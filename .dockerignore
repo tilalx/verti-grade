@@ -1,0 +1,19 @@
+# Ignore node_modules directory
+node_modules
+
+# Ignore build artifacts
+/dist/
+/.nuxt/
+/.env
+
+# Ignore logs
+*.log
+
+# Ignore Vue CLI service worker
+/service-worker.js
+
+# Ignore Docker specific files
+.dockerignore
+.dockerignore.template
+Dockerfile*
+docker-compose.yml
