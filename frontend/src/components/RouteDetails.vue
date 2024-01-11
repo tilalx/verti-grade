@@ -19,7 +19,14 @@
             >
               <template v-slot:item="{ item }">
                 <tr>
-                  <td>{{ item.rating }}</td>
+                  <td>
+                    <v-rating
+                      v-model="item.rating"
+                      :max="5"
+                      :half-increments="true"
+                      :readonly="true"
+                    ></v-rating>
+                  </td>
                   <td>{{ item.difficulty }}</td>
                   <td>{{ item.difficultySign }}</td>
                   <td>{{ item.comment }}</td>

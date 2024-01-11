@@ -33,32 +33,21 @@
                         ></v-select>
                     </v-col>
                 </v-row>
-                <v-data-table>
-                    <template v-slot:default>
-                        <thead>
-                            <tr>
-                                <th>{{ $t('climbing.routename') }}</th>
-                                <th>{{ $t('climbing.difficulty') }}</th>
-                                <th>{{ $t('climbing.location') }}</th>
-                                <th>{{ $t('climbing.type') }}</th>
-                                <th>{{ $t('climbing.comment') }}</th>
-                                <th>{{ $t('climbing.creators') }}</th>
-                                <th>{{ $t('table.created_at') }}</th>
-                                <th>{{ $t('table.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="climbingRoute in climbingRoutes" :key="climbingRoute.id">
-                                <td>{{ climbingRoute.name }}</td>
-                                <td>{{ climbingRoute.difficulty }} {{ climbingRoute.difficultySign }}</td>
-                                <td>{{ climbingRoute.location }}</td>
-                                <td>{{ climbingRoute.type }}</td>
-                                <td>{{ climbingRoute.comment }}</td>
-                                <td>{{ climbingRoute.creators.join(',') }}</td>
-                                <td>{{ climbingRoute.createdAt }}</td>
-                                <td><RouteDetails :routeId=climbingRoute.id></RouteDetails></td>
-                            </tr>
-                        </tbody>
+                <v-data-table :headers="headers" :items="filteredClimbingRoutes" item-key="id">
+                    <template v-slot:[`item`]="{ item: climbingRoute }">
+                        <tr>
+                        <td>
+                            <v-avatar :color="climbingRoute.color" size="30"></v-avatar>
+                        </td>
+                        <td>{{ climbingRoute.name }}</td>
+                        <td>{{ climbingRoute.difficulty }} {{ climbingRoute.difficultySign }}</td>
+                        <td>{{ climbingRoute.location }}</td>
+                        <td>{{ climbingRoute.type }}</td>
+                        <td>{{ climbingRoute.comment }}</td>
+                        <td>{{ climbingRoute.creators.join(',') }}</td>
+                        <td>{{ formatDate(climbingRoute.screwDate) }}</td>
+                        <td><RouteDetails :routeId="climbingRoute.id"></RouteDetails></td>
+                        </tr>
                     </template>
                 </v-data-table>
             </v-container>
@@ -75,16 +64,18 @@ export default {
     data() {
         return {
             headers: [
-                { title: 'Name', value: 'name' },
-                { title: 'Difficulty', value: 'difficulty' },
-                { title: 'Location', value: 'location' },
-                { title: 'Type', value: 'type' },
-                { title: 'Comment', value: 'comment' },
-                { title: 'Created At', value: 'createdAt' },
-                { title: 'Actions', value: 'actions', sortable: false}
+                { title: this.$t('climbing.color'), value: 'color' },
+                { title: this.$t('climbing.routename'), value: 'name' },
+                { title: this.$t('climbing.difficulty'), value: 'difficulty' },
+                { title: this.$t('climbing.location'), value: 'location' },
+                { title: this.$t('climbing.type'), value: 'type' },
+                { title: this.$t('climbing.comment'), value: 'comment' },
+                { title: this.$t('climbing.creators'), value: 'creators' },
+                { title: this.$t('table.created_at'), value: 'screwDate' },
+                { title: this.$t('table.actions'), value: 'actions' },
             ],
             difficulties: [
-                { text: 'All', value: '' },
+                { text: this.$t('filter.all'), value: '' },
                 { text: '1', value: '1' },
                 { text: '2', value: '2' },
                 { text: '3', value: '3' },
@@ -97,7 +88,7 @@ export default {
                 { text: '10', value: '10' }
             ],
             locations: [
-                { text: 'All', value: '' },
+                { text: this.$t('filter.all'), value: '' },
                 { text: 'Hanau', value: 'Hanau' },
                 { text: 'Gelnhausen', value: 'Gelnhausen' }
             ],
@@ -110,28 +101,46 @@ export default {
             pagination: {},
         };
     },
+    methods:{
+        formatDate(date) {
+            if (!date) return null;
+            const d = new Date(date);
+            let day = '' + d.getDate(),
+                month = '' + (d.getMonth() + 1),
+                year = d.getFullYear();
+
+            if (day.length < 2) day = '0' + day;
+            if (month.length < 2) month = '0' + month;
+
+            return [day, month, year].join('.');
+        },
+    },
     computed: {
         filteredClimbingRoutes() {
-            let filteredRoutes = this.climbingRoutes;
+            let filteredRoutes = this.climbingRoutes.filter(route => !route.archived);
+            
             if (this.selectedDifficulty) {
-              const selectedDifficultyInt = parseInt(this.selectedDifficulty);
-              filteredRoutes = filteredRoutes.filter(route => parseInt(route.difficulty) === selectedDifficultyInt);
+                const selectedDifficultyInt = parseInt(this.selectedDifficulty);
+                filteredRoutes = filteredRoutes.filter(route => parseInt(route.difficulty) === selectedDifficultyInt);
             }
             if (this.selectedLocation) {
                 filteredRoutes = filteredRoutes.filter(route => route.location === this.selectedLocation);
             }
-            if (this.searchRouteName) { // Added search filter for route name
+            if (this.searchRouteName) {
                 filteredRoutes = filteredRoutes.filter(route => route.name.toLowerCase().includes(this.searchRouteName.toLowerCase()));
             }
+            
             return filteredRoutes;
         },
     },
     mounted() {
         getAllClimbingRoutes().then(response => {
             this.climbingRoutes = response;
+            this.loading = false;
+        }).catch(error => {
+            console.error('Error loading climbing routes:', error);
+            this.loading = false;
         });
-        this.loading = false;
-
     },
 };
 </script>

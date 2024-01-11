@@ -45,9 +45,12 @@ router.get('/creators', authMiddleware, async (req, res) => {
 });
 
 
-router.get('/:id', async (req, res) => {
+router.get('/route', async (req, res) => {
     try {
-        const climbingRoute = await ClimbingRoute.findByPk(req.params.id);
+        if (!req.query.id) {
+            return res.status(400).send('No ID provided.');
+        }
+        const climbingRoute = await ClimbingRoute.findByPk(req.query.id);
         if (!climbingRoute) {
             return res.status(404).send('Climbing route not found.');
         }
@@ -61,7 +64,7 @@ router.get('/:id', async (req, res) => {
 router.put('/', authMiddleware, async (req, res) => {
     try {
         //check if name, difficulty, location and type are provided
-        if (!req.body.name || !req.body.difficulty || !req.body.location || !req.body.type || !req.body.creators) {
+        if (!req.body.name || !req.body.difficulty || !req.body.location || !req.body.type || !req.body.creators || !req.body.screwDate || !req.body.color) {
             return res.status(400).send({ message: 'Climbing route creation failed: Name, difficulty, location and type are required.' });
         }
         //create Route
@@ -74,6 +77,8 @@ router.put('/', authMiddleware, async (req, res) => {
             creatorId: req.user.id,
             comment: req.body.comment || null,
             creators: req.body.creators || null,
+            screwDate: req.body.screwDate,
+            color: req.body.color,
         });
         return res.json(climbingRoute);
     } catch (e) {
@@ -100,6 +105,9 @@ router.post('/', authMiddleware, async (req, res) => {
         climbingRoute.type = req.body.type;
         climbingRoute.comment = req.body.comment || null;
         climbingRoute.creators = req.body.creators || null;
+        climbingRoute.screwDate = req.body.screwDate;
+        climbingRoute.color = req.body.color;
+        climbingRoute.archived = req.body.archived || false;
         await climbingRoute.save();
         return res.json(climbingRoute);
     } catch (e) {
@@ -108,9 +116,9 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-router.delete('/:ids', authMiddleware, async (req, res) => {
+router.delete('/', authMiddleware, async (req, res) => {
     try {
-        const ids = req.params.ids.split(','); // Split the comma-separated IDs
+        const ids = req.query.id.split(','); // Split the comma-separated IDs
         const deletePromises = ids.map(async (id) => {
             const climbingRoute = await ClimbingRoute.findByPk(id);
             if (!climbingRoute) {
@@ -126,9 +134,31 @@ router.delete('/:ids', authMiddleware, async (req, res) => {
     }
 });
 
-router.get('/:ids/pdf', authMiddleware, async (req, res) => {
+router.post('/archive', authMiddleware, async (req, res) => {
     try {
-        const ids = req.params.ids.split(','); // Assuming IDs are comma-separated
+        const ids = req.query.id.split(','); // Split the comma-separated IDs
+        const deletePromises = ids.map(async (id) => {
+            const climbingRoute = await ClimbingRoute.findByPk(id);
+            if (!climbingRoute) {
+                return; // Skip if the climbing route is not found
+            }
+            climbingRoute.archived = true;
+            await climbingRoute.save();
+        });
+        await Promise.all(deletePromises);
+        res.json({ message: 'Climbing routes archived.' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Server error');
+    }
+});
+
+router.get('/pdf', authMiddleware, async (req, res) => {
+    try {
+        const ids = req.query.id ? req.query.id.split(',').map(id => parseInt(id)).filter(id => !isNaN(id)) : [];
+        if (ids.length === 0) {
+            return res.status(400).send('No IDs provided.');
+        }
         const doc = new PDFDocument({ size: [595.28, 841.89] });
         doc.pipe(res);
 
@@ -145,26 +175,31 @@ router.get('/:ids/pdf', authMiddleware, async (req, res) => {
                 doc.addPage();
             }
 
-            const x = entryCount % 2 === 0 ? 20 : 315; // Position for 2 columns
-            const y = (Math.floor(entryCount / 2) % 4) * 180 + 20; // Position for 4 rows
+            const x = entryCount % 2 === 0 ? 25 : 310; // Position for 2 columns
+            const y = (Math.floor(entryCount / 2) % 4) * 180 + 40; // Position for 4 rows
 
             // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke();
             
+            // add color
+            doc.circle(x + 80, y + 5, 10).fill(climbingRoute.color);
 
+            //set text color black
+            doc.fillColor('black');
+            
             // Set text positions
             const textOptions = { align: 'left', width: 200 };
-            doc.text(climbingRoute.name, calculateStartX(x + 80, climbingRoute.name, doc), y + 10, textOptions);
-            doc.fontSize(12).text(climbingRoute.difficulty + climbingRoute.difficultySign , x+ 70, y + 40, textOptions);
-            doc.text(climbingRoute.comment, calculateStartX(x + 80, climbingRoute.comment, doc), y + 70, textOptions);
+            doc.text(climbingRoute.name, calculateStartX(x + 80, climbingRoute.name, doc), y + 25, textOptions);
+            doc.fontSize(25).text(climbingRoute.difficulty + climbingRoute.difficultySign , x+ 70, y + 45, textOptions);
+            doc.text(climbingRoute.comment, calculateStartX(x + 80, climbingRoute.comment, doc), y + 75, textOptions);
 
             // Search for first and last name based on creatorId
             const creators = climbingRoute.creators || [];
             if (Array.isArray(creators)) {
-                doc.text(creators.join(' / '), calculateStartX(x + 80, creators.join(' / '), doc), y + 120, textOptions);
+                doc.fontSize(8).text(creators.join(' / '), calculateStartX(x + 80, creators.join(' / '), doc), y + 120, textOptions);
             }
-            const createdAtDate = climbingRoute.createdAt.toLocaleDateString('de-DE');
-            doc.text(createdAtDate, calculateStartX(x + 80 , createdAtDate, doc), y + 140, textOptions);
+            const screwDate = climbingRoute.screwDate.toLocaleDateString('de-DE');
+            doc.fontSize(8).text(screwDate, calculateStartX(x + 80 , screwDate, doc), y + 140, textOptions);
 
             // QR code positioning and scaling
             const qrX = x + 155; // X position for QR code (to the right of the text)
@@ -172,7 +207,7 @@ router.get('/:ids/pdf', authMiddleware, async (req, res) => {
             const qrSize = 120;  // Size of the QR code, adjust as necessary
 
             // Generate QR code with the server URL
-            const serverUrl = process.env.SERVER_URL + `/wall/${ids[i]}` || `http://192.168.1.78:8080/wall/${ids[i]}`;
+            const serverUrl = process.env.SERVER_URL + `/route?id=${ids[i]}` || `http://localhost:8080/route?id=${ids[i]}`;
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
                 color: {
                     light: '#0000' // Transparent background
@@ -195,18 +230,126 @@ router.get('/:ids/pdf', authMiddleware, async (req, res) => {
     }
 });
 
+router.get('/xlsx', authMiddleware, async (req, res) => {
+    try {
+        const ids = req.query.id ? req.query.id.split(',') : []; // Assuming IDs are comma-separated
+        if (ids.length === 0) {
+            return res.status(400).send('No IDs provided.');
+        }
+        const climbingRoutes = await ClimbingRoute.findAll({
+            where: {
+                id: ids,
+            },
+            order: [
+                ['createdAt', 'DESC']
+            ],
+        });
+        const xlsx = require('xlsx');
+        const wb = xlsx.utils.book_new();
+        const ws = xlsx.utils.json_to_sheet(climbingRoutes.map(cr => {
+            return {
+                'Name': cr.name,
+                'Schwierigkeit': cr.difficulty,
+                'Schrauber': cr.creators.join(', '),
+                'Schraubdatum': cr.screwDate.toLocaleDateString('de-DE'),
+                'Ort': cr.location,
+                'Typ': cr.type,
+                'Kommentar': cr.comment,
+            };
+        }));
+        
+        xlsx.utils.book_append_sheet(wb, ws, 'Climbing Routes');
+        const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        const timestamp = Date.now();
+        res.setHeader('Content-Disposition', `attachment; filename="climbing-routes-${timestamp}.xlsx"`);
+        res.send(buffer);
+        
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Server error');
+    }
+});
+
+router.get('/json', authMiddleware, async (req, res) => {
+    //export as json if no route is given all routes are exported, otherwise only the given route
+    const ids = req.query.id ? req.query.id.split(',') : [];
+
+    if (ids.length === 0) {
+        try {
+            const climbingRoutes = await ClimbingRoute.findAll({
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+                attributes: {exclude: ['id', 'createdAt', 'updatedAt']}
+            });
+            res.json(climbingRoutes);
+        } catch (e) {
+            console.error(e);
+            res.status(500).send('Server error');
+        }
+    }
+    else {
+        try {
+            const climbingRoutes = await ClimbingRoute.findAll({
+                where: {
+                    id: ids,
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ],
+                attributes: {exclude: ['id', 'createdAt', 'updatedAt']}
+            });
+            res.json(climbingRoutes);
+        } catch (e) {
+            console.error(e);
+            res.status(500).send('Server error');
+        }
+    }
+});
+
+router.put('/json' , authMiddleware, async (req, res) => {
+    //import climbing routes from json file and create new routes
+    if (!req.body.length > 0) {
+        return res.status(400).send({ message: 'No climbing routes provided.' });
+    }
+    try {
+        const climbingRoutes = req.body;
+        const createPromises = climbingRoutes.map(async (cr) => {
+            await ClimbingRoute.create({
+                name: cr.name,
+                difficulty: cr.difficulty,
+                difficultySign: cr.difficultySign || null,
+                location: cr.location,
+                type: cr.type,
+                creatorId: req.user.id,
+                comment: cr.comment || null,
+                creators: cr.creators || null,
+                screwDate: cr.screwDate,
+                color: cr.color,
+            });
+        });
+        await Promise.all(createPromises);
+        res.json({ message: 'Climbing routes imported.', count: climbingRoutes.length });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Server error');
+    }
+});
 
 // Function to calculate the starting X-coordinate for centered text
 function calculateStartX(desiredXCenter, text, doc) {
-    // Choose a font and font size for measuring
-    doc.font('Helvetica').fontSize(12);
-  
-    // Measure the width of the text
-    const textWidth = doc.widthOfString(text);
-  
-    // Calculate and return the starting X position for the centered text
-    return desiredXCenter - (textWidth / 2);
-  }
+    if (text !== null) {
+        // Choose a font and font size for measuring
+        doc.font('Helvetica').fontSize(12);
+      
+        // Measure the width of the text
+        const textWidth = doc.widthOfString(text);
+      
+        // Calculate and return the starting X position for the centered text
+        return desiredXCenter - (textWidth / 2);
+    }
+    return 0;
+}
 
 
 module.exports = router;

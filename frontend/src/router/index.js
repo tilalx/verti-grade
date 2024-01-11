@@ -11,7 +11,7 @@ const routes = [
         meta: { title: 'Rate Routes', requiresAuth: false, navbar: true },
     },
     {
-        path: '/wall/:id',
+        path: '/route',
         name: 'Rate Route',
         component: () => import('@/views/RouteRatingQR.vue'),
         meta: { title: 'Rate Route', requiresAuth: false, navbar: false },
@@ -68,17 +68,15 @@ router.beforeEach((to, from, next) => {
 
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isTokenValid) {
-            // If the token is not valid, redirect to login
+            store.state.token = null;
             next('/login');
         } else {
-            // If everything is fine, proceed to the route
             next();
         }
     } else if (to.name === 'Login' && isTokenValid) {
         // If already logged in, redirect to dashboard
         next('/dashboard');
     } else {
-        // If the route does not require auth, always allow
         next();
     }
 });

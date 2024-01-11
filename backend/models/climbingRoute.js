@@ -5,6 +5,11 @@ class ClimbingRoute extends Model {}
 
 ClimbingRoute.init({
     name: DataTypes.STRING,
+    color: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "#000000",
+    },
     difficulty: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -26,6 +31,11 @@ ClimbingRoute.init({
     archived: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+    },
+    screwDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
     },
 }, { sequelize, modelName: "climbingroute" }); // Consider using singular for modelName
 

@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 const Umzug = require('umzug');
 const path = require('path');
+const logger = require('./winston');
 
 // Load environment variables
 require('dotenv').config();
@@ -48,13 +49,13 @@ async function migrateAndSeed() {
   try {
     // Execute all pending migrations
     await migrator.up();
-    console.log('All migrations performed successfully');
+    logger.log('All migrations performed successfully');
 
     // Execute all pending seeders
     await seeder.up();
-    console.log('All seeders performed successfully');
+    logger.log('All seeders performed successfully');
   } catch (error) {
-    console.error('Error during migration and seeding:', error);
+    logger.error('Error during migration and seeding:', error);
   }
 }
 

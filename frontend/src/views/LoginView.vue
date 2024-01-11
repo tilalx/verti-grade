@@ -1,16 +1,59 @@
 <template>
-    <div class="login-container">
-        <h1>Login</h1>
-        <form @submit.prevent="handleLogin">
-            <label for="email">Email:</label>
-            <input type="email" id="email" v-model="email" required>
-            <br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" v-model="password" required>
-            <br>
-            <button type="submit">Login</button>
-        </form>
-    </div>
+    <v-container class="login-container">
+        <v-row justify="center" align="center" style="height: 100vh;">
+            <v-col cols="12" sm="12" md="4">
+                <v-card>
+                    <v-card>
+                        
+                        <v-card-title class="text-center">
+                            <h1>Login</h1>
+                        </v-card-title>
+                        <v-divider></v-divider>
+                        <v-card-text>
+                            <v-form @submit.prevent="handleLogin">
+                                <v-text-field
+                                    v-model="email"
+                                    label="Email"
+                                    type="email"
+                                    autocomplete="email"
+                                    required
+                                ></v-text-field>
+                                <v-text-field
+                                    v-model="password"
+                                    :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                                    @click:append="showPassword = !showPassword"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    label="Password"
+                                    autocomplete="current-password"
+                                    required
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn type="submit" color="primary" class="text-right">Login</v-btn>
+                            </v-form>
+                        </v-card-text>
+                    </v-card>
+                </v-card>
+                <v-alert
+                    v-if="loginFailed"
+                    type="error"
+                    dismissible
+                    outlined
+                    class="mt-4"
+                >
+                    Login failed. Please check your credentials and try again.
+                </v-alert>
+                <v-alert
+                    v-if="loginSuccess"
+                    type="success"
+                    dismissible
+                    outlined
+                    class="mt-4"
+                >
+                    Login successful. Redirecting to the Dashboard...
+                </v-alert>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script>
@@ -21,69 +64,28 @@ export default {
         return {
             email: '',
             password: '',
+            loginFailed: false,
+            loginSuccess: false,
+            showPassword: false,
         };
     },
     methods: {
         async handleLogin() {
             try {
+                this.loginFailed = false;
                 const token = await loginUser(this.email, this.password);
                 // Save the user data to the Vuex store
                 this.$store.commit('setToken', token);
                 // Redirect the user to the Dashboard
-                this.$router.push('/dashboard');             
+                this.$router.push('/dashboard');
+                this.loginSuccess = true;
             } catch (error) {
                 console.error('Login failed:', error);
+                this.loginFailed = true;
             }
         },
     },
 };
 </script>
 
-<style scoped>
-.login-container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
-label {
-    margin-bottom: 10px;
-}
-
-input {
-    margin-bottom: 20px;
-    padding: 10px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-</style>
+<style scoped></style>

@@ -8,15 +8,19 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import theme from './plugins/theme';
 import '@mdi/font/css/materialdesignicons.min.css';
-
-// Import Vue I18n and messages
 import { createI18n } from 'vue-i18n';
 import messages from '@/plugins/messages';
 
 const userLanguage = (navigator.language || navigator.userLanguage).split('-')[0];
-console.log('userLanguage: ', userLanguage);
 
-// Create instance of VueI18n
+
+if (window.console) {
+  window.console.log('Welcome to Verti-Grade!');
+  window.console.log('If you are interested in contributing to the project, please contanct me');
+  window.console.warn('Dont execute any code here unless you know what you are doing!')
+  
+}
+
 const i18n = createI18n({
   locale: userLanguage,
   fallbackLocale: 'en',

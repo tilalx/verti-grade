@@ -12,4 +12,6 @@ module.exports = defineConfig({
       }
     }
   },
+
+  productionSourceMap: false, // Disable source maps in production
 });

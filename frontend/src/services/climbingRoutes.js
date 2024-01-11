@@ -12,7 +12,7 @@ export const getAllClimbingRoutes = async () => {
 
 export const getClimbingRouteById = async (id) => {
   try {
-    const response = await API.get(`/api/climbingroute/${id}`);
+    const response = await API.get(`/api/climbingroute/route?id=${id}`);
     return response;
   } catch (error) {
     console.error("Error getting climbing route:", error);
@@ -43,7 +43,7 @@ export const updateClimbingRoute = async (climbingRoute) => {
 
 export const deleteClimbingRoute = async (id) => {
   try {
-    const response = await API.delete(`/api/climbingroute/${id}`);
+    const response = await API.delete(`/api/climbingroute?id=${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting climbing route:", error);
@@ -51,9 +51,19 @@ export const deleteClimbingRoute = async (id) => {
   }
 }
 
+export const archiveClimbingRoute = async (id) => {
+  try {
+    const response = await API.post(`/api/climbingroute/archive?id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error archiving climbing route:", error);
+    throw error;
+  }
+}
+
 export const printClimbingRoute = async (id) => {
   try {
-    const response = await API.get(`/api/climbingroute/${id}/pdf`, 
+    const response = await API.get(`/api/climbingroute/pdf?id=${id}`, 
       { 
         responseType: 'blob',
         headers: {
@@ -73,6 +83,48 @@ export const getAllCreators = async () => {
     return response.data;
   } catch (error) {
     console.error("Error getting creators:", error);
+    throw error;
+  }
+}
+
+export const exportXlsx = async (id) => {
+  try {
+    const response = await API.get(`/api/climbingroute/xlsx?id=${id}`, 
+      { 
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+      });
+    return response.data;
+  } catch (error) {
+    console.error("Error exporting climbing route:", error);
+    throw error;
+  }
+}
+
+export const exportJson = async (id) => {
+  try {
+    const response = await API.get(`/api/climbingroute/json?id=${id}`, 
+      { 
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+    return response.data;
+  } catch (error) {
+    console.error("Error exporting climbing route:", error);
+    throw error;
+  }
+}
+
+export const importJson = async (json) => {
+  try {
+    const response = await API.put("/api/climbingroute/json", json);
+    return response.data;
+  } catch (error) {
+    console.error("Error importing climbing route:", error);
     throw error;
   }
 }

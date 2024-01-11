@@ -9,7 +9,14 @@
       <v-row>
         <v-col>
           <h2>Create Route</h2>
-          <CreateRoute></CreateRoute>
+          <CreateRoute @closed="reloadRoutes"></CreateRoute>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col>
+          <h2>Import Route</h2>
+          <ImportRoute @closed="reloadRoutes"></ImportRoute>
         </v-col>
       </v-row>
   
@@ -20,14 +27,14 @@
             <!-- Column for the Route Name search -->
             <v-col cols="6" sm="3">
               <v-text-field
-                label="Search Route Name"
+                :label="$t('climbing.searchRouteName')"
                 v-model="searchRouteName"
                 class="mt-2"
               ></v-text-field>
             </v-col>
             <v-col cols="6" sm="3">
               <v-select
-                label="Difficulty"
+                :label="$t('climbing.difficulty')"
                 :items="difficulties"
                 v-model="selectedDifficulty"
                 item-title="text"
@@ -39,13 +46,20 @@
             <!-- Column for the Location select -->
             <v-col cols="6" sm="3">
               <v-select
-                label="Location"
+                :label="$t('climbing.location')"
                 :items="locations"
                 v-model="selectedLocation"
                 item-title="text"
                 item-value="value"
                 class="mt-2"
               ></v-select>
+            </v-col>
+            <v-col cols="6" sm="3">
+              <v-checkbox
+                label="Display Archived"
+                v-model="displayArchived"
+                class="mt-2"
+              ></v-checkbox>
             </v-col>
           </v-row>
           <v-col cols="12" sm="6" class="d-flex align-center">
@@ -57,42 +71,50 @@
             <div class="mx-2"></div> 
             <v-btn v-if="hasSelection" @click="printSelected" color="success">
               <v-icon>mdi-printer</v-icon>
-              Print Label
+            </v-btn>
+            <div class="mx-2"></div>
+            <v-btn v-if="hasSelection" @click="exportSelectedExcel" color="success">
+              <v-icon>mdi-file-excel</v-icon>
+            </v-btn>
+            <div class="mx-2"></div>
+            <v-btn v-if="hasSelection" @click="exportSelectedJson" color="success">
+              <v-icon>mdi-code-json</v-icon>
             </v-btn>
             <div class="mx-2"></div>
             <v-btn v-if="hasSelection" @click="deleteSelected" color="error">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
+            <div class="mx-2"></div>
+            <v-btn v-if="hasSelection" @click="archiveSelected" color="warning">
+              <v-icon>mdi-archive</v-icon>
+            </v-btn>
           </v-col>
           
-          <v-table>
-            <template v-slot:default>
-              <thead>
-                <tr>
-                  <th>Select</th>
-                  <th>Route Name</th>
-                  <th>Difficulty</th>
-                  <th>Location</th>
-                  <th>Type</th>
-                  <th>Comment</th>
-                  <th>Creators</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="climbingRoute in filteredClimbingRoutes" :key="climbingRoute.id">
-                  <td><input type="checkbox" v-model="climbingRoute.selected"></td>
-                  <td>{{ climbingRoute.name }}</td>
-                  <td>{{ climbingRoute.difficulty }} {{ climbingRoute.difficultySign }}</td>
-                  <td>{{ climbingRoute.location }}</td>
-                  <td>{{ climbingRoute.type }}</td>
-                  <td>{{ climbingRoute.comment }}</td>
-                  <td>{{ climbingRoute.creators.join(',') }}</td>
-                  <td><EditRoute :routeId=climbingRoute.id></EditRoute></td>
-                </tr>
-              </tbody>
+          <v-data-table :headers="headers" :items="filteredClimbingRoutes">
+            <template v-slot:[`item`]="{ item: climbingRoute }">
+              <tr>
+                <td>
+                  <v-checkbox
+                    v-model="climbingRoute.selected"
+                    color="primary"
+                    hide-details
+                  ></v-checkbox>
+                </td>
+                <td>
+                  <v-avatar :color="climbingRoute.color" size="30"></v-avatar>
+                </td>
+                <td>{{ climbingRoute.name }}</td>
+                <td>{{ climbingRoute.difficulty }} {{ climbingRoute.difficultySign }}</td>
+                <td>{{ climbingRoute.location }}</td>
+                <td>{{ climbingRoute.type }}</td>
+                <td>{{ climbingRoute.comment }}</td>
+                <td>{{ climbingRoute.creators.join(',') }}</td>
+                <td>{{ new Date(climbingRoute.screwDate).toLocaleDateString('de-DE') }}</td>
+                <td>{{ climbingRoute.archived }}</td>
+                <td><EditRoute @closed="reloadRoutes" :routeId="climbingRoute.id"></EditRoute></td>
+              </tr>
             </template>
-          </v-table>
+          </v-data-table>
   
           <div v-if="hasSelection" class="selection-info">
             Selection: {{ selectedCount }} routes selected.
@@ -105,21 +127,37 @@
   
 
 <script>
-import { getAllClimbingRoutes, printClimbingRoute, deleteClimbingRoute } from '@/services/climbingRoutes';
+import { getAllClimbingRoutes, printClimbingRoute, exportXlsx, exportJson , deleteClimbingRoute, archiveClimbingRoute } from '@/services/climbingRoutes';
 import CreateRoute from '@/components/CreateRoute.vue';
 import EditRoute from '@/components/EditRoute.vue';
+import ImportRoute from '@/components/ImportRoute.vue';
 export default {
     name: 'DashBoard',
-    components: { CreateRoute, EditRoute },
+    components: { CreateRoute, EditRoute, ImportRoute },
     data() {
         return {
             routes: [],
             climbingRoutes: [],
             selectedDifficulty: '',
             selectedLocation: '',
-            searchRouteName: '', // Added searchRouteName data property
+            searchRouteName: '',
+            selected: [],
+            displayArchived: false,
+            headers: [
+                { title: this.$t('table.select'), value: 'selected' },
+                { title: this.$t('climbing.color'), value: 'color' },
+                { title: this.$t('climbing.routename'), value: 'name' },
+                { title: this.$t('climbing.difficulty'), value: 'difficulty' },
+                { title: this.$t('climbing.location'), value: 'location' },
+                { title: this.$t('climbing.type'), value: 'type' },
+                { title: this.$t('climbing.comment'), value: 'comment' },
+                { title: this.$t('climbing.creators'), value: 'creators' },
+                { title: this.$t('table.created_at'), value: 'screwDate' },
+                { title: this.$t('climbing.archived'), value: 'archived' },
+                { title: this.$t('table.actions'), value: 'actions' },
+            ],
             difficulties: [
-                { text: 'All', value: '' },
+                { text: this.$t('filter.all'), value: '' },
                 { text: '1', value: '1' },
                 { text: '2', value: '2' },
                 { text: '3', value: '3' },
@@ -132,7 +170,7 @@ export default {
                 { text: '10', value: '10' }
             ],
             locations: [
-                { text: 'All', value: '' },
+                { text: this.$t('filter.all'), value: '' },
                 { text: 'Hanau', value: 'Hanau' },
                 { text: 'Gelnhausen', value: 'Gelnhausen' }
             ],
@@ -156,8 +194,11 @@ export default {
             if (this.selectedLocation) {
                 filteredRoutes = filteredRoutes.filter(route => route.location === this.selectedLocation);
             }
-            if (this.searchRouteName) { // Added search filter for route name
+            if (this.searchRouteName) {
                 filteredRoutes = filteredRoutes.filter(route => route.name.toLowerCase().includes(this.searchRouteName.toLowerCase()));
+            }
+            if (!this.displayArchived) {
+                filteredRoutes = filteredRoutes.filter(route => !route.archived);
             }
             return filteredRoutes;
         },
@@ -175,6 +216,12 @@ export default {
         }
     },
     methods: {
+        async reloadRoutes() {
+            this.climbingRoutes = await getAllClimbingRoutes();
+            this.climbingRoutes.forEach(route => {
+                route.selected = false;
+            });
+        },
         selectAll() {
             if (this.areAllSelected()) {
                 this.deselectAll();
@@ -204,13 +251,52 @@ export default {
                 const blob = new Blob([pdfBlob], { type: 'application/pdf' });
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
-                link.download = 'climbing-routes.pdf'; 
-                document.body.appendChild(link); 
+                const currentDate = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+                link.download = `climbing-routes-${currentDate}.pdf`; 
+                document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
             } catch (error) {
                 console.error('Error in printSelected:', error);
+            }
+        },
+        async exportSelectedExcel() {
+            const selectedRoutes = this.filteredClimbingRoutes.filter(route => route.selected);
+            const selectedRouteIds = selectedRoutes.map(route => route.id).join(',');
+
+            try {
+                const excelBlob = await exportXlsx(selectedRouteIds);  // Fetch the Excel file as a blob
+                const blob = new Blob([excelBlob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                const currentDate = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+                link.download = `climbing-routes-${currentDate}.xlsx`; 
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error('Error in exportSelectedAsExcel:', error);
+            }
+        },
+        async exportSelectedJson(){
+            const selectedRoutes = this.filteredClimbingRoutes.filter(route => route.selected);
+            const selectedRouteIds = selectedRoutes.map(route => route.id).join(',');
+
+            try {
+                const jsonBlob = await exportJson(selectedRouteIds);  // Fetch the Excel file as a blob
+                const blob = new Blob([jsonBlob], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                const currentDate = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+                link.download = `climbing-routes-${currentDate}.json`; 
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error('Error in exportSelectedAsJson:', error);
             }
         },
         async deleteSelected() {
@@ -223,6 +309,19 @@ export default {
             } catch (error) {
                 console.error('Error in deleteSelected:', error);
             }
+            this.reloadRoutes();
+        },
+        async archiveSelected() {
+            const selectedRoutes = this.filteredClimbingRoutes.filter(route => route.selected);
+            const selectedRouteIds = selectedRoutes.map(route => route.id).join(',');
+
+            try {
+                await archiveClimbingRoute(selectedRouteIds);
+                await this.getAllClimbingRoutes();
+            } catch (error) {
+                console.error('Error in archiveSelected:', error);
+            }
+            this.reloadRoutes();
         }
     }
 };

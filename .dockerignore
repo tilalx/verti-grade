@@ -1,13 +1,12 @@
 # Ignore node_modules directory
-node_modules
-
+**/node_modules/
 # Ignore build artifacts
-/dist/
+**/dist/
 /.nuxt/
-/.env
+**/.env
 
 # Ignore logs
-*.log
+**/.log
 
 # Ignore Vue CLI service worker
 /service-worker.js

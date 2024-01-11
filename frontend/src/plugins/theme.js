@@ -7,9 +7,9 @@ const theme = {
                 colors: {
                     background: '#121212', // default dark background
                     surface: '#1E1E1E', // default dark surface
-                    primary: '#004D40', // DAV dark primary color (Teal)
-                    secondary: '#1A237E', // DAV dark secondary color (Indigo)
-                    accent: '#263238', // DAV dark accent color (Blue Grey)
+                    primary: '#58ab27', // DAV dark primary color (Teal)
+                    secondary: '#1A237E', //t DAV dark secondary color (Indigo)
+                    accent: '#263238',
                     error: '#D32F2F', // Error color (Red)
                     info: '#2979FF', // Info color (Blue)
                     success: '#2E7D32', // Success color (Green)

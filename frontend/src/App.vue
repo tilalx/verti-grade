@@ -1,14 +1,16 @@
 <template>
   <v-app class="fontbody">
     <v-app-bar app dense color="primary" v-if="$route.meta.navbar !== false">
-      <v-toolbar-title to="/">Verti-Grade</v-toolbar-title>
+      <v-toolbar-title to="/">
+        <router-link to="/">
+          <img src="@/assets/logo.svg" alt="Logo" style="max-width: 130px; filter: brightness(0) invert(1);" />
+        </router-link>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn text to="/">Home</v-btn>
       <v-btn v-if="isLoggedIn" text to="/dashboard">{{ $t('routes.dashboard') }}</v-btn>
       <v-btn v-if="!isLoggedIn" text to="/login">
-        <v-btn-icon>
           <v-icon class="mdi mdi-login"></v-icon>
-        </v-btn-icon>
       </v-btn>
       <v-btn v-if="isLoggedIn" text to="/user">{{ $t('routes.users') }}</v-btn>
       <LogOut v-if="isLoggedIn"></LogOut>

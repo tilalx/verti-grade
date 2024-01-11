@@ -7,11 +7,10 @@ WORKDIR /app
 COPY frontend /app/frontend
 COPY backend /app/backend
 
+
 # Build frontend
 WORKDIR /app/frontend
-RUN yarn set version berry && yarn
-RUN yarn install
-RUN yarn build
+RUN yarn set version berry && yarn && yarn install && yarn build
 
 # Move frontend build to backend
 WORKDIR /app/backend
@@ -19,19 +18,17 @@ RUN mkdir -p /app/backend/frontend
 RUN mv /app/frontend/dist /app/backend
 
 # Step 2: Create final image with only necessary files
-FROM node:20
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Copy backend code and frontend build
-COPY --from=builder /app/backend /app/backend
+COPY --from=builder /app/backend /app
 
 # Remove unnecessary files
-WORKDIR /app/backend
-RUN rm -rf /app/backend/frontend/node_modules
-RUN rm -rf /app/backend/frontend/src
+WORKDIR /app
+RUN rm -rf /app/frontend
 
 # Install dependencies and start backend
-RUN yarn set version berry && yarn
-RUN yarn install
+RUN yarn set version berry && yarn && yarn install
 CMD ["yarn", "start"]

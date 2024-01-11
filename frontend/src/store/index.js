@@ -29,8 +29,8 @@ const store = createStore({
       context.commit('increment');
     },
     resetStore({ commit }) {
-      commit('RESET_STATE'); // Reset the Vuex state
-      localStorage.removeItem(storageName); // Clear localStorage
+      commit('RESET_STATE');
+      localStorage.removeItem(storageName);
     }
   },
   getters: {

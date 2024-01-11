@@ -28,12 +28,14 @@ const messages = {
             logout: "Logout"
         },
         climbing: {
+            color: "Color",
             routename: "Route name",
             difficulty: "Difficulty",
             difficultySign: "Difficulty sign",
             location: "Location",
             searchRouteName: "Search",
             type: "Type",
+            archived: "Archived",
             comment: "Comment",
             creators: "Creators"
         },
@@ -51,6 +53,7 @@ const messages = {
         },
         table: {
             id: "ID",
+            select: "Selected",
             actions: "Actions",          
             created_at: "Created at",
             updated_at: "Updated at",
@@ -85,6 +88,9 @@ const messages = {
                 delete: "Error deleting"
             }
         },
+        filter : {
+            "all": "All",
+        }
     },
     de: {
         account: {
@@ -115,12 +121,14 @@ const messages = {
             logout: "Abmelden"
         },
         climbing: {
+            color: "Farbe",
             routename: "Routenname",
             difficulty: "Schwierigkeit",
             difficultySign: "Schwierigkeitsgrad",
             location: "Standort",
             searchRouteName: "Suche",
             type: "Typ",
+            archived: "Archiviert",
             comment: "Kommentar",
             creators: "Ersteller"
         },
@@ -138,6 +146,7 @@ const messages = {
         },
         table: {
             id: "ID",
+            select: "Ausgewählt",
             actions: "Aktionen",
             created_at: "Erstellt am",
             updated_at: "Aktualisiert am",
@@ -172,6 +181,9 @@ const messages = {
                 delete: "Fehler beim Löschen"
             }
         },
+        filter : {
+            "all": "Alle",
+        }
     }
 };
 

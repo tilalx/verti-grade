@@ -4,7 +4,7 @@
       <v-row>
         <v-col>
           <v-card class="mx-auto" outlined>
-            <v-toolbar color="deep-purple accent-3" dark flat>
+            <v-toolbar color="primary" >
               <v-toolbar-title>{{ $t('header.routereviews') }}</v-toolbar-title>
             </v-toolbar>
             <v-data-table :items="reviews" :headers="headers" class="elevation-1">
@@ -46,10 +46,9 @@ export default {
     },
     methods: {
         getRouteIdFromUrl() {
-            const url = window.location.href;
-            const parts = url.split("/");
-            const id = parts[parts.length - 1];
-            return Number(id); // Convert string to number
+          const urlParams = new URLSearchParams(window.location.search);
+          const id = urlParams.get('id');
+          return Number(id); // Convert string to number
         },
         getAllRouteRatings() {
             getClimbingRouteById(this.routeId)

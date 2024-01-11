@@ -76,6 +76,7 @@ export default {
         },
         closeDialog() {
             this.dialog = false;
+            this.$emit('closed')
         },
         createUser() {
             if (this.$refs.form.validate()) { // Check if the form is valid

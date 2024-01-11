@@ -10,7 +10,7 @@ const authMiddleware = async (req, res, next) => {
       // Verify the token
       jwt.verify(token, process.env.JWT_SECRET, async (err, userData) => {  // Note: userData is the payload from the token
         if (err) {
-          return res.sendStatus(403);  // Invalid token
+          return res.status(403).json({ message: 'Invalid Token' });  // Invalid token
         }
   
         try {

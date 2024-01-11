@@ -75,6 +75,7 @@ export default {
         },
         closePopup() {
             this.showPopup = false;
+            this.$emit('closed');
         },
         submitReview() {
             createRouteRating({

@@ -9,7 +9,7 @@
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:[`activator`]="{ props }">
-              <v-btn color="primary" dark class="mb-2" v-bind="props">
+              <v-btn dark class="mb-2" v-bind="props">
                 Add New user
               </v-btn>
             </template>
@@ -20,28 +20,36 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12">
                       <v-text-field
                         v-model="editedItem.firstname"
                         label="First Name"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
                       <v-text-field
                         v-model="editedItem.lastname"
                         label="Last Name"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
                       <v-text-field
                         v-model="editedItem.email"
                         label="Email"
+                        type="email"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12" >
                       <v-text-field
                         v-model="editedItem.password"
-                        label="password"
+                        label="Password"
+                        type="password"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -50,10 +58,10 @@
   
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="close">
+                <v-btn variant="text" @click="close">
                   Cancel
                 </v-btn>
-                <v-btn color="blue-darken-1" variant="text" @click="save">
+                <v-btn color="primary" variant="text" @click="save">
                   Save
                 </v-btn>
               </v-card-actions>
@@ -82,7 +90,7 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon size="small" class="me-2" color="black" @click="editItem(item)" icon="mdi-pencil">
+        <v-icon size="small" class="me-2" @click="editItem(item)" icon="mdi-pencil">
             
         </v-icon>
         <v-icon size="small" @click="deleteItem(item)" icon="mdi-delete"></v-icon>
