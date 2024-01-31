@@ -1,52 +1,36 @@
 {
-  "name": "verti-grade",
-  "version": "0.0.0",
+  "name": "nuxt-app",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
-  },
-  "dependencies": {
-    "@mdi/font": "^7.3.67",
-    "axios": "^1.6.2",
-    "core-js": "^3.8.3",
-    "jwt-decode": "^4.0.0",
-    "moment": "^2.29.4",
-    "vue": "^3.2.13",
-    "vue-i18n": "9.4.1",
-    "vue-router": "^4.2.5",
-    "vuetify": "^3.4.8",
-    "vuex": "4.0.2",
-    "vuex-persist": "^3.1.3"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "@nuxtjs/i18n": "^8.0.0",
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
+    "nuxt": "^3.10.0",
+    "vue": "^3.4.14"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "rules": {}
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@pinia/nuxt": "^0.5.1",
+    "axios": "^1.6.7",
+    "fs": "^0.0.1-security",
+    "jwt-decode": "^4.0.0",
+    "moment": "^2.30.1",
+    "path": "^0.12.7",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "sass": "^1.70.0",
+    "vite": "^5.0.12",
+    "vite-plugin-vuetify": "^2.0.1",
+    "vuetify": "3.5.2",
+    "vuex": "^4.1.0",
+    "vuex-persist": "^3.1.3"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  "packageManager": "yarn@4.0.2"
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const ClimbingRoute = require('../../models/climbingRoute');
-const User = require('../../models/User');
+const Routerating = require('../../models/routeRating');
 const authMiddleware = require('../../middleware/authMiddleware');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
@@ -124,7 +124,8 @@ router.delete('/', authMiddleware, async (req, res) => {
             if (!climbingRoute) {
                 return; // Skip if the climbing route is not found
             }
-            await climbingRoute.destroy();
+            await Routerating.destroy({ where: { routeId: id } }); // Delete associated routeratings
+            await climbingRoute.destroy({ cascade: true, force: true });
         });
         await Promise.all(deletePromises);
         res.json({ message: 'Climbing routes deleted.' });

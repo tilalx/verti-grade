@@ -28,12 +28,11 @@ app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/users', require('./routes/api/user'));
 app.use('/api/climbingroute', require('./routes/api/climbingRoute'));
 app.use('/api/routeRating', require('./routes/api/routeRating'));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
 
 // Start server
 migrateAndSeed().then(() => {
-    app.listen(process.env.PORT || 3000, () => {
-      logger.log(`Server is running on port ${process.env.PORT || 3000}`);
+    app.listen(process.env.PORT || 3001, () => {
+      logger.log(`Server is running on port ${process.env.PORT || 3001}`);
     });
   });
