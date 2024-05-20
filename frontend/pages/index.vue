@@ -78,7 +78,8 @@ export default {
         });
 
         const { t } = useI18n();
-        const climbingRoutes = ref([]);
+        //const climbingRoutes = ref([]);
+        const { pending, data: climbingRoutes } = useLazyFetch('/api/climbingroute');
         const selectedDifficulty = ref('');
         const selectedLocation = ref('');
         const searchRouteName = ref('');
@@ -143,14 +144,6 @@ export default {
             }
 
             return filteredRoutes;
-        });
-
-        onMounted(async () => {
-            try {
-                climbingRoutes.value = await getAllClimbingRoutes();
-            } catch (error) {
-                console.error('Error loading climbing routes:', error);
-            }
         });
 
         return {

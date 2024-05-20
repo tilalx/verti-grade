@@ -23,7 +23,7 @@
   
   <script>
   import LogOut from '@/components/auth/LogOut.vue';
-  import { toRefs } from 'vue';
+  import { toRefs, watch } from 'vue';
   import { useMainStore } from '@/stores/main';
   export default {
     name: "NavBar",
@@ -39,12 +39,17 @@
     },
     setup(props) {
     const { loggedIn } = toRefs(props);
-    const theme = useMainStore().getColorTheme();
+    const theme = ref(useMainStore().getColorTheme);
 
     const logoColor = computed(() => ({
       maxWidth: '90px',
-      filter: `brightness(0) invert(${theme === 'dark' ? 1 : 0})`,
+      filter: `brightness(0) invert(${theme.value === 'dark' ? 1 : 0})`,
     }));
+
+    watch(() => useMainStore().getColorTheme, (newTheme) => {
+      theme.value = newTheme;
+    });
+    
 
       return {
         isLoggedIn: loggedIn,

@@ -9,29 +9,28 @@
 </template>
 
 <script>
-import { computed } from 'vue';
+import { computed, onMounted, watchEffect } from 'vue';
 import { useMainStore } from '~/stores/main'; // Import your Pinia store
 import NavBar from '@/components/layout/NavBar.vue';
 import FootBar from '@/components/layout/FootBar.vue';
-import { useI18n } from '#imports'
+import { useTheme } from 'vuetify';
 export default {
   setup: () => {
     const mainStore = useMainStore();
-    const isLoggedIn = computed(() => mainStore.isLoggedIn());
- 
+    const isLoggedIn = computed(() => mainStore.isLoggedIn);
+    const theme = useTheme();
+
     onMounted(() => {
       const colorSchemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-      const setTheme = () => {
-        const theme = mainStore.getColorTheme();
-        const colorTheme = colorSchemeMediaQuery.matches ? 'dark' : 'light';
-        mainStore.setColorTheme(colorTheme);
-        if (theme !== colorTheme) {
-          window.location.reload();
-        }
-      };
       
-
+      const setTheme = () => {
+          const currentTheme = mainStore.getColorTheme;
+          const colorTheme = colorSchemeMediaQuery.matches ? 'dark' : 'light';
+          mainStore.setColorTheme(colorTheme);
+          if (currentTheme !== colorTheme) {
+            theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+          }
+      };
       // Initial set of the theme
       setTheme();
 

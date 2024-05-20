@@ -1,29 +1,25 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  ssr: true,
   devtools: {
     enabled: true,
-
     timeline: {
       enabled: true,
     },
   },
   modules: [
     '@pinia/nuxt',
-    '@pinia-plugin-persistedstate/nuxt',
-    '@nuxtjs/i18n',
+    '@nuxtjs/i18n'
   ],
   plugins: [
     '~/plugins/vuetify.js',
-     '~/plugins/piniaPersist.js',],
+    { src: '~/plugins/persistStore.server.js', mode: 'client' },
+  ],
   css: [
     '~/assets/css/main.css',
     'vuetify/lib/styles/main.sass',
     '@mdi/font/css/materialdesignicons.min.css'
   ],
-  build: {
-    transpile: ['vuetify'],
-  },
-  ssr: true,
   nitro: {
     devProxy: {
       '/api': 
@@ -37,5 +33,8 @@ export default defineNuxtConfig({
   },
   i18n: {
     vueI18n: '~/plugins/i18n.js',
-  }
+  },
+  build: {
+    transpile: ['vuetify'],
+  },
 })

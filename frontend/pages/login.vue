@@ -79,13 +79,13 @@ export default {
         const loginFailed = ref(false);
         const loginSuccess = ref(false);
         const showPassword = ref(false);
+        const mainStore = useMainStore();
 
         const handleLogin = async () => {
             try {
                 loginFailed.value = false;
                 const token = await loginUser(email.value, password.value);
                 // Save the user data to the Vuex store
-                const mainStore = useMainStore();
                 mainStore.setToken(token);
                 // Redirect the user to the Dashboard
                 navigateTo('/dashboard');
@@ -95,6 +95,13 @@ export default {
                 loginFailed.value = true;
             }
         };
+
+        watchEffect(() => {
+            const token = mainStore.getToken;
+            if (token) {
+                navigateTo('/dashboard');
+            }
+        });
 
         return {
             email,

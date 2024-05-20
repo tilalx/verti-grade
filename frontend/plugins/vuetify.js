@@ -70,7 +70,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     };
 
     const store = useMainStore();
-    const defaultTheme = store.getColorTheme();
+    const defaultTheme = store.getColorTheme;
 
     // Create Vuetify instance with your theme
     const vuetify = createVuetify({

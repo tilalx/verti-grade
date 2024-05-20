@@ -13,7 +13,7 @@ API.interceptors.request.use(
     const mainStore = useMainStore();
 
     // Directly access the token from the store
-    const token = mainStore.getToken();
+    const token = mainStore.getToken;
     
     if (token) {
       // If your token is an object and you need to transform it, do it here.

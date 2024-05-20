@@ -5,6 +5,8 @@ const authMiddleware = require('../../middleware/authMiddleware');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const router = express.Router();
+const path = require('path');
+const logoPath = path.join(__dirname, '../../assets/logo.png');
 
 router.get('/', async (req, res) => {
     try {
@@ -165,6 +167,7 @@ router.get('/pdf', authMiddleware, async (req, res) => {
 
         let entryCount = 0; // Keep track of entries for new page logic
 
+
         for (let i = 0; i < ids.length; i++) {
             const climbingRoute = await ClimbingRoute.findByPk(ids[i]);
             if (!climbingRoute) {
@@ -215,7 +218,7 @@ router.get('/pdf', authMiddleware, async (req, res) => {
             }});
             doc.image(qrCodeBuffer, qrX, qrY, { fit: [qrSize, qrSize] });
 
-            doc.image('assets/logo.png', {
+            doc.image(logoPath, {
                 fit: [100, 100],
                 y: y + 100,
                 x: x + 165,

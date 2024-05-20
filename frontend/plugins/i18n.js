@@ -3,7 +3,7 @@ import { useMainStore } from "#imports"
 
 export default defineNuxtPlugin(() => {
   const mainStore = useMainStore()
-  const locale = mainStore.getLocale() || 'de'
+  const locale = mainStore.getLocale || 'de'
 
   return {
     legacy: false,

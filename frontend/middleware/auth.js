@@ -24,7 +24,7 @@ export default defineNuxtRouteMiddleware((to, from, next) => {
     
     const authRequired = to.meta.authRequired || false;
     const store = useMainStore();
-    let token = store.getToken();
+    let token = store.getToken;
     let isTokenValid = false;
 
     if (token) {
@@ -33,13 +33,14 @@ export default defineNuxtRouteMiddleware((to, from, next) => {
     
 
     if (authRequired) {
-        if (!isTokenValid) {
-            store.resetStore();
-            return navigateTo('/login');
-        }
-    } else if (to.name === 'Login' && isTokenValid) {
+      if (!isTokenValid) {
+          store.resetStore();
+          return navigateTo('/login');
+      }
+      if (to.name === 'Login' && isTokenValid) {
         // If already logged in, redirect to dashboard
         return navigateTo('/dashboard');
+    	}
     }
 });
 
