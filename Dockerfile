@@ -4,7 +4,7 @@ WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/yarn.lock .yarnrc.yml ./
 
-RUN yarn set version berry && yarn install
+RUN corepack enable  && yarn set version berry && yarn install
 
 COPY frontend ./
 
