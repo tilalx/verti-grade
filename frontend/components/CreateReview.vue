@@ -44,52 +44,58 @@
     </div>
 </template>
 
-<script>
-import { createRouteRating } from '@/services/routeRating';
-export default {
-    name: 'CreateReview',
-    props: {
-        routeId: {
-            type: Number,
-            required: true
-        }
-    },
-    data() {
-        return {
-            showPopup: false,
-            rating: null,
-            difficulty: null,
-            difficultySign: '',
-            comment: '',
-            ratings: [1, 2, 3, 4, 5],
-            difficulties: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            calltoaction: true
-        };
-    },
-    computed: {
-        isFormValid() {
-            return this.rating && this.difficulty && this.comment;
-        }
-    },
-    methods: {
-        openPopup() {
-            this.showPopup = true;
-        },
-        closePopup() {
-            this.showPopup = false;
-            this.$emit('closed');
-        },
-        submitReview() {
-            createRouteRating({
-                routeId: this.routeId,
-                rating: this.rating,
-                difficulty: this.difficulty,
-                difficultySign: this.difficultySign,
-                comment: this.comment
-            });
-            this.closePopup();
-        }
+<script setup>
+import { ref, computed } from 'vue';
+
+const props = defineProps({
+  routeId: {
+    type: String,
+    required: true
+  }
+});
+
+const supabase = useSupabaseClient();
+const showPopup = ref(false);
+const rating = ref(null);
+const difficulty = ref(null);
+const difficultySign = ref('');
+const comment = ref('');
+const ratings = ref([1, 2, 3, 4, 5]);
+const difficulties = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const calltoaction = ref(true);
+
+const isFormValid = computed(() => {
+  return rating.value && difficulty.value && comment.value;
+});
+
+function openPopup() {
+  showPopup.value = true;
+}
+
+function closePopup() {
+  showPopup.value = false;
+  emit('closed');
+}
+
+async function createRouteRating(data) {
+    const { error } = await supabase.from("ratings").insert(data);
+
+    if (error) {
+        console.error(error);
+        return;
     }
-};
+}
+
+function submitReview() {
+  // Assuming createRouteRating is a global function or imported
+  createRouteRating({
+    routeId: props.routeId,
+    rating: rating.value,
+    difficulty: difficulty.value,
+    difficultySign: difficultySign.value === '+' ? true : difficultySign.value === '-' ? false : null,
+    comment: comment.value
+  });
+  closePopup();
+}
 </script>
 

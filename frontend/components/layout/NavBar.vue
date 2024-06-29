@@ -15,7 +15,8 @@
       <v-btn v-if="!isLoggedIn" text to="/login">
         <v-icon class="mdi mdi-login"></v-icon>
       </v-btn>
-      <v-btn v-if="isLoggedIn" text to="/user">{{ $t("routes.users") }}</v-btn>
+      <v-btn v-if="isLoggedIn" text to="/comments">{{ $t("routes.comments") }}</v-btn>
+      <v-btn v-if="isLoggedIn" text to="/statistics">{{ $t("routes.statistics") }}</v-btn>
       <log-out v-if="isLoggedIn"></log-out>
     </v-app-bar>
     <v-divider></v-divider>

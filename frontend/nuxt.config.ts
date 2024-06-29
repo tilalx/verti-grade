@@ -1,16 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: true,
   devtools: {
-    enabled: true,
+    enabled: false,
     timeline: {
       enabled: true,
     },
   },
-  modules: [
-    '@pinia/nuxt',
-    '@nuxtjs/i18n'
-  ],
+  modules: ['@pinia/nuxt', '@nuxtjs/i18n', "@nuxtjs/supabase", "nuxt-echarts"],
   plugins: [
     '~/plugins/vuetify.js',
     { src: '~/plugins/persistStore.server.js', mode: 'client' },
@@ -20,21 +16,15 @@ export default defineNuxtConfig({
     'vuetify/lib/styles/main.sass',
     '@mdi/font/css/materialdesignicons.min.css'
   ],
-  nitro: {
-    devProxy: {
-      '/api': 
-      {
-        target: 'http://localhost:3001/api',
-      },
-    }
-  },
-  routeRules: {
-    '/api/**': { proxy: 'http://localhost:3001/api/**' },
+  supabase: {
+    url: 'http://192.168.178.110:8000',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE2MTU2MDAwLAogICJleHAiOiAxODczOTIyNDAwCn0.S4IjH9EnarNccAnzOB4TdVRoDnM8QZalGozd6kdWvtY',
+    redirect: false,
   },
   i18n: {
     vueI18n: '~/plugins/i18n.js',
   },
   build: {
-    transpile: ['vuetify'],
+    transpile: ['vuetify', 'echarts'],
   },
 })

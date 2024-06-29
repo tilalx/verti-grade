@@ -12,7 +12,7 @@
                         <v-select v-model="routeData.location" label="Route Location" :items="locations" required></v-select>
                         <v-select v-model="routeData.type" label="Route Type" :items="Type" required></v-select>
                         <v-textarea v-model="routeData.comment" label="Route Comment"></v-textarea>
-                        <v-text-field v-model="routeData.creators" label="Route Creators split by ," required></v-text-field>
+                        <v-text-field v-model="routeData.creator" label="Route Creator split by ," required></v-text-field>
                         <v-text-field v-model="routeData.screwDate" label="Screw Date" type="date" required></v-text-field>
                         <v-switch v-model="routeData.archived" label="Archived" required :true-value="true" :false-value="false"></v-switch>
                         <div class="color-picker-container">
@@ -29,8 +29,25 @@
     </div>
 </template>
 
-<script>
-import { getClimbingRouteById, updateClimbingRoute } from '@/services/climbingRoutes';
+<script setup>
+import { ref, computed } from 'vue';
+
+
+const supabase = useSupabaseClient();
+
+const popupOpen = ref(false);
+const routeData = ref(null);
+const locations = ['Hanau', 'Gelnhausen'];
+const Type = ['Boulder', 'Route'];
+const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+const difficultySign = ['', '-', '+'];
+
+const props = defineProps({
+  routeId: {
+    type: String,
+    required: true
+  }
+});
 
 function formatDateToYYYYMMDD(date) {
     if (!date) return null;
@@ -45,55 +62,70 @@ function formatDateToYYYYMMDD(date) {
     return [year, month, day].join('-');
 }
 
+const isFormValid = computed(() => {
+    const data = routeData.value;
+    return data && data.name && data.difficulty && data.location && data.type && data.creator && data.screwDate && data.archived !== null && data.color;
+});
 
-export default {
-    props: {
-        routeId: {
-            type: Number,
-            required: true
-        }
-    },
-    data() {
-        return {
-            popupOpen: false,
-            routeData: null,
-            locations: ['Hanau', 'Gelnhausen'],
-            Type: ['Boulder', 'Route'],
-            difficulty: Array.from({ length: 10 }, (_, i) => (i + 1).toString()),
-            difficultySign: ['','-', '+'],
-            
-        };
-    },
-    computed: {
-        isFormValid() {
-            return this.routeData && this.routeData.name && this.routeData.difficulty && this.routeData.location && this.routeData.type && this.routeData.creators && this.routeData.screwDate && this.routeData.archived !== null && this.routeData.color;
-        }
-    },
-    methods: {
-        openPopup() {
-            getClimbingRouteById(this.routeId).then((response) => {
-                response.data.screwDate = formatDateToYYYYMMDD(response.data.screwDate);
-                this.routeData = response.data;
-                this.routeData.creators = this.routeData.creators.join(',');
-                this.popupOpen = true;
-            });
-        },
-        closePopup() {
-            this.popupOpen = false;
-            this.$emit('closed');
-        },
-        async saveChanges() {
-            if (this.isFormValid) {
-                // Ensure the date is formatted correctly before sending
-                this.routeData.screwDate = formatDateToYYYYMMDD(this.routeData.screwDate);
-                
-                this.routeData.creators = this.routeData.creators.split(',');
-                await updateClimbingRoute(this.routeData);
-                this.closePopup();
-            }
-        }
+async function openPopup() {
+    const response = await fetchClimbingRoute();
+    response.screwDate = formatDateToYYYYMMDD(response.screwDate);
+    response.creator = response.creator.join(',');
+    routeData.value = response;
+    popupOpen.value = true;
+}
+
+async function fetchClimbingRoute() {
+    if (!props.routeId) {
+        error.value = "No route ID provided!";
+        return;
     }
-};
+
+    const { data, error: fetchError } = await supabase
+        .from('climbingroutes')
+        .select('*')
+        .eq('id', props.routeId)
+        .single();
+
+    if (fetchError) {
+        error.value = fetchError.message;
+    } else {
+        return data;
+    }
+}
+
+function closePopup() {
+    popupOpen.value = false;
+}
+
+async function saveChanges() {
+  if (isFormValid.value) {
+    routeData.value.screwDate = formatDateToYYYYMMDD(routeData.value.screwDate);
+    routeData.value.creator = routeData.value.creator.split(',');
+
+    const { data, error } = await supabase
+      .from('climbingroutes') 
+      .update({
+        name: routeData.value.name,
+        difficulty: routeData.value.difficulty,
+        difficultySign: routeData.value.difficultySign,
+        location: routeData.value.location,
+        type: routeData.value.type,
+        comment: routeData.value.comment,
+        creator: routeData.value.creator,
+        screwDate: routeData.value.screwDate,
+        archived: routeData.value.archived,
+        color: routeData.value.color
+      })
+      .match({ id: routeData.value.id });
+
+    if (error) {
+      console.error('Error updating the route:', error);
+    } else {
+      closePopup(); // Assuming closePopup() is defined to handle UI closure
+    }
+  }
+}
 </script>
 
 <style scoped>

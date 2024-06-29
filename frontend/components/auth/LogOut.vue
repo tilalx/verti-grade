@@ -4,17 +4,19 @@
     </v-btn>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-import { useMainStore } from '@/stores/main';
+<script setup>
+import { useRouter } from 'vue-router';
 
-export default defineComponent({
-    methods: {
-        logout() {
-            const store = useMainStore();
-            store.resetStore();
-            navigateTo('/');
-        },
-    },
-});
+const router = useRouter();
+const supabase = useSupabaseClient();
+
+async function logout() {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+        console.error('Logout failed:', error);
+    } else {
+        router.push('/login');
+    }
+}
 </script>

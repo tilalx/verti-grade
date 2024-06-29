@@ -1,46 +1,33 @@
-// middleware/auth.js
-import { jwtDecode } from "jwt-decode";
-import { useMainStore } from "../stores/main";
-export default defineNuxtRouteMiddleware((to, from, next) => {
-    function tokenValid(token) {
-        try {
-          const decodedToken = jwtDecode(token);
-          if (!decodedToken) {
-            throw new Error('Invalid token');
-          }
-      
-          // Check if the token has an expiration time
-          if (!decodedToken.exp) {
-            return false;
-          }
-      
-          const currentUnixTime = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
-          return currentUnixTime < decodedToken.exp;
-        } catch (error) {
-          console.error('Error validating token:', error);
-          return false;
-        }
-      }
-    
-    const authRequired = to.meta.authRequired || false;
-    const store = useMainStore();
-    let token = store.getToken;
-    let isTokenValid = false;
+// This assumes you have set up a Supabase plugin that exports useSupabaseClient
+import { useSupabaseClient } from '#imports';
 
-    if (token) {
-        isTokenValid = tokenValid(token);
-    }
-    
+export default defineNuxtRouteMiddleware(async (to, from, next) => {
+  const authRequired = to.meta.authRequired || true;
 
-    if (authRequired) {
-      if (!isTokenValid) {
-          store.resetStore();
-          return navigateTo('/login');
-      }
-      if (to.name === 'Login' && isTokenValid) {
-        // If already logged in, redirect to dashboard
-        return navigateTo('/dashboard');
-    	}
+  // Use the Supabase client from the Nuxt composable
+  const supabase = useSupabaseClient();
+
+  // Retrieve the current session from Supabase
+  const session = await supabase.auth.getSession();
+
+  // Helper function to verify the session is still valid
+  function isSessionValid(session) {
+    if (!session) return false; // Check if there is a session at all
+    const currentUnixTime = Math.floor(Date.now() / 1000);
+    return session.data.session?.expires_at > currentUnixTime;
+  }
+
+  const isValidSession = isSessionValid(session);
+
+
+  if (authRequired && to.path !== '/') {
+    if (!isValidSession) {
+      // If the session is not valid, redirect to the login page
+      return navigateTo('/login');
     }
+    if (to.name === 'Login' && isValidSession) {
+      // Redirect to the dashboard if already logged in and trying to access the login page
+      return navigateTo('/dashboard');
+    }
+  }
 });
-

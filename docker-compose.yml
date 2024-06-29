@@ -9,28 +9,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=vertigrade
-      - DB_USERNAME=vertigrade
-      - DB_PASSWORD=wihfuiwe890zhfwjlhbw0i9
       - SERVER_URL=https://dav.aelx.de
-      - JWT_SECRET=whuidfh8iwuid0uj9wjhfß890jdohiwujibc
-
-  db:
-    container_name: verti-grade-db
-    image: postgres:16
-    environment:
-      - POSTGRES_USER=vertigrade
-      - POSTGRES_PASSWORD=wihfuiwe890zhfwjlhbw0i9
-      - POSTGRES_DB=vertigrade
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vertigrade"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
+      - SUPABASE_URL=https://dbdav.aelx.de
+      - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJzdXBhYmFzZS1rZXkiLCJleHAiOjE2MjYwNjYwNjAsImlhdCI6MTYyNTQ2MDA2MCwiaXNzIjoic3VwYWJhc2Uta2V5IiwianRpIjoiMjIwMzQwZjItZjQzZi00ZjYwLWIwZjYtZjQwZjIwZjQwZjYwIiwicm9sZSI6InN1cGFyIn0.1
 
 volumes:
   db_data:
