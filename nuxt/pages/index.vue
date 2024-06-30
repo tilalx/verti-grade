@@ -59,8 +59,8 @@
               <td>{{ climbingRoute.type }}</td>
               <td>{{ climbingRoute.comment }}</td>
               <td>{{ climbingRoute.creator.join(",") }}</td>
-              <td>{{ formatDate(climbingRoute.screwDate) }}</td>
-              <td><RouteDetails :routeId="climbingRoute.id"></RouteDetails></td>
+              <td>{{ formatDate(climbingRoute.screw_date) }}</td>
+              <td><RouteDetails :route_id="climbingRoute.id"></RouteDetails></td>
             </tr>
           </template>
         </v-data-table>
@@ -106,7 +106,7 @@ export default {
       { title: t("climbing.type"), value: "type" },
       { title: t("climbing.comment"), value: "comment" },
       { title: t("climbing.creators"), value: "creator" },
-      { title: t("table.created_at"), value: "screwDate" },
+      { title: t("table.created_at"), value: "screw_date" },
       { title: t("table.actions"), value: "actions" },
     ]);
 

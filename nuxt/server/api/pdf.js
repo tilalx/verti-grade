@@ -95,13 +95,13 @@ export default eventHandler(async (event) => {
           );
       }
 
-      const date = new Date(climbingRoute.screwDate);
-      const screwDate = date.toLocaleDateString("DE-de");
+      const date = new Date(climbingRoute.screw_date);
+      const screw_date = date.toLocaleDateString("DE-de");
       doc
         .fontSize(8)
         .text(
-          screwDate,
-          calculateStartX(x + 80, screwDate, doc),
+          screw_date,
+          calculateStartX(x + 80, screw_date, doc),
           y + 140,
           textOptions
         );

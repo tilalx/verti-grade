@@ -1,12 +1,12 @@
 # --------------> The build image
-FROM node:22.3.0-bookworm as frontend-build
-WORKDIR /app/frontend
+FROM node:22.3.0-bookworm as nuxt-build
+WORKDIR /app/nuxt
 
-COPY frontend/package.json frontend/yarn.lock .yarnrc.yml ./
+COPY nuxt/package.json nuxt/yarn.lock .yarnrc.yml ./
 
 RUN corepack enable  && yarn set version berry && yarn install
 
-COPY frontend ./
+COPY nuxt ./
 
 RUN yarn build
 
@@ -14,8 +14,8 @@ RUN yarn build
 FROM node:22.3.0-bookworm-slim
 WORKDIR /app
 
-# Copy the build output and other necessary files from the frontend build stage
-COPY --from=frontend-build /app/frontend/.output /app/nuxt
+# Copy the build output and other necessary files from the nuxt build stage
+COPY --from=nuxt-build /app/nuxt/.output /app/nuxt
 
 EXPOSE 3000
 

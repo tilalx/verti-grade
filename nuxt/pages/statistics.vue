@@ -1,16 +1,7 @@
 <template>
   <v-row>
     <v-col>
-      <v-date-picker
-        v-model="selectedDate"
-        :type="'week'"
-        label="Select Week"
-      ></v-date-picker>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-col>
-      <StatisticsWeeklyHeatmap :selectedDate="selectedDate" />
+      <StatisticsWeeklyHeatmap/>
     </v-col>
   </v-row>
 </template>

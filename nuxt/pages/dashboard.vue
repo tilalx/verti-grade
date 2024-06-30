@@ -152,7 +152,7 @@
               <td>{{ climbingRoute.creator.join(",") }}</td>
               <td>
                 {{
-                  new Date(climbingRoute.screwDate).toLocaleDateString("de-DE")
+                  new Date(climbingRoute.screw_date).toLocaleDateString("de-DE")
                 }}
               </td>
               <td>{{ climbingRoute.score !== null ? climbingRoute.score + '/10' : climbingRoute.score }}</td>
@@ -160,7 +160,7 @@
               <td>
                 <EditRoute
                   @closed="reloadRoutes"
-                  :routeId="climbingRoute.id"
+                  :route_id="climbingRoute.id"
                 ></EditRoute>
               </td>
             </tr>
@@ -220,7 +220,7 @@ export default {
       { title: t("climbing.type"), value: "type" },
       { title: t("climbing.comment"), value: "comment" },
       { title: t("climbing.creators"), value: "creator" },
-      { title: t("table.created_at"), value: "screwDate" },
+      { title: t("table.created_at"), value: "screw_date" },
       { title: t("rating.score"), value: "rating"},
       { title: t("climbing.archived"), value: "archived" },
       { title: t("table.actions"), value: "actions" },
@@ -249,14 +249,11 @@ export default {
     const getClimbingRoutes = async () => {
       const { data, error } = await supabase
         .from("climbingroutes")
-        .select("*")
-        .order("screwDate", { ascending: false })
-        .from('climbingroutes')
         .select(`
           *,
           ratings(rating)
         `)
-        .order('screwDate', { ascending: false });
+        .order("screw_date", { ascending: false })
 
       if (error) {
         console.error(error);
@@ -444,7 +441,7 @@ export default {
             difficultySign,
             location,
             creator,
-            screwDate,
+            screw_date,
             comment,
             color,
             type,

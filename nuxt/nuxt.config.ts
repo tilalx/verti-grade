@@ -17,8 +17,6 @@ export default defineNuxtConfig({
     '@mdi/font/css/materialdesignicons.min.css'
   ],
   supabase: {
-    url: 'http://192.168.178.110:8000',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE2MTU2MDAwLAogICJleHAiOiAxODczOTIyNDAwCn0.S4IjH9EnarNccAnzOB4TdVRoDnM8QZalGozd6kdWvtY',
     redirect: false,
   },
   i18n: {

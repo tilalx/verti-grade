@@ -55,12 +55,12 @@ export default {
         return;
       }
 
-      // Prepare ratings with the correct routeId
+      // Prepare ratings with the correct route_id
       const ratings = [];
       routeData.forEach((route, index) => {
         const routeRatings = jsonData[index].ratings.map((rating) => ({
           ...rating,
-          routeId: route.id,
+          route_id: route.id,
         }));
         ratings.push(...routeRatings);
       });

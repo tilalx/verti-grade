@@ -38,7 +38,7 @@ export default eventHandler(async (event) => {
       { header: 'Typ', key: 'type', width: 15 },
       { header: 'Kommentar', key: 'comment', width: 30 },
       { header: 'Schrauber', key: 'creator', width: 30 },
-      { header: 'Schraubdatum', key: 'screwDate', width: 15 },
+      { header: 'Schraubdatum', key: 'screw_date', width: 15 },
     ];
 
     // Add rows
@@ -51,7 +51,7 @@ export default eventHandler(async (event) => {
         type: cr.type,
         comment: cr.comment,
         creator: cr.creator.join(', '),
-        screwDate: new Date(cr.screwDate).toLocaleDateString('de-DE'),
+        screw_date: new Date(cr.screw_date).toLocaleDateString('de-DE'),
       });
     });
 

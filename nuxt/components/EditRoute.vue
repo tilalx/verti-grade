@@ -13,7 +13,7 @@
                         <v-select v-model="routeData.type" label="Route Type" :items="Type" required></v-select>
                         <v-textarea v-model="routeData.comment" label="Route Comment"></v-textarea>
                         <v-text-field v-model="routeData.creator" label="Route Creator split by ," required></v-text-field>
-                        <v-text-field v-model="routeData.screwDate" label="Screw Date" type="date" required></v-text-field>
+                        <v-text-field v-model="routeData.screw_date" label="Screw Date" type="date" required></v-text-field>
                         <v-switch v-model="routeData.archived" label="Archived" required :true-value="true" :false-value="false"></v-switch>
                         <div class="color-picker-container">
                             <v-color-picker v-model="routeData.color" :modes="['hexa']" label="Route Color" required></v-color-picker>
@@ -43,7 +43,7 @@ const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
 const difficultySign = ['', '-', '+'];
 
 const props = defineProps({
-  routeId: {
+  route_id: {
     type: String,
     required: true
   }
@@ -64,19 +64,19 @@ function formatDateToYYYYMMDD(date) {
 
 const isFormValid = computed(() => {
     const data = routeData.value;
-    return data && data.name && data.difficulty && data.location && data.type && data.creator && data.screwDate && data.archived !== null && data.color;
+    return data && data.name && data.difficulty && data.location && data.type && data.creator && data.screw_date && data.archived !== null && data.color;
 });
 
 async function openPopup() {
     const response = await fetchClimbingRoute();
-    response.screwDate = formatDateToYYYYMMDD(response.screwDate);
+    response.screw_date = formatDateToYYYYMMDD(response.screw_date);
     response.creator = response.creator.join(',');
     routeData.value = response;
     popupOpen.value = true;
 }
 
 async function fetchClimbingRoute() {
-    if (!props.routeId) {
+    if (!props.route_id) {
         error.value = "No route ID provided!";
         return;
     }
@@ -84,7 +84,7 @@ async function fetchClimbingRoute() {
     const { data, error: fetchError } = await supabase
         .from('climbingroutes')
         .select('*')
-        .eq('id', props.routeId)
+        .eq('id', props.route_id)
         .single();
 
     if (fetchError) {
@@ -100,7 +100,7 @@ function closePopup() {
 
 async function saveChanges() {
   if (isFormValid.value) {
-    routeData.value.screwDate = formatDateToYYYYMMDD(routeData.value.screwDate);
+    routeData.value.screw_date = formatDateToYYYYMMDD(routeData.value.screw_date);
     routeData.value.creator = routeData.value.creator.split(',');
 
     const { data, error } = await supabase
@@ -113,7 +113,7 @@ async function saveChanges() {
         type: routeData.value.type,
         comment: routeData.value.comment,
         creator: routeData.value.creator,
-        screwDate: routeData.value.screwDate,
+        screw_date: routeData.value.screw_date,
         archived: routeData.value.archived,
         color: routeData.value.color
       })

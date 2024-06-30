@@ -48,7 +48,7 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-  routeId: {
+  route_id: {
     type: String,
     required: true
   }
@@ -89,7 +89,7 @@ async function createRouteRating(data) {
 function submitReview() {
   // Assuming createRouteRating is a global function or imported
   createRouteRating({
-    routeId: props.routeId,
+    route_id: props.route_id,
     rating: rating.value,
     difficulty: difficulty.value,
     difficultySign: difficultySign.value === '+' ? true : difficultySign.value === '-' ? false : null,

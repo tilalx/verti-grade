@@ -42,7 +42,7 @@
 import { ref } from "vue";
 
 const props = defineProps({
-  routeId: {
+  route_id: {
     type: String,
     required: true,
   },
@@ -81,7 +81,7 @@ async function getClimbingRatings() {
   const { data: ratings } = await supabase
     .from("ratings")
     .select()
-    .eq("routeId", props.routeId)
+    .eq("route_id", props.route_id)
     .order("created_at", { ascending: false });
 
   routeDetails.value = ratings;

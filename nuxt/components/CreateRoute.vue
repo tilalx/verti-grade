@@ -155,7 +155,7 @@ async function createRoute() {
     type: routeType.value,
     comment: routeComment.value || "",
     creator: routeCreator.value.split(","),
-    screwDate: routeScrewDate.value,
+    screw_date: routeScrewDate.value,
     color: routeColor.value,
   };
 

@@ -2,7 +2,7 @@ version: '3'
 services:
   verti-grade:
     container_name: verti-grade-app
-    image: tilalx/verti-grade:1.0.9
+    image: tilalx/verti-grade:beta
     ports:
       - 3000:3000
     depends_on:

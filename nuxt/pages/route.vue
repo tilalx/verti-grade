@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <CreateReview :routeId="routeId"></CreateReview>
+    <CreateReview :route_id="route_id"></CreateReview>
     <v-row>
       <v-col>
         <v-card class="mx-auto" outlined>
@@ -16,7 +16,7 @@
                 <v-list-item>
                   <span
                     >Geschraubt am:
-                    {{ formatDateToYYYYMMDD(metadata?.screwDate) }}</span
+                    {{ formatDateToYYYYMMDD(metadata?.screw_date) }}</span
                   >
                 </v-list-item>
               </v-list>
@@ -60,7 +60,7 @@ useHead({
 const { t } = useI18n();
 const supabase = useSupabaseClient();
 const route = useRoute();
-const routeId = ref(getRouteIdFromUrl());
+const route_id = ref(getRouteIdFromUrl());
 const reviews = ref([]);
 const metadata = ref(null);
 
@@ -92,7 +92,7 @@ const getAllRouteRatings = async () => {
   const { data, error } = await supabase
     .from("ratings")
     .select("*")
-    .eq("routeId", routeId.value)
+    .eq("route_id", route_id.value)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -136,7 +136,7 @@ const getRouteMetadata = async () => {
   const { data, error } = await supabase
     .from("climbingroutes")
     .select("*")
-    .eq("id", routeId.value)
+    .eq("id", route_id.value)
     .single();
 
   if (error) {
@@ -148,7 +148,7 @@ const getRouteMetadata = async () => {
 };
 
 onMounted(() => {
-  routeId.value = getRouteIdFromUrl();
+  route_id.value = getRouteIdFromUrl();
   getAllRouteRatings();
   getRouteMetadata();
 });
