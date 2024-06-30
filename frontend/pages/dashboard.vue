@@ -1,3 +1,4 @@
+@ -1,549 +1,556 @@
 <template>
   <v-container class="dashboard">
     <v-row>
@@ -154,6 +155,7 @@
                   new Date(climbingRoute.screwDate).toLocaleDateString("de-DE")
                 }}
               </td>
+              <td>{{ climbingRoute.score !== null ? climbingRoute.score + '/10' : climbingRoute.score }}</td>
               <td>{{ climbingRoute.archived }}</td>
               <td>
                 <EditRoute
@@ -219,6 +221,7 @@ export default {
       { title: t("climbing.comment"), value: "comment" },
       { title: t("climbing.creators"), value: "creator" },
       { title: t("table.created_at"), value: "screwDate" },
+      { title: t("rating.score"), value: "rating"},
       { title: t("climbing.archived"), value: "archived" },
       { title: t("table.actions"), value: "actions" },
     ]);
@@ -248,6 +251,12 @@ export default {
         .from("climbingroutes")
         .select("*")
         .order("screwDate", { ascending: false });
+        .from('climbingroutes')
+        .select(`
+          *,
+          ratings(rating)
+        `)
+        .order('screwDate', { ascending: false });
 
       if (error) {
         console.error(error);
@@ -258,7 +267,13 @@ export default {
       climbingRoutes.value.forEach((route) => {
         route.selected = false;
       });
+      climbingRoutes.value = data.map(route => ({
+        ...route,
+        score: route.ratings && route.ratings.length > 0
+      ? route.ratings.map(r => r.rating).reduce((a, b) => a + b, 0) / route.ratings.length: null
+      }));
     };
+
 
     const channel = supabase
       .channel("db-changes")
