@@ -250,7 +250,7 @@ export default {
       const { data, error } = await supabase
         .from("climbingroutes")
         .select("*")
-        .order("screwDate", { ascending: false });
+        .order("screwDate", { ascending: false })
         .from('climbingroutes')
         .select(`
           *,
