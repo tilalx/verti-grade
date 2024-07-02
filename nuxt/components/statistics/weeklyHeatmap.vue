@@ -11,8 +11,10 @@ import {
     TooltipComponent,
     LegendComponent,
 } from 'echarts/components'
-import { ref, provide } from 'vue'
+import { ref, computed, provide } from 'vue'
+import { useMainStore } from '~/stores/main'
 
+// Import components and use them
 use([
     CanvasRenderer,
     PieChart,
@@ -21,8 +23,15 @@ use([
     LegendComponent,
 ])
 
-provide(THEME_KEY, 'dark')
+// Access the store and get the current theme
+const mainStore = useMainStore()
+const currentTheme = computed(() => mainStore.getColorTheme)
 
+// Provide the theme value
+const THEME_KEY = Symbol('theme')
+provide(THEME_KEY, currentTheme.value)
+
+// Define the chart options
 const option = ref({
     title: {
         text: 'Traffic Sources',

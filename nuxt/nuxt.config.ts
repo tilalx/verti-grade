@@ -22,6 +22,9 @@ export default defineNuxtConfig({
   i18n: {
     vueI18n: '~/plugins/i18n.js',
   },
+  echarts: {
+    renderer: 'svg',
+  },
   build: {
     transpile: ['vuetify', 'echarts'],
   },
