@@ -8,7 +8,6 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "format": "prettier --write \"**/*.{js,vue,html,css}\""
-
   },
   "devDependencies": {
     "@nuxtjs/i18n": "^8.0.0",
@@ -16,7 +15,7 @@
     "@pinia-plugin-persistedstate/nuxt": "1.2.0",
     "@types/pdfkit": "^0",
     "@types/qrcode": "^1",
-    "nuxt": "^3.11.2",
+    "nuxt": "^3.12.2",
     "nuxt-echarts": "^0.0.9",
     "prettier": "^3.3.2",
     "vue": "^3.4.14"
