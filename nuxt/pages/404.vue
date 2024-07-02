@@ -4,8 +4,12 @@
             <v-col cols="12">
                 <v-card class="pa-4">
                     <v-card-title class="display-1">404</v-card-title>
-                    <v-card-subtitle class="headline">Page not found</v-card-subtitle>
-                    <v-card-text class="subheading-1">The requested page could not be found.</v-card-text>
+                    <v-card-subtitle class="headline"
+                        >Page not found</v-card-subtitle
+                    >
+                    <v-card-text class="subheading-1"
+                        >The requested page could not be found.</v-card-text
+                    >
                 </v-card>
             </v-col>
         </v-row>
@@ -18,5 +22,4 @@ export default {
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

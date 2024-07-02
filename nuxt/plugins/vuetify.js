@@ -1,10 +1,9 @@
 // plugins/vuetify.js
-import { createVuetify } from 'vuetify';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 export default defineNuxtPlugin((nuxtApp) => {
-
     const theme = {
         default: 'dark',
         theme: {
@@ -20,7 +19,7 @@ export default defineNuxtPlugin((nuxtApp) => {
                         info: '#2979FF', // Info color (Blue)
                         success: '#2E7D32', // Success color (Green)
                         warning: '#FF6F00', // Warning color (Orange)
-                    }
+                    },
                 },
                 light: {
                     colors: {
@@ -33,11 +32,11 @@ export default defineNuxtPlugin((nuxtApp) => {
                         info: '#2196F3', // Info color (Blue)
                         success: '#4CAF50', // Success color (Green)
                         warning: '#FFC107', // Warning color (Amber)
-                    }
+                    },
                 },
             },
         },
-    };
+    }
 
     const darkTheme = {
         dark: true,
@@ -51,8 +50,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2979FF', // Info color (Blue)
             success: '#2E7D32', // Success color (Green)
             warning: '#FF6F00', // Warning color (Orange)
-        }
-    };
+        },
+    }
 
     const lightTheme = {
         dark: false,
@@ -66,11 +65,11 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2196F3', // Info color (Blue)
             success: '#4CAF50', // Success color (Green)
             warning: '#FFC107', // Warning color (Amber)
-        }
-    };
+        },
+    }
 
-    const store = useMainStore();
-    const defaultTheme = store.getColorTheme;
+    const store = useMainStore()
+    const defaultTheme = store.getColorTheme
 
     // Create Vuetify instance with your theme
     const vuetify = createVuetify({
@@ -83,9 +82,9 @@ export default defineNuxtPlugin((nuxtApp) => {
                 dark: darkTheme,
                 light: lightTheme,
             },
-        }
-    });
+        },
+    })
 
     // Make Vuetify available to the app
-    nuxtApp.vueApp.use(vuetify);
-});
+    nuxtApp.vueApp.use(vuetify)
+})

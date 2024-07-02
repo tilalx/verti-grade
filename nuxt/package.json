@@ -6,7 +6,9 @@
     "dev": "nuxt dev --host",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write \"**/*.{js,vue,html,css}\""
+
   },
   "devDependencies": {
     "@nuxtjs/i18n": "^8.0.0",
@@ -16,6 +18,7 @@
     "@types/qrcode": "^1",
     "nuxt": "^3.11.2",
     "nuxt-echarts": "^0.0.9",
+    "prettier": "^3.3.2",
     "vue": "^3.4.14"
   },
   "dependencies": {

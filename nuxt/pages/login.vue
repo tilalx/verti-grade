@@ -1,99 +1,109 @@
 <template>
-    <v-container class="login-container">
-        <v-row justify="center" align="center" style="height: 100vh;">
-            <v-col cols="12" sm="12" md="4">
-                <v-card>
-                    <v-card-title class="text-center">
-                        <h1>Login</h1>
+    <v-container class="login-container" fluid>
+        <v-row justify="center" align="center" class="fill-height">
+            <v-col cols="12" sm="8" md="4">
+                <v-card class="pa-4">
+                    <v-card-title class="justify-center">
+                        <span class="text-h5">Login</span>
                     </v-card-title>
-                    <v-divider></v-divider>
                     <v-card-text>
-                        <v-form @submit.prevent="handleSupabaseLogin">
+                        <v-form
+                            ref="form"
+                            @submit.prevent="handleSupabaseLogin"
+                        >
                             <v-text-field
-                                v-model="email"
                                 label="Email"
+                                prepend-icon="mdi-account"
+                                v-model="email"
                                 type="email"
                                 autocomplete="email"
                                 required
+                                outlined
+                                dense
                             ></v-text-field>
+
                             <v-text-field
-                                v-model="password"
-                                :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                                @click:append="showPassword = !showPassword"
-                                :type="showPassword ? 'text' : 'password'"
                                 label="Password"
+                                prepend-icon="mdi-lock"
+                                v-model="password"
+                                type="password"
                                 autocomplete="current-password"
                                 required
+                                outlined
+                                dense
                             ></v-text-field>
-                            <v-spacer></v-spacer>
-                            <v-btn tspe="submit" color="primary" @click="handleSupabaseLogin">Login</v-btn>
+
+                            <div class="text-center mt-4">
+                                <v-btn
+                                    :loading="loading"
+                                    color="primary"
+                                    large
+                                    type="submit"
+                                    class="mx-auto"
+                                    elevation="2"
+                                    rounded
+                                    >Sign In</v-btn
+                                >
+                            </div>
                         </v-form>
+                        <v-alert
+                            v-if="loginFailed"
+                            type="error"
+                            dismissible
+                            outlined
+                            class="mt-4"
+                        >
+                            Login failed. Please check your credentials and try
+                            again.
+                        </v-alert>
+                        <v-alert
+                            v-if="loginSuccess"
+                            type="success"
+                            dismissible
+                            outlined
+                            class="mt-4"
+                        >
+                            Login successful. Redirecting to the Dashboard...
+                        </v-alert>
                     </v-card-text>
                 </v-card>
-                <v-alert
-                    v-if="loginFailed"
-                    type="error"
-                    dismissible
-                    outlined
-                    class="mt-4"
-                >
-                    Login failed. Please check your credentials and try again.
-                </v-alert>
-                <v-alert
-                    v-if="loginSuccess"
-                    type="success"
-                    dismissible
-                    outlined
-                    class="mt-4"
-                >
-                    Login successful. Redirecting to the Dashboard...
-                </v-alert>
             </v-col>
         </v-row>
     </v-container>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script setup>
+import { ref } from 'vue'
 
-export default {
-    setup() {
-        const email = ref('');
-        const password = ref('');
-        const loginFailed = ref(false);
-        const loginSuccess = ref(false);
-        const showPassword = ref(false);
-        const supabase = useSupabaseClient()
+const email = ref('')
+const password = ref('')
+const loginFailed = ref(false)
+const loginSuccess = ref(false)
+const loading = ref(false)
+const supabase = useSupabaseClient()
+const router = useRouter()
 
-        const handleSupabaseLogin = async () => {
-            try {
-                const { user, error } = await supabase.auth.signInWithPassword({
-                    email: email.value,
-                    password: password.value,
-                });
+const handleSupabaseLogin = async () => {
+    loading.value = true
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email.value,
+            password: password.value,
+        })
 
-                if (error) throw error;
+        if (error) throw error
 
-                navigateTo('/dashboard');
-                loginFailed.value = false;
-                loginSuccess.value = true;
-            } catch (error) {
-                console.error('Supabase login failed:', error.message);
-                loginSuccess.value = false;
-                loginFailed.value = true;
-            }
-        };
-
-        return {
-            email,
-            password,
-            loginFailed,
-            loginSuccess,
-            showPassword,
-            handleSupabaseLogin,
-        };
-    },
-};
+        loginFailed.value = false
+        loginSuccess.value = true
+        router.push('/dashboard')
+    } catch (error) {
+        console.error('Supabase login failed:', error.message)
+        loginSuccess.value = false
+        loginFailed.value = true
+    } finally {
+        loading.value = false
+    }
+}
 </script>
 
 <style scoped></style>

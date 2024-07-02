@@ -5,18 +5,18 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const supabase = useSupabaseClient();
+const router = useRouter()
+const supabase = useSupabaseClient()
 
 async function logout() {
-    const { error } = await supabase.auth.signOut();
-    
+    const { error } = await supabase.auth.signOut()
+
     if (error) {
-        console.error('Logout failed:', error);
+        console.error('Logout failed:', error)
     } else {
-        router.push('/login');
+        router.push('/login')
     }
 }
 </script>
