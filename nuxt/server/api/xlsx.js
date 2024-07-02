@@ -33,7 +33,7 @@ export default eventHandler(async (event) => {
     worksheet.columns = [
       { header: 'Name', key: 'name', width: 20 },
       { header: 'Schwierigkeit', key: 'difficulty', width: 20 },
-      { header: 'Sign', key: 'difficultySign', width: 10},
+      { header: 'Sign', key: 'difficulty_sign', width: 10},
       { header: 'Ort', key: 'location', width: 20 },
       { header: 'Typ', key: 'type', width: 15 },
       { header: 'Kommentar', key: 'comment', width: 30 },
@@ -46,7 +46,7 @@ export default eventHandler(async (event) => {
       worksheet.addRow({
         name: cr.name,
         difficulty: cr.difficulty,
-        difficultySign: cr.difficultySign === '+' ? true : difficultySign.value === '-' ? false : null,
+        difficulty_sign: cr.difficulty_sign === '+' ? true : difficulty_sign.value === '-' ? false : null,
         location: cr.location,
         type: cr.type,
         comment: cr.comment,

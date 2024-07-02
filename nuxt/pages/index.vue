@@ -48,9 +48,9 @@
               <td>
                 {{ climbingRoute.difficulty }}
                 {{
-                  climbingRoute.difficultySign
+                  climbingRoute.difficulty_sign
                     ? "+"
-                    : climbingRoute.difficultySign === false
+                    : climbingRoute.difficulty_sign === false
                     ? "-"
                     : null
                 }}

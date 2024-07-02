@@ -106,9 +106,9 @@ const getAllRouteRatings = async () => {
       difficulty:
         rating.difficulty +
         " " +
-        (rating.difficultySign
+        (rating.difficulty_sign
           ? "+"
-          : rating.difficultySign === false
+          : rating.difficulty_sign === false
           ? "-"
           : ""),
       comment: rating.comment,

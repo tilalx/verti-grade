@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-btn color="primary" @click="openDialog">Ratiings</v-btn>
+    <v-btn color="primary" @click="openDialog">Ratings</v-btn>
     <v-dialog v-model="dialog" persistent max-width="800px">
       <v-card>
         <v-card-title>

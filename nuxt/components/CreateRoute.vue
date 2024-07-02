@@ -150,7 +150,7 @@ async function createRoute() {
   const routeData = {
     name: routeName.value,
     difficulty: routeDifficulty.value,
-    difficultySign: routeDifficultySign.value === '+' ? true : routeDifficultySign.value === '-' ? false : null,
+    difficulty_sign: routeDifficultySign.value === '+' ? true : routeDifficultySign.value === '-' ? false : null,
     location: routeLocation.value,
     type: routeType.value,
     comment: routeComment.value || "",

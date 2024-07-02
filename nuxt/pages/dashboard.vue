@@ -139,9 +139,9 @@
               <td>
                 {{ climbingRoute.difficulty }}
                 {{
-                  climbingRoute.difficultySign
+                  climbingRoute.difficulty_sign
                     ? "+"
-                    : climbingRoute.difficultySign === false
+                    : climbingRoute.difficulty_sign === false
                     ? "-"
                     : null
                 }}
@@ -155,7 +155,7 @@
                   new Date(climbingRoute.screw_date).toLocaleDateString("de-DE")
                 }}
               </td>
-              <td>{{ climbingRoute.score !== null ? climbingRoute.score + '/10' : climbingRoute.score }}</td>
+              <td>{{ climbingRoute.score !== null ? climbingRoute.score + '/5' : climbingRoute.score }}</td>
               <td>{{ climbingRoute.archived }}</td>
               <td>
                 <EditRoute
@@ -221,7 +221,7 @@ export default {
       { title: t("climbing.comment"), value: "comment" },
       { title: t("climbing.creators"), value: "creator" },
       { title: t("table.created_at"), value: "screw_date" },
-      { title: t("rating.score"), value: "rating"},
+      { title: t("ratings.score"), value: "rating"},
       { title: t("climbing.archived"), value: "archived" },
       { title: t("table.actions"), value: "actions" },
     ]);
@@ -438,7 +438,7 @@ export default {
             `
             name,
             difficulty,
-            difficultySign,
+            difficulty_sign,
             location,
             creator,
             screw_date,
@@ -450,7 +450,7 @@ export default {
             ratings (
               rating,
               difficulty,
-              difficultySign,
+              difficulty_sign,
               comment,
               created_at
             )

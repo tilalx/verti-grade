@@ -74,6 +74,21 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
+useHead({
+  title: "Settings - Verti-Grade",
+  meta: [
+    {
+      name: "description",
+      content: "Settings for Verti-Grade",
+    },
+  ],
+});
+
+definePageMeta({
+  authRequired: true,
+  middleware: ["auth"],
+});
+
 const supabase = useSupabaseClient();
 const qrCodeUrl = ref(null);
 const uploadedFile = ref(null);
@@ -104,34 +119,26 @@ const onFileChange = async (event) => {
     return;
   }
 
+  qrCodeUrl.value = null;
+
   //Copy the old file to trash
-  const { data: oldData, error: oldError } = supabase.storage
+  const { error: deleteError } = await supabase.storage
     .from("img")
-    .remove(["public/logo.png"])
+    .remove(["public/logo.png"]);
 
-  console.log(oldData, oldError);
+  if (deleteError) {
+    console.error(deleteError);
+    return;
+  }
 
-  const { data, error } = supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("img")
     .upload("public/logo.png", file);
-  if (error) {
-    console.error(error);
+  if (uploadError) {
+    console.error(uploadError);
     return;
   }
-  // Assuming you want to display the uploaded image
-  const { publicURL, error: urlError } = supabase.storage
-    .from("img")
-    .getPublicUrl("public/logo.png");
-  if (urlError) {
-    console.error(urlError);
-    return;
-  }
-  qrCodeUrl.value = publicURL;
-};
-
-const deleteQrCode = () => {
-  qrCodeUrl.value = null;
-  uploadedFile.value = null;
+  fetchQrCodeUrl();
 };
 
 const submitSamlData = () => {

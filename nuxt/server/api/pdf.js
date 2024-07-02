@@ -70,7 +70,7 @@ export default eventHandler(async (event) => {
       doc
         .fontSize(25)
         .text(
-          climbingRoute.difficulty + climbingRoute.difficultySign,
+          climbingRoute.difficulty + climbingRoute.difficulty_sign,
           x + 70,
           y + 45,
           textOptions

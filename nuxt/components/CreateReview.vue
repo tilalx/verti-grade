@@ -24,7 +24,7 @@
                         </v-col>
 
                         <v-col cols="12" sm="6">
-                            <v-select v-model="difficultySign" :label="$t('ratings.difficultySign')" :items="['', '+', '-']">
+                            <v-select v-model="difficulty_sign" :label="$t('ratings.difficulty_sign')" :items="['', '+', '-']">
                             </v-select>
                         </v-col>
 
@@ -58,7 +58,7 @@ const supabase = useSupabaseClient();
 const showPopup = ref(false);
 const rating = ref(null);
 const difficulty = ref(null);
-const difficultySign = ref('');
+const difficulty_sign = ref('');
 const comment = ref('');
 const ratings = ref([1, 2, 3, 4, 5]);
 const difficulties = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -92,7 +92,7 @@ function submitReview() {
     route_id: props.route_id,
     rating: rating.value,
     difficulty: difficulty.value,
-    difficultySign: difficultySign.value === '+' ? true : difficultySign.value === '-' ? false : null,
+    difficulty_sign: difficulty_sign.value === '+' ? true : difficulty_sign.value === '-' ? false : null,
     comment: comment.value
   });
   closePopup();

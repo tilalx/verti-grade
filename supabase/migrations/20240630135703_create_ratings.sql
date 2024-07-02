@@ -21,14 +21,6 @@ COMMIT;
 -- Enable Row Level Security (RLS) on the ratings table
 ALTER TABLE public.ratings ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow insert operations for authenticated users only
-CREATE POLICY "Enable insert for authenticated users only"
-    ON public.ratings
-    AS PERMISSIVE
-    FOR INSERT
-    TO PUBLIC
-    WITH CHECK (auth.uid() IS NOT NULL);
-
 -- Create policy to allow read access for all users
 CREATE POLICY "Enable read access for all users"
     ON public.ratings
@@ -36,3 +28,27 @@ CREATE POLICY "Enable read access for all users"
     FOR SELECT
     TO PUBLIC
     USING (true);
+
+--- Create policy to allow insert operations for all users
+CREATE POLICY "Enable insert for all users"
+    ON public.ratings
+    AS PERMISSIVE
+    FOR INSERT
+    TO PUBLIC
+    WITH CHECK (true);
+
+--- Create policy to allow update operations for authenticated users only
+CREATE POLICY "Enable update for authenticated users only"
+    ON public.ratings
+    AS PERMISSIVE
+    FOR UPDATE
+    TO PUBLIC
+    USING (auth.uid() IS NOT NULL);
+
+--- Create policy to allow delete operations for authenticated users only
+CREATE POLICY "Enable delete for authenticated users only"
+    ON public.ratings
+    AS PERMISSIVE
+    FOR DELETE
+    TO PUBLIC
+    USING (auth.uid() IS NOT NULL);

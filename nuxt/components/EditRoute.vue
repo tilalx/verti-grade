@@ -8,7 +8,7 @@
                     <v-form @submit.prevent="saveChanges">
                         <v-text-field v-model="routeData.name" label="Route Name" required></v-text-field>
                         <v-select v-model="routeData.difficulty" label="Route Difficulty" :items="difficulty" required></v-select>
-                        <v-select v-model="routeData.difficultySign" label="Route Difficulty Sign" :items="difficultySign" allow-numeric required></v-select>
+                        <v-select v-model="routeData.difficulty_sign" label="Route Difficulty Sign" :items="difficulty_sign" allow-numeric required></v-select>
                         <v-select v-model="routeData.location" label="Route Location" :items="locations" required></v-select>
                         <v-select v-model="routeData.type" label="Route Type" :items="Type" required></v-select>
                         <v-textarea v-model="routeData.comment" label="Route Comment"></v-textarea>
@@ -21,8 +21,8 @@
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="primary" type="submit" @click="saveChanges" :disabled="!isFormValid">Save</v-btn>
                     <v-btn @click="closePopup">Cancel</v-btn>
+                    <v-btn color="primary" type="submit" @click="saveChanges" :disabled="!isFormValid">Save</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -40,7 +40,7 @@ const routeData = ref(null);
 const locations = ['Hanau', 'Gelnhausen'];
 const Type = ['Boulder', 'Route'];
 const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
-const difficultySign = ['', '-', '+'];
+const difficulty_sign = ['', '-', '+'];
 
 const props = defineProps({
   route_id: {
@@ -108,7 +108,7 @@ async function saveChanges() {
       .update({
         name: routeData.value.name,
         difficulty: routeData.value.difficulty,
-        difficultySign: routeData.value.difficultySign,
+        difficulty_sign: routeData.value.difficulty_sign,
         location: routeData.value.location,
         type: routeData.value.type,
         comment: routeData.value.comment,
