@@ -9,7 +9,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME = "tilalx/verti-grade"
         DOCKER_BUILDKIT = 1
-        PIPELINE_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
+        PIPELINE_NAME = "${JOB_NAME.replaceAll('/', '_')}-${BUILD_NUMBER}"
     }
 
     triggers {
