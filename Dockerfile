@@ -1,12 +1,13 @@
 # --------------> The build image
-FROM node:22.3.0-bookworm as nuxt-build
-WORKDIR /app/nuxt
+FROM node:22.3.0-bookworm AS ui-build
 
-COPY nuxt/package.json nuxt/yarn.lock .yarnrc.yml ./
+WORKDIR /app
+
+COPY package.json yarn.lock .yarnrc.yml ./
 
 RUN corepack enable  && yarn set version berry && yarn install
 
-COPY nuxt ./
+COPY src ./src
 
 RUN yarn build
 
@@ -14,9 +15,19 @@ RUN yarn build
 FROM node:22.3.0-bookworm-slim
 WORKDIR /app
 
-# Copy the build output and other necessary files from the nuxt build stage
-COPY --from=nuxt-build /app/nuxt/.output /app/nuxt
+# Copy the build output and other necessary files from the ui build stage
+COPY pocketbase /app/pocketbase
+COPY --from=ui-build /app/.output /app/ui
+COPY docker-entrypoint.sh /app/entrypoint.sh
 
-EXPOSE 3000
+# Make the entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
 
-CMD ["node", "nuxt/server/index.mjs"]
+RUN npm install -g concurrently
+
+# Set the entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+EXPOSE 8080 8081
+
+CMD ["concurrently", "node ui/server/index.mjs", "/app/pocketbase/pocketbase serve --http=0.0.0.0:8080"]
