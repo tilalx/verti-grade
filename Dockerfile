@@ -3,7 +3,7 @@ FROM node:22.3.0-bookworm AS ui-build
 
 WORKDIR /app
 
-COPY package.json yarn.lock .yarnrc.yml ./
+COPY package.json .yarnrc.yml ./
 
 RUN corepack enable  && yarn set version berry && yarn install
 
