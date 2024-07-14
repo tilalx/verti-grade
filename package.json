@@ -36,7 +36,7 @@
     "pocketbase": "^0.21.3",
     "qrcode": "^1.5.3",
     "sass": "^1.70.0",
-    "supabase": "1.178.2",
+    "supabase": "1.183.5",
     "vite": "^5.0.12",
     "vite-plugin-vuetify": "^2.0.3",
     "vuetify": "3.6.7",
