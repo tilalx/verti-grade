@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware(async (to, from, next) => {
 
     // Retrieve the current session from Supabase
     const isValidSession = pb.authStore.isValid
-    
+
     if (authRequired && to.path !== '/') {
         if (!isValidSession) {
             // If the session is not valid, redirect to the login page

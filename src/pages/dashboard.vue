@@ -233,7 +233,7 @@ export default {
         const searchRouteName = ref('')
         const selected = ref([])
         const displayArchived = ref(false)
-        const supabase = useSupabaseClient()
+        const pb = usePocketbase()
         const showDeleteConfirmation = ref(false)
 
         const headers = reactive([
@@ -272,50 +272,31 @@ export default {
         ])
 
         const getClimbingRoutes = async () => {
-            const { data, error } = await supabase
-                .from('climbingroutes')
-                .select(
-                    `
-          *,
-          ratings(rating)
-        `,
-                )
-                .order('screw_date', { ascending: false })
+            try {
+                const climbingRoutesData = await pb
+                    .collection('routes')
+                    .getFullList({
+                        sort: '-screw_date',
+                    })
 
-            if (error) {
-                console.error(error)
-                return
+                if (!climbingRoutesData) {
+                    console.error('Error fetching climbing routes')
+                    return
+                }
+
+                climbingRoutes.value = climbingRoutesData
+            } catch (error) {
+                console.error('Error in getClimbingRoutes:', error)
             }
-
-            climbingRoutes.value = data
-            climbingRoutes.value.forEach((route) => {
-                route.selected = false
-            })
-            climbingRoutes.value = data.map((route) => ({
-                ...route,
-                score:
-                    route.ratings && route.ratings.length > 0
-                        ? route.ratings
-                              .map((r) => r.rating)
-                              .reduce((a, b) => a + b, 0) / route.ratings.length
-                        : null,
-            }))
         }
 
-        const channel = supabase
-            .channel('db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // Listen for all events: INSERT, UPDATE, DELETE
-                    schema: 'public',
-                    table: 'climbingroutes',
-                },
-                async (payload) => {
-                    await getClimbingRoutes()
-                },
-            )
-            .subscribe()
+        pb.collection('routes').subscribe(
+            '*',
+            function (e) {
+                getClimbingRoutes()
+            },
+            {},
+        )
 
         const filteredClimbingRoutes = computed(() => {
             let filteredRoutes = climbingRoutes.value
@@ -474,33 +455,57 @@ export default {
             }
 
             try {
-                const { data, error } = await supabase
-                    .from('climbingroutes')
-                    .select(
-                        `
-            name,
-            difficulty,
-            difficulty_sign,
-            location,
-            creator,
-            screw_date,
-            comment,
-            color,
-            type,
-            archived,
-            created_at,
-            ratings (
-              rating,
-              difficulty,
-              difficulty_sign,
-              comment,
-              created_at
-            )
-          `,
+                const routeArray = []
+                for (const routeId of selectedRouteIds) {
+                    const route = climbingRoutes.value.find(
+                        (route) => route.id === routeId,
                     )
-                    .in('id', selectedRouteIds)
+                    if (!route) {
+                        console.error('Route not found:', routeId)
+                        continue
+                    }
 
-                const json = JSON.stringify(data, null, 2)
+                    const responseRating = await pb
+                        .collection('ratings')
+                        .getFullList({
+                            filter: `route_id = "${routeId}"`,
+                        })
+
+                    const ratings = []
+
+                    for (const rating of responseRating) {
+                        const rate = {
+                            rating: rating.rating,
+                            difficulty: rating.difficulty,
+                            difficulty_sign: rating.difficulty_sign,
+                            comment: rating.comment,
+                            created: rating.created,
+                            updated: rating.updated,
+                        }
+                        ratings.push(rate)
+                    }
+
+                    const data = {
+                        name: route.name,
+                        color: route.color,
+                        difficulty: route.difficulty,
+                        difficulty_sign: route.difficulty_sign,
+                        location: route.location,
+                        type: route.type,
+                        comment: route.comment,
+                        creator: route.creator,
+                        screw_date: route.screw_date,
+                        score: route.score,
+                        archived: route.archived,
+                        screw_date: route.screw_date,
+                        created: route.created,
+                        updated: route.updated,
+                        ratings: ratings,
+                    }
+                    routeArray.push(data)
+                }
+
+                const json = JSON.stringify(routeArray, null, 2)
                 const blob = new Blob([json], { type: 'application/json' })
                 const link = document.createElement('a')
                 link.href = window.URL.createObjectURL(blob)
@@ -525,13 +530,13 @@ export default {
             }
 
             try {
-                const { data, error } = await supabase
-                    .from('climbingroutes')
-                    .delete()
-                    .in('id', selectedRouteIds)
-
-                if (error) {
-                    console.error('Error in deleteSelected:', error)
+                for (const routeId of selectedRouteIds) {
+                    const response = await pb
+                        .collection('routes')
+                        .delete(routeId)
+                    if (!response) {
+                        console.error('Error deleting route:', routeId)
+                    }
                 }
             } catch (error) {
                 console.error('Exception in deleteSelected:', error)
@@ -550,13 +555,15 @@ export default {
             }
 
             try {
-                const { data, error } = await supabase
-                    .from('climbingroutes')
-                    .update({ archived: true })
-                    .in('id', selectedRouteIds)
-
-                if (error) {
-                    console.error('Error in deleteSelected:', error)
+                for (const routeId of selectedRouteIds) {
+                    const response = await pb
+                        .collection('routes')
+                        .update(routeId, {
+                            archived: true,
+                        })
+                    if (!response) {
+                        console.error('Error deleting route:', routeId)
+                    }
                 }
             } catch (error) {
                 console.error('Exception in deleteSelected:', error)

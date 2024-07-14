@@ -34,19 +34,15 @@ const props = defineProps({
 const emit = defineEmits(['comment-deleted'])
 
 const dialog = ref(false)
-const supabase = useSupabaseClient()
+const pb = usePocketbase()
 
 const deleteComment = async () => {
-    const { error } = await supabase
-        .from('ratings')
-        .delete()
-        .eq('id', props.commentId)
-
-    if (error) {
-        console.error(error)
-    } else {
+    try {
+        const error = await pb.delete('comments', props.commentId)
         emit('comment-deleted')
         dialog.value = false
+    } catch (error) {
+        console.error('Error deleting comment:', error)
     }
 }
 </script>

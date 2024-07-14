@@ -86,10 +86,9 @@ const router = useRouter()
 const handlePocketbaseLogin = async () => {
     loading.value = true
     try {
-        const authData = await pb.collection('users').authWithPassword(
-            email.value,
-            password.value,
-        );
+        const authData = await pb
+            .collection('users')
+            .authWithPassword(email.value, password.value)
 
         if (authData.error) throw authData.error
 
@@ -104,7 +103,6 @@ const handlePocketbaseLogin = async () => {
         loading.value = false
     }
 }
-
 </script>
 
 <style scoped></style>

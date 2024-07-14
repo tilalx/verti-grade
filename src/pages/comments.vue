@@ -55,7 +55,7 @@
                             </td>
                             <td>{{ comment.location }}</td>
                             <td>{{ comment.comment }}</td>
-                            <td>{{ formatDate(comment.created_at) }}</td>
+                            <td>{{ formatDate(comment.created) }}</td>
                             <td>
                                 <DeleteComment
                                     :commentId="comment.id"
@@ -92,7 +92,6 @@ export default {
         })
 
         const { t } = useI18n()
-        const supabase = useSupabaseClient()
         const pb = usePocketbase()
         const comments = ref([])
         const selectedDifficulty = ref('')
@@ -130,40 +129,26 @@ export default {
         ])
 
         const getComments = async () => {
-            const { data: commentsData, error: commentsError } = await supabase
-                .from('ratings')
-                .select(
-                    '*, climbingroutes(name, location, difficulty, difficulty_sign)',
-                )
+            const data = await pb.collection('ratings').getFullList({
+                expand: 'route_id',
+            })
 
-            if (commentsError) {
-                console.error(commentsError)
-                return
-            }
-
-            comments.value = commentsData.map((comment) => ({
+            comments.value = data.map((comment) => ({
                 ...comment,
-                routeName: comment.climbingroutes.name,
-                location: comment.climbingroutes.location,
-                difficulty: comment.climbingroutes.difficulty,
-                difficulty_sign: comment.climbingroutes.difficulty_sign,
+                routeName: comment.expand.route_id.name,
+                location: comment.expand.route_id.location,
+                difficulty: comment.expand.route_id.difficulty,
+                difficulty_sign: comment.expand.route_id.difficulty_sign,
             }))
         }
 
-        const channel = supabase
-            .channel('db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // Listen for all events: INSERT, UPDATE, DELETE
-                    schema: 'public',
-                    table: 'ratings',
-                },
-                async (payload) => {
-                    await getComments()
-                },
-            )
-            .subscribe()
+        pb.collection('ratings').subscribe(
+            '*',
+            function (e) {
+                getComments()
+            },
+            {},
+        )
 
         getComments()
 

@@ -141,7 +141,7 @@ export default {
         const fetchClimbingRoutes = async () => {
             const records = await pb.collection('routes').getFullList({
                 sort: '-created',
-            });
+            })
 
             climbingRoutes.value = records
             climbingRoutes.value.forEach((route) => {
@@ -153,7 +153,7 @@ export default {
             await fetchClimbingRoutes()
             pb.collection('routes').subscribe('*', function (e) {
                 getClimbingRoutes()
-            });
+            })
         }
 
         getClimbingRoutes()

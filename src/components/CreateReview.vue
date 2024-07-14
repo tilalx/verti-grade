@@ -84,7 +84,8 @@ const props = defineProps({
     },
 })
 
-const supabase = useSupabaseClient()
+const pb = usePocketbase()
+
 const showPopup = ref(false)
 const rating = ref(null)
 const difficulty = ref(null)
@@ -104,16 +105,10 @@ function openPopup() {
 
 function closePopup() {
     showPopup.value = false
-    emit('closed')
 }
 
 async function createRouteRating(data) {
-    const { error } = await supabase.from('ratings').insert(data)
-
-    if (error) {
-        console.error(error)
-        return
-    }
+    await pb.collection('ratings').create(data)
 }
 
 function submitReview() {

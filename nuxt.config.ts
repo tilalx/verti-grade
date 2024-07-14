@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   },
   ssr: false,
   srcDir: 'src',
-  modules: ['@pinia/nuxt', '@nuxtjs/i18n', "@nuxtjs/supabase"],
+  modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
 
   plugins: [
     '~/plugins/vuetify.js',
@@ -25,10 +25,6 @@ export default defineNuxtConfig({
     'vuetify/lib/styles/main.sass',
     '@mdi/font/css/materialdesignicons.min.css'
   ],
-
-  supabase: {
-    redirect: false,
-  },
 
   i18n: {
     vueI18n: '~/plugins/i18n.js',

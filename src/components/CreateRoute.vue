@@ -112,7 +112,8 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const supabase = useSupabaseClient()
+
+const pb = usePocketbase()
 
 const showPopup = ref(false)
 const routeName = ref('')
@@ -151,7 +152,6 @@ function openPopup() {
 
 function closePopup() {
     showPopup.value = false
-    this.$emit('closed')
 }
 
 async function createRoute() {
@@ -173,11 +173,7 @@ async function createRoute() {
     }
 
     try {
-        const { data, error } = await supabase
-            .from('climbingroutes')
-            .insert([routeData])
-
-        if (error) throw error
+        await pb.collection('routes').create(routeData)
 
         showPopup.value = false
         form.value.reset()

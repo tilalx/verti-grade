@@ -55,9 +55,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useI18n } from '#imports'
 import CreateReview from '@/components/CreateReview.vue'
+import { navigateTo } from 'nuxt/app'
 
 useHead({
     title: 'Route Reviews',
@@ -70,7 +71,7 @@ useHead({
 })
 
 const { t } = useI18n()
-const supabase = useSupabaseClient()
+const pb = usePocketbase()
 const route = useRoute()
 const route_id = ref(getRouteIdFromUrl())
 const reviews = ref([])
@@ -101,16 +102,9 @@ function formatDateToYYYYMMDD(date) {
 }
 
 const getAllRouteRatings = async () => {
-    const { data, error } = await supabase
-        .from('ratings')
-        .select('*')
-        .eq('route_id', route_id.value)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error(error)
-        return
-    }
+    const data = await pb.collection('ratings').getFullList({
+        filter: `route_id = "${route_id.value}"`,
+    })
 
     const ratings = data.map((rating) => {
         return {
@@ -129,39 +123,22 @@ const getAllRouteRatings = async () => {
     reviews.value = ratings
 }
 
-const channel = supabase
-    .channel('db-changes')
-    .on(
-        'postgres_changes',
-        {
-            event: '*', // Listen for all events: INSERT, UPDATE, DELETE
-            schema: 'public',
-            table: 'ratings',
-        },
-        async (payload) => {
-            await getAllRouteRatings()
-        },
-    )
-    .subscribe()
-
 const getRouteMetadata = async () => {
-    const { data, error } = await supabase
-        .from('climbingroutes')
-        .select('*')
-        .eq('id', route_id.value)
-        .single()
+    try {
+        const record = await pb.collection('routes').getOne(route_id.value, {
+            expand: 'name, creator, screw_date',
+        })
 
-    if (error) {
+        metadata.value = record
+    } catch (error) {
         console.error(error)
-        return
+        navigateTo('/404')
     }
-
-    metadata.value = data
 }
 
 onMounted(() => {
     route_id.value = getRouteIdFromUrl()
-    getAllRouteRatings()
     getRouteMetadata()
+    getAllRouteRatings()
 })
 </script>

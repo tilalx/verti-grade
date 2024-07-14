@@ -21,18 +21,23 @@ export default {
 
         const pb = usePocketbase()
 
-        const isLoggedIn = ref(pb.authStore.isValid)
+        let isLoggedIn = ref(pb.authStore.isValid)
+
+        let intervalId
 
         const checkSession = async () => {
-            console.log(isLoggedIn.value)
+            isLoggedIn.value = pb.authStore.isValid
+        }
+
+        const refreshSession = async () => {
             if (isLoggedIn.value) {
-                pb.collection('users').authRefresh();
+                pb.collection('users').authRefresh()
             }
         }
 
         // When the component is mounted, check the session immediately
         onMounted(async () => {
-            await checkSession()
+            await refreshSession()
         })
 
         onMounted(() => {
@@ -66,6 +71,11 @@ export default {
                     )
                 }
             })
+
+            intervalId = setInterval(() => {
+                checkSession()
+            }, 600)
+
         })
 
         return { isLoggedIn }

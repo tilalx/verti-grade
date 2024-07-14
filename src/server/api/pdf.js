@@ -1,11 +1,16 @@
 import QRCode from 'qrcode'
 import PDFDocument from 'pdfkit'
-import { serverSupabaseClient } from '#supabase/server'
+import { usePocketbase } from '~/composables/pocketbase'
+import { createError } from 'h3'
 
 export default eventHandler(async (event) => {
-    const supabase = await serverSupabaseClient(event)
+    const pb = usePocketbase()
 
     const res = event.node.res
+    const req = event.node.req
+
+    const host = req.headers.host || req.socket.remoteAddress
+
     try {
         const paramId = getQuery(event)
 
@@ -17,11 +22,10 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const { data: imageUrl } = supabase.storage
-            .from('img')
-            .getPublicUrl('public/logo.png')
+        const imageUrl =
+            'http://127.0.0.1:54321/storage/v1/object/public/img/public/logo.png'
 
-        const logoBuffer = await fetch(imageUrl.publicUrl).then((res) =>
+        const logoBuffer = await fetch(imageUrl).then((res) =>
             res.arrayBuffer(),
         )
 
@@ -33,15 +37,8 @@ export default eventHandler(async (event) => {
         let entryCount = 0
 
         for (let id of ids) {
-            const { data: climbingRoute, error } = await supabase
-                .from('climbingroutes')
-                .select('*')
-                .eq('id', id)
-                .single()
+            const climbingRoute = await pb.collection('routes').getOne(id, {})
 
-            if (error || !climbingRoute) {
-                continue // Skip if not found
-            }
             // Every 8 entries, add a new page
             if (entryCount % 8 === 0 && entryCount > 0) {
                 doc.addPage()
@@ -107,8 +104,9 @@ export default eventHandler(async (event) => {
 
             // Generate QR code with the server URL
             const serverUrl =
-                process.env.SERVER_URL + `/route?id=${id}` ||
-                `http://localhost:8080/route?id=${id}`
+                (process.env.SERVER_URL
+                    ? process.env.SERVER_URL
+                    : `http://${host}`) + `/route?id=${id}`
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
                 color: {
                     light: '#0000', // Transparent background

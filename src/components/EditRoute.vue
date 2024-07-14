@@ -86,7 +86,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const supabase = useSupabaseClient()
+const pb = usePocketbase()
 
 const popupOpen = ref(false)
 const routeData = ref(null)
@@ -144,16 +144,13 @@ async function fetchClimbingRoute() {
         return
     }
 
-    const { data, error: fetchError } = await supabase
-        .from('climbingroutes')
-        .select('*')
-        .eq('id', props.route_id)
-        .single()
+    const record = await pb.collection('routes').getOne(props.route_id, {})
 
-    if (fetchError) {
-        error.value = fetchError.message
+    if (!record) {
+        error.value = 'No route found!'
+        return
     } else {
-        return data
+        return record
     }
 }
 
@@ -168,27 +165,19 @@ async function saveChanges() {
         )
         routeData.value.creator = routeData.value.creator.split(',')
 
-        const { data, error } = await supabase
-            .from('climbingroutes')
-            .update({
-                name: routeData.value.name,
-                difficulty: routeData.value.difficulty,
-                difficulty_sign: routeData.value.difficulty_sign,
-                location: routeData.value.location,
-                type: routeData.value.type,
-                comment: routeData.value.comment,
-                creator: routeData.value.creator,
-                screw_date: routeData.value.screw_date,
-                archived: routeData.value.archived,
-                color: routeData.value.color,
-            })
-            .match({ id: routeData.value.id })
-
-        if (error) {
-            console.error('Error updating the route:', error)
-        } else {
-            closePopup() // Assuming closePopup() is defined to handle UI closure
-        }
+        await pb.collection('routes').update(routeData.value.id, {
+            name: routeData.value.name,
+            difficulty: routeData.value.difficulty,
+            difficulty_sign: routeData.value.difficulty_sign,
+            location: routeData.value.location,
+            type: routeData.value.type,
+            comment: routeData.value.comment,
+            creator: routeData.value.creator,
+            screw_date: routeData.value.screw_date,
+            archived: routeData.value.archived,
+            color: routeData.value.color,
+        })
+        closePopup() // Assuming closePopup() is defined to handle UI closure
     }
 }
 </script>

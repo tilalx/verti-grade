@@ -44,39 +44,42 @@ export default {
                 return routeData
             })
 
-            // Insert climbing routes
-            const result = await pb.collection('routes').create(climbingRoutes)
+            // Insert climbing routes one at a time
+            for (const route of climbingRoutes) {
+                const result = await pb.collection('routes').create(route)
 
-            if (result.error) {
-                console.error('Error inserting climbing routes:', routeError)
-                return
+                if (result.error) {
+                    console.error(
+                        'Error inserting climbing route:',
+                        result.error,
+                    )
+                    continue
+                }
+
+                // Prepare ratings with the correct route_id
+                const routeId = result.id
+                const routeRatings = jsonData
+                    .find((r) => r.name === route.name)
+                    .ratings.map((rating) => ({
+                        ...rating,
+                        route_id: routeId,
+                    }))
+
+                // Insert ratings one at a time
+                for (const rating of routeRatings) {
+                    const ratingResult = await pb
+                        .collection('ratings')
+                        .create(rating)
+
+                    if (ratingResult.error) {
+                        console.error(
+                            'Error inserting rating:',
+                            ratingResult.error,
+                        )
+                        continue
+                    }
+                }
             }
-
-            // Prepare ratings with the correct route_id
-            const ratings = []
-            routeData.forEach((route, index) => {
-                const routeRatings = jsonData[index].ratings.map((rating) => ({
-                    ...rating,
-                    route_id: route.id,
-                }))
-                ratings.push(...routeRatings)
-            })
-
-            // Insert ratings
-            const { data: ratingData, error: ratingError } = await supabase
-                .from('ratings')
-                .insert(ratings)
-
-            if (ratingError) {
-                console.error('Error inserting ratings:', ratingError)
-                return
-            }
-
-            console.log(
-                'Successfully imported climbing routes and ratings:',
-                routeData,
-                ratingData,
-            )
         }
 
         return {
