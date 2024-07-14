@@ -140,7 +140,7 @@ export default {
 
         const fetchClimbingRoutes = async () => {
             const records = await pb.collection('routes').getFullList({
-                sort: '-created',
+                sort: '-screw_date',
             })
 
             climbingRoutes.value = records

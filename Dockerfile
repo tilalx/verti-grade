@@ -3,7 +3,7 @@ FROM node:22.4.1-bookworm AS ui-build
 
 WORKDIR /app
 
-COPY package.json .yarnrc.yml ./
+COPY package.json .yarnrc.yml nuxt.config.ts ./ 
 
 RUN corepack enable  && yarn set version berry && yarn install
 
