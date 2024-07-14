@@ -9,10 +9,6 @@ pipeline {
         DOCKER_CLI_EXPERIMENTAL = 'enabled'
     }
 
-    triggers {
-        pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
-    }
-
     options {
         timestamps() // Enable timestamps for each build step
     }
