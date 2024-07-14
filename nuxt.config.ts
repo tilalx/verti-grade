@@ -12,7 +12,6 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   ssr: false,
-  srcDir: 'src',
   modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
 
   plugins: [
@@ -38,5 +37,5 @@ export default defineNuxtConfig({
     autoImport: true,
   },
 
-  compatibilityDate: '2024-07-05',
+  compatibilityDate: '2024-07-14',
 })
