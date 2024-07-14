@@ -1,5 +1,5 @@
 # --------------> The build image
-FROM node:22.3.0-bookworm AS ui-build
+FROM node:22.4.1-bookworm AS ui-build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 RUN yarn build
 
 # --------------> The final stage
-FROM node:22.3.0-bookworm-slim
+FROM node:22.4.1-bookworm-slim
 WORKDIR /app
 
 # Copy the build output and other necessary files from the ui build stage
