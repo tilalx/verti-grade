@@ -75,7 +75,6 @@ export default {
             intervalId = setInterval(() => {
                 checkSession()
             }, 600)
-
         })
 
         return { isLoggedIn }

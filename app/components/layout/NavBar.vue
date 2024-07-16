@@ -23,9 +23,6 @@
         <v-btn v-if="isLoggedIn" text to="/users">{{
             $t('routes.users')
         }}</v-btn>
-        <v-btn v-if="isLoggedIn" text to="/settings">{{
-            $t('routes.settings')
-        }}</v-btn>
         <log-out v-if="isLoggedIn"></log-out>
     </v-app-bar>
     <v-divider></v-divider>

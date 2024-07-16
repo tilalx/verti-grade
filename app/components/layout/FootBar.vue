@@ -1,28 +1,37 @@
 <template>
     <v-footer color="background">
         <v-container>
-            <v-row justify="center">
-                <v-col>
+            <v-row justify="center" align="center">
+                <v-col cols="auto">
                     <div class="text-center">
                         <a
                             href="https://www.dav-hanau.de/datenschutz"
                             class="footer-link"
                             target="_blank"
-                            >{{ $t('legal.privacy') }}</a
                         >
+                            {{ $t('legal.privacy') }}
+                        </a>
                         <span class="footer-separator">|</span>
                         <a
                             href="https://www.dav-hanau.de/impressum"
                             class="footer-link"
                             target="_blank"
-                            >{{ $t('legal.imprint') }}</a
                         >
+                            {{ $t('legal.imprint') }}
+                        </a>
+                        <span class="footer-separator">|</span>
+                        <p class="d-inline">{{ appVersion }}</p>
                     </div>
                 </v-col>
             </v-row>
         </v-container>
     </v-footer>
 </template>
+
+<script setup>
+const config = useRuntimeConfig()
+const appVersion = config.public.appVersion
+</script>
 
 <style scoped>
 .footer-link {

@@ -1,11 +1,14 @@
 services:
   verti-grade:
     container_name: verti-grade-app
-    image: tilalx/verti-grade:beta
+    image: tilalx/verti-grade:latest
     ports:
-      - 8080:8080
+      - 80:80
     environment:
-      - SERVER_URL=https://dav.aelx.de
+    #  - SERVER_URL=http://example.com
+    volumes:
+      - verti-grade-data:/pb
 
 volumes:
-  db_data:
+  verti-grade-data:
+    driver: local

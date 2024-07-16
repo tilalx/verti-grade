@@ -8,6 +8,11 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
+  runtimeConfig: {
+    public: {
+      appVersion: process.env.npm_package_version
+    }
+  },
   future: {
     compatibilityVersion: 4,
   },

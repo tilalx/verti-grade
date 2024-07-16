@@ -1,6 +1,7 @@
 @ -1,549 +1,556 @@
 <template>
     <v-container class="dashboard">
+        <newVersionAvailable></newVersionAvailable>
         <v-row>
             <v-col>
                 <h1>Welcome to the Dashboard!</h1>
@@ -205,11 +206,12 @@ import { ref, reactive, onMounted } from 'vue'
 import CreateRoute from '@/components/CreateRoute.vue'
 import EditRoute from '@/components/EditRoute.vue'
 import ImportRoute from '@/components/ImportRoute.vue'
+import newVersionAvailable from '../components/notifcations/newVersionAvailable.vue'
 import { useI18n } from 'vue-i18n'
 
 export default {
     name: 'DashBoard',
-    components: { CreateRoute, EditRoute, ImportRoute },
+    components: { CreateRoute, EditRoute, ImportRoute, newVersionAvailable },
     setup() {
         useHead({
             title: 'Dashboard - Verti-Grade',
@@ -383,7 +385,7 @@ export default {
 
             try {
                 const response = await fetch(
-                    '/api/pdf?id=' + selectedRouteIds,
+                    '/api/ui/pdf?id=' + selectedRouteIds,
                     {
                         method: 'GET',
                         headers: {
@@ -420,7 +422,7 @@ export default {
 
             try {
                 const response = await fetch(
-                    '/api/xlsx?id=' + selectedRouteIds,
+                    '/api/ui/xlsx?id=' + selectedRouteIds,
                     {
                         method: 'GET',
                         headers: {
@@ -601,6 +603,7 @@ export default {
             deleteSelected,
             archiveSelected,
             showDeleteConfirmation,
+            newVersionAvailable,
         }
     },
 }

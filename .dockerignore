@@ -13,6 +13,9 @@ dist
 /.nuxt/
 **/.env
 
+# Ignore Pocketbase 
+/pocketbase/pb_data
+
 # Ignore logs
 **/.log
 

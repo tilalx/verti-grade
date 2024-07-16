@@ -168,9 +168,12 @@ async function saveChanges() {
         await pb.collection('routes').update(routeData.value.id, {
             name: routeData.value.name,
             difficulty: routeData.value.difficulty,
-            difficulty_sign: routeData.value.difficulty_sign === '+' ? true
-                : routeData.value.difficulty_sign === '-' ? false
-                : null,
+            difficulty_sign:
+                routeData.value.difficulty_sign === '+'
+                    ? true
+                    : routeData.value.difficulty_sign === '-'
+                      ? false
+                      : null,
             location: routeData.value.location,
             type: routeData.value.type,
             comment: routeData.value.comment,

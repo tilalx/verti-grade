@@ -123,18 +123,30 @@ const getAllRouteRatings = async () => {
     reviews.value = ratings
 }
 
+const fetchRouteMetadata = async () => {
+    const record = await pb.collection('routes').getOne(route_id.value, {
+        expand: 'name, creator, screw_date',
+    })
+
+    metadata.value = record
+}
+
 const getRouteMetadata = async () => {
     try {
-        const record = await pb.collection('routes').getOne(route_id.value, {
-            expand: 'name, creator, screw_date',
-        })
-
-        metadata.value = record
+        await fetchRouteMetadata()
     } catch (error) {
         console.error(error)
         navigateTo('/404')
     }
 }
+
+pb.collection('ratings').subscribe(
+    '*',
+    function (e) {
+        getAllRouteRatings()
+    },
+    {},
+)
 
 onMounted(() => {
     route_id.value = getRouteIdFromUrl()
