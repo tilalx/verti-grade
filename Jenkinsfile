@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME = "tilalx/verti-grade"
         DOCKER_BUILDKIT = 1
         PIPELINE_NAME = "${JOB_NAME.replaceAll('/', '_')}-${BUILD_NUMBER}"
@@ -34,6 +33,16 @@ pipeline {
             }
         }
 
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                        sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -49,7 +58,7 @@ pipeline {
                     }
 
                     sh """
-                        docker buildx build --platform linux/amd64,linux/arm64 --build-arg DOCKER_BUILDKIT=${env.DOCKER_BUILDKIT} -t ${env.IMAGE_NAME}:${tagName} --push .
+                        docker buildx build --platform linux/amd64,linux/arm64,linux/s390x --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --memory 32g --memory-swap 16g -t ${env.IMAGE_NAME}:${tagName} --push .
                     """
                 }
             }
