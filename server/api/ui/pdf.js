@@ -2,6 +2,7 @@ import QRCode from 'qrcode'
 import PDFDocument from 'pdfkit'
 import { usePocketbase } from '~/composables/pocketbase'
 import { createError } from 'h3'
+import path from 'path'
 
 export default eventHandler(async (event) => {
     const pb = usePocketbase()
@@ -22,12 +23,9 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const imageUrl =
-            'http://127.0.0.1:54321/storage/v1/object/public/img/public/logo.png'
+        const imagePath = path.resolve('app/assets/QRCode.png')
 
-        const logoBuffer = await fetch(imageUrl).then((res) =>
-            res.arrayBuffer(),
-        )
+        const logoBuffer = path.resolve(imagePath)
 
         const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
@@ -64,7 +62,7 @@ export default eventHandler(async (event) => {
                 y + 25,
                 textOptions,
             )
-            doc.fontSize(25).text(
+            doc.fontSize(30).text(
                 climbingRoute.difficulty + climbingRoute.difficulty_sign,
                 x + 70,
                 y + 45,
@@ -119,7 +117,7 @@ export default eventHandler(async (event) => {
                 y: y + 100,
                 x: x + 165,
             })
-
+           
             entryCount++
         }
 

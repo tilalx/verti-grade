@@ -3,12 +3,8 @@ services:
     container_name: verti-grade-app
     image: tilalx/verti-grade:latest
     ports:
-      - 80:80
-    environment:
-    #  - SERVER_URL=http://example.com
+      - "80:80"
+#    environment:
+#       SERVER_URL=http://example.com
     volumes:
-      - verti-grade-data:/pb
-
-volumes:
-  verti-grade-data:
-    driver: local
+      - ./pb_data:/pb/pb_data

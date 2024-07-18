@@ -22,7 +22,7 @@ COPY ./pocketbase/main.go ./pocketbase/go.mod ./pocketbase/go.sum /pocketbase/
 
 RUN go mod download
 
-RUN go build -o pocketbase
+RUN go build
 
 COPY ./pocketbase/pb_hooks ./pb_hooks
 
