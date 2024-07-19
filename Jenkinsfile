@@ -9,7 +9,8 @@ pipeline {
     }
 
     options {
-        timestamps() // Enable timestamps for each build step
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
