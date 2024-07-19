@@ -5,14 +5,17 @@
 
 version: 2
 updates:
-  # Configuration for npm package updates
-  - package-ecosystem: "npm" # The package manager for JavaScript projects
-    directory: "/" # The directory containing the package.json file
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: "weekly" # The frequency of updates
+      interval: "weekly"
 
-  # Configuration for Docker image updates
-  - package-ecosystem: "docker" # The package manager for Docker images
-    directory: "/" # The directory containing the Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
-      interval: "weekly" # The frequency of updates
+      interval: "weekly"
+
+  - package-ecosystem: "gomod"
+    directory: "/pocketbase"
+    schedule:
+      interval: "weekly"
