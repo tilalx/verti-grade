@@ -1,11 +1,11 @@
 # --------------> Build nuxt app
-FROM node:22.5.0-bookworm AS ui-build
+FROM node:22.5.1-bookworm AS ui-build
 
 WORKDIR /nuxt
 
 COPY package.json .yarnrc.yml nuxt.config.ts ./
 
-RUN corepack enable  && yarn set version berry && yarn install
+RUN corepack enable && yarn set version berry && yarn install
 
 COPY app ./app
 
@@ -29,7 +29,7 @@ COPY ./pocketbase/pb_hooks ./pb_hooks
 COPY ./pocketbase/pb_migrations ./pb_migrations
 
 # --------------> The final stage
-FROM node:22.5.0-bookworm-slim
+FROM node:22.5.1-bookworm-slim
 
 # Install Nginx
 RUN apt-get update && apt-get install -y nginx
