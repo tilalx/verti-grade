@@ -14,15 +14,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[
-                    url: 'https://github.com/tilalx/verti-grade.git',
-                    credentialsId: 'github-tilalx'
-                ]], branches: [[name: '**']]]
-            }
-        }
-
         stage('Setup Buildx') {
             steps {
                 script {
@@ -30,13 +21,6 @@ pipeline {
                     def builderName = "builder-${env.BUILD_ID}-${env.BRANCH_NAME}"
                     sh "docker buildx create --name ${builderName} --use"
                     sh 'docker buildx inspect --bootstrap'
-                }
-            }
-        }
-
-        stage('Login to Docker Hub') {
-            steps {
-                script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
                     }
@@ -49,17 +33,37 @@ pipeline {
                 script {
                     def branchName = env.BRANCH_NAME
                     def tagName = ""
+                    def isReleaseCommit = false
+                    def releaseVersion = ""
+
+                    // Retrieve and convert the latest commit message to lowercase
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim().toLowerCase()
+
+                    // Check if the commit message contains "release x.x.x"
+                    if (commitMessage ==~ /.*release\s+(\d+\.\d+\.\d+).*/) {
+                        def matcher = (commitMessage =~ /release\s+(\d+\.\d+\.\d+)/)
+                        if (matcher) {
+                            releaseVersion = matcher[0][1]
+                            isReleaseCommit = true
+                        }
+                    }
 
                     if (branchName == "main") {
-                        tagName = "latest"
+                        tagName = "rolling"
                     } else if (branchName.startsWith("PR-")) {
                         tagName = "pr-${branchName.split('-')[1]}"
                     } else {
                         tagName = branchName
                     }
 
+                    def tags = "-t ${env.IMAGE_NAME}:${tagName}"
+
+                    if (isReleaseCommit) {
+                        tags += " -t ${env.IMAGE_NAME}:latest -t ${env.IMAGE_NAME}:${releaseVersion}"
+                    }
+
                     sh """
-                        docker buildx build --platform linux/amd64,linux/arm64,linux/s390x --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --memory 32g --memory-swap 16g -t ${env.IMAGE_NAME}:${tagName} --push .
+                        docker buildx build --platform linux/amd64,linux/arm64,linux/s390x --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --memory 32g --memory-swap 16g ${tags} --push .
                     """
                 }
             }
