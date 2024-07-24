@@ -10,7 +10,7 @@
             </router-link>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn text to="/">Home</v-btn>
+        <v-btn text to="/">{{ $t('routes.home') }}</v-btn>
         <v-btn v-if="isLoggedIn" text to="/dashboard">{{
             $t('routes.dashboard')
         }}</v-btn>

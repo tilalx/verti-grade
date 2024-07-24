@@ -1,17 +1,16 @@
-import messages from '~/locales/messages'
-import { useMainStore } from '#imports'
+import en from '~/locales/en.json'
+import de from '~/locales/de.json'
 
 export default defineNuxtPlugin(() => {
-    const mainStore = useMainStore()
-    const locale = mainStore.getLocale || 'de'
+    const locale = navigator.language || 'en'
 
     return {
         legacy: false,
         locale: locale,
         fallbackLocale: 'en',
         messages: {
-            en: messages.en,
-            de: messages.de,
+            en: en,
+            de: de,
         },
     }
 })

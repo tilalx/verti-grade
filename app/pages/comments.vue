@@ -69,139 +69,117 @@
     </v-app>
 </template>
 
-<script>
-import { ref, computed } from 'vue'
-import { useI18n } from '#imports'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useI18n, useHead } from '#imports'
 import DeleteComment from '@/components/comments/DeleteComment.vue'
 
-export default {
-    components: {
-        DeleteComment,
+const { t } = useI18n()
+
+useHead({
+  title: t('page.title.comments'),
+  meta: [
+    {
+      name: 'description',
+      content: t('page.content.comments'),
+      authRequired: false,
     },
+  ],
+})
 
-    setup() {
-        useHead({
-            title: 'Climbing Routes - Verti-Grade',
-            meta: [
-                {
-                    name: 'description',
-                    content: 'Climbing Routes',
-                    authRequired: false,
-                },
-            ],
-        })
+const pb = usePocketbase()
+const comments = ref([])
+const selectedDifficulty = ref('')
+const selectedLocation = ref('')
+const searchRouteName = ref('')
 
-        const { t } = useI18n()
-        const pb = usePocketbase()
-        const comments = ref([])
-        const selectedDifficulty = ref('')
-        const selectedLocation = ref('')
-        const searchRouteName = ref('')
+const headers = ref([
+  { title: t('climbing.routename'), value: 'routeName' },
+  { title: t('ratings.score'), value: 'rating' },
+  { title: t('climbing.difficulty'), value: 'difficulty' },
+  { title: t('climbing.location'), value: 'location' },
+  { title: t('climbing.comment'), value: 'comment' },
+  { title: t('table.created_at'), value: 'created_at' },
+  { title: t('table.actions'), value: 'actions' },
+])
 
-        const headers = ref([
-            { title: t('climbing.routename'), value: 'routeName' },
-            { title: t('ratings.score'), value: 'rating' },
-            { title: t('climbing.difficulty'), value: 'difficulty' },
-            { title: t('climbing.location'), value: 'location' },
-            { title: t('climbing.comment'), value: 'comment' },
-            { title: t('table.created_at'), value: 'created_at' },
-            { title: t('table.actions'), value: 'actions' },
-        ])
+const difficulties = ref([
+  { text: t('filter.all'), value: '' },
+  { text: '1', value: '1' },
+  { text: '2', value: '2' },
+  { text: '3', value: '3' },
+  { text: '4', value: '4' },
+  { text: '5', value: '5' },
+  { text: '6', value: '6' },
+  { text: '7', value: '7' },
+  { text: '8', value: '8' },
+  { text: '9', value: '9' },
+  { text: '10', value: '10' },
+])
 
-        const difficulties = ref([
-            { text: t('filter.all'), value: '' },
-            { text: '1', value: '1' },
-            { text: '2', value: '2' },
-            { text: '3', value: '3' },
-            { text: '4', value: '4' },
-            { text: '5', value: '5' },
-            { text: '6', value: '6' },
-            { text: '7', value: '7' },
-            { text: '8', value: '8' },
-            { text: '9', value: '9' },
-            { text: '10', value: '10' },
-        ])
+const locations = ref([
+  { text: t('filter.all'), value: '' },
+  { text: 'Hanau', value: 'Hanau' },
+  { text: 'Gelnhausen', value: 'Gelnhausen' },
+])
 
-        const locations = ref([
-            { text: t('filter.all'), value: '' },
-            { text: 'Hanau', value: 'Hanau' },
-            { text: 'Gelnhausen', value: 'Gelnhausen' },
-        ])
+const getComments = async () => {
+  const data = await pb.collection('ratings').getFullList({
+    expand: 'route_id',
+  })
 
-        const getComments = async () => {
-            const data = await pb.collection('ratings').getFullList({
-                expand: 'route_id',
-            })
-
-            comments.value = data.map((comment) => ({
-                ...comment,
-                routeName: comment.expand.route_id.name,
-                location: comment.expand.route_id.location,
-                difficulty: comment.expand.route_id.difficulty,
-                difficulty_sign: comment.expand.route_id.difficulty_sign,
-            }))
-        }
-
-        pb.collection('ratings').subscribe(
-            '*',
-            function (e) {
-                getComments()
-            },
-            {},
-        )
-
-        getComments()
-
-        const formatDate = (date) => {
-            if (!date) return null
-            const d = new Date(date)
-            let day = '' + d.getDate(),
-                month = '' + (d.getMonth() + 1),
-                year = d.getFullYear()
-
-            if (day.length < 2) day = '0' + day
-            if (month.length < 2) month = '0' + month
-
-            return [day, month, year].join('.')
-        }
-
-        const filteredComments = computed(() => {
-            let filteredComments = comments.value
-
-            if (selectedDifficulty.value) {
-                const selectedDifficultyInt = parseInt(selectedDifficulty.value)
-                filteredComments = filteredComments.filter(
-                    (comment) =>
-                        parseInt(comment.difficulty) === selectedDifficultyInt,
-                )
-            }
-            if (selectedLocation.value) {
-                filteredComments = filteredComments.filter(
-                    (comment) => comment.location === selectedLocation.value,
-                )
-            }
-            if (searchRouteName.value) {
-                filteredComments = filteredComments.filter((comment) =>
-                    comment.routeName
-                        .toLowerCase()
-                        .includes(searchRouteName.value.toLowerCase()),
-                )
-            }
-
-            return filteredComments
-        })
-
-        return {
-            comments,
-            selectedDifficulty,
-            selectedLocation,
-            searchRouteName,
-            headers,
-            difficulties,
-            locations,
-            formatDate,
-            filteredComments,
-        }
-    },
+  comments.value = data.map((comment) => ({
+    ...comment,
+    routeName: comment.expand.route_id.name,
+    location: comment.expand.route_id.location,
+    difficulty: comment.expand.route_id.difficulty,
+    difficulty_sign: comment.expand.route_id.difficulty_sign,
+  }))
 }
+
+pb.collection('ratings').subscribe('*', () => {
+  getComments()
+})
+
+onMounted(() => {
+  getComments()
+})
+
+const formatDate = (date) => {
+  if (!date) return null
+  const d = new Date(date)
+  let day = '' + d.getDate(),
+    month = '' + (d.getMonth() + 1),
+    year = d.getFullYear()
+
+  if (day.length < 2) day = '0' + day
+  if (month.length < 2) month = '0' + month
+
+  return [day, month, year].join('.')
+}
+
+const filteredComments = computed(() => {
+  let filteredComments = comments.value
+
+  if (selectedDifficulty.value) {
+    const selectedDifficultyInt = parseInt(selectedDifficulty.value)
+    filteredComments = filteredComments.filter(
+      (comment) => parseInt(comment.difficulty) === selectedDifficultyInt
+    )
+  }
+  if (selectedLocation.value) {
+    filteredComments = filteredComments.filter(
+      (comment) => comment.location === selectedLocation.value
+    )
+  }
+  if (searchRouteName.value) {
+    filteredComments = filteredComments.filter((comment) =>
+      comment.routeName
+        .toLowerCase()
+        .includes(searchRouteName.value.toLowerCase())
+    )
+  }
+
+  return filteredComments
+})
 </script>

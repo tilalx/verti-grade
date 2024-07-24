@@ -13,26 +13,26 @@
                         <v-text-field
                             v-model="user.firstname"
                             :rules="nameRules"
-                            label="$t('account.firstname')')"
+                            :label="$t('account.firstname')"
                             required
                         ></v-text-field>
                         <v-text-field
                             v-model="user.lastname"
                             :rules="nameRules"
-                            label="$t('account.lastname')')"
+                            :label="$t('account.lastname')"
                             required
                         ></v-text-field>
                         <v-text-field
                             v-model="user.email"
                             :rules="emailRules"
-                            label="$t('account.email')')"
+                            :label="$t('account.email')"
                             type="email"
                             required
                         ></v-text-field>
                         <v-text-field
                             v-model="user.password"
                             :rules="passwordRules"
-                            label="$t('account.password')"
+                            :label="$t('account.password')"
                             type="password"
                             required
                         ></v-text-field>
@@ -41,7 +41,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="closeDialog"
-                        >Cancel</v-btn
+                        >{{ $t('actions.cancel') }}</v-btn
                     >
                     <!-- Disable the button if the form is invalid -->
                     <v-btn
@@ -49,7 +49,7 @@
                         color="blue darken-1"
                         text
                         @click="createUser"
-                        >Create</v-btn
+                        >{{ $t('actions.create') }}</v-btn
                     >
                 </v-card-actions>
             </v-card>
@@ -73,10 +73,10 @@ export default {
             },
             // Define rules
             nameRules: [
-                (v) => !!v || 'Name is required',
+                (v) => !!v || t('notifications.error.nameRequired'),
                 (v) =>
-                    (v && v.length <= 10) ||
-                    'Name must be less than 10 characters',
+                    (v && v.length <= 30) ||
+                    t('notifications.error.nameTooLong'),
             ],
             emailRules: [
                 (v) => !!v || 'E-mail is required',

@@ -7,7 +7,7 @@
             @change="handleFileChange"
             accept="application/json"
         />
-        <v-btn @click="openFilePicker" color="primary">Import Routes</v-btn>
+        <v-btn @click="openFilePicker" color="primary">{{ $t('actions.import') }}</v-btn>
     </div>
 </template>
 

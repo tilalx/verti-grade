@@ -67,9 +67,13 @@ export default defineNuxtPlugin((nuxtApp) => {
             warning: '#FFC107', // Warning color (Amber)
         },
     }
+    
+    // Get theme from browser
+    const prefersDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    const store = useMainStore()
-    const defaultTheme = store.getColorTheme
+    // Set the default theme based on the browser preference
+    const defaultTheme = prefersDarkTheme ? 'dark' : 'light';
+
 
     // Create Vuetify instance with your theme
     const vuetify = createVuetify({

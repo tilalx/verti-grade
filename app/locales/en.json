@@ -1,0 +1,150 @@
+{
+    "account": {
+        "account": "Account",
+        "login": "Sign In",
+        "logout": "Logout",
+        "register": "Register",
+        "name": "Name",
+        "firstname": "Firstname",
+        "lastname": "Lastname",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "confirm_password": "Confirm password"
+    },
+    "routes": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "about": "About",
+        "contact": "Contact",
+        "login": "Login",
+        "register": "Register",
+        "profile": "Profile",
+        "users": "Users",
+        "user": "User",
+        "statistics": "Statistics",
+        "statistic": "Statistic",
+        "comments": "Comments",
+        "comment": "Comment",
+        "settings": "Settings",
+        "setting": "Setting",
+        "edit": "Edit",
+        "delete": "Delete",
+        "create": "Create",
+        "logout": "Logout",
+        "route_setter": "Route Setter",
+        "screwed_at": "Screwed at",
+        "types": {
+            "route": "Route",
+            "boulder": "Boulder"
+        },
+        "name": "Name",
+        "creator_split": "Creator split by ,"
+    },
+    "dashboard": {
+        "welcome": "Welcome to the Dashboard!"
+    },
+    "climbing": {
+        "create": "Create route",
+        "color": "Color",
+        "routename": "Route name",
+        "difficulty": "Difficulty",
+        "difficulty_sign": "Difficulty sign",
+        "location": "Location",
+        "searchRouteName": "Search",
+        "type": "Type",
+        "archived": "Archived",
+        "comment": "Comment",
+        "creators": "Creators"
+    },
+    "ratings": {
+        "ratings": "Ratings",
+        "createReview": "Create review",
+        "routename": "Route name",
+        "stars": "Stars",
+        "difficulty": "Difficulty",
+        "difficulty_sign": "Difficulty sign",
+        "location": "Location",
+        "searchRouteName": "Search",
+        "type": "Type",
+        "score": "Score",
+        "comment": "Comment",
+        "creators": "Creators"
+    },
+    "table": {
+        "id": "ID",
+        "select": "Selected",
+        "actions": "Actions",
+        "created_at": "Created at",
+        "updated_at": "Updated at",
+        "created_by": "Created by",
+        "updated_by": "Updated by"
+    },
+    "header": {
+        "create_route": "Create climbing route",
+        "routereviews": "Route reviews",
+        "title": "Climbing routes",
+        "subtitle": "Climbing routes"
+    },
+    "actions": {
+        "import": "Import Routes",
+        "print": "Print",
+        "create": "Create",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "new_item": "New Item",
+        "edit_item": "Edit Item",
+        "confirm": "Confirm Delete",
+        "select_all": "Select All",
+        "deselect_all": "Deselect All"
+    },
+    "notifications": {
+        "success": {
+            "create": "Successfully created",
+            "edit": "Successfully edited",
+            "delete": "Successfully deleted",
+            "login": "Login successful. Redirecting to the Dashboard..."
+        },
+        "error": {
+            "nameRequired": "Name is required",
+            "nameTooLong": "Name must be less than 30 characters",
+            "create": "Error creating",
+            "edit": "Error editing",
+            "delete": "Error deleting",
+            "login_failed": "Login failed. Please check your credentials and try again.",
+            "no_route_found": "No route found!"
+        },
+        "deleteItem": "Are you sure you want to delete this item?",
+        "deleteMoreItems": "Are you sure you want to delete the selected items?",
+        "newVersionAvailable": "A new version is available! Please update to the latest version."
+    },
+    "filter": {
+        "all": "All",
+        "archived": "Archived"
+    },
+    "legal": {
+        "privacy": "Privacy",
+        "imprint": "Imprint",
+        "terms": "Terms of use"
+    },
+    "page": {
+        "title": {
+            "user": "User - Verti-Grade",
+            "settings": "Settings - Verti-Grade",
+            "route": "Route - Verti-Grade",
+            "index": "Climbing Routes - Verti-Grade",
+            "comments": "Comments - Verti-Grade",
+            "dashboard": "Dashboard - Verti-Grade"
+        },
+        "content": {
+            "user": "User Page",
+            "settings": "Settings",
+            "route": "Create Review",
+            "index": "Climbing Routes",
+            "comments": "Comments",
+            "dashboard": "Dashboard"
+        }
+    }
+}

@@ -3,8 +3,7 @@
         <v-row justify="center" v-if="newVersionAvailable">
             <v-col cols="auto">
                 <v-alert type="info" dense>
-                    A new version is available! Please update to the latest
-                    version.
+                    {{ $t('notifications.newVersionAvailable') }}
                 </v-alert>
             </v-col>
         </v-row>

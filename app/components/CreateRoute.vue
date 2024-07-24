@@ -6,15 +6,10 @@
                     color="primary"
                     @click="openPopup"
                     class="create-route-button"
-                    >Create Route</v-btn
+                    >{{ $t('climbing.create') }}</v-btn
                 >
                 <v-dialog v-model="showPopup" persistent max-width="600px">
                     <v-card>
-                        <v-card-title>
-                            <span class="headline">{{
-                                $t('header.create_route')
-                            }}</span>
-                        </v-card-title>
                         <v-card-text>
                             <v-container>
                                 <v-form

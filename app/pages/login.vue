@@ -3,16 +3,13 @@
         <v-row justify="center" align="center" class="fill-height">
             <v-col cols="12" sm="8" md="4">
                 <v-card class="pa-4">
-                    <v-card-title class="justify-center">
-                        <span class="text-h5">Login</span>
-                    </v-card-title>
                     <v-card-text>
                         <v-form
                             ref="form"
                             @submit.prevent="handlePocketbaseLogin"
                         >
                             <v-text-field
-                                label="Email"
+                                :label="$t('account.email')"
                                 prepend-icon="mdi-account"
                                 v-model="email"
                                 type="email"
@@ -23,7 +20,7 @@
                             ></v-text-field>
 
                             <v-text-field
-                                label="Password"
+                                :label="$t('account.password')"
                                 prepend-icon="mdi-lock"
                                 v-model="password"
                                 type="password"
@@ -42,7 +39,7 @@
                                     class="mx-auto"
                                     elevation="2"
                                     rounded
-                                    >Sign In</v-btn
+                                    >{{ $t('account.login') }}</v-btn
                                 >
                             </div>
                         </v-form>
@@ -53,8 +50,7 @@
                             outlined
                             class="mt-4"
                         >
-                            Login failed. Please check your credentials and try
-                            again.
+                            {{ $t('notifications.error.login_failed') }}
                         </v-alert>
                         <v-alert
                             v-if="loginSuccess"
@@ -63,7 +59,7 @@
                             outlined
                             class="mt-4"
                         >
-                            Login successful. Redirecting to the Dashboard...
+                            {{ $t('notifications.success.login') }}
                         </v-alert>
                     </v-card-text>
                 </v-card>

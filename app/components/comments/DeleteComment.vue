@@ -5,15 +5,15 @@
         </v-btn>
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-                <v-card-title class="headline">Confirm Delete</v-card-title>
+                <v-card-title class="headline">{{ $t('actions.confirm') }}</v-card-title>
                 <v-card-text>
-                    Are you sure you want to delete this comment?
+                    {{ $t('notifications.deleteItem') }}
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn @click="dialog = false">Cancel</v-btn>
+                    <v-btn @click="dialog = false">{{ $t('actions.cancel') }}</v-btn>
                     <v-btn color="red darken-1" text @click="deleteComment"
-                        >Delete</v-btn
+                        >{{ $t('actions.delete') }}</v-btn
                     >
                 </v-card-actions>
             </v-card>

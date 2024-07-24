@@ -12,8 +12,7 @@
                 <VDialog v-model:show="dialogDelete" max-width="500px">
                     <VCard>
                         <VCardTitle class="text-h5"
-                            >Are you sure you want to delete this
-                            item?</VCardTitle
+                            >{{ $t('notifications.deleteItem') }}</VCardTitle
                         >
                         <VCardActions>
                             <VSpacer></VSpacer>
@@ -22,7 +21,7 @@
                                 variant="text"
                                 @click="closeDelete"
                             >
-                                Cancel
+                                {{ $t('actions.cancel') }}
                             </VBtn>
                             <VBtn
                                 color="blue-darken-1"
@@ -44,12 +43,14 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import moment from 'moment'
 
+const { t } = useI18n()
+
 useHead({
-    title: 'User - Verti-Grade',
+    title: t('page.title.user'),
     meta: [
         {
             name: 'description',
-            content: 'User Edit Page for Verti-Grade',
+            content: t('page.content.user'),
         },
     ],
 })
@@ -82,15 +83,15 @@ const defaultItem = {
 }
 
 headers.value = [
-    { title: 'Firstname', key: 'firstname' },
-    { title: 'Lastname', key: 'name' },
-    { title: 'Email', key: 'email' },
-    { title: 'Created At', key: 'created' },
-    { title: 'Updated At', key: 'updated' },
+    { title: t('account.firstname'), key: 'firstname' },
+    { title: t('account.lastname'), key: 'name' },
+    { title: t('account.email'), key: 'email' },
+    { title: t('table.created_at'), key: 'created' },
+    { title: t('table.updated_at'), key: 'updated' },
 ]
 
 const formTitle = computed(() => {
-    return editIndex.value === -1 ? 'New Item' : 'Edit Item'
+    return editIndex.value === -1 ? t('actions.new_item') : t('actions.edit_item')
 })
 
 watch(dialog, (newVal) => {

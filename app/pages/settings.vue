@@ -1,12 +1,15 @@
 <template></template>
 
 <script setup>
+
+const { t } = useI18n()
+
 useHead({
-    title: 'Settings - Verti-Grade',
+    title: t('page.title.settings'),
     meta: [
         {
             name: 'description',
-            content: 'Settings for Verti-Grade',
+            content: t('page.content.settings'),
         },
     ],
 })

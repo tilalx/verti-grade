@@ -1,59 +1,62 @@
 <template>
     <div>
-        <v-btn @click="openPopup">Edit Route</v-btn>
+        <v-btn @click="openPopup">{{ $t('actions.edit') }}</v-btn>
         <v-dialog v-model="popupOpen" max-width="500px">
             <v-card>
-                <v-card-title>Edit Route</v-card-title>
                 <v-card-text v-if="routeData">
                     <v-form @submit.prevent="saveChanges">
                         <v-text-field
                             v-model="routeData.name"
-                            label="Route Name"
+                            :label="$t('routes.name')"
                             required
                         ></v-text-field>
                         <v-select
                             v-model="routeData.difficulty"
-                            label="Route Difficulty"
+                            :label="$t('climbing.difficulty')"
                             :items="difficulty"
                             required
                         ></v-select>
                         <v-select
                             v-model="routeData.difficulty_sign"
-                            label="Route Difficulty Sign"
+                            :label="$t('climbing.difficulty_sign')"
                             :items="difficulty_sign"
+                            item-title="title"
+                            item-value="value"
                             allow-numeric
                             required
                         ></v-select>
                         <v-select
                             v-model="routeData.location"
-                            label="Route Location"
+                            :label="$t('climbing.location')"
                             :items="locations"
                             required
                         ></v-select>
                         <v-select
                             v-model="routeData.type"
-                            label="Route Type"
+                            :label="$t('climbing.type')"
                             :items="Type"
+                            item-title="title"
+                            item-value="value"
                             required
                         ></v-select>
                         <v-textarea
                             v-model="routeData.comment"
-                            label="Route Comment"
+                            :label="$t('climbing.comment')"
                         ></v-textarea>
                         <v-text-field
                             v-model="routeData.creator"
-                            label="Route Creator split by ,"
+                            :label="$t('routes.creator_split')"
                             required
                         ></v-text-field>
                         <v-text-field
                             v-model="routeData.screw_date"
-                            label="Screw Date"
+                            :label="$t('routes.screwed_at')"
                             type="date"
                             required
                         ></v-text-field>
                         <v-switch
                             v-model="routeData.archived"
-                            label="Archived"
+                            :label="$t('climbing.archived')"
                             required
                             :true-value="true"
                             :false-value="false"
@@ -62,20 +65,22 @@
                             <v-color-picker
                                 v-model="routeData.color"
                                 :modes="['hexa']"
-                                label="Route Color"
+                                _label="$t('climbing.color')"
                                 required
                             ></v-color-picker>
                         </div>
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn @click="closePopup">Cancel</v-btn>
+                    <v-btn @click="closePopup">{{
+                        $t('actions.cancel')
+                    }}</v-btn>
                     <v-btn
                         color="primary"
                         type="submit"
                         @click="saveChanges"
                         :disabled="!isFormValid"
-                        >Save</v-btn
+                        >{{ $t('actions.save') }}</v-btn
                     >
                 </v-card-actions>
             </v-card>
@@ -86,14 +91,25 @@
 <script setup>
 import { ref, computed } from 'vue'
 
+const { t } = useI18n()
+
 const pb = usePocketbase()
 
 const popupOpen = ref(false)
 const routeData = ref(null)
 const locations = ['Hanau', 'Gelnhausen']
-const Type = ['Boulder', 'Route']
+const Type = reactive([
+    { title: t('routes.types.route'), value: 'Route' },
+    { title: t('routes.types.boulder'), value: 'Boulder' },
+])
+
+const difficulty_sign = reactive([
+        { title: '', value: null },
+        { title: '-', value: false },
+        { title: '+', value: true }
+    ])
+
 const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString())
-const difficulty_sign = ['', '-', '+']
 
 const props = defineProps({
     route_id: {
@@ -140,14 +156,14 @@ async function openPopup() {
 
 async function fetchClimbingRoute() {
     if (!props.route_id) {
-        error.value = 'No route ID provided!'
+        error.value = t('notifications.error.no_route_found')
         return
     }
 
     const record = await pb.collection('routes').getOne(props.route_id, {})
 
     if (!record) {
-        error.value = 'No route found!'
+        error.value = t('notifications.error.no_route_found')
         return
     } else {
         return record
@@ -168,12 +184,7 @@ async function saveChanges() {
         await pb.collection('routes').update(routeData.value.id, {
             name: routeData.value.name,
             difficulty: routeData.value.difficulty,
-            difficulty_sign:
-                routeData.value.difficulty_sign === '+'
-                    ? true
-                    : routeData.value.difficulty_sign === '-'
-                      ? false
-                      : null,
+            difficulty_sign: routeData.value.difficulty_sign,
             location: routeData.value.location,
             type: routeData.value.type,
             comment: routeData.value.comment,
@@ -182,7 +193,7 @@ async function saveChanges() {
             archived: routeData.value.archived,
             color: routeData.value.color,
         })
-        closePopup() // Assuming closePopup() is defined to handle UI closure
+        closePopup()
     }
 }
 </script>

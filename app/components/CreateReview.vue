@@ -10,7 +10,7 @@
         >
             <v-row align="center">
                 <v-col cols="12">
-                    <span class="call-to-action-text">Create a Review</span>
+                    <span class="call-to-action-text">{{ $t('ratings.createReview') }}</span>
                 </v-col>
             </v-row>
         </v-btn>

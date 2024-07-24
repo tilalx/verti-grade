@@ -1,11 +1,9 @@
 <template>
     <v-container>
-        <v-btn color="primary" @click="openDialog">Ratings</v-btn>
+        <v-btn color="primary" @click="openDialog">{{ $t('ratings.ratings') }}</v-btn>
         <v-dialog v-model="dialog" persistent max-width="800px">
             <v-card>
                 <v-card-title>
-                    Route Details
-                    <v-spacer></v-spacer>
                     <v-btn icon @click="dialog = false">
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
@@ -50,6 +48,8 @@
 <script setup>
 import { ref } from 'vue'
 
+const { t } = useI18n()
+
 const props = defineProps({
     route_id: {
         type: String,
@@ -61,9 +61,9 @@ const pb = usePocketbase()
 const dialog = ref(false)
 const routeDetails = ref([])
 const headers = [
-    { title: 'Rating', value: 'rating' },
-    { title: 'Difficulty', value: 'difficulty' },
-    { title: 'Comment', value: 'comment' },
+    { title: t('ratings.stars'), value: 'rating' },
+    { title: t('ratings.difficulty'), value: 'difficulty' },
+    { title: t('routes.comment'), value: 'comment' },
 ]
 
 function openDialog() {

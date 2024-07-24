@@ -1,6 +1,5 @@
 <template>
     <v-container>
-        <CreateReview :route_id="route_id"></CreateReview>
         <v-row>
             <v-col>
                 <v-card class="mx-auto" outlined>
@@ -8,29 +7,36 @@
                         <v-card-actions :disabled="true">
                             <v-list>
                                 <v-list-item>
-                                    <span>Name: {{ metadata?.name }}</span>
+                                    <v-list-item-content>
+                                        <v-list-item-title>
+                                            <span>{{ $t('account.name') }}:</span>
+                                            <span class="ml-1">{{ metadata?.name }}</span>
+                                        </v-list-item-title>
+                                    </v-list-item-content>
                                 </v-list-item>
                                 <v-list-item>
-                                    <span
-                                        >Schrauber:
-                                        {{ metadata?.creator.join(', ') }}</span
-                                    >
+                                    <v-list-item-content>
+                                        <v-list-item-title>
+                                            <span>{{ $t('routes.route_setter') }}:</span>
+                                            <span class="ml-1">{{ metadata?.creator.join(', ') }}</span>
+                                        </v-list-item-title>
+                                    </v-list-item-content>
                                 </v-list-item>
                                 <v-list-item>
-                                    <span
-                                        >Geschraubt am:
-                                        {{
-                                            formatDateToYYYYMMDD(
-                                                metadata?.screw_date,
-                                            )
-                                        }}</span
-                                    >
+                                    <v-list-item-content>
+                                        <v-list-item-title>
+                                            <span>{{ $t('routes.screwed_at')}}:</span>
+                                            <span class="ml-1">{{ formatDateToYYYYMMDD(metadata?.screw_date) }}</span>
+                                        </v-list-item-title>
+                                    </v-list-item-content>
                                 </v-list-item>
                             </v-list>
                         </v-card-actions>
                     </v-card>
                 </v-card>
-                <div style="margin-bottom: 10px"></div>
+                <v-spacer class="my-4"></v-spacer>
+                <CreateReview :route_id="route_id"></CreateReview>
+                <v-spacer class="my-4"></v-spacer>
                 <v-card class="mx-auto" outlined>
                     <v-data-table
                         :items="reviews"
@@ -53,6 +59,7 @@
     </v-container>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -60,17 +67,18 @@ import { useI18n } from '#imports'
 import CreateReview from '@/components/CreateReview.vue'
 import { navigateTo } from 'nuxt/app'
 
+const { t } = useI18n()
+
 useHead({
-    title: 'Route Reviews',
+    title: t('page.title.route'),
     meta: [
         {
             name: 'description',
-            content: 'Route Reviews',
+            content: t('page.content.route'),
         },
     ],
 })
 
-const { t } = useI18n()
 const pb = usePocketbase()
 const route = useRoute()
 const route_id = ref(getRouteIdFromUrl())
