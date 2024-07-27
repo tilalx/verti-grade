@@ -2,7 +2,14 @@
     <v-app-bar app dense color="background" v-if="$route.meta.navbar !== false">
         <v-toolbar-title to="/">
             <router-link to="/">
+                <img 
+                    v-if="logo_url"
+                    :src="logo_url"
+                    alt="Logo"
+                    :style="logoColor"
+                />
                 <img
+                    v-else
                     src="@/assets/DAVLogoHanau.png"
                     alt="Logo"
                     :style="logoColor"
@@ -20,51 +27,40 @@
         <v-btn v-if="isLoggedIn" text to="/comments">{{
             $t('routes.comments')
         }}</v-btn>
-        <v-btn v-if="isLoggedIn" text to="/users">{{
-            $t('routes.users')
+        <v-btn v-if="isLoggedIn" text to="/settings">{{
+            $t('routes.settings')
         }}</v-btn>
-        <log-out v-if="isLoggedIn"></log-out>
+        <UserIcon v-if="isLoggedIn"></UserIcon>
     </v-app-bar>
     <v-divider></v-divider>
 </template>
 
-<script>
-import LogOut from '@/components/auth/LogOut.vue'
-import { toRefs, watch } from 'vue'
-import { useMainStore } from '@/stores/main'
-export default {
-    name: 'NavBar',
-    components: {
-        LogOut,
-    },
-    props: {
-        loggedIn: {
-            type: Boolean,
-            required: true,
-            default: false,
-        },
-    },
-    setup(props) {
-        const { loggedIn } = toRefs(props)
-        const theme = ref(useMainStore().getColorTheme)
+<script setup>
+import { computed, toRefs } from 'vue'
+import UserIcon from '@/components/user/UserIcon.vue'
 
-        const logoColor = computed(() => ({
-            maxWidth: '90px',
-            filter: `brightness(0) invert(${theme.value === 'dark' ? 1 : 0})`,
-        }))
+const pb = usePocketbase()
 
-        watch(
-            () => useMainStore().getColorTheme,
-            (newTheme) => {
-                theme.value = newTheme
-            },
-        )
-
-        return {
-            isLoggedIn: loggedIn,
-            theme,
-            logoColor,
-        }
+const props = defineProps({
+    loggedIn: {
+        type: Boolean,
+        required: true,
+        default: false,
     },
-}
+    settings: {
+        type: Object,
+        required: true,
+    },
+})
+
+const { loggedIn, settings } = toRefs(props)
+const theme = getTheme()
+const logo_url = await pb.files.getUrl(settings.value, settings.value?.page_logo)
+
+const logoColor = computed(() => ({
+    maxWidth: '90px',
+    filter: `brightness(0) invert(${theme.value === 'dark' ? 1 : 0})`,
+}))
+
+const isLoggedIn = loggedIn
 </script>

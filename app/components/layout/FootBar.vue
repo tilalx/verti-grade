@@ -4,23 +4,41 @@
             <v-row justify="center" align="center">
                 <v-col cols="auto">
                     <div class="text-center">
-                        <a
-                            href="https://www.dav-hanau.de/datenschutz"
-                            class="footer-link"
-                            target="_blank"
-                        >
-                            {{ $t('legal.privacy') }}
-                        </a>
+                            <a
+                                v-if="settings.privacy_url"
+                                :href="settings.privacy_url"
+                                class="footer-link"
+                                target="_blank"
+                            >
+                                {{ $t('legal.privacy') }}
+                            </a>
+                            <span v-if="settings.privacy_url" class="footer-separator">|</span>
+                            <a
+                                v-if="settings.imprint_url"
+                                :href="settings.imprint_url"
+                                class="footer-link"
+                                target="_blank"
+                            >
+                                {{ $t('legal.imprint') }}
+                            </a>
+                    </div>
+                </v-col>
+            </v-row>
+            <v-row justify="center" align="center">
+                <v-col cols="auto">
+                    <div class="text-center">
+                        <v-chip color="success" v-if="health.code === 200">{{
+                            $t('notifications.success.health')
+                        }}</v-chip>
+                        <v-chip color="error" v-else>{{
+                            $t('notifications.error.health')
+                        }}</v-chip>
                         <span class="footer-separator">|</span>
-                        <a
-                            href="https://www.dav-hanau.de/impressum"
-                            class="footer-link"
-                            target="_blank"
-                        >
-                            {{ $t('legal.imprint') }}
-                        </a>
+                        <v-chip color="grey">{{ appVersion }}</v-chip>
                         <span class="footer-separator">|</span>
-                        <p class="d-inline">{{ appVersion }}</p>
+                        <v-chip color="info">{{
+                            $t('dashboard.online', [online.clients + 1])
+                        }}</v-chip>
                     </div>
                 </v-col>
             </v-row>
@@ -31,6 +49,21 @@
 <script setup>
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
+
+const pb = usePocketbase()
+
+const health = await pb.health.check()
+
+const online = await pb.send('/api/online')
+
+const props = defineProps({
+    settings: {
+        type: Object,
+        required: true,
+    },
+})
+
+const { settings } = toRefs(props)
 </script>
 
 <style scoped>

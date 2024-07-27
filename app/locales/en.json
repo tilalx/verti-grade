@@ -1,16 +1,20 @@
 {
     "account": {
+        "profile": "Profile",
         "account": "Account",
         "login": "Sign In",
         "logout": "Logout",
         "register": "Register",
         "name": "Name",
-        "firstname": "Firstname",
-        "lastname": "Lastname",
+        "firstname": "First name",
+        "lastname": "Last name",
         "username": "Username",
         "password": "Password",
         "email": "Email",
-        "confirm_password": "Confirm password"
+        "reset_password": "Reset password",
+        "newPassword": "Confirm Password",
+        "userProfile": "User Profile",
+        "oldPassword": "Current Password"
     },
     "routes": {
         "home": "Home",
@@ -42,7 +46,8 @@
         "creator_split": "Creator split by ,"
     },
     "dashboard": {
-        "welcome": "Welcome to the Dashboard!"
+        "welcome": "Welcome to the Dashboard!",
+        "online": "{0} Online"
     },
     "climbing": {
         "create": "Create route",
@@ -95,6 +100,7 @@
         "save": "Save",
         "cancel": "Cancel",
         "new_item": "New Item",
+        "submit": "Submit",
         "edit_item": "Edit Item",
         "confirm": "Confirm Delete",
         "select_all": "Select All",
@@ -102,19 +108,23 @@
     },
     "notifications": {
         "success": {
+            "resetPassword": "Password reset request sent. Please check your email.",
             "create": "Successfully created",
             "edit": "Successfully edited",
             "delete": "Successfully deleted",
-            "login": "Login successful. Redirecting to the Dashboard..."
+            "login": "Login successful. Redirecting to the Dashboard...",
+            "health": "Health: OK"
         },
         "error": {
+            "resetPassword": "Password reset request failed.",
             "nameRequired": "Name is required",
             "nameTooLong": "Name must be less than 30 characters",
             "create": "Error creating",
             "edit": "Error editing",
             "delete": "Error deleting",
             "login_failed": "Login failed. Please check your credentials and try again.",
-            "no_route_found": "No route found!"
+            "no_route_found": "No route found!",
+            "health": "Health: Down"
         },
         "deleteItem": "Are you sure you want to delete this item?",
         "deleteMoreItems": "Are you sure you want to delete the selected items?",
@@ -131,6 +141,7 @@
     },
     "page": {
         "title": {
+            "login": "Login - Verti-Grade",
             "user": "User - Verti-Grade",
             "settings": "Settings - Verti-Grade",
             "route": "Route - Verti-Grade",
@@ -139,6 +150,7 @@
             "dashboard": "Dashboard - Verti-Grade"
         },
         "content": {
+            "login": "Login",
             "user": "User Page",
             "settings": "Settings",
             "route": "Create Review",

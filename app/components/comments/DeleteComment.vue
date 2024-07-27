@@ -38,8 +38,7 @@ const pb = usePocketbase()
 
 const deleteComment = async () => {
     try {
-        const error = await pb.delete('comments', props.commentId)
-        emit('comment-deleted')
+        await pb.collection('ratings').delete(props.commentId)
         dialog.value = false
     } catch (error) {
         console.error('Error deleting comment:', error)

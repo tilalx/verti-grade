@@ -270,9 +270,21 @@ const getClimbingRoutes = async () => {
                 sort: '-screw_date',
             })
 
-        if (!climbingRoutesData) {
+        const averageRating = await pb.collection('averageRating').getFullList({
+        });
+
+        if (!climbingRoutesData || !averageRating) {
             console.error('Error fetching climbing routes')
             return
+        }
+
+        for (const route of climbingRoutesData) {
+            const rating = averageRating.find(
+                (rate) => rate.id === route.id,
+            )
+            if (rating) {
+                route.score = rating.average_rating
+            }
         }
 
         climbingRoutes.value = climbingRoutesData

@@ -7,28 +7,28 @@
                         <v-card-actions :disabled="true">
                             <v-list>
                                 <v-list-item>
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            <span>{{ $t('account.name') }}:</span>
-                                            <span class="ml-1">{{ metadata?.name }}</span>
-                                        </v-list-item-title>
-                                    </v-list-item-content>
+                                    <span>{{ $t('account.name') }}:</span>
+                                    <span class="ml-1">{{
+                                        metadata?.name
+                                    }}</span>
                                 </v-list-item>
                                 <v-list-item>
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            <span>{{ $t('routes.route_setter') }}:</span>
-                                            <span class="ml-1">{{ metadata?.creator.join(', ') }}</span>
-                                        </v-list-item-title>
-                                    </v-list-item-content>
+                                    <span
+                                        >{{ $t('routes.route_setter') }}:</span
+                                    >
+                                    <span class="ml-1">{{
+                                        metadata?.creator.join(', ')
+                                    }}</span>
                                 </v-list-item>
                                 <v-list-item>
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            <span>{{ $t('routes.screwed_at')}}:</span>
-                                            <span class="ml-1">{{ formatDateToYYYYMMDD(metadata?.screw_date) }}</span>
-                                        </v-list-item-title>
-                                    </v-list-item-content>
+                                    <span>{{ $t('routes.screwed_at') }}:</span>
+                                    <span class="ml-1">
+                                        {{
+                                            new Date(
+                                                metadata?.screw_date,
+                                            ).toLocaleDateString('de-DE')
+                                        }}
+                                    </span>
                                 </v-list-item>
                             </v-list>
                         </v-card-actions>
@@ -58,7 +58,6 @@
         </v-row>
     </v-container>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -133,6 +132,7 @@ const getAllRouteRatings = async () => {
 
 const fetchRouteMetadata = async () => {
     const record = await pb.collection('routes').getOne(route_id.value, {
+        sort: '-created',
         expand: 'name, creator, screw_date',
     })
 

@@ -3,40 +3,8 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
+
 export default defineNuxtPlugin((nuxtApp) => {
-    const theme = {
-        default: 'dark',
-        theme: {
-            themes: {
-                dark: {
-                    colors: {
-                        background: '#0f172a', // default dark background
-                        surface: '#1e293b', // default dark surface
-                        primary: '#58ab27', // DAV dark primary color (Teal)
-                        secondary: '#1A237E', //t DAV dark secondary color (Indigo)
-                        accent: '#263238',
-                        error: '#D32F2F', // Error color (Red)
-                        info: '#2979FF', // Info color (Blue)
-                        success: '#2E7D32', // Success color (Green)
-                        warning: '#FF6F00', // Warning color (Orange)
-                    },
-                },
-                light: {
-                    colors: {
-                        background: '#FFFFFF', // default light background
-                        surface: '#F5F5F5', // default light surface
-                        primary: '#58ab27', // DAV light primary color (Teal)
-                        secondary: '#3F51B5', // DAV light secondary color (Indigo)
-                        accent: '#546E7A', // DAV light accent color (Blue Grey)
-                        error: '#F44336', // Error color (Red)
-                        info: '#2196F3', // Info color (Blue)
-                        success: '#4CAF50', // Success color (Green)
-                        warning: '#FFC107', // Warning color (Amber)
-                    },
-                },
-            },
-        },
-    }
 
     const darkTheme = {
         dark: true,
@@ -67,13 +35,6 @@ export default defineNuxtPlugin((nuxtApp) => {
             warning: '#FFC107', // Warning color (Amber)
         },
     }
-    
-    // Get theme from browser
-    const prefersDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    // Set the default theme based on the browser preference
-    const defaultTheme = prefersDarkTheme ? 'dark' : 'light';
-
 
     // Create Vuetify instance with your theme
     const vuetify = createVuetify({
@@ -81,7 +42,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         components,
         directives,
         theme: {
-            defaultTheme: defaultTheme,
+            defaultTheme: 'dark',
             themes: {
                 dark: darkTheme,
                 light: lightTheme,

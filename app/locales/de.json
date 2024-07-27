@@ -1,5 +1,6 @@
 {
     "account": {
+        "profile": "Profil",
         "account": "Konto",
         "login": "Anmelden",
         "logout": "Abmelden",
@@ -10,7 +11,10 @@
         "username": "Benutzername",
         "password": "Passwort",
         "email": "E-Mail",
-        "confirm_password": "Passwort bestätigen"
+        "reset_password": "Passwort zurücksetzen",
+        "newPassword": "Passwort bestätigen",
+        "userProfile": "Benutzerprofil",
+        "oldPassword": "Aktuelles Passwort"
     },
     "routes": {
         "home": "Startseite",
@@ -32,7 +36,7 @@
         "delete": "Löschen",
         "create": "Erstellen",
         "logout": "Abmelden",
-        "route_setter": "Routensteller",
+        "route_setter": "Routen Schrauber",
         "screwed_at": "Geschraubt am",
         "types": {
             "route": "Route",
@@ -42,7 +46,8 @@
         "creator_split": "Schrauber getrennt durch ,"
     },
     "dashboard": {
-        "welcome": "Willkommen im Dashboard!"
+        "welcome": "Willkommen im Dashboard!",
+        "online": "{0} Online"
     },
     "climbing": {
         "create": "Route erstellen",
@@ -94,6 +99,7 @@
         "delete": "Löschen",
         "save": "Speichern",
         "cancel": "Abbrechen",
+        "submit": "Absenden",
         "new_item": "Neues Element",
         "edit_item": "Element bearbeiten",
         "confirm": "Löschen bestätigen",
@@ -102,19 +108,23 @@
     },
     "notifications": {
         "success": {
+            "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
             "create": "Erfolgreich erstellt",
             "edit": "Erfolgreich bearbeitet",
             "delete": "Erfolgreich gelöscht",
-            "login": "Anmeldung erfolgreich. Weiterleitung zum Dashboard..."
+            "login": "Anmeldung erfolgreich. Weiterleitung zum Dashboard...",
+            "health": "Status: OK"
         },
         "error": {
+            "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
             "nameRequired": "Name ist erforderlich",
             "nameTooLong": "Name muss weniger als 30 Zeichen lang sein",
             "create": "Fehler beim Erstellen",
             "edit": "Fehler beim Bearbeiten",
             "delete": "Fehler beim Löschen",
             "login_failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
-            "no_route_found": "Keine Route gefunden"
+            "no_route_found": "Keine Route gefunden",
+            "health": "Status: Schlecht"
         },
         "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
         "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
@@ -131,6 +141,7 @@
     },
     "page": {
         "title": {
+            "login": "Anmelden - Verti-Grade",
             "user": "Benutzer - Verti-Grade",
             "settings": "Einstellungen - Verti-Grade",
             "route": "Route - Verti-Grade",
@@ -139,6 +150,7 @@
             "dashboard": "Dashboard - Verti-Grade"
         },
         "content": {
+            "login": "Anmelden",
             "user": "Benutzerseite",
             "settings": "Einstellungen",
             "route": "Bewertung erstellen",

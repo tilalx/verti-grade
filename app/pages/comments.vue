@@ -87,6 +87,11 @@ useHead({
   ],
 })
 
+definePageMeta({
+    authRequired: true,
+    middleware: ['auth'],
+})
+
 const pb = usePocketbase()
 const comments = ref([])
 const selectedDifficulty = ref('')
@@ -125,6 +130,7 @@ const locations = ref([
 
 const getComments = async () => {
   const data = await pb.collection('ratings').getFullList({
+    sort: '-created',
     expand: 'route_id',
   })
 
@@ -175,6 +181,9 @@ const filteredComments = computed(() => {
   if (searchRouteName.value) {
     filteredComments = filteredComments.filter((comment) =>
       comment.routeName
+        .toLowerCase()
+        .includes(searchRouteName.value.toLowerCase()) ||
+      comment.comment
         .toLowerCase()
         .includes(searchRouteName.value.toLowerCase())
     )

@@ -65,7 +65,7 @@
                             <v-color-picker
                                 v-model="routeData.color"
                                 :modes="['hexa']"
-                                _label="$t('climbing.color')"
+                                :label="$t('climbing.color')"
                                 required
                             ></v-color-picker>
                         </div>

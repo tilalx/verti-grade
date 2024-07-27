@@ -65,7 +65,7 @@
                     <v-btn @click="closePopup">{{
                         $t('actions.cancel')
                     }}</v-btn>
-                    <v-btn @click="submitReview" :disabled="!isFormValid">{{
+                    <v-btn @click="submitReview" :disabled="!isFormValid" color="primary">{{
                         $t('actions.create')
                     }}</v-btn>
                 </v-card-actions>
@@ -75,7 +75,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { isBot } from '../composables/isBot';
 
 const props = defineProps({
     route_id: {
@@ -83,6 +84,8 @@ const props = defineProps({
         required: true,
     },
 })
+
+const isABot = ref(await isBot())
 
 const pb = usePocketbase()
 
@@ -96,7 +99,7 @@ const difficulties = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 const calltoaction = ref(true)
 
 const isFormValid = computed(() => {
-    return rating.value && difficulty.value && comment.value
+    return rating.value && difficulty.value && comment.value && !isABot.value.bot
 })
 
 function openPopup() {
