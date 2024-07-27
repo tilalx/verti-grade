@@ -22,11 +22,13 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const settings = await pb.collection('settings').getOne('settings_123456')
+        const settings = await pb
+            .collection('settings')
+            .getOne('settings_123456')
 
         const logoUrl = await pb.files.getUrl(settings, settings.sign_image)
 
-        const logo = await fetchLogo(logoUrl);
+        const logo = await fetchLogo(logoUrl)
 
         if (!logo) {
             return createError({
@@ -35,7 +37,14 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const doc = new PDFDocument({ size: [595.28, 841.89] });
+        if (!settings.application_url) {
+            return createError({
+                statusCode: 500,
+                statusMessage: 'No application url provided.',
+            })
+        }
+
+        const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
 
         doc.pipe(res)
@@ -108,11 +117,9 @@ export default eventHandler(async (event) => {
             const qrY = y - 15 // Y position for QR code
             const qrSize = 120 // Size of the QR code, adjust as necessary
 
-            // Generate QR code with the server URL
-            const serverUrl =
-                (process.env.SERVER_URL
-                    ? process.env.SERVER_URL
-                    : `http://${host}`) + `/route?id=${id}`
+            // Generate QR code with the server URL and the entry ID as a query parameter
+            const serverUrl = settings.application_url + `/route?id=${id}`
+
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
                 color: {
                     light: '#0000', // Transparent background
@@ -125,7 +132,7 @@ export default eventHandler(async (event) => {
                 y: y + 100,
                 x: x + 165,
             })
-           
+
             entryCount++
         }
 
@@ -152,14 +159,14 @@ function calculateStartX(desiredXCenter, text, doc) {
 
 async function fetchLogo(url) {
     try {
-        const response = await fetch(url);
+        const response = await fetch(url)
         if (!response.ok) {
-            throw new Error('Failed to fetch logo');
+            throw new Error('Failed to fetch logo')
         }
-        const logoBuffer = await response.arrayBuffer();
-        return logoBuffer;
+        const logoBuffer = await response.arrayBuffer()
+        return logoBuffer
     } catch (error) {
-        console.error(error);
-        throw new Error('Failed to fetch logo');
+        console.error(error)
+        throw new Error('Failed to fetch logo')
     }
 }
