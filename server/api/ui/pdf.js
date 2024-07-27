@@ -2,7 +2,6 @@ import QRCode from 'qrcode'
 import PDFDocument from 'pdfkit'
 import { usePocketbase } from '~/composables/pocketbase'
 import { createError } from 'h3'
-import path from 'path'
 
 export default eventHandler(async (event) => {
     const pb = usePocketbase()
@@ -23,11 +22,20 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const imagePath = path.resolve('app/assets/QRCode.png')
+        const settings = await pb.collection('settings').getOne('settings_123456')
 
-        const logoBuffer = path.resolve(imagePath)
+        const logoUrl = await pb.files.getUrl(settings, settings.sign_image)
 
-        const doc = new PDFDocument({ size: [595.28, 841.89] })
+        const logo = await fetchLogo(logoUrl);
+
+        if (!logo) {
+            return createError({
+                statusCode: 500,
+                statusMessage: 'Failed to fetch logo.',
+            })
+        }
+
+        const doc = new PDFDocument({ size: [595.28, 841.89] });
         res.setHeader('Content-Type', 'application/pdf')
 
         doc.pipe(res)
@@ -112,7 +120,7 @@ export default eventHandler(async (event) => {
             })
             doc.image(qrCodeBuffer, qrX, qrY, { fit: [qrSize, qrSize] })
 
-            doc.image(logoBuffer, {
+            doc.image(logo, {
                 fit: [100, 100],
                 y: y + 100,
                 x: x + 165,
@@ -140,4 +148,18 @@ function calculateStartX(desiredXCenter, text, doc) {
         return desiredXCenter - textWidth / 2
     }
     return 0
+}
+
+async function fetchLogo(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch logo');
+        }
+        const logoBuffer = await response.arrayBuffer();
+        return logoBuffer;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to fetch logo');
+    }
 }
