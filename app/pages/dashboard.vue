@@ -174,7 +174,7 @@
                             <td>
                                 {{
                                     climbingRoute.score !== null
-                                        ? climbingRoute.score + '/5'
+                                        ? climbingRoute.score.toFixed(2) + '/5'
                                         : climbingRoute.score
                                 }}
                             </td>
