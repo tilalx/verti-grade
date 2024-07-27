@@ -1,8 +1,8 @@
 import ExcelJS from 'exceljs'
-import { usePocketbase } from '~/composables/pocketbase'
+import { useServerPocketbase } from '~/composables/serverPocketbase'
 
 export default eventHandler(async (event) => {
-    const pb = usePocketbase()
+    const pb = useServerPocketbase()
     const res = event.node.res
 
     try {

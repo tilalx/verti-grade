@@ -1,15 +1,12 @@
 import QRCode from 'qrcode'
 import PDFDocument from 'pdfkit'
-import { usePocketbase } from '~/composables/pocketbase'
+import { useServerPocketbase } from '~/composables/serverPocketbase'
 import { createError } from 'h3'
 
 export default eventHandler(async (event) => {
-    const pb = usePocketbase()
+    const pb = useServerPocketbase()
 
     const res = event.node.res
-    const req = event.node.req
-
-    const host = req.headers.host || req.socket.remoteAddress
 
     try {
         const paramId = getQuery(event)
@@ -52,7 +49,7 @@ export default eventHandler(async (event) => {
         let entryCount = 0
 
         for (let id of ids) {
-            const climbingRoute = await pb.collection('routes').getOne(id, {})
+            const climbingRoute = await pb.collection('routes').getOne(id)
 
             // Every 8 entries, add a new page
             if (entryCount % 8 === 0 && entryCount > 0) {

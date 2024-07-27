@@ -9,6 +9,10 @@ RUN corepack enable && yarn set version berry && yarn install
 
 COPY app ./app
 
+COPY server ./server
+
+COPY public ./public
+
 RUN yarn build
 
 # --------------> Build pocketbase
