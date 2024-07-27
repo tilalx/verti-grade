@@ -43,7 +43,9 @@
   "release-it": {
     "$schema": "https://unpkg.com/release-it/schema/release-it.json",
     "github": {
-      "release": true
+      "commitMessage": "release ${version}",
+      "release": true,
+      "tagName": "v${version}"
     }
   }
 }
