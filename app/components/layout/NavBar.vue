@@ -21,24 +21,22 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-if="isLoggedIn" v-model="drawer" app temporary class="d-md-none">
-      <v-list>
+    <v-navigation-drawer v-model="drawer" app temporary class="d-md-none">
         <v-list-item to="/">
-          <v-list-item-title>{{ $t('routes.home') }}</v-list-item-title>
+            {{ $t('routes.home') }}
         </v-list-item>
         <v-list-item to="/dashboard">
-          <v-list-item-title>{{ $t('routes.dashboard') }}</v-list-item-title>
+            {{ $t('routes.dashboard') }}
         </v-list-item>
         <v-list-item to="/comments">
-          <v-list-item-title>{{ $t('routes.comments') }}</v-list-item-title>
+          {{ $t('routes.comments') }}
         </v-list-item>
         <v-list-item to="/settings">
-          <v-list-item-title>{{ $t('routes.settings') }}</v-list-item-title>
+          {{ $t('routes.settings') }}
         </v-list-item>
         <v-list-item>
           <UserIcon />
         </v-list-item>
-      </v-list>
     </v-navigation-drawer>
     <v-divider></v-divider>
   </template>
@@ -64,7 +62,9 @@
   let logo_url = ref('')
   
   onMounted(async () => {
-    logo_url.value = await pb.files.getUrl(settings.value, settings.value?.page_logo)
+    if (settings.value && settings.value.page_logo) {
+      logo_url.value = await pb.files.getUrl(settings.value, settings.value.page_logo)
+    }
   })
   
   const logoColor = computed(() => ({
