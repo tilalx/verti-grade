@@ -35,7 +35,7 @@
           {{ $t('routes.settings') }}
         </v-list-item>
         <v-list-item>
-          <UserIcon />
+          <UserIcon v-if="isLoggedIn"/>
         </v-list-item>
     </v-navigation-drawer>
     <v-divider></v-divider>
