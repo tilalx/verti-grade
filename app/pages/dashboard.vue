@@ -57,7 +57,7 @@
                 </v-row>
                 <v-col cols="12" class="d-flex flex-wrap align-center">
                     <!-- Select All Button -->
-                    <v-btn @click="selectAll" color="primary" class="mb-2">
+                    <v-btn @click="selectAll" color="primary" class="mb-2 mx-1">
                         <v-icon>{{
                             areAllSelected()
                                 ? 'mdi-checkbox-marked-outline'
@@ -65,8 +65,8 @@
                         }}</v-icon>
                         {{
                             areAllSelected()
-                                ? $t('actions.select_all')
-                                : $t('actions.deselect_all')
+                                ? $t('actions.deselect_all')
+                                : $t('actions.select_all')
                         }}
                     </v-btn>
                     <v-btn
