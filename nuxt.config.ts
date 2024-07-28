@@ -25,17 +25,30 @@ export default defineNuxtConfig({
     '@mdi/font/css/materialdesignicons.min.css'
   ],
   i18n: {
-    vueI18n: '~/plugins/i18n.js',
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    langDir: 'locales',
     detectBrowserLanguage: {
       useCookie: false,
-      alwaysRedirect: true,
     },
+    locales: [
+      { code: 'en', iso: 'en-US', file: 'en.json', isCatchallLocale: true  },
+      { code: 'de', iso: 'de-DE', file: 'de.json'},
+    ],
   },
   build: {
-    transpile: ['vuetify', 'echarts'],
+    transpile: ['vuetify'],
   },
   imports: {
     autoImport: true,
   },
   compatibilityDate: '2024-07-24',
-})
+  vite: {
+    build: {
+      minify: 'esbuild',
+    },
+    optimizeDeps: {
+      include: ['vuetify'],
+    },
+  },
+});
