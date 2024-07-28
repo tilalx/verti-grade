@@ -5,7 +5,7 @@
                 <div v-bind="props">
                     <v-avatar color="grey" class="mr-4">
                         <v-img v-if="image" :src="image"></v-img>
-                        <v-icon v-else icon="mdi-account-circle"></v-icon>
+                        <v-icon v-else icon="mdi-account-circle" alt="user-icon"></v-icon>
                     </v-avatar>
                 </div>
             </template>
@@ -39,7 +39,7 @@ const pocketbaseAuth = JSON.parse(localStorage.getItem('pocketbase_auth'))
 const user = ref(pocketbaseAuth.model)
 const dialogOpen = ref(false);
 const { t } = useI18n();
-const image = pb.files.getUrl(user.value, user.value.avatar);
+const image = pb.files.getUrl(user.value, user.value.avatar, {'thumb': '100x100'});
 
 const items = [
     {
