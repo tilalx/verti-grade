@@ -104,7 +104,8 @@
         "edit_item": "Edit Item",
         "confirm": "Confirm Delete",
         "select_all": "Select All",
-        "deselect_all": "Deselect All"
+        "deselect_all": "Deselect All",
+        "back_to_home": "Back to Home"
     },
     "notifications": {
         "success": {

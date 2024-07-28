@@ -104,7 +104,8 @@
         "edit_item": "Element bearbeiten",
         "confirm": "Löschen bestätigen",
         "select_all": "Alle auswählen",
-        "deselect_all": "Alle abwählen"
+        "deselect_all": "Alle abwählen",
+        "back_to_home": "Zurück zur Startseite"
     },
     "notifications": {
         "success": {

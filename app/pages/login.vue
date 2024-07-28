@@ -3,9 +3,23 @@
         <v-row justify="center" align="center" class="fill-height">
             <v-col cols="12" sm="8" md="4">
                 <v-card class="pa-4">
+                    <v-card-title class="text-center">
+                        <h2>
+                            {{
+                                view === 'login'
+                                    ? $t('account.login')
+                                    : $t('account.reset_password')
+                            }}
+                        </h2>
+                    </v-card-title>
+                    <v-divider></v-divider>
                     <v-card-text>
                         <!-- Login Form -->
-                        <v-form v-if="view === 'login'" ref="form" @submit.prevent="handlePocketbaseLogin">
+                        <v-form
+                            v-if="view === 'login'"
+                            ref="form"
+                            @submit.prevent="handlePocketbaseLogin"
+                        >
                             <v-text-field
                                 :label="$t('account.email')"
                                 prepend-icon="mdi-account"
@@ -15,8 +29,8 @@
                                 required
                                 outlined
                                 dense
+                                class="mt-4"
                             ></v-text-field>
-
                             <v-text-field
                                 :label="$t('account.password')"
                                 prepend-icon="mdi-lock"
@@ -26,9 +40,20 @@
                                 required
                                 outlined
                                 dense
+                                class="mt-4"
                             ></v-text-field>
-
-                            <v-row class="text-center mt-4">
+                            <v-row class="text-center mt-2 mb-4">
+                                <v-col cols="12" class="text-right">
+                                    <small
+                                        @click="view = 'requestReset'"
+                                        class="reset-link"
+                                        >{{
+                                            $t('account.reset_password')
+                                        }}</small
+                                    >
+                                </v-col>
+                            </v-row>
+                            <v-row class="text-center mt-2">
                                 <v-col cols="12">
                                     <v-btn
                                         :loading="loading"
@@ -38,20 +63,24 @@
                                         elevation="2"
                                         rounded
                                         block
-                                    >{{ $t('account.login') }}</v-btn>
+                                        >{{ $t('account.login') }}</v-btn
+                                    >
                                 </v-col>
+                            </v-row>
+                            <v-row class="text-center mt-2">
                                 <v-col cols="12">
-                                    <v-btn
-                                        text
-                                        @click="view = 'requestReset'"
-                                        block
-                                    >{{ $t('account.reset_password') }}</v-btn>
+                                    <v-btn text @click="navigateHome" block>{{
+                                        $t('actions.back_to_home')
+                                    }}</v-btn>
                                 </v-col>
                             </v-row>
                         </v-form>
-
                         <!-- Request Password Reset Form -->
-                        <v-form v-if="view === 'requestReset'" ref="resetForm" @submit.prevent="handleRequestPasswordReset">
+                        <v-form
+                            v-if="view === 'requestReset'"
+                            ref="resetForm"
+                            @submit.prevent="handleRequestPasswordReset"
+                        >
                             <v-text-field
                                 :label="$t('account.email')"
                                 prepend-icon="mdi-email"
@@ -63,7 +92,6 @@
                                 dense
                                 class="mt-4"
                             ></v-text-field>
-
                             <v-row class="text-center mt-4">
                                 <v-col cols="12">
                                     <v-btn
@@ -73,20 +101,27 @@
                                         elevation="2"
                                         rounded
                                         block
-                                    >{{ $t('actions.submit') }}</v-btn>
+                                        >{{ $t('actions.submit') }}</v-btn
+                                    >
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-btn
-                                        text
-                                        @click="view = 'login'"
-                                        block
-                                    >{{ $t('actions.cancel') }}</v-btn>
+                                    <v-btn text @click="view = 'login'" block>{{
+                                        $t('actions.cancel')
+                                    }}</v-btn>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-btn text @click="navigateHome" block>{{
+                                        $t('actions.back_to_home')
+                                    }}</v-btn>
                                 </v-col>
                             </v-row>
                         </v-form>
-
-                        <!-- Snackbar Notifications -->
-                        <v-snackbar v-model="snackbar" :color="snackbarColor" top timeout="5000">
+                        <v-snackbar
+                            v-model="snackbar"
+                            :color="snackbarColor"
+                            top
+                            timeout="5000"
+                        >
                             {{ snackbarMessage }}
                         </v-snackbar>
                     </v-card-text>
@@ -97,41 +132,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
 const { t } = useI18n()
+const pb = usePocketbase()
+const router = useRouter()
 
 useHead({
-  title: t('page.title.login'),
-  meta: [
-    {
-      name: 'description',
-      content: t('page.content.login'),
-      authRequired: false,
-    },
-  ],
+    title: t('page.title.login'),
+    meta: [
+        {
+            name: 'description',
+            content: t('page.content.login'),
+            authRequired: false,
+        },
+    ],
 })
+
+// Check if the user is already logged in
+if (pb.authStore.isValid) {
+    router.push('/dashboard')
+}
+
+// Set navbar visibility
+router.currentRoute.value.meta.navbar = false
 
 const email = ref('')
 const password = ref('')
 const resetEmail = ref('')
 const loading = ref(false)
-const view = ref('login')  // Tracks the current view
+const view = ref('login') // Tracks the current view
 
 // Snackbar state
 const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('')
 
-const pb = usePocketbase()
-const router = useRouter()
-
-
 const handlePocketbaseLogin = async () => {
     loading.value = true
     try {
-        const authData = await pb.collection('users').authWithPassword(email.value, password.value)
+        const authData = await pb
+            .collection('users')
+            .authWithPassword(email.value, password.value)
         if (authData.error) throw authData.error
 
         showSnackbar(t('notifications.success.login'), 'success')
@@ -155,6 +195,10 @@ const handleRequestPasswordReset = async () => {
     }
 }
 
+const navigateHome = () => {
+    router.push('/')
+}
+
 const showSnackbar = (message, color) => {
     snackbarMessage.value = message
     snackbarColor.value = color
@@ -168,5 +212,12 @@ const showSnackbar = (message, color) => {
     justify-content: center;
     align-items: center;
     height: 100vh;
+}
+
+.reset-link {
+    cursor: pointer;
+    color: #1976d2;
+    text-decoration: underline;
+    font-size: 1rem;
 }
 </style>

@@ -55,77 +55,80 @@
                         ></v-checkbox>
                     </v-col>
                 </v-row>
-                <v-col cols="12" sm="6" class="d-flex align-center">
+                <v-col cols="12" class="d-flex flex-wrap align-center">
                     <!-- Select All Button -->
-                    <v-btn @click="selectAll" color="primary">
+                    <v-btn @click="selectAll" color="primary" class="mb-2">
                         <v-icon>{{
                             areAllSelected()
                                 ? 'mdi-checkbox-marked-outline'
                                 : 'mdi-checkbox-blank-outline'
                         }}</v-icon>
-                        {{ areAllSelected() ? $t('actions.select_all') : $t('actions.deselect_all') }}
+                        {{
+                            areAllSelected()
+                                ? $t('actions.select_all')
+                                : $t('actions.deselect_all')
+                        }}
                     </v-btn>
-                    <div class="mx-2"></div>
                     <v-btn
                         v-if="hasSelection"
                         @click="printSelected"
                         color="success"
+                        class="mb-2 mx-1"
                     >
                         <v-icon>mdi-printer</v-icon>
                     </v-btn>
-                    <div class="mx-2"></div>
                     <v-btn
                         v-if="hasSelection"
                         @click="exportSelectedExcel"
                         color="success"
+                        class="mb-2 mx-1"
                     >
                         <v-icon>mdi-file-excel</v-icon>
                     </v-btn>
-                    <div class="mx-2"></div>
                     <v-btn
                         v-if="hasSelection"
                         @click="exportSelectedJson"
                         color="success"
+                        class="mb-2 mx-1"
                     >
                         <v-icon>mdi-code-json</v-icon>
                     </v-btn>
-                    <div class="mx-2"></div>
                     <v-btn
                         v-if="hasSelection"
                         @click="archiveSelected"
                         color="warning"
+                        class="mb-2 mx-1"
                     >
                         <v-icon>mdi-archive</v-icon>
                     </v-btn>
-                    <div class="mx-2"></div>
+                    <v-btn
+                        v-if="hasSelection"
+                        @click="showDeleteConfirmation = true"
+                        color="error"
+                        class="mb-2 mx-1"
+                    >
+                        <v-icon>mdi-delete</v-icon>
+                    </v-btn>
                     <v-dialog
                         v-model="showDeleteConfirmation"
                         max-width="500px"
-                        class="ml-auto"
                     >
                         <v-card>
-                            <v-card-text>
-                                {{ $t('notifications.deleteMoreItems') }}
-                            </v-card-text>
+                            <v-card-text>{{
+                                $t('notifications.deleteMoreItems')
+                            }}</v-card-text>
                             <v-card-actions>
-                                <v-btn color="primary" @click="deleteSelected"
-                                    >{{ $t('actions.delete') }}</v-btn
-                                >
+                                <v-btn color="error" @click="deleteSelected">{{
+                                    $t('actions.delete')
+                                }}</v-btn>
                                 <v-btn
-                                    color="error"
+                                    color="primary"
                                     @click="showDeleteConfirmation = false"
                                     >{{ $t('actions.cancel') }}</v-btn
                                 >
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
-                    <v-btn
-                        v-if="hasSelection"
-                        @click="showDeleteConfirmation = true"
-                        color="error"
-                    >
-                        <v-icon>mdi-delete</v-icon>
-                    </v-btn>
                 </v-col>
 
                 <v-data-table
@@ -178,7 +181,13 @@
                                         : climbingRoute.score
                                 }}
                             </td>
-                            <td>{{ climbingRoute.archived ? '&#9989;' : '&#10060;'}}</td>
+                            <td>
+                                {{
+                                    climbingRoute.archived
+                                        ? '&#9989;'
+                                        : '&#10060;'
+                                }}
+                            </td>
                             <td>
                                 <EditRoute
                                     @closed="reloadRoutes"
@@ -264,14 +273,13 @@ const locations = reactive([
 
 const getClimbingRoutes = async () => {
     try {
-        const climbingRoutesData = await pb
-            .collection('routes')
-            .getFullList({
-                sort: '-screw_date',
-            })
+        const climbingRoutesData = await pb.collection('routes').getFullList({
+            sort: '-screw_date',
+        })
 
-        const averageRating = await pb.collection('averageRating').getFullList({
-        });
+        const averageRating = await pb
+            .collection('averageRating')
+            .getFullList({})
 
         if (!climbingRoutesData || !averageRating) {
             console.error('Error fetching climbing routes')
@@ -279,9 +287,7 @@ const getClimbingRoutes = async () => {
         }
 
         for (const route of climbingRoutesData) {
-            const rating = averageRating.find(
-                (rate) => rate.id === route.id,
-            )
+            const rating = averageRating.find((rate) => rate.id === route.id)
             if (rating) {
                 route.score = rating.average_rating
             }
@@ -302,8 +308,7 @@ const filteredClimbingRoutes = computed(() => {
     if (selectedDifficulty.value) {
         const selectedDifficultyInt = parseInt(selectedDifficulty.value)
         filteredRoutes = filteredRoutes.filter(
-            (route) =>
-                parseInt(route.difficulty) === selectedDifficultyInt,
+            (route) => parseInt(route.difficulty) === selectedDifficultyInt,
         )
     }
     if (selectedLocation.value) {
@@ -313,13 +318,13 @@ const filteredClimbingRoutes = computed(() => {
     }
     if (searchRouteName.value) {
         filteredRoutes = filteredRoutes.filter((route) =>
-            route.name.toLowerCase().includes(searchRouteName.value.toLowerCase()),
+            route.name
+                .toLowerCase()
+                .includes(searchRouteName.value.toLowerCase()),
         )
     }
     if (!displayArchived.value) {
-        filteredRoutes = filteredRoutes.filter(
-            (route) => !route.archived,
-        )
+        filteredRoutes = filteredRoutes.filter((route) => !route.archived)
     }
     return filteredRoutes
 })
@@ -329,9 +334,7 @@ const hasSelection = computed(() => {
 })
 
 const selectedCount = computed(() => {
-    return filteredClimbingRoutes.value.filter(
-        (route) => route.selected,
-    ).length
+    return filteredClimbingRoutes.value.filter((route) => route.selected).length
 })
 
 const selectedDifficultyValue = computed(() => {
