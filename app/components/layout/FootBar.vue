@@ -24,6 +24,9 @@
                     </div>
                 </v-col>
             </v-row>
+            <v-col class="text-center mt-4" cols="12">
+                &copy; {{ new Date().getFullYear() }} — <strong><a href="https://github.com/tilalx/verti-grade" target="_blank">Verti-Grade</a></strong>.
+            </v-col>
             <v-row justify="center" align="center">
                 <v-col cols="auto">
                     <div class="text-center">

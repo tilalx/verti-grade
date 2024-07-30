@@ -21,7 +21,7 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" app temporary class="d-md-none">
+    <v-navigation-drawer v-model="drawer" location="right" app temporary class="d-md-none">
         <v-list-item to="/">
             {{ $t('routes.home') }}
         </v-list-item>

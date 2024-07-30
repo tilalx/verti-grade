@@ -53,7 +53,6 @@
                                           : null
                                 }}
                             </td>
-                            <td>{{ comment.location }}</td>
                             <td>{{ comment.comment }}</td>
                             <td>{{ formatDate(comment.created) }}</td>
                             <td>
@@ -102,7 +101,6 @@ const headers = ref([
   { title: t('climbing.routename'), value: 'routeName' },
   { title: t('ratings.score'), value: 'rating' },
   { title: t('climbing.difficulty'), value: 'difficulty' },
-  { title: t('climbing.location'), value: 'location' },
   { title: t('climbing.comment'), value: 'comment' },
   { title: t('table.created_at'), value: 'created_at' },
   { title: t('table.actions'), value: 'actions' },

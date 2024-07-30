@@ -43,11 +43,14 @@
                             v-model="routeData.comment"
                             :label="$t('climbing.comment')"
                         ></v-textarea>
-                        <v-text-field
+                        <v-combobox
+                            :label="$t('routes.route_setter')"
+                            multiple
+                            chips
                             v-model="routeData.creator"
-                            :label="$t('routes.creator_split')"
+                            :items="setterItems"
                             required
-                        ></v-text-field>
+                        ></v-combobox>
                         <v-text-field
                             v-model="routeData.screw_date"
                             :label="$t('routes.screwed_at')"
@@ -110,6 +113,22 @@ const difficulty_sign = reactive([
     ])
 
 const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString())
+const setterItems = ref([])
+
+function getSetters() {
+    pb.collection('routes')
+        .getFullList({
+            fields: 'creator',
+            sort: '-created',
+        })
+        .then((querySnapshot) => {
+            const uniqueCreators = Array.from(
+                new Set(querySnapshot.flatMap((doc) => doc.creator))
+            );
+            setterItems.value = uniqueCreators
+        })
+
+}
 
 const props = defineProps({
     route_id: {
@@ -149,9 +168,9 @@ const isFormValid = computed(() => {
 async function openPopup() {
     const response = await fetchClimbingRoute()
     response.screw_date = formatDateToYYYYMMDD(response.screw_date)
-    response.creator = response.creator.join(',')
     routeData.value = response
     popupOpen.value = true
+    getSetters()
 }
 
 async function fetchClimbingRoute() {
@@ -179,7 +198,6 @@ async function saveChanges() {
         routeData.value.screw_date = formatDateToYYYYMMDD(
             routeData.value.screw_date,
         )
-        routeData.value.creator = routeData.value.creator.split(',')
 
         await pb.collection('routes').update(routeData.value.id, {
             name: routeData.value.name,

@@ -55,13 +55,14 @@
                                         v-model="routeComment"
                                         :counter="255"
                                     ></v-textarea>
-
-                                    <v-text-field
-                                        label="Creator split by ,"
+                                    <v-combobox
+                                        :label="$t('routes.route_setter')"
+                                        multiple
+                                        chips
                                         v-model="routeCreator"
-                                        :rules="nameRules"
+                                        :items="setterItems"
                                         required
-                                    ></v-text-field>
+                                    ></v-combobox>
                                     <v-text-field
                                         v-model="routeScrewDate"
                                         label="Screw Date"
@@ -117,10 +118,11 @@ const routeDifficultySign = ref('')
 const routeLocation = ref('')
 const routeType = ref('')
 const routeComment = ref('')
-const routeCreator = ref('')
+const routeCreator = ref([])
 const routeScrewDate = ref('')
 const routeColor = ref('')
 const form = ref(null)
+const setterItems = ref([])
 
 const nameRules = [
     (v) => !!v || t('notifications.error.nameRequired'),
@@ -143,10 +145,26 @@ const isFormComplete = computed(
 
 function openPopup() {
     showPopup.value = true
+    getSetters()
 }
 
 function closePopup() {
     showPopup.value = false
+}
+
+function getSetters() {
+    pb.collection('routes')
+        .getFullList({
+            fields: 'creator',
+            sort: '-created',
+        })
+        .then((querySnapshot) => {
+            const uniqueCreators = Array.from(
+                new Set(querySnapshot.flatMap((doc) => doc.creator))
+            );
+            setterItems.value = uniqueCreators
+        })
+
 }
 
 async function createRoute() {
@@ -162,7 +180,7 @@ async function createRoute() {
         location: routeLocation.value,
         type: routeType.value,
         comment: routeComment.value || '',
-        creator: routeCreator.value.split(','),
+        creator: routeCreator.value || '',
         screw_date: routeScrewDate.value,
         color: routeColor.value,
     }

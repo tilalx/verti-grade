@@ -20,8 +20,16 @@
                             class="mt-2"
                         ></v-select>
                     </v-col>
-
-                    <!-- Column for the Location select -->
+                    <v-col cols="6" sm="3">
+                        <v-select
+                            :label="$t('climbing.type')"
+                            :items="types"
+                            v-model="selectedType"
+                            item-title="text"
+                            item-value="value"
+                            class="mt-2"
+                        ></v-select>
+                    </v-col>
                     <v-col cols="6" sm="3">
                         <v-select
                             :label="$t('climbing.location')"
@@ -59,10 +67,18 @@
                                           : null
                                 }}
                             </td>
-                            <td>{{ climbingRoute.location }}</td>
-                            <td>{{ climbingRoute.type }}</td>
                             <td>{{ climbingRoute.comment }}</td>
-                            <td>{{ climbingRoute.creator.join(',') }}</td>
+                            <td>
+                                <div class="d-flex ga-1">
+                                    <v-chip
+                                        v-for="creator in climbingRoute.creator"
+                                        :key="creator"
+                                        size="small"
+                                    >
+                                        {{ creator }}
+                                    </v-chip>
+                                </div>
+                            </td>
                             <td>{{ formatDate(climbingRoute.screw_date) }}</td>
                             <td>
                                 <RouteDetails
@@ -99,14 +115,13 @@ const pb = usePocketbase()
 const climbingRoutes = ref([])
 const selectedDifficulty = ref('')
 const selectedLocation = ref('')
+const selectedType = ref('')
 const searchRouteName = ref('')
 
 const headers = ref([
   { title: t('climbing.color'), value: 'color' },
   { title: t('climbing.routename'), value: 'name' },
   { title: t('climbing.difficulty'), value: 'difficulty' },
-  { title: t('climbing.location'), value: 'location' },
-  { title: t('climbing.type'), value: 'type' },
   { title: t('climbing.comment'), value: 'comment' },
   { title: t('climbing.creators'), value: 'creator' },
   { title: t('table.created_at'), value: 'screw_date' },
@@ -131,6 +146,12 @@ const locations = ref([
   { text: t('filter.all'), value: '' },
   { text: 'Hanau', value: 'Hanau' },
   { text: 'Gelnhausen', value: 'Gelnhausen' },
+])
+
+const types = ref([
+  { text: t('filter.all'), value: '' },
+  { text: t('routes.types.boulder'), value: 'Boulder' },
+  { text: t('routes.types.route'), value: 'Route' },
 ])
 
 const fetchClimbingRoutes = async () => {
@@ -180,6 +201,11 @@ const filteredClimbingRoutes = computed(() => {
   if (selectedLocation.value) {
     filteredRoutes = filteredRoutes.filter(
       (route) => route.location === selectedLocation.value
+    )
+  }
+  if (selectedType.value) {
+    filteredRoutes = filteredRoutes.filter(
+      (route) => route.type === selectedType.value
     )
   }
   if (searchRouteName.value) {

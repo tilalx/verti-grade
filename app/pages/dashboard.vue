@@ -18,7 +18,7 @@
             <v-col>
                 <v-row>
                     <!-- Column for the Route Name search -->
-                    <v-col cols="6" sm="3">
+                    <v-col cols="12" sm="3">
                         <v-text-field
                             :label="$t('climbing.searchRouteName')"
                             v-model="searchRouteName"
@@ -36,7 +36,16 @@
                         ></v-select>
                     </v-col>
 
-                    <!-- Column for the Location select -->
+                    <v-col cols="6" sm="3">
+                        <v-select
+                            :label="$t('climbing.type')"
+                            :items="types"
+                            v-model="selectedType"
+                            item-title="text"
+                            item-value="value"
+                            class="mt-2"
+                        ></v-select>
+                    </v-col>                     
                     <v-col cols="6" sm="3">
                         <v-select
                             :label="$t('climbing.location')"
@@ -55,6 +64,7 @@
                         ></v-checkbox>
                     </v-col>
                 </v-row>
+                <v-row>
                 <v-col cols="12" class="d-flex flex-wrap align-center">
                     <!-- Select All Button -->
                     <v-btn @click="selectAll" color="primary" class="mb-2 mx-1">
@@ -130,6 +140,7 @@
                         </v-card>
                     </v-dialog>
                 </v-col>
+            </v-row>
 
                 <v-data-table
                     :headers="headers"
@@ -163,17 +174,20 @@
                                           : null
                                 }}
                             </td>
+                            <td>{{ climbingRoute.comment }}</td>
+                            <td>
+                                <div class="d-flex ga-1">
+                                    <v-chip
+                                        v-for="creator in climbingRoute.creator"
+                                        :key="creator"
+                                        size="small"
+                                    >
+                                        {{ creator }}
+                                    </v-chip>
+                                </div>
+                            </td>
                             <td>{{ climbingRoute.location }}</td>
                             <td>{{ climbingRoute.type }}</td>
-                            <td>{{ climbingRoute.comment }}</td>
-                            <td>{{ climbingRoute.creator.join(',') }}</td>
-                            <td>
-                                {{
-                                    new Date(
-                                        climbingRoute.screw_date,
-                                    ).toLocaleDateString('de-DE')
-                                }}
-                            </td>
                             <td>
                                 {{
                                     climbingRoute.score !== null
@@ -186,6 +200,13 @@
                                     climbingRoute.archived
                                         ? '&#9989;'
                                         : '&#10060;'
+                                }}
+                            </td>
+                            <td>
+                                {{
+                                    new Date(
+                                        climbingRoute.screw_date,
+                                    ).toLocaleDateString('de-DE')
                                 }}
                             </td>
                             <td>
@@ -231,6 +252,7 @@ const climbingRoutes = ref([])
 const selectedDifficulty = ref('')
 const selectedLocation = ref('')
 const searchRouteName = ref('')
+const selectedType = ref('')
 const selected = ref([])
 const displayArchived = ref(false)
 const pb = usePocketbase()
@@ -269,6 +291,12 @@ const locations = reactive([
     { text: t('filter.all'), value: '' },
     { text: 'Hanau', value: 'Hanau' },
     { text: 'Gelnhausen', value: 'Gelnhausen' },
+])
+
+const types = reactive([
+    { text: t('filter.all'), value: '' },
+    { text: t('routes.types.boulder'), value: 'Boulder' },
+    { text: t('routes.types.route'), value: 'Route' },
 ])
 
 const getClimbingRoutes = async () => {
@@ -314,6 +342,11 @@ const filteredClimbingRoutes = computed(() => {
     if (selectedLocation.value) {
         filteredRoutes = filteredRoutes.filter(
             (route) => route.location === selectedLocation.value,
+        )
+    }
+    if (selectedType.value) {
+        filteredRoutes = filteredRoutes.filter(
+            (route) => route.type === selectedType.value,
         )
     }
     if (searchRouteName.value) {
