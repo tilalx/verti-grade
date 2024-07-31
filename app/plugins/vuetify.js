@@ -2,9 +2,11 @@
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-
+import { en, de } from 'vuetify/locale'
 
 export default defineNuxtPlugin((nuxtApp) => {
+    // Get the current i18n locale
+    const { $i18n } = nuxtApp
 
     const darkTheme = {
         dark: true,
@@ -38,7 +40,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     // Create Vuetify instance with your theme
     const vuetify = createVuetify({
-        ssr: true,
         components,
         directives,
         theme: {
@@ -46,6 +47,14 @@ export default defineNuxtPlugin((nuxtApp) => {
             themes: {
                 dark: darkTheme,
                 light: lightTheme,
+            },
+        },
+        locale: {
+            locale: $i18n.locale.value,
+            fallback: 'en',
+            messages: {
+                en,
+                de,
             },
         },
     })

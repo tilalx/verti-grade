@@ -9,11 +9,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { getTheme } from './composables/getTheme';
 import NavBar from '@/components/layout/NavBar.vue'
 import FootBar from '@/components/layout/FootBar.vue'
 
 const pb = usePocketbase()
+const theme = getTheme()
 const isLoggedIn = ref(pb.authStore.isValid)
 let intervalId = null
 
@@ -66,6 +67,7 @@ const setFavicon = () => {
     }
     link.href = favUrl;
 }
+
 
 // When the component is mounted, check the session immediately
 onMounted(async () => {
