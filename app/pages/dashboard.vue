@@ -263,13 +263,13 @@ const headers = reactive([
     { title: t('climbing.color'), value: 'color' },
     { title: t('climbing.routename'), value: 'name' },
     { title: t('climbing.difficulty'), value: 'difficulty' },
-    { title: t('climbing.location'), value: 'location' },
-    { title: t('climbing.type'), value: 'type' },
     { title: t('climbing.comment'), value: 'comment' },
     { title: t('climbing.creators'), value: 'creator' },
-    { title: t('table.created_at'), value: 'screw_date' },
+    { title: t('climbing.location'), value: 'location' },
+    { title: t('climbing.type'), value: 'type' },
     { title: t('ratings.score'), value: 'rating' },
     { title: t('climbing.archived'), value: 'archived' },
+    { title: t('table.created_at'), value: 'screw_date' },
     { title: t('table.actions'), value: 'actions' },
 ])
 
