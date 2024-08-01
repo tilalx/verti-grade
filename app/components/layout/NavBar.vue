@@ -2,13 +2,13 @@
     <v-app-bar app dense color="background" v-if="$route.meta.navbar !== false">
         <v-toolbar-title>
             <router-link to="/">
-                <img
+                <NuxtImg
                     v-if="logo_url"
                     :src="logo_url"
                     alt="Logo"
                     :style="logoColor"
                 />
-                <img
+                <NuxtImg
                     v-else
                     src="@/assets/DAVLogoHanau.png"
                     alt="Logo"

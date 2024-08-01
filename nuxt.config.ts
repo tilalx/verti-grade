@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   ssr: false,
-  modules: ['@nuxtjs/i18n'],
+  modules: ['@nuxtjs/i18n', '@nuxt/image'],
   plugins: [
     '~/plugins/vuetify.js',
   ],
@@ -35,6 +35,9 @@ export default defineNuxtConfig({
       { code: 'en', iso: 'en-US', file: 'en.json', isCatchallLocale: true  },
       { code: 'de', iso: 'de-DE', file: 'de.json'},
     ],
+  },
+  image: {
+    formats: ['avif', 'webp'],
   },
   build: {
     transpile: ['vuetify'],

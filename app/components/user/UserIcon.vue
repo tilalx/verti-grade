@@ -4,7 +4,7 @@
             <template v-slot:activator="{ props }">
                 <div v-bind="props">
                     <v-avatar color="grey" class="mr-4">
-                        <v-img v-if="image" :src="image"></v-img>
+                        <NuxtImg v-if="image" :src="image"></NuxtImg>
                         <v-icon v-else icon="mdi-account-circle" alt="user-icon"></v-icon>
                     </v-avatar>
                 </div>

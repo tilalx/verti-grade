@@ -11,12 +11,12 @@
                                 class="d-flex align-center justify-center"
                                 style="height: 150px"
                             >
-                                <v-img
+                                <NuxtImg
                                     :src="pageLogo"
                                     height="100"
                                     contain
                                     @error="onImageError('logo')"
-                                ></v-img>
+                                ></NuxtImg>
                             </div>
                             <v-file-input
                                 variant="underlined"
@@ -39,11 +39,11 @@
                                 class="d-flex align-center justify-center"
                                 style="height: 150px"
                             >
-                                <v-img
+                                <NuxtImg
                                     :src="pageIcon"
                                     height="100"
                                     contain
-                                ></v-img>
+                                ></NuxtImg>
                             </div>
                             <v-file-input
                                 variant="underlined"
@@ -66,11 +66,11 @@
                                 class="d-flex align-center justify-center"
                                 style="height: 150px"
                             >
-                                <v-img
+                                <NuxtImg
                                     :src="signImage"
                                     height="100"
                                     contain
-                                ></v-img>
+                                ></NuxtImg>
                             </div>
                             <v-file-input
                                 variant="underlined"
