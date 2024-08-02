@@ -36,7 +36,7 @@ COPY ./pocketbase/pb_migrations ./pb_migrations
 FROM node:22.5.1-bookworm-slim
 
 # Install Nginx
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update && apt-get install -y nginx ca-certificates
 
 WORKDIR /app
 
