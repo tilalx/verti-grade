@@ -10,7 +10,7 @@
                 />
                 <NuxtImg
                     v-else
-                    src="@/assets/DAVLogoHanau.png"
+                    src="/DAVLogoHanau.png"
                     alt="Logo"
                     :style="logoColor"
                 />

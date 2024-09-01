@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   ssr: false,
-  modules: ['@nuxtjs/i18n', '@nuxt/image'],
+  modules: ['@nuxtjs/i18n', '@nuxt/image', '@vite-pwa/nuxt'],
   plugins: [
     '~/plugins/vuetify.js',
   ],
@@ -32,9 +32,50 @@ export default defineNuxtConfig({
       useCookie: false,
     },
     locales: [
-      { code: 'en', iso: 'en-US', file: 'en.json', isCatchallLocale: true  },
-      { code: 'de', iso: 'de-DE', file: 'de.json'},
+      { code: 'en', language: 'en-US', file: 'en.json', isCatchallLocale: true  },
+      { code: 'de', language: 'de-DE', file: 'de.json'},
     ],
+  },
+  pwa: {
+    manifest: {
+      name: 'Verti-Grade',
+      short_name: 'Verti-Grade',
+      description: 'Tool for Documenting and Rating of Climbing Routes',
+      theme_color: '#0f172a',
+      background_color: '#0f172a',
+      display: 'standalone',
+      start_url: '/',
+      lang: 'en',
+      icons: [
+        {
+          src: 'icon.png',
+          sizes: '512x512',
+          type: 'image/png',
+        },
+      ],
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,jpg}'],
+      runtimeCaching: [
+        {
+          urlPattern: /\/api\/.*/,
+          handler: 'NetworkFirst', 
+          options: {
+            cacheName: 'api-cache',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24,
+            },
+            networkTimeoutSeconds: 10,
+          },
+        },
+      ],
+    },
+    devOptions: {
+      enabled: true, 
+      type: "module"
+    }
   },
   image: {
     formats: ['avif', 'webp'],

@@ -1,4 +1,5 @@
 <template>
+    <NuxtPwaManifest />
     <v-app class="fontbody">
         <NavBar :loggedIn="isLoggedIn" :settings="settings" />
         <v-main>

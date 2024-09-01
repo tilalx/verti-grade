@@ -11,8 +11,6 @@
 </template>
 
 <script setup>
-import axios from 'axios'
-
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
 
@@ -25,10 +23,10 @@ async function checkNewVersion(currentVersion, repoOwner, repoName) {
     const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
 
     try {
-        const response = await axios.get(apiUrl)
-        const latestVersion = response.data.name
-        const draft = response.data.draft
-        const prerelease = response.data.prerelease
+        const response = await $fetch(apiUrl)
+        const latestVersion = response.name
+        const draft = response.draft
+        const prerelease = response.prerelease
 
         if (draft || prerelease) {
             return false
