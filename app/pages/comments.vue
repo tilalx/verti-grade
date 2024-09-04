@@ -136,8 +136,8 @@ const getComments = async () => {
     ...comment,
     routeName: comment.expand.route_id.name,
     location: comment.expand.route_id.location,
-    difficulty: comment.expand.route_id.difficulty,
-    difficulty_sign: comment.expand.route_id.difficulty_sign,
+    difficulty: comment.difficulty,
+    difficulty_sign: comment.difficulty_sign,
   }))
 }
 

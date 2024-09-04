@@ -56,46 +56,47 @@ export default eventHandler(async (event) => {
                 doc.addPage()
             }
 
-            const x = entryCount % 2 === 0 ? 25 : 310 // Position for 2 columns
-            const y = (Math.floor(entryCount / 2) % 4) * 180 + 40 // Position for 4 rows
+            const x = entryCount % 2 === 0 ? 20 : 315 // Position for 2 columns
+            const y = (Math.floor(entryCount / 2) % 4) * 193 + 30 // Position for 4 rows
 
             // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
             // add color
-            doc.circle(x + 80, y + 5, 10).fill(climbingRoute.color)
+            doc.circle(x + 80, y + 15, 10).fill(climbingRoute.color)
 
             //set text color black
             doc.fillColor('black')
 
             // Set text positions
             const textOptions = { align: 'left', width: 200 }
+            const difficulty = climbingRoute.difficulty + (climbingRoute.difficulty_sign ? (climbingRoute.difficulty_sign === '' ? '' : '+') : '-')
             doc.text(
                 climbingRoute.name,
                 calculateStartX(x + 80, climbingRoute.name, doc),
-                y + 25,
+                y + 35,
                 textOptions,
             )
-            doc.fontSize(30).text(
-                climbingRoute.difficulty + climbingRoute.difficulty_sign,
-                x + 70,
-                y + 45,
+            doc.text(
+                difficulty,
+                calculateStartX(x + 80, difficulty, doc, 45),
+                y + 55,
                 textOptions,
             )
             doc.text(
                 climbingRoute.comment,
                 calculateStartX(x + 80, climbingRoute.comment, doc),
-                y + 75,
+                y + 100,
                 textOptions,
             )
 
             // Search for first and last name based on creatorId
-            const creators = climbingRoute.creators || []
+            const creators = climbingRoute.creator || []
             if (Array.isArray(creators)) {
                 doc.fontSize(8).text(
                     creators.join(' / '),
                     calculateStartX(x + 80, creators.join(' / '), doc),
-                    y + 120,
+                    y + 130,
                     textOptions,
                 )
             }
@@ -105,7 +106,7 @@ export default eventHandler(async (event) => {
             doc.fontSize(8).text(
                 screw_date,
                 calculateStartX(x + 80, screw_date, doc),
-                y + 140,
+                y + 145,
                 textOptions,
             )
 
@@ -141,10 +142,10 @@ export default eventHandler(async (event) => {
 })
 
 // Function to calculate the starting X-coordinate for centered text
-function calculateStartX(desiredXCenter, text, doc) {
+function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
     if (text !== null) {
         // Choose a font and font size for measuring
-        doc.font('Helvetica').fontSize(12)
+        doc.font('Helvetica').fontSize(fontSize)
 
         // Measure the width of the text
         const textWidth = doc.widthOfString(text)
