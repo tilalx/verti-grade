@@ -35,7 +35,7 @@
     "vite": "^5.4.2",
     "vite-plugin-vuetify": "^2.0.4",
     "vue": "^3.4.38",
-    "vuetify": "3.7.1",
+    "vuetify": "3.7.2",
     "vuetify-nuxt-module": "^0.18.0"
   },
   "packageManager": "yarn@4.3.1",
