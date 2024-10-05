@@ -4,33 +4,44 @@
             <v-row justify="center" align="center">
                 <v-col cols="auto">
                     <div class="text-center">
-                            <a
-                                v-if="settings.privacy_url"
-                                :href="settings.privacy_url"
-                                class="footer-link"
-                                target="_blank"
-                            >
-                                {{ $t('legal.privacy') }}
-                            </a>
-                            <span v-if="settings.privacy_url" class="footer-separator">|</span>
-                            <a
-                                v-if="settings.imprint_url"
-                                :href="settings.imprint_url"
-                                class="footer-link"
-                                target="_blank"
-                            >
-                                {{ $t('legal.imprint') }}
-                            </a>
+                        <a
+                            v-if="settings.privacy_url"
+                            :href="settings.privacy_url"
+                            class="footer-link"
+                            target="_blank"
+                        >
+                            {{ $t('legal.privacy') }}
+                        </a>
+                        <span
+                            v-if="settings.privacy_url"
+                            class="footer-separator"
+                            >|</span
+                        >
+                        <a
+                            v-if="settings.imprint_url"
+                            :href="settings.imprint_url"
+                            class="footer-link"
+                            target="_blank"
+                        >
+                            {{ $t('legal.imprint') }}
+                        </a>
                     </div>
                 </v-col>
             </v-row>
             <v-col class="text-center mt-4" cols="12">
-                &copy; {{ new Date().getFullYear() }} — <strong><a href="https://github.com/tilalx/verti-grade" target="_blank">Verti-Grade</a></strong>.
+                &copy; {{ currentYear }} —
+                <strong
+                    ><a
+                        href="https://github.com/tilalx/verti-grade"
+                        target="_blank"
+                        >Verti-Grade</a
+                    ></strong
+                >.
             </v-col>
             <v-row justify="center" align="center">
                 <v-col cols="auto">
                     <div class="text-center">
-                        <v-chip color="success" v-if="health.code === 200">{{
+                        <v-chip color="success" v-if="health?.code === 200">{{
                             $t('notifications.success.health')
                         }}</v-chip>
                         <v-chip color="error" v-else>{{
@@ -50,14 +61,29 @@
 </template>
 
 <script setup>
+// Import required Vue and Nuxt composables
+import { ref, computed, toRefs } from 'vue'
+
+const pb = useServerPocketbase()
+
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
 
-const pb = usePocketbase()
+const currentYear = computed(() => new Date().getFullYear())
 
-const health = await pb.health.check()
+const { data: health, error: healthError } = await useAsyncData(
+    'health',
+    async () => {
+        return await pb.health.check() // Fetch health status from Pocketbase
+    },
+)
 
-const online = await pb.send('/api/online')
+const { data: online, error: onlineError } = await useAsyncData(
+    'online',
+    async () => {
+        return await pb.send('/api/online') // Fetch online status from API
+    },
+)
 
 const props = defineProps({
     settings: {
@@ -67,17 +93,24 @@ const props = defineProps({
 })
 
 const { settings } = toRefs(props)
+
+if (healthError.value || onlineError.value) {
+    console.error('Error fetching health or online status', {
+        healthError,
+        onlineError,
+    })
+}
 </script>
 
 <style scoped>
 .footer-link {
     margin: 0 10px;
-    text-decoration: none; /* Removes underline */
-    color: inherit; /* Inherits the color from the parent element */
+    text-decoration: none;
+    color: inherit;
 }
 
 .footer-link:hover {
-    text-decoration: none; /* Keeps the underline removed on hover */
+    text-decoration: none;
 }
 
 .footer-separator {

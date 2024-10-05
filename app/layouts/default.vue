@@ -1,80 +1,80 @@
 <template>
     <NavBar :loggedIn="isLoggedIn" :settings="settings" />
-        <VMain>
-            <NuxtPage />
-        </VMain>
+    <VMain>
+        <NuxtPage />
+    </VMain>
     <FootBar :settings="settings" />
 </template>
 
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import NavBar from '~/components/layout/NavBar.vue'
 import FootBar from '~/components/layout/FootBar.vue'
 
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 let intervalId = null
+const settings = ref({})
 
 const getSettings = async () => {
     try {
-        const settings = await pb
-            .collection('settings')
-            .getOne('settings_123456')
-        return settings
+        return await pb.collection('settings').getOne('settings_123456')
     } catch (error) {
         if (error.data && error.data.code === 404) {
             console.log('Settings not found, creating new settings')
             try {
-                const newSettings = await pb.collection('settings').create({
+                return await pb.collection('settings').create({
                     id: 'settings_123456',
                 })
-                return newSettings
             } catch (createError) {
                 console.error('Error creating new settings:', createError)
                 throw createError
             }
-        } else {
-            console.error('An error occurred:', error)
-            throw error
         }
+        console.error('An error occurred:', error)
+        throw error
     }
 }
 
-const settings = await getSettings()
+const refreshSession = async () => {
+    try {
+        await pb.authStore.refresh()
+        isLoggedIn.value = pb.authStore.isValid
+    } catch (error) {
+        isLoggedIn.value = false
+        console.error('Error refreshing session:', error)
+    }
+}
+
+const setFavicon = () => {
+    if (!settings.value?.page_icon) return
+    const favUrl = pb.files.getUrl(settings.value, settings.value.page_icon)
+    let link = document.querySelector("link[rel~='icon']") || document.createElement('link')
+    link.rel = 'icon'
+    link.href = favUrl
+    document.head.appendChild(link)
+}
 
 const checkSession = async () => {
     isLoggedIn.value = pb.authStore.isValid
 }
 
-const refreshSession = async () => {
-    try {
-        isLoggedIn.value = pb.authStore.isValid
-        pb.authStore.refresh()
-    } catch (error) {
-        isLoggedIn.value = false
-    }
-}
-
-const setFavicon = () => {
-    if (!settings?.page_icon) return
-    const favUrl = pb.files.getUrl(settings, settings.page_icon)
-    let link = document.querySelector("link[rel~='icon']")
-    if (!link) {
-        link = document.createElement('link')
-        link.rel = 'icon'
-        document.getElementsByTagName('head')[0].appendChild(link)
-    }
-    link.href = favUrl
-}
-
-// When the component is mounted, check the session immediately
 onMounted(async () => {
-    await refreshSession()
+    try {
+        settings.value = await getSettings()
+        await refreshSession()
+        setFavicon()
+        
+        intervalId = setInterval(checkSession, 600)
+    } catch (error) {
+        // Handle error (e.g., display notification to user)
+        console.error('Error during initialization:', error)
+    }
 })
 
-onMounted(() => {
-    setFavicon()
-    intervalId = setInterval(() => {
-        checkSession()
-    }, 600)
+onBeforeUnmount(() => {
+    if (intervalId) {
+        clearInterval(intervalId)
+    }
 })
 </script>
