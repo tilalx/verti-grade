@@ -14,68 +14,65 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  ssr: false,
-  modules: ['@nuxtjs/i18n', '@nuxt/image', '@vite-pwa/nuxt'],
-  plugins: [
-    '~/plugins/vuetify.js',
-  ],
+  ssr: true,
+  modules: ['@nuxtjs/i18n', '@nuxt/image', 'vuetify-nuxt-module'],
   css: [
     '~/assets/css/main.css',
-    'vuetify/lib/styles/main.sass',
     '@mdi/font/css/materialdesignicons.min.css'
   ],
+  vuetify: {
+    moduleOptions: {
+      ssrClientHints: {
+        reloadOnFirstRequest: false, // Reloads the page on first request to apply the theme
+        prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
+        viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
+        prefersColorSchemeOptions: {
+          cookieName: 'color-scheme', // Stores user's preferred color scheme
+          useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
+        },
+      }
+    },  
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'light',
+        themes: {
+          light: {
+            colors: {
+              background: '#FFFFFF',
+              surface: '#F5F5F5',
+              primary: '#58ab27',
+              secondary: '#3F51B5',
+              accent: '#546E7A',
+              error: '#F44336',
+              info: '#2196F3',
+              success: '#4CAF50',
+              warning: '#FFC107',
+            },
+          },
+          dark: {
+            colors: {
+              background: '#0f172a',
+              surface: '#1e293b',
+              primary: '#58ab27',
+              secondary: '#1A237E',
+              accent: '#263238',
+              error: '#D32F2F',
+              info: '#2979FF',
+              success: '#2E7D32',
+              warning: '#FF6F00',
+            },
+          },
+        },
+      },
+    },
+  },
   i18n: {
+    vueI18n: './app/config/i18n.config.ts',
     strategy: 'no_prefix',
     defaultLocale: 'en',
-    langDir: 'locales',
     detectBrowserLanguage: {
       useCookie: false,
     },
-    locales: [
-      { code: 'en', language: 'en-US', file: 'en.json', isCatchallLocale: true  },
-      { code: 'de', language: 'de-DE', file: 'de.json'},
-    ],
-  },
-  pwa: {
-    manifest: {
-      name: 'Verti-Grade',
-      short_name: 'Verti-Grade',
-      description: 'Tool for Documenting and Rating of Climbing Routes',
-      theme_color: '#0f172a',
-      background_color: '#0f172a',
-      display: 'standalone',
-      start_url: '/',
-      lang: 'en',
-      icons: [
-        {
-          src: 'icon.png',
-          sizes: '512x512',
-          type: 'image/png',
-        },
-      ],
-    },
-    workbox: {
-      navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,jpg}'],
-      runtimeCaching: [
-        {
-          urlPattern: /\/api\/.*/,
-          handler: 'NetworkFirst', 
-          options: {
-            cacheName: 'api-cache',
-            expiration: {
-              maxEntries: 100,
-              maxAgeSeconds: 60 * 60 * 24,
-            },
-            networkTimeoutSeconds: 10,
-          },
-        },
-      ],
-    },
-    devOptions: {
-      enabled: true, 
-      type: "module"
-    }
   },
   image: {
     formats: ['avif', 'webp'],
