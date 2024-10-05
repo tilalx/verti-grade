@@ -23,7 +23,7 @@ export default defineNuxtConfig({
   vuetify: {
     moduleOptions: {
       ssrClientHints: {
-        reloadOnFirstRequest: false, // Reloads the page on first request to apply the theme
+        reloadOnFirstRequest: true, // Reloads the page on first request to apply the theme
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
         prefersColorSchemeOptions: {
