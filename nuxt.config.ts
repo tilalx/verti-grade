@@ -30,6 +30,7 @@ export default defineNuxtConfig({
           cookieName: 'color-scheme', // Stores user's preferred color scheme
           useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
         },
+        prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }
     },  
     vuetifyOptions: {

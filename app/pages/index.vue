@@ -94,10 +94,6 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useI18n, useHead } from '#imports'
-import RouteDetails from '@/components/RouteDetails.vue'
-
 const { t } = useI18n()
 
 useHead({
@@ -166,11 +162,12 @@ const fetchClimbingRoutes = async () => {
 }
 
 const getClimbingRoutes = async () => {
-  await fetchClimbingRoutes()
   pb.collection('routes').subscribe('*', function () {
     getClimbingRoutes()
   })
 }
+
+await fetchClimbingRoutes()
 
 onMounted(() => {
   getClimbingRoutes()

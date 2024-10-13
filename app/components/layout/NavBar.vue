@@ -109,5 +109,3 @@ const logoColor = computed(() => ({
 const isLoggedIn = computed(() => loggedIn.value)
 const drawer = ref(false)
 </script>
-
-<style scoped></style>

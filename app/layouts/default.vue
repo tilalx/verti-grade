@@ -1,8 +1,11 @@
 <template>
     <NavBar :loggedIn="isLoggedIn" :settings="settings" />
-    <VMain>
-        <NuxtPage />
-    </VMain>
+    <v-main>
+        <v-container>
+            <NuxtPage />
+        </v-container>
+    </v-main>
+
     <FootBar :settings="settings" />
 </template>
 
@@ -38,7 +41,7 @@ const getSettings = async () => {
 
 const refreshSession = async () => {
     try {
-        await pb.authStore.refresh()
+        await pb.collection('users').authRefresh()
         isLoggedIn.value = pb.authStore.isValid
     } catch (error) {
         isLoggedIn.value = false
@@ -49,7 +52,9 @@ const refreshSession = async () => {
 const setFavicon = () => {
     if (!settings.value?.page_icon) return
     const favUrl = pb.files.getUrl(settings.value, settings.value.page_icon)
-    let link = document.querySelector("link[rel~='icon']") || document.createElement('link')
+    let link =
+        document.querySelector("link[rel~='icon']") ||
+        document.createElement('link')
     link.rel = 'icon'
     link.href = favUrl
     document.head.appendChild(link)
@@ -64,7 +69,7 @@ onMounted(async () => {
         settings.value = await getSettings()
         await refreshSession()
         setFavicon()
-        
+
         intervalId = setInterval(checkSession, 600)
     } catch (error) {
         // Handle error (e.g., display notification to user)
