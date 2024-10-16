@@ -68,9 +68,9 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
+    locales: [ 'en', 'de' ],
     vueI18n: './app/config/i18n.config.ts',
     strategy: 'no_prefix',
-    defaultLocale: 'en',
     detectBrowserLanguage: {
       useCookie: false,
     },
@@ -84,7 +84,7 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-  compatibilityDate: '2024-07-24',
+  compatibilityDate: '2024-10-13',
   vite: {
     build: {
       minify: 'esbuild',
