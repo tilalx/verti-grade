@@ -64,7 +64,7 @@
 // Import required Vue and Nuxt composables
 import { ref, computed, toRefs } from 'vue'
 
-const pb = useServerPocketbase()
+const pb = usePocketbase()
 
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion

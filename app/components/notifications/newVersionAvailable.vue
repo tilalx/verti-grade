@@ -19,7 +19,7 @@ const repoName = 'verti-grade'
 
 const newVersionAvailable = ref(false)
 
-async function checkNewVersion(currentVersion, repoOwner, repoName) {
+const getGhVersion = async (currentVersion, repoOwner, repoName) => {
     const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
 
     try {
@@ -40,6 +40,10 @@ async function checkNewVersion(currentVersion, repoOwner, repoName) {
     }
 }
 
+const checkForNewVersion = async () => {
+    newVersionAvailable.value = await getGhVersion(appVersion, repoOwner, repoName)
+}
+
 function compareVersions(v1, v2) {
     const v1Parts = v1.replace(/^v/, '').split('.').map(Number)
     const v2Parts = v2.replace(/^v/, '').split('.').map(Number)
@@ -54,14 +58,6 @@ function compareVersions(v1, v2) {
 
     return 0
 }
-
-onMounted(async () => {
-    newVersionAvailable.value = await checkNewVersion(
-        appVersion,
-        repoOwner,
-        repoName,
-    )
-})
 </script>
 
 <style scoped></style>

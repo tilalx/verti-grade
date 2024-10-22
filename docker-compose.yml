@@ -1,7 +1,7 @@
 services:
   verti-grade:
     container_name: verti-grade-app
-    image: tilalx/verti-grade:latest
+    image: tilalx/verti-grade:1.4.3
     ports:
       - "80:80"
 #    environment:

@@ -17,27 +17,30 @@ import FootBar from '~/components/layout/FootBar.vue'
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 let intervalId = null
-const settings = ref({})
 
 const getSettings = async () => {
-    try {
-        return await pb.collection('settings').getOne('settings_123456')
-    } catch (error) {
-        if (error.data && error.data.code === 404) {
-            console.log('Settings not found, creating new settings')
-            try {
-                return await pb.collection('settings').create({
-                    id: 'settings_123456',
-                })
-            } catch (createError) {
-                console.error('Error creating new settings:', createError)
-                throw createError
-            }
-        }
-        console.error('An error occurred:', error)
-        throw error
+  try {
+    return await pb.collection('settings').getOne('settings_123456')
+  } catch (error) {
+    if (error.data && error.data.code === 404) {
+      console.log('Settings not found, creating new settings')
+      try {
+        return await pb.collection('settings').create({
+          id: 'settings_123456',
+        })
+      } catch (createError) {
+        console.error('Error creating new settings:', createError)
+        throw createError
+      }
     }
+    console.error('An error occurred:', error)
+    throw error
+  }
 }
+
+const { data: settingsData } = await useAsyncData('settings', getSettings)
+
+const settings = ref(settingsData.value)
 
 const refreshSession = async () => {
     try {
@@ -66,8 +69,9 @@ const checkSession = async () => {
 
 onMounted(async () => {
     try {
-        settings.value = await getSettings()
-        await refreshSession()
+        if(pb.authStore.isValid)(
+            await refreshSession()
+        )
         setFavicon()
 
         intervalId = setInterval(checkSession, 600)

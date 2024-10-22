@@ -68,7 +68,7 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    locales: [ 'en', 'de' ],
+    locales: [ 'de', 'en', 'ru', 'tr', 'uk' ],
     vueI18n: './app/config/i18n.config.ts',
     strategy: 'no_prefix',
     detectBrowserLanguage: {
