@@ -20,6 +20,7 @@
                     <!-- Column for the Route Name search -->
                     <v-col cols="12" sm="3">
                         <v-text-field
+                            :id="routeNameId"
                             :label="$t('climbing.searchRouteName')"
                             v-model="searchRouteName"
                             class="mt-2"
@@ -27,6 +28,7 @@
                     </v-col>
                     <v-col cols="6" sm="3">
                         <v-select
+                            :id="difficultyId"
                             :label="$t('climbing.difficulty')"
                             :items="difficulties"
                             v-model="selectedDifficulty"
@@ -38,6 +40,7 @@
 
                     <v-col cols="6" sm="3">
                         <v-select
+                            :id="typeId"
                             :label="$t('climbing.type')"
                             :items="types"
                             v-model="selectedType"
@@ -48,6 +51,7 @@
                     </v-col>                     
                     <v-col cols="6" sm="3">
                         <v-select
+                            :id="locationId"
                             :label="$t('climbing.location')"
                             :items="locations"
                             v-model="selectedLocation"
@@ -58,6 +62,7 @@
                     </v-col>
                     <v-col cols="6" sm="3">
                         <v-checkbox
+                            :id="archivedCheckboxId"
                             :label="$t('filter.archived')"
                             v-model="displayArchived"
                             class="mt-2"
@@ -247,13 +252,17 @@ definePageMeta({
     middleware: ['auth'],
 })
 
-const routes = ref([])
+const routeNameId = useId()
+const difficultyId = useId()
+const typeId = useId()
+const locationId = useId()
+const archivedCheckboxId = useId()
+
 const climbingRoutes = ref([])
 const selectedDifficulty = ref('')
 const selectedLocation = ref('')
 const searchRouteName = ref('')
 const selectedType = ref('')
-const selected = ref([])
 const displayArchived = ref(false)
 const pb = usePocketbase()
 const showDeleteConfirmation = ref(false)

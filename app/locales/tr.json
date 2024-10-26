@@ -1,163 +1,166 @@
 {
-    "account": {
-        "profile": "Profil",
-        "account": "Hesap",
-        "login": "Giriş Yap",
-        "logout": "Çıkış Yap",
-        "register": "Kayıt Ol",
-        "name": "İsim",
-        "firstname": "Ad",
-        "lastname": "Soyad",
-        "username": "Kullanıcı Adı",
-        "password": "Şifre",
-        "email": "E-posta",
-        "reset_password": "Şifreyi Sıfırla",
-        "newPassword": "Şifreyi Onayla",
-        "userProfile": "Kullanıcı Profili",
-        "oldPassword": "Mevcut Şifre"
+  "account": {
+    "profile": "Profil",
+    "account": "Hesap",
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "register": "Kayıt Ol",
+    "name": "İsim",
+    "firstname": "Ad",
+    "lastname": "Soyad",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "email": "E-posta",
+    "username_or_email": "Kullanıcı Adı veya E-posta",
+    "reset_password": "Şifreyi Sıfırla",
+    "newPassword": "Şifreyi Onayla",
+    "userProfile": "Kullanıcı Profili",
+    "oldPassword": "Mevcut Şifre",
+    "or_login_with": "Veya OAuth ile giriş yapın"
+  },
+  "routes": {
+    "home": "Ana Sayfa",
+    "dashboard": "Gösterge Paneli",
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "profile": "Profil",
+    "users": "Kullanıcılar",
+    "user": "Kullanıcı",
+    "statistics": "İstatistikler",
+    "statistic": "İstatistik",
+    "comments": "Yorumlar",
+    "comment": "Yorum",
+    "settings": "Ayarlar",
+    "setting": "Ayar",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "create": "Oluştur",
+    "logout": "Çıkış Yap",
+    "route_setter": "Rota Ayarlayıcı",
+    "screwed_at": "Vidalama Tarihi",
+    "types": {
+      "route": "Rota",
+      "boulder": "Boulder"
     },
-    "routes": {
-        "home": "Ana Sayfa",
-        "dashboard": "Gösterge Paneli",
-        "about": "Hakkında",
-        "contact": "İletişim",
-        "login": "Giriş Yap",
-        "register": "Kayıt Ol",
-        "profile": "Profil",
-        "users": "Kullanıcılar",
-        "user": "Kullanıcı",
-        "statistics": "İstatistikler",
-        "statistic": "İstatistik",
-        "comments": "Yorumlar",
-        "comment": "Yorum",
-        "settings": "Ayarlar",
-        "setting": "Ayar",
-        "edit": "Düzenle",
-        "delete": "Sil",
-        "create": "Oluştur",
-        "logout": "Çıkış Yap",
-        "route_setter": "Rota Ayarlayıcı",
-        "screwed_at": "Vidalama Tarihi",
-        "types": {
-            "route": "Rota",
-            "boulder": "Boulder"
-        },
-        "name": "İsim",
-        "creator_split": "Yaratıcıları ',' ile ayırın"
+    "name": "İsim",
+    "creator_split": "Yaratıcıları ',' ile ayırın"
+  },
+  "dashboard": {
+    "welcome": "Gösterge Paneline Hoş Geldiniz!",
+    "online": "{0} Çevrimiçi"
+  },
+  "climbing": {
+    "create": "Rota Oluştur",
+    "color": "Renk",
+    "routename": "Rota Adı",
+    "difficulty": "Zorluk",
+    "difficulty_sign": "Zorluk İşareti",
+    "location": "Konum",
+    "searchRouteName": "Ara",
+    "type": "Tür",
+    "archived": "Arşivlendi",
+    "comment": "Yorum",
+    "creators": "Yaratıcılar"
+  },
+  "ratings": {
+    "ratings": "Değerlendirmeler",
+    "createReview": "İnceleme Oluştur",
+    "routename": "Rota Adı",
+    "stars": "Yıldızlar",
+    "difficulty": "Zorluk",
+    "difficulty_sign": "Zorluk İşareti",
+    "location": "Konum",
+    "searchRouteName": "Ara",
+    "type": "Tür",
+    "score": "Puan",
+    "comment": "Yorum",
+    "creators": "Yaratıcılar"
+  },
+  "table": {
+    "id": "ID",
+    "select": "Seçildi",
+    "actions": "İşlemler",
+    "created_at": "Oluşturulma Tarihi",
+    "updated_at": "Güncellenme Tarihi",
+    "created_by": "Oluşturan",
+    "updated_by": "Güncelleyen"
+  },
+  "header": {
+    "create_route": "Tırmanış Rotası Oluştur",
+    "routereviews": "Rota İncelemeleri",
+    "title": "Tırmanış Rotaları",
+    "subtitle": "Tırmanış Rotaları"
+  },
+  "actions": {
+    "import": "Rotaları İçe Aktar",
+    "print": "Yazdır",
+    "create": "Oluştur",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "submit": "Gönder",
+    "new_item": "Yeni Öğe",
+    "edit_item": "Öğeyi Düzenle",
+    "confirm": "Silme Onayı",
+    "select_all": "Tümünü Seç",
+    "deselect_all": "Seçimi Kaldır",
+    "back_to_home": "Ana Sayfaya Dön"
+  },
+  "notifications": {
+    "success": {
+      "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
+      "create": "Başarıyla oluşturuldu",
+      "edit": "Başarıyla düzenlendi",
+      "delete": "Başarıyla silindi",
+      "login": "Giriş başarılı. Gösterge Paneline yönlendiriliyorsunuz...",
+      "health": "Durum: İyi"
     },
-    "dashboard": {
-        "welcome": "Gösterge Paneline Hoş Geldiniz!",
-        "online": "{0} Çevrimiçi"
+    "error": {
+      "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
+      "nameRequired": "İsim gerekli",
+      "nameTooLong": "İsim 30 karakterden az olmalıdır",
+      "create": "Oluşturma hatası",
+      "edit": "Düzenleme hatası",
+      "delete": "Silme hatası",
+      "login_failed": "Giriş başarısız. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
+      "no_route_found": "Rota bulunamadı!",
+      "health": "Durum: Kötü",
+      "no_auth_methods_available": "Kimlik doğrulama yöntemi mevcut değil"
     },
-    "climbing": {
-        "create": "Rota Oluştur",
-        "color": "Renk",
-        "routename": "Rota Adı",
-        "difficulty": "Zorluk",
-        "difficulty_sign": "Zorluk İşareti",
-        "location": "Konum",
-        "searchRouteName": "Ara",
-        "type": "Tür",
-        "archived": "Arşivlendi",
-        "comment": "Yorum",
-        "creators": "Yaratıcılar"
+    "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
+    "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
+    "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
+  },
+  "filter": {
+    "all": "Tümü",
+    "archived": "Arşivlendi"
+  },
+  "legal": {
+    "privacy": "Gizlilik",
+    "imprint": "Künye",
+    "terms": "Kullanım Şartları"
+  },
+  "page": {
+    "title": {
+      "login": "Giriş Yap - Verti-Grade",
+      "user": "Kullanıcı - Verti-Grade",
+      "settings": "Ayarlar - Verti-Grade",
+      "route": "Rota - Verti-Grade",
+      "index": "Tırmanış Rotaları - Verti-Grade",
+      "comments": "Yorumlar - Verti-Grade",
+      "dashboard": "Gösterge Paneli - Verti-Grade"
     },
-    "ratings": {
-        "ratings": "Değerlendirmeler",
-        "createReview": "İnceleme Oluştur",
-        "routename": "Rota Adı",
-        "stars": "Yıldızlar",
-        "difficulty": "Zorluk",
-        "difficulty_sign": "Zorluk İşareti",
-        "location": "Konum",
-        "searchRouteName": "Ara",
-        "type": "Tür",
-        "score": "Puan",
-        "comment": "Yorum",
-        "creators": "Yaratıcılar"
-    },
-    "table": {
-        "id": "ID",
-        "select": "Seçildi",
-        "actions": "İşlemler",
-        "created_at": "Oluşturulma Tarihi",
-        "updated_at": "Güncellenme Tarihi",
-        "created_by": "Oluşturan",
-        "updated_by": "Güncelleyen"
-    },
-    "header": {
-        "create_route": "Tırmanış Rotası Oluştur",
-        "routereviews": "Rota İncelemeleri",
-        "title": "Tırmanış Rotaları",
-        "subtitle": "Tırmanış Rotaları"
-    },
-    "actions": {
-        "import": "Rotaları İçe Aktar",
-        "print": "Yazdır",
-        "create": "Oluştur",
-        "edit": "Düzenle",
-        "delete": "Sil",
-        "save": "Kaydet",
-        "cancel": "İptal",
-        "submit": "Gönder",
-        "new_item": "Yeni Öğe",
-        "edit_item": "Öğeyi Düzenle",
-        "confirm": "Silme Onayı",
-        "select_all": "Tümünü Seç",
-        "deselect_all": "Seçimi Kaldır",
-        "back_to_home": "Ana Sayfaya Dön"
-    },
-    "notifications": {
-        "success": {
-            "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
-            "create": "Başarıyla oluşturuldu",
-            "edit": "Başarıyla düzenlendi",
-            "delete": "Başarıyla silindi",
-            "login": "Giriş başarılı. Gösterge Paneline yönlendiriliyorsunuz...",
-            "health": "Durum: İyi"
-        },
-        "error": {
-            "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
-            "nameRequired": "İsim gerekli",
-            "nameTooLong": "İsim 30 karakterden az olmalıdır",
-            "create": "Oluşturma hatası",
-            "edit": "Düzenleme hatası",
-            "delete": "Silme hatası",
-            "login_failed": "Giriş başarısız. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
-            "no_route_found": "Rota bulunamadı!",
-            "health": "Durum: Kötü"
-        },
-        "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
-        "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
-        "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
-    },
-    "filter": {
-        "all": "Tümü",
-        "archived": "Arşivlendi"
-    },
-    "legal": {
-        "privacy": "Gizlilik",
-        "imprint": "Künye",
-        "terms": "Kullanım Şartları"
-    },
-    "page": {
-        "title": {
-            "login": "Giriş Yap - Verti-Grade",
-            "user": "Kullanıcı - Verti-Grade",
-            "settings": "Ayarlar - Verti-Grade",
-            "route": "Rota - Verti-Grade",
-            "index": "Tırmanış Rotaları - Verti-Grade",
-            "comments": "Yorumlar - Verti-Grade",
-            "dashboard": "Gösterge Paneli - Verti-Grade"
-        },
-        "content": {
-            "login": "Giriş Yap",
-            "user": "Kullanıcı Sayfası",
-            "settings": "Ayarlar",
-            "route": "İnceleme Oluştur",
-            "index": "Tırmanış Rotaları",
-            "comments": "Yorumlar",
-            "dashboard": "Gösterge Paneli"
-        }
+    "content": {
+      "login": "Giriş Yap",
+      "user": "Kullanıcı Sayfası",
+      "settings": "Ayarlar",
+      "route": "İnceleme Oluştur",
+      "index": "Tırmanış Rotaları",
+      "comments": "Yorumlar",
+      "dashboard": "Gösterge Paneli"
     }
+  }
 }

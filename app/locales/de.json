@@ -1,163 +1,166 @@
 {
-    "account": {
-        "profile": "Profil",
-        "account": "Konto",
-        "login": "Anmelden",
-        "logout": "Abmelden",
-        "register": "Registrieren",
-        "name": "Name",
-        "firstname": "Vorname",
-        "lastname": "Nachname",
-        "username": "Benutzername",
-        "password": "Passwort",
-        "email": "E-Mail",
-        "reset_password": "Passwort zurücksetzen",
-        "newPassword": "Passwort bestätigen",
-        "userProfile": "Benutzerprofil",
-        "oldPassword": "Aktuelles Passwort"
+  "account": {
+    "profile": "Profil",
+    "account": "Konto",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "register": "Registrieren",
+    "name": "Name",
+    "firstname": "Vorname",
+    "lastname": "Nachname",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "email": "E-Mail",
+    "username_or_email": "Benutzername oder E-Mail",
+    "reset_password": "Passwort zurücksetzen",
+    "newPassword": "Passwort bestätigen",
+    "userProfile": "Benutzerprofil",
+    "oldPassword": "Aktuelles Passwort",
+    "or_login_with": "Oder mit OAuth anmelden"
+  },
+  "routes": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "about": "Über",
+    "contact": "Kontakt",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "profile": "Profil",
+    "users": "Benutzer",
+    "user": "Benutzer",
+    "statistics": "Statistiken",
+    "statistic": "Statistik",
+    "comments": "Kommentare",
+    "comment": "Kommentar",
+    "settings": "Einstellungen",
+    "setting": "Einstellung",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "create": "Erstellen",
+    "logout": "Abmelden",
+    "route_setter": "Routen Schrauber",
+    "screwed_at": "Geschraubt am",
+    "types": {
+      "route": "Route",
+      "boulder": "Boulder"
     },
-    "routes": {
-        "home": "Startseite",
-        "dashboard": "Dashboard",
-        "about": "Über",
-        "contact": "Kontakt",
-        "login": "Anmelden",
-        "register": "Registrieren",
-        "profile": "Profil",
-        "users": "Benutzer",
-        "user": "Benutzer",
-        "statistics": "Statistiken",
-        "statistic": "Statistik",
-        "comments": "Kommentare",
-        "comment": "Kommentar",
-        "settings": "Einstellungen",
-        "setting": "Einstellung",
-        "edit": "Bearbeiten",
-        "delete": "Löschen",
-        "create": "Erstellen",
-        "logout": "Abmelden",
-        "route_setter": "Routen Schrauber",
-        "screwed_at": "Geschraubt am",
-        "types": {
-            "route": "Route",
-            "boulder": "Boulder"
-        },
-        "name": "Name",
-        "creator_split": "Schrauber getrennt durch ,"
+    "name": "Name",
+    "creator_split": "Schrauber getrennt durch ,"
+  },
+  "dashboard": {
+    "welcome": "Willkommen im Dashboard!",
+    "online": "{0} Online"
+  },
+  "climbing": {
+    "create": "Route erstellen",
+    "color": "Farbe",
+    "routename": "Routenname",
+    "difficulty": "Schwierigkeitsgrad",
+    "difficulty_sign": "Schwierigkeitszeichen",
+    "location": "Ort",
+    "searchRouteName": "Suchen",
+    "type": "Typ",
+    "archived": "Archiviert",
+    "comment": "Kommentar",
+    "creators": "Ersteller"
+  },
+  "ratings": {
+    "ratings": "Bewertungen",
+    "createReview": "Bewertung erstellen",
+    "routename": "Routenname",
+    "stars": "Sterne",
+    "difficulty": "Schwierigkeitsgrad",
+    "difficulty_sign": "Schwierigkeitszeichen",
+    "location": "Ort",
+    "searchRouteName": "Suchen",
+    "type": "Typ",
+    "score": "Punktzahl",
+    "comment": "Kommentar",
+    "creators": "Ersteller"
+  },
+  "table": {
+    "id": "ID",
+    "select": "Ausgewählt",
+    "actions": "Aktionen",
+    "created_at": "Erstellt am",
+    "updated_at": "Aktualisiert am",
+    "created_by": "Erstellt von",
+    "updated_by": "Aktualisiert von"
+  },
+  "header": {
+    "create_route": "Kletterroute erstellen",
+    "routereviews": "Routenbewertungen",
+    "title": "Kletterrouten",
+    "subtitle": "Kletterrouten"
+  },
+  "actions": {
+    "import": "Routen importieren",
+    "print": "Drucken",
+    "create": "Erstellen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "submit": "Absenden",
+    "new_item": "Neues Element",
+    "edit_item": "Element bearbeiten",
+    "confirm": "Löschen bestätigen",
+    "select_all": "Alle auswählen",
+    "deselect_all": "Alle abwählen",
+    "back_to_home": "Zurück zur Startseite"
+  },
+  "notifications": {
+    "success": {
+      "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
+      "create": "Erfolgreich erstellt",
+      "edit": "Erfolgreich bearbeitet",
+      "delete": "Erfolgreich gelöscht",
+      "login": "Anmeldung erfolgreich. Weiterleitung zum Dashboard...",
+      "health": "Status: OK"
     },
-    "dashboard": {
-        "welcome": "Willkommen im Dashboard!",
-        "online": "{0} Online"
+    "error": {
+      "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
+      "nameRequired": "Name ist erforderlich",
+      "nameTooLong": "Name muss weniger als 30 Zeichen lang sein",
+      "create": "Fehler beim Erstellen",
+      "edit": "Fehler beim Bearbeiten",
+      "delete": "Fehler beim Löschen",
+      "login_failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
+      "no_route_found": "Keine Route gefunden",
+      "health": "Status: Schlecht",
+      "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar"
     },
-    "climbing": {
-        "create": "Route erstellen",
-        "color": "Farbe",
-        "routename": "Routenname",
-        "difficulty": "Schwierigkeitsgrad",
-        "difficulty_sign": "Schwierigkeitszeichen",
-        "location": "Ort",
-        "searchRouteName": "Suchen",
-        "type": "Typ",
-        "archived": "Archiviert",
-        "comment": "Kommentar",
-        "creators": "Ersteller"
+    "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
+    "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
+    "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
+  },
+  "filter": {
+    "all": "Alle",
+    "archived": "Archiviert"
+  },
+  "legal": {
+    "privacy": "Datenschutz",
+    "imprint": "Impressum",
+    "terms": "Nutzungsbedingungen"
+  },
+  "page": {
+    "title": {
+      "login": "Anmelden - Verti-Grade",
+      "user": "Benutzer - Verti-Grade",
+      "settings": "Einstellungen - Verti-Grade",
+      "route": "Route - Verti-Grade",
+      "index": "Kletterrouten - Verti-Grade",
+      "comments": "Kommentare - Verti-Grade",
+      "dashboard": "Dashboard - Verti-Grade"
     },
-    "ratings": {
-        "ratings": "Bewertungen",
-        "createReview": "Bewertung erstellen",
-        "routename": "Routenname",
-        "stars": "Sterne",
-        "difficulty": "Schwierigkeitsgrad",
-        "difficulty_sign": "Schwierigkeitszeichen",
-        "location": "Ort",
-        "searchRouteName": "Suchen",
-        "type": "Typ",
-        "score": "Punktzahl",
-        "comment": "Kommentar",
-        "creators": "Ersteller"
-    },
-    "table": {
-        "id": "ID",
-        "select": "Ausgewählt",
-        "actions": "Aktionen",
-        "created_at": "Erstellt am",
-        "updated_at": "Aktualisiert am",
-        "created_by": "Erstellt von",
-        "updated_by": "Aktualisiert von"
-    },
-    "header": {
-        "create_route": "Kletterroute erstellen",
-        "routereviews": "Routenbewertungen",
-        "title": "Kletterrouten",
-        "subtitle": "Kletterrouten"
-    },
-    "actions": {
-        "import": "Routen importieren",
-        "print": "Drucken",
-        "create": "Erstellen",
-        "edit": "Bearbeiten",
-        "delete": "Löschen",
-        "save": "Speichern",
-        "cancel": "Abbrechen",
-        "submit": "Absenden",
-        "new_item": "Neues Element",
-        "edit_item": "Element bearbeiten",
-        "confirm": "Löschen bestätigen",
-        "select_all": "Alle auswählen",
-        "deselect_all": "Alle abwählen",
-        "back_to_home": "Zurück zur Startseite"
-    },
-    "notifications": {
-        "success": {
-            "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
-            "create": "Erfolgreich erstellt",
-            "edit": "Erfolgreich bearbeitet",
-            "delete": "Erfolgreich gelöscht",
-            "login": "Anmeldung erfolgreich. Weiterleitung zum Dashboard...",
-            "health": "Status: OK"
-        },
-        "error": {
-            "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
-            "nameRequired": "Name ist erforderlich",
-            "nameTooLong": "Name muss weniger als 30 Zeichen lang sein",
-            "create": "Fehler beim Erstellen",
-            "edit": "Fehler beim Bearbeiten",
-            "delete": "Fehler beim Löschen",
-            "login_failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
-            "no_route_found": "Keine Route gefunden",
-            "health": "Status: Schlecht"
-        },
-        "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-        "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
-        "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
-    },
-    "filter": {
-        "all": "Alle",
-        "archived": "Archiviert"
-    },
-    "legal": {
-        "privacy": "Datenschutz",
-        "imprint": "Impressum",
-        "terms": "Nutzungsbedingungen"
-    },
-    "page": {
-        "title": {
-            "login": "Anmelden - Verti-Grade",
-            "user": "Benutzer - Verti-Grade",
-            "settings": "Einstellungen - Verti-Grade",
-            "route": "Route - Verti-Grade",
-            "index": "Kletterrouten - Verti-Grade",
-            "comments": "Kommentare - Verti-Grade",
-            "dashboard": "Dashboard - Verti-Grade"
-        },
-        "content": {
-            "login": "Anmelden",
-            "user": "Benutzerseite",
-            "settings": "Einstellungen",
-            "route": "Bewertung erstellen",
-            "index": "Kletterrouten",
-            "comments": "Kommentare",
-            "dashboard": "Dashboard"
-        }
+    "content": {
+      "login": "Anmelden",
+      "user": "Benutzerseite",
+      "settings": "Einstellungen",
+      "route": "Bewertung erstellen",
+      "index": "Kletterrouten",
+      "comments": "Kommentare",
+      "dashboard": "Dashboard"
     }
+  }
 }
