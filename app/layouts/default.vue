@@ -54,7 +54,7 @@ const refreshSession = async () => {
 
 const setFavicon = () => {
     if (!settings.value?.page_icon) return
-    const favUrl = pb.files.getUrl(settings.value, settings.value.page_icon)
+    const favUrl = pb.files.getURL(settings.value, settings.value.page_icon)
     let link =
         document.querySelector("link[rel~='icon']") ||
         document.createElement('link')

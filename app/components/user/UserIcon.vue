@@ -39,7 +39,7 @@ const pocketbaseAuth = JSON.parse(localStorage.getItem('pocketbase_auth'))
 const user = ref(pocketbaseAuth.model)
 const dialogOpen = ref(false);
 const { t } = useI18n();
-const image = pb.files.getUrl(user.value, user.value.avatar, {'thumb': '100x100'});
+const image = pb.files.getURL(user.value, user.value?.avatar, {'thumb': '100x100'});
 
 const items = [
     {

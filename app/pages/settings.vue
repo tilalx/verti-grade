@@ -154,18 +154,18 @@ const signImage = ref(null)
 
 onMounted(() => {
     // Compute image URLs only on the client side
-    pageLogo.value = pb.files.getUrl(settings.value, settings.value.page_logo)
-    pageIcon.value = pb.files.getUrl(settings.value, settings.value.page_icon)
-    signImage.value = pb.files.getUrl(settings.value, settings.value.sign_image)
+    pageLogo.value = pb.files.getURL(settings.value, settings.value.page_logo)
+    pageIcon.value = pb.files.getURL(settings.value, settings.value.page_icon)
+    signImage.value = pb.files.getURL(settings.value, settings.value.sign_image)
 
     // Subscribe to changes in the settings collection
     pb.collection('settings').subscribe(
         'RECORD_ID',
         (e) => {
             Object.assign(copySettings, e.data)
-            pageLogo.value = pb.files.getUrl(e.data, e.data.page_logo)
-            pageIcon.value = pb.files.getUrl(e.data, e.data.page_icon)
-            signImage.value = pb.files.getUrl(e.data, e.data.sign_image)
+            pageLogo.value = pb.files.getURL(e.data, e.data.page_logo)
+            pageIcon.value = pb.files.getURL(e.data, e.data.page_icon)
+            signImage.value = pb.files.getURL(e.data, e.data.sign_image)
         },
         { recordId: 'settings_123456' },
     )
@@ -178,7 +178,7 @@ const updateLogo = async (file) => {
         .update(settings.value.id, {
             page_logo: file,
         })
-    pageLogo.value = pb.files.getUrl(updatedSettings, updatedSettings.page_logo)
+    pageLogo.value = pb.files.getURL(updatedSettings, updatedSettings.page_logo)
 }
 
 const updateIcon = async (file) => {
@@ -187,7 +187,7 @@ const updateIcon = async (file) => {
         .update(settings.value.id, {
             page_icon: file,
         })
-    pageIcon.value = pb.files.getUrl(updatedSettings, updatedSettings.page_icon)
+    pageIcon.value = pb.files.getURL(updatedSettings, updatedSettings.page_icon)
 }
 
 const updateSignImage = async (file) => {
@@ -196,7 +196,7 @@ const updateSignImage = async (file) => {
         .update(settings.value.id, {
             sign_image: file,
         })
-    signImage.value = pb.files.getUrl(
+    signImage.value = pb.files.getURL(
         updatedSettings,
         updatedSettings.sign_image,
     )

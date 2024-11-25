@@ -94,7 +94,7 @@ let logo_url = ref('')
 
 onMounted(async () => {
     if (settings.value && settings.value.page_logo) {
-        logo_url.value = await pb.files.getUrl(
+        logo_url.value = await pb.files.getURL(
             settings.value,
             settings.value.page_logo,
         )

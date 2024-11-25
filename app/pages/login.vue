@@ -18,9 +18,8 @@
                         <div
                             v-if="
                                 authMethods &&
-                                (authMethods.emailPassword ||
-                                    authMethods.usernamePassword ||
-                                    authMethods.authProviders.length > 0)
+                                (authMethods.password.enabled ||
+                                    authMethods.oauth2.enabled)
                             "
                         >
                             <!-- Login Form -->
@@ -32,8 +31,11 @@
                                 <!-- Identity Field -->
                                 <v-text-field
                                     v-if="
-                                        authMethods.usernamePassword &&
-                                        authMethods.emailPassword
+                                        authMethods.password.enabled &&
+                                        authMethods.password.identityFields.includes(
+                                            'email',
+                                            'username',
+                                        )
                                     "
                                     :label="$t('account.username_or_email')"
                                     prepend-icon="mdi-account"
@@ -46,7 +48,10 @@
                                     class="mt-4"
                                 ></v-text-field>
                                 <v-text-field
-                                    v-else-if="authMethods.emailPassword"
+                                    v-else-if="authMethods.password.enabled &&
+                                        authMethods.password.identityFields.includes(
+                                            'email',
+                                        )"
                                     :label="$t('account.email')"
                                     prepend-icon="mdi-email"
                                     v-model="identity"
@@ -58,7 +63,10 @@
                                     class="mt-4"
                                 ></v-text-field>
                                 <v-text-field
-                                    v-else-if="authMethods.usernamePassword"
+                                    v-else-if="authMethods.password.enabled &&
+                                        authMethods.password.identityFields.includes(
+                                            'username',
+                                        )"
                                     :label="$t('account.username')"
                                     prepend-icon="mdi-account"
                                     v-model="identity"
@@ -73,8 +81,7 @@
                                 <!-- Password Field -->
                                 <v-text-field
                                     v-if="
-                                        authMethods.usernamePassword ||
-                                        authMethods.emailPassword
+                                        authMethods.password.enabled
                                     "
                                     :label="$t('account.password')"
                                     prepend-icon="mdi-lock"
@@ -89,7 +96,7 @@
 
                                 <!-- Reset Password Link -->
                                 <v-row
-                                    v-if="authMethods.emailPassword"
+                                    v-if="authMethods.password.enabled"
                                     class="text-center mt-2 mb-4"
                                 >
                                     <v-col cols="12" class="text-right">
@@ -106,8 +113,7 @@
                                 <!-- Login Button -->
                                 <v-row
                                     v-if="
-                                        authMethods.usernamePassword ||
-                                        authMethods.emailPassword
+                                        authMethods.password.enabled
                                     "
                                     class="text-center mt-2"
                                 >
@@ -128,20 +134,19 @@
                                 <!-- Social Login Options -->
                                 <div
                                     v-if="
-                                        authMethods.authProviders.length > 0 &&
-                                        (authMethods.usernamePassword ||
-                                            authMethods.emailPassword)
+                                        authMethods.oauth2.enabled &&
+                                        authMethods.password.enabled
                                     "
                                     class="text-center mt-2"
                                 >
                                     {{ $t('account.or_login_with') }}
                                 </div>
                                 <v-row
-                                    v-if="authMethods.authProviders.length > 0"
+                                    v-if="authMethods.oauth2.enabled"
                                     class="text-center mt-4"
                                 >
                                     <v-col
-                                        v-for="provider in authMethods.authProviders"
+                                        v-for="provider in authMethods.oauth2.providers"
                                         :key="provider.name"
                                         cols="6"
                                         md="4"
@@ -184,7 +189,7 @@
                             <v-form
                                 v-if="
                                     view === 'requestReset' &&
-                                    authMethods.emailPassword
+                                    authMethods.password.enabled
                                 "
                                 ref="resetForm"
                                 @submit.prevent="handleRequestPasswordReset"

@@ -6,9 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -77,15 +75,7 @@ func main() {
 		&indexFallback,
 		"indexFallback",
 		true,
-		"fallback the request to index.html on missing static path (eg. when pretty urls are used with SPA)",
-	)
-
-	var queryTimeout int
-	app.RootCmd.PersistentFlags().IntVar(
-		&queryTimeout,
-		"queryTimeout",
-		30,
-		"the default SELECT queries timeout in seconds",
+		"fallback the request to index.html on missing static path (e.g., when pretty URLs are used with SPA)",
 	)
 
 	app.RootCmd.ParseFlags(os.Args[1:])
@@ -94,7 +84,7 @@ func main() {
 	// Plugins and hooks:
 	// ---------------------------------------------------------------
 
-	// load jsvm (hooks and migrations)
+	// Load JSVM (hooks and migrations)
 	jsvm.MustRegister(app, jsvm.Config{
 		MigrationsDir: migrationsDir,
 		HooksDir:      hooksDir,
@@ -102,33 +92,30 @@ func main() {
 		HooksPoolSize: hooksPool,
 	})
 
-	// migrate command (with js templates)
+	// Migrate command (with JS templates)
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		TemplateLang: migratecmd.TemplateLangJS,
 		Automigrate:  automigrate,
 		Dir:          migrationsDir,
 	})
 
-	// GitHub selfupdate
+	// GitHub self-update
 	ghupdate.MustRegister(app, app.RootCmd, ghupdate.Config{})
 
-	app.OnAfterBootstrap().PreAdd(func(e *core.BootstrapEvent) error {
-		app.Dao().ModelQueryTimeout = time.Duration(queryTimeout) * time.Second
-		return nil
-	})
+	// ---------------------------------------------------------------
 
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		// serves static files from the provided public dir (if exists)
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDir), indexFallback))
-		e.Router.GET("/api/online", func(c echo.Context) error {
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		// Serve static files from the provided public directory (if exists)
+		se.Router.GET("/*", apis.Static(os.DirFS(publicDir), indexFallback))
+		se.Router.GET("/api/online", func(e *core.RequestEvent) error {
 			count := 0
 			clients := app.SubscriptionsBroker().Clients()
 			for range clients {
 				count++
 			}
-			return c.JSON(http.StatusOK, map[string]int{"clients": count})
+			return e.JSON(http.StatusOK, map[string]int{"clients": count})
 		})
-		return nil
+		return se.Next()
 	})
 
 	if err := app.Start(); err != nil {
@@ -136,12 +123,11 @@ func main() {
 	}
 }
 
-// the default pb_public dir location is relative to the executable
+// The default pb_public directory location is relative to the executable
 func defaultPublicDir() string {
 	if strings.HasPrefix(os.Args[0], os.TempDir()) {
-		// most likely ran with go run
+		// Most likely ran with go run
 		return "./pb_public"
 	}
-
 	return filepath.Join(os.Args[0], "../pb_public")
 }
