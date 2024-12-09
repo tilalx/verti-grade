@@ -16,7 +16,7 @@ COPY public ./public
 RUN yarn build
 
 # --------------> Build pocketbase
-FROM golang:1.23.3-bookworm AS pb-build
+FROM golang:1.23.4-bookworm AS pb-build
 
 ENV CGO_ENABLED=0
 
