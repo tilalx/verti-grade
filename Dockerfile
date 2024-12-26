@@ -8,6 +8,7 @@ COPY package.json .yarnrc.yml nuxt.config.ts ./
 RUN corepack enable && yarn set version berry && yarn install
 
 COPY app ./app
+COPY i18n ./i18n
 
 COPY server ./server
 
