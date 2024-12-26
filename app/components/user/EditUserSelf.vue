@@ -95,7 +95,7 @@ import { ref, watch } from 'vue'
 const pb = usePocketbase()
 const pocketbaseAuth = JSON.parse(localStorage.getItem('pocketbase_auth'))
 const user = ref(
-    pocketbaseAuth ? pocketbaseAuth.model : {
+    pocketbaseAuth ? pocketbaseAuth.record : {
         id: '',
         firstname: '',
         name: '',

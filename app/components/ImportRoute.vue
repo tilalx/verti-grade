@@ -7,7 +7,9 @@
             @change="handleFileChange"
             accept="application/json"
         />
-        <v-btn @click="openFilePicker" color="primary">{{ $t('actions.import') }}</v-btn>
+        <v-btn @click="openFilePicker" color="primary">{{
+            $t('actions.import')
+        }}</v-btn>
     </div>
 </template>
 
@@ -17,11 +19,9 @@ import { ref } from 'vue'
 export default {
     setup() {
         const fileInput = ref(null)
-
         const pb = usePocketbase()
 
         const openFilePicker = () => {
-            //open file explorer
             fileInput.value.click()
         }
 
@@ -37,48 +37,75 @@ export default {
             reader.readAsText(file)
         }
 
-        async function importJsonToClimbingRoutes(jsonData) {
-            // Extract climbing routes and ratings from jsonData
-            const climbingRoutes = jsonData.map((route) => {
-                const { ratings, ...routeData } = route
-                return routeData
-            })
+        const importJsonToClimbingRoutes = async (jsonData) => {
+            try {
+                // Step 1: Prepare the data
+                const routesData = jsonData.map((route) => {
+                    const { ratings, ...routeData } = route
+                    return routeData
+                })
 
-            // Insert climbing routes one at a time
-            for (const route of climbingRoutes) {
-                const result = await pb.collection('routes').create(route)
+                // Step 2: Batch insert routes
+                const routeBatch = pb.createBatch()
+                routesData.forEach((route) => {
+                    routeBatch.collection('routes').create(route)
+                })
+                const routeResults = await routeBatch.send()
 
-                if (result.error) {
-                    console.error(
-                        'Error inserting climbing route:',
-                        result.error,
-                    )
-                    continue
-                }
+                // Step 3: Retrieve inserted route IDs
+                const routeIdMap = {}
+                routeResults.forEach((result, index) => {
+                    if (
+                        result.status === 200 &&
+                        result.body &&
+                        result.body.id
+                    ) {
+                        const originalRoute = jsonData[index]
+                        routeIdMap[originalRoute.name] = result.body.id
+                    } else {
+                        console.error(
+                            `Failed to insert route at index ${index}:`,
+                            result,
+                        )
+                    }
+                })
 
-                // Prepare ratings with the correct route_id
-                const routeId = result.id
-                const routeRatings = jsonData
-                    .find((r) => r.name === route.name)
-                    .ratings.map((rating) => ({
+                // Step 4: Associate ratings with route IDs
+                const ratingsData = jsonData.flatMap((route) => {
+                    const routeId = routeIdMap[route.name]
+                    if (!routeId) {
+                        console.error(
+                            `No route ID found for route: ${route.name}`,
+                        )
+                        return []
+                    }
+                    return route.ratings.map((rating) => ({
                         ...rating,
                         route_id: routeId,
                     }))
+                })
 
-                // Insert ratings one at a time
-                for (const rating of routeRatings) {
-                    const ratingResult = await pb
-                        .collection('ratings')
-                        .create(rating)
+                // Step 5: Batch insert ratings
+                const ratingBatch = pb.createBatch()
+                ratingsData.forEach((rating) => {
+                    ratingBatch.collection('ratings').create(rating)
+                })
+                const ratingResults = await ratingBatch.send()
 
-                    if (ratingResult.error) {
-                        console.error(
-                            'Error inserting rating:',
-                            ratingResult.error,
-                        )
-                        continue
-                    }
+                // Handle any errors
+                const failedRatings = ratingResults.filter(
+                    (result) => result.status !== 200,
+                )
+                if (failedRatings.length > 0) {
+                    console.error(
+                        'Errors occurred while inserting ratings:',
+                        failedRatings,
+                    )
+                } else {
+                    console.log('Import completed successfully.')
                 }
+            } catch (error) {
+                console.error('Error during import:', error)
             }
         }
 

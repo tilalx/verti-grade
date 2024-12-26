@@ -32,7 +32,7 @@ export default defineNuxtConfig({
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }
-    },  
+    },
     vuetifyOptions: {
       theme: {
         defaultTheme: 'light',
@@ -68,8 +68,8 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    locales: [ 'de', 'en', 'ru', 'tr', 'uk' ],
-    vueI18n: './app/config/i18n.config.ts',
+    locales: ['de', 'en', 'ru', 'tr', 'uk'],
+    vueI18n: './i18n/i18n.config.ts',
     strategy: 'no_prefix',
     detectBrowserLanguage: {
       useCookie: false,

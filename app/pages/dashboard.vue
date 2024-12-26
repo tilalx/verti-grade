@@ -473,124 +473,131 @@ const exportSelectedExcel = async () => {
 }
 
 const exportSelectedJson = async () => {
-    const selectedRoutes = filteredClimbingRoutes.value.filter(
-        (route) => route.selected,
-    )
-    const selectedRouteIds = selectedRoutes.map((route) => route.id)
-    if (selectedRouteIds.length === 0) {
-        console.log('No routes selected for deletion.')
-        return
+    const selectedRoutes = filteredClimbingRoutes.value.filter(route => route.selected);
+    if (selectedRoutes.length === 0) {
+        console.log('No routes selected for export.');
+        return;
     }
 
     try {
-        const routeArray = []
-        for (const routeId of selectedRouteIds) {
-            const route = climbingRoutes.value.find(
-                (route) => route.id === routeId,
-            )
-            if (!route) {
-                console.error('Route not found:', routeId)
-                continue
+        // Extract selected route IDs
+        const selectedRouteIds = selectedRoutes.map(route => route.id);
+
+        // Fetch all ratings for the selected routes in a single batch request
+        const filterQuery = selectedRouteIds.map(id => `route_id = "${id}"`).join(' || ');
+        const responseRatings = await pb.collection('ratings').getFullList({
+            filter: filterQuery,
+        });
+
+        // Organize ratings by route_id
+        const ratingsByRouteId = responseRatings.reduce((acc, rating) => {
+            if (!acc[rating.route_id]) {
+                acc[rating.route_id] = [];
             }
+            acc[rating.route_id].push({
+                rating: rating.rating,
+                difficulty: rating.difficulty,
+                difficulty_sign: rating.difficulty_sign,
+                comment: rating.comment,
+                created: rating.created,
+                updated: rating.updated,
+            });
+            return acc;
+        }, {});
 
-            const responseRating = await pb.collection('ratings').getFullList({
-                filter: `route_id = "${routeId}"`,
-            })
+        // Prepare the data for export
+        const exportData = selectedRoutes.map(route => ({
+            name: route.name,
+            color: route.color,
+            difficulty: route.difficulty,
+            difficulty_sign: route.difficulty_sign,
+            location: route.location,
+            type: route.type,
+            comment: route.comment,
+            creator: route.creator,
+            screw_date: route.screw_date,
+            score: route.score,
+            archived: route.archived,
+            created: route.created,
+            updated: route.updated,
+            ratings: ratingsByRouteId[route.id] || [],
+        }));
 
-            const ratings = []
-
-            for (const rating of responseRating) {
-                const rate = {
-                    rating: rating.rating,
-                    difficulty: rating.difficulty,
-                    difficulty_sign: rating.difficulty_sign,
-                    comment: rating.comment,
-                    created: rating.created,
-                    updated: rating.updated,
-                }
-                ratings.push(rate)
-            }
-
-            const data = {
-                name: route.name,
-                color: route.color,
-                difficulty: route.difficulty,
-                difficulty_sign: route.difficulty_sign,
-                location: route.location,
-                type: route.type,
-                comment: route.comment,
-                creator: route.creator,
-                screw_date: route.screw_date,
-                score: route.score,
-                archived: route.archived,
-                screw_date: route.screw_date,
-                created: route.created,
-                updated: route.updated,
-                ratings: ratings,
-            }
-            routeArray.push(data)
-        }
-
-        const json = JSON.stringify(routeArray, null, 2)
-        const blob = new Blob([json], { type: 'application/json' })
-        const link = document.createElement('a')
-        link.href = window.URL.createObjectURL(blob)
-        const currentDate = Math.floor(Date.now() / 1000)
-        link.download = `climbing-routes-${currentDate}.json`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        // Convert to JSON and trigger download
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const currentDate = Math.floor(Date.now() / 1000);
+        link.download = `climbing-routes-${currentDate}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     } catch (error) {
-        console.error('Error in exportSelectedAsJson:', error)
+        console.error('Error in exportSelectedJson:', error);
     }
-}
+};
 
 const deleteSelected = async () => {
     const selectedRoutes = filteredClimbingRoutes.value.filter(
         (route) => route.selected,
-    )
-    const selectedRouteIds = selectedRoutes.map((route) => route.id)
+    );
+    const selectedRouteIds = selectedRoutes.map((route) => route.id);
+
     if (selectedRouteIds.length === 0) {
-        console.log('No routes selected for deletion.')
-        return
+        console.log('No routes selected for deletion.');
+        return;
     }
 
     try {
-        for (const routeId of selectedRouteIds) {
-            const response = await pb.collection('routes').delete(routeId)
-            if (!response) {
-                console.error('Error deleting route:', routeId)
-            }
-        }
-    } catch (error) {
-        console.error('Exception in deleteSelected:', error)
-    }
-    showDeleteConfirmation.value = false
-}
+        // Create a new batch instance
+        const batch = pb.createBatch();
 
+        // Register delete requests to the batch
+        selectedRouteIds.forEach((routeId) => {
+            batch.collection('routes').delete(routeId);
+        });
+
+        // Send the batch request
+        const result = await batch.send();
+
+        console.log('Batch delete result:', result);
+    } catch (error) {
+        console.error('Exception in deleteSelected:', error);
+    }
+
+    showDeleteConfirmation.value = false;
+};
+
+// Updated archiveSelected function using batch API
 const archiveSelected = async () => {
     const selectedRoutes = filteredClimbingRoutes.value.filter(
         (route) => route.selected,
-    )
-    const selectedRouteIds = selectedRoutes.map((route) => route.id)
+    );
+    const selectedRouteIds = selectedRoutes.map((route) => route.id);
+
     if (selectedRouteIds.length === 0) {
-        console.log('No routes selected for deletion.')
-        return
+        console.log('No routes selected for archiving.');
+        return;
     }
 
     try {
-        for (const routeId of selectedRouteIds) {
-            const response = await pb.collection('routes').update(routeId, {
-                archived: true,
-            })
-            if (!response) {
-                console.error('Error deleting route:', routeId)
-            }
-        }
+        // Create a new batch instance
+        const batch = pb.createBatch();
+
+        // Register update requests to the batch
+        selectedRouteIds.forEach((routeId) => {
+            batch.collection('routes').update(routeId, { archived: true });
+        });
+
+        // Send the batch request
+        const result = await batch.send();
+
+        console.log('Batch archive result:', result);
     } catch (error) {
-        console.error('Exception in deleteSelected:', error)
+        console.error('Exception in archiveSelected:', error);
     }
-}
+};
 
 onMounted(async () => {
     await getClimbingRoutes()

@@ -12,10 +12,18 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
+                                    v-if="pageLogo"
                                     :src="pageLogo"
                                     height="100"
                                     contain
                                 ></NuxtImg>
+                                <div
+                                    v-else
+                                    class="placeholder"
+                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                >
+                                    No logo uploaded
+                                </div>
                             </div>
                             <v-file-input
                                 variant="underlined"
@@ -40,10 +48,18 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
+                                    v-if="pageIcon"
                                     :src="pageIcon"
                                     height="100"
                                     contain
                                 ></NuxtImg>
+                                <div
+                                    v-else
+                                    class="placeholder"
+                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                >
+                                    No icon uploaded
+                                </div>
                             </div>
                             <v-file-input
                                 variant="underlined"
@@ -68,10 +84,18 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
+                                    v-if="signImage"
                                     :src="signImage"
                                     height="100"
                                     contain
                                 ></NuxtImg>
+                                <div
+                                    v-else
+                                    class="placeholder"
+                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                >
+                                    No sign image uploaded
+                                </div>
                             </div>
                             <v-file-input
                                 variant="underlined"
@@ -173,7 +197,7 @@ onMounted(() => {
 
 // Update functions for images
 const updateLogo = async (file) => {
-    const updatedSettings = await pb
+    const updatedSettings = await $pb
         .collection('settings')
         .update(settings.value.id, {
             page_logo: file,
@@ -182,7 +206,7 @@ const updateLogo = async (file) => {
 }
 
 const updateIcon = async (file) => {
-    const updatedSettings = await pb
+    const updatedSettings = await $pb
         .collection('settings')
         .update(settings.value.id, {
             page_icon: file,
@@ -191,7 +215,7 @@ const updateIcon = async (file) => {
 }
 
 const updateSignImage = async (file) => {
-    const updatedSettings = await pb
+    const updatedSettings = await $pb
         .collection('settings')
         .update(settings.value.id, {
             sign_image: file,
