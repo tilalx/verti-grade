@@ -26,7 +26,7 @@
     "nuxt": "^3.15.0",
     "path": "^0.12.7",
     "pdfkit": "^0.16.0",
-    "pocketbase": "^0.24.0",
+    "pocketbase": "^0.25.0",
     "prettier": "^3.4.2",
     "qrcode": "^1.5.4",
     "release-it": "^17.11.0",
