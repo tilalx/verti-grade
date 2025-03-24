@@ -23,7 +23,7 @@ export default eventHandler(async (event) => {
             .collection('settings')
             .getOne('settings_123456')
 
-        const logoUrl = await pb.files.getURL()(settings, settings.sign_image)
+        const logoUrl = await pb.files.getURL(settings, settings.sign_image)
 
         const logo = await fetchLogo(logoUrl)
 
