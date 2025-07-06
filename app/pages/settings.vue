@@ -12,15 +12,21 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
-                                    v-if="pageLogo"
-                                    :src="pageLogo"
+                                    v-if="logoPreview"
+                                    :src="logoPreview"
                                     height="100"
                                     contain
-                                ></NuxtImg>
+                                />
                                 <div
                                     v-else
                                     class="placeholder"
-                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                    style="
+                                        height: 100px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: gray;
+                                    "
                                 >
                                     No logo uploaded
                                 </div>
@@ -31,9 +37,10 @@
                                 dense
                                 flat
                                 accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                                @change="(files) => updateLogo(files[0])"
-                                placeholder="Change logo"
-                            ></v-file-input>
+                                v-model="logoFile"
+                                @update:model-value="onLogoSelected"
+                                placeholder="Select new logo"
+                            />
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -48,15 +55,21 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
-                                    v-if="pageIcon"
-                                    :src="pageIcon"
+                                    v-if="iconPreview"
+                                    :src="iconPreview"
                                     height="100"
                                     contain
-                                ></NuxtImg>
+                                />
                                 <div
                                     v-else
                                     class="placeholder"
-                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                    style="
+                                        height: 100px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: gray;
+                                    "
                                 >
                                     No icon uploaded
                                 </div>
@@ -66,10 +79,11 @@
                                 hide-details
                                 dense
                                 flat
-                                accept="image/x-icon"
-                                @change="(files) => updateIcon(files[0])"
-                                placeholder="Change icon"
-                            ></v-file-input>
+                                accept=".ico,image/vnd.microsoft.icon,image/x-icon"
+                                v-model="iconFile"
+                                @update:model-value="onIconSelected"
+                                placeholder="Select new icon"
+                            />
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -84,15 +98,21 @@
                                 style="height: 150px"
                             >
                                 <NuxtImg
-                                    v-if="signImage"
-                                    :src="signImage"
+                                    v-if="signPreview"
+                                    :src="signPreview"
                                     height="100"
                                     contain
-                                ></NuxtImg>
+                                />
                                 <div
                                     v-else
                                     class="placeholder"
-                                    style="height: 100px; display: flex; align-items: center; justify-content: center; color: gray;"
+                                    style="
+                                        height: 100px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: gray;
+                                    "
                                 >
                                     No sign image uploaded
                                 </div>
@@ -103,37 +123,45 @@
                                 dense
                                 flat
                                 accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                                @change="(files) => updateSignImage(files[0])"
-                                placeholder="Change sign image"
-                            ></v-file-input>
+                                v-model="signFile"
+                                @update:model-value="onSignSelected"
+                                placeholder="Select new sign image"
+                            />
                         </v-card-text>
                     </v-card>
                 </v-col>
             </v-row>
+
             <v-row>
                 <v-col cols="12" md="6">
                     <v-text-field
                         label="Application URL"
                         v-model="copySettings.application_url"
-                    ></v-text-field>
+                    />
                 </v-col>
-                <v-col cols="12" md="6"></v-col>
                 <v-col cols="12" md="6">
                     <v-text-field
                         label="Imprint URL"
                         v-model="copySettings.imprint_url"
-                    ></v-text-field>
+                    />
                 </v-col>
                 <v-col cols="12" md="6">
                     <v-text-field
                         label="Privacy URL"
                         v-model="copySettings.privacy_url"
-                    ></v-text-field>
+                    />
                 </v-col>
             </v-row>
+
             <v-row>
                 <v-col cols="12" class="text-right">
-                    <v-btn color="primary" @click="saveSettings">Save</v-btn>
+                    <v-btn
+                        v-if="hasChanges"
+                        color="success"
+                        @click="saveSettings"
+                    >
+                        Save
+                    </v-btn>
                 </v-col>
             </v-row>
         </v-form>
@@ -141,17 +169,13 @@
 </template>
 
 <script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
 const pb = usePocketbase()
 const { t } = useI18n()
 
 useHead({
     title: t('page.title.settings'),
-    meta: [
-        {
-            name: 'description',
-            content: t('page.content.settings'),
-        },
-    ],
+    meta: [{ name: 'description', content: t('page.content.settings') }],
 })
 
 definePageMeta({
@@ -164,76 +188,121 @@ const { data: settings } = await useAsyncData('settings', () =>
     pb.collection('settings').getOne('settings_123456'),
 )
 
-// Reactive copy of settings for two-way binding
-const copySettings = reactive({
+// Make original reactive so Vue tracks updates
+const original = reactive({
     application_url: settings.value.application_url,
     imprint_url: settings.value.imprint_url,
     privacy_url: settings.value.privacy_url,
 })
 
-// Refs for image URLs, initialized as null
-const pageLogo = ref(null)
-const pageIcon = ref(null)
-const signImage = ref(null)
+// Reactive copy for text fields
+const copySettings = reactive({
+    application_url: original.application_url,
+    imprint_url: original.imprint_url,
+    privacy_url: original.privacy_url,
+})
 
+// Refs for chosen File objects
+const logoFile = ref(null)
+const iconFile = ref(null)
+const signFile = ref(null)
+
+// Refs for preview URLs (initially from PB)
+const logoPreview = ref(null)
+const iconPreview = ref(null)
+const signPreview = ref(null)
+
+// Load initial previews & subscribe to updates
 onMounted(() => {
-    // Compute image URLs only on the client side
-    pageLogo.value = pb.files.getURL(settings.value, settings.value.page_logo)
-    pageIcon.value = pb.files.getURL(settings.value, settings.value.page_icon)
-    signImage.value = pb.files.getURL(settings.value, settings.value.sign_image)
+    const rec = settings.value
+    logoPreview.value = pb.files.getURL(rec, rec.page_logo)
+    iconPreview.value = pb.files.getURL(rec, rec.page_icon)
+    signPreview.value = pb.files.getURL(rec, rec.sign_image)
 
-    // Subscribe to changes in the settings collection
     pb.collection('settings').subscribe(
         'RECORD_ID',
         (e) => {
             Object.assign(copySettings, e.data)
-            pageLogo.value = pb.files.getURL(e.data, e.data.page_logo)
-            pageIcon.value = pb.files.getURL(e.data, e.data.page_icon)
-            signImage.value = pb.files.getURL(e.data, e.data.sign_image)
+            logoPreview.value = pb.files.getURL(e.data, e.data.page_logo)
+            iconPreview.value = pb.files.getURL(e.data, e.data.page_icon)
+            signPreview.value = pb.files.getURL(e.data, e.data.sign_image)
+            // update original snapshot too
+            original.application_url = e.data.application_url
+            original.imprint_url = e.data.imprint_url
+            original.privacy_url = e.data.privacy_url
         },
         { recordId: 'settings_123456' },
     )
 })
 
-// Update functions for images
-const updateLogo = async (file) => {
-    const updatedSettings = await $pb
-        .collection('settings')
-        .update(settings.value.id, {
-            page_logo: file,
-        })
-    pageLogo.value = pb.files.getURL(updatedSettings, updatedSettings.page_logo)
+// Handlers: store file + generate local preview
+function onLogoSelected(file) {
+    logoFile.value = file
+    logoPreview.value = file
+        ? URL.createObjectURL(file)
+        : pb.files.getURL(settings.value, settings.value.page_logo)
+}
+function onIconSelected(file) {
+    iconFile.value = file
+    iconPreview.value = file
+        ? URL.createObjectURL(file)
+        : pb.files.getURL(settings.value, settings.value.page_icon)
+}
+function onSignSelected(file) {
+    signFile.value = file
+    signPreview.value = file
+        ? URL.createObjectURL(file)
+        : pb.files.getURL(settings.value, settings.value.sign_image)
 }
 
-const updateIcon = async (file) => {
-    const updatedSettings = await $pb
-        .collection('settings')
-        .update(settings.value.id, {
-            page_icon: file,
-        })
-    pageIcon.value = pb.files.getURL(updatedSettings, updatedSettings.page_icon)
-}
-
-const updateSignImage = async (file) => {
-    const updatedSettings = await $pb
-        .collection('settings')
-        .update(settings.value.id, {
-            sign_image: file,
-        })
-    signImage.value = pb.files.getURL(
-        updatedSettings,
-        updatedSettings.sign_image,
+// Computed “dirty” flag
+const hasChanges = computed(() => {
+    // any new file selected?
+    if (logoFile.value || iconFile.value || signFile.value) return true
+    // compare text fields against reactive original
+    return (
+        copySettings.application_url !== original.application_url ||
+        copySettings.imprint_url !== original.imprint_url ||
+        copySettings.privacy_url !== original.privacy_url
     )
-}
+})
 
-// Save settings when the user clicks the "Save" button
-const saveSettings = async () => {
+// Save all at once
+async function saveSettings() {
+    if (!hasChanges.value) return
+
+    const formData = new FormData()
+    formData.append('application_url', copySettings.application_url)
+    formData.append('imprint_url', copySettings.imprint_url)
+    formData.append('privacy_url', copySettings.privacy_url)
+    if (logoFile.value) formData.append('page_logo', logoFile.value)
+    if (iconFile.value) formData.append('page_icon', iconFile.value)
+    if (signFile.value) formData.append('sign_image', signFile.value)
+
     try {
-        await pb.collection('settings').update(settings.value.id, copySettings)
-        // Optionally show a success message or refresh data
-    } catch (error) {
-        console.error('Save failed:', error)
-        // Optionally show an error message to the user
+        const updated = await pb
+            .collection('settings')
+            .update(settings.value.id, formData)
+
+        // refresh previews to PB-hosted URLs
+        logoPreview.value = pb.files.getURL(updated, updated.page_logo)
+        iconPreview.value = pb.files.getURL(updated, updated.page_icon)
+        signPreview.value = pb.files.getURL(updated, updated.sign_image)
+
+        // clear file refs
+        logoFile.value = iconFile.value = signFile.value = null
+
+        // update reactive original & copySettings
+        original.application_url = updated.application_url
+        original.imprint_url = updated.imprint_url
+        original.privacy_url = updated.privacy_url
+
+        copySettings.application_url = updated.application_url
+        copySettings.imprint_url = updated.imprint_url
+        copySettings.privacy_url = updated.privacy_url
+    } catch (err) {
+        console.error('Save failed:', err)
+        // TODO: user feedback
     }
 }
 </script>
