@@ -74,9 +74,6 @@ export default defineNuxtConfig({
     detectBrowserLanguage: {
       useCookie: false,
     },
-    bundle: {
-      optimizeTranslationDirective: false,
-    },
   },
   image: {
     formats: ['avif', 'webp'],
