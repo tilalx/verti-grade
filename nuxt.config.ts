@@ -84,7 +84,7 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-  compatibilityDate: '2024-12-31',
+  compatibilityDate: '2025-08-01',
   vite: {
     build: {
       minify: 'esbuild',
