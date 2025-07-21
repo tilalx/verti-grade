@@ -30,13 +30,11 @@
             </v-row>
             <v-col class="text-center mt-4" cols="12">
                 &copy; {{ currentYear }} —
-                <strong
-                    ><a
-                        href="https://github.com/tilalx/verti-grade"
-                        target="_blank"
-                        >Verti-Grade</a
-                    ></strong
-                >.
+                <a
+                    style="cursor: pointer"
+                    onclick="window.open('https://github.com/tilalx/verti-grade','_blank');"
+                    >Verti‑Grade</a
+                >
             </v-col>
             <v-row justify="center" align="center">
                 <v-col cols="auto">

@@ -13,6 +13,9 @@
                     src="/DAVLogoHanau.png"
                     alt="Logo"
                     :style="logoColor"
+                    height="50"
+                    densities="x1 x2"
+
                 />
             </router-link>
         </v-toolbar-title>
@@ -97,6 +100,7 @@ onMounted(async () => {
         logo_url.value = await pb.files.getURL(
             settings.value,
             settings.value.page_logo,
+            { thumb: '0x200' }
         )
     }
 })
