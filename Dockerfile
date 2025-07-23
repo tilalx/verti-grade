@@ -17,7 +17,7 @@ COPY public ./public
 RUN yarn build
 
 # --------------> Build pocketbase
-FROM golang:1.24.4-bookworm AS pb-build
+FROM golang:1.24.5-bookworm AS pb-build
 
 ENV CGO_ENABLED=0
 
@@ -34,7 +34,7 @@ COPY ./pocketbase/pb_hooks ./pb_hooks
 COPY ./pocketbase/pb_migrations ./pb_migrations
 
 # --------------> The final stage
-FROM node:24.3.0-bookworm-slim
+FROM node:24.4.1-bookworm-slim
 
 # Install Nginx
 RUN apt-get update && apt-get install -y nginx ca-certificates
