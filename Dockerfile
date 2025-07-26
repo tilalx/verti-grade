@@ -20,6 +20,7 @@ RUN yarn build
 FROM golang:1.24.5-bookworm AS pb-build
 
 ENV CGO_ENABLED=0
+ENV GOPROXY=direct
 
 WORKDIR /pocketbase
 
