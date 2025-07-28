@@ -1,5 +1,5 @@
 # --------------> Build nuxt app
-FROM node:24.3.0-bookworm AS ui-build
+FROM node:24.4.1-bookworm AS ui-build
 
 WORKDIR /nuxt
 
