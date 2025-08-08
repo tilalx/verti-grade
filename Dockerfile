@@ -1,5 +1,5 @@
 # --------------> Build nuxt app
-FROM node:24.3.0-bookworm AS ui-build
+FROM node:24.5.0-bookworm AS ui-build
 
 WORKDIR /nuxt
 
@@ -35,7 +35,7 @@ COPY ./pocketbase/pb_hooks ./pb_hooks
 COPY ./pocketbase/pb_migrations ./pb_migrations
 
 # --------------> The final stage
-FROM node:24.4.1-bookworm-slim
+FROM node:24.5.0-bookworm-slim
 
 # Install Nginx
 RUN apt-get update && apt-get install -y nginx ca-certificates
