@@ -4,7 +4,7 @@ go 1.23.0
 
 toolchain go1.24.1
 
-require github.com/pocketbase/pocketbase v0.29.1
+require github.com/pocketbase/pocketbase v0.29.2
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
