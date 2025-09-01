@@ -1,9 +1,10 @@
-import QRCode from 'qrcode'
-import PDFDocument from 'pdfkit'
-import { createError } from 'h3'
-import { usePocketbase } from '~/composables/pocketbase'
+import { getQuery, createError } from 'h3'
 
 export default eventHandler(async (event) => {
+    const { default: QRCode } = await import('qrcode')
+    const { default: PDFDocument } = await import('pdfkit')
+    const { usePocketbase } = await import('~/composables/pocketbase')
+    
     const pb = usePocketbase()
 
     const res = event.node.res

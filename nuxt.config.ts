@@ -11,9 +11,6 @@ export default defineNuxtConfig({
       appVersion: process.env.npm_package_version
     }
   },
-  future: {
-    compatibilityVersion: 4,
-  },
   ssr: true,
   modules: ['@nuxtjs/i18n', '@nuxt/image', 'vuetify-nuxt-module'],
   css: [
@@ -22,6 +19,7 @@ export default defineNuxtConfig({
   ],
   vuetify: {
     moduleOptions: {
+      autoimport: true, // Automatically imports Vuetify components
       ssrClientHints: {
         reloadOnFirstRequest: true, // Reloads the page on first request to apply the theme
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
@@ -68,12 +66,21 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    locales: ['de', 'en', 'ru', 'tr', 'uk'],
-    vueI18n: './i18n.config.ts',
     strategy: 'no_prefix',
+    lazy: true,
+    langDir: 'locales/',
+    defaultLocale: 'en',
     detectBrowserLanguage: {
-      useCookie: false,
+      useCookie: false
     },
+    vueI18n: './i18n.config.ts',
+    locales: [
+      { code: 'en', file: 'en.ts', name: 'English' },
+      { code: 'de', file: 'de.ts', name: 'Deutsch' },
+      { code: 'ru', file: 'ru.ts', name: 'Русский' },
+      { code: 'tr', file: 'tr.ts', name: 'Türkçe' },
+      { code: 'uk', file: 'uk.ts', name: 'Українська' }
+    ],
   },
   image: {
     formats: ['avif', 'webp'],
@@ -84,7 +91,6 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-  compatibilityDate: '2025-08-01',
   vite: {
     build: {
       minify: 'esbuild',

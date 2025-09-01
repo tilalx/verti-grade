@@ -12,11 +12,14 @@
     "password": "Şifre",
     "email": "E-posta",
     "username_or_email": "Kullanıcı Adı veya E-posta",
+    "login_hint": "Kullanıcı adınızı veya e-posta adresinizi girin.",
     "reset_password": "Şifreyi Sıfırla",
+    "reset_hint": "Şifre sıfırlama bağlantısı e-posta ile gönderilecektir.",
     "newPassword": "Şifreyi Onayla",
     "userProfile": "Kullanıcı Profili",
     "oldPassword": "Mevcut Şifre",
-    "or_login_with": "Veya OAuth ile giriş yapın"
+    "or_login_with": "Veya OAuth ile giriş yapın",
+    "remember_me": "Beni Hatırla"
   },
   "routes": {
     "home": "Ana Sayfa",

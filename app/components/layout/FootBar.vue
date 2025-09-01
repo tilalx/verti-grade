@@ -1,117 +1,105 @@
 <template>
-    <v-footer color="background">
-        <v-container>
-            <v-row justify="center" align="center">
-                <v-col cols="auto">
-                    <div class="text-center">
-                        <a
-                            v-if="settings.privacy_url"
-                            :href="settings.privacy_url"
-                            class="footer-link"
-                            target="_blank"
-                        >
-                            {{ $t('legal.privacy') }}
-                        </a>
-                        <span
-                            v-if="settings.privacy_url"
-                            class="footer-separator"
-                            >|</span
-                        >
-                        <a
-                            v-if="settings.imprint_url"
-                            :href="settings.imprint_url"
-                            class="footer-link"
-                            target="_blank"
-                        >
-                            {{ $t('legal.imprint') }}
-                        </a>
-                    </div>
-                </v-col>
-            </v-row>
-            <v-col class="text-center mt-4" cols="12">
-                &copy; {{ currentYear }} —
-                <a
-                    style="cursor: pointer"
-                    onclick="window.open('https://github.com/tilalx/verti-grade','_blank');"
-                    >Verti‑Grade</a
-                >
-            </v-col>
-            <v-row justify="center" align="center">
-                <v-col cols="auto">
-                    <div class="text-center">
-                        <v-chip color="success" v-if="health?.code === 200">{{
-                            $t('notifications.success.health')
-                        }}</v-chip>
-                        <v-chip color="error" v-else>{{
-                            $t('notifications.error.health')
-                        }}</v-chip>
-                        <span class="footer-separator">|</span>
-                        <v-chip color="grey">{{ appVersion }}</v-chip>
-                        <span class="footer-separator">|</span>
-                        <v-chip color="info">{{
-                            $t('dashboard.online', [online.clients + 1])
-                        }}</v-chip>
-                    </div>
-                </v-col>
-            </v-row>
-        </v-container>
-    </v-footer>
+  <v-footer
+    color="background"
+    elevation="2"
+    v-if="$route.meta.footer !== false"
+  >
+    <v-container>
+      <!-- Legal links -->
+      <v-row justify="center" align="center">
+        <v-btn
+          v-if="settings.privacy_url"
+          :href="settings.privacy_url"
+          target="_blank"
+          variant="text"
+        >
+          {{ $t('legal.privacy') }}
+        </v-btn>
+
+        <v-divider inset vertical v-if="settings.privacy_url && settings.imprint_url" class="mx-2" />
+
+        <v-btn
+          v-if="settings.imprint_url"
+          :href="settings.imprint_url"
+          target="_blank"
+          variant="text"
+        >
+          {{ $t('legal.imprint') }}
+        </v-btn>
+      </v-row>
+
+      <!-- Title -->
+      <v-row justify="center" class="mt-2">
+        <v-btn
+          variant="text"
+          density="compact"
+          @click="() => window.open('https://github.com/tilalx/verti-grade')"
+        >
+          &copy; {{ currentYear }} — Verti-Grade
+        </v-btn>
+      </v-row>
+
+      <!-- Status bar -->
+      <v-row justify="center" class="mt-4">
+        <v-card
+          elevation="0"
+          variant="tonal"
+          color="surface"
+          class="px-4 py-2"
+        >
+          <v-row dense align="center" justify="center" class="flex-nowrap">
+            <v-chip
+              :color="health?.code === 200 ? 'success' : 'error'"
+              variant="flat"
+              size="small"
+              class="ma-1"
+            >
+              {{ health?.code === 200 ? $t('notifications.success.health') : $t('notifications.error.health') }}
+            </v-chip>
+
+            <v-chip
+              color="grey"
+              variant="flat"
+              size="small"
+              class="ma-1"
+            >
+              {{ appVersion }}
+            </v-chip>
+
+            <v-chip
+              color="info"
+              variant="flat"
+              size="small"
+              class="ma-1"
+            >
+              {{ $t('dashboard.online', [online.clients + 1]) }}
+            </v-chip>
+          </v-row>
+        </v-card>
+      </v-row>
+    </v-container>
+  </v-footer>
 </template>
 
 <script setup>
-// Import required Vue and Nuxt composables
-import { ref, computed, toRefs } from 'vue'
-
 const pb = usePocketbase()
-
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
-
 const currentYear = computed(() => new Date().getFullYear())
 
-const { data: health, error: healthError } = await useAsyncData(
-    'health',
-    async () => {
-        return await pb.health.check() // Fetch health status from Pocketbase
-    },
+const { data: health, error: healthError } = await useAsyncData('health', () =>
+  pb.health.check()
 )
 
-const { data: online, error: onlineError } = await useAsyncData(
-    'online',
-    async () => {
-        return await pb.send('/api/online') // Fetch online status from API
-    },
+const { data: online, error: onlineError } = await useAsyncData('online', () =>
+  pb.send('/api/online')
 )
 
 const props = defineProps({
-    settings: {
-        type: Object,
-        required: true,
-    },
+  settings: { type: Object, required: true }
 })
 
-const { settings } = toRefs(props)
-
 if (healthError.value || onlineError.value) {
-    console.error('Error fetching health or online status', {
-        healthError,
-        onlineError,
-    })
+  console.error('Error fetching health or online status', { healthError, onlineError })
 }
 </script>
-
-<style scoped>
-.footer-link {
-    margin: 0 10px;
-    text-decoration: none;
-    color: inherit;
-}
-
-.footer-link:hover {
-    text-decoration: none;
-}
-
-.footer-separator {
-    margin: 0 5px;
-}
-</style>

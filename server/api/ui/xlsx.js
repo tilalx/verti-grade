@@ -1,7 +1,7 @@
-import ExcelJS from 'exceljs'
-import { usePocketbase } from '~/composables/pocketbase'
-
 export default eventHandler(async (event) => {
+    const { default: ExcelJS } = await import('exceljs')
+    const { usePocketbase } = await import('~/composables/pocketbase')
+
     const pb = usePocketbase()
     const res = event.node.res
 
@@ -50,8 +50,8 @@ export default eventHandler(async (event) => {
                     cr.difficulty_sign === true
                         ? '+'
                         : cr.difficulty_sign === false
-                          ? '-'
-                          : '',
+                            ? '-'
+                            : '',
                 location: cr.location,
                 type: cr.type,
                 comment: cr.comment,

@@ -1,59 +1,88 @@
-# --------------> Build nuxt app
-FROM node:24.3.0-bookworm AS ui-build
+# syntax=docker/dockerfile:1.7
+# --------------> Build pocketbase (Go)
+FROM golang:1.24.5-bookworm AS pb-build
+ARG TARGETOS
+ARG TARGETARCH
+ENV CGO_ENABLED=0 \
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH}
 
-WORKDIR /nuxt
+WORKDIR /src
 
-COPY package.json .yarnrc.yml nuxt.config.ts ./
+# Copy only go mod/sum first for better caching
+COPY pocketbase/go.mod pocketbase/go.sum ./pocketbase/
+WORKDIR /src/pocketbase
 
-RUN corepack enable && yarn set version berry && yarn install
+# BuildKit caches: module + build cache
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
-COPY app ./app
+# Now copy the rest needed to build
+COPY pocketbase/main.go ./
+COPY pocketbase/pb_hooks ./pb_hooks
+COPY pocketbase/pb_migrations ./pb_migrations
+
+# Compile to /out; -trimpath makes cache keys stable
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -ldflags="-s -w" -o /out/pocketbase
+
+# --------------> Build nuxt app (Node)
+FROM node:24.4.1-bookworm AS ui-deps
+WORKDIR /app
+
+# Toolchain for native deps (sharp, parcel/watcher, esbuild)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git python3 make g++ pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only what Yarn needs for dependency resolution
+COPY .yarn ./.yarn
+COPY .yarnrc.yml package.json nuxt.config.ts ./
+# IMPORTANT: commit yarn.lock to the repo and copy it in
+COPY yarn.lock ./
+
+# 👇 add the bits Nuxt i18n expects during install
 COPY i18n ./i18n
 
+# Pin Yarn and install with cache mounts
+RUN corepack enable && corepack prepare yarn@4.3.1 --activate
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
+    --mount=type=cache,target=/root/.cache \
+    yarn install --immutable --inline-builds \
+    || (cat /tmp/xfs-*/build.log || true; exit 1)
+
+FROM node:24.4.1-bookworm AS ui-build
+WORKDIR /app
+ENV NODE_ENV=production NITRO_PRESET=node
+RUN corepack enable && corepack prepare yarn@4.3.1 --activate
+COPY --from=ui-deps /app/ ./
+COPY app ./app
 COPY server ./server
-
 COPY public ./public
+COPY i18n ./i18n
+RUN --mount=type=cache,target=/root/.cache yarn build \
+    || (cat /tmp/xfs-*/build.log || true; exit 1)
 
-RUN yarn build
-
-# --------------> Build pocketbase
-FROM golang:1.24.5-bookworm AS pb-build
-
-ENV CGO_ENABLED=0
-
-WORKDIR /pocketbase
-
-COPY ./pocketbase/main.go ./pocketbase/go.mod ./pocketbase/go.sum /pocketbase/
-
-RUN go mod download
-
-RUN go build
-
-COPY ./pocketbase/pb_hooks ./pb_hooks
-
-COPY ./pocketbase/pb_migrations ./pb_migrations
-
-# --------------> The final stage
-FROM node:24.4.1-bookworm-slim
-
-# Install Nginx
-RUN apt-get update && apt-get install -y nginx ca-certificates
+# --------------> Runtime (final stage)
+FROM node:24.4.1-bookworm-slim AS runtime
+# Install nginx (cacheable layer)
+RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy the build output and other necessary files from the ui build stage
-COPY --from=pb-build /pocketbase /pb
-COPY --from=ui-build /nuxt/.output /app/ui
+# Copy artifacts only
+COPY --from=pb-build /out/pocketbase /pb/pocketbase
+COPY --from=ui-build /app/.output /app/ui
+
+# Entrypoint + nginx config
 COPY .docker/docker-entrypoint.sh /app/entrypoint.sh
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
-
-# Make the entrypoint script executable
 RUN chmod +x /app/entrypoint.sh
 
-# Install concurrently for running multiple commands
-RUN npm install -g concurrently
-
-# Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
-
+# Avoid global npm installs at runtime; use npx if needed. (concurrently usually not needed in final image)
+# EXPOSE as needed
 EXPOSE 80 8080 3000
+ENTRYPOINT ["/app/entrypoint.sh"]

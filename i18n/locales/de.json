@@ -12,11 +12,14 @@
     "password": "Passwort",
     "email": "E-Mail",
     "username_or_email": "Benutzername oder E-Mail",
+    "login_hint": "Benutzername oder E-Mail eingeben.",
     "reset_password": "Passwort zurücksetzen",
+    "reset_hint": "Link zum Zurücksetzen wird per E-Mail gesendet.",
     "newPassword": "Passwort bestätigen",
     "userProfile": "Benutzerprofil",
     "oldPassword": "Aktuelles Passwort",
-    "or_login_with": "Oder mit OAuth anmelden"
+    "or_login_with": "Oder mit OAuth anmelden",
+    "remember_me": "Angemeldet bleiben"
   },
   "routes": {
     "home": "Startseite",

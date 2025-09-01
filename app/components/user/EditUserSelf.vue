@@ -125,8 +125,6 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
-
 const pb = usePocketbase()
 const pocketbaseAuth = JSON.parse(localStorage.getItem('pocketbase_auth'))
 
