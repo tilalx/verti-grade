@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # --------------> Build pocketbase (Go)
-FROM golang:1.24.5-bookworm AS pb-build
+FROM golang:1.25.0-trixie AS pb-build
 ARG TARGETOS
 ARG TARGETARCH
 ENV CGO_ENABLED=0 \
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go build -trimpath -ldflags="-s -w" -o /out/pocketbase
 
 # --------------> Build nuxt app (Node)
-FROM node:24.4.1-bookworm AS ui-deps
+FROM node:24.7.0-trixie AS ui-deps
 WORKDIR /app
 
 # Toolchain for native deps (sharp, parcel/watcher, esbuild)
@@ -43,17 +43,17 @@ COPY .yarnrc.yml package.json nuxt.config.ts ./
 # IMPORTANT: commit yarn.lock to the repo and copy it in
 COPY yarn.lock ./
 
-# 👇 add the bits Nuxt i18n expects during install
+# add the bits Nuxt i18n expects during install
 COPY i18n ./i18n
 
 # Pin Yarn and install with cache mounts
-RUN corepack enable && corepack prepare yarn@4.3.1 --activate
+RUN corepack enable && corepack prepare yarn --activate
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     --mount=type=cache,target=/root/.cache \
     yarn install --immutable --inline-builds \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
-FROM node:24.4.1-bookworm AS ui-build
+FROM node:24.7.0-trixie AS ui-build
 WORKDIR /app
 ENV NODE_ENV=production NITRO_PRESET=node
 RUN corepack enable && corepack prepare yarn@4.3.1 --activate
@@ -66,7 +66,7 @@ RUN --mount=type=cache,target=/root/.cache yarn build \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
 # --------------> Runtime (final stage)
-FROM node:24.4.1-bookworm-slim AS runtime
+FROM node:24.7.0-trixie-slim
 # Install nginx (cacheable layer)
 RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates \
  && rm -rf /var/lib/apt/lists/*
