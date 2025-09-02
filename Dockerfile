@@ -55,7 +55,7 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 
 FROM node:24.7.0-trixie AS ui-build
 WORKDIR /app
-ENV NODE_ENV=production NITRO_PRESET=node
+ENV NODE_ENV=production NITRO_PRESET=node-server
 RUN corepack enable && corepack prepare yarn@4.3.1 --activate
 COPY --from=ui-deps /app/ ./
 COPY app ./app
