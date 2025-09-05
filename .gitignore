@@ -37,3 +37,6 @@ pnpm-debug.log*
 *.bak
 *.tmp
 pocketbase/pocketbase.exe
+
+# Yarn
+.yarn/install-state.gz
