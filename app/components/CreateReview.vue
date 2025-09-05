@@ -185,16 +185,12 @@ async function submitReview() {
             difficulty: difficultyNumber,
             difficulty_sign: signValue,
             comment: comment.value.trim(),
-            user: pb.authStore.model.id 
         }
 
         await pb.collection('ratings').create(data)
 
-        // Optionally, show a success notification to the user here
-
     } catch (error) {
         console.error("Failed to submit review:", error)
-        // Optionally, show an error notification to the user here
     } finally {
         closeSheet()
         resetForm()
