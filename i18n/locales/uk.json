@@ -79,12 +79,14 @@
     "type": "Тип",
     "score": "Оцінка",
     "comment": "Коментар",
-    "creators": "Автори"
+    "creators": "Автори",
+    "climber_reviews": "Відгуки скелелазів"
   },
   "table": {
     "id": "ID",
     "select": "Вибрано",
     "actions": "Дії",
+    "no_data": "Немає даних",
     "created_at": "Створено",
     "updated_at": "Оновлено",
     "created_by": "Створено",
@@ -97,6 +99,8 @@
     "subtitle": "Маршрути для скелелазіння"
   },
   "actions": {
+    "search": "Пошук",
+    "clear": "Очистити",
     "import": "Імпортувати маршрути",
     "print": "Друк",
     "create": "Створити",
@@ -138,6 +142,7 @@
     "newVersionAvailable": "Доступна нова версія Verti-Grade. Будь ласка, оновіть до останньої версії."
   },
   "filter": {
+    "title": "Фільтр",
     "all": "Всі",
     "archived": "Архівовано"
   },
@@ -165,5 +170,9 @@
       "comments": "Коментарі",
       "dashboard": "Панель керування"
     }
+  },
+  "validation": {
+    "required": "Це поле є обов'язковим.",
+    "requiredAndNotEmpty": "Це поле не повинно бути порожнім."
   }
 }

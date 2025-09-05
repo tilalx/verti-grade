@@ -68,6 +68,7 @@
     "creators": "Создатели"
   },
   "ratings": {
+    "average": "Среднее",
     "ratings": "Оценки",
     "createReview": "Создать отзыв",
     "routename": "Название маршрута",
@@ -79,12 +80,14 @@
     "type": "Тип",
     "score": "Оценка",
     "comment": "Комментарий",
-    "creators": "Создатели"
+    "creators": "Создатели",
+    "climber_reviews": "Отзывы скалолазов"
   },
   "table": {
     "id": "ID",
     "select": "Выбрано",
     "actions": "Действия",
+    "no_data": "Нет данных",
     "created_at": "Создано",
     "updated_at": "Обновлено",
     "created_by": "Создано",
@@ -138,6 +141,7 @@
     "newVersionAvailable": "Доступна новая версия Verti-Grade. Пожалуйста, обновитесь до последней версии."
   },
   "filter": {
+    "title": "Фильтр",
     "all": "Все",
     "archived": "Архивировано"
   },
@@ -165,5 +169,9 @@
       "comments": "Комментарии",
       "dashboard": "Панель управления"
     }
+  },
+  "validation": {
+    "required": "Это поле обязательно для заполнения.",
+    "requiredAndNotEmpty": "Это поле не должно быть пустым."
   }
 }

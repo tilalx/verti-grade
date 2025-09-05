@@ -79,12 +79,14 @@
     "type": "Typ",
     "score": "Punktzahl",
     "comment": "Kommentar",
-    "creators": "Ersteller"
+    "creators": "Ersteller",
+    "climber_reviews": "Kletterer Bewertungen"
   },
   "table": {
     "id": "ID",
     "select": "Ausgewählt",
     "actions": "Aktionen",
+    "no_data": "Keine Daten",
     "created_at": "Erstellt am",
     "updated_at": "Aktualisiert am",
     "created_by": "Erstellt von",
@@ -97,6 +99,8 @@
     "subtitle": "Kletterrouten"
   },
   "actions": {
+    "search": "Suchen",
+    "clear": "Löschen",
     "import": "Routen importieren",
     "print": "Drucken",
     "create": "Erstellen",
@@ -110,7 +114,8 @@
     "confirm": "Löschen bestätigen",
     "select_all": "Alle auswählen",
     "deselect_all": "Alle abwählen",
-    "back_to_home": "Zurück zur Startseite"
+    "back_to_home": "Zurück zur Startseite",
+    "load_more": "Mehr laden"
   },
   "notifications": {
     "success": {
@@ -138,6 +143,7 @@
     "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
   },
   "filter": {
+    "title": "Filter",
     "all": "Alle",
     "archived": "Archiviert"
   },
@@ -165,5 +171,9 @@
       "comments": "Kommentare",
       "dashboard": "Dashboard"
     }
+  },
+  "validation": {
+    "required": "Das Feld ist erforderlich.",
+    "requiredAndNotEmpty": "Das Feld darf nicht leer sein."
   }
 }

@@ -79,12 +79,14 @@
     "type": "Tür",
     "score": "Puan",
     "comment": "Yorum",
-    "creators": "Yaratıcılar"
+    "creators": "Yaratıcılar",
+    "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri"
   },
   "table": {
     "id": "ID",
     "select": "Seçildi",
     "actions": "İşlemler",
+    "no_data": "Veri Yok",
     "created_at": "Oluşturulma Tarihi",
     "updated_at": "Güncellenme Tarihi",
     "created_by": "Oluşturan",
@@ -97,6 +99,8 @@
     "subtitle": "Tırmanış Rotaları"
   },
   "actions": {
+    "search": "Ara",
+    "clear": "Temizle",
     "import": "Rotaları İçe Aktar",
     "print": "Yazdır",
     "create": "Oluştur",
@@ -138,6 +142,7 @@
     "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
   },
   "filter": {
+    "title": "Filtre",
     "all": "Tümü",
     "archived": "Arşivlendi"
   },
@@ -165,5 +170,9 @@
       "comments": "Yorumlar",
       "dashboard": "Gösterge Paneli"
     }
+  },
+  "validation": {
+    "required": "Bu alan gereklidir.",
+    "requiredAndNotEmpty": "Bu alan boş olmamalıdır."
   }
 }
