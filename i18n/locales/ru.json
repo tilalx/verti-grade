@@ -68,9 +68,10 @@
     "creators": "Создатели"
   },
   "ratings": {
-    "average": "Среднее",
     "ratings": "Оценки",
     "createReview": "Создать отзыв",
+    "no_reviews_yet": "Еще нет отзывов",
+    "be_the_first": "Будьте первым",
     "routename": "Название маршрута",
     "stars": "Звезды",
     "difficulty": "Сложность",

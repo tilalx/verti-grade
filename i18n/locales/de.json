@@ -70,6 +70,8 @@
   "ratings": {
     "ratings": "Bewertungen",
     "createReview": "Bewertung erstellen",
+    "no_reviews_yet": "Noch keine Bewertungen vorhanden",
+    "be_the_first": "Sei der Erste",
     "routename": "Routenname",
     "stars": "Sterne",
     "difficulty": "Schwierigkeitsgrad",

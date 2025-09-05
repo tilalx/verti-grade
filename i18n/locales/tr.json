@@ -70,6 +70,8 @@
   "ratings": {
     "ratings": "Değerlendirmeler",
     "createReview": "İnceleme Oluştur",
+    "no_reviews_yet": "Henüz hiç inceleme yok",
+    "be_the_first": "İlk olun",
     "routename": "Rota Adı",
     "stars": "Yıldızlar",
     "difficulty": "Zorluk",

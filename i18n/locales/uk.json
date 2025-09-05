@@ -70,6 +70,8 @@
   "ratings": {
     "ratings": "Оцінки",
     "createReview": "Створити відгук",
+    "no_reviews_yet": "Ще немає відгуків",
+    "be_the_first": "Будьте першим",
     "routename": "Назва маршруту",
     "stars": "Зірки",
     "difficulty": "Складність",

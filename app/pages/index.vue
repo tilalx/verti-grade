@@ -165,8 +165,11 @@
         <div v-if="smAndDown">
           <v-row class="mt-2">
             <v-col v-for="route in routes" :key="route.id" cols="12">
-              <v-card variant="outlined">
-                <v-list-item class="pt-3 pb-2">
+              <v-card variant="outlined" class="mobile-route-card">
+                 <div class="route-difficulty-display text-h5 font-weight-bold">
+                    {{ formatDifficulty(route) }}
+                </div>
+                <v-list-item class="pt-3 pb-2 pr-12">
                   <template #prepend>
                     <v-avatar :color="route.color" size="32" class="mr-4" />
                   </template>
@@ -174,7 +177,6 @@
                     {{ route.name }}
                     <v-icon v-if="route.has_ratings" color="yellow-darken-2" size="small" class="ml-2">mdi-star-circle</v-icon>
                   </v-list-item-title>
-                  <v-list-item-subtitle>{{ formatDifficulty(route) }}</v-list-item-subtitle>
                 </v-list-item>
                 <v-divider />
                 <v-list density="compact" class="py-1">
@@ -395,5 +397,16 @@ function formatDifficulty(item) {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
+}
+.mobile-route-card {
+  position: relative;
+  overflow: hidden;
+}
+.route-difficulty-display {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 1;
+  color: rgba(var(--v-theme-on-surface), 0.6);
 }
 </style>
