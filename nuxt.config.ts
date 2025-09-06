@@ -1,3 +1,5 @@
+import { text } from "pdfkit";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: {
@@ -50,15 +52,16 @@ export default defineNuxtConfig({
           },
           dark: {
             colors: {
-              background: '#0f172a',
-              surface: '#1e293b',
-              primary: '#58ab27',
-              secondary: '#1A237E',
-              accent: '#263238',
-              error: '#D32F2F',
-              info: '#2979FF',
-              success: '#2E7D32',
-              warning: '#FF6F00',
+              background: '#0d1117',
+              surface: '#161b22',
+              primary: '#238636',
+              secondary: '#58a6ff',
+              error: '#f85149',
+              info: '#58a6ff',
+              success: '#238636',
+              warning: '#e3b341',
+              'on-surface': '#dddddd',
+              'on-surface-light': '#a0297dff'
             },
           },
         },

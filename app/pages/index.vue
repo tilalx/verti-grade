@@ -209,14 +209,9 @@
           </div>
         </div>
 
-        <!-- Empty State / Skeleton Loader -->
-        <v-skeleton-loader
-          v-if="loading && routes.length === 0"
-          type="table"
-          class="mt-4"
-          :elevation="0"
-        />
-        <div v-if="!loading && routes.length === 0" class="text-center pa-8 mt-4">
+        <!-- Empty State / Skeleton Loader on Mobile -->
+
+        <div v-if="!loading && routes.length === 0 && smAndDown" class="text-center pa-8 mt-4">
           <v-icon size="x-large" class="mb-4">mdi-magnify-remove-outline</v-icon>
           <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
         </div>
@@ -227,11 +222,6 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue';
-import { useDisplay } from 'vuetify';
-import { useI18n } from 'vue-i18n';
-import { useHead, useId } from '#imports';
-
 const { t } = useI18n();
 const pb = usePocketbase();
 const { smAndDown, mdAndUp } = useDisplay();

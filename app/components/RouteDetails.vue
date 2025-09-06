@@ -59,9 +59,7 @@
                             </v-list-item>
                             
                             <v-card-text v-if="review.comment" class="pt-0">
-                                <v-blockquote class="pa-3" :cite="t('ratings.climber_comment')">
                                     {{ review.comment }}
-                                </v-blockquote>
                             </v-card-text>
                         </v-card>
                     </div>
@@ -165,9 +163,4 @@ watch(isSheetOpen, (isOpen) => {
 </script>
 
 <style scoped>
-.v-blockquote {
-    background-color: rgba(var(--v-theme-on-surface), 0.04);
-    border-left: 3px solid rgba(var(--v-theme-on-surface), 0.2);
-    border-radius: 4px;
-}
 </style>
