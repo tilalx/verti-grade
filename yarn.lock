@@ -3468,12 +3468,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pdfkit@npm:0.17.2":
-  version: 0.17.2
-  resolution: "@types/pdfkit@npm:0.17.2"
+"@types/pdfkit@npm:0.17.3":
+  version: 0.17.3
+  resolution: "@types/pdfkit@npm:0.17.3"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/5a4f48bb6bbf26b4b3c7f0604dc876d9a2862aaf2d3467d3cb4990bf2a4d624fae5119352e122f1f481750175c16a851fea24e783214f375ffb5f2b55864c444
+  checksum: 10c0/59e501871d503edf2f7ec64233de382a34a9d7296417fa63e14f26468fcf1a76c95d4ff8714805b89ab9b06114bd96117e33d3f7544d0ad9a41c1fe194183b86
   languageName: node
   linkType: hard
 
@@ -9005,7 +9005,7 @@ __metadata:
     "@mdi/font": "npm:7.4.47"
     "@nuxt/image": "npm:1.11.0"
     "@nuxtjs/i18n": "npm:10.0.6"
-    "@types/pdfkit": "npm:0.17.2"
+    "@types/pdfkit": "npm:0.17.3"
     "@types/qrcode": "npm:1.5.5"
     concurrently: "npm:9.2.1"
     exceljs: "npm:4.4.0"
