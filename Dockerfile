@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # --------------> Build pocketbase (Go)
-FROM golang:1.25.0-trixie AS pb-build
+FROM golang:1.25.1-trixie AS pb-build
 ARG TARGETOS
 ARG TARGETARCH
 ENV CGO_ENABLED=0 \
