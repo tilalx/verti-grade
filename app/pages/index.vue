@@ -145,6 +145,9 @@
           <template #item.difficulty="{ item }">
             <span>{{ formatDifficulty(item) }}</span>
           </template>
+          <template #item.anchor_point="{ item }">
+            <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
+          </template>
           <template #item.comment="{ item }">
             <div class="route-comment">{{ item.comment }}</div>
           </template>
@@ -189,6 +192,11 @@
                       <v-chip v-for="c in route.creator" :key="c" size="x-small">{{ c }}</v-chip>
                     </div>
                   </v-list-item>
+                  <v-list-item>
+                    <template #prepend><v-icon size="small" class="mr-3">mdi-pound</v-icon></template>
+                    <v-list-item-title class="text-caption text-uppercase">{{ $t('climbing.anchor_point') }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ formatAnchorPoint(route.anchor_point) }}</v-list-item-subtitle>
+                  </v-list-item>
                    <v-list-item :subtitle="formatDate(route.screw_date) || '—'">
                     <template #prepend><v-icon size="small" class="mr-3">mdi-calendar-month</v-icon></template>
                   </v-list-item>
@@ -210,7 +218,12 @@
         </div>
 
         <!-- Empty State / Skeleton Loader on Mobile -->
-
+        <v-skeleton-loader
+          v-if="loading && routes.length === 0 && smAndDown"
+          type="card"
+          class="mt-4"
+          :elevation="0"
+        />
         <div v-if="!loading && routes.length === 0 && smAndDown" class="text-center pa-8 mt-4">
           <v-icon size="x-large" class="mb-4">mdi-magnify-remove-outline</v-icon>
           <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
@@ -260,6 +273,7 @@ const headersDesktop = [
   { title: t('climbing.color'), key: 'color', sortable: false },
   { title: t('climbing.routename'), key: 'name' },
   { title: t('climbing.difficulty'), key: 'difficulty' },
+  { title: t('climbing.anchor_point'), key: 'anchor_point' },
   { title: t('climbing.comment'), key: 'comment' },
   { title: t('climbing.creators'), key: 'creator' },
   { title: t('table.created_at'), key: 'screw_date' },
@@ -364,6 +378,10 @@ function formatDifficulty(item) {
   if (item.difficulty_sign === true) sign = '+';
   else if (item.difficulty_sign === false) sign = '-';
   return `${item.difficulty} ${sign}`.trim();
+}
+
+function formatAnchorPoint(value) {
+  return value === null || value === undefined || value === '' ? '—' : value;
 }
 </script>
 

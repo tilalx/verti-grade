@@ -60,6 +60,7 @@
     "routename": "Назва маршруту",
     "difficulty": "Складність",
     "difficulty_sign": "Знак складності",
+  "anchor_point": "Анкер",
     "location": "Місце",
     "searchRouteName": "Пошук",
     "type": "Тип",
@@ -175,6 +176,7 @@
   },
   "validation": {
     "required": "Це поле є обов'язковим.",
-    "requiredAndNotEmpty": "Це поле не повинно бути порожнім."
+    "requiredAndNotEmpty": "Це поле не повинно бути порожнім.",
+    "anchorPointRange": "Номер анкера має бути від 1 до 100."
   }
 }

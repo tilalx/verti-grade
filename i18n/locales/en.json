@@ -60,6 +60,7 @@
     "routename": "Route name",
     "difficulty": "Difficulty",
     "difficulty_sign": "Difficulty sign",
+  "anchor_point": "Anchor point",
     "location": "Location",
     "searchRouteName": "Search",
     "type": "Type",
@@ -176,6 +177,7 @@
   },
   "validation": {
     "required": "This field is required.",
-    "requiredAndNotEmpty": "This field must not be empty."
+    "requiredAndNotEmpty": "This field must not be empty.",
+    "anchorPointRange": "Anchor point must be between 1 and 100."
   }
 }

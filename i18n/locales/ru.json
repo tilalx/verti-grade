@@ -60,6 +60,7 @@
     "routename": "Название маршрута",
     "difficulty": "Сложность",
     "difficulty_sign": "Знак сложности",
+  "anchor_point": "Анкер",
     "location": "Местоположение",
     "searchRouteName": "Поиск",
     "type": "Тип",
@@ -173,6 +174,7 @@
   },
   "validation": {
     "required": "Это поле обязательно для заполнения.",
-    "requiredAndNotEmpty": "Это поле не должно быть пустым."
+    "requiredAndNotEmpty": "Это поле не должно быть пустым.",
+    "anchorPointRange": "Номер анкера должен быть от 1 до 100."
   }
 }

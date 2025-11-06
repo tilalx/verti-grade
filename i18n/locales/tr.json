@@ -60,6 +60,7 @@
     "routename": "Rota Adı",
     "difficulty": "Zorluk",
     "difficulty_sign": "Zorluk İşareti",
+  "anchor_point": "Ankraj noktası",
     "location": "Konum",
     "searchRouteName": "Ara",
     "type": "Tür",
@@ -175,6 +176,7 @@
   },
   "validation": {
     "required": "Bu alan gereklidir.",
-    "requiredAndNotEmpty": "Bu alan boş olmamalıdır."
+    "requiredAndNotEmpty": "Bu alan boş olmamalıdır.",
+    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır."
   }
 }

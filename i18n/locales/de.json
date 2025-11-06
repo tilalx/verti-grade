@@ -60,6 +60,7 @@
     "routename": "Routenname",
     "difficulty": "Schwierigkeitsgrad",
     "difficulty_sign": "Schwierigkeitszeichen",
+    "anchor_point": "Umlenkerpunkt",
     "location": "Ort",
     "searchRouteName": "Suchen",
     "type": "Typ",
@@ -176,6 +177,7 @@
   },
   "validation": {
     "required": "Das Feld ist erforderlich.",
-    "requiredAndNotEmpty": "Das Feld darf nicht leer sein."
+    "requiredAndNotEmpty": "Das Feld darf nicht leer sein.",
+    "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen."
   }
 }

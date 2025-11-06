@@ -25,6 +25,16 @@
                             allow-numeric
                             required
                         ></v-select>
+                        <v-text-field
+                            v-model.number="routeData.anchor_point"
+                            :label="$t('climbing.anchor_point')"
+                            :rules="anchorPointRules"
+                            type="number"
+                            min="1"
+                            max="100"
+                            step="1"
+                            required
+                        ></v-text-field>
                         <v-select
                             v-model="routeData.location"
                             :label="$t('climbing.location')"
@@ -115,6 +125,11 @@ const difficulty_sign = reactive([
 const difficulty = Array.from({ length: 10 }, (_, i) => (i + 1).toString())
 const setterItems = ref([])
 
+const anchorPointRules = [
+    (v) => v !== null && v !== undefined && v !== '' || t('validation.required'),
+    (v) => Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 100 || t('validation.anchorPointRange'),
+]
+
 function getSetters() {
     pb.collection('routes')
         .getFullList({
@@ -152,16 +167,22 @@ function formatDateToYYYYMMDD(date) {
 
 const isFormValid = computed(() => {
     const data = routeData.value
+    if (!data) return false
+
+    const anchorPoint = Number(data.anchor_point)
+
     return (
-        data &&
-        data.name &&
-        data.difficulty &&
-        data.location &&
-        data.type &&
-        data.creator &&
-        data.screw_date &&
+        Boolean(data.name) &&
+        Boolean(data.difficulty) &&
+        Number.isInteger(anchorPoint) &&
+        anchorPoint >= 1 &&
+        anchorPoint <= 100 &&
+        Boolean(data.location) &&
+        Boolean(data.type) &&
+        Boolean(data.creator) &&
+        Boolean(data.screw_date) &&
         data.archived !== null &&
-        data.color
+        Boolean(data.color)
     )
 })
 
@@ -203,6 +224,7 @@ async function saveChanges() {
             name: routeData.value.name,
             difficulty: routeData.value.difficulty,
             difficulty_sign: routeData.value.difficulty_sign,
+            anchor_point: Number(routeData.value.anchor_point),
             location: routeData.value.location,
             type: routeData.value.type,
             comment: routeData.value.comment,

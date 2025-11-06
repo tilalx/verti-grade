@@ -13,6 +13,11 @@
                                 <v-icon color="grey-darken-1">mdi-account-hard-hat</v-icon>
                             </template>
                         </v-list-item>
+                        <v-list-item :title="formattedAnchorPoint">
+                            <template v-slot:prepend>
+                                <v-icon color="grey-darken-1">mdi-pound</v-icon>
+                            </template>
+                        </v-list-item>
                         <v-list-item :title="formattedScrewDate">
                             <template v-slot:prepend>
                                 <v-icon color="grey-darken-1">mdi-calendar-month</v-icon>
@@ -95,6 +100,14 @@ const route = useRoute()
 const route_id = ref(route.query.id || null)
 const reviews = ref([])
 const metadata = ref(null)
+
+const formattedAnchorPoint = computed(() => {
+    if (!metadata.value) return ''
+    const value = metadata.value.anchor_point
+    const anchorValue =
+        value === null || value === undefined || value === '' ? '—' : value
+    return `${t('climbing.anchor_point')}: ${anchorValue}`
+})
 
 // Computed property for safely formatting the date
 const formattedScrewDate = computed(() => {
