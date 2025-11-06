@@ -311,7 +311,7 @@ const types = reactive([
 ])
 
 const formatAnchorPoint = (value) =>
-    value === null || value === undefined || value === '' ? '—' : value
+    value === 0 || value === null || value === undefined || value === '' ? '—' : value
 
 const getClimbingRoutes = async () => {
     try {

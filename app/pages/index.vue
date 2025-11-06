@@ -381,7 +381,7 @@ function formatDifficulty(item) {
 }
 
 function formatAnchorPoint(value) {
-  return value === null || value === undefined || value === '' ? '—' : value;
+  return value === 0 || value === null || value === undefined || value === '' ? '—' : value;
 }
 </script>
 
