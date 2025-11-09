@@ -1,11 +1,10 @@
 import { getQuery, createError } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js';
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const { usePocketbase } = await import('~/composables/pocketbase')
-
-    const pb = usePocketbase()
+    const pb = createPocketBase();
     const res = event.node.res
 
     try {
@@ -60,7 +59,7 @@ export default eventHandler(async (event) => {
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
             // Add small anchor number in top-left corner (if exists)
-            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined  && climbingRoute.anchor_point !== 0) {
+            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
                 const anchorValue = String(climbingRoute.anchor_point).trim()
 
                 // Box dimensions and position — aligned mid-height with name
@@ -166,7 +165,7 @@ export default eventHandler(async (event) => {
         doc.end()
     } catch (error) {
         console.error(error)
-        createError({ statusCode: 500, statusMessage: 'Server error' })
+        return createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
 

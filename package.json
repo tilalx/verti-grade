@@ -1,50 +1,50 @@
 {
-  "name": "nuxt-app",
-  "version": "1.6.2",
-  "private": true,
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "concurrently \"nuxt dev\" \"npm run start:db\"",
-    "start:db": "cd pocketbase && pocketbase serve --http=0.0.0.0:8090",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "format": "prettier --write \"**/*.{js,vue,html,css}\"",
-    "release": "release-it"
-  },
-  "devDependencies": {
-    "@mdi/font": "7.4.47",
-    "@nuxt/image": "2.0.0",
-    "@nuxtjs/i18n": "10.2.0",
-    "@types/pdfkit": "0.17.3",
-    "@types/qrcode": "1.5.6",
-    "concurrently": "9.2.1",
-    "exceljs": "4.4.0",
-    "h3": "1.15.4",
-    "install": "^0.13.0",
-    "nuxt": "^4.2.0",
-    "pdfkit": "0.17.2",
-    "pocketbase": "^0.26.3",
-    "prettier": "3.6.2",
-    "qrcode": "1.5.4",
-    "release-it": "19.0.6",
-    "release-it-snapshot-prerelease-version": "^2.1.0",
-    "sass": "1.93.3",
-    "typescript": "5.9.3",
-    "vue": "3.5.23",
-    "vuetify-nuxt-module": "0.18.8"
-  },
-  "packageManager": "yarn@4.3.1",
-  "release-it": {
-    "$schema": "https://unpkg.com/release-it/schema/release-it.json",
-    "git": {
-      "tagName": "v${version}",
-      "commitMessage": "release v${version}",
-      "requireCleanWorkingDir": true,
-      "push": true
+    "name": "nuxt-app",
+    "version": "1.6.2",
+    "private": true,
+    "scripts": {
+        "build": "nuxt build",
+        "dev": "concurrently \"nuxt dev\" \"npm run start:db\"",
+        "start:db": "cd pocketbase && pocketbase serve --http=0.0.0.0:8090",
+        "generate": "nuxt generate",
+        "preview": "nuxt preview",
+        "postinstall": "nuxt prepare",
+        "format": "prettier --write \"**/*.{js,vue,html,css}\"",
+        "release": "release-it"
     },
-    "plugins": {
-      "release-it-snapshot-prerelease-version": {}
+    "devDependencies": {
+        "@mdi/font": "7.4.47",
+        "@nuxt/image": "2.0.0",
+        "@nuxtjs/i18n": "10.2.0",
+        "@types/pdfkit": "0.17.3",
+        "@types/qrcode": "1.5.6",
+        "concurrently": "9.2.1",
+        "exceljs": "4.4.0",
+        "h3": "1.15.4",
+        "install": "^0.13.0",
+        "nuxt": "^4.2.1",
+        "pdfkit": "0.17.2",
+        "pocketbase": "^0.26.3",
+        "prettier": "3.6.2",
+        "qrcode": "1.5.4",
+        "release-it": "19.0.6",
+        "release-it-snapshot-prerelease-version": "^2.1.0",
+        "sass": "1.93.3",
+        "typescript": "5.9.3",
+        "vue": "3.5.24",
+        "vuetify-nuxt-module": "0.18.8"
+    },
+    "packageManager": "yarn@4.3.1",
+    "release-it": {
+        "$schema": "https://unpkg.com/release-it/schema/release-it.json",
+        "git": {
+            "tagName": "v${version}",
+            "commitMessage": "release v${version}",
+            "requireCleanWorkingDir": true,
+            "push": true
+        },
+        "plugins": {
+            "release-it-snapshot-prerelease-version": {}
+        }
     }
-  }
 }

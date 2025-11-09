@@ -1,10 +1,10 @@
 import { getQuery, createError } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js';
 
 export default eventHandler(async (event) => {
     const { default: ExcelJS } = await import('exceljs')
-    const { usePocketbase } = await import('~/composables/pocketbase')
 
-    const pb = usePocketbase()
+    const pb = createPocketBase()
     const res = event.node.res
 
     try {
@@ -81,6 +81,6 @@ export default eventHandler(async (event) => {
         res.end(buffer)
     } catch (error) {
         console.error(error)
-        createError({ statusCode: 500, statusMessage: 'Server error' })
+        return createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
