@@ -36,6 +36,17 @@
                                         v-model="routeDifficultySign"
                                     ></v-select>
 
+                                    <v-text-field
+                                        :label="$t('climbing.anchor_point')"
+                                        v-model.number="routeAnchorPoint"
+                                        :rules="anchorPointRules"
+                                        type="number"
+                                        min="1"
+                                        max="100"
+                                        step="1"
+                                        required
+                                    ></v-text-field>
+
                                     <v-select
                                         label="Location"
                                         :items="locations"
@@ -115,6 +126,7 @@ const showPopup = ref(false)
 const routeName = ref('')
 const routeDifficulty = ref('')
 const routeDifficultySign = ref('')
+const routeAnchorPoint = ref(null)
 const routeLocation = ref('')
 const routeType = ref('')
 const routeComment = ref('')
@@ -129,6 +141,11 @@ const nameRules = [
     (v) => v.length <= 30 || t('notifications.error.nameTooLong'),
 ]
 
+const anchorPointRules = [
+    (v) => v !== null && v !== undefined && v !== '' || t('validation.required'),
+    (v) => Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 100 || t('validation.anchorPointRange'),
+]
+
 const difficulties = Array.from({ length: 10 }, (_, i) => (i + 1).toString())
 const locations = ['Hanau', 'Gelnhausen']
 
@@ -136,6 +153,9 @@ const isFormComplete = computed(
     () =>
         routeName.value &&
         routeDifficulty.value &&
+        Number.isInteger(Number(routeAnchorPoint.value)) &&
+        Number(routeAnchorPoint.value) >= 1 &&
+        Number(routeAnchorPoint.value) <= 100 &&
         routeLocation.value &&
         routeType.value &&
         routeCreator.value &&
@@ -177,6 +197,7 @@ async function createRoute() {
                 : routeDifficultySign.value === '-'
                   ? false
                   : null,
+    anchor_point: Number(routeAnchorPoint.value),
         location: routeLocation.value,
         type: routeType.value,
         comment: routeComment.value || '',
@@ -189,7 +210,8 @@ async function createRoute() {
         await pb.collection('routes').create(routeData)
 
         showPopup.value = false
-        form.value.reset()
+    form.value?.reset()
+    routeAnchorPoint.value = null
     } catch (error) {
         console.error('Error creating route:', error)
     }

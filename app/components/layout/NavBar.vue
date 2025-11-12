@@ -24,13 +24,13 @@
             <v-btn text class="d-none d-md-inline-flex" to="/">{{
                 $t('routes.home')
             }}</v-btn>
-            <v-btn text class="d-none d-md-inline-flex" to="/dashboard">{{
+            <v-btn text class="d-none d-md-inline-flex" to="/admin/dashboard">{{
                 $t('routes.dashboard')
             }}</v-btn>
-            <v-btn text class="d-none d-md-inline-flex" to="/comments">{{
+            <v-btn text class="d-none d-md-inline-flex" to="/admin/comments">{{
                 $t('routes.comments')
             }}</v-btn>
-            <v-btn text class="d-none d-md-inline-flex" to="/settings">{{
+            <v-btn text class="d-none d-md-inline-flex" to="/admin/settings">{{
                 $t('routes.settings')
             }}</v-btn>
             <UserIcon class="d-none d-md-inline-flex"></UserIcon>
@@ -57,13 +57,13 @@
         <v-list-item to="/">
             {{ $t('routes.home') }}
         </v-list-item>
-        <v-list-item to="/dashboard">
+        <v-list-item to="/admin/dashboard">
             {{ $t('routes.dashboard') }}
         </v-list-item>
-        <v-list-item to="/comments">
+        <v-list-item to="/admin/comments">
             {{ $t('routes.comments') }}
         </v-list-item>
-        <v-list-item to="/settings">
+        <v-list-item to="/admin/settings">
             {{ $t('routes.settings') }}
         </v-list-item>
         <v-list-item>

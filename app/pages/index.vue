@@ -3,20 +3,18 @@
     <v-main>
       <v-container>
 
-        <!-- Filters -->
-        <v-row>
-          <v-col cols="6" sm="3">
+        <!-- DESKTOP Filters -->
+        <v-row v-if="mdAndUp">
+          <v-col cols="12" md="3">
             <v-text-field
               :id="routeNameId"
               :label="$t('climbing.searchRouteName')"
               v-model="searchRouteName"
-              class="mt-2"
               density="comfortable"
               hide-details
             />
           </v-col>
-
-          <v-col cols="6" sm="3">
+          <v-col cols="12" md="3">
             <v-select
               :id="difficultyId"
               :label="$t('climbing.difficulty')"
@@ -24,13 +22,11 @@
               v-model="selectedDifficulty"
               item-title="text"
               item-value="value"
-              class="mt-2"
               density="comfortable"
               hide-details
             />
           </v-col>
-
-          <v-col cols="6" sm="3">
+          <v-col cols="12" md="3">
             <v-select
               :id="typeId"
               :label="$t('climbing.type')"
@@ -38,13 +34,11 @@
               v-model="selectedType"
               item-title="text"
               item-value="value"
-              class="mt-2"
               density="comfortable"
               hide-details
             />
           </v-col>
-
-          <v-col cols="6" sm="3">
+          <v-col cols="12" md="3">
             <v-select
               :id="locationId"
               :label="$t('climbing.location')"
@@ -52,26 +46,83 @@
               v-model="selectedLocation"
               item-title="text"
               item-value="value"
-              class="mt-2"
               density="comfortable"
               hide-details
             />
           </v-col>
         </v-row>
 
-        <!-- Skeleton (no CLS on first load) -->
-        <v-skeleton-loader
-          v-if="loading && routes.length === 0"
-          type="table"
-          class="mt-4"
-          :elevation="0"
-        />
+        <!-- MOBILE Filters -->
+        <v-row v-if="smAndDown" align="center" class="mb-2">
+            <v-col>
+                <v-text-field
+                    :id="routeNameId"
+                    :label="$t('climbing.searchRouteName')"
+                    v-model="searchRouteName"
+                    density="comfortable"
+                    hide-details
+                />
+            </v-col>
+            <v-col cols="auto">
+                <v-btn @click="isFilterSheetOpen = true" icon>
+                    <v-badge :content="activeFilterCount" color="primary" :model-value="activeFilterCount > 0">
+                        <v-icon>mdi-filter-variant</v-icon>
+                    </v-badge>
+                </v-btn>
+            </v-col>
+        </v-row>
 
-        <!-- Server-side table (no inner scroll, uses footer) -->
+        <!-- Filter Bottom Sheet for Mobile -->
+        <v-bottom-sheet v-model="isFilterSheetOpen" v-if="smAndDown">
+            <v-card>
+                <v-card-title class="text-h5 text-center">{{ $t('filter.title') }}</v-card-title>
+                <v-card-text>
+                    <v-select
+                        :id="difficultyId"
+                        :label="$t('climbing.difficulty')"
+                        :items="difficulties"
+                        v-model="selectedDifficulty"
+                        item-title="text"
+                        item-value="value"
+                        density="comfortable"
+                        hide-details
+                        class="mb-4"
+                    />
+                    <v-select
+                        :id="typeId"
+                        :label="$t('climbing.type')"
+                        :items="types"
+                        v-model="selectedType"
+                        item-title="text"
+                        item-value="value"
+                        density="comfortable"
+                        hide-details
+                        class="mb-4"
+                    />
+                    <v-select
+                        :id="locationId"
+                        :label="$t('climbing.location')"
+                        :items="locations"
+                        v-model="selectedLocation"
+                        item-title="text"
+                        item-value="value"
+                        density="comfortable"
+                        hide-details
+                    />
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn @click="clearFilters" variant="text">{{ $t('actions.clear') }}</v-btn>
+                    <v-spacer/>
+                    <v-btn color="primary" @click="isFilterSheetOpen = false" variant="flat">{{ $t('actions.search') }}</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-bottom-sheet>
+
+        <!-- DESKTOP VIEW: Data Table -->
         <v-data-table-server
-          v-else
+          v-if="mdAndUp"
           class="mt-4"
-          :headers="headersToUse"
+          :headers="headersDesktop"
           :items="routes"
           :items-length="totalItems"
           :loading="loading"
@@ -80,74 +131,103 @@
           :sort-by="tableOptions.sortBy"
           item-value="id"
           density="comfortable"
-          :show-expand="smAndDown"
-          :expand-on-click="smAndDown"
-          v-model:expanded="expanded"
           @update:options="loadRoutes"
         >
-          <!-- Per-cell slots (required to keep expand working) -->
           <template #item.color="{ item }">
             <v-avatar :color="item.color" size="30" />
           </template>
-
           <template #item.name="{ item }">
-            <div style="min-width:160px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-              {{ item.name }}
+            <div class="d-flex align-center">
+              <span class="route-name">{{ item.name }}</span>
+              <v-icon v-if="item.has_ratings" color="yellow-darken-2" size="small" class="ml-2">mdi-star-circle</v-icon>
             </div>
           </template>
-
           <template #item.difficulty="{ item }">
-            <span>
-              {{ item.difficulty }}
-              {{ item.difficulty_sign === true ? '+' : item.difficulty_sign === false ? '-' : '' }}
-            </span>
+            <span>{{ formatDifficulty(item) }}</span>
           </template>
-
-          <!-- Desktop-only columns (moved to expanded on mobile) -->
-          <template v-if="!smAndDown" #item.comment="{ item }">
-            <div style="min-width:200px;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-              {{ item.comment }}
-            </div>
+          <template #item.anchor_point="{ item }">
+            <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
           </template>
-
-          <template v-if="!smAndDown" #item.creator="{ item }">
-            <div class="d-flex ga-1 flex-wrap" style="max-height:40px;overflow:hidden">
+          <template #item.comment="{ item }">
+            <div class="route-comment">{{ item.comment }}</div>
+          </template>
+          <template #item.creator="{ item }">
+            <div class="creator-chips">
               <v-chip v-for="c in item.creator" :key="c" size="small">{{ c }}</v-chip>
             </div>
           </template>
-
-          <template v-if="!smAndDown" #item.screw_date="{ item }">
+          <template #item.screw_date="{ item }">
             {{ formatDate(item.screw_date) }}
           </template>
-
           <template #item.actions="{ item }">
             <RouteDetails :route_id="item.id" />
           </template>
-
-          <!-- Expanded row for MOBILE -->
-          <template #expanded-row="{ columns, item }">
-            <tr>
-              <td :colspan="columns.length">
-                <div class="pa-3 d-flex flex-column ga-3">
-                  <div>
-                    <strong>{{ $t('climbing.comment') }}:</strong>
-                    <div class="mt-1">{{ item.comment || '—' }}</div>
-                  </div>
-                  <div>
-                    <strong>{{ $t('climbing.creators') }}:</strong>
-                    <div class="d-flex ga-1 flex-wrap mt-1">
-                      <v-chip v-for="c in item.creator" :key="c" size="small">{{ c }}</v-chip>
-                    </div>
-                  </div>
-                  <div>
-                    <strong>{{ $t('table.created_at') }}:</strong>
-                    <div class="mt-1">{{ formatDate(item.screw_date) || '—' }}</div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </template>
         </v-data-table-server>
+
+        <!-- MOBILE VIEW: Card List -->
+        <div v-if="smAndDown">
+          <v-row class="mt-2">
+            <v-col v-for="route in routes" :key="route.id" cols="12">
+              <v-card variant="outlined" class="mobile-route-card">
+                 <div class="route-difficulty-display text-h5 font-weight-bold">
+                    {{ formatDifficulty(route) }}
+                </div>
+                <v-list-item class="pt-3 pb-2 pr-12">
+                  <template #prepend>
+                    <v-avatar :color="route.color" size="32" class="mr-4" />
+                  </template>
+                  <v-list-item-title class="text-h6 font-weight-bold d-flex align-center">
+                    {{ route.name }}
+                    <v-icon v-if="route.has_ratings" color="yellow-darken-2" size="small" class="ml-2">mdi-star-circle</v-icon>
+                  </v-list-item-title>
+                </v-list-item>
+                <v-divider />
+                <v-list density="compact" class="py-1">
+                  <v-list-item :subtitle="route.comment || '—'">
+                    <template #prepend><v-icon size="small" class="mr-3">mdi-comment-text-outline</v-icon></template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template #prepend><v-icon size="small" class="mr-3">mdi-account-hard-hat</v-icon></template>
+                    <div class="d-flex ga-1 flex-wrap mt-1">
+                      <v-chip v-for="c in route.creator" :key="c" size="x-small">{{ c }}</v-chip>
+                    </div>
+                  </v-list-item>
+                  <v-list-item>
+                    <template #prepend><v-icon size="small" class="mr-3">mdi-pound</v-icon></template>
+                    <v-list-item-title class="text-caption text-uppercase">{{ $t('climbing.anchor_point') }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ formatAnchorPoint(route.anchor_point) }}</v-list-item-subtitle>
+                  </v-list-item>
+                   <v-list-item :subtitle="formatDate(route.screw_date) || '—'">
+                    <template #prepend><v-icon size="small" class="mr-3">mdi-calendar-month</v-icon></template>
+                  </v-list-item>
+                </v-list>
+                <v-card-actions class="pa-2">
+                  <v-spacer />
+                  <RouteDetails :route_id="route.id" />
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+          
+          <!-- "Load More" Button for Mobile -->
+          <div v-if="routes.length < totalItems" class="text-center pa-4">
+            <v-btn :loading="loading" @click="loadMore" variant="tonal" color="primary">
+              {{ $t('actions.load_more') }}
+            </v-btn>
+          </div>
+        </div>
+
+        <!-- Empty State / Skeleton Loader on Mobile -->
+        <v-skeleton-loader
+          v-if="loading && routes.length === 0 && smAndDown"
+          type="card"
+          class="mt-4"
+          :elevation="0"
+        />
+        <div v-if="!loading && routes.length === 0 && smAndDown" class="text-center pa-8 mt-4">
+          <v-icon size="x-large" class="mb-4">mdi-magnify-remove-outline</v-icon>
+          <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
+        </div>
 
       </v-container>
     </v-main>
@@ -155,164 +235,186 @@
 </template>
 
 <script setup>
-/**
- * Assumes you have:
- * - Vuetify plugin installed
- * - i18n with keys used below
- * - PocketBase composable `usePocketbase()`
- */
-const { t } = useI18n()
-const pb = usePocketbase()
-const { smAndDown } = useDisplay()
+const { t } = useI18n();
+const pb = usePocketbase();
+const { smAndDown, mdAndUp } = useDisplay();
 
 useHead({
   title: t('page.title.index'),
   meta: [{ name: 'description', content: t('page.content.index'), authRequired: false }],
-})
+});
 
-// Stable IDs for a11y (SSR-safe)
-const routeNameId = useId()
-const difficultyId = useId()
-const typeId = useId()
-const locationId = useId()
+const routeNameId = useId(), difficultyId = useId(), typeId = useId(), locationId = useId();
 
-/** Filters */
-const selectedDifficulty = ref('')
-const selectedLocation   = ref('')
-const selectedType       = ref('')
-const searchRouteName    = ref('')
+// Filter State
+const selectedDifficulty = ref(''), selectedLocation = ref(''), selectedType = ref(''), searchRouteName = ref('');
+const isFilterSheetOpen = ref(false);
 
-/** Server table state */
+const activeFilterCount = computed(() => {
+  return [selectedDifficulty.value, selectedLocation.value, selectedType.value].filter(Boolean).length;
+});
+
+function clearFilters() {
+  selectedDifficulty.value = '';
+  selectedLocation.value = '';
+  selectedType.value = '';
+  isFilterSheetOpen.value = false;
+}
+
 const tableOptions = reactive({
   page: 1,
-  itemsPerPage: 50,
-  // Vuetify expects: [{ key: 'field', order: 'asc'|'desc' }]
+  itemsPerPage: 20,
   sortBy: [{ key: 'screw_date', order: 'desc' }],
-})
+});
 
-/** Data state */
-const loading    = ref(false)
-const routes     = ref([])
-const totalItems = ref(0)
-const expanded   = ref([]) // holds expanded row ids (mobile)
+const loading = ref(true), routes = ref([]), totalItems = ref(0);
 
-/** Headers */
 const headersDesktop = [
-  { title: t('climbing.color'),    key: 'color' },
-  { title: t('climbing.routename'),key: 'name' },
+  { title: t('climbing.color'), key: 'color', sortable: false },
+  { title: t('climbing.routename'), key: 'name' },
   { title: t('climbing.difficulty'), key: 'difficulty' },
-  { title: t('climbing.comment'),  key: 'comment' },
+  { title: t('climbing.anchor_point'), key: 'anchor_point' },
+  { title: t('climbing.comment'), key: 'comment' },
   { title: t('climbing.creators'), key: 'creator' },
-  { title: t('table.created_at'),  key: 'screw_date' },
-  { title: t('table.actions'),     key: 'actions', sortable: false },
-]
+  { title: t('table.created_at'), key: 'screw_date' },
+  { title: t('table.actions'), key: 'actions', sortable: false },
+];
 
-const headersMobile = [
-  { title: t('climbing.color'),    key: 'color' },
-  { title: t('climbing.routename'),key: 'name' },
-  { title: t('climbing.difficulty'), key: 'difficulty' },
-  { title: t('table.actions'),     key: 'actions', sortable: false },
-]
+const difficulties = [{ text: t('filter.all'), value: '' }, ...Array.from({ length: 10 }, (_, i) => ({ text: String(i + 1), value: String(i + 1) }))];
+const locations = [{ text: t('filter.all'), value: '' }, { text: 'Hanau', value: 'Hanau' }, { text: 'Gelnhausen', value: 'Gelnhausen' }];
+const types = [{ text: t('routes.types.boulder'), value: 'Boulder' }, { text: t('filter.all'), value: '' }, { text: t('routes.types.route'), value: 'Route' }];
 
-const headersToUse = computed(() => smAndDown.value ? headersMobile : headersDesktop)
-
-/** Filter lists */
-const difficulties = [
-  { text: t('filter.all'), value: '' },
-  ...Array.from({ length: 10 }, (_, i) => ({ text: String(i + 1), value: String(i + 1) })),
-]
-
-const locations = [
-  { text: t('filter.all'), value: '' },
-  { text: 'Hanau', value: 'Hanau' },
-  { text: 'Gelnhausen', value: 'Gelnhausen' },
-]
-
-const types = [
-  { text: t('routes.types.boulder'), value: 'Boulder' },
-  { text: t('filter.all'),           value: '' },
-  { text: t('routes.types.route'),   value: 'Route' },
-]
-
-/** Build PocketBase filter */
 const pbFilter = computed(() => {
-  const parts = ['archived = false']
-  if (selectedDifficulty.value) parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
-  if (selectedLocation.value)   parts.push(`location = "${selectedLocation.value}"`)
-  if (selectedType.value)       parts.push(`type = "${selectedType.value}"`)
+  const parts = ['archived = false'];
+  if (selectedDifficulty.value) parts.push(`difficulty = ${Number(selectedDifficulty.value)}`);
+  if (selectedLocation.value) parts.push(`location = "${selectedLocation.value}"`);
+  if (selectedType.value) parts.push(`type = "${selectedType.value}"`);
   if (searchRouteName.value.trim()) {
-    const term = searchRouteName.value.replace(/"/g, '\\"')
-    parts.push(`name ~ "${term}"`)
+    const term = searchRouteName.value.replace(/"/g, '\\"');
+    parts.push(`name ~ "${term}"`);
   }
-  return parts.join(' && ')
-})
+  return parts.join(' && ');
+});
 
-/** Map Vuetify sort -> PB sort string */
 function toPbSort(sortByArr) {
-  if (!Array.isArray(sortByArr) || !sortByArr.length) return '-screw_date'
-  return sortByArr.map(s => (s.order === 'desc' ? `-${s.key}` : s.key)).join(',')
+  if (!Array.isArray(sortByArr) || !sortByArr.length) return '-screw_date';
+  return sortByArr.map(s => (s.order === 'desc' ? `-${s.key}` : s.key)).join(',');
 }
 
-/** Core loader; invoked on init and any table/filter changes */
-async function loadRoutes(options) {
-  loading.value = true
+async function loadRoutes(options = {}, { append = false } = {}) {
+  loading.value = true;
+  if (options.page) tableOptions.page = options.page;
+  if (options.itemsPerPage) tableOptions.itemsPerPage = options.itemsPerPage;
+  if (options.sortBy) tableOptions.sortBy = options.sortBy;
 
-  // sync local state with table options
-  if (options) {
-    tableOptions.page         = options.page
-    tableOptions.itemsPerPage = options.itemsPerPage
-    tableOptions.sortBy       = options.sortBy
+  const sort = toPbSort(tableOptions.sortBy);
+  try {
+    const res = await pb.collection('routes').getList(
+      tableOptions.page,
+      tableOptions.itemsPerPage,
+      { filter: pbFilter.value, sort }
+    );
+
+    const routeIds = res.items.map(r => r.id);
+    let ratedRouteIds = new Set();
+    if (routeIds.length > 0) {
+      const ratingsFilter = routeIds.map(id => `route_id = "${id}"`).join(' || ');
+      const ratingsRecords = await pb.collection('ratings').getFullList({
+          filter: ratingsFilter,
+          fields: 'route_id'
+      });
+      ratedRouteIds = new Set(ratingsRecords.map(r => r.route_id));
+    }
+
+    const newRoutes = res.items.map(route => ({
+      ...route,
+      has_ratings: ratedRouteIds.has(route.id)
+    }));
+
+    if (append) {
+      routes.value.push(...newRoutes);
+    } else {
+      routes.value = newRoutes;
+    }
+    totalItems.value = res.totalItems;
+  } catch (error) {
+    console.error("Failed to load routes:", error);
+  } finally {
+    loading.value = false;
   }
-
-  const sort = toPbSort(tableOptions.sortBy)
-
-  const res = await pb.collection('routes').getList(
-    tableOptions.page,
-    tableOptions.itemsPerPage,
-    { filter: pbFilter.value, sort }
-  )
-
-  routes.value     = res.items
-  totalItems.value = res.totalItems ?? res.total ?? 0
-  loading.value    = false
 }
 
-/** Initial load */
-onMounted(() => { loadRoutes({ ...tableOptions }) })
+function loadMore() {
+  tableOptions.page++;
+  loadRoutes({}, { append: true });
+}
 
-/** Debounce filters -> reset page -> reload */
-let debounceT = null
+let debounceT = null;
 watch([selectedDifficulty, selectedLocation, selectedType, searchRouteName], () => {
-  if (debounceT) clearTimeout(debounceT)
+  clearTimeout(debounceT);
   debounceT = setTimeout(() => {
-    tableOptions.page = 1
-    expanded.value = [] // collapse expanded rows after filter change
-    loadRoutes({ ...tableOptions })
-  }, 220)
-})
+    tableOptions.page = 1;
+    loadRoutes({}, { append: false });
+  }, 300);
+});
 
-/** Live updates from PocketBase (optional) */
-let unsub = null
+let unsub = null;
 onMounted(async () => {
-  unsub = await pb.collection('routes').subscribe('*', async () => {
-    await loadRoutes({ ...tableOptions })
-  })
-})
-onBeforeUnmount(() => { if (unsub) unsub() })
+  await loadRoutes({ ...tableOptions });
+  unsub = await pb.collection('routes').subscribe('*', () => {
+    tableOptions.page = 1;
+    loadRoutes({}, { append: false });
+  });
+});
+onBeforeUnmount(() => unsub && unsub());
 
-/** Utils */
 function formatDate(date) {
-  if (!date) return ''
-  const d = new Date(date)
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const year = d.getFullYear()
-  return `${day}.${month}.${year}`
+  if (!date) return '';
+  return new Date(date).toLocaleDateString('de-DE');
+}
+
+function formatDifficulty(item) {
+  let sign = '';
+  if (item.difficulty_sign === true) sign = '+';
+  else if (item.difficulty_sign === false) sign = '-';
+  return `${item.difficulty} ${sign}`.trim();
+}
+
+function formatAnchorPoint(value) {
+  return value === 0 || value === null || value === undefined || value === '' ? '—' : value;
 }
 </script>
 
 <style scoped>
-/* stabilize control heights & chips to avoid tiny reflows */
-:deep(.v-field){ min-height: 40px; }
-:deep(.v-chip){ line-height: 20px; }
+.route-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.route-comment {
+  min-width: 200px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.creator-chips {
+  max-height: 40px;
+  overflow: hidden;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.mobile-route-card {
+  position: relative;
+  overflow: hidden;
+}
+.route-difficulty-display {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 1;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+}
 </style>

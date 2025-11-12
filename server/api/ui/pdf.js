@@ -1,17 +1,14 @@
 import { getQuery, createError } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js';
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const { usePocketbase } = await import('~/composables/pocketbase')
-    
-    const pb = usePocketbase()
-
+    const pb = createPocketBase();
     const res = event.node.res
 
     try {
         const paramId = getQuery(event)
-
         const ids = paramId?.id ? paramId.id.split(',') : []
         if (ids.length === 0) {
             return createError({
@@ -25,7 +22,6 @@ export default eventHandler(async (event) => {
             .getOne('settings_123456')
 
         const logoUrl = await pb.files.getURL(settings, settings.sign_image)
-
         const logo = await fetchLogo(logoUrl)
 
         if (!logo) {
@@ -44,7 +40,6 @@ export default eventHandler(async (event) => {
 
         const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
-
         doc.pipe(res)
 
         let entryCount = 0
@@ -63,27 +58,60 @@ export default eventHandler(async (event) => {
             // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
-            // add color
+            // Add small anchor number in top-left corner (if exists)
+            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
+                const anchorValue = String(climbingRoute.anchor_point).trim()
+
+                // Box dimensions and position — aligned mid-height with name
+                const boxWidth = 32
+                const boxHeight = 25
+                const boxX = x + 2     // small gap from left border
+                const boxY = y + 129   // moved slightly lower for better alignment with name line
+
+                // Draw the box outline
+                doc.rect(boxX, boxY, boxWidth, boxHeight).stroke()
+
+                // Centered "Seil" label
+                doc.font('Helvetica').fontSize(8).fillColor('black')
+                    .text('Seil', boxX, boxY + 4, {
+                        width: boxWidth,
+                        align: 'center',
+                    })
+
+                // Centered bold anchor number below label
+                doc.font('Helvetica-Bold').fontSize(12)
+                    .text(anchorValue, boxX, boxY + 11, {
+                        width: boxWidth,
+                        align: 'center',
+                    })
+            }
+
+            // Add color circle
             doc.circle(x + 80, y + 15, 10).fill(climbingRoute.color)
 
-            //set text color black
+            // Set text color black
             doc.fillColor('black')
 
             // Set text positions
             const textOptions = { align: 'left', width: 200 }
-            const difficulty = climbingRoute.difficulty + (climbingRoute.difficulty_sign ? (climbingRoute.difficulty_sign === '' ? '' : '+') : '-')
-            doc.text(
-                climbingRoute.name,
-                calculateStartX(x + 80, climbingRoute.name, doc),
-                y + 35,
-                textOptions,
-            )
+            let sign = ''
+
+            if (typeof climbingRoute.difficulty_sign === 'string') {
+                sign = climbingRoute.difficulty_sign.trim()
+            } else if (typeof climbingRoute.difficulty_sign === 'boolean') {
+                // interpret boolean true as "+"
+                sign = climbingRoute.difficulty_sign ? '+' : ''
+            }
+
+            const difficulty = climbingRoute.difficulty + sign
+
             doc.text(
                 difficulty,
                 calculateStartX(x + 80, difficulty, doc, 45),
                 y + 55,
                 textOptions,
             )
+
             doc.text(
                 climbingRoute.comment,
                 calculateStartX(x + 80, climbingRoute.comment, doc),
@@ -91,7 +119,7 @@ export default eventHandler(async (event) => {
                 textOptions,
             )
 
-            // Search for first and last name based on creatorId
+            // Creator names
             const creators = climbingRoute.creator || []
             if (Array.isArray(creators)) {
                 doc.fontSize(8).text(
@@ -102,6 +130,7 @@ export default eventHandler(async (event) => {
                 )
             }
 
+            // Screw date
             const date = new Date(climbingRoute.screw_date)
             const screw_date = date.toLocaleDateString('DE-de')
             doc.fontSize(8).text(
@@ -112,20 +141,18 @@ export default eventHandler(async (event) => {
             )
 
             // QR code positioning and scaling
-            const qrX = x + 155 // X position for QR code (to the right of the text)
+            const qrX = x + 155 // X position for QR code
             const qrY = y - 15 // Y position for QR code
-            const qrSize = 120 // Size of the QR code, adjust as necessary
+            const qrSize = 120 // Size of the QR code
 
-            // Generate QR code with the server URL and the entry ID as a query parameter
+            // Generate QR code with the server URL and the entry ID
             const serverUrl = settings.application_url + `/route?id=${id}`
-
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
-                color: {
-                    light: '#0000', // Transparent background
-                },
+                color: { light: '#0000' }, // Transparent background
             })
             doc.image(qrCodeBuffer, qrX, qrY, { fit: [qrSize, qrSize] })
 
+            // Add logo
             doc.image(logo, {
                 fit: [100, 100],
                 y: y + 100,
@@ -138,30 +165,25 @@ export default eventHandler(async (event) => {
         doc.end()
     } catch (error) {
         console.error(error)
-        createError({ statusCode: 500, statusMessage: 'Server error' })
+        return createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
 
 // Function to calculate the starting X-coordinate for centered text
 function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
     if (text !== null) {
-        // Choose a font and font size for measuring
         doc.font('Helvetica').fontSize(fontSize)
-
-        // Measure the width of the text
         const textWidth = doc.widthOfString(text)
-        // Calculate and return the starting X position for the centered text
         return desiredXCenter - textWidth / 2
     }
     return 0
 }
 
+// Helper to fetch the logo as a buffer
 async function fetchLogo(url) {
     try {
         const response = await fetch(url)
-        if (!response.ok) {
-            throw new Error('Failed to fetch logo')
-        }
+        if (!response.ok) throw new Error('Failed to fetch logo')
         const logoBuffer = await response.arrayBuffer()
         return logoBuffer
     } catch (error) {

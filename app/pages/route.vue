@@ -1,58 +1,75 @@
 <template>
     <v-container>
-        <v-row>
-            <v-col>
-                <v-card class="mx-auto" outlined>
-                    <v-card>
-                        <v-card-actions :disabled="true">
-                            <v-list>
-                                <v-list-item>
-                                    <span>{{ $t('account.name') }}:</span>
-                                    <span class="ml-1">{{
-                                        metadata?.name
-                                    }}</span>
-                                </v-list-item>
-                                <v-list-item>
-                                    <span
-                                        >{{ $t('routes.route_setter') }}:</span
-                                    >
-                                    <span class="ml-1">{{
-                                        metadata?.creator.join(', ')
-                                    }}</span>
-                                </v-list-item>
-                                <v-list-item>
-                                    <span>{{ $t('routes.screwed_at') }}:</span>
-                                    <span class="ml-1">
-                                        {{
-                                            new Date(
-                                                metadata?.screw_date,
-                                            ).toLocaleDateString('de-DE')
-                                        }}
-                                    </span>
-                                </v-list-item>
-                            </v-list>
-                        </v-card-actions>
-                    </v-card>
+        <v-row justify="center">
+            <v-col cols="12" md="10" lg="8">
+                <!-- Route Metadata Card -->
+                <v-card class="mb-6" variant="outlined">
+                    <v-card-title class="text-h5 text-primary">
+                        {{ metadata?.name }}
+                    </v-card-title>
+                    <v-list density="compact">
+                        <v-list-item :title="metadata?.creator.join(', ')">
+                            <template v-slot:prepend>
+                                <v-icon color="grey-darken-1">mdi-account-hard-hat</v-icon>
+                            </template>
+                        </v-list-item>
+                        <v-list-item :title="formattedAnchorPoint">
+                            <template v-slot:prepend>
+                                <v-icon color="grey-darken-1">mdi-pound</v-icon>
+                            </template>
+                        </v-list-item>
+                        <v-list-item :title="formattedScrewDate">
+                            <template v-slot:prepend>
+                                <v-icon color="grey-darken-1">mdi-calendar-month</v-icon>
+                            </template>
+                        </v-list-item>
+                    </v-list>
                 </v-card>
-                <v-spacer class="my-4"></v-spacer>
-                <CreateReview :route_id="route_id"></CreateReview>
-                <v-spacer class="my-4"></v-spacer>
-                <v-card class="mx-auto" outlined>
-                    <v-data-table
-                        :items="reviews"
-                        :headers="headers"
-                        :items-per-page="15"
-                        class="elevation-1"
+
+                <!-- Create Review Action -->
+                <CreateReview :route_id="route_id" :call-to-action="true" class="mb-6"></CreateReview>
+
+                <!-- Reviews Section -->
+                <div v-if="reviews.length > 0">
+                    <v-card 
+                        v-for="(review, index) in reviews" 
+                        :key="index" 
+                        class="mb-4"
+                        variant="tonal"
                     >
-                        <template v-slot:[`item.rating`]="{ item }">
+                        <v-list-item class="py-2">
+                             <!-- Placeholder for user avatar -->
+                            <template v-slot:prepend>
+                                <v-avatar color="grey-lighten-2">
+                                    <v-icon>mdi-account</v-icon>
+                                </v-avatar>
+                            </template>
+
+                            <v-list-item-title class="font-weight-bold">
+                                {{ review.difficulty }}
+                            </v-list-item-title>
+                            
                             <v-rating
-                                v-model="item.rating"
-                                :readonly="true"
-                                :half-increments="true"
-                                :length="5"
+                                :model-value="review.rating"
+                                readonly
+                                color="yellow-darken-2"
+                                density="compact"
+                                size="small"
+                                class="mt-1"
                             ></v-rating>
-                        </template>
-                    </v-data-table>
+                        </v-list-item>
+                        
+                        <v-card-text v-if="review.comment" class="pt-0">
+                                {{ review.comment }}
+                        </v-card-text>
+                    </v-card>
+                </div>
+                
+                <!-- Empty State for No Reviews -->
+                <v-card v-else class="text-center pa-8" variant="tonal">
+                    <v-icon size="x-large" class="mb-4">mdi-comment-search-outline</v-icon>
+                    <h3 class="text-h6 mb-2">{{ $t('ratings.no_reviews_yet') }}</h3>
+                    <p class="text-body-1">{{ $t('ratings.be_the_first') }}</p>
                 </v-card>
             </v-col>
         </v-row>
@@ -60,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from '#imports'
 import CreateReview from '@/components/CreateReview.vue'
@@ -80,85 +97,88 @@ useHead({
 
 const pb = usePocketbase()
 const route = useRoute()
-const route_id = ref(getRouteIdFromUrl())
+const route_id = ref(route.query.id || null)
 const reviews = ref([])
 const metadata = ref(null)
 
-const headers = ref([
-    { title: t('ratings.stars'), value: 'rating' },
-    { title: t('ratings.difficulty'), value: 'difficulty' },
-    { title: t('ratings.comment'), value: 'comment' },
-])
+const formattedAnchorPoint = computed(() => {
+    if (!metadata.value) return ''
+    const value = metadata.value.anchor_point
+    const anchorValue =
+        value === null || value === undefined || value === '' ? '—' : value
+    return `${t('climbing.anchor_point')}: ${anchorValue}`
+})
 
-function getRouteIdFromUrl() {
-    const id = route.query.id
-    return id
-}
-
-function formatDateToYYYYMMDD(date) {
-    if (!date) return null
-    const d = new Date(date)
-    let month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear()
-
-    if (month.length < 2) month = '0' + month
-    if (day.length < 2) day = '0' + day
-
-    return [year, month, day].join('-')
-}
+// Computed property for safely formatting the date
+const formattedScrewDate = computed(() => {
+    if (!metadata.value?.screw_date) return ''
+    try {
+        return new Date(metadata.value.screw_date).toLocaleDateString('de-DE', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch (e) {
+        return ''
+    }
+})
 
 const getAllRouteRatings = async () => {
-    const data = await pb.collection('ratings').getFullList({
-        filter: `route_id = "${route_id.value}"`,
-    })
-
-    const ratings = data.map((rating) => {
-        return {
-            rating: rating.rating,
-            difficulty:
-                rating.difficulty +
-                ' ' +
-                (rating.difficulty_sign
-                    ? '+'
-                    : rating.difficulty_sign === false
-                      ? '-'
-                      : ''),
-            comment: rating.comment,
-        }
-    })
-    reviews.value = ratings
-}
-
-const fetchRouteMetadata = async () => {
-    const record = await pb.collection('routes').getOne(route_id.value, {
-        sort: '-created',
-        expand: 'name, creator, screw_date',
-    })
-
-    metadata.value = record
-}
-
-const getRouteMetadata = async () => {
+    if (!route_id.value) return;
     try {
-        await fetchRouteMetadata()
+        const data = await pb.collection('ratings').getFullList({
+            filter: `route_id = "${route_id.value}"`,
+            sort: '-created' // Show newest reviews first
+        });
+
+        reviews.value = data.map((rating) => {
+            let difficultySign = '';
+            if (rating.difficulty_sign === true) {
+                difficultySign = '+';
+            } else if (rating.difficulty_sign === false) {
+                difficultySign = '-';
+            }
+            return {
+                rating: rating.rating,
+                difficulty: `${rating.difficulty}${difficultySign}`,
+                comment: rating.comment,
+            };
+        });
     } catch (error) {
-        console.error(error)
-        navigateTo('/404')
+        console.error("Error fetching ratings:", error);
     }
 }
 
-pb.collection('ratings').subscribe(
-    '*',
-    function (e) {
-        getAllRouteRatings()
-    },
-    {},
-)
+const getRouteMetadata = async () => {
+    if (!route_id.value) {
+        navigateTo('/404');
+        return;
+    }
+    try {
+        metadata.value = await pb.collection('routes').getOne(route_id.value);
+    } catch (error) {
+        console.error("Error fetching route metadata:", error);
+        navigateTo('/404');
+    }
+}
+
+// Subscribe to real-time updates
+pb.collection('ratings').subscribe('*', (e) => {
+    if (e.record.route_id === route_id.value) {
+        getAllRouteRatings();
+    }
+});
 
 onMounted(() => {
-    route_id.value = getRouteIdFromUrl()
-    getRouteMetadata()
-    getAllRouteRatings()
+    if (route_id.value) {
+        getRouteMetadata();
+        getAllRouteRatings();
+    } else {
+        console.warn("No route ID found in URL.");
+        navigateTo('/404');
+    }
 })
 </script>
+
+<style scoped>
+</style>

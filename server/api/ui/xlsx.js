@@ -1,8 +1,10 @@
+import { getQuery, createError } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js';
+
 export default eventHandler(async (event) => {
     const { default: ExcelJS } = await import('exceljs')
-    const { usePocketbase } = await import('~/composables/pocketbase')
 
-    const pb = usePocketbase()
+    const pb = createPocketBase()
     const res = event.node.res
 
     try {
@@ -34,6 +36,7 @@ export default eventHandler(async (event) => {
                 key: 'difficulty_sign',
                 width: 10,
             },
+            { header: 'Umlenkerpunkt', key: 'anchor_point', width: 15 },
             { header: 'Ort', key: 'location', width: 20 },
             { header: 'Typ', key: 'type', width: 15 },
             { header: 'Kommentar', key: 'comment', width: 30 },
@@ -52,6 +55,10 @@ export default eventHandler(async (event) => {
                         : cr.difficulty_sign === false
                             ? '-'
                             : '',
+                anchor_point:
+                    cr.anchor_point !== null && cr.anchor_point !== undefined
+                        ? cr.anchor_point
+                        : '',
                 location: cr.location,
                 type: cr.type,
                 comment: cr.comment,
@@ -74,6 +81,6 @@ export default eventHandler(async (event) => {
         res.end(buffer)
     } catch (error) {
         console.error(error)
-        createError({ statusCode: 500, statusMessage: 'Server error' })
+        return createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })

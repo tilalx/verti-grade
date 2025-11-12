@@ -68,10 +68,11 @@ RUN --mount=type=cache,target=/root/.cache yarn build \
 # --------------> Runtime (final stage)
 FROM node:24.8.0-trixie-slim
 # Install nginx (cacheable layer)
-RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates \
+RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 
 # Copy artifacts only
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
@@ -82,7 +83,11 @@ COPY .docker/docker-entrypoint.sh /app/entrypoint.sh
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /app/entrypoint.sh
 
-# Avoid global npm installs at runtime; use npx if needed. (concurrently usually not needed in final image)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -fs http://localhost:8080/api/health \
+   && curl -fs http://localhost:3000/ \
+   && curl -fs http://localhost/ || exit 1
+
 # EXPOSE as needed
-EXPOSE 80 8080 3000
+EXPOSE 80
 ENTRYPOINT ["/app/entrypoint.sh"]

@@ -14,14 +14,10 @@
             <!-- Title + subtitle -->
             <div class="text-center mb-4">
               <div class="text-h5 font-weight-bold">
-                {{ view === 'login' ? $t('account.login') : $t('account.reset_password') }}
+                {{ title }}
               </div>
               <div class="text-medium-emphasis mt-1">
-                {{
-                  view === 'login'
-                    ? ($t('account.login_hint') || 'Enter your credentials to continue')
-                    : ($t('account.reset_hint') || 'We will email you a reset link')
-                }}
+                {{ subtitle }}
               </div>
             </div>
 
@@ -151,6 +147,44 @@
                 </v-btn>
               </v-form>
 
+              <!-- TOTP -->
+              <v-form
+                v-else-if="view === 'totp'"
+                ref="totpForm"
+                v-model="isTotpValid"
+                validate-on="submit"
+                @submit.prevent="onSubmitTotp"
+              >
+                <v-text-field
+                  :label="$t('account.totp_code')"
+                  prepend-inner-icon="mdi-key"
+                  v-model="totpCode"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  :disabled="loading"
+                  :rules="totpRules"
+                  density="comfortable"
+                  variant="outlined"
+                  autofocus
+                  clearable
+                />
+                <v-btn
+                  color="primary"
+                  class="mt-4"
+                  block
+                  size="large"
+                  type="submit"
+                  :loading="loading"
+                  :disabled="loading"
+                >
+                  {{ $t('actions.verify') }}
+                </v-btn>
+                <v-btn variant="text" class="mt-2" block @click="view = 'login'">
+                  {{ $t('actions.cancel') }}
+                </v-btn>
+              </v-form>
+
               <!-- RESET -->
               <v-form
                 v-else-if="view === 'requestReset' && authMethods.password.enabled"
@@ -221,7 +255,6 @@
 const { t } = useI18n()
 const pb = usePocketbase()
 const router = useRouter()
-const { smAndDown } = useDisplay()
 
 useHead({
   title: t('page.title.login'),
@@ -273,12 +306,15 @@ const view = ref('login')
 const loading = ref(false)
 const isValid = ref(false)
 const isResetValid = ref(false)
+const isTotpValid = ref(false)
 const identity = ref('')
 const password = ref('')
 const resetEmail = ref('')
 const rememberMe = ref(true)
 const showPassword = ref(false)
 const capsOn = ref(false)
+const totpCode = ref('')
+const mfaToken = ref('') // To store the temporary token for MFA
 
 // snackbar
 const snackbar = ref(false)
@@ -299,6 +335,25 @@ const identityType = computed(() => (supportsEmail && !supportsUsername ? 'email
 const identityAutocomplete = computed(() => (supportsEmail ? 'email' : 'username'))
 const identityIcon = computed(() => (supportsEmail && !supportsUsername ? 'mdi-email' : 'mdi-account'))
 
+// Titles and subtitles
+const title = computed(() => {
+    switch(view.value) {
+        case 'login': return t('account.login');
+        case 'requestReset': return t('account.reset_password');
+        case 'totp': return t('account.totp_verification');
+        default: return '';
+    }
+});
+
+const subtitle = computed(() => {
+    switch(view.value) {
+        case 'login': return t('account.login_hint') || 'Enter your credentials to continue';
+        case 'requestReset': return t('account.reset_hint') || 'We will email you a reset link';
+        case 'totp': return t('account.totp_hint') || 'Enter the code from your authenticator app';
+        default: return '';
+    }
+});
+
 // validation rules
 const required = v => !!v || t('validations.required') || 'Required'
 const isEmail = v => /.+@.+\..+/.test(String(v || '')) || (t('validations.email') || 'Invalid email')
@@ -310,6 +365,7 @@ const identityRules = computed(() => {
 })
 const emailOnlyRules = [required, isEmail]
 const passwordRules = [required, v => (v && v.length >= 6) || (t('validations.password_min') || 'Min 6 chars')]
+const totpRules = [required, v => (v && /^\d{6}$/.test(v)) || 'Must be a 6-digit code']
 
 // handlers
 async function onSubmitLogin () {
@@ -320,13 +376,36 @@ async function onSubmitLogin () {
     const res = await pb.collection('users').authWithPassword(identity.value, password.value)
     if (res?.error) throw res.error
     showSnack(t('notifications.success.login'), 'success')
-    router.push('/dashboard')
+    router.push('/admin/dashboard')
   } catch (e) {
-    console.error('PocketBase login failed:', e)
-    showSnack(resolveAuthError(e) || t('notifications.error.login_failed'), 'error')
+    if (e.response?.data?.code === 'mfa_required') {
+        mfaToken.value = e.response.data.token;
+        view.value = 'totp';
+        showSnack(t('notifications.info.mfa_required'), 'info');
+    } else {
+        console.error('PocketBase login failed:', e)
+        showSnack(resolveAuthError(e) || t('notifications.error.login_failed'), 'error')
+    }
   } finally {
     loading.value = false
   }
+}
+
+async function onSubmitTotp() {
+    const ok = await tryValidate(totpForm);
+    if (!ok) return;
+    loading.value = true;
+    try {
+        const res = await pb.collection('users').authWithTotp(mfaToken.value, totpCode.value);
+        if (res?.error) throw res.error;
+        showSnack(t('notifications.success.login'), 'success');
+        router.push('/admin/dashboard');
+    } catch (e) {
+        console.error('TOTP confirmation failed:', e);
+        showSnack(resolveAuthError(e) || t('notifications.error.invalid_totp'), 'error');
+    } finally {
+        loading.value = false;
+    }
 }
 
 async function onSubmitReset () {
@@ -351,7 +430,7 @@ function handleOAuthLogin (provider) {
     .then(res => {
       if (res?.error) throw res.error
       showSnack(t('notifications.success.login'), 'success')
-      router.push('/dashboard')
+      router.push('/admin/dashboard')
     })
     .catch(e => {
       console.error('OAuth login failed:', e)
@@ -373,6 +452,7 @@ function resolveAuthError (e) {
   if (/invalid.+credentials/i.test(msg)) return t('notifications.error.invalid_credentials') || 'Invalid credentials'
   if (/not verified/i.test(msg)) return t('notifications.error.email_not_verified') || 'Email not verified'
   if (/too many/i.test(msg)) return t('notifications.error.too_many_attempts') || 'Too many attempts'
+  if (/failed to verify/i.test(msg)) return t('notifications.error.invalid_totp') || 'Invalid TOTP code'
   return msg
 }
 
@@ -386,6 +466,7 @@ function onPasswordKeydown (ev) {
 // form refs + helpers
 const form = ref()
 const resetForm = ref()
+const totpForm = ref()
 async function tryValidate (formRef) {
   const f = formRef?.value
   if (!f) return true

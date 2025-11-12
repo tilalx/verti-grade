@@ -60,6 +60,7 @@
     "routename": "Route name",
     "difficulty": "Difficulty",
     "difficulty_sign": "Difficulty sign",
+  "anchor_point": "Anchor point",
     "location": "Location",
     "searchRouteName": "Search",
     "type": "Type",
@@ -70,6 +71,8 @@
   "ratings": {
     "ratings": "Ratings",
     "createReview": "Create review",
+    "no_reviews_yet": "No reviews yet",
+    "be_the_first": "Be the first",
     "routename": "Route name",
     "stars": "Stars",
     "difficulty": "Difficulty",
@@ -79,12 +82,14 @@
     "type": "Type",
     "score": "Score",
     "comment": "Comment",
-    "creators": "Creators"
+    "creators": "Creators",
+    "climber_reviews": "Climber Reviews"
   },
   "table": {
     "id": "ID",
     "select": "Selected",
     "actions": "Actions",
+    "no_data": "No data",
     "created_at": "Created at",
     "updated_at": "Updated at",
     "created_by": "Created by",
@@ -97,6 +102,8 @@
     "subtitle": "Climbing routes"
   },
   "actions": {
+    "search": "Search",
+    "clear": "Clear",
     "import": "Import Routes",
     "print": "Print",
     "create": "Create",
@@ -110,7 +117,8 @@
     "confirm": "Confirm Delete",
     "select_all": "Select All",
     "deselect_all": "Deselect All",
-    "back_to_home": "Back to Home"
+    "back_to_home": "Back to Home",
+    "load_more": "Load More"
   },
   "notifications": {
     "success": {
@@ -138,6 +146,7 @@
     "newVersionAvailable": "A new version is available! Please update to the latest version."
   },
   "filter": {
+    "title": "Filter",
     "all": "All",
     "archived": "Archived"
   },
@@ -165,5 +174,10 @@
       "comments": "Comments",
       "dashboard": "Dashboard"
     }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "requiredAndNotEmpty": "This field must not be empty.",
+    "anchorPointRange": "Anchor point must be between 1 and 100."
   }
 }

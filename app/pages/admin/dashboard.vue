@@ -179,6 +179,7 @@
                                           : null
                                 }}
                             </td>
+                            <td>{{ formatAnchorPoint(climbingRoute.anchor_point) }}</td>
                             <td>{{ climbingRoute.comment }}</td>
                             <td>
                                 <div class="d-flex ga-1">
@@ -195,9 +196,9 @@
                             <td>{{ climbingRoute.type }}</td>
                             <td>
                                 {{
-                                    climbingRoute.score !== null
+                                    climbingRoute.score !== null && climbingRoute.score !== undefined
                                         ? climbingRoute.score.toFixed(2) + '/5'
-                                        : climbingRoute.score
+                                        : 'N/A'
                                 }}
                             </td>
                             <td>
@@ -229,13 +230,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import CreateRoute from '@/components/CreateRoute.vue'
 import EditRoute from '@/components/EditRoute.vue'
 import ImportRoute from '@/components/ImportRoute.vue'
 import newVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 useHead({
     title: t('page.title.dashboard'),
@@ -272,6 +273,7 @@ const headers = reactive([
     { title: t('climbing.color'), value: 'color' },
     { title: t('climbing.routename'), value: 'name' },
     { title: t('climbing.difficulty'), value: 'difficulty' },
+    { title: t('climbing.anchor_point'), value: 'anchor_point' },
     { title: t('climbing.comment'), value: 'comment' },
     { title: t('climbing.creators'), value: 'creator' },
     { title: t('climbing.location'), value: 'location' },
@@ -292,7 +294,7 @@ const difficulties = reactive([
     { text: '6', value: '6' },
     { text: '7', value: '7' },
     { text: '8', value: '8' },
-    { text: '9', value: '9' },
+    { text: '9', 'value': '9' },
     { text: '10', value: '10' },
 ])
 
@@ -308,37 +310,52 @@ const types = reactive([
     { text: t('routes.types.route'), value: 'Route' },
 ])
 
+const formatAnchorPoint = (value) =>
+    value === 0 || value === null || value === undefined || value === '' ? '—' : value
+
 const getClimbingRoutes = async () => {
     try {
         const climbingRoutesData = await pb.collection('routes').getFullList({
             sort: '-screw_date',
-        })
+            requestKey: 'routes-list' // Add a request key to prevent auto-cancellation from other calls
+        });
 
         const averageRating = await pb
             .collection('averageRating')
-            .getFullList({})
+            .getFullList({
+                requestKey: 'ratings-list' // Add a request key
+            });
 
-        if (!climbingRoutesData || !averageRating) {
-            console.error('Error fetching climbing routes')
-            return
+        if (!climbingRoutesData) {
+            console.error('Error fetching climbing routes');
+            return;
         }
 
         for (const route of climbingRoutesData) {
-            const rating = averageRating.find((rate) => rate.id === route.id)
+            const rating = averageRating.find((rate) => rate.id === route.id);
             if (rating) {
-                route.score = rating.average_rating
+                route.score = rating.average_rating;
+            } else {
+                route.score = null;
             }
         }
 
-        climbingRoutes.value = climbingRoutesData
+        climbingRoutes.value = climbingRoutesData;
     } catch (error) {
-        console.error('Error in getClimbingRoutes:', error)
+        if (!error.isAbort) { // Only log errors that are not auto-cancellations
+            console.error('Error in getClimbingRoutes:', error);
+        }
     }
 }
 
+let subscriptionDebounceTimer = null;
 pb.collection('routes').subscribe('*', () => {
-    getClimbingRoutes()
-})
+    clearTimeout(subscriptionDebounceTimer);
+    subscriptionDebounceTimer = setTimeout(() => {
+        getClimbingRoutes();
+    }, 250); // Debounce for 250ms
+});
+
 
 const filteredClimbingRoutes = computed(() => {
     let filteredRoutes = climbingRoutes.value
@@ -379,14 +396,6 @@ const selectedCount = computed(() => {
     return filteredClimbingRoutes.value.filter((route) => route.selected).length
 })
 
-const selectedDifficultyValue = computed(() => {
-    return selectedDifficulty.value
-})
-
-const selectedLocationValue = computed(() => {
-    return selectedLocation.value
-})
-
 const reloadRoutes = async () => {
     await getClimbingRoutes()
 }
@@ -400,6 +409,7 @@ const selectAll = () => {
 }
 
 const areAllSelected = () => {
+    if (filteredClimbingRoutes.value.length === 0) return false;
     return filteredClimbingRoutes.value.every((route) => route.selected)
 }
 
@@ -433,8 +443,8 @@ const printSelected = async () => {
         const blob = new Blob([pdfBlob], { type: 'application/pdf' })
         const link = document.createElement('a')
         link.href = window.URL.createObjectURL(blob)
-        const currentDate = Math.floor(Date.now() / 1000)
-        link.download = `climbing-routes-${currentDate}.pdf`
+        const filename = generateFilename();
+        link.download = filename + '.pdf'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -462,8 +472,8 @@ const exportSelectedExcel = async () => {
         })
         const link = document.createElement('a')
         link.href = window.URL.createObjectURL(blob)
-        const currentDate = Math.floor(Date.now() / 1000)
-        link.download = `climbing-routes-${currentDate}.xlsx`
+        const filename = generateFilename();
+        link.download = filename + '.xlsx'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -511,6 +521,7 @@ const exportSelectedJson = async () => {
             color: route.color,
             difficulty: route.difficulty,
             difficulty_sign: route.difficulty_sign,
+            anchor_point: route.anchor_point,
             location: route.location,
             type: route.type,
             comment: route.comment,
@@ -528,8 +539,8 @@ const exportSelectedJson = async () => {
         const blob = new Blob([json], { type: 'application/json' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        const currentDate = Math.floor(Date.now() / 1000);
-        link.download = `climbing-routes-${currentDate}.json`;
+        const filename = generateFilename();
+        link.download = filename + '.json';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -559,9 +570,8 @@ const deleteSelected = async () => {
         });
 
         // Send the batch request
-        const result = await batch.send();
+        await batch.send();
 
-        console.log('Batch delete result:', result);
     } catch (error) {
         console.error('Exception in deleteSelected:', error);
     }
@@ -591,15 +601,33 @@ const archiveSelected = async () => {
         });
 
         // Send the batch request
-        const result = await batch.send();
+        await batch.send();
 
-        console.log('Batch archive result:', result);
     } catch (error) {
         console.error('Exception in archiveSelected:', error);
     }
 };
 
+
+function generateFilename() {
+    const name = locale.value === 'de' ? 'kletterrouten' : 'climbing-routes';
+    const date = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    const dd = pad(date.getDate());
+    const MM = pad(date.getMonth() + 1);
+    const yyyy = date.getFullYear();
+    const timestamp = `${hh}-${mm}_${dd}.${MM}.${yyyy}`;
+    return `${name}-${timestamp}`;
+}
+
 onMounted(async () => {
     await getClimbingRoutes()
 })
+
+onBeforeUnmount(() => {
+    clearTimeout(subscriptionDebounceTimer);
+    pb.collection('routes').unsubscribe('*');
+});
 </script>
