@@ -4,7 +4,7 @@ go 1.25.0
 
 toolchain go1.25.1
 
-require github.com/pocketbase/pocketbase v0.31.0
+require github.com/pocketbase/pocketbase v0.32.0
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
@@ -46,5 +46,5 @@ require (
 	modernc.org/libc v1.66.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.39.1 // indirect
+	modernc.org/sqlite v1.40.0 // indirect
 )
