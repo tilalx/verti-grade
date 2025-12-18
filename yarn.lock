@@ -7435,7 +7435,7 @@ __metadata:
     qrcode: "npm:1.5.4"
     release-it: "npm:19.0.6"
     release-it-snapshot-prerelease-version: "npm:^2.1.0"
-    sass: "npm:1.93.3"
+    sass: "npm:1.97.0"
     typescript: "npm:5.9.3"
     vue: "npm:3.5.24"
     vuetify-nuxt-module: "npm:0.18.8"
@@ -9093,9 +9093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:1.93.3":
-  version: 1.93.3
-  resolution: "sass@npm:1.93.3"
+"sass@npm:1.97.0":
+  version: 1.97.0
+  resolution: "sass@npm:1.97.0"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^4.0.0"
@@ -9106,7 +9106,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10c0/b9facc64de10c9d1514272c1dcbb48ca99d5f591a1cd43fd27d641275d9d95948f1299107ab5b309e2abb552667cca84a38a1a3df5116eb72eba4144bf850b6a
+  checksum: 10c0/4c0e2596131054089beeeb6e98f7318beb909c4775187690656cbb85a45153d04eecd970e6a4431fe47dc94f9749cf8d58c9c5e59055d2cae39f4887a4bb6104
   languageName: node
   linkType: hard
 
