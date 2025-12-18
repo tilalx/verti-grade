@@ -24,7 +24,7 @@
         "install": "^0.13.0",
         "nuxt": "^4.2.1",
         "pdfkit": "0.17.2",
-        "pocketbase": "^0.26.3",
+        "pocketbase": "^0.26.5",
         "prettier": "3.7.4",
         "qrcode": "1.5.4",
         "release-it": "19.0.6",
