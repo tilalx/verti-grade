@@ -27,7 +27,7 @@
         "pocketbase": "^0.26.5",
         "prettier": "3.7.4",
         "qrcode": "1.5.4",
-        "release-it": "19.0.6",
+        "release-it": "19.1.0",
         "release-it-snapshot-prerelease-version": "^2.1.0",
         "sass": "1.97.0",
         "typescript": "5.9.3",
