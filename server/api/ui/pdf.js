@@ -1,4 +1,4 @@
-import { getQuery, createError } from 'h3'
+import { eventHandler, getQuery, readBody, createError } from 'h3'
 import { createPocketBase } from '../../utils/pb-server.js';
 
 export default eventHandler(async (event) => {
@@ -8,8 +8,7 @@ export default eventHandler(async (event) => {
     const res = event.node.res
 
     try {
-        const paramId = getQuery(event)
-        const ids = paramId?.id ? paramId.id.split(',') : []
+        const ids = await resolveRouteIds(event)
         if (ids.length === 0) {
             return createError({
                 statusCode: 400,
@@ -58,37 +57,6 @@ export default eventHandler(async (event) => {
             // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
-            // Add small anchor number in top-left corner (if exists)
-            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
-                const anchorValue = String(climbingRoute.anchor_point).trim()
-
-                // Box dimensions and position — aligned mid-height with name
-                const boxWidth = 32
-                const boxHeight = 25
-                const boxX = x + 2     // small gap from left border
-                const boxY = y + 129   // moved slightly lower for better alignment with name line
-
-                // Draw the box outline
-                doc.rect(boxX, boxY, boxWidth, boxHeight).stroke()
-
-                // Centered "Seil" label
-                doc.font('Helvetica').fontSize(8).fillColor('black')
-                    .text('Seil', boxX, boxY + 4, {
-                        width: boxWidth,
-                        align: 'center',
-                    })
-
-                // Centered bold anchor number below label
-                doc.font('Helvetica-Bold').fontSize(12)
-                    .text(anchorValue, boxX, boxY + 11, {
-                        width: boxWidth,
-                        align: 'center',
-                    })
-            }
-
-            // Add color circle
-            doc.circle(x + 80, y + 15, 10).fill(climbingRoute.color)
-
             // Set text color black
             doc.fillColor('black')
 
@@ -99,8 +67,8 @@ export default eventHandler(async (event) => {
             if (typeof climbingRoute.difficulty_sign === 'string') {
                 sign = climbingRoute.difficulty_sign.trim()
             } else if (typeof climbingRoute.difficulty_sign === 'boolean') {
-                // interpret boolean true as "+"
-                sign = climbingRoute.difficulty_sign ? '+' : ''
+                // interpret boolean true as "+" and false as "-"
+                sign = climbingRoute.difficulty_sign ? '+' : '-'
             }
 
             const difficulty = climbingRoute.difficulty + sign
@@ -113,11 +81,44 @@ export default eventHandler(async (event) => {
             )
 
             doc.text(
+                climbingRoute.name,
+                calculateStartX(x + 80, climbingRoute.name, doc),
+                y + 35,
+                textOptions,
+            )
+
+            doc.text(
                 climbingRoute.comment,
                 calculateStartX(x + 80, climbingRoute.comment, doc),
                 y + 100,
                 textOptions,
             )
+
+            doc.fillColor('black')
+
+            // Add small anchor number in top-left corner (if exists)
+            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
+                const anchorValue = String(climbingRoute.anchor_point).trim()
+
+                // Box dimensions and position — aligned mid-height with name
+                const boxWidth = 32
+                const boxX = x + 65     // small gap from left border
+                const boxY = y + 5   // moved slightly lower for better alignment with name line
+
+                // Centered "Seil" label
+                doc.font('Helvetica').fontSize(8).fillColor('black')
+                    .text('Seil', boxX, boxY + 4, {
+                        width: boxWidth,
+                        align: 'center',
+                    })
+
+                // Centered bold anchor number below label
+                doc.font('Helvetica-Bold').fontSize(12)
+                    .text(anchorValue, boxX, boxY + 12, {
+                        width: boxWidth,
+                        align: 'center',
+                    })
+            }
 
             // Creator names
             const creators = climbingRoute.creator || []
@@ -151,6 +152,11 @@ export default eventHandler(async (event) => {
                 color: { light: '#0000' }, // Transparent background
             })
             doc.image(qrCodeBuffer, qrX, qrY, { fit: [qrSize, qrSize] })
+
+            // Add color circle
+            doc.circle(x + 215, y + 45, 15).fill("#FFFFFF")
+            doc.circle(x + 215, y + 45, 14).fill(climbingRoute.color)
+
 
             // Add logo
             doc.image(logo, {
@@ -190,4 +196,27 @@ async function fetchLogo(url) {
         console.error(error)
         throw new Error('Failed to fetch logo')
     }
+}
+
+async function resolveRouteIds(event) {
+    try {
+        const body = await readBody(event)
+        if (body && Array.isArray(body.ids)) {
+            return body.ids
+                .map((value) => (typeof value === 'string' ? value.trim() : ''))
+                .filter(Boolean)
+        }
+    } catch (error) {
+        // ignore body parsing errors and fallback to query string
+    }
+
+    const params = getQuery(event)
+    if (typeof params?.id === 'string') {
+        return params.id
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean)
+    }
+
+    return []
 }

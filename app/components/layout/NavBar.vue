@@ -24,8 +24,11 @@
             <v-btn text class="d-none d-md-inline-flex" to="/">{{
                 $t('routes.home')
             }}</v-btn>
-            <v-btn text class="d-none d-md-inline-flex" to="/admin/dashboard">{{
+            <v-btn text class="d-none d-md-inline-flex" to="/admin/routes">{{
                 $t('routes.dashboard')
+            }}</v-btn>
+            <v-btn text class="d-none d-md-inline-flex" to="/admin/analytics">{{
+                $t('routes.analytics')
             }}</v-btn>
             <v-btn text class="d-none d-md-inline-flex" to="/admin/comments">{{
                 $t('routes.comments')
@@ -57,8 +60,14 @@
         <v-list-item to="/">
             {{ $t('routes.home') }}
         </v-list-item>
-        <v-list-item to="/admin/dashboard">
+        <v-list-item to="/admin/routes">
             {{ $t('routes.dashboard') }}
+        </v-list-item>
+        <v-list-item to="/admin/inventory">
+            {{ $t('routes.inventory') }}
+        </v-list-item>
+        <v-list-item to="/admin/analytics">
+            {{ $t('routes.analytics') }}
         </v-list-item>
         <v-list-item to="/admin/comments">
             {{ $t('routes.comments') }}

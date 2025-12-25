@@ -23,7 +23,8 @@
   },
   "routes": {
     "home": "Ana Sayfa",
-    "dashboard": "Gösterge Paneli",
+    "dashboard": "Rota Yönetimi",
+    "inventory": "Inventory Scan",
     "about": "Hakkında",
     "contact": "İletişim",
     "login": "Giriş Yap",
@@ -33,6 +34,7 @@
     "user": "Kullanıcı",
     "statistics": "İstatistikler",
     "statistic": "İstatistik",
+    "analytics": "Analitik",
     "comments": "Yorumlar",
     "comment": "Yorum",
     "settings": "Ayarlar",
@@ -51,8 +53,53 @@
     "creator_split": "Yaratıcıları ',' ile ayırın"
   },
   "dashboard": {
-    "welcome": "Gösterge Paneline Hoş Geldiniz!",
+    "welcome": "Rota Yönetimi",
     "online": "{0} Çevrimiçi"
+  },
+  "analytics": {
+    "title": "Tırmanış Rota Analitiği",
+    "subtitle": "Tüm rotalar için temel metrikleri izleyin.",
+    "refresh": "Yenile",
+    "retry": "Tekrar dene",
+    "empty": "Henüz analitik verisi mevcut değil.",
+    "generatedAt": "Son güncelleme {value}",
+    "meta": {
+      "title": "Analitik - Verti-Grade",
+      "description": "Tırmanış rotaları için yönetici analitik paneli."
+    },
+    "cards": {
+      "totalRoutes": "Toplam Rota",
+      "totalRoutesSubtitle": "Tüm lokasyonlar",
+      "activeRoutes": "Aktif Rotalar",
+      "activeRoutesSubtitle": "Şu anda erişilebilir",
+      "averageDifficulty": "Ort. Zorluk",
+      "averageDifficultySubtitle": "Ortalama derece",
+      "totalComments": "Yorumlar",
+      "totalCommentsSubtitle": "Tüm geri bildirimler"
+    },
+    "charts": {
+      "difficultyDistribution": "Zorluk Dağılımı",
+      "routeSetters": "Rotalar Ayarlayıcıya Göre",
+      "routeTimeline": "Zaman İçinde Rotalar",
+      "commentTimeline": "Zaman İçinde Yorumlar"
+    },
+    "sections": {
+      "latestComments": "En son yorumlar",
+      "latestRoutes": "En yeni rotalar"
+    },
+    "emptyComments": "Henüz yorum yok.",
+    "emptyRoutes": "Henüz yeni rota yok.",
+    "actions": {
+      "showAllSetters": "Tüm ayarlayıcıları göster"
+    },
+    "labels": {
+      "attempts": "Denemeler",
+      "sends": "Tamamlamalar",
+      "comments": "Yorumlar",
+      "routes": "Rotalar",
+      "unknown": "Bilinmiyor",
+      "other": "Diğer"
+    }
   },
   "climbing": {
     "create": "Rota Oluştur",
@@ -60,7 +107,7 @@
     "routename": "Rota Adı",
     "difficulty": "Zorluk",
     "difficulty_sign": "Zorluk İşareti",
-  "anchor_point": "Ankraj noktası",
+      "anchor_point": "Ankraj noktası",
     "location": "Konum",
     "searchRouteName": "Ara",
     "type": "Tür",
@@ -111,6 +158,7 @@
     "delete": "Sil",
     "save": "Kaydet",
     "cancel": "İptal",
+    "archive": "Arşivle",
     "submit": "Gönder",
     "new_item": "Yeni Öğe",
     "edit_item": "Öğeyi Düzenle",
@@ -119,13 +167,48 @@
     "deselect_all": "Seçimi Kaldır",
     "back_to_home": "Ana Sayfaya Dön"
   },
+  "inventory": {
+    "title": "Route Inventory Scan",
+    "subtitle": "Point your camera at each QR code to register the route.",
+    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
+    "start": "Start Scanning",
+    "stop": "Stop Scanning",
+    "finish": "Finish Inventory",
+    "scannedCount": "Scanned routes: {count}",
+    "pendingCount": "Routes still to find: {count}",
+    "lastScanned": "Last scanned",
+    "invalidCode": "Scanned code is not a recognized route.",
+    "unknownRoute": "The scanned route could not be found.",
+    "noScans": "No routes scanned yet.",
+    "dialogTitle": "Archive missing routes?",
+    "dialogDescription": "The following routes were not scanned and will be archived:",
+    "archiveSuccess": "Inventory completed. Archived {count} routes.",
+    "nothingToArchive": "All routes were scanned. Nothing to archive.",
+    "archiveError": "Failed to archive the missing routes.",
+    "loadError": "Failed to load active routes.",
+    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "restoreSuccess": "{name} yeniden etkinleştirildi.",
+    "restoreError": "Rotayı yeniden etkinleştiremedik.",
+    "showInstructions": "Talimatları göster",
+    "instructionsTitle": "Envanter talimatları",
+    "instructionsIntro": "Tüm rota QR kodlarını taramak için şu adımları izleyin.",
+    "instructionsStep1": "Kamera erişimine izin verin ve cihazınızı bir rota QR koduna doğrultun.",
+    "instructionsStep2": "Aşağıdaki bilgi çubuğunda görüntülenen rota bilgilerini kontrol edin.",
+    "instructionsStep3": "Bitirdiğinizde, eksik rotaları arşivlemek için Envanteri Bitir'e dokunun.",
+    "instructionsClose": "Anladım",
+    "reset": "Envanteri sıfırla",
+    "reviewTitle": "Taramayı gözden geçirin",
+    "reviewFoundTitle": "Taranan rotalar",
+    "reviewMissingTitle": "Tarama sırasında bulunmayanlar",
+    "reviewMissingDescription": "Bu rotalar taranmadı ve otomatik olarak arşivlenecek."
+  },
   "notifications": {
     "success": {
       "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
       "create": "Başarıyla oluşturuldu",
       "edit": "Başarıyla düzenlendi",
       "delete": "Başarıyla silindi",
-      "login": "Giriş başarılı. Gösterge Paneline yönlendiriliyorsunuz...",
+      "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
       "health": "Durum: İyi"
     },
     "error": {
@@ -142,6 +225,7 @@
     },
     "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
     "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
+    "archiveMoreItems": "Seçili öğeleri arşivlemek istediğinizden emin misiniz?",
     "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
   },
   "filter": {
@@ -161,8 +245,9 @@
       "settings": "Ayarlar - Verti-Grade",
       "route": "Rota - Verti-Grade",
       "index": "Tırmanış Rotaları - Verti-Grade",
+      "inventory": "Inventory Scan - Verti-Grade",
       "comments": "Yorumlar - Verti-Grade",
-      "dashboard": "Gösterge Paneli - Verti-Grade"
+      "dashboard": "Rota Yönetimi - Verti-Grade"
     },
     "content": {
       "login": "Giriş Yap",
@@ -170,13 +255,14 @@
       "settings": "Ayarlar",
       "route": "İnceleme Oluştur",
       "index": "Tırmanış Rotaları",
+      "inventory": "Route Inventory Scan",
       "comments": "Yorumlar",
-      "dashboard": "Gösterge Paneli"
+      "dashboard": "Rota Yönetimi"
     }
   },
   "validation": {
     "required": "Bu alan gereklidir.",
     "requiredAndNotEmpty": "Bu alan boş olmamalıdır.",
-    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır."
+    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır, boulder'lar için 0 da kabul edilir."
   }
 }
