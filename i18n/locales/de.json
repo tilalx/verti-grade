@@ -23,7 +23,8 @@
   },
   "routes": {
     "home": "Startseite",
-    "dashboard": "Dashboard",
+    "dashboard": "Routenverwaltung",
+    "inventory": "Inventur",
     "about": "Über",
     "contact": "Kontakt",
     "login": "Anmelden",
@@ -33,6 +34,7 @@
     "user": "Benutzer",
     "statistics": "Statistiken",
     "statistic": "Statistik",
+    "analytics": "Analysen",
     "comments": "Kommentare",
     "comment": "Kommentar",
     "settings": "Einstellungen",
@@ -51,8 +53,53 @@
     "creator_split": "Schrauber getrennt durch ,"
   },
   "dashboard": {
-    "welcome": "Willkommen im Dashboard!",
+    "welcome": "Routenverwaltung",
     "online": "{0} Online"
+  },
+  "analytics": {
+    "title": "Routen-Analyse",
+    "subtitle": "Überwache wichtige Kennzahlen aller Kletterrouten.",
+    "refresh": "Aktualisieren",
+    "retry": "Erneut versuchen",
+    "empty": "Noch keine Analysedaten verfügbar.",
+    "generatedAt": "Zuletzt aktualisiert {value}",
+    "meta": {
+      "title": "Analysen - Verti-Grade",
+      "description": "Administratives Analyse-Dashboard für Kletterrouten."
+    },
+    "cards": {
+      "totalRoutes": "Gesamtanzahl Routen",
+      "totalRoutesSubtitle": "Über alle Standorte",
+      "activeRoutes": "Aktive Routen",
+      "activeRoutesSubtitle": "Derzeit verfügbar",
+      "averageDifficulty": "Durchschnittliche Schwierigkeit",
+      "averageDifficultySubtitle": "Mittlerer Grad",
+      "totalComments": "Kommentare",
+      "totalCommentsSubtitle": "Gesamtes Feedback"
+    },
+    "charts": {
+      "difficultyDistribution": "Verteilung der Schwierigkeiten",
+      "routeSetters": "Routen nach Schrauber",
+      "routeTimeline": "Routen im Zeitverlauf",
+      "commentTimeline": "Kommentare im Zeitverlauf"
+    },
+    "sections": {
+      "latestComments": "Neueste Kommentare",
+      "latestRoutes": "Neueste Routen"
+    },
+    "emptyComments": "Noch keine Kommentare vorhanden.",
+    "emptyRoutes": "Noch keine neuen Routen vorhanden.",
+    "actions": {
+      "showAllSetters": "Alle Schrauber anzeigen"
+    },
+    "labels": {
+      "attempts": "Versuche",
+      "sends": "Begehungen",
+      "comments": "Kommentare",
+      "routes": "Routen",
+      "unknown": "Unbekannt",
+      "other": "Andere"
+    }
   },
   "climbing": {
     "create": "Route erstellen",
@@ -111,6 +158,7 @@
     "delete": "Löschen",
     "save": "Speichern",
     "cancel": "Abbrechen",
+    "archive": "Archivieren",
     "submit": "Absenden",
     "new_item": "Neues Element",
     "edit_item": "Element bearbeiten",
@@ -120,13 +168,48 @@
     "back_to_home": "Zurück zur Startseite",
     "load_more": "Mehr laden"
   },
+  "inventory": {
+    "title": "Routeninventur",
+    "subtitle": "Scanne nacheinander alle QR-Codes, um die Route zu erfassen.",
+    "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
+    "start": "Scan starten",
+    "stop": "Scan stoppen",
+    "finish": "Inventur abschließen",
+    "scannedCount": "Gescannt: {count}",
+    "pendingCount": "Noch offen: {count}",
+    "lastScanned": "Zuletzt gescannt",
+    "invalidCode": "Der Code konnte keiner Route zugeordnet werden.",
+    "unknownRoute": "Die Route wurde nicht gefunden.",
+    "noScans": "Noch keine Routen gescannt.",
+    "dialogTitle": "Fehlende Routen archivieren?",
+    "dialogDescription": "Die folgenden Routen wurden nicht gescannt und werden archiviert:",
+    "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
+    "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
+    "archiveError": "Fehler beim Archivieren der fehlenden Routen.",
+    "loadError": "Aktive Routen konnten nicht geladen werden.",
+    "cameraError": "Auf die Gerätekamera konnte nicht zugegriffen werden. Bitte Kamerazugriff erlauben oder ein anderes Gerät verwenden.",
+    "restoreSuccess": "Route {name} wurde reaktiviert.",
+    "restoreError": "Fehler beim Reaktivieren der Route.",
+    "showInstructions": "Anleitung anzeigen",
+    "instructionsTitle": "Inventur-Anleitung",
+    "instructionsIntro": "Folge diesen Schritten, um alle Routen-QR-Codes zu scannen.",
+    "instructionsStep1": "Erlaube den Kamerazugriff und richte dein Gerät auf einen Routen-QR-Code.",
+    "instructionsStep2": "Prüfe die angezeigten Routeninformationen in der Informationsleiste.",
+    "instructionsStep3": "Tippe auf \"Inventur abschließen\", um fehlende Routen zu archivieren.",
+    "instructionsClose": "Verstanden",
+    "reset": "Inventur zurücksetzen",
+    "reviewTitle": "Inventur überprüfen",
+    "reviewFoundTitle": "Gescannt",
+    "reviewMissingTitle": "Nicht gescannt",
+    "reviewMissingDescription": "Diese Routen wurden nicht gescannt und werden automatisch archiviert."
+  },
   "notifications": {
     "success": {
       "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
       "create": "Erfolgreich erstellt",
       "edit": "Erfolgreich bearbeitet",
       "delete": "Erfolgreich gelöscht",
-      "login": "Anmeldung erfolgreich. Weiterleitung zum Dashboard...",
+      "login": "Anmeldung erfolgreich. Weiterleitung zur Routenverwaltung...",
       "health": "Status: OK"
     },
     "error": {
@@ -143,6 +226,7 @@
     },
     "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
     "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
+    "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
     "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
   },
   "filter": {
@@ -162,8 +246,9 @@
       "settings": "Einstellungen - Verti-Grade",
       "route": "Route - Verti-Grade",
       "index": "Kletterrouten - Verti-Grade",
+      "inventory": "Routeninventur - Verti-Grade",
       "comments": "Kommentare - Verti-Grade",
-      "dashboard": "Dashboard - Verti-Grade"
+      "dashboard": "Routenverwaltung - Verti-Grade"
     },
     "content": {
       "login": "Anmelden",
@@ -171,13 +256,14 @@
       "settings": "Einstellungen",
       "route": "Bewertung erstellen",
       "index": "Kletterrouten",
+      "inventory": "Routeninventur",
       "comments": "Kommentare",
-      "dashboard": "Dashboard"
+      "dashboard": "Routenverwaltung"
     }
   },
   "validation": {
     "required": "Das Feld ist erforderlich.",
     "requiredAndNotEmpty": "Das Feld darf nicht leer sein.",
-    "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen."
+    "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen, bei Bouldern ist auch 0 erlaubt."
   }
 }

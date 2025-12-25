@@ -1,4 +1,4 @@
-import { getQuery, createError } from 'h3'
+import { eventHandler, getQuery, readBody, createError } from 'h3'
 import { createPocketBase } from '../../utils/pb-server.js';
 
 export default eventHandler(async (event) => {
@@ -8,9 +8,7 @@ export default eventHandler(async (event) => {
     const res = event.node.res
 
     try {
-        const paramId = getQuery(event)
-
-        const ids = paramId?.id ? paramId.id.split(',') : []
+        const ids = await resolveRouteIds(event)
         if (ids.length === 0) {
             return createError({
                 statusCode: 400,
@@ -84,3 +82,26 @@ export default eventHandler(async (event) => {
         return createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
+
+async function resolveRouteIds(event) {
+    try {
+        const body = await readBody(event)
+        if (body && Array.isArray(body.ids)) {
+            return body.ids
+                .map((value) => (typeof value === 'string' ? value.trim() : ''))
+                .filter(Boolean)
+        }
+    } catch (error) {
+        // ignore body parsing errors and fall back to query parameters
+    }
+
+    const params = getQuery(event)
+    if (typeof params?.id === 'string') {
+        return params.id
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean)
+    }
+
+    return []
+}

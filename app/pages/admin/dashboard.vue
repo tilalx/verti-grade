@@ -110,7 +110,7 @@
                     </v-btn>
                     <v-btn
                         v-if="hasSelection"
-                        @click="archiveSelected"
+                        @click="handleArchiveClick"
                         color="warning"
                         class="mb-2 mx-1"
                     >
@@ -141,6 +141,25 @@
                                     @click="showDeleteConfirmation = false"
                                     >{{ $t('actions.cancel') }}</v-btn
                                 >
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                    <v-dialog
+                        v-model="showArchiveConfirmation"
+                        max-width="500px"
+                    >
+                        <v-card>
+                            <v-card-text>{{
+                                $t('notifications.archiveMoreItems')
+                            }}</v-card-text>
+                            <v-card-actions>
+                                <v-btn color="warning" @click="confirmArchive">{{
+                                    $t('actions.archive')
+                                }}</v-btn>
+                                <v-btn
+                                    color="primary"
+                                    @click="showArchiveConfirmation = false"
+                                >{{ $t('actions.cancel') }}</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -218,7 +237,7 @@
                             <td>
                                 <EditRoute
                                     @closed="reloadRoutes"
-                                    :route_id="climbingRoute.id"
+                                    :route="climbingRoute"
                                 ></EditRoute>
                             </td>
                         </tr>
@@ -267,6 +286,7 @@ const selectedType = ref('')
 const displayArchived = ref(false)
 const pb = usePocketbase()
 const showDeleteConfirmation = ref(false)
+const showArchiveConfirmation = ref(false)
 
 const headers = reactive([
     { title: t('table.select'), value: 'selected' },
@@ -429,15 +449,25 @@ const printSelected = async () => {
     const selectedRoutes = filteredClimbingRoutes.value.filter(
         (route) => route.selected,
     )
-    const selectedRouteIds = selectedRoutes.map((route) => route.id).join(',')
+    const selectedRouteIds = selectedRoutes.map((route) => route.id)
+
+    if (selectedRouteIds.length === 0) {
+        console.warn('No routes selected for PDF export.')
+        return
+    }
 
     try {
-        const response = await fetch('/api/ui/pdf?id=' + selectedRouteIds, {
-            method: 'GET',
+        const response = await fetch('/api/ui/pdf', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ ids: selectedRouteIds }),
         })
+
+        if (!response.ok) {
+            throw new Error(`PDF export failed with status ${response.status}`)
+        }
 
         const pdfBlob = await response.blob()
         const blob = new Blob([pdfBlob], { type: 'application/pdf' })
@@ -457,15 +487,25 @@ const exportSelectedExcel = async () => {
     const selectedRoutes = filteredClimbingRoutes.value.filter(
         (route) => route.selected,
     )
-    const selectedRouteIds = selectedRoutes.map((route) => route.id).join(',')
+    const selectedRouteIds = selectedRoutes.map((route) => route.id)
+
+    if (selectedRouteIds.length === 0) {
+        console.warn('No routes selected for Excel export.')
+        return
+    }
 
     try {
-        const response = await fetch('/api/ui/xlsx?id=' + selectedRouteIds, {
-            method: 'GET',
+        const response = await fetch('/api/ui/xlsx', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ ids: selectedRouteIds }),
         })
+
+        if (!response.ok) {
+            throw new Error(`Excel export failed with status ${response.status}`)
+        }
         const excelBlob = await response.blob()
         const blob = new Blob([excelBlob], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -490,49 +530,21 @@ const exportSelectedJson = async () => {
     }
 
     try {
-        // Extract selected route IDs
         const selectedRouteIds = selectedRoutes.map(route => route.id);
 
-        // Fetch all ratings for the selected routes in a single batch request
-        const filterQuery = selectedRouteIds.map(id => `route_id = "${id}"`).join(' || ');
-        const responseRatings = await pb.collection('ratings').getFullList({
-            filter: filterQuery,
+        const response = await fetch('/api/ui/json', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: selectedRouteIds }),
         });
 
-        // Organize ratings by route_id
-        const ratingsByRouteId = responseRatings.reduce((acc, rating) => {
-            if (!acc[rating.route_id]) {
-                acc[rating.route_id] = [];
-            }
-            acc[rating.route_id].push({
-                rating: rating.rating,
-                difficulty: rating.difficulty,
-                difficulty_sign: rating.difficulty_sign,
-                comment: rating.comment,
-                created: rating.created,
-                updated: rating.updated,
-            });
-            return acc;
-        }, {});
+        if (!response.ok) {
+            throw new Error(`JSON export failed with status ${response.status}`);
+        }
 
-        // Prepare the data for export
-        const exportData = selectedRoutes.map(route => ({
-            name: route.name,
-            color: route.color,
-            difficulty: route.difficulty,
-            difficulty_sign: route.difficulty_sign,
-            anchor_point: route.anchor_point,
-            location: route.location,
-            type: route.type,
-            comment: route.comment,
-            creator: route.creator,
-            screw_date: route.screw_date,
-            score: route.score,
-            archived: route.archived,
-            created: route.created,
-            updated: route.updated,
-            ratings: ratingsByRouteId[route.id] || [],
-        }));
+        const exportData = await response.json();
 
         // Convert to JSON and trigger download
         const json = JSON.stringify(exportData, null, 2);
@@ -606,7 +618,23 @@ const archiveSelected = async () => {
     } catch (error) {
         console.error('Exception in archiveSelected:', error);
     }
+
+    showArchiveConfirmation.value = false;
 };
+
+const handleArchiveClick = () => {
+    const selectedCountValue = selectedCount.value
+    if (selectedCountValue > 1) {
+        showArchiveConfirmation.value = true
+        return
+    }
+
+    void archiveSelected()
+}
+
+const confirmArchive = async () => {
+    await archiveSelected()
+}
 
 
 function generateFilename() {

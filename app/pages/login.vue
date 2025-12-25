@@ -295,7 +295,7 @@ const providerIcons = {
 }
 
 // redirect if already logged in
-if (pb.authStore.isValid) router.push('/dashboard')
+if (pb.authStore.isValid) router.push('/admin/routes')
 
 // hide navbar/footer if your layout reads these
 router.currentRoute.value.meta.navbar = false
@@ -376,7 +376,7 @@ async function onSubmitLogin () {
     const res = await pb.collection('users').authWithPassword(identity.value, password.value)
     if (res?.error) throw res.error
     showSnack(t('notifications.success.login'), 'success')
-    router.push('/admin/dashboard')
+    router.push('/admin/routes')
   } catch (e) {
     if (e.response?.data?.code === 'mfa_required') {
         mfaToken.value = e.response.data.token;
@@ -399,7 +399,7 @@ async function onSubmitTotp() {
         const res = await pb.collection('users').authWithTotp(mfaToken.value, totpCode.value);
         if (res?.error) throw res.error;
         showSnack(t('notifications.success.login'), 'success');
-        router.push('/admin/dashboard');
+        router.push('/admin/routes');
     } catch (e) {
         console.error('TOTP confirmation failed:', e);
         showSnack(resolveAuthError(e) || t('notifications.error.invalid_totp'), 'error');
@@ -430,7 +430,7 @@ function handleOAuthLogin (provider) {
     .then(res => {
       if (res?.error) throw res.error
       showSnack(t('notifications.success.login'), 'success')
-      router.push('/admin/dashboard')
+      router.push('/admin/routes')
     })
     .catch(e => {
       console.error('OAuth login failed:', e)

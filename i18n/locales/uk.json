@@ -23,7 +23,8 @@
   },
   "routes": {
     "home": "Головна",
-    "dashboard": "Панель керування",
+    "dashboard": "Управління маршрутами",
+    "inventory": "Inventory Scan",
     "about": "Про нас",
     "contact": "Контакти",
     "login": "Увійти",
@@ -33,6 +34,7 @@
     "user": "Користувач",
     "statistics": "Статистика",
     "statistic": "Статистика",
+    "analytics": "Аналітика",
     "comments": "Коментарі",
     "comment": "Коментар",
     "settings": "Налаштування",
@@ -51,8 +53,48 @@
     "creator_split": "Авторів розділити комами"
   },
   "dashboard": {
-    "welcome": "Ласкаво просимо до панелі керування!",
+    "welcome": "Управління маршрутами",
     "online": "{0} Онлайн"
+  },
+  "analytics": {
+    "title": "Аналітика маршрутів",
+    "subtitle": "Відстежуйте ключові показники всіх маршрутів.",
+    "refresh": "Оновити",
+    "retry": "Спробувати ще раз",
+    "empty": "Аналітичні дані поки відсутні.",
+    "generatedAt": "Останнє оновлення {value}",
+    "meta": {
+      "title": "Аналітика - Verti-Grade",
+      "description": "Адміністративна панель аналітики для скелелазних маршрутів."
+    },
+    "cards": {
+      "totalRoutes": "Усього маршрутів",
+      "totalRoutesSubtitle": "По всіх локаціях",
+      "activeRoutes": "Активні маршрути",
+      "activeRoutesSubtitle": "Доступні зараз",
+      "averageDifficulty": "Середня складність",
+      "averageDifficultySubtitle": "Середній рівень",
+      "totalComments": "Коментарі",
+      "totalCommentsSubtitle": "Всі відгуки"
+    },
+    "charts": {
+      "difficultyDistribution": "Розподіл складностей",
+      "routeSetters": "Маршрути за автором",
+      "routeTimeline": "Маршрути у часі",
+      "commentTimeline": "Коментарі у часі"
+    },
+    "sections": {
+      "latestComments": "Останні коментарі"
+    },
+    "emptyComments": "Коментарів поки немає.",
+    "labels": {
+      "attempts": "Спроби",
+      "sends": "Проходження",
+      "comments": "Коментарі",
+      "routes": "Маршрути",
+      "unknown": "Невідомо",
+      "other": "Інші"
+    }
   },
   "climbing": {
     "create": "Створити маршрут",
@@ -102,15 +144,18 @@
     "subtitle": "Маршрути для скелелазіння"
   },
   "actions": {
-    "search": "Пошук",
+      "latestComments": "Останні коментарі",
+      "latestRoutes": "Останні маршрути",
     "clear": "Очистити",
-    "import": "Імпортувати маршрути",
+    "emptyComments": "Поки що немає коментарів.",
+    "emptyRoutes": "Поки немає нових маршрутів.",
     "print": "Друк",
     "create": "Створити",
     "edit": "Редагувати",
     "delete": "Видалити",
     "save": "Зберегти",
     "cancel": "Скасувати",
+    "archive": "Архівувати",
     "submit": "Відправити",
     "new_item": "Новий елемент",
     "edit_item": "Редагувати елемент",
@@ -119,13 +164,48 @@
     "deselect_all": "Скасувати вибір",
     "back_to_home": "Повернутися на головну"
   },
+  "inventory": {
+    "title": "Route Inventory Scan",
+    "subtitle": "Point your camera at each QR code to register the route.",
+    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
+    "start": "Start Scanning",
+    "stop": "Stop Scanning",
+    "finish": "Finish Inventory",
+    "scannedCount": "Scanned routes: {count}",
+    "pendingCount": "Routes still to find: {count}",
+    "lastScanned": "Last scanned",
+    "invalidCode": "Scanned code is not a recognized route.",
+    "unknownRoute": "The scanned route could not be found.",
+    "noScans": "No routes scanned yet.",
+    "dialogTitle": "Archive missing routes?",
+    "dialogDescription": "The following routes were not scanned and will be archived:",
+    "archiveSuccess": "Inventory completed. Archived {count} routes.",
+    "nothingToArchive": "All routes were scanned. Nothing to archive.",
+    "archiveError": "Failed to archive the missing routes.",
+    "loadError": "Failed to load active routes.",
+    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "restoreSuccess": "Маршрут {name} відновлено.",
+    "restoreError": "Не вдалося відновити маршрут.",
+    "showInstructions": "Показати інструкцію",
+    "instructionsTitle": "Інструкція з інвентаризації",
+    "instructionsIntro": "Виконайте ці кроки, щоб відсканувати всі QR-коди маршрутів.",
+    "instructionsStep1": "Дозвольте доступ до камери та наведіть пристрій на QR-код маршруту.",
+    "instructionsStep2": "Перевірте інформацію про маршрут на інформаційній панелі нижче.",
+    "instructionsStep3": "Коли завершите, натисніть \"Завершити інвентаризацію\", щоб заархівувати відсутні маршрути.",
+    "instructionsClose": "Зрозуміло",
+    "reset": "Скинути інвентаризацію",
+    "reviewTitle": "Перегляд результатів",
+    "reviewFoundTitle": "Проскановані маршрути",
+    "reviewMissingTitle": "Маршрути не знайдено",
+    "reviewMissingDescription": "Ці маршрути не були відскановані й будуть автоматично заархівовані."
+  },
   "notifications": {
     "success": {
       "resetPassword": "Запит на скидання пароля надіслано. Будь ласка, перевірте свою електронну пошту.",
       "create": "Успішно створено",
       "edit": "Успішно відредаговано",
       "delete": "Успішно видалено",
-      "login": "Вхід успішний. Переадресація на панель керування...",
+      "login": "Вхід успішний. Переадресація до управління маршрутами...",
       "health": "Стан: Добрий"
     },
     "error": {
@@ -142,6 +222,7 @@
     },
     "deleteItem": "Ви впевнені, що хочете видалити цей елемент?",
     "deleteMoreItems": "Ви впевнені, що хочете видалити вибрані елементи?",
+    "archiveMoreItems": "Ви впевнені, що хочете архівувати вибрані елементи?",
     "newVersionAvailable": "Доступна нова версія Verti-Grade. Будь ласка, оновіть до останньої версії."
   },
   "filter": {
@@ -161,8 +242,9 @@
       "settings": "Налаштування - Verti-Grade",
       "route": "Маршрут - Verti-Grade",
       "index": "Маршрути для скелелазіння - Verti-Grade",
+      "inventory": "Inventory Scan - Verti-Grade",
       "comments": "Коментарі - Verti-Grade",
-      "dashboard": "Панель керування - Verti-Grade"
+      "dashboard": "Управління маршрутами - Verti-Grade"
     },
     "content": {
       "login": "Увійти",
@@ -170,13 +252,14 @@
       "settings": "Налаштування",
       "route": "Створити відгук",
       "index": "Маршрути для скелелазіння",
+      "inventory": "Route Inventory Scan",
       "comments": "Коментарі",
-      "dashboard": "Панель керування"
+      "dashboard": "Управління маршрутами"
     }
   },
   "validation": {
     "required": "Це поле є обов'язковим.",
     "requiredAndNotEmpty": "Це поле не повинно бути порожнім.",
-    "anchorPointRange": "Номер анкера має бути від 1 до 100."
+    "anchorPointRange": "Номер анкера має бути від 1 до 100, для боулдерів дозволяється 0."
   }
 }

@@ -23,7 +23,8 @@
   },
   "routes": {
     "home": "Home",
-    "dashboard": "Dashboard",
+    "dashboard": "Route Management",
+    "inventory": "Inventory Scan",
     "about": "About",
     "contact": "Contact",
     "login": "Login",
@@ -33,6 +34,7 @@
     "user": "User",
     "statistics": "Statistics",
     "statistic": "Statistic",
+    "analytics": "Analytics",
     "comments": "Comments",
     "comment": "Comment",
     "settings": "Settings",
@@ -51,8 +53,53 @@
     "creator_split": "Creator split by ,"
   },
   "dashboard": {
-    "welcome": "Welcome to the Dashboard!",
+    "welcome": "Route Management",
     "online": "{0} Online"
+  },
+  "analytics": {
+    "title": "Climbing Route Analytics",
+    "subtitle": "Monitor key metrics for all climbing routes.",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "empty": "No analytics data available yet.",
+    "generatedAt": "Last updated {value}",
+    "meta": {
+      "title": "Analytics - Verti-Grade",
+      "description": "Admin analytics dashboard for climbing routes."
+    },
+    "cards": {
+      "totalRoutes": "Total Routes",
+      "totalRoutesSubtitle": "Across all locations",
+      "activeRoutes": "Active Routes",
+      "activeRoutesSubtitle": "Currently available",
+      "averageDifficulty": "Avg. Difficulty",
+      "averageDifficultySubtitle": "Mean grade",
+      "totalComments": "Comments",
+      "totalCommentsSubtitle": "All route feedback"
+    },
+    "charts": {
+      "difficultyDistribution": "Difficulty Distribution",
+      "routeSetters": "Routes by Setter",
+      "routeTimeline": "Routes Over Time",
+      "commentTimeline": "Comments Over Time"
+    },
+    "sections": {
+      "latestComments": "Latest Comments",
+      "latestRoutes": "Latest Routes"
+    },
+    "emptyComments": "No comments recorded yet.",
+    "emptyRoutes": "No recent routes yet.",
+    "actions": {
+      "showAllSetters": "Show all setters"
+    },
+    "labels": {
+      "attempts": "Attempts",
+      "sends": "Sends",
+      "comments": "Comments",
+      "routes": "Routes",
+      "unknown": "Unknown",
+      "other": "Other"
+    }
   },
   "climbing": {
     "create": "Create route",
@@ -111,6 +158,7 @@
     "delete": "Delete",
     "save": "Save",
     "cancel": "Cancel",
+    "archive": "Archive",
     "new_item": "New Item",
     "submit": "Submit",
     "edit_item": "Edit Item",
@@ -120,13 +168,48 @@
     "back_to_home": "Back to Home",
     "load_more": "Load More"
   },
+  "inventory": {
+    "title": "Route Inventory Scan",
+    "subtitle": "Point your camera at each QR code to register the route.",
+    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
+    "start": "Start Scanning",
+    "stop": "Stop Scanning",
+    "finish": "Finish Inventory",
+    "scannedCount": "Scanned routes: {count}",
+    "pendingCount": "Routes still to find: {count}",
+    "lastScanned": "Last scanned",
+    "invalidCode": "Scanned code is not a recognized route.",
+    "unknownRoute": "The scanned route could not be found.",
+    "noScans": "No routes scanned yet.",
+    "dialogTitle": "Archive missing routes?",
+    "dialogDescription": "The following routes were not scanned and will be archived:",
+    "archiveSuccess": "Inventory completed. Archived {count} routes.",
+    "nothingToArchive": "All routes were scanned. Nothing to archive.",
+    "archiveError": "Failed to archive the missing routes.",
+    "loadError": "Failed to load active routes.",
+    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "restoreSuccess": "Reactivated {name}.",
+    "restoreError": "Failed to reactivate the route.",
+    "showInstructions": "Show instructions",
+    "instructionsTitle": "Inventory instructions",
+    "instructionsIntro": "Follow these steps to scan every route QR code.",
+    "instructionsStep1": "Allow camera access and point your device at a route QR code.",
+    "instructionsStep2": "Check the highlighted route details in the information bar.",
+    "instructionsStep3": "When finished, tap Finish Inventory to archive the missing routes.",
+    "instructionsClose": "Got it",
+    "reset": "Reset inventory",
+    "reviewTitle": "Review scanned routes",
+    "reviewFoundTitle": "Scanned routes",
+    "reviewMissingTitle": "Routes not scanned",
+    "reviewMissingDescription": "These routes were not scanned and will be archived automatically."
+  },
   "notifications": {
     "success": {
       "resetPassword": "Password reset request sent. Please check your email.",
       "create": "Successfully created",
       "edit": "Successfully edited",
       "delete": "Successfully deleted",
-      "login": "Login successful. Redirecting to the Dashboard...",
+      "login": "Login successful. Redirecting to the Route Manager...",
       "health": "Health: OK"
     },
     "error": {
@@ -143,6 +226,7 @@
     },
     "deleteItem": "Are you sure you want to delete this item?",
     "deleteMoreItems": "Are you sure you want to delete the selected items?",
+    "archiveMoreItems": "Are you sure you want to archive the selected items?",
     "newVersionAvailable": "A new version is available! Please update to the latest version."
   },
   "filter": {
@@ -162,8 +246,9 @@
       "settings": "Settings - Verti-Grade",
       "route": "Route - Verti-Grade",
       "index": "Climbing Routes - Verti-Grade",
+      "inventory": "Inventory Scan - Verti-Grade",
       "comments": "Comments - Verti-Grade",
-      "dashboard": "Dashboard - Verti-Grade"
+      "dashboard": "Route Management - Verti-Grade"
     },
     "content": {
       "login": "Login",
@@ -171,13 +256,14 @@
       "settings": "Settings",
       "route": "Create Review",
       "index": "Climbing Routes",
+      "inventory": "Route Inventory Scan",
       "comments": "Comments",
-      "dashboard": "Dashboard"
+      "dashboard": "Route Management"
     }
   },
   "validation": {
     "required": "This field is required.",
     "requiredAndNotEmpty": "This field must not be empty.",
-    "anchorPointRange": "Anchor point must be between 1 and 100."
+    "anchorPointRange": "Anchor point must be between 1 and 100, or 0 for boulders."
   }
 }

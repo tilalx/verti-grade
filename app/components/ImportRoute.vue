@@ -145,53 +145,58 @@ const confirmImport = async () => {
     const jsonData = routesToImport.value;
 
     try {
-        // Step 1: Prepare the route data, stripping any existing ID
-        const routesData = jsonData.map((route) => {
-            const { id, ratings, ...routeData } = route
-            return routeData
-        })
+        const fallbackCreator = buildFallbackCreator(currentUser)
+        const routeErrors = []
+        const ratingErrors = []
 
-        // Step 2: Batch insert routes
-        const routeBatch = pb.createBatch()
-        routesData.forEach((route) => {
-            routeBatch.collection('routes').create(route)
-        })
-        const routeResults = await routeBatch.send()
+        for (const route of jsonData) {
+            try {
+                const createdRoute = await pb.collection('routes').create(
+                    sanitizeRoutePayload(route, fallbackCreator),
+                )
 
-        // Step 3 & 4: Prepare ratings by linking them to the newly created route IDs
-        const ratingsData = [];
-        routeResults.forEach((result, index) => {
-            if (result.statusCode === 200 && result.data?.id) {
-                const newRouteId = result.data.id;
-                const originalRoute = jsonData[index];
-
-                if (originalRoute.ratings && originalRoute.ratings.length > 0) {
-                    originalRoute.ratings.forEach(rating => {
-                        const { id, ...ratingData } = rating; // IMPORTANT: Strip old rating ID
-                        ratingsData.push({
-                            ...ratingData,
-                            route_id: newRouteId, // Use the newly created route ID
-                            user: rating.user || currentUser.id, // Assign current user if not present in data
-                        });
-                    });
+                if (Array.isArray(route.ratings) && route.ratings.length > 0) {
+                    for (const rating of route.ratings) {
+                        try {
+                            await pb.collection('ratings').create(
+                                sanitizeRatingPayload(rating, {
+                                    routeId: createdRoute.id,
+                                    fallbackUserId: currentUser?.id,
+                                }),
+                            )
+                        } catch (ratingError) {
+                            console.error('Failed to insert rating', ratingError)
+                            ratingErrors.push({
+                                routeName: route.name,
+                                message: ratingError?.message ?? 'Unknown rating error',
+                            })
+                        }
+                    }
                 }
-            } else {
-                const originalRouteName = jsonData[index]?.name || `at index ${index}`;
-                console.error(`Failed to insert route: ${originalRouteName}`, result);
+            } catch (routeError) {
+                console.error('Failed to insert route', routeError)
+                routeErrors.push({
+                    routeName: route?.name ?? 'Unnamed Route',
+                    message: routeError?.message ?? 'Unknown route error',
+                })
             }
-        });
-
-        // Step 5: Batch insert ratings if there are any
-        if (ratingsData.length > 0) {
-            const ratingBatch = pb.createBatch()
-            ratingsData.forEach((rating) => {
-                ratingBatch.collection('ratings').create(rating)
-            })
-            await ratingBatch.send()
         }
 
-        showSnackbar('Import completed successfully!', 'success')
-        emit('closed') // Notify parent to reload data
+        if (routeErrors.length === 0 && ratingErrors.length === 0) {
+            showSnackbar('Import completed successfully!', 'success')
+        } else {
+            const summaryParts = []
+            if (routeErrors.length > 0) {
+                summaryParts.push(`${routeErrors.length} route(s) failed`)
+            }
+            if (ratingErrors.length > 0) {
+                summaryParts.push(`${ratingErrors.length} comment(s) failed`)
+            }
+            const details = summaryParts.join(', ')
+            showSnackbar(`Import finished with issues: ${details}`, 'warning')
+        }
+
+        emit('closed')
     } catch (error) {
         console.error('Error during import:', error)
         showSnackbar(error.message || 'An unexpected error occurred during import.', 'error')
@@ -199,5 +204,89 @@ const confirmImport = async () => {
         loading.value = false
         cancelImport()
     }
+}
+
+function sanitizeRoutePayload(route, fallbackCreator) {
+    const normalizeSign = (value) => {
+        if (value === true || value === false || value === null) {
+            return value
+        }
+        const sign = typeof value === 'string' ? value.trim() : ''
+        return sign === '+' ? true : sign === '-' ? false : null
+    }
+
+    const numericDifficulty = Number(route.difficulty)
+    const normalizedCreators = Array.isArray(route.creator)
+        ? route.creator
+              .map((value) => (typeof value === 'string' ? value.trim() : ''))
+              .filter(Boolean)
+        : typeof route.creator === 'string'
+          ? route.creator
+                .split(',')
+                .map((value) => value.trim())
+                .filter(Boolean)
+          : []
+
+    return {
+        name: typeof route.name === 'string' ? route.name : '',
+        difficulty: Number.isFinite(numericDifficulty) ? numericDifficulty : 0,
+        difficulty_sign: normalizeSign(route.difficulty_sign),
+        anchor_point: Number.isFinite(Number(route.anchor_point))
+            ? Number(route.anchor_point)
+            : null,
+        location: route.location || null,
+        type: route.type || null,
+        comment: typeof route.comment === 'string' ? route.comment : '',
+        creator: normalizedCreators.length > 0
+            ? normalizedCreators
+            : fallbackCreator
+                ? [fallbackCreator]
+                : [],
+        screw_date: route.screw_date || null,
+        color: route.color || null,
+        archived: Boolean(route.archived),
+    }
+}
+
+function sanitizeRatingPayload(rating, meta) {
+    const normalizeSign = (value) => {
+        if (value === true || value === false || value === null) {
+            return value
+        }
+        const sign = typeof value === 'string' ? value.trim() : ''
+        return sign === '+' ? true : sign === '-' ? false : null
+    }
+
+    const payload = {
+        route_id: meta.routeId,
+        rating: Number.isFinite(Number(rating.rating)) ? Number(rating.rating) : null,
+        difficulty: Number.isFinite(Number(rating.difficulty))
+            ? Number(rating.difficulty)
+            : 0,
+        difficulty_sign: normalizeSign(rating.difficulty_sign),
+        comment: typeof rating.comment === 'string' ? rating.comment : '',
+    }
+
+    const userId = rating.user || meta.fallbackUserId
+    if (userId) {
+        payload.user = userId
+    }
+
+    return payload
+}
+
+function buildFallbackCreator(user) {
+    if (!user) {
+        return 'Imported'
+    }
+
+    const candidates = [
+        user.name,
+        `${user.firstname ?? ''} ${user.lastname ?? ''}`.trim(),
+        user.username,
+        user.email,
+    ].filter((value) => typeof value === 'string' && value.trim())
+
+    return candidates[0] || 'Imported'
 }
 </script>

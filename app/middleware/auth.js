@@ -17,7 +17,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
       if (to.name === 'Login' && isValidSession) {
         // Redirect to the dashboard if already logged in and trying to access the login page
-        return navigateTo('/admin/dashboard')
+        return navigateTo('/admin/routes')
       }
     }
   }

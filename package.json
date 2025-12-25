@@ -10,7 +10,9 @@
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare",
         "format": "prettier --write \"**/*.{js,vue,html,css}\"",
-        "release": "release-it"
+        "release": "release-it",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "devDependencies": {
         "@mdi/font": "7.4.47",
@@ -18,23 +20,30 @@
         "@nuxtjs/i18n": "10.2.1",
         "@types/pdfkit": "0.17.4",
         "@types/qrcode": "1.5.6",
+        "@vitejs/plugin-vue": "6.0.3",
+        "@vue/test-utils": "2.4.6",
         "concurrently": "9.2.1",
+        "echarts": "6.0.0",
         "exceljs": "4.4.0",
         "h3": "1.15.4",
+        "happy-dom": "20.0.11",
+        "html5-qrcode": "2.3.8",
         "install": "^0.13.0",
         "nuxt": "^4.2.2",
         "pdfkit": "0.17.2",
         "pocketbase": "^0.26.5",
         "prettier": "3.7.4",
         "qrcode": "1.5.4",
-        "release-it": "19.1.0",
+        "release-it": "19.2.1",
         "release-it-snapshot-prerelease-version": "^2.1.0",
         "sass": "1.97.1",
         "typescript": "5.9.3",
+        "vite": "7.3.0",
+        "vitest": "4.0.16",
         "vue": "3.5.26",
         "vuetify-nuxt-module": "0.19.1"
     },
-    "packageManager": "yarn@4.3.1",
+    "packageManager": "yarn@4.11.0",
     "release-it": {
         "$schema": "https://unpkg.com/release-it/schema/release-it.json",
         "git": {

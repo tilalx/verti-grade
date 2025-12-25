@@ -76,12 +76,14 @@
     </v-container>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue'
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useI18n } from '#imports'
-import CreateReview from '@/components/CreateReview.vue'
+import { useHead, useI18n } from '#imports'
 import { navigateTo } from 'nuxt/app'
+import type PocketBase from 'pocketbase'
+import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+import CreateReview from '@/components/CreateReview.vue'
 
 const { t } = useI18n()
 
@@ -95,89 +97,125 @@ useHead({
     ],
 })
 
-const pb = usePocketbase()
+interface ReviewDisplay {
+    rating: number | null | undefined
+    difficulty: string
+    comment: string | null
+}
+
+const pb = usePocketbase() as PocketBase
 const route = useRoute()
-const route_id = ref(route.query.id || null)
-const reviews = ref([])
-const metadata = ref(null)
+const route_id = ref<string | null>((route.query.id as string) || null)
+const reviews = ref<ReviewDisplay[]>([])
+const metadata = ref<RouteListItem | null>(null)
+let unsubscribe: (() => void | Promise<void>) | null = null
 
 const formattedAnchorPoint = computed(() => {
     if (!metadata.value) return ''
     const value = metadata.value.anchor_point
-    const anchorValue =
-        value === null || value === undefined || value === '' ? '—' : value
+    const anchorValue = value === null || value === undefined || value === '' ? '—' : value
     return `${t('climbing.anchor_point')}: ${anchorValue}`
 })
 
-// Computed property for safely formatting the date
 const formattedScrewDate = computed(() => {
     if (!metadata.value?.screw_date) return ''
     try {
         return new Date(metadata.value.screw_date).toLocaleDateString('de-DE', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
-        });
-    } catch (e) {
+            day: 'numeric',
+        })
+    } catch (error) {
         return ''
     }
 })
 
-const getAllRouteRatings = async () => {
-    if (!route_id.value) return;
+const getAllRouteRatings = async (): Promise<void> => {
+    if (!route_id.value) return
     try {
-        const data = await pb.collection('ratings').getFullList({
+        const data = await pb.collection('ratings').getFullList<RatingRecord>({
             filter: `route_id = "${route_id.value}"`,
-            sort: '-created' // Show newest reviews first
-        });
+            sort: '-created',
+        })
 
-        reviews.value = data.map((rating) => {
-            let difficultySign = '';
-            if (rating.difficulty_sign === true) {
-                difficultySign = '+';
-            } else if (rating.difficulty_sign === false) {
-                difficultySign = '-';
-            }
-            return {
-                rating: rating.rating,
-                difficulty: `${rating.difficulty}${difficultySign}`,
-                comment: rating.comment,
-            };
-        });
+        reviews.value = data.map((rating) => ({
+            rating: typeof rating.rating === 'number' ? rating.rating : null,
+            difficulty: buildDifficultyLabel(rating),
+            comment: rating.comment ?? null,
+        }))
     } catch (error) {
-        console.error("Error fetching ratings:", error);
+        console.error('Error fetching ratings:', error)
     }
 }
 
-const getRouteMetadata = async () => {
+const getRouteMetadata = async (): Promise<void> => {
     if (!route_id.value) {
-        navigateTo('/404');
-        return;
+        navigateTo('/404')
+        return
     }
+
     try {
-        metadata.value = await pb.collection('routes').getOne(route_id.value);
+        const record = await pb.collection('routes').getOne<RouteRecord>(route_id.value)
+        metadata.value = {
+            ...record,
+            creator: normalizeCreators(record.creator),
+        }
     } catch (error) {
-        console.error("Error fetching route metadata:", error);
-        navigateTo('/404');
+        console.error('Error fetching route metadata:', error)
+        navigateTo('/404')
     }
 }
 
-// Subscribe to real-time updates
-pb.collection('ratings').subscribe('*', (e) => {
-    if (e.record.route_id === route_id.value) {
-        getAllRouteRatings();
-    }
-});
-
-onMounted(() => {
+onMounted(async () => {
     if (route_id.value) {
-        getRouteMetadata();
-        getAllRouteRatings();
+        await Promise.all([getRouteMetadata(), getAllRouteRatings()])
+        unsubscribe = await pb.collection('ratings').subscribe('*', (event) => {
+            if (event.record.route_id === route_id.value) {
+                void getAllRouteRatings()
+            }
+        })
     } else {
-        console.warn("No route ID found in URL.");
-        navigateTo('/404');
+        console.warn('No route ID found in URL.')
+        navigateTo('/404')
     }
 })
+
+onBeforeUnmount(async () => {
+    if (unsubscribe) {
+        await unsubscribe()
+        unsubscribe = null
+    }
+})
+
+function buildDifficultyLabel(rating: RatingRecord): string {
+    const base = rating.difficulty ?? ''
+    const sign = rating.difficulty_sign === true
+        ? '+'
+        : rating.difficulty_sign === false
+            ? '-'
+            : typeof rating.difficulty_sign === 'string'
+                ? rating.difficulty_sign
+                : ''
+
+    return `${base}${sign}`.trim()
+}
+
+function normalizeCreators(raw: RouteRecord['creator']): string[] {
+    if (Array.isArray(raw)) {
+        return raw
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter(Boolean)
+    }
+
+    if (typeof raw === 'string') {
+        return raw
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean)
+    }
+
+    return []
+}
 </script>
 
 <style scoped>

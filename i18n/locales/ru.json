@@ -23,7 +23,8 @@
   },
   "routes": {
     "home": "Главная",
-    "dashboard": "Панель управления",
+    "dashboard": "Управление маршрутами",
+    "inventory": "Inventory Scan",
     "about": "О нас",
     "contact": "Контакты",
     "login": "Войти",
@@ -33,6 +34,7 @@
     "user": "Пользователь",
     "statistics": "Статистика",
     "statistic": "Статистика",
+    "analytics": "Аналитика",
     "comments": "Комментарии",
     "comment": "Комментарий",
     "settings": "Настройки",
@@ -51,8 +53,53 @@
     "creator_split": "Создателей разделить запятой"
   },
   "dashboard": {
-    "welcome": "Добро пожаловать в панель управления!",
+    "welcome": "Управление маршрутами",
     "online": "{0} Онлайн"
+  },
+  "analytics": {
+    "title": "Аналитика маршрутов",
+    "subtitle": "Отслеживайте ключевые показатели всех маршрутов.",
+    "refresh": "Обновить",
+    "retry": "Повторить",
+    "empty": "Данные аналитики пока отсутствуют.",
+    "generatedAt": "Последнее обновление {value}",
+    "meta": {
+      "title": "Аналитика - Verti-Grade",
+      "description": "Административная панель аналитики для скалолазных маршрутов."
+    },
+    "cards": {
+      "totalRoutes": "Всего маршрутов",
+      "totalRoutesSubtitle": "По всем площадкам",
+      "activeRoutes": "Активные маршруты",
+      "activeRoutesSubtitle": "Доступны сейчас",
+      "averageDifficulty": "Средняя сложность",
+      "averageDifficultySubtitle": "Средний уровень",
+      "totalComments": "Комментарии",
+      "totalCommentsSubtitle": "Все отзывы"
+    },
+    "charts": {
+      "difficultyDistribution": "Распределение сложностей",
+      "routeSetters": "Маршруты по авторам",
+      "routeTimeline": "Маршруты по времени",
+      "commentTimeline": "Комментарии по времени"
+    },
+    "sections": {
+      "latestComments": "Последние комментарии",
+      "latestRoutes": "Последние маршруты"
+    },
+    "emptyComments": "Комментарии пока отсутствуют.",
+    "emptyRoutes": "Недавних маршрутов пока нет.",
+    "actions": {
+      "showAllSetters": "Показать всех постановщиков"
+    },
+    "labels": {
+      "attempts": "Попытки",
+      "sends": "Прохождения",
+      "comments": "Комментарии",
+      "routes": "Маршруты",
+      "unknown": "Неизвестно",
+      "other": "Прочие"
+    }
   },
   "climbing": {
     "create": "Создать маршрут",
@@ -60,7 +107,7 @@
     "routename": "Название маршрута",
     "difficulty": "Сложность",
     "difficulty_sign": "Знак сложности",
-  "anchor_point": "Анкер",
+      "anchor_point": "Анкер",
     "location": "Местоположение",
     "searchRouteName": "Поиск",
     "type": "Тип",
@@ -109,6 +156,7 @@
     "delete": "Удалить",
     "save": "Сохранить",
     "cancel": "Отмена",
+    "archive": "Архивировать",
     "submit": "Отправить",
     "new_item": "Новый элемент",
     "edit_item": "Редактировать элемент",
@@ -117,13 +165,48 @@
     "deselect_all": "Снять выделение",
     "back_to_home": "Вернуться на главную"
   },
+  "inventory": {
+    "title": "Route Inventory Scan",
+    "subtitle": "Point your camera at each QR code to register the route.",
+    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
+    "start": "Start Scanning",
+    "stop": "Stop Scanning",
+    "finish": "Finish Inventory",
+    "scannedCount": "Scanned routes: {count}",
+    "pendingCount": "Routes still to find: {count}",
+    "lastScanned": "Last scanned",
+    "invalidCode": "Scanned code is not a recognized route.",
+    "unknownRoute": "The scanned route could not be found.",
+    "noScans": "No routes scanned yet.",
+    "dialogTitle": "Archive missing routes?",
+    "dialogDescription": "The following routes were not scanned and will be archived:",
+    "archiveSuccess": "Inventory completed. Archived {count} routes.",
+    "nothingToArchive": "All routes were scanned. Nothing to archive.",
+    "archiveError": "Failed to archive the missing routes.",
+    "loadError": "Failed to load active routes.",
+    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "restoreSuccess": "Маршрут {name} восстановлен.",
+    "restoreError": "Не удалось восстановить маршрут.",
+    "showInstructions": "Показать инструкцию",
+    "instructionsTitle": "Инструкция по инвентаризации",
+    "instructionsIntro": "Выполните следующие шаги, чтобы отсканировать все QR-коды маршрутов.",
+    "instructionsStep1": "Разрешите доступ к камере и наведите устройство на QR-код маршрута.",
+    "instructionsStep2": "Проверьте сведения о маршруте на информационной панели ниже.",
+    "instructionsStep3": "После завершения нажмите \"Завершить инвентаризацию\", чтобы архивировать отсутствующие маршруты.",
+    "instructionsClose": "Понятно",
+    "reset": "Сбросить инвентаризацию",
+    "reviewTitle": "Проверка результатов",
+    "reviewFoundTitle": "Найденные маршруты",
+    "reviewMissingTitle": "Маршруты не найдены",
+    "reviewMissingDescription": "Эти маршруты не были отсканированы и будут автоматически архивированы."
+  },
   "notifications": {
     "success": {
       "resetPassword": "Запрос на сброс пароля отправлен. Пожалуйста, проверьте вашу электронную почту.",
       "create": "Успешно создано",
       "edit": "Успешно отредактировано",
       "delete": "Успешно удалено",
-      "login": "Вход выполнен успешно. Перенаправление на панель управления...",
+      "login": "Вход выполнен успешно. Перенаправление в управление маршрутами...",
       "health": "Статус: Хорошо"
     },
     "error": {
@@ -140,6 +223,7 @@
     },
     "deleteItem": "Вы уверены, что хотите удалить этот элемент?",
     "deleteMoreItems": "Вы уверены, что хотите удалить выбранные элементы?",
+    "archiveMoreItems": "Вы уверены, что хотите архивировать выбранные элементы?",
     "newVersionAvailable": "Доступна новая версия Verti-Grade. Пожалуйста, обновитесь до последней версии."
   },
   "filter": {
@@ -159,8 +243,9 @@
       "settings": "Настройки - Verti-Grade",
       "route": "Маршрут - Verti-Grade",
       "index": "Маршруты для скалолазания - Verti-Grade",
+      "inventory": "Inventory Scan - Verti-Grade",
       "comments": "Комментарии - Verti-Grade",
-      "dashboard": "Панель управления - Verti-Grade"
+      "dashboard": "Управление маршрутами - Verti-Grade"
     },
     "content": {
       "login": "Войти",
@@ -168,13 +253,14 @@
       "settings": "Настройки",
       "route": "Создать отзыв",
       "index": "Маршруты для скалолазания",
+      "inventory": "Route Inventory Scan",
       "comments": "Комментарии",
-      "dashboard": "Панель управления"
+      "dashboard": "Управление маршрутами"
     }
   },
   "validation": {
     "required": "Это поле обязательно для заполнения.",
     "requiredAndNotEmpty": "Это поле не должно быть пустым.",
-    "anchorPointRange": "Номер анкера должен быть от 1 до 100."
+    "anchorPointRange": "Номер анкера должен быть от 1 до 100, для боулдеров допускается 0."
   }
 }
