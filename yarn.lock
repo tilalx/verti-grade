@@ -8217,7 +8217,7 @@ __metadata:
     sass: "npm:1.97.2"
     typescript: "npm:5.9.3"
     vue: "npm:3.5.26"
-    vuetify-nuxt-module: "npm:0.19.1"
+    vuetify-nuxt-module: "npm:0.19.2"
   languageName: unknown
   linkType: soft
 
@@ -11642,9 +11642,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:0.19.1":
-  version: 0.19.1
-  resolution: "vuetify-nuxt-module@npm:0.19.1"
+"vuetify-nuxt-module@npm:0.19.2":
+  version: 0.19.2
+  resolution: "vuetify-nuxt-module@npm:0.19.2"
   dependencies:
     "@nuxt/kit": "npm:3.15.4"
     defu: "npm:^6.1.4"
@@ -11652,12 +11652,13 @@ __metadata:
     local-pkg: "npm:^0.5.0"
     pathe: "npm:^1.1.2"
     perfect-debounce: "npm:^1.0.0"
+    semver: "npm:^7.7.3"
     ufo: "npm:^1.5.4"
     unconfig: "npm:^0.5.5"
     upath: "npm:^2.0.1"
     vite-plugin-vuetify: "npm:^2.1.2"
     vuetify: "npm:^3.7.0"
-  checksum: 10c0/b16960ea0c489613322aaf9f30b6354b9de14ecd9335c5cba55a878004d021177be4bb3d08d412139e43b43b075b86d7ffa8896de0dda29c45a58c60d29e40a7
+  checksum: 10c0/aa60feddb5c9e11f33927515f1c2ee3e905ba5ad59440ac50521677c491a55ff3250eaca21509f92ab8a12e1840746fb9e22fc1810fe6c994c55e22c71a374e9
   languageName: node
   linkType: hard
 
