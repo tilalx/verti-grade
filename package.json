@@ -34,7 +34,7 @@
         "vue": "3.5.30",
         "vuetify-nuxt-module": "0.19.5"
     },
-    "packageManager": "yarn@4.3.1",
+    "packageManager": "yarn@4.13.0",
     "release-it": {
         "$schema": "https://unpkg.com/release-it/schema/release-it.json",
         "git": {
