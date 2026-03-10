@@ -38,7 +38,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only what Yarn needs for dependency resolution
-COPY .yarn ./.yarn
 COPY .yarnrc.yml package.json nuxt.config.ts ./
 # IMPORTANT: commit yarn.lock to the repo and copy it in
 COPY yarn.lock ./
