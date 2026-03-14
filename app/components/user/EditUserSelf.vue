@@ -34,7 +34,7 @@
                 />
 
                 <v-form>
-                    <v-row dense>
+                    <v-row density="comfortable">
                         <v-col cols="12" md="4" sm="6">
                             <v-text-field
                                 v-model="user.firstname"

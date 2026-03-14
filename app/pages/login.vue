@@ -121,7 +121,7 @@
                 </v-row>
 
                 <!-- OAuth providers -->
-                <v-row v-if="authMethods.oauth2.enabled" dense>
+                <v-row v-if="authMethods.oauth2.enabled" density="comfortable">
                   <v-col
                     v-for="p in authMethods.oauth2.providers"
                     :key="p.name"

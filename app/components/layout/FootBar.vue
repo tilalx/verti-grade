@@ -47,7 +47,7 @@
           color="surface"
           class="px-4 py-2"
         >
-          <v-row dense align="center" justify="center" class="flex-nowrap">
+          <v-row density="comfortable" align="center" justify="center" class="flex-nowrap">
             <v-chip
               :color="health?.code === 200 ? 'success' : 'error'"
               variant="flat"

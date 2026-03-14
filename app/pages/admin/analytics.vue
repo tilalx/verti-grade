@@ -27,7 +27,7 @@
             </v-col>
         </v-row>
 
-        <v-row class="mb-4" dense>
+        <v-row class="mb-4" density="comfortable">
             <v-col
                 v-for="card in summaryCards"
                 :key="card.key"
@@ -48,7 +48,7 @@
             </v-col>
         </v-row>
 
-        <v-row v-if="!error" class="mb-4" dense>
+        <v-row v-if="!error" class="mb-4" density="comfortable">
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="w-100" elevation="2">
                     <v-card-title class="justify-space-between align-center">

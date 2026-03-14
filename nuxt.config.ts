@@ -99,7 +99,12 @@ export default defineNuxtConfig({
       minify: 'esbuild',
     },
     optimizeDeps: {
-      include: ['vuetify'],
+      include: [
+         'vuetify',
+         '@vue/devtools-core',
+         '@vue/devtools-kit',
+         'pocketbase',
+      ],
     },
   },
 });
