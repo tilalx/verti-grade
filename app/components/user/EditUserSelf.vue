@@ -214,6 +214,7 @@ const original = {
 
 const hasChanges = computed(() => {
     if (avatarFile.value) return true
+    if (user.password && user.oldPassword && user.passwordConfirm) return true
     return user.firstname !== original.firstname || user.name !== original.name
 })
 
@@ -257,8 +258,8 @@ async function saveUser() {
         showSnackbar('Profile updated successfully', 'success')
         localDialog.value = false
     } catch (err) {
-        const code = err?.response?.data?.code
-        if (code === 400) {
+        const code = err?.response?.data?.oldPassword?.code
+        if (code === 'validation_invalid_old_password') {
             showSnackbar('Old password is incorrect', 'error')
         } else {
             showSnackbar('An error occurred', 'error')
