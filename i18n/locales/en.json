@@ -9,7 +9,7 @@
     "firstname": "First name",
     "lastname": "Last name",
     "username": "Username",
-    "password": "Password",
+    "password": "New Password",
     "email": "Email",
     "username_or_email": "Username or Email",
     "login_hint": "Enter your username or email.",
@@ -19,7 +19,38 @@
     "userProfile": "User Profile",
     "oldPassword": "Current Password",
     "or_login_with": "Or login with OAuth",
-    "remember_me": "Remember me"
+    "remember_me": "Remember me",
+    "changeAvatar": "Change avatar",
+    "emailLocked": "Email cannot be changed here",
+    "passwordStrength": "Password strength",
+    "passwordHint": "Leave the password fields empty to keep your current password.",
+    "unsavedChanges": "Unsaved changes",
+    "wrongOldPassword": "Current password is incorrect",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security"
+    },
+    "placeholders": {
+      "firstname": "Jane",
+      "lastname": "Doe",
+      "oldPassword": "Your current password",
+      "newPassword": "Min. 8 characters",
+      "confirmPassword": "Repeat new password"
+    },
+    "strength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "requirements": {
+      "minLength": "At least 8 characters",
+      "maxLength": "Max 72 characters",
+      "uppercase": "Uppercase letter (A–Z)",
+      "lowercase": "Lowercase letter (a–z)",
+      "number": "Number (0–9)",
+      "special": "Special character (!{'@'}#...)"
+    }
   },
   "routes": {
     "home": "Home",
@@ -107,7 +138,7 @@
     "routename": "Route name",
     "difficulty": "Difficulty",
     "difficulty_sign": "Difficulty sign",
-  "anchor_point": "Anchor point",
+    "anchor_point": "Anchor point",
     "location": "Location",
     "searchRouteName": "Search",
     "type": "Type",
@@ -207,7 +238,7 @@
     "success": {
       "resetPassword": "Password reset request sent. Please check your email.",
       "create": "Successfully created",
-      "edit": "Successfully edited",
+      "edit": "Successfully saved",
       "delete": "Successfully deleted",
       "login": "Login successful. Redirecting to the Route Manager...",
       "health": "Health: OK"
@@ -217,7 +248,7 @@
       "nameRequired": "Name is required",
       "nameTooLong": "Name must be less than 30 characters",
       "create": "Error creating",
-      "edit": "Error editing",
+      "edit": "Error saving profile",
       "delete": "Error deleting",
       "login_failed": "Login failed. Please check your credentials and try again.",
       "no_route_found": "No route found!",
@@ -264,6 +295,10 @@
   "validation": {
     "required": "This field is required.",
     "requiredAndNotEmpty": "This field must not be empty.",
-    "anchorPointRange": "Anchor point must be between 1 and 100, or 0 for boulders."
+    "anchorPointRange": "Anchor point must be between 1 and 100, or 0 for boulders.",
+    "minLength": "Minimum {n} characters.",
+    "maxLength": "Maximum {n} characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordTooWeak": "Password must be at least \"Good\" strength."
   }
 }

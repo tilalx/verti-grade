@@ -9,7 +9,7 @@
     "firstname": "Ad",
     "lastname": "Soyad",
     "username": "Kullanıcı Adı",
-    "password": "Şifre",
+    "password": "Yeni Şifre",
     "email": "E-posta",
     "username_or_email": "Kullanıcı Adı veya E-posta",
     "login_hint": "Kullanıcı adınızı veya e-posta adresinizi girin.",
@@ -19,7 +19,38 @@
     "userProfile": "Kullanıcı Profili",
     "oldPassword": "Mevcut Şifre",
     "or_login_with": "Veya OAuth ile giriş yapın",
-    "remember_me": "Beni Hatırla"
+    "remember_me": "Beni Hatırla",
+    "changeAvatar": "Avatar değiştir",
+    "emailLocked": "E-posta burada değiştirilemez",
+    "passwordStrength": "Şifre güvenliği",
+    "passwordHint": "Mevcut şifrenizi korumak için şifre alanlarını boş bırakın.",
+    "unsavedChanges": "Kaydedilmemiş değişiklikler",
+    "wrongOldPassword": "Mevcut şifre yanlış",
+    "tabs": {
+      "profile": "Profil",
+      "security": "Güvenlik"
+    },
+    "placeholders": {
+      "firstname": "Ahmet",
+      "lastname": "Yılmaz",
+      "oldPassword": "Mevcut şifreniz",
+      "newPassword": "En az 8 karakter",
+      "confirmPassword": "Yeni şifreyi tekrar girin"
+    },
+    "strength": {
+      "weak": "Zayıf",
+      "fair": "Orta",
+      "good": "İyi",
+      "strong": "Güçlü"
+    },
+    "requirements": {
+      "minLength": "En az 8 karakter",
+      "maxLength": "En fazla 72 karakter",
+      "uppercase": "Büyük harf (A–Z)",
+      "lowercase": "Küçük harf (a–z)",
+      "number": "Rakam (0–9)",
+      "special": "Özel karakter (!{'@'}#...)"
+    }
   },
   "routes": {
     "home": "Ana Sayfa",
@@ -107,7 +138,7 @@
     "routename": "Rota Adı",
     "difficulty": "Zorluk",
     "difficulty_sign": "Zorluk İşareti",
-      "anchor_point": "Ankraj noktası",
+    "anchor_point": "Ankraj noktası",
     "location": "Konum",
     "searchRouteName": "Ara",
     "type": "Tür",
@@ -165,28 +196,29 @@
     "confirm": "Silme Onayı",
     "select_all": "Tümünü Seç",
     "deselect_all": "Seçimi Kaldır",
-    "back_to_home": "Ana Sayfaya Dön"
+    "back_to_home": "Ana Sayfaya Dön",
+    "load_more": "Daha fazla yükle"
   },
   "inventory": {
-    "title": "Route Inventory Scan",
-    "subtitle": "Point your camera at each QR code to register the route.",
-    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
-    "start": "Start Scanning",
-    "stop": "Stop Scanning",
-    "finish": "Finish Inventory",
-    "scannedCount": "Scanned routes: {count}",
-    "pendingCount": "Routes still to find: {count}",
-    "lastScanned": "Last scanned",
-    "invalidCode": "Scanned code is not a recognized route.",
-    "unknownRoute": "The scanned route could not be found.",
-    "noScans": "No routes scanned yet.",
-    "dialogTitle": "Archive missing routes?",
-    "dialogDescription": "The following routes were not scanned and will be archived:",
-    "archiveSuccess": "Inventory completed. Archived {count} routes.",
-    "nothingToArchive": "All routes were scanned. Nothing to archive.",
-    "archiveError": "Failed to archive the missing routes.",
-    "loadError": "Failed to load active routes.",
-    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "title": "Rota Envanter Taraması",
+    "subtitle": "Rotayı kaydetmek için kameranızı her QR koda doğrultun.",
+    "mobileOnly": "Bu araç yalnızca mobil cihazlarda kullanılabilir. Lütfen bir telefon veya tablet kullanın.",
+    "start": "Taramayı Başlat",
+    "stop": "Taramayı Durdur",
+    "finish": "Envanteri Bitir",
+    "scannedCount": "Taranan rotalar: {count}",
+    "pendingCount": "Bulunacak rotalar: {count}",
+    "lastScanned": "Son taranan",
+    "invalidCode": "Taranan kod tanınan bir rota değil.",
+    "unknownRoute": "Taranan rota bulunamadı.",
+    "noScans": "Henüz hiç rota taranmadı.",
+    "dialogTitle": "Eksik rotalar arşivlensin mi?",
+    "dialogDescription": "Aşağıdaki rotalar taranmadı ve arşivlenecek:",
+    "archiveSuccess": "Envanter tamamlandı. {count} rota arşivlendi.",
+    "nothingToArchive": "Tüm rotalar tarandı. Arşivlenecek bir şey yok.",
+    "archiveError": "Eksik rotalar arşivlenemedi.",
+    "loadError": "Aktif rotalar yüklenemedi.",
+    "cameraError": "Cihaz kamerasına erişilemiyor. Lütfen kamera izinlerine izin verin veya başka bir cihaz deneyin.",
     "restoreSuccess": "{name} yeniden etkinleştirildi.",
     "restoreError": "Rotayı yeniden etkinleştiremedik.",
     "showInstructions": "Talimatları göster",
@@ -206,7 +238,7 @@
     "success": {
       "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
       "create": "Başarıyla oluşturuldu",
-      "edit": "Başarıyla düzenlendi",
+      "edit": "Başarıyla kaydedildi",
       "delete": "Başarıyla silindi",
       "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
       "health": "Durum: İyi"
@@ -216,7 +248,7 @@
       "nameRequired": "İsim gerekli",
       "nameTooLong": "İsim 30 karakterden az olmalıdır",
       "create": "Oluşturma hatası",
-      "edit": "Düzenleme hatası",
+      "edit": "Profil kaydedilemedi",
       "delete": "Silme hatası",
       "login_failed": "Giriş başarısız. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
       "no_route_found": "Rota bulunamadı!",
@@ -245,7 +277,7 @@
       "settings": "Ayarlar - Verti-Grade",
       "route": "Rota - Verti-Grade",
       "index": "Tırmanış Rotaları - Verti-Grade",
-      "inventory": "Inventory Scan - Verti-Grade",
+      "inventory": "Envanter Taraması - Verti-Grade",
       "comments": "Yorumlar - Verti-Grade",
       "dashboard": "Rota Yönetimi - Verti-Grade"
     },
@@ -255,7 +287,7 @@
       "settings": "Ayarlar",
       "route": "İnceleme Oluştur",
       "index": "Tırmanış Rotaları",
-      "inventory": "Route Inventory Scan",
+      "inventory": "Rota Envanter Taraması",
       "comments": "Yorumlar",
       "dashboard": "Rota Yönetimi"
     }
@@ -263,6 +295,10 @@
   "validation": {
     "required": "Bu alan gereklidir.",
     "requiredAndNotEmpty": "Bu alan boş olmamalıdır.",
-    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır, boulder'lar için 0 da kabul edilir."
+    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır, boulder'lar için 0 da kabul edilir.",
+    "minLength": "En az {n} karakter.",
+    "maxLength": "En fazla {n} karakter.",
+    "passwordMismatch": "Şifreler eşleşmiyor.",
+    "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır."
   }
 }

@@ -104,6 +104,7 @@ export default defineNuxtConfig({
          '@vue/devtools-core',
          '@vue/devtools-kit',
          'pocketbase',
+         'echarts',
       ],
     },
   },
