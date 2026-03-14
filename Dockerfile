@@ -46,6 +46,7 @@ COPY yarn.lock ./
 COPY i18n ./i18n
 
 # Pin Yarn and install with cache mounts
+RUN npm install -g corepack --force
 RUN corepack enable && corepack prepare yarn --activate
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     --mount=type=cache,target=/root/.cache \
@@ -55,7 +56,8 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 FROM node:25.8.0-trixie AS ui-build
 WORKDIR /app
 ENV NODE_ENV=production NITRO_PRESET=node-server
-RUN corepack enable && corepack prepare yarn@4.3.1 --activate
+RUN npm install -g corepack --force
+RUN corepack enable && corepack prepare yarn --activate
 COPY --from=ui-deps /app/ ./
 COPY app ./app
 COPY server ./server
