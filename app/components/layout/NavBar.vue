@@ -43,16 +43,18 @@
                 <!-- Right Side -->
                 <div class="nav-actions">
                     <template v-if="isLoggedIn">
-                        <UserIcon v-show="mdAndUp" />
+                        <!-- Desktop: user icon only -->
+                        <UserIcon v-if="mdAndUp" />
+                        <!-- Mobile: hamburger only -->
                         <v-btn
-                            v-if="!mdAndUp"
+                            v-else
                             icon
                             variant="text"
                             class="nav-hamburger"
                             @click="drawer = !drawer"
                             :aria-label="$t('nav.openMenu')"
                         >
-                            <v-icon :icon="drawer ? 'mdi-close' : 'mdi-menu'" />
+                            <v-icon>mdi-menu</v-icon>
                         </v-btn>
                     </template>
                     <template v-else>
@@ -78,25 +80,6 @@
             width="260"
             class="mobile-drawer"
         >
-            <div class="drawer-header">
-                <NuxtImg
-                    v-if="logo_url"
-                    :src="logo_url"
-                    alt="Logo"
-                    :style="logoStyle"
-                    height="30"
-                />
-                <NuxtImg
-                    v-else
-                    src="/DAVLogoHanau.png"
-                    alt="Logo"
-                    :style="logoStyle"
-                    height="30"
-                    densities="x1 x2"
-                />
-            </div>
-
-            <v-divider class="mx-4 mb-2" />
 
             <v-list nav density="compact" class="drawer-list">
                 <v-list-item
@@ -108,6 +91,7 @@
                     rounded="lg"
                     class="drawer-item"
                     active-class="drawer-item--active"
+                    @click="drawer = false"
                 />
             </v-list>
 
@@ -144,7 +128,6 @@ const props = defineProps({
 
 const { loggedIn, settings } = toRefs(props)
 
-// Nav link definitions — single source of truth for both desktop + mobile
 const navLinks = [
     { to: '/',                  icon: 'mdi-home-outline',           label: 'routes.home'      },
     { to: '/admin/routes',      icon: 'mdi-map-marker-path',        label: 'routes.dashboard' },
@@ -156,7 +139,6 @@ const navLinks = [
 
 const desktopLinks = computed(() => navLinks.filter(l => !l.mobileOnly))
 
-// Close drawer when resizing to desktop
 watch(mdAndUp, (isDesktop) => {
     if (isDesktop) drawer.value = false
 })
@@ -184,7 +166,6 @@ const drawer = ref(false)
 </script>
 
 <style scoped>
-/* ── Bar shell ──────────────────────────────────────── */
 .nav-bar {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -200,7 +181,6 @@ const drawer = ref(false)
     gap: 8px;
 }
 
-/* ── Logo ───────────────────────────────────────────── */
 .nav-logo {
     display: flex;
     align-items: center;
@@ -209,14 +189,12 @@ const drawer = ref(false)
     margin-right: 8px;
 }
 
-/* ── Desktop links ──────────────────────────────────── */
 .nav-links {
     display: flex;
     align-items: center;
     gap: 2px;
 }
 
-/* ── Actions cluster ────────────────────────────────── */
 .nav-actions {
     display: flex;
     align-items: center;
@@ -233,7 +211,6 @@ const drawer = ref(false)
     font-size: 0.85rem;
 }
 
-/* ── Mobile drawer ──────────────────────────────────── */
 .mobile-drawer {
     background: rgb(var(--v-theme-surface)) !important;
 }
@@ -241,7 +218,7 @@ const drawer = ref(false)
 .drawer-header {
     display: flex;
     align-items: center;
-    padding: 20px 20px 16px;
+    padding: 16px 16px 12px;
 }
 
 .drawer-list {

@@ -191,8 +191,8 @@
                                 <v-col cols="12">
                                     <v-text-field
                                         v-model="user.password"
-                                        :label="$t('account.password')"
-                                        :placeholder="$t('account.placeholders.newPassword')"
+                                        :label="$t('account.newPassword')"
+                                        :placeholder="$t('account.placeholders.confirmPassword')"
                                         :type="showNew ? 'text' : 'password'"
                                         autocomplete="new-password"
                                         variant="outlined"
@@ -257,7 +257,7 @@
                                 <v-col cols="12">
                                     <v-text-field
                                         v-model="user.passwordConfirm"
-                                        :label="$t('account.newPassword')"
+                                        :label="$t('account.confirmPassword')"
                                         :placeholder="$t('account.placeholders.confirmPassword')"
                                         :type="showConfirm ? 'text' : 'password'"
                                         autocomplete="new-password"

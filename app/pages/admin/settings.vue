@@ -1,175 +1,165 @@
 <template>
-    <v-container>
-        <v-form>
-            <v-row>
-                <!-- Page Logo Upload -->
-                <v-col cols="12" md="4">
-                    <v-card outlined tile flat>
-                        <v-card-title class="text-h6">Page Logo</v-card-title>
-                        <v-card-text>
-                            <div
-                                class="d-flex align-center justify-center"
-                                style="height: 150px"
+    <v-container fluid class="pa-6">
+
+        <!-- Image Upload Cards -->
+        <v-row class="mb-4" density="comfortable">
+            <v-col
+                v-for="asset in assetFields"
+                :key="asset.key"
+                cols="12"
+                sm="4"
+            >
+                <v-card
+                    rounded="lg"
+                    border
+                    flat
+                    :class="{ 'border-primary': asset.isDirty }"
+                    style="transition: border-color 0.2s"
+                >
+                    <v-card-text class="pa-4">
+                        <div class="d-flex align-center justify-space-between mb-3">
+                            <span class="text-subtitle-2 font-weight-semibold">
+                                {{ asset.label }}
+                            </span>
+                            <v-chip
+                                v-if="asset.isDirty"
+                                color="warning"
+                                size="x-small"
+                                variant="tonal"
                             >
-                                <NuxtImg
-                                    v-if="logoPreview"
-                                    :src="logoPreview"
-                                    height="100"
-                                    contain
-                                />
-                                <div
-                                    v-else
-                                    class="placeholder"
-                                    style="
-                                        height: 100px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        color: gray;
-                                    "
-                                >
-                                    No logo uploaded
-                                </div>
-                            </div>
-                            <v-file-input
-                                variant="underlined"
-                                hide-details
-                                dense
-                                flat
-                                accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                                v-model="logoFile"
-                                @update:model-value="onLogoSelected"
-                                placeholder="Select new logo"
-                            />
-                        </v-card-text>
-                    </v-card>
-                </v-col>
+                                Changed
+                            </v-chip>
+                        </div>
 
-                <!-- Page Icon Upload -->
-                <v-col cols="12" md="4">
-                    <v-card outlined tile flat>
-                        <v-card-title class="text-h6">Page Icon</v-card-title>
-                        <v-card-text>
+                        <!-- Preview + Upload combined area -->
+                        <div
+                            class="asset-drop-zone d-flex flex-column align-center justify-center rounded-lg position-relative"
+                            style="height: 160px; border: 1.5px dashed rgba(255,255,255,0.12); overflow: hidden; cursor: pointer"
+                            @click="() => asset.triggerInput()"
+                        >
+                            <!-- Preview image when available -->
+                            <NuxtImg
+                                v-if="asset.preview.value"
+                                :src="asset.preview.value"
+                                style="max-height: 130px; max-width: 100%; object-fit: contain; display: block"
+                            />
+
+                            <!-- Empty state -->
+                            <template v-else>
+                                <v-icon size="28" class="mb-2 text-medium-emphasis">mdi-image-plus-outline</v-icon>
+                                <span class="text-caption text-medium-emphasis">Click to upload</span>
+                            </template>
+
+                            <!-- Hover overlay -->
                             <div
-                                class="d-flex align-center justify-center"
-                                style="height: 150px"
+                                class="asset-hover-overlay d-flex flex-column align-center justify-center rounded-lg"
+                                style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); opacity: 0; transition: opacity 0.18s"
                             >
-                                <NuxtImg
-                                    v-if="iconPreview"
-                                    :src="iconPreview"
-                                    height="100"
-                                    contain
-                                />
-                                <div
-                                    v-else
-                                    class="placeholder"
-                                    style="
-                                        height: 100px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        color: gray;
-                                    "
-                                >
-                                    No icon uploaded
-                                </div>
+                                <v-icon color="white" size="24" class="mb-1">mdi-upload-outline</v-icon>
+                                <span class="text-caption text-white">Replace</span>
                             </div>
-                            <v-file-input
-                                variant="underlined"
-                                hide-details
-                                dense
-                                flat
-                                accept=".ico,image/vnd.microsoft.icon,image/x-icon"
-                                v-model="iconFile"
-                                @update:model-value="onIconSelected"
-                                placeholder="Select new icon"
-                            />
-                        </v-card-text>
-                    </v-card>
-                </v-col>
+                        </div>
 
-                <!-- Sign Image Upload -->
-                <v-col cols="12" md="4">
-                    <v-card outlined tile flat>
-                        <v-card-title class="text-h6">Sign Image</v-card-title>
-                        <v-card-text>
-                            <div
-                                class="d-flex align-center justify-center"
-                                style="height: 150px"
-                            >
-                                <NuxtImg
-                                    v-if="signPreview"
-                                    :src="signPreview"
-                                    height="100"
-                                    contain
-                                />
-                                <div
-                                    v-else
-                                    class="placeholder"
-                                    style="
-                                        height: 100px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        color: gray;
-                                    "
-                                >
-                                    No sign image uploaded
-                                </div>
-                            </div>
-                            <v-file-input
-                                variant="underlined"
-                                hide-details
-                                dense
-                                flat
-                                accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                                v-model="signFile"
-                                @update:model-value="onSignSelected"
-                                placeholder="Select new sign image"
-                            />
-                        </v-card-text>
-                    </v-card>
-                </v-col>
-            </v-row>
+                        <!-- Hidden real file input, triggered by clicking the drop zone -->
+                        <v-file-input
+                            :ref="(el) => { asset.inputRef.value = el }"
+                            :accept="asset.accept"
+                            :model-value="asset.file.value"
+                            @update:model-value="(f) => asset.onSelect(f)"
+                            style="display: none"
+                            hide-details
+                        />
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
 
-            <v-row>
-                <v-col cols="12" md="6">
-                    <v-text-field
-                        label="Application URL"
-                        v-model="copySettings.application_url"
-                    />
-                </v-col>
-                <v-col cols="12" md="6">
-                    <v-text-field
-                        label="Imprint URL"
-                        v-model="copySettings.imprint_url"
-                    />
-                </v-col>
-                <v-col cols="12" md="6">
-                    <v-text-field
-                        label="Privacy URL"
-                        v-model="copySettings.privacy_url"
-                    />
-                </v-col>
-            </v-row>
+        <!-- URL Fields -->
+        <v-card rounded="lg" border flat class="mb-6">
+            <v-card-text class="pa-4">
+                <p class="text-subtitle-2 font-weight-semibold mb-4">Public URLs</p>
+                <v-row density="comfortable">
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.application_url"
+                            label="Application URL"
+                            density="compact"
+                            variant="outlined"
+                            rounded="md"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-web"
+                            placeholder="https://app.example.com"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.imprint_url"
+                            label="Imprint URL"
+                            density="compact"
+                            variant="outlined"
+                            rounded="md"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-file-document-outline"
+                            placeholder="https://example.com/imprint"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.privacy_url"
+                            label="Privacy URL"
+                            density="compact"
+                            variant="outlined"
+                            rounded="md"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-shield-outline"
+                            placeholder="https://example.com/privacy"
+                        />
+                    </v-col>
+                </v-row>
+            </v-card-text>
+        </v-card>
 
-            <v-row>
-                <v-col cols="12" class="text-right">
-                    <v-btn
-                        v-if="hasChanges"
-                        color="success"
-                        @click="saveSettings"
-                    >
-                        Save
-                    </v-btn>
-                </v-col>
-            </v-row>
-        </v-form>
+        <!-- Actions Row -->
+        <div class="d-flex align-center">
+            <v-fade-transition>
+                <span v-if="hasChanges" class="text-caption text-medium-emphasis">
+                    <v-icon size="14" class="mr-1">mdi-circle-medium</v-icon>
+                    Unsaved changes
+                </span>
+            </v-fade-transition>
+
+            <v-spacer />
+
+            <v-btn
+                v-if="hasChanges"
+                color="primary"
+                rounded="md"
+                :loading="saving"
+                prepend-icon="mdi-content-save-outline"
+                @click="saveSettings"
+            >
+                Save Changes
+            </v-btn>
+        </div>
+
+        <!-- Snackbar feedback -->
+        <v-snackbar
+            v-model="snackbar.show"
+            :color="snackbar.color"
+            :timeout="3000"
+            location="bottom right"
+            rounded="md"
+        >
+            <v-icon class="mr-2">{{ snackbar.icon }}</v-icon>
+            {{ snackbar.text }}
+        </v-snackbar>
+
     </v-container>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+
 const pb = usePocketbase()
 const { t } = useI18n()
 
@@ -183,126 +173,220 @@ definePageMeta({
     middleware: ['auth'],
 })
 
-// Fetch settings during SSR
+// ── Data fetching ─────────────────────────────────────────────────────────────
+
 const { data: settings } = await useAsyncData('settings', () =>
     pb.collection('settings').getOne('settings_123456'),
 )
 
-// Make original reactive so Vue tracks updates
+// ── State ─────────────────────────────────────────────────────────────────────
+
 const original = reactive({
-    application_url: settings.value.application_url,
-    imprint_url: settings.value.imprint_url,
-    privacy_url: settings.value.privacy_url,
+    application_url: settings.value?.application_url ?? '',
+    imprint_url:     settings.value?.imprint_url ?? '',
+    privacy_url:     settings.value?.privacy_url ?? '',
 })
 
-// Reactive copy for text fields
-const copySettings = reactive({
-    application_url: original.application_url,
-    imprint_url: original.imprint_url,
-    privacy_url: original.privacy_url,
-})
+const copySettings = reactive({ ...original })
 
-// Refs for chosen File objects
-const logoFile = ref(null)
-const iconFile = ref(null)
-const signFile = ref(null)
+const logoFile  = ref(null)
+const iconFile  = ref(null)
+const signFile  = ref(null)
 
-// Refs for preview URLs (initially from PB)
+const logoInputRef  = ref(null)
+const iconInputRef  = ref(null)
+const signInputRef  = ref(null)
+
 const logoPreview = ref(null)
 const iconPreview = ref(null)
 const signPreview = ref(null)
 
-// Load initial previews & subscribe to updates
-onMounted(() => {
-    const rec = settings.value
-    logoPreview.value = pb.files.getURL(rec, rec.page_logo)
-    iconPreview.value = pb.files.getURL(rec, rec.page_icon)
-    signPreview.value = pb.files.getURL(rec, rec.sign_image)
+const saving = ref(false)
+const snackbar = reactive({
+    show:  false,
+    color: 'success',
+    icon:  'mdi-check-circle',
+    text:  '',
+})
 
-    pb.collection('settings').subscribe(
-        'RECORD_ID',
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function pbFileUrl(rec, filename) {
+    if (!filename) return null
+    return pb.files.getURL(rec, filename)
+}
+
+function notify(text, color = 'success', icon = 'mdi-check-circle') {
+    Object.assign(snackbar, { show: true, color, icon, text })
+}
+
+// ── Asset field descriptors (drives the template v-for) ───────────────────────
+
+const assetFields = computed(() => [
+    {
+        key:          'logo',
+        label:        'Page Logo',
+        accept:       'image/jpeg,image/png,image/svg+xml,image/webp',
+        file:         logoFile,
+        preview:      logoPreview,
+        inputRef:     logoInputRef,
+        isDirty:      !!logoFile.value,
+        onSelect:     onLogoSelected,
+        triggerInput: () => logoInputRef.value?.$el?.querySelector('input')?.click(),
+    },
+    {
+        key:          'icon',
+        label:        'Page Icon',
+        accept:       '.ico,image/vnd.microsoft.icon,image/x-icon',
+        file:         iconFile,
+        preview:      iconPreview,
+        inputRef:     iconInputRef,
+        isDirty:      !!iconFile.value,
+        onSelect:     onIconSelected,
+        triggerInput: () => iconInputRef.value?.$el?.querySelector('input')?.click(),
+    },
+    {
+        key:          'sign',
+        label:        'Sign Image',
+        accept:       'image/jpeg,image/png,image/svg+xml,image/webp',
+        file:         signFile,
+        preview:      signPreview,
+        inputRef:     signInputRef,
+        isDirty:      !!signFile.value,
+        onSelect:     onSignSelected,
+        triggerInput: () => signInputRef.value?.$el?.querySelector('input')?.click(),
+    },
+])
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────────
+
+let unsubscribe = null
+
+onMounted(async () => {
+    const rec = settings.value
+    logoPreview.value = pbFileUrl(rec, rec.page_logo)
+    iconPreview.value = pbFileUrl(rec, rec.page_icon)
+    signPreview.value = pbFileUrl(rec, rec.sign_image)
+
+    // subscribe() returns a Promise<unsubscribe fn> in PocketBase JS SDK v0.21+
+    unsubscribe = await pb.collection('settings').subscribe(
+        'settings_123456',
         (e) => {
-            Object.assign(copySettings, e.data)
-            logoPreview.value = pb.files.getURL(e.data, e.data.page_logo)
-            iconPreview.value = pb.files.getURL(e.data, e.data.page_icon)
-            signPreview.value = pb.files.getURL(e.data, e.data.sign_image)
-            // update original snapshot too
-            original.application_url = e.data.application_url
-            original.imprint_url = e.data.imprint_url
-            original.privacy_url = e.data.privacy_url
+            const d = e.record
+            logoPreview.value = pbFileUrl(d, d.page_logo)
+            iconPreview.value = pbFileUrl(d, d.page_icon)
+            signPreview.value = pbFileUrl(d, d.sign_image)
+
+            original.application_url = d.application_url
+            original.imprint_url     = d.imprint_url
+            original.privacy_url     = d.privacy_url
+
+            Object.assign(copySettings, {
+                application_url: d.application_url,
+                imprint_url:     d.imprint_url,
+                privacy_url:     d.privacy_url,
+            })
         },
-        { recordId: 'settings_123456' },
     )
 })
 
-// Handlers: store file + generate local preview
+onUnmounted(() => {
+    unsubscribe?.()
+})
+
+// ── File selection handlers ───────────────────────────────────────────────────
+
 function onLogoSelected(file) {
-    logoFile.value = file
+    logoFile.value    = file
     logoPreview.value = file
         ? URL.createObjectURL(file)
-        : pb.files.getURL(settings.value, settings.value.page_logo)
-}
-function onIconSelected(file) {
-    iconFile.value = file
-    iconPreview.value = file
-        ? URL.createObjectURL(file)
-        : pb.files.getURL(settings.value, settings.value.page_icon)
-}
-function onSignSelected(file) {
-    signFile.value = file
-    signPreview.value = file
-        ? URL.createObjectURL(file)
-        : pb.files.getURL(settings.value, settings.value.sign_image)
+        : pbFileUrl(settings.value, settings.value.page_logo)
 }
 
-// Computed “dirty” flag
+function onIconSelected(file) {
+    iconFile.value    = file
+    iconPreview.value = file
+        ? URL.createObjectURL(file)
+        : pbFileUrl(settings.value, settings.value.page_icon)
+}
+
+function onSignSelected(file) {
+    signFile.value    = file
+    signPreview.value = file
+        ? URL.createObjectURL(file)
+        : pbFileUrl(settings.value, settings.value.sign_image)
+}
+
+// ── Dirty flag ────────────────────────────────────────────────────────────────
+
 const hasChanges = computed(() => {
-    // any new file selected?
     if (logoFile.value || iconFile.value || signFile.value) return true
-    // compare text fields against reactive original
     return (
         copySettings.application_url !== original.application_url ||
-        copySettings.imprint_url !== original.imprint_url ||
-        copySettings.privacy_url !== original.privacy_url
+        copySettings.imprint_url     !== original.imprint_url     ||
+        copySettings.privacy_url     !== original.privacy_url
     )
 })
 
-// Save all at once
-async function saveSettings() {
-    if (!hasChanges.value) return
+// ── Save ──────────────────────────────────────────────────────────────────────
 
-    const formData = new FormData()
-    formData.append('application_url', copySettings.application_url)
-    formData.append('imprint_url', copySettings.imprint_url)
-    formData.append('privacy_url', copySettings.privacy_url)
-    if (logoFile.value) formData.append('page_logo', logoFile.value)
-    if (iconFile.value) formData.append('page_icon', iconFile.value)
-    if (signFile.value) formData.append('sign_image', signFile.value)
+async function saveSettings() {
+    if (!hasChanges.value || saving.value) return
+    saving.value = true
 
     try {
+        // PB SDK v0.21+ converts plain objects with File values to multipart automatically
+        const payload = {
+            application_url: copySettings.application_url,
+            imprint_url:     copySettings.imprint_url,
+            privacy_url:     copySettings.privacy_url,
+        }
+        if (logoFile.value) payload.page_logo  = logoFile.value
+        if (iconFile.value) payload.page_icon  = iconFile.value
+        if (signFile.value) payload.sign_image = signFile.value
+
         const updated = await pb
             .collection('settings')
-            .update(settings.value.id, formData)
+            .update(settings.value.id, payload)
 
-        // refresh previews to PB-hosted URLs
-        logoPreview.value = pb.files.getURL(updated, updated.page_logo)
-        iconPreview.value = pb.files.getURL(updated, updated.page_icon)
-        signPreview.value = pb.files.getURL(updated, updated.sign_image)
+        // Sync previews to canonical PB-hosted URLs
+        logoPreview.value = pbFileUrl(updated, updated.page_logo)
+        iconPreview.value = pbFileUrl(updated, updated.page_icon)
+        signPreview.value = pbFileUrl(updated, updated.sign_image)
 
-        // clear file refs
+        // Clear staged file refs
         logoFile.value = iconFile.value = signFile.value = null
 
-        // update reactive original & copySettings
+        // Advance the original snapshot so hasChanges resets
         original.application_url = updated.application_url
-        original.imprint_url = updated.imprint_url
-        original.privacy_url = updated.privacy_url
+        original.imprint_url     = updated.imprint_url
+        original.privacy_url     = updated.privacy_url
 
-        copySettings.application_url = updated.application_url
-        copySettings.imprint_url = updated.imprint_url
-        copySettings.privacy_url = updated.privacy_url
+        Object.assign(copySettings, {
+            application_url: updated.application_url,
+            imprint_url:     updated.imprint_url,
+            privacy_url:     updated.privacy_url,
+        })
+
+        notify('Settings saved successfully.')
     } catch (err) {
         console.error('Save failed:', err)
-        // TODO: user feedback
+        notify(
+            'Failed to save settings. Please try again.',
+            'error',
+            'mdi-alert-circle',
+        )
+    } finally {
+        saving.value = false
     }
 }
 </script>
+
+<style scoped>
+.asset-drop-zone:hover .asset-hover-overlay {
+    opacity: 1 !important;
+}
+.asset-drop-zone:hover {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+</style>
