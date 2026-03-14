@@ -234,42 +234,67 @@
   </v-app>
 </template>
 
-<script setup>
-const { t } = useI18n();
-const pb = usePocketbase();
-const { smAndDown, mdAndUp } = useDisplay();
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, reactive, ref, useId, watch } from 'vue'
+import { useDisplay } from 'vuetify'
+import { useHead, useI18n } from '#imports'
+import type PocketBase from 'pocketbase'
+import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+
+const { t } = useI18n()
+const pb = usePocketbase() as PocketBase
+const { smAndDown, mdAndUp } = useDisplay()
 
 useHead({
   title: t('page.title.index'),
   meta: [{ name: 'description', content: t('page.content.index'), authRequired: false }],
-});
+})
 
-const routeNameId = useId(), difficultyId = useId(), typeId = useId(), locationId = useId();
+const routeNameId = useId()
+const difficultyId = useId()
+const typeId = useId()
+const locationId = useId()
 
-// Filter State
-const selectedDifficulty = ref(''), selectedLocation = ref(''), selectedType = ref(''), searchRouteName = ref('');
-const isFilterSheetOpen = ref(false);
-
-const activeFilterCount = computed(() => {
-  return [selectedDifficulty.value, selectedLocation.value, selectedType.value].filter(Boolean).length;
-});
-
-function clearFilters() {
-  selectedDifficulty.value = '';
-  selectedLocation.value = '';
-  selectedType.value = '';
-  isFilterSheetOpen.value = false;
+type SortDirection = 'asc' | 'desc' | undefined
+interface SortOption {
+  key: string
+  order?: SortDirection
 }
 
-const tableOptions = reactive({
+interface TableOptions {
+  page: number
+  itemsPerPage: number
+  sortBy: SortOption[]
+}
+
+const selectedDifficulty = ref('')
+const selectedLocation = ref('')
+const selectedType = ref('')
+const searchRouteName = ref('')
+const isFilterSheetOpen = ref(false)
+
+const activeFilterCount = computed(() => {
+  return [selectedDifficulty.value, selectedLocation.value, selectedType.value].filter(Boolean).length
+})
+
+function clearFilters() {
+  selectedDifficulty.value = ''
+  selectedLocation.value = ''
+  selectedType.value = ''
+  isFilterSheetOpen.value = false
+}
+
+const tableOptions = reactive<TableOptions>({
   page: 1,
   itemsPerPage: 20,
   sortBy: [{ key: 'screw_date', order: 'desc' }],
-});
+})
 
-const loading = ref(true), routes = ref([]), totalItems = ref(0);
+const loading = ref(true)
+const routes = ref<RouteListItem[]>([])
+const totalItems = ref(0)
 
-const headersDesktop = [
+const headersDesktop: Array<{ title: string; key: string; sortable?: boolean }> = [
   { title: t('climbing.color'), key: 'color', sortable: false },
   { title: t('climbing.routename'), key: 'name' },
   { title: t('climbing.difficulty'), key: 'difficulty' },
@@ -278,110 +303,166 @@ const headersDesktop = [
   { title: t('climbing.creators'), key: 'creator' },
   { title: t('table.created_at'), key: 'screw_date' },
   { title: t('table.actions'), key: 'actions', sortable: false },
-];
+]
 
-const difficulties = [{ text: t('filter.all'), value: '' }, ...Array.from({ length: 10 }, (_, i) => ({ text: String(i + 1), value: String(i + 1) }))];
-const locations = [{ text: t('filter.all'), value: '' }, { text: 'Hanau', value: 'Hanau' }, { text: 'Gelnhausen', value: 'Gelnhausen' }];
-const types = [{ text: t('routes.types.boulder'), value: 'Boulder' }, { text: t('filter.all'), value: '' }, { text: t('routes.types.route'), value: 'Route' }];
+const difficulties = [
+  { text: t('filter.all'), value: '' },
+  ...Array.from({ length: 10 }, (_, index) => ({ text: String(index + 1), value: String(index + 1) })),
+]
+const locations = [
+  { text: t('filter.all'), value: '' },
+  { text: 'Hanau', value: 'Hanau' },
+  { text: 'Gelnhausen', value: 'Gelnhausen' },
+]
+const types = [
+  { text: t('routes.types.boulder'), value: 'Boulder' },
+  { text: t('filter.all'), value: '' },
+  { text: t('routes.types.route'), value: 'Route' },
+]
 
 const pbFilter = computed(() => {
-  const parts = ['archived = false'];
-  if (selectedDifficulty.value) parts.push(`difficulty = ${Number(selectedDifficulty.value)}`);
-  if (selectedLocation.value) parts.push(`location = "${selectedLocation.value}"`);
-  if (selectedType.value) parts.push(`type = "${selectedType.value}"`);
+  const parts = ['archived = false']
+  if (selectedDifficulty.value) parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
+  if (selectedLocation.value) parts.push(`location = "${selectedLocation.value}"`)
+  if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
   if (searchRouteName.value.trim()) {
-    const term = searchRouteName.value.replace(/"/g, '\\"');
-    parts.push(`name ~ "${term}"`);
+    const term = searchRouteName.value.replace(/"/g, '\\"')
+    parts.push(`name ~ "${term}"`)
   }
-  return parts.join(' && ');
-});
+  return parts.join(' && ')
+})
 
-function toPbSort(sortByArr) {
-  if (!Array.isArray(sortByArr) || !sortByArr.length) return '-screw_date';
-  return sortByArr.map(s => (s.order === 'desc' ? `-${s.key}` : s.key)).join(',');
+function toPbSort(sortByArr: SortOption[]) {
+  if (!Array.isArray(sortByArr) || !sortByArr.length) return '-screw_date'
+  return sortByArr.map((sort) => (sort.order === 'desc' ? `-${sort.key}` : sort.key)).join(',')
 }
 
-async function loadRoutes(options = {}, { append = false } = {}) {
-  loading.value = true;
-  if (options.page) tableOptions.page = options.page;
-  if (options.itemsPerPage) tableOptions.itemsPerPage = options.itemsPerPage;
-  if (options.sortBy) tableOptions.sortBy = options.sortBy;
+async function loadRoutes(options: Partial<TableOptions> = {}, meta: { append?: boolean } = {}): Promise<void> {
+  loading.value = true
 
-  const sort = toPbSort(tableOptions.sortBy);
+  if (typeof options.page === 'number') tableOptions.page = options.page
+  if (typeof options.itemsPerPage === 'number') tableOptions.itemsPerPage = options.itemsPerPage
+  if (options.sortBy) tableOptions.sortBy = options.sortBy
+
+  const sort = toPbSort(tableOptions.sortBy)
+
   try {
-    const res = await pb.collection('routes').getList(
-      tableOptions.page,
-      tableOptions.itemsPerPage,
-      { filter: pbFilter.value, sort }
-    );
+    const res = await pb
+      .collection('routes')
+      .getList<RouteRecord>(tableOptions.page, tableOptions.itemsPerPage, {
+        filter: pbFilter.value,
+        sort,
+      })
 
-    const routeIds = res.items.map(r => r.id);
-    let ratedRouteIds = new Set();
+    const routeIds = res.items.map((route) => route.id)
+    let ratedRouteIds = new Set<string>()
+
     if (routeIds.length > 0) {
-      const ratingsFilter = routeIds.map(id => `route_id = "${id}"`).join(' || ');
-      const ratingsRecords = await pb.collection('ratings').getFullList({
-          filter: ratingsFilter,
-          fields: 'route_id'
-      });
-      ratedRouteIds = new Set(ratingsRecords.map(r => r.route_id));
+      const ratingsFilter = routeIds.map((id) => `route_id = "${id}"`).join(' || ')
+      const ratingsRecords = await pb.collection('ratings').getFullList<RatingRecord>({
+        filter: ratingsFilter,
+        fields: 'route_id',
+      })
+
+      const ids = ratingsRecords
+        .map((rating) => rating.route_id)
+        .filter((routeId): routeId is string => typeof routeId === 'string' && routeId.length > 0)
+      ratedRouteIds = new Set(ids)
     }
 
-    const newRoutes = res.items.map(route => ({
+    const newRoutes: RouteListItem[] = res.items.map((route) => ({
       ...route,
-      has_ratings: ratedRouteIds.has(route.id)
-    }));
+      creator: normalizeCreators(route.creator),
+      has_ratings: ratedRouteIds.has(route.id),
+    }))
 
-    if (append) {
-      routes.value.push(...newRoutes);
+    if (meta.append) {
+      routes.value = routes.value.concat(newRoutes)
     } else {
-      routes.value = newRoutes;
+      routes.value = newRoutes
     }
-    totalItems.value = res.totalItems;
+
+    totalItems.value = res.totalItems
   } catch (error) {
-    console.error("Failed to load routes:", error);
+    console.error('Failed to load routes:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
 function loadMore() {
-  tableOptions.page++;
-  loadRoutes({}, { append: true });
+  tableOptions.page += 1
+  void loadRoutes({}, { append: true })
 }
 
-let debounceT = null;
+let debounceT: ReturnType<typeof setTimeout> | null = null
 watch([selectedDifficulty, selectedLocation, selectedType, searchRouteName], () => {
-  clearTimeout(debounceT);
+  if (debounceT) {
+    clearTimeout(debounceT)
+  }
+
   debounceT = setTimeout(() => {
-    tableOptions.page = 1;
-    loadRoutes({}, { append: false });
-  }, 300);
-});
+    tableOptions.page = 1
+    void loadRoutes({}, { append: false })
+  }, 300)
+})
 
-let unsub = null;
+let unsub: (() => void | Promise<void>) | null = null
 onMounted(async () => {
-  await loadRoutes({ ...tableOptions });
+  await loadRoutes({ ...tableOptions })
   unsub = await pb.collection('routes').subscribe('*', () => {
-    tableOptions.page = 1;
-    loadRoutes({}, { append: false });
-  });
-});
-onBeforeUnmount(() => unsub && unsub());
+    tableOptions.page = 1
+    void loadRoutes({}, { append: false })
+  })
+})
 
-function formatDate(date) {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('de-DE');
+onBeforeUnmount(() => {
+  if (unsub) {
+    void unsub()
+    unsub = null
+  }
+  if (debounceT) {
+    clearTimeout(debounceT)
+    debounceT = null
+  }
+})
+
+function formatDate(date: string | null | undefined) {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('de-DE')
 }
 
-function formatDifficulty(item) {
-  let sign = '';
-  if (item.difficulty_sign === true) sign = '+';
-  else if (item.difficulty_sign === false) sign = '-';
-  return `${item.difficulty} ${sign}`.trim();
+function formatDifficulty(item: RouteRecord | RouteListItem) {
+  const sign = item.difficulty_sign === true
+    ? '+'
+    : item.difficulty_sign === false
+      ? '-'
+      : typeof item.difficulty_sign === 'string'
+        ? item.difficulty_sign
+        : ''
+
+  return `${item.difficulty} ${sign}`.trim()
 }
 
-function formatAnchorPoint(value) {
-  return value === 0 || value === null || value === undefined || value === '' ? '—' : value;
+function formatAnchorPoint(value: number | string | null | undefined) {
+  return value === 0 || value === null || value === undefined || value === '' ? '—' : value
+}
+
+function normalizeCreators(raw: RouteRecord['creator']): string[] {
+  if (Array.isArray(raw)) {
+    return raw
+      .map((value) => (typeof value === 'string' ? value.trim() : ''))
+      .filter(Boolean)
+  }
+
+  if (typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+  }
+
+  return []
 }
 </script>
 

@@ -41,7 +41,7 @@
                                         v-model.number="routeAnchorPoint"
                                         :rules="anchorPointRules"
                                         type="number"
-                                        min="1"
+                                        :min="isBoulderRoute ? 0 : 1"
                                         max="100"
                                         step="1"
                                         required
@@ -114,104 +114,125 @@
     </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type PocketBase from 'pocketbase'
+import type { DifficultySignValue, RouteRecord } from '~/types/models'
 
 const { t } = useI18n()
 
-const pb = usePocketbase()
+type DifficultySelectValue = '' | '+' | '-'
+type VFormHandle = { reset: () => void } | null
+
+const pb = usePocketbase() as PocketBase
 
 const showPopup = ref(false)
 const routeName = ref('')
 const routeDifficulty = ref('')
-const routeDifficultySign = ref('')
-const routeAnchorPoint = ref(null)
+const routeDifficultySign = ref<DifficultySelectValue>('')
+const routeAnchorPoint = ref<number | null>(null)
 const routeLocation = ref('')
 const routeType = ref('')
 const routeComment = ref('')
-const routeCreator = ref([])
+const routeCreator = ref<string[]>([])
 const routeScrewDate = ref('')
 const routeColor = ref('')
-const form = ref(null)
-const setterItems = ref([])
+const form = ref<VFormHandle>(null)
+const setterItems = ref<string[]>([])
 
-const nameRules = [
-    (v) => !!v || t('notifications.error.nameRequired'),
-    (v) => v.length <= 30 || t('notifications.error.nameTooLong'),
+const isBoulderRoute = computed(() => routeType.value === 'Boulder')
+
+const isAnchorPointWithinRange = (value: number | string | null) => {
+    const numeric = Number(value)
+
+    if (!Number.isInteger(numeric)) {
+        return false
+    }
+
+    const min = isBoulderRoute.value ? 0 : 1
+    return numeric >= min && numeric <= 100
+}
+
+const nameRules: Array<(value: string) => true | string> = [
+    (value) => (!!value ? true : t('notifications.error.nameRequired')),
+    (value) => (value.length <= 30 ? true : t('notifications.error.nameTooLong')),
 ]
 
-const anchorPointRules = [
-    (v) => v !== null && v !== undefined && v !== '' || t('validation.required'),
-    (v) => Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 100 || t('validation.anchorPointRange'),
+const anchorPointRules: Array<(value: number | string | null) => true | string> = [
+    (value) => (value !== null && value !== undefined && value !== '' ? true : t('validation.required')),
+    (value) => (isAnchorPointWithinRange(value) ? true : t('validation.anchorPointRange')),
 ]
 
-const difficulties = Array.from({ length: 10 }, (_, i) => (i + 1).toString())
+const difficulties = Array.from({ length: 10 }, (_, index) => (index + 1).toString())
 const locations = ['Hanau', 'Gelnhausen']
 
-const isFormComplete = computed(
-    () =>
-        routeName.value &&
-        routeDifficulty.value &&
-        Number.isInteger(Number(routeAnchorPoint.value)) &&
-        Number(routeAnchorPoint.value) >= 1 &&
-        Number(routeAnchorPoint.value) <= 100 &&
-        routeLocation.value &&
-        routeType.value &&
-        routeCreator.value &&
-        routeScrewDate.value &&
-        routeColor.value,
-)
+const isFormComplete = computed(() => {
+    return (
+        !!routeName.value &&
+        !!routeDifficulty.value &&
+        isAnchorPointWithinRange(routeAnchorPoint.value) &&
+        !!routeLocation.value &&
+        !!routeType.value &&
+        routeCreator.value.length > 0 &&
+        !!routeScrewDate.value &&
+        !!routeColor.value
+    )
+})
 
 function openPopup() {
     showPopup.value = true
-    getSetters()
+    void getSetters()
 }
 
 function closePopup() {
     showPopup.value = false
 }
 
-function getSetters() {
-    pb.collection('routes')
-        .getFullList({
-            fields: 'creator',
-            sort: '-created',
-        })
-        .then((querySnapshot) => {
-            const uniqueCreators = Array.from(
-                new Set(querySnapshot.flatMap((doc) => doc.creator))
-            );
-            setterItems.value = uniqueCreators
-        })
+async function getSetters() {
+    try {
+        const records = await pb
+            .collection('routes')
+            .getFullList<RouteRecord>({ fields: 'creator', sort: '-created' })
 
+        const creators = records
+            .flatMap((record) => normalizeCreators(record.creator))
+            .filter(Boolean)
+
+        setterItems.value = Array.from(new Set(creators))
+    } catch (error) {
+        console.error('Error loading route setters:', error)
+    }
 }
 
 async function createRoute() {
-    const routeData = {
+    const signValue: DifficultySignValue =
+        routeDifficultySign.value === '+'
+            ? true
+            : routeDifficultySign.value === '-'
+                ? false
+                : null
+
+    const routeData: Partial<RouteRecord> = {
         name: routeName.value,
-        difficulty: routeDifficulty.value,
-        difficulty_sign:
-            routeDifficultySign.value === '+'
-                ? true
-                : routeDifficultySign.value === '-'
-                  ? false
-                  : null,
-    anchor_point: Number(routeAnchorPoint.value),
+        difficulty: Number(routeDifficulty.value),
+        difficulty_sign: signValue,
+        anchor_point: routeAnchorPoint.value,
         location: routeLocation.value,
         type: routeType.value,
         comment: routeComment.value || '',
-        creator: routeCreator.value || '',
+        creator: routeCreator.value,
         screw_date: routeScrewDate.value,
         color: routeColor.value,
+        archived: false,
     }
 
     try {
         await pb.collection('routes').create(routeData)
-
         showPopup.value = false
-    form.value?.reset()
-    routeAnchorPoint.value = null
+        form.value?.reset()
+        routeAnchorPoint.value = null
+        routeCreator.value = []
     } catch (error) {
         console.error('Error creating route:', error)
     }
@@ -219,8 +240,25 @@ async function createRoute() {
 
 function validate() {
     if (isFormComplete.value) {
-        createRoute()
+        void createRoute()
     }
+}
+
+function normalizeCreators(raw: RouteRecord['creator']): string[] {
+    if (Array.isArray(raw)) {
+        return raw
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter(Boolean)
+    }
+
+    if (typeof raw === 'string') {
+        return raw
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean)
+    }
+
+    return []
 }
 </script>
 

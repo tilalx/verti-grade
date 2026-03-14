@@ -76,27 +76,33 @@
     </div>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue'
+<script setup lang="ts">
+import { onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type PocketBase from 'pocketbase'
+import type { RatingRecord } from '~/types/models'
 
 const { t } = useI18n()
 
-const props = defineProps({
-    route_id: {
-        type: String,
-        required: true,
-    },
-})
+interface RatingDisplay {
+    rating: number | null | undefined
+    difficulty: string
+    comment: string | null
+}
 
-const pb = usePocketbase()
+type Unsubscribe = (() => void | Promise<void>) | null
+
+const props = defineProps<{
+    route_id: string
+}>()
+
+const pb = usePocketbase() as PocketBase
 
 // Component State
 const isSheetOpen = ref(false)
 const isLoading = ref(false)
-const ratings = ref([])
-const unsubscribe = ref(null) // Holds the unsubscribe function for real-time updates
-
-// --- Methods ---
+const ratings = ref<RatingDisplay[]>([])
+const unsubscribe = ref<Unsubscribe>(null)
 
 const openSheet = async () => {
     isSheetOpen.value = true
@@ -105,61 +111,73 @@ const openSheet = async () => {
 }
 
 const fetchClimbingRatings = async () => {
-    if (!props.route_id) return;
-    
+    if (!props.route_id) {
+        return
+    }
+
     isLoading.value = true
     try {
-        const data = await pb.collection('ratings').getFullList({
+        const data = await pb.collection('ratings').getFullList<RatingRecord>({
             filter: `route_id = "${props.route_id}"`,
-            sort: '-created', // Show newest reviews first
-        });
+            sort: '-created',
+        })
 
-        ratings.value = data.map((rating) => {
-            let difficultySign = rating.difficulty_sign === true ? '+' : rating.difficulty_sign === false ? '-' : '';
-            return {
-                rating: rating.rating,
-                difficulty: `${rating.difficulty}${difficultySign}`,
-                comment: rating.comment,
-            };
-        });
+        ratings.value = data.map((rating) => ({
+            rating: typeof rating.rating === 'number' ? rating.rating : null,
+            difficulty: buildDifficultyLabel(rating),
+            comment: rating.comment ?? null,
+        }))
     } catch (error) {
-        console.error("Error fetching ratings:", error);
-        ratings.value = [];
+        console.error('Error fetching ratings:', error)
+        ratings.value = []
     } finally {
         isLoading.value = false
     }
 }
 
-// Subscribes to real-time updates for the ratings collection
 const subscribeToRatings = async () => {
-    if (unsubscribe.value) unsubscribe.value(); // Unsubscribe from any previous listener
+    await unsubscribeFromRatings()
 
     try {
         unsubscribe.value = await pb.collection('ratings').subscribe('*', (e) => {
-            // If the change is relevant to the current route, refresh the list
             if (e.record.route_id === props.route_id) {
-                fetchClimbingRatings();
+                fetchClimbingRatings()
             }
-        });
+        })
     } catch (error) {
-        console.error("Failed to subscribe to ratings:", error);
+        console.error('Failed to subscribe to ratings:', error)
     }
 }
 
-// Unsubscribes from real-time updates to prevent memory leaks
-const unsubscribeFromRatings = () => {
+const unsubscribeFromRatings = async () => {
     if (unsubscribe.value) {
-        unsubscribe.value();
-        unsubscribe.value = null;
+        await unsubscribe.value()
+        unsubscribe.value = null
     }
 }
 
-// Watch for the sheet closing to clean up the real-time subscription
 watch(isSheetOpen, (isOpen) => {
     if (!isOpen) {
-        unsubscribeFromRatings();
+        void unsubscribeFromRatings()
     }
 })
+
+onBeforeUnmount(() => {
+    void unsubscribeFromRatings()
+})
+
+function buildDifficultyLabel(rating: RatingRecord): string {
+    const base = rating.difficulty ?? ''
+    const sign = rating.difficulty_sign === true
+        ? '+'
+        : rating.difficulty_sign === false
+            ? '-'
+            : typeof rating.difficulty_sign === 'string'
+                ? rating.difficulty_sign
+                : ''
+
+    return `${base}${sign}`.trim()
+}
 </script>
 
 <style scoped>
