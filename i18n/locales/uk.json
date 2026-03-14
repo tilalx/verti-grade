@@ -9,17 +9,48 @@
     "firstname": "Ім'я",
     "lastname": "Прізвище",
     "username": "Ім'я користувача",
-    "password": "Пароль",
+    "password": "Новий пароль",
     "email": "Електронна пошта",
     "username_or_email": "Ім'я користувача або електронна пошта",
     "login_hint": "Введіть ім'я користувача або електронну пошту.",
     "reset_password": "Скинути пароль",
-    "reset_hint": "Ссылка для сброса будет отправлена на вашу электронную почту.",
+    "reset_hint": "Посилання для скидання буде надіслано на вашу електронну пошту.",
     "newPassword": "Підтвердити пароль",
     "userProfile": "Профіль користувача",
     "oldPassword": "Поточний пароль",
     "or_login_with": "Або увійти за допомогою OAuth",
-    "remember_me": "Запам'ятати мене"
+    "remember_me": "Запам'ятати мене",
+    "changeAvatar": "Змінити аватар",
+    "emailLocked": "Електронну пошту не можна змінити тут",
+    "passwordStrength": "Надійність пароля",
+    "passwordHint": "Залиште поля пароля порожніми, щоб зберегти поточний пароль.",
+    "unsavedChanges": "Незбережені зміни",
+    "wrongOldPassword": "Поточний пароль неправильний",
+    "tabs": {
+      "profile": "Профіль",
+      "security": "Безпека"
+    },
+    "placeholders": {
+      "firstname": "Олексій",
+      "lastname": "Коваленко",
+      "oldPassword": "Ваш поточний пароль",
+      "newPassword": "Мін. 8 символів",
+      "confirmPassword": "Повторіть новий пароль"
+    },
+    "strength": {
+      "weak": "Слабкий",
+      "fair": "Помірний",
+      "good": "Хороший",
+      "strong": "Надійний"
+    },
+    "requirements": {
+      "minLength": "Не менше 8 символів",
+      "maxLength": "Не більше 72 символів",
+      "uppercase": "Велика літера (A–Z)",
+      "lowercase": "Мала літера (a–z)",
+      "number": "Цифра (0–9)",
+      "special": "Спецсимвол (!{'@'}#...)"
+    }
   },
   "routes": {
     "home": "Головна",
@@ -84,9 +115,14 @@
       "commentTimeline": "Коментарі у часі"
     },
     "sections": {
-      "latestComments": "Останні коментарі"
+      "latestComments": "Останні коментарі",
+      "latestRoutes": "Останні маршрути"
     },
     "emptyComments": "Коментарів поки немає.",
+    "emptyRoutes": "Нових маршрутів поки немає.",
+    "actions": {
+      "showAllSetters": "Показати всіх постановників"
+    },
     "labels": {
       "attempts": "Спроби",
       "sends": "Проходження",
@@ -102,7 +138,7 @@
     "routename": "Назва маршруту",
     "difficulty": "Складність",
     "difficulty_sign": "Знак складності",
-  "anchor_point": "Анкер",
+    "anchor_point": "Анкер",
     "location": "Місце",
     "searchRouteName": "Пошук",
     "type": "Тип",
@@ -144,11 +180,9 @@
     "subtitle": "Маршрути для скелелазіння"
   },
   "actions": {
-      "latestComments": "Останні коментарі",
-      "latestRoutes": "Останні маршрути",
+    "search": "Пошук",
     "clear": "Очистити",
-    "emptyComments": "Поки що немає коментарів.",
-    "emptyRoutes": "Поки немає нових маршрутів.",
+    "import": "Імпорт маршрутів",
     "print": "Друк",
     "create": "Створити",
     "edit": "Редагувати",
@@ -162,28 +196,29 @@
     "confirm": "Підтвердити видалення",
     "select_all": "Вибрати все",
     "deselect_all": "Скасувати вибір",
-    "back_to_home": "Повернутися на головну"
+    "back_to_home": "Повернутися на головну",
+    "load_more": "Завантажити ще"
   },
   "inventory": {
-    "title": "Route Inventory Scan",
-    "subtitle": "Point your camera at each QR code to register the route.",
-    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
-    "start": "Start Scanning",
-    "stop": "Stop Scanning",
-    "finish": "Finish Inventory",
-    "scannedCount": "Scanned routes: {count}",
-    "pendingCount": "Routes still to find: {count}",
-    "lastScanned": "Last scanned",
-    "invalidCode": "Scanned code is not a recognized route.",
-    "unknownRoute": "The scanned route could not be found.",
-    "noScans": "No routes scanned yet.",
-    "dialogTitle": "Archive missing routes?",
-    "dialogDescription": "The following routes were not scanned and will be archived:",
-    "archiveSuccess": "Inventory completed. Archived {count} routes.",
-    "nothingToArchive": "All routes were scanned. Nothing to archive.",
-    "archiveError": "Failed to archive the missing routes.",
-    "loadError": "Failed to load active routes.",
-    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "title": "Інвентаризація маршрутів",
+    "subtitle": "Наведіть камеру на кожен QR-код для реєстрації маршруту.",
+    "mobileOnly": "Цей інструмент доступний лише на мобільних пристроях. Будь ласка, використовуйте смартфон або планшет.",
+    "start": "Почати сканування",
+    "stop": "Зупинити сканування",
+    "finish": "Завершити інвентаризацію",
+    "scannedCount": "Відскановано: {count}",
+    "pendingCount": "Залишилось: {count}",
+    "lastScanned": "Останнє сканування",
+    "invalidCode": "Код не розпізнано як маршрут.",
+    "unknownRoute": "Маршрут не знайдено.",
+    "noScans": "Маршрути ще не сканувались.",
+    "dialogTitle": "Архівувати відсутні маршрути?",
+    "dialogDescription": "Наступні маршрути не були відскановані та будуть архівовані:",
+    "archiveSuccess": "Інвентаризацію завершено. Архівовано маршрутів: {count}.",
+    "nothingToArchive": "Всі маршрути відскановано. Нічого архівувати.",
+    "archiveError": "Помилка архівування відсутніх маршрутів.",
+    "loadError": "Не вдалося завантажити активні маршрути.",
+    "cameraError": "Немає доступу до камери пристрою. Дозвольте доступ до камери або скористайтеся іншим пристроєм.",
     "restoreSuccess": "Маршрут {name} відновлено.",
     "restoreError": "Не вдалося відновити маршрут.",
     "showInstructions": "Показати інструкцію",
@@ -191,7 +226,7 @@
     "instructionsIntro": "Виконайте ці кроки, щоб відсканувати всі QR-коди маршрутів.",
     "instructionsStep1": "Дозвольте доступ до камери та наведіть пристрій на QR-код маршруту.",
     "instructionsStep2": "Перевірте інформацію про маршрут на інформаційній панелі нижче.",
-    "instructionsStep3": "Коли завершите, натисніть \"Завершити інвентаризацію\", щоб заархівувати відсутні маршрути.",
+    "instructionsStep3": "Коли завершите, натисніть «Завершити інвентаризацію», щоб заархівувати відсутні маршрути.",
     "instructionsClose": "Зрозуміло",
     "reset": "Скинути інвентаризацію",
     "reviewTitle": "Перегляд результатів",
@@ -203,7 +238,7 @@
     "success": {
       "resetPassword": "Запит на скидання пароля надіслано. Будь ласка, перевірте свою електронну пошту.",
       "create": "Успішно створено",
-      "edit": "Успішно відредаговано",
+      "edit": "Успішно збережено",
       "delete": "Успішно видалено",
       "login": "Вхід успішний. Переадресація до управління маршрутами...",
       "health": "Стан: Добрий"
@@ -213,7 +248,7 @@
       "nameRequired": "Ім'я обов'язкове",
       "nameTooLong": "Ім'я повинно бути менше 30 символів",
       "create": "Помилка створення",
-      "edit": "Помилка редагування",
+      "edit": "Помилка збереження профілю",
       "delete": "Помилка видалення",
       "login_failed": "Помилка входу. Будь ласка, перевірте свої дані та спробуйте ще раз.",
       "no_route_found": "Маршрут не знайдено!",
@@ -242,7 +277,7 @@
       "settings": "Налаштування - Verti-Grade",
       "route": "Маршрут - Verti-Grade",
       "index": "Маршрути для скелелазіння - Verti-Grade",
-      "inventory": "Inventory Scan - Verti-Grade",
+      "inventory": "Інвентаризація - Verti-Grade",
       "comments": "Коментарі - Verti-Grade",
       "dashboard": "Управління маршрутами - Verti-Grade"
     },
@@ -252,7 +287,7 @@
       "settings": "Налаштування",
       "route": "Створити відгук",
       "index": "Маршрути для скелелазіння",
-      "inventory": "Route Inventory Scan",
+      "inventory": "Інвентаризація маршрутів",
       "comments": "Коментарі",
       "dashboard": "Управління маршрутами"
     }
@@ -260,6 +295,10 @@
   "validation": {
     "required": "Це поле є обов'язковим.",
     "requiredAndNotEmpty": "Це поле не повинно бути порожнім.",
-    "anchorPointRange": "Номер анкера має бути від 1 до 100, для боулдерів дозволяється 0."
+    "anchorPointRange": "Номер анкера має бути від 1 до 100, для боулдерів дозволяється 0.",
+    "minLength": "Мінімум {n} символів.",
+    "maxLength": "Максимум {n} символів.",
+    "passwordMismatch": "Паролі не збігаються.",
+    "passwordTooWeak": "Пароль має бути не нижче рівня «Хороший»."
   }
 }

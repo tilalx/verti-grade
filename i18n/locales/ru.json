@@ -9,7 +9,7 @@
     "firstname": "Имя",
     "lastname": "Фамилия",
     "username": "Имя пользователя",
-    "password": "Пароль",
+    "password": "Новый пароль",
     "email": "Электронная почта",
     "username_or_email": "Имя пользователя или адрес электронной почты",
     "login_hint": "Введите имя пользователя или адрес электронной почты.",
@@ -19,7 +19,38 @@
     "userProfile": "Профиль пользователя",
     "oldPassword": "Текущий пароль",
     "or_login_with": "Или войдите с помощью OAuth",
-    "remember_me": "Запомнить меня"
+    "remember_me": "Запомнить меня",
+    "changeAvatar": "Изменить аватар",
+    "emailLocked": "Электронную почту нельзя изменить здесь",
+    "passwordStrength": "Надёжность пароля",
+    "passwordHint": "Оставьте поля пароля пустыми, чтобы сохранить текущий пароль.",
+    "unsavedChanges": "Несохранённые изменения",
+    "wrongOldPassword": "Текущий пароль неверен",
+    "tabs": {
+      "profile": "Профиль",
+      "security": "Безопасность"
+    },
+    "placeholders": {
+      "firstname": "Иван",
+      "lastname": "Иванов",
+      "oldPassword": "Ваш текущий пароль",
+      "newPassword": "Мин. 8 символов",
+      "confirmPassword": "Повторите новый пароль"
+    },
+    "strength": {
+      "weak": "Слабый",
+      "fair": "Умеренный",
+      "good": "Хороший",
+      "strong": "Надёжный"
+    },
+    "requirements": {
+      "minLength": "Не менее 8 символов",
+      "maxLength": "Не более 72 символов",
+      "uppercase": "Заглавная буква (A–Z)",
+      "lowercase": "Строчная буква (a–z)",
+      "number": "Цифра (0–9)",
+      "special": "Спецсимвол (!{'@'}#...)"
+    }
   },
   "routes": {
     "home": "Главная",
@@ -107,7 +138,7 @@
     "routename": "Название маршрута",
     "difficulty": "Сложность",
     "difficulty_sign": "Знак сложности",
-      "anchor_point": "Анкер",
+    "anchor_point": "Анкер",
     "location": "Местоположение",
     "searchRouteName": "Поиск",
     "type": "Тип",
@@ -149,7 +180,9 @@
     "subtitle": "Маршруты для скалолазания"
   },
   "actions": {
-    "import": "Импортировать маршруты",
+    "search": "Поиск",
+    "clear": "Очистить",
+    "import": "Импорт маршрутов",
     "print": "Печать",
     "create": "Создать",
     "edit": "Редактировать",
@@ -163,28 +196,29 @@
     "confirm": "Подтвердить удаление",
     "select_all": "Выбрать все",
     "deselect_all": "Снять выделение",
-    "back_to_home": "Вернуться на главную"
+    "back_to_home": "Вернуться на главную",
+    "load_more": "Загрузить ещё"
   },
   "inventory": {
-    "title": "Route Inventory Scan",
-    "subtitle": "Point your camera at each QR code to register the route.",
-    "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
-    "start": "Start Scanning",
-    "stop": "Stop Scanning",
-    "finish": "Finish Inventory",
-    "scannedCount": "Scanned routes: {count}",
-    "pendingCount": "Routes still to find: {count}",
-    "lastScanned": "Last scanned",
-    "invalidCode": "Scanned code is not a recognized route.",
-    "unknownRoute": "The scanned route could not be found.",
-    "noScans": "No routes scanned yet.",
-    "dialogTitle": "Archive missing routes?",
-    "dialogDescription": "The following routes were not scanned and will be archived:",
-    "archiveSuccess": "Inventory completed. Archived {count} routes.",
-    "nothingToArchive": "All routes were scanned. Nothing to archive.",
-    "archiveError": "Failed to archive the missing routes.",
-    "loadError": "Failed to load active routes.",
-    "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
+    "title": "Инвентаризация маршрутов",
+    "subtitle": "Наведите камеру на каждый QR-код для регистрации маршрута.",
+    "mobileOnly": "Инструмент доступен только на мобильных устройствах. Используйте смартфон или планшет.",
+    "start": "Начать сканирование",
+    "stop": "Остановить сканирование",
+    "finish": "Завершить инвентаризацию",
+    "scannedCount": "Отсканировано: {count}",
+    "pendingCount": "Осталось: {count}",
+    "lastScanned": "Последнее сканирование",
+    "invalidCode": "Код не распознан как маршрут.",
+    "unknownRoute": "Маршрут не найден.",
+    "noScans": "Маршруты ещё не сканировались.",
+    "dialogTitle": "Архивировать отсутствующие маршруты?",
+    "dialogDescription": "Следующие маршруты не были отсканированы и будут архивированы:",
+    "archiveSuccess": "Инвентаризация завершена. Архивировано маршрутов: {count}.",
+    "nothingToArchive": "Все маршруты отсканированы. Нечего архивировать.",
+    "archiveError": "Ошибка архивирования отсутствующих маршрутов.",
+    "loadError": "Не удалось загрузить активные маршруты.",
+    "cameraError": "Нет доступа к камере устройства. Разрешите доступ к камере или воспользуйтесь другим устройством.",
     "restoreSuccess": "Маршрут {name} восстановлен.",
     "restoreError": "Не удалось восстановить маршрут.",
     "showInstructions": "Показать инструкцию",
@@ -192,7 +226,7 @@
     "instructionsIntro": "Выполните следующие шаги, чтобы отсканировать все QR-коды маршрутов.",
     "instructionsStep1": "Разрешите доступ к камере и наведите устройство на QR-код маршрута.",
     "instructionsStep2": "Проверьте сведения о маршруте на информационной панели ниже.",
-    "instructionsStep3": "После завершения нажмите \"Завершить инвентаризацию\", чтобы архивировать отсутствующие маршруты.",
+    "instructionsStep3": "После завершения нажмите «Завершить инвентаризацию», чтобы архивировать отсутствующие маршруты.",
     "instructionsClose": "Понятно",
     "reset": "Сбросить инвентаризацию",
     "reviewTitle": "Проверка результатов",
@@ -204,7 +238,7 @@
     "success": {
       "resetPassword": "Запрос на сброс пароля отправлен. Пожалуйста, проверьте вашу электронную почту.",
       "create": "Успешно создано",
-      "edit": "Успешно отредактировано",
+      "edit": "Успешно сохранено",
       "delete": "Успешно удалено",
       "login": "Вход выполнен успешно. Перенаправление в управление маршрутами...",
       "health": "Статус: Хорошо"
@@ -214,7 +248,7 @@
       "nameRequired": "Имя обязательно",
       "nameTooLong": "Имя должно быть менее 30 символов",
       "create": "Ошибка при создании",
-      "edit": "Ошибка при редактировании",
+      "edit": "Ошибка сохранения профиля",
       "delete": "Ошибка при удалении",
       "login_failed": "Ошибка входа. Пожалуйста, проверьте ваши данные и попробуйте снова.",
       "no_route_found": "Маршрут не найден!",
@@ -253,7 +287,7 @@
       "settings": "Настройки",
       "route": "Создать отзыв",
       "index": "Маршруты для скалолазания",
-      "inventory": "Route Inventory Scan",
+      "inventory": "Инвентаризация маршрутов",
       "comments": "Комментарии",
       "dashboard": "Управление маршрутами"
     }
@@ -261,6 +295,10 @@
   "validation": {
     "required": "Это поле обязательно для заполнения.",
     "requiredAndNotEmpty": "Это поле не должно быть пустым.",
-    "anchorPointRange": "Номер анкера должен быть от 1 до 100, для боулдеров допускается 0."
+    "anchorPointRange": "Номер анкера должен быть от 1 до 100, для боулдеров допускается 0.",
+    "minLength": "Минимум {n} символов.",
+    "maxLength": "Максимум {n} символов.",
+    "passwordMismatch": "Пароли не совпадают.",
+    "passwordTooWeak": "Пароль должен быть не ниже уровня «Хороший»."
   }
 }
