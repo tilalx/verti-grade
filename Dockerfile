@@ -77,6 +77,7 @@ WORKDIR /app
 
 # Copy artifacts only
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
+COPY ./pocketbase/pb_migrations /pb/pb_migrations
 COPY --from=ui-build /app/.output /app/ui
 
 # Entrypoint + nginx config
