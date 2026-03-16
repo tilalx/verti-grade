@@ -1,14 +1,5 @@
 <template>
-    <div>
-        <v-container>
-            <v-row>
-                <v-btn
-                    color="primary"
-                    @click="openPopup"
-                    class="create-route-button"
-                    >{{ $t('climbing.create') }}</v-btn
-                >
-                <v-dialog v-model="showPopup" persistent max-width="600px">
+    <v-dialog v-model="showPopup" persistent max-width="600px">
                     <v-card>
                         <v-card-text>
                             <v-container>
@@ -108,10 +99,7 @@
                             >
                         </v-card-actions>
                     </v-card>
-                </v-dialog>
-            </v-row>
-        </v-container>
-    </div>
+    </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -180,10 +168,12 @@ const isFormComplete = computed(() => {
     )
 })
 
-function openPopup() {
+function open() {
     showPopup.value = true
     void getSetters()
 }
+
+defineExpose({ open })
 
 function closePopup() {
     showPopup.value = false

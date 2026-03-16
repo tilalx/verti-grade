@@ -1,11 +1,8 @@
 {
   "account": {
     "profile": "Profil",
-    "account": "Hesap",
     "login": "Giriş Yap",
     "logout": "Çıkış Yap",
-    "register": "Kayıt Ol",
-    "name": "İsim",
     "firstname": "Ad",
     "lastname": "Soyad",
     "username": "Kullanıcı Adı",
@@ -27,6 +24,7 @@
     "passwordHint": "Mevcut şifrenizi korumak için şifre alanlarını boş bırakın.",
     "unsavedChanges": "Kaydedilmemiş değişiklikler",
     "wrongOldPassword": "Mevcut şifre yanlış",
+    "unknownUser": "Bilinmeyen Kullanıcı",
     "tabs": {
       "profile": "Profil",
       "security": "Güvenlik"
@@ -35,7 +33,7 @@
       "firstname": "Ahmet",
       "lastname": "Yılmaz",
       "oldPassword": "Mevcut şifreniz",
-      "confirmPassword": "En az 8 karakter",
+      "newPassword": "Yeni şifreniz",
       "confirmPassword": "Yeni şifreyi tekrar girin"
     },
     "strength": {
@@ -56,36 +54,20 @@
   "routes": {
     "home": "Ana Sayfa",
     "dashboard": "Rota Yönetimi",
-    "inventory": "Inventory Scan",
-    "about": "Hakkında",
-    "contact": "İletişim",
+    "inventory": "Envanter Taraması",
     "login": "Giriş Yap",
-    "register": "Kayıt Ol",
-    "profile": "Profil",
-    "users": "Kullanıcılar",
-    "user": "Kullanıcı",
-    "statistics": "İstatistikler",
-    "statistic": "İstatistik",
     "analytics": "Analitik",
     "comments": "Yorumlar",
-    "comment": "Yorum",
     "settings": "Ayarlar",
-    "setting": "Ayar",
-    "edit": "Düzenle",
-    "delete": "Sil",
-    "create": "Oluştur",
-    "logout": "Çıkış Yap",
     "route_setter": "Rota Ayarlayıcı",
     "screwed_at": "Vidalama Tarihi",
     "types": {
       "route": "Rota",
       "boulder": "Boulder"
     },
-    "name": "İsim",
-    "creator_split": "Yaratıcıları ',' ile ayırın"
+    "name": "İsim"
   },
   "dashboard": {
-    "welcome": "Rota Yönetimi",
     "online": "{0} Çevrimiçi"
   },
   "analytics": {
@@ -152,33 +134,16 @@
     "createReview": "İnceleme Oluştur",
     "no_reviews_yet": "Henüz hiç inceleme yok",
     "be_the_first": "İlk olun",
-    "routename": "Rota Adı",
     "stars": "Yıldızlar",
     "difficulty": "Zorluk",
-    "difficulty_sign": "Zorluk İşareti",
-    "location": "Konum",
-    "searchRouteName": "Ara",
-    "type": "Tür",
     "score": "Puan",
     "comment": "Yorum",
-    "creators": "Yaratıcılar",
     "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri"
   },
   "table": {
-    "id": "ID",
-    "select": "Seçildi",
     "actions": "İşlemler",
     "no_data": "Veri Yok",
-    "created_at": "Oluşturulma Tarihi",
-    "updated_at": "Güncellenme Tarihi",
-    "created_by": "Oluşturan",
-    "updated_by": "Güncelleyen"
-  },
-  "header": {
-    "create_route": "Tırmanış Rotası Oluştur",
-    "routereviews": "Rota İncelemeleri",
-    "title": "Tırmanış Rotaları",
-    "subtitle": "Tırmanış Rotaları"
+    "created_at": "Oluşturulma Tarihi"
   },
   "actions": {
     "search": "Ara",
@@ -192,8 +157,6 @@
     "cancel": "İptal",
     "archive": "Arşivle",
     "submit": "Gönder",
-    "new_item": "Yeni Öğe",
-    "edit_item": "Öğeyi Düzenle",
     "confirm": "Silme Onayı",
     "select_all": "Tümünü Seç",
     "deselect_all": "Seçimi Kaldır",
@@ -242,19 +205,21 @@
       "edit": "Başarıyla kaydedildi",
       "delete": "Başarıyla silindi",
       "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
-      "health": "Durum: İyi"
+      "health": "Durum: İyi",
+      "userCreated": "Kullanıcı başarıyla oluşturuldu."
     },
     "error": {
       "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
-      "nameRequired": "İsim gerekli",
-      "nameTooLong": "İsim 30 karakterden az olmalıdır",
       "create": "Oluşturma hatası",
       "edit": "Profil kaydedilemedi",
       "delete": "Silme hatası",
-      "login_failed": "Giriş başarısız. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
-      "no_route_found": "Rota bulunamadı!",
       "health": "Durum: Kötü",
-      "no_auth_methods_available": "Kimlik doğrulama yöntemi mevcut değil"
+      "no_auth_methods_available": "Kimlik doğrulama yöntemi mevcut değil",
+      "invalid_credentials": "Geçersiz kimlik bilgileri. Lütfen kullanıcı adınızı ve şifrenizi kontrol edin.",
+      "email_not_verified": "E-posta adresiniz henüz doğrulanmamış.",
+      "too_many_attempts": "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
+      "unknown": "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+      "generic": "Beklenmeyen bir hata oluştu."
     },
     "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
     "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
@@ -268,27 +233,20 @@
   },
   "legal": {
     "privacy": "Gizlilik",
-    "imprint": "Künye",
-    "terms": "Kullanım Şartları"
+    "imprint": "Künye"
   },
   "page": {
     "title": {
-      "login": "Giriş Yap - Verti-Grade",
-      "user": "Kullanıcı - Verti-Grade",
       "settings": "Ayarlar - Verti-Grade",
       "route": "Rota - Verti-Grade",
       "index": "Tırmanış Rotaları - Verti-Grade",
-      "inventory": "Envanter Taraması - Verti-Grade",
       "comments": "Yorumlar - Verti-Grade",
       "dashboard": "Rota Yönetimi - Verti-Grade"
     },
     "content": {
-      "login": "Giriş Yap",
-      "user": "Kullanıcı Sayfası",
       "settings": "Ayarlar",
       "route": "İnceleme Oluştur",
       "index": "Tırmanış Rotaları",
-      "inventory": "Rota Envanter Taraması",
       "comments": "Yorumlar",
       "dashboard": "Rota Yönetimi"
     }
@@ -300,6 +258,14 @@
     "minLength": "En az {n} karakter.",
     "maxLength": "En fazla {n} karakter.",
     "passwordMismatch": "Şifreler eşleşmiyor.",
-    "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır."
+    "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır.",
+    "email": "Lütfen geçerli bir e-posta adresi girin."
+  },
+  "nav": {
+    "openMenu": "Menüyü aç"
+  },
+  "users": {
+    "create": "Kullanıcı Oluştur",
+    "edit": "Kullanıcıyı Düzenle"
   }
 }

@@ -1,5 +1,5 @@
 <template>
-    <v-container class="inventory-scan">
+    <v-container fluid class="inventory-scan">
         <NewVersionAvailable />
 
         <v-alert v-if="!isMobile" type="warning" class="mb-4" variant="tonal">

@@ -9,9 +9,6 @@
             accept="application/json"
         />
         
-        <!-- Import Button -->
-        <v-btn @click="openFilePicker" color="primary">{{ $t('actions.import') }}</v-btn>
-
         <!-- Import Preview Dialog -->
         <v-dialog v-model="showPreviewDialog" persistent max-width="900px">
             <v-card>
@@ -101,9 +98,11 @@ function showSnackbar(message, color = 'success') {
     snackbar.show = true
 }
 
-const openFilePicker = () => {
+const open = () => {
     fileInput.value.click()
 }
+
+defineExpose({ open })
 
 const handleFileChange = async (event) => {
     const file = event.target.files[0]

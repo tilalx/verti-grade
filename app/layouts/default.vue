@@ -1,9 +1,7 @@
 <template>
     <NavBar :loggedIn="isLoggedIn" :settings="settings" />
     <v-main>
-        <v-container>
-            <NuxtPage />
-        </v-container>
+        <NuxtPage />
     </v-main>
 
     <FootBar :settings="settings" />

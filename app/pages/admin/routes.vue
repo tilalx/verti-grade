@@ -1,33 +1,48 @@
 <template>
-    <v-container class="route-manager">
+    <v-container fluid class="route-manager">
         <NewVersionAvailable />
 
-        <v-row>
+        <v-row align="start" class="mb-2">
             <v-col>
                 <h1>{{ $t('routes.dashboard') }}</h1>
             </v-col>
-        </v-row>
+            <v-col cols="auto" class="d-flex pt-3 ga-2">
+                <v-btn
+                    color="primary"
+                    variant="tonal"
+                    prepend-icon="mdi-routes"
+                    @click="createRouteRef.open()"
+                >
+                    {{ $t('climbing.create') }}
+                </v-btn>
 
-        <v-row>
-            <v-col cols="12" sm="6" class="d-flex flex-wrap gap-2 align-center">
-                <CreateRoute @closed="reloadRoutes" />
-                <ImportRoute @closed="reloadRoutes" />
+                <v-btn
+                    color="primary"
+                    variant="tonal"
+                    prepend-icon="mdi-file-import-outline"
+                    @click="importRouteRef.open()"
+                >
+                    {{ $t('actions.import') }}
+                </v-btn>
             </v-col>
         </v-row>
 
+        <CreateRoute ref="createRouteRef" @closed="reloadRoutes" />
+        <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
+
         <v-row>
             <v-col>
-                <v-row class="route-manager__filters" density="comfortable">
-                    <v-col cols="12" sm="6" md="3">
+                <v-row align="center" dense class="mb-2">
+                    <v-col cols="12" md="3">
                         <v-text-field
                             :id="routeNameId"
                             :label="$t('climbing.searchRouteName')"
                             v-model="searchRouteName"
-                            class="mt-2"
                             density="comfortable"
+                            hide-details
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="3">
+                    <v-col cols="6" md="2">
                         <v-select
                             :id="difficultyId"
                             :label="$t('climbing.difficulty')"
@@ -35,12 +50,12 @@
                             v-model="selectedDifficulty"
                             item-title="text"
                             item-value="value"
-                            class="mt-2"
                             density="comfortable"
+                            hide-details
                             clearable
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="3">
+                    <v-col cols="6" md="2">
                         <v-select
                             :id="typeId"
                             :label="$t('climbing.type')"
@@ -48,12 +63,12 @@
                             v-model="selectedType"
                             item-title="text"
                             item-value="value"
-                            class="mt-2"
                             density="comfortable"
+                            hide-details
                             clearable
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="3">
+                    <v-col cols="6" md="2">
                         <v-select
                             :id="locationId"
                             :label="$t('climbing.location')"
@@ -61,19 +76,20 @@
                             v-model="selectedLocation"
                             item-title="text"
                             item-value="value"
-                            class="mt-2"
                             density="comfortable"
+                            hide-details
                             clearable
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="3">
-                        <v-checkbox
-                            :id="archivedCheckboxId"
-                            :label="$t('filter.archived')"
-                            v-model="displayArchived"
-                            class="mt-2"
-                            density="comfortable"
-                        />
+                    <v-col cols="6" md="auto" class="d-flex align-center">
+                        <v-chip
+                            :color="displayArchived ? 'warning' : undefined"
+                            :variant="displayArchived ? 'tonal' : 'outlined'"
+                            prepend-icon="mdi-archive-outline"
+                            @click="displayArchived = !displayArchived"
+                        >
+                            {{ $t('filter.archived') }}
+                        </v-chip>
                     </v-col>
                 </v-row>
 
@@ -379,8 +395,6 @@ import { useHead } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import { usePocketbase } from '@/composables/pocketbase.js'
-import CreateRoute from '@/components/CreateRoute.vue'
-import ImportRoute from '@/components/ImportRoute.vue'
 import EditRoute from '@/components/EditRoute.vue'
 import RouteDetails from '@/components/RouteDetails.vue'
 import NewVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
@@ -425,11 +439,13 @@ const averageRatings = ref(new Map())
 const averageRatingsLoaded = ref(false)
 const averageRatingsLoading = ref(false)
 
+const createRouteRef = useTemplateRef('createRouteRef')
+const importRouteRef = useTemplateRef('importRouteRef')
+
 const routeNameId = 'route-name-input'
 const difficultyId = 'difficulty-select'
 const typeId = 'type-select'
 const locationId = 'location-select'
-const archivedCheckboxId = 'archived-checkbox'
 
 const difficulties = computed(() => [
     { text: t('filter.all'), value: '' },
@@ -1007,9 +1023,6 @@ useHead(() => ({
     padding-bottom: 64px;
 }
 
-.route-manager__filters {
-    gap: 8px 0;
-}
 
 .route-manager__actions {
     display: flex;

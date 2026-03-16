@@ -37,6 +37,16 @@ export default eventHandler(async (event) => {
             })
         }
 
+        // ── Layout constants ───────────────────────────────────────────────
+        const QR_SIZE   = 110  // Rendered size of the QR code in PDF points (square)
+        const QR_PX     = 330  // Pixel size of the generated QR image (3× for sharpness)
+
+        // Color circle — centered on the QR code.
+        // Error correction H (30%) supports up to ~15pt radius safely at QR_SIZE=110.
+        const CIRCLE_RADIUS = 12   // Radius of the route color circle
+        const CIRCLE_BORDER = 1.5  // Dark outline for light-color visibility
+        // ──────────────────────────────────────────────────────────────────
+
         const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
         doc.pipe(res)
@@ -51,23 +61,20 @@ export default eventHandler(async (event) => {
                 doc.addPage()
             }
 
-            const x = entryCount % 2 === 0 ? 20 : 315 // Position for 2 columns
-            const y = (Math.floor(entryCount / 2) % 4) * 193 + 30 // Position for 4 rows
+            const x = entryCount % 2 === 0 ? 20 : 315
+            const y = (Math.floor(entryCount / 2) % 4) * 193 + 30
 
             // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
-            // Set text color black
             doc.fillColor('black')
 
-            // Set text positions
             const textOptions = { align: 'left', width: 200 }
             let sign = ''
 
             if (typeof climbingRoute.difficulty_sign === 'string') {
                 sign = climbingRoute.difficulty_sign.trim()
             } else if (typeof climbingRoute.difficulty_sign === 'boolean') {
-                // interpret boolean true as "+" and false as "-"
                 sign = climbingRoute.difficulty_sign ? '+' : '-'
             }
 
@@ -96,23 +103,19 @@ export default eventHandler(async (event) => {
 
             doc.fillColor('black')
 
-            // Add small anchor number in top-left corner (if exists)
             if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
                 const anchorValue = String(climbingRoute.anchor_point).trim()
 
-                // Box dimensions and position — aligned mid-height with name
                 const boxWidth = 32
-                const boxX = x + 65     // small gap from left border
-                const boxY = y + 5   // moved slightly lower for better alignment with name line
+                const boxX = x + 65
+                const boxY = y + 5
 
-                // Centered "Seil" label
                 doc.font('Helvetica').fontSize(8).fillColor('black')
                     .text('Seil', boxX, boxY + 4, {
                         width: boxWidth,
                         align: 'center',
                     })
 
-                // Centered bold anchor number below label
                 doc.font('Helvetica-Bold').fontSize(12)
                     .text(anchorValue, boxX, boxY + 12, {
                         width: boxWidth,
@@ -120,14 +123,20 @@ export default eventHandler(async (event) => {
                     })
             }
 
-            // Creator names
+            // Creator names — shrink font if the list is long
             const creators = climbingRoute.creator || []
-            if (Array.isArray(creators)) {
-                doc.fontSize(8).text(
-                    creators.join(' / '),
-                    calculateStartX(x + 80, creators.join(' / '), doc),
+            if (Array.isArray(creators) && creators.length > 0) {
+                const creatorText = creators.join(' / ')
+                doc.font('Helvetica').fontSize(8)
+                const maxWidth = 130
+                const measuredWidth = doc.widthOfString(creatorText)
+                const creatorFontSize = measuredWidth > maxWidth ? 6 : 8
+
+                doc.fontSize(creatorFontSize).text(
+                    creatorText,
+                    calculateStartX(x + 80, creatorText, doc, creatorFontSize),
                     y + 130,
-                    textOptions,
+                    { align: 'left', width: maxWidth, lineBreak: false, ellipsis: true },
                 )
             }
 
@@ -141,24 +150,38 @@ export default eventHandler(async (event) => {
                 textOptions,
             )
 
-            // QR code positioning and scaling
-            const qrX = x + 155 // X position for QR code
-            const qrY = y - 15 // Y position for QR code
-            const qrSize = 120 // Size of the QR code
+            // ── QR code ────────────────────────────────────────────────────
+            // width/height (not fit:[]) guarantees exact QR_SIZE × QR_SIZE
+            // so the circle center calculation is always precise.
+            const qrX = x + 158
+            const qrY = y - 10
 
-            // Generate QR code with the server URL and the entry ID
             const serverUrl = settings.application_url + `/route?id=${id}`
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
-                color: { light: '#0000' }, // Transparent background
+                errorCorrectionLevel: 'H',
+                width: QR_PX,
+                margin: 1,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF',
+                },
             })
-            doc.image(qrCodeBuffer, qrX, qrY, { fit: [qrSize, qrSize] })
+            doc.image(qrCodeBuffer, qrX, qrY, { width: QR_SIZE, height: QR_SIZE })
 
-            // Add color circle
-            doc.circle(x + 215, y + 45, 15).fill("#FFFFFF")
-            doc.circle(x + 215, y + 45, 14).fill(climbingRoute.color)
+            // ── Color circle — precisely centered on the QR image ──────────
+            const cx = qrX + QR_SIZE / 2
+            const cy = qrY + QR_SIZE / 2
 
+            // White clearing disc
+            doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER + 1).fill('#FFFFFF')
+            // Dark outline ring
+            doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER).fill('#333333')
+            // Thin white gap
+            doc.circle(cx, cy, CIRCLE_RADIUS + 0.5).fill('#FFFFFF')
+            // Route color fill
+            doc.circle(cx, cy, CIRCLE_RADIUS).fill(climbingRoute.color)
+            // ──────────────────────────────────────────────────────────────
 
-            // Add logo
             doc.image(logo, {
                 fit: [100, 100],
                 y: y + 100,
@@ -175,7 +198,6 @@ export default eventHandler(async (event) => {
     }
 })
 
-// Function to calculate the starting X-coordinate for centered text
 function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
     if (text !== null) {
         doc.font('Helvetica').fontSize(fontSize)
@@ -185,7 +207,6 @@ function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
     return 0
 }
 
-// Helper to fetch the logo as a buffer
 async function fetchLogo(url) {
     try {
         const response = await fetch(url)

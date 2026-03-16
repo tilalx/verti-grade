@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (authRequired && to.path !== '/') {
       if (!isValidSession) {
         // If the session is not valid, redirect to the login page
-        return navigateTo('/login')
+        return navigateTo('/auth/login')
       }
 
       if (to.name === 'Login' && isValidSession) {
