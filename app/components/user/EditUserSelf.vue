@@ -25,7 +25,7 @@
                         </v-tooltip>
                     </div>
 
-                    <div class="flex-grow-1 overflow-hidden">
+                    <div class="flex-grow-1 overflow-hidden ml-3">
                         <div class="text-h6 font-weight-bold text-truncate">
                             {{ fullName || $t('account.userProfile') }}
                         </div>
@@ -81,6 +81,10 @@
                     <v-tab value="security">
                         <v-icon start icon="mdi-shield-lock-outline" size="18" />
                         {{ $t('account.tabs.security') }}
+                        <!--
+                            Dot badge: user started typing a password on the security tab
+                            but navigated away and the fields are not yet valid.
+                        -->
                         <v-badge
                             v-if="showSecurityWarning"
                             color="warning"
@@ -95,7 +99,7 @@
 
             <v-divider class="mt-0" />
 
-            <!-- hidden file input -->
+            <!-- Hidden native file input for avatar -->
             <input
                 type="file"
                 ref="avatarInput"
@@ -107,7 +111,7 @@
             <!-- ── Tab windows ────────────────────────────────────── -->
             <v-window v-model="activeTab">
 
-                <!-- Profile tab -->
+                <!-- ── Profile tab ────────────────────────────────── -->
                 <v-window-item value="profile">
                     <v-card-text class="pa-6">
                         <v-form ref="profileForm" @submit.prevent>
@@ -164,133 +168,27 @@
                     </v-card-text>
                 </v-window-item>
 
-                <!-- Security tab -->
+                <!-- ── Security tab ───────────────────────────────── -->
                 <v-window-item value="security">
                     <v-card-text class="pa-6">
-                        <v-form ref="securityForm" @submit.prevent>
-                            <v-row density="comfortable">
+                        <!--
+                            PasswordChangeFields owns all password state and
+                            validation. We just bind the three string refs and
+                            listen to @validity to know whether the block is
+                            complete and valid before attempting to save.
 
-                                <!-- Current password -->
-                                <v-col cols="12">
-                                    <v-text-field
-                                        v-model="user.oldPassword"
-                                        :label="$t('account.oldPassword')"
-                                        :placeholder="$t('account.placeholders.oldPassword')"
-                                        :type="showOld ? 'text' : 'password'"
-                                        autocomplete="current-password"
-                                        variant="outlined"
-                                        density="comfortable"
-                                        :rules="passwordChangeRequested ? [rules.required] : []"
-                                        prepend-inner-icon="mdi-lock-check-outline"
-                                        :append-inner-icon="showOld ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                                        @click:append-inner="showOld = !showOld"
-                                    />
-                                </v-col>
+                            :require-old-password="true" → current-password
+                            field is shown and required (change flow).
+                        -->
+                        <PasswordChangeFields
+                            v-model:old-password="user.oldPassword"
+                            v-model:password="user.password"
+                            v-model:password-confirm="user.passwordConfirm"
+                            :require-old-password="true"
+                            @validity="passwordFieldsValid = $event"
+                        />
 
-                                <!-- New password -->
-                                <v-col cols="12">
-                                    <v-text-field
-                                        v-model="user.password"
-                                        :label="$t('account.newPassword')"
-                                        :placeholder="$t('account.placeholders.confirmPassword')"
-                                        :type="showNew ? 'text' : 'password'"
-                                        autocomplete="new-password"
-                                        variant="outlined"
-                                        density="comfortable"
-                                        validate-on="blur"
-                                        :rules="passwordChangeRequested
-                                            ? [rules.required, rules.minLength, rules.maxLength, rules.strength]
-                                            : []"
-                                        prepend-inner-icon="mdi-lock-plus-outline"
-                                        :append-inner-icon="showNew ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                                        @click:append-inner="showNew = !showNew"
-                                    />
-
-                                    <!-- Strength bar + checklist (animated) -->
-                                    <Transition name="slide-down">
-                                        <div v-if="user.password" class="mt-n1 mb-3 px-1">
-                                            <div class="d-flex align-center justify-space-between mb-1">
-                                                <span class="text-caption text-medium-emphasis">
-                                                    {{ $t('account.passwordStrength') }}
-                                                </span>
-                                                <span
-                                                    class="text-caption font-weight-bold"
-                                                    :class="`text-${strengthColor}`"
-                                                >
-                                                    {{ $t(`account.strength.${strengthLabel}`) }}
-                                                </span>
-                                            </div>
-                                            <div class="strength-bar-track">
-                                                <div
-                                                    v-for="n in 4"
-                                                    :key="n"
-                                                    class="strength-bar-segment"
-                                                    :class="n <= strengthScore
-                                                        ? `bg-${strengthColor}`
-                                                        : 'bg-grey-lighten-3'"
-                                                />
-                                            </div>
-                                            <div class="mt-3 requirements-grid">
-                                                <div
-                                                    v-for="req in passwordRequirements"
-                                                    :key="req.key"
-                                                    class="requirement-item"
-                                                    :class="req.met ? 'met' : 'unmet'"
-                                                >
-                                                    <v-icon
-                                                        :icon="req.met
-                                                            ? 'mdi-check-circle'
-                                                            : 'mdi-circle-outline'"
-                                                        size="14"
-                                                        class="mr-1 flex-shrink-0"
-                                                    />
-                                                    <span class="text-caption">
-                                                        {{ $t(`account.requirements.${req.key}`) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Transition>
-                                </v-col>
-
-                                <!-- Confirm password -->
-                                <v-col cols="12">
-                                    <v-text-field
-                                        v-model="user.passwordConfirm"
-                                        :label="$t('account.confirmPassword')"
-                                        :placeholder="$t('account.placeholders.confirmPassword')"
-                                        :type="showConfirm ? 'text' : 'password'"
-                                        autocomplete="new-password"
-                                        variant="outlined"
-                                        density="comfortable"
-                                        validate-on="blur"
-                                        :rules="passwordChangeRequested
-                                            ? [rules.required, rules.matchPassword]
-                                            : []"
-                                        prepend-inner-icon="mdi-lock-check-outline"
-                                        @click:append-inner="showConfirm = !showConfirm"
-                                    >
-                                        <!-- Always-mounted slot: swaps eye↔checkmark in place, no remount -->
-                                        <template #append-inner>
-                                            <v-icon
-                                                v-if="passwordsMatch"
-                                                icon="mdi-check-circle"
-                                                color="success"
-                                                size="20"
-                                            />
-                                            <v-icon
-                                                v-else
-                                                :icon="showConfirm ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                                                size="20"
-                                                @click="showConfirm = !showConfirm"
-                                            />
-                                        </template>
-                                    </v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-form>
-
-                        <!-- Hint when password change not started -->
+                        <!-- Hint shown when the user hasn't started yet -->
                         <v-alert
                             v-if="!passwordChangeRequested"
                             type="info"
@@ -298,6 +196,7 @@
                             density="compact"
                             rounded="lg"
                             icon="mdi-information-outline"
+                            class="mt-2"
                         >
                             {{ $t('account.passwordHint') }}
                         </v-alert>
@@ -330,7 +229,7 @@
                     color="primary"
                     variant="flat"
                     rounded="lg"
-                    :disabled="!hasChanges || saving"
+                    :disabled="!canSave || saving"
                     :loading="saving"
                     prepend-icon="mdi-content-save-outline"
                     @click="saveUser"
@@ -364,6 +263,8 @@
 </template>
 
 <script setup>
+import PasswordChangeFields from '@/components/user/PasswordChangeFields.vue'
+
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
 
@@ -387,13 +288,14 @@ const user = reactive({
     ...(pocketbaseAuth?.record ?? {
         id: '', firstname: '', name: '', email: '', avatar: null,
     }),
-    oldPassword: '',
-    password: '',
+    // Password fields — owned here, bound into PasswordChangeFields via v-model
+    oldPassword:     '',
+    password:        '',
     passwordConfirm: '',
 })
 
-const fullName = computed(() =>
-    [user.firstname, user.name].filter(Boolean).join(' '),
+const fullName = computed(
+    () => [user.firstname, user.name].filter(Boolean).join(' '),
 )
 
 // ── Avatar ────────────────────────────────────────────────────────────────
@@ -421,60 +323,34 @@ function onAvatarNative(e) {
 // ── Tabs ──────────────────────────────────────────────────────────────────
 const activeTab = ref('profile')
 
-const showSecurityWarning = computed(() =>
-    activeTab.value !== 'security' &&
-    passwordChangeRequested.value &&
-    strengthScore.value < 3,
-)
-
-// ── Password visibility ───────────────────────────────────────────────────
-const showOld     = ref(false)
-const showNew     = ref(false)
-const showConfirm = ref(false)
-
-// ── Password strength ─────────────────────────────────────────────────────
+// ── Password section state ────────────────────────────────────────────────
+/**
+ * True once the user has typed anything into any of the three password fields.
+ * Used to show the "hint" alert and the security-tab warning badge.
+ */
 const passwordChangeRequested = computed(
     () => !!(user.oldPassword || user.password || user.passwordConfirm),
 )
 
-const passwordRequirements = computed(() => [
-    { key: 'minLength', met: user.password.length >= 8 },
-    { key: 'maxLength', met: user.password.length <= 72 },
-    { key: 'uppercase', met: /[A-Z]/.test(user.password) },
-    { key: 'lowercase', met: /[a-z]/.test(user.password) },
-    { key: 'number',    met: /\d/.test(user.password) },
-    { key: 'special',   met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(user.password) },
-])
+/**
+ * Kept in sync by PasswordChangeFields via @validity.
+ * True when all three fields satisfy their validation rules.
+ */
+const passwordFieldsValid = ref(false)
 
-const strengthScore = computed(() => {
-    if (!user.password) return 0
-    const met = passwordRequirements.value.filter(r => r.met).length
-    if (met <= 2) return 1
-    if (met <= 3) return 2
-    if (met <= 4) return 3
-    return 4
-})
-
-const strengthLabel = computed(() =>
-    (['', 'weak', 'fair', 'good', 'strong'])[strengthScore.value] ?? 'weak',
+const showSecurityWarning = computed(
+    () => activeTab.value !== 'security' &&
+          passwordChangeRequested.value  &&
+          !passwordFieldsValid.value,
 )
 
-const strengthColor = computed(() =>
-    (['', 'error', 'warning', 'info', 'success'])[strengthScore.value] ?? 'error',
-)
-
-const passwordsMatch = computed(() =>
-    !!(user.passwordConfirm && user.password === user.passwordConfirm),
-)
-
-// ── Validation rules ──────────────────────────────────────────────────────
+// ── Profile-only validation rule (only "required" needed here) ────────────
 const rules = {
-    required:      (v) => !!v || t('validation.required'),
-    minLength:     (v) => v.length >= 8  || t('validation.minLength', { n: 8 }),
-    maxLength:     (v) => v.length <= 72 || t('validation.maxLength', { n: 72 }),
-    matchPassword: (v) => v === user.password || t('validation.passwordMismatch'),
-    strength:      () => strengthScore.value >= 3 || t('validation.passwordTooWeak'),
+    required: (v) => !!v || t('validation.required'),
 }
+
+// ── Form ref (profile tab only) ───────────────────────────────────────────
+const profileForm = ref(null)
 
 // ── Change detection ──────────────────────────────────────────────────────
 const original = { firstname: user.firstname, name: user.name }
@@ -483,6 +359,17 @@ const hasChanges = computed(() => {
     if (avatarFile.value) return true
     if (passwordChangeRequested.value) return true
     return user.firstname !== original.firstname || user.name !== original.name
+})
+
+/**
+ * Save is only enabled when:
+ *  - there are actual changes, AND
+ *  - if the password section was touched, those fields are fully valid
+ */
+const canSave = computed(() => {
+    if (!hasChanges.value) return false
+    if (passwordChangeRequested.value && !passwordFieldsValid.value) return false
+    return true
 })
 
 // ── Snackbar ──────────────────────────────────────────────────────────────
@@ -496,31 +383,39 @@ function showSnackbar(message, color) {
     snackbar.value        = true
 }
 
-// ── Form refs ─────────────────────────────────────────────────────────────
-const profileForm  = ref(null)
-const securityForm = ref(null)
-
 // ── Save ──────────────────────────────────────────────────────────────────
 const saving = ref(false)
 
 async function saveUser() {
-    const profileValid  = (await profileForm.value?.validate())?.valid  ?? true
-    const securityValid = passwordChangeRequested.value
-        ? (await securityForm.value?.validate())?.valid ?? true
-        : true
+    // Validate profile fields (name, firstname)
+    const profileResult = await profileForm.value?.validate()
+    if (!profileResult?.valid) {
+        activeTab.value = 'profile'
+        return
+    }
 
-    if (!profileValid)  { activeTab.value = 'profile';  return }
-    if (!securityValid) { activeTab.value = 'security'; return }
+    // If password change was requested, guard against invalid state
+    // (canSave already prevents the button being clickable, but this is
+    // a safety net e.g. if called programmatically)
+    if (passwordChangeRequested.value && !passwordFieldsValid.value) {
+        activeTab.value = 'security'
+        return
+    }
 
     saving.value = true
+
     const formData = new FormData()
     formData.append('firstname', user.firstname)
     formData.append('name',      user.name)
+
     if (passwordChangeRequested.value) {
+        // oldPassword, password, passwordConfirm are owned by `user` reactive
+        // and were kept in sync by PasswordChangeFields via v-model
         formData.append('oldPassword',     user.oldPassword)
         formData.append('password',        user.password)
         formData.append('passwordConfirm', user.passwordConfirm)
     }
+
     if (avatarFile.value) {
         formData.append('avatar', avatarFile.value)
     }
@@ -528,20 +423,24 @@ async function saveUser() {
     try {
         const updated = await pb.collection('users').update(user.id, formData)
 
+        // Sync local reactive state with what PocketBase returned
         Object.assign(user, updated)
         avatarPreview.value = updated.avatar
             ? pb.files.getURL(updated, updated.avatar, { thumb: '100x100' })
             : null
 
+        // Clear password fields
         user.oldPassword     = ''
         user.password        = ''
         user.passwordConfirm = ''
         avatarFile.value     = null
 
+        // Persist updated record to localStorage (keeps app session fresh)
         const auth = JSON.parse(localStorage.getItem('pocketbase_auth'))
         auth.record = updated
         localStorage.setItem('pocketbase_auth', JSON.stringify(auth))
 
+        // Update original snapshot so hasChanges resets to false
         original.firstname = updated.firstname
         original.name      = updated.name
 
@@ -614,48 +513,5 @@ watch(() => props.dialogOpen, (val) => (localDialog.value = val))
 .locale-flag {
     font-size: 1.1em;
     line-height: 1;
-}
-
-/* ── Strength bar ────────────────────────────────────── */
-.strength-bar-track {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-}
-.strength-bar-segment {
-    height: 4px;
-    border-radius: 2px;
-    transition: background-color 0.35s ease;
-}
-
-/* ── Requirements checklist ──────────────────────────── */
-.requirements-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
-}
-.requirement-item {
-    display: flex;
-    align-items: center;
-    transition: color 0.2s;
-}
-.requirement-item.met   { color: rgb(var(--v-theme-success)); }
-.requirement-item.unmet { color: rgb(var(--v-theme-on-surface-variant)); opacity: 0.55; }
-
-/* ── Slide-down transition for strength block ────────── */
-.slide-down-enter-active,
-.slide-down-leave-active {
-    transition: opacity 0.25s ease, max-height 0.25s ease;
-    overflow: hidden;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-    opacity: 0;
-    max-height: 0;
-}
-.slide-down-enter-to,
-.slide-down-leave-from {
-    opacity: 1;
-    max-height: 220px;
 }
 </style>

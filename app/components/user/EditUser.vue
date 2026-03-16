@@ -58,10 +58,10 @@ const form = ref(null)
 const editableUser = reactive({ id: '', username: '', firstname: '', name: '', email: '' })
 const originalUser = reactive({ ...editableUser })
 
-const nameRules = [v => !!v || t('validations.required')]
+const nameRules = [v => !!v || t('validation.required')]
 const usernameRules = [
-    v => !!v || t('validations.required'),
-    v => (v && v.length >= 3) || t('validations.minLength', { min: 3 }),
+    v => !!v || t('validation.required'),
+    v => (v && v.length >= 3) || t('validation.minLength', { n: 3 }),
 ]
 
 const hasChanges = computed(() => {

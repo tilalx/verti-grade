@@ -46,7 +46,7 @@
                         <v-text-field
                             v-model="user.passwordConfirm"
                             :rules="passwordConfirmRules"
-                            :label="$t('account.passwordConfirm')"
+                            :label="$t('account.confirmPassword')"
                             type="password"
                             required
                         ></v-text-field>
@@ -105,24 +105,24 @@ function showSnackbar(message, color = 'success') {
 
 // --- Validation Rules ---
 const nameRules = [
-    (v) => !!v || t('validations.required'),
-    (v) => (v && v.length <= 30) || t('validations.maxLength', { max: 30 }),
+    (v) => !!v || t('validation.required'),
+    (v) => (v && v.length <= 30) || t('validation.maxLength', { n: 30 }),
 ]
 const usernameRules = [
-    (v) => !!v || t('validations.required'),
-    (v) => (v && v.length >= 3) || t('validations.minLength', { min: 3 }),
+    (v) => !!v || t('validation.required'),
+    (v) => (v && v.length >= 3) || t('validation.minLength', { n: 3 }),
 ]
 const emailRules = [
-    (v) => !!v || t('validations.required'),
-    (v) => /.+@.+\..+/.test(v) || t('validations.email'),
+    (v) => !!v || t('validation.required'),
+    (v) => /.+@.+\..+/.test(v) || t('validation.email'),
 ]
 const passwordRules = [
-    (v) => !!v || t('validations.required'),
-    (v) => (v && v.length >= 8) || t('validations.minLength', { min: 8 }),
+    (v) => !!v || t('validation.required'),
+    (v) => (v && v.length >= 8) || t('validation.minLength', { n: 8 }),
 ]
 const passwordConfirmRules = computed(() => [
-    (v) => !!v || t('validations.required'),
-    (v) => v === user.password || t('validations.passwordMatch'),
+    (v) => !!v || t('validation.required'),
+    (v) => v === user.password || t('validation.passwordMismatch'),
 ])
 
 function openDialog() {

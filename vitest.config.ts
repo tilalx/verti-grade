@@ -23,6 +23,7 @@ export default defineConfig({
     alias: {
       '~': path.resolve(__dirname, 'app'),
       '@': path.resolve(__dirname, 'app'),
+      '#imports': path.resolve(__dirname, 'test/__stubs__/imports.ts'),
     },
   },
   test: {

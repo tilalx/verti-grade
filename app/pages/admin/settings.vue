@@ -74,6 +74,43 @@
             </v-col>
         </v-row>
 
+        <!-- Organization -->
+        <v-card rounded="lg" border flat class="mb-6">
+            <v-card-text class="pa-4">
+                <p class="text-subtitle-2 font-weight-semibold mb-4">Organization</p>
+                <v-row density="comfortable">
+                    <v-col cols="12" md="6">
+                        <v-text-field
+                            v-model="copySettings.organization_name"
+                            label="Organization Name"
+                            density="compact"
+                            variant="outlined"
+                            rounded="md"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-domain"
+                            placeholder="e.g. Deutscher Alpenverein"
+                            :maxlength="50"
+                            counter
+                        />
+                    </v-col>
+                    <v-col cols="12" md="6">
+                        <v-text-field
+                            v-model="copySettings.organization_unit_name"
+                            label="Organization Unit"
+                            density="compact"
+                            variant="outlined"
+                            rounded="md"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-office-building-outline"
+                            placeholder="e.g. Sektion Hanau"
+                            :maxlength="50"
+                            counter
+                        />
+                    </v-col>
+                </v-row>
+            </v-card-text>
+        </v-card>
+
         <!-- URL Fields -->
         <v-card rounded="lg" border flat class="mb-6">
             <v-card-text class="pa-4">
@@ -182,9 +219,11 @@ const { data: settings } = await useAsyncData('settings', () =>
 // ── State ─────────────────────────────────────────────────────────────────────
 
 const original = reactive({
-    application_url: settings.value?.application_url ?? '',
-    imprint_url:     settings.value?.imprint_url ?? '',
-    privacy_url:     settings.value?.privacy_url ?? '',
+    application_url:       settings.value?.application_url ?? '',
+    imprint_url:           settings.value?.imprint_url ?? '',
+    privacy_url:           settings.value?.privacy_url ?? '',
+    organization_name:      settings.value?.organization_name ?? '',
+    organization_unit_name: settings.value?.organization_unit_name ?? '',
 })
 
 const copySettings = reactive({ ...original })
@@ -277,14 +316,18 @@ onMounted(async () => {
             iconPreview.value = pbFileUrl(d, d.page_icon)
             signPreview.value = pbFileUrl(d, d.sign_image)
 
-            original.application_url = d.application_url
-            original.imprint_url     = d.imprint_url
-            original.privacy_url     = d.privacy_url
+            original.application_url       = d.application_url
+            original.imprint_url           = d.imprint_url
+            original.privacy_url           = d.privacy_url
+            original.organization_name      = d.organization_name
+            original.organization_unit_name = d.organization_unit_name
 
             Object.assign(copySettings, {
-                application_url: d.application_url,
-                imprint_url:     d.imprint_url,
-                privacy_url:     d.privacy_url,
+                application_url:       d.application_url,
+                imprint_url:           d.imprint_url,
+                privacy_url:           d.privacy_url,
+                organization_name:      d.organization_name,
+                organization_unit_name: d.organization_unit_name,
             })
         },
     )
@@ -322,9 +365,11 @@ function onSignSelected(file) {
 const hasChanges = computed(() => {
     if (logoFile.value || iconFile.value || signFile.value) return true
     return (
-        copySettings.application_url !== original.application_url ||
-        copySettings.imprint_url     !== original.imprint_url     ||
-        copySettings.privacy_url     !== original.privacy_url
+        copySettings.application_url       !== original.application_url       ||
+        copySettings.imprint_url           !== original.imprint_url           ||
+        copySettings.privacy_url           !== original.privacy_url           ||
+        copySettings.organization_name      !== original.organization_name      ||
+        copySettings.organization_unit_name !== original.organization_unit_name
     )
 })
 
@@ -337,9 +382,11 @@ async function saveSettings() {
     try {
         // PB SDK v0.21+ converts plain objects with File values to multipart automatically
         const payload = {
-            application_url: copySettings.application_url,
-            imprint_url:     copySettings.imprint_url,
-            privacy_url:     copySettings.privacy_url,
+            application_url:       copySettings.application_url,
+            imprint_url:           copySettings.imprint_url,
+            privacy_url:           copySettings.privacy_url,
+            organization_name:      copySettings.organization_name,
+            organization_unit_name: copySettings.organization_unit_name,
         }
         if (logoFile.value) payload.page_logo  = logoFile.value
         if (iconFile.value) payload.page_icon  = iconFile.value
@@ -358,14 +405,18 @@ async function saveSettings() {
         logoFile.value = iconFile.value = signFile.value = null
 
         // Advance the original snapshot so hasChanges resets
-        original.application_url = updated.application_url
-        original.imprint_url     = updated.imprint_url
-        original.privacy_url     = updated.privacy_url
+        original.application_url       = updated.application_url
+        original.imprint_url           = updated.imprint_url
+        original.privacy_url           = updated.privacy_url
+        original.organization_name      = updated.organization_name
+        original.organization_unit_name = updated.organization_unit_name
 
         Object.assign(copySettings, {
-            application_url: updated.application_url,
-            imprint_url:     updated.imprint_url,
-            privacy_url:     updated.privacy_url,
+            application_url:       updated.application_url,
+            imprint_url:           updated.imprint_url,
+            privacy_url:           updated.privacy_url,
+            organization_name:      updated.organization_name,
+            organization_unit_name: updated.organization_unit_name,
         })
 
         notify('Settings saved successfully.')

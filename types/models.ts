@@ -73,6 +73,8 @@ export interface SettingsRecord extends BaseRecord {
     imprint_url?: string | null
     privacy_url?: string | null
     application_url?: string | null
+    organization_name?: string | null
+    organization_unit_name?: string | null
 }
 
 export interface AverageRatingRecord extends BaseRecord {

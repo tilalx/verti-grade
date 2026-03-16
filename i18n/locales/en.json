@@ -1,11 +1,8 @@
 {
   "account": {
     "profile": "Profile",
-    "account": "Account",
     "login": "Sign In",
     "logout": "Logout",
-    "register": "Register",
-    "name": "Name",
     "firstname": "First name",
     "lastname": "Last name",
     "username": "Username",
@@ -27,6 +24,7 @@
     "passwordHint": "Leave the password fields empty to keep your current password.",
     "unsavedChanges": "Unsaved changes",
     "wrongOldPassword": "Current password is incorrect",
+    "unknownUser": "Unknown User",
     "tabs": {
       "profile": "Profile",
       "security": "Security"
@@ -35,7 +33,7 @@
       "firstname": "Jane",
       "lastname": "Doe",
       "oldPassword": "Your current password",
-      "confirmPassword": "Min. 8 characters",
+      "newPassword": "Your new password",
       "confirmPassword": "Repeat new password"
     },
     "strength": {
@@ -57,35 +55,19 @@
     "home": "Home",
     "dashboard": "Route Management",
     "inventory": "Inventory Scan",
-    "about": "About",
-    "contact": "Contact",
     "login": "Login",
-    "register": "Register",
-    "profile": "Profile",
-    "users": "Users",
-    "user": "User",
-    "statistics": "Statistics",
-    "statistic": "Statistic",
     "analytics": "Analytics",
     "comments": "Comments",
-    "comment": "Comment",
     "settings": "Settings",
-    "setting": "Setting",
-    "edit": "Edit",
-    "delete": "Delete",
-    "create": "Create",
-    "logout": "Logout",
     "route_setter": "Route Setter",
     "screwed_at": "Screwed at",
     "types": {
       "route": "Route",
       "boulder": "Boulder"
     },
-    "name": "Name",
-    "creator_split": "Creator split by ,"
+    "name": "Name"
   },
   "dashboard": {
-    "welcome": "Route Management",
     "online": "{0} Online"
   },
   "analytics": {
@@ -152,33 +134,16 @@
     "createReview": "Create review",
     "no_reviews_yet": "No reviews yet",
     "be_the_first": "Be the first",
-    "routename": "Route name",
     "stars": "Stars",
     "difficulty": "Difficulty",
-    "difficulty_sign": "Difficulty sign",
-    "location": "Location",
-    "searchRouteName": "Search",
-    "type": "Type",
     "score": "Score",
     "comment": "Comment",
-    "creators": "Creators",
     "climber_reviews": "Climber Reviews"
   },
   "table": {
-    "id": "ID",
-    "select": "Selected",
     "actions": "Actions",
     "no_data": "No data",
-    "created_at": "Created at",
-    "updated_at": "Updated at",
-    "created_by": "Created by",
-    "updated_by": "Updated by"
-  },
-  "header": {
-    "create_route": "Create climbing route",
-    "routereviews": "Route reviews",
-    "title": "Climbing routes",
-    "subtitle": "Climbing routes"
+    "created_at": "Created at"
   },
   "actions": {
     "search": "Search",
@@ -191,9 +156,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "archive": "Archive",
-    "new_item": "New Item",
     "submit": "Submit",
-    "edit_item": "Edit Item",
     "confirm": "Confirm Delete",
     "select_all": "Select All",
     "deselect_all": "Deselect All",
@@ -242,19 +205,21 @@
       "edit": "Successfully saved",
       "delete": "Successfully deleted",
       "login": "Login successful. Redirecting to the Route Manager...",
-      "health": "Health: OK"
+      "health": "Health: OK",
+      "userCreated": "User created successfully."
     },
     "error": {
       "resetPassword": "Password reset request failed.",
-      "nameRequired": "Name is required",
-      "nameTooLong": "Name must be less than 30 characters",
       "create": "Error creating",
       "edit": "Error saving profile",
       "delete": "Error deleting",
-      "login_failed": "Login failed. Please check your credentials and try again.",
-      "no_route_found": "No route found!",
       "health": "Health: Down",
-      "no_auth_methods_available": "No authentication methods available"
+      "no_auth_methods_available": "No authentication methods available",
+      "invalid_credentials": "Invalid credentials. Please check your username and password.",
+      "email_not_verified": "Your email address has not been verified.",
+      "too_many_attempts": "Too many login attempts. Please try again later.",
+      "unknown": "An unknown error occurred. Please try again.",
+      "generic": "An unexpected error occurred."
     },
     "deleteItem": "Are you sure you want to delete this item?",
     "deleteMoreItems": "Are you sure you want to delete the selected items?",
@@ -268,27 +233,20 @@
   },
   "legal": {
     "privacy": "Privacy",
-    "imprint": "Imprint",
-    "terms": "Terms of use"
+    "imprint": "Imprint"
   },
   "page": {
     "title": {
-      "login": "Login - Verti-Grade",
-      "user": "User - Verti-Grade",
       "settings": "Settings - Verti-Grade",
       "route": "Route - Verti-Grade",
       "index": "Climbing Routes - Verti-Grade",
-      "inventory": "Inventory Scan - Verti-Grade",
       "comments": "Comments - Verti-Grade",
       "dashboard": "Route Management - Verti-Grade"
     },
     "content": {
-      "login": "Login",
-      "user": "User Page",
       "settings": "Settings",
       "route": "Create Review",
       "index": "Climbing Routes",
-      "inventory": "Route Inventory Scan",
       "comments": "Comments",
       "dashboard": "Route Management"
     }
@@ -300,6 +258,14 @@
     "minLength": "Minimum {n} characters.",
     "maxLength": "Maximum {n} characters.",
     "passwordMismatch": "Passwords do not match.",
-    "passwordTooWeak": "Password must be at least \"Good\" strength."
+    "passwordTooWeak": "Password must be at least \"Good\" strength.",
+    "email": "Please enter a valid email address."
+  },
+  "nav": {
+    "openMenu": "Open menu"
+  },
+  "users": {
+    "create": "Create User",
+    "edit": "Edit User"
   }
 }

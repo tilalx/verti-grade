@@ -1,11 +1,8 @@
 {
   "account": {
     "profile": "Profil",
-    "account": "Konto",
     "login": "Anmelden",
     "logout": "Abmelden",
-    "register": "Registrieren",
-    "name": "Name",
     "firstname": "Vorname",
     "lastname": "Nachname",
     "username": "Benutzername",
@@ -27,6 +24,7 @@
     "passwordHint": "Lassen Sie die Passwortfelder leer, um das aktuelle Passwort beizubehalten.",
     "unsavedChanges": "Ungespeicherte Änderungen",
     "wrongOldPassword": "Aktuelles Passwort ist falsch",
+    "unknownUser": "Unbekannter Benutzer",
     "tabs": {
       "profile": "Profil",
       "security": "Sicherheit"
@@ -35,7 +33,7 @@
       "firstname": "Max",
       "lastname": "Mustermann",
       "oldPassword": "Ihr aktuelles Passwort",
-      "confirmPassword": "Mind. 8 Zeichen",
+      "newPassword": "Ihr neues Passwort",
       "confirmPassword": "Neues Passwort wiederholen"
     },
     "strength": {
@@ -57,35 +55,19 @@
     "home": "Startseite",
     "dashboard": "Routenverwaltung",
     "inventory": "Inventur",
-    "about": "Über",
-    "contact": "Kontakt",
     "login": "Anmelden",
-    "register": "Registrieren",
-    "profile": "Profil",
-    "users": "Benutzer",
-    "user": "Benutzer",
-    "statistics": "Statistiken",
-    "statistic": "Statistik",
     "analytics": "Analysen",
     "comments": "Kommentare",
-    "comment": "Kommentar",
     "settings": "Einstellungen",
-    "setting": "Einstellung",
-    "edit": "Bearbeiten",
-    "delete": "Löschen",
-    "create": "Erstellen",
-    "logout": "Abmelden",
     "route_setter": "Routen Schrauber",
     "screwed_at": "Geschraubt am",
     "types": {
       "route": "Route",
       "boulder": "Boulder"
     },
-    "name": "Name",
-    "creator_split": "Schrauber getrennt durch ,"
+    "name": "Name"
   },
   "dashboard": {
-    "welcome": "Routenverwaltung",
     "online": "{0} Online"
   },
   "analytics": {
@@ -152,33 +134,16 @@
     "createReview": "Bewertung erstellen",
     "no_reviews_yet": "Noch keine Bewertungen vorhanden",
     "be_the_first": "Sei der Erste",
-    "routename": "Routenname",
     "stars": "Sterne",
     "difficulty": "Schwierigkeitsgrad",
-    "difficulty_sign": "Schwierigkeitszeichen",
-    "location": "Ort",
-    "searchRouteName": "Suchen",
-    "type": "Typ",
     "score": "Punktzahl",
     "comment": "Kommentar",
-    "creators": "Ersteller",
     "climber_reviews": "Kletterer Bewertungen"
   },
   "table": {
-    "id": "ID",
-    "select": "Ausgewählt",
     "actions": "Aktionen",
     "no_data": "Keine Daten",
-    "created_at": "Erstellt am",
-    "updated_at": "Aktualisiert am",
-    "created_by": "Erstellt von",
-    "updated_by": "Aktualisiert von"
-  },
-  "header": {
-    "create_route": "Kletterroute erstellen",
-    "routereviews": "Routenbewertungen",
-    "title": "Kletterrouten",
-    "subtitle": "Kletterrouten"
+    "created_at": "Erstellt am"
   },
   "actions": {
     "search": "Suchen",
@@ -192,8 +157,6 @@
     "cancel": "Abbrechen",
     "archive": "Archivieren",
     "submit": "Absenden",
-    "new_item": "Neues Element",
-    "edit_item": "Element bearbeiten",
     "confirm": "Löschen bestätigen",
     "select_all": "Alle auswählen",
     "deselect_all": "Alle abwählen",
@@ -242,19 +205,21 @@
       "edit": "Erfolgreich gespeichert",
       "delete": "Erfolgreich gelöscht",
       "login": "Anmeldung erfolgreich. Weiterleitung zur Routenverwaltung...",
-      "health": "Status: OK"
+      "health": "Status: OK",
+      "userCreated": "Benutzer erfolgreich erstellt."
     },
     "error": {
       "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
-      "nameRequired": "Name ist erforderlich",
-      "nameTooLong": "Name muss weniger als 30 Zeichen lang sein",
       "create": "Fehler beim Erstellen",
       "edit": "Fehler beim Speichern des Profils",
       "delete": "Fehler beim Löschen",
-      "login_failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
-      "no_route_found": "Keine Route gefunden",
       "health": "Status: Schlecht",
-      "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar"
+      "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar",
+      "invalid_credentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie Benutzernamen und Passwort.",
+      "email_not_verified": "Ihre E-Mail-Adresse wurde noch nicht verifiziert.",
+      "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "generic": "Ein unerwarteter Fehler ist aufgetreten."
     },
     "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
     "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
@@ -268,27 +233,20 @@
   },
   "legal": {
     "privacy": "Datenschutz",
-    "imprint": "Impressum",
-    "terms": "Nutzungsbedingungen"
+    "imprint": "Impressum"
   },
   "page": {
     "title": {
-      "login": "Anmelden - Verti-Grade",
-      "user": "Benutzer - Verti-Grade",
       "settings": "Einstellungen - Verti-Grade",
       "route": "Route - Verti-Grade",
       "index": "Kletterrouten - Verti-Grade",
-      "inventory": "Routeninventur - Verti-Grade",
       "comments": "Kommentare - Verti-Grade",
       "dashboard": "Routenverwaltung - Verti-Grade"
     },
     "content": {
-      "login": "Anmelden",
-      "user": "Benutzerseite",
       "settings": "Einstellungen",
       "route": "Bewertung erstellen",
       "index": "Kletterrouten",
-      "inventory": "Routeninventur",
       "comments": "Kommentare",
       "dashboard": "Routenverwaltung"
     }
@@ -300,6 +258,14 @@
     "minLength": "Mindestens {n} Zeichen.",
     "maxLength": "Maximal {n} Zeichen.",
     "passwordMismatch": "Passwörter stimmen nicht überein.",
-    "passwordTooWeak": "Passwort muss mindestens „Gut“ sein."
+    "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
+    "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+  },
+  "nav": {
+    "openMenu": "Menü öffnen"
+  },
+  "users": {
+    "create": "Benutzer erstellen",
+    "edit": "Benutzer bearbeiten"
   }
 }

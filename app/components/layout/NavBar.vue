@@ -59,7 +59,7 @@
                     </template>
                     <template v-else>
                         <v-btn
-                            to="/login"
+                            to="/auth/login"
                             variant="tonal"
                             rounded="lg"
                             prepend-icon="mdi-login"
