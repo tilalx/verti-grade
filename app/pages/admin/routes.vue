@@ -11,7 +11,7 @@
                     color="primary"
                     variant="tonal"
                     prepend-icon="mdi-routes"
-                    @click="createRouteRef.open()"
+                    @click="routeFormRef.open()"
                 >
                     {{ $t('climbing.create') }}
                 </v-btn>
@@ -27,12 +27,12 @@
             </v-col>
         </v-row>
 
-        <CreateRoute ref="createRouteRef" @closed="reloadRoutes" />
+        <RouteFormDialog ref="routeFormRef" @saved="reloadRoutes" />
         <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
 
         <v-row>
             <v-col>
-                <v-row align="center" dense class="mb-2">
+                <v-row align="center" density="comfortable" class="mb-2">
                     <v-col cols="12" md="3">
                         <v-text-field
                             :id="routeNameId"
@@ -205,7 +205,9 @@
                     </template>
                     <template #item.actions="{ item }">
                         <div class="route-manager__row-actions">
-                            <EditRoute :route="item" @closed="reloadRoutes" />
+                            <v-btn icon size="small" class="mr-1" @click="routeFormRef.open(item)">
+                                <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
                             <RouteDetails :route_id="item.id" />
                         </div>
                     </template>
@@ -330,7 +332,9 @@
 
                                 <v-card-actions class="pa-2 route-manager__mobile-actions">
                                     <v-spacer />
-                                    <EditRoute :route="route" @closed="reloadRoutes" />
+                                    <v-btn icon size="small" class="mr-1" @click="routeFormRef.open(route)">
+                                        <v-icon>mdi-pencil</v-icon>
+                                    </v-btn>
                                     <RouteDetails :route_id="route.id" />
                                 </v-card-actions>
                             </v-card>
@@ -363,11 +367,12 @@
             <v-card>
                 <v-card-text>{{ $t('notifications.deleteMoreItems') }}</v-card-text>
                 <v-card-actions>
-                    <v-btn color="error" @click="deleteSelected">
-                        {{ $t('actions.delete') }}
-                    </v-btn>
-                    <v-btn color="primary" @click="showDeleteConfirmation = false">
+                    <v-spacer />
+                    <v-btn @click="showDeleteConfirmation = false">
                         {{ $t('actions.cancel') }}
+                    </v-btn>
+                    <v-btn color="error" variant="flat" @click="deleteSelected">
+                        {{ $t('actions.delete') }}
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -377,11 +382,12 @@
             <v-card>
                 <v-card-text>{{ $t('notifications.archiveMoreItems') }}</v-card-text>
                 <v-card-actions>
-                    <v-btn color="warning" @click="confirmArchive">
-                        {{ $t('actions.archive') }}
-                    </v-btn>
-                    <v-btn color="primary" @click="showArchiveConfirmation = false">
+                    <v-spacer />
+                    <v-btn @click="showArchiveConfirmation = false">
                         {{ $t('actions.cancel') }}
+                    </v-btn>
+                    <v-btn color="warning" variant="flat" @click="archiveSelected">
+                        {{ $t('actions.archive') }}
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -395,7 +401,6 @@ import { useHead } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import { usePocketbase } from '@/composables/pocketbase.js'
-import EditRoute from '@/components/EditRoute.vue'
 import RouteDetails from '@/components/RouteDetails.vue'
 import NewVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
 
@@ -421,7 +426,7 @@ const loading = ref(false)
 const tableOptions = reactive({
     page: 1,
     itemsPerPage: 25,
-    sortBy: [{ key: 'created', order: 'desc' }],
+    sortBy: [{ key: 'screw_date', order: 'desc' }],
 })
 
 const selectedRouteIds = ref(new Set())
@@ -439,7 +444,7 @@ const averageRatings = ref(new Map())
 const averageRatingsLoaded = ref(false)
 const averageRatingsLoading = ref(false)
 
-const createRouteRef = useTemplateRef('createRouteRef')
+const routeFormRef = useTemplateRef('routeFormRef')
 const importRouteRef = useTemplateRef('importRouteRef')
 
 const routeNameId = 'route-name-input'
@@ -734,7 +739,6 @@ const loadRoutes = async (options = {}) => {
             },
         )
 
-        const routeIds = list.items.map((route) => route.id)
         const averageMap = averageRatings.value
 
         const normalizedRoutes = list.items.map((route) => {
@@ -788,10 +792,6 @@ const handleArchiveClick = () => {
     }
 }
 
-const confirmArchive = async () => {
-    await archiveSelected()
-}
-
 const deleteSelected = async () => {
     const ids = Array.from(selectedRouteIds.value)
     if (!ids.length) {
@@ -834,107 +834,43 @@ const archiveSelected = async () => {
     }
 }
 
-const printSelected = async () => {
+const downloadExport = async (endpoint, extension, mimeType) => {
     const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length) {
-        console.warn('No routes selected for PDF export.')
-        return
-    }
+    if (!ids.length) return
 
     try {
-        const response = await fetch('/api/ui/pdf', {
+        const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids }),
         })
 
         if (!response.ok) {
-            throw new Error(`PDF export failed with status ${response.status}`)
+            throw new Error(`Export failed with status ${response.status}`)
         }
 
-        const pdfBlob = await response.blob()
-        const blob = new Blob([pdfBlob], { type: 'application/pdf' })
-        const link = document.createElement('a')
-        link.href = window.URL.createObjectURL(blob)
-        link.download = `${generateFilename()}.pdf`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    } catch (error) {
-        console.error('Error downloading PDF:', error)
-    }
-}
-
-const exportSelectedExcel = async () => {
-    const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length) {
-        console.warn('No routes selected for Excel export.')
-        return
-    }
-
-    try {
-        const response = await fetch('/api/ui/xlsx', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ids }),
-        })
-
-        if (!response.ok) {
-            throw new Error(`Excel export failed with status ${response.status}`)
+        let blob
+        if (extension === 'json') {
+            const text = JSON.stringify(await response.json(), null, 2)
+            blob = new Blob([text], { type: mimeType })
+        } else {
+            blob = new Blob([await response.blob()], { type: mimeType })
         }
 
-        const excelBlob = await response.blob()
-        const blob = new Blob([excelBlob], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        const link = document.createElement('a')
-        link.href = window.URL.createObjectURL(blob)
-        link.download = `${generateFilename()}.xlsx`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    } catch (error) {
-        console.error('Error in exportSelectedExcel:', error)
-    }
-}
-
-const exportSelectedJson = async () => {
-    const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length) {
-        console.log('No routes selected for export.')
-        return
-    }
-
-    try {
-        const response = await fetch('/api/ui/json', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ids }),
-        })
-
-        if (!response.ok) {
-            throw new Error(`JSON export failed with status ${response.status}`)
-        }
-
-        const exportData = await response.json()
-        const json = JSON.stringify(exportData, null, 2)
-        const blob = new Blob([json], { type: 'application/json' })
         const link = document.createElement('a')
         link.href = URL.createObjectURL(blob)
-        link.download = `${generateFilename()}.json`
+        link.download = `${generateFilename()}.${extension}`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
     } catch (error) {
-        console.error('Error in exportSelectedJson:', error)
+        console.error(`Export error (${extension}):`, error)
     }
 }
+
+const printSelected = () => downloadExport('/api/ui/pdf', 'pdf', 'application/pdf')
+const exportSelectedExcel = () => downloadExport('/api/ui/xlsx', 'xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+const exportSelectedJson = () => downloadExport('/api/ui/json', 'json', 'application/json')
 
 const onMobilePageChange = (value) => {
     if (value === tableOptions.page) {

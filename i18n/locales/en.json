@@ -89,13 +89,16 @@
       "averageDifficulty": "Avg. Difficulty",
       "averageDifficultySubtitle": "Mean grade",
       "totalComments": "Comments",
-      "totalCommentsSubtitle": "All route feedback"
+      "totalCommentsSubtitle": "All route feedback",
+      "averageLifespan": "Avg. Route Lifespan",
+      "averageLifespanSubtitle": "Archived routes only"
     },
     "charts": {
       "difficultyDistribution": "Difficulty Distribution",
       "routeSetters": "Routes by Setter",
       "routeTimeline": "Routes Over Time",
-      "commentTimeline": "Comments Over Time"
+      "commentTimeline": "Comments Over Time",
+      "activityHeatmap": "Route Setting Activity"
     },
     "sections": {
       "latestComments": "Latest Comments",
@@ -113,6 +116,10 @@
       "routes": "Routes",
       "unknown": "Unknown",
       "other": "Other"
+    },
+    "heatmap": {
+      "less": "Less",
+      "more": "More"
     }
   },
   "climbing": {

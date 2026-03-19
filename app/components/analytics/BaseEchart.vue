@@ -11,11 +11,13 @@ interface ChartProps {
     option: Record<string, unknown>
     height?: string | number
     responsive?: boolean
+    renderer?: 'canvas' | 'svg'
 }
 
 const props = withDefaults(defineProps<ChartProps>(), {
     height: '320px',
     responsive: true,
+    renderer: 'svg',
 })
 
 const chartEl = ref<HTMLElement | null>(null)
@@ -53,7 +55,7 @@ const renderChart = async () => {
     }
 
     if (!chartInstance) {
-        chartInstance = echartsModule.init(chartEl.value)
+        chartInstance = echartsModule.init(chartEl.value, null, { renderer: props.renderer })
         if (props.responsive) {
             window.addEventListener('resize', resizeChart)
         }

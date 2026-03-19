@@ -55,6 +55,20 @@ export default eventHandler(async () => {
             }
         }
 
+        let lifespanSum = 0
+        let lifespanCount = 0
+        for (const route of routes) {
+            if (!route.archived || !route.screw_date || !route.updated) continue
+            const screwTime = new Date(route.screw_date).getTime()
+            const updatedTime = new Date(route.updated).getTime()
+            if (Number.isNaN(screwTime) || Number.isNaN(updatedTime)) continue
+            const diffDays = (updatedTime - screwTime) / 86_400_000
+            if (diffDays < 0) continue
+            lifespanSum += diffDays
+            lifespanCount++
+        }
+        const averageLifespanDays = lifespanCount > 0 ? Math.round(lifespanSum / lifespanCount) : 0
+
         const commentRecords = ratings.filter((rating) =>
             typeof rating.comment === 'string' && rating.comment.trim().length > 0,
         )
@@ -68,6 +82,7 @@ export default eventHandler(async () => {
             activeRoutes: routes.filter((route) => !route.archived).length,
             averageDifficulty: difficultyCount > 0 ? difficultySum / difficultyCount : 0,
             totalComments: commentRecords.length,
+            averageLifespanDays,
             generatedAt: new Date().toISOString(),
         }
 

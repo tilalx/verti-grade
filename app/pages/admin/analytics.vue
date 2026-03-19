@@ -15,7 +15,7 @@
                         {{ t('analytics.subtitle') }}
                     </p>
                 </div>
-                <div class="d-flex align-center gap-3">
+                <div class="d-flex align-center ga-3">
                     <div v-if="summary.generatedAt" class="generated-at">
                         {{ t('analytics.generatedAt', { value: formatDate(summary.generatedAt) }) }}
                     </div>
@@ -239,6 +239,101 @@
             </v-col>
         </v-row>
 
+        <!-- ── Activity heatmap ───────────────────────────────────────── -->
+        <v-row v-if="!error" class="mb-6" density="comfortable">
+            <v-col cols="12" class="d-flex">
+                <v-card class="analytics-card w-100" elevation="0">
+                    <v-card-title class="card-header">
+                        <div class="card-header-icon" style="background:#E1F5EE">
+                            <v-icon size="16" color="#0F6E56">mdi-calendar-month-outline</v-icon>
+                        </div>
+                        <span class="card-header-title">{{ t('analytics.charts.activityHeatmap') }}</span>
+                    </v-card-title>
+                    <v-divider />
+                    <v-card-text class="heatmap-wrapper">
+                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <template v-else-if="hasData">
+                            <!-- Mobile year chips -->
+                            <div class="d-flex d-sm-none flex-wrap ga-2 mb-3">
+                                <v-chip
+                                    v-for="year in availableYears"
+                                    :key="year"
+                                    :color="year === selectedYear ? 'primary' : undefined"
+                                    :variant="year === selectedYear ? 'flat' : 'outlined'"
+                                    size="small"
+                                    @click="selectedYear = year"
+                                >{{ year }}</v-chip>
+                            </div>
+
+                            <div class="heatmap-outer">
+                                <!-- Left: day labels + scrollable grid -->
+                                <div class="heatmap-graph">
+                                    <div class="heatmap-day-labels">
+                                        <span class="heatmap-day-label" />
+                                        <span class="heatmap-day-label">{{ heatmapDayLabels.mon }}</span>
+                                        <span class="heatmap-day-label" />
+                                        <span class="heatmap-day-label">{{ heatmapDayLabels.wed }}</span>
+                                        <span class="heatmap-day-label" />
+                                        <span class="heatmap-day-label">{{ heatmapDayLabels.fri }}</span>
+                                        <span class="heatmap-day-label" />
+                                        <span class="heatmap-day-label" />
+                                    </div>
+                                    <div class="heatmap-scroll">
+                                        <div class="heatmap-month-labels">
+                                            <span
+                                                v-for="label in heatmapMonthLabels"
+                                                :key="label.key"
+                                                class="heatmap-month-label"
+                                                :style="{ gridColumnStart: label.startCol }"
+                                            >{{ label.text }}</span>
+                                        </div>
+                                        <div class="heatmap-grid">
+                                            <v-tooltip
+                                                v-for="cell in heatmapCells"
+                                                :key="cell.date"
+                                                :text="cell.label"
+                                                location="top"
+                                            >
+                                                <template #activator="{ props: tp }">
+                                                    <div
+                                                        v-bind="tp"
+                                                        class="heatmap-cell"
+                                                        :class="[`heatmap-level-${cell.level}`, { 'heatmap-cell--outside': !cell.inYear }]"
+                                                    />
+                                                </template>
+                                            </v-tooltip>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right: desktop year selector -->
+                                <div class="heatmap-years d-none d-sm-flex flex-column">
+                                    <button
+                                        v-for="year in availableYears"
+                                        :key="year"
+                                        class="heatmap-year-btn"
+                                        :class="{ 'heatmap-year-btn--active': year === selectedYear }"
+                                        @click="selectedYear = year"
+                                    >{{ year }}</button>
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="heatmap-legend">
+                                <span class="heatmap-legend-label">{{ t('analytics.heatmap.less') }}</span>
+                                <div class="heatmap-cell heatmap-level-0" />
+                                <div class="heatmap-cell heatmap-level-1" />
+                                <div class="heatmap-cell heatmap-level-2" />
+                                <div class="heatmap-cell heatmap-level-3" />
+                                <div class="heatmap-cell heatmap-level-4" />
+                                <span class="heatmap-legend-label">{{ t('analytics.heatmap.more') }}</span>
+                            </div>
+                        </template>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
+
         <!-- ── Charts row 2: setters + comment timeline ───────────────── -->
         <v-row density="comfortable">
             <v-col cols="12" md="6" class="d-flex">
@@ -302,7 +397,7 @@ import BaseEchart from '@/components/analytics/BaseEchart.vue'
 import StatsCard from '@/components/analytics/StatsCard.vue'
 import { useClimbingAnalytics } from '@/composables/useClimbingAnalytics'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 useHead(() => ({
     title: t('analytics.meta.title'),
@@ -387,6 +482,19 @@ const summaryCards = computed(() => [
         sparkline: summary.value.commentsTrend ?? [],
         subtitle: t('analytics.cards.totalCommentsSubtitle'),
         format: (value) => `${value}`,
+    },
+    {
+        key: 'averageLifespanDays',
+        title: t('analytics.cards.averageLifespan'),
+        value: summary.value.averageLifespanDays,
+        icon: 'mdi-timer-sand',
+        accentColor: '#D85A30',
+        iconBg: '#FDEBD8',
+        iconFg: '#D85A30',
+        delta: null,
+        sparkline: [],
+        subtitle: t('analytics.cards.averageLifespanSubtitle'),
+        format: (value) => `${value}d`,
     },
 ])
 
@@ -484,6 +592,105 @@ function makeBarSeries(name, data, color, emphasisColor) {
     }
 }
 
+// ── Activity heatmap ──────────────────────────────────────────────────────
+
+// Locale-aware short names for Mon / Wed / Fri
+const heatmapDayLabels = computed(() => {
+    const fmt = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
+    return {
+        mon: fmt.format(new Date(2024, 0, 1)), // known Monday
+        wed: fmt.format(new Date(2024, 0, 3)), // known Wednesday
+        fri: fmt.format(new Date(2024, 0, 5)), // known Friday
+    }
+})
+
+const selectedYear = ref(new Date().getFullYear())
+
+const availableYears = computed(() => {
+    const years = new Set([new Date().getFullYear()])
+    for (const item of routeTimeline.value) {
+        const y = parseInt(item.period.slice(0, 4), 10)
+        if (!Number.isNaN(y)) years.add(y)
+    }
+    return Array.from(years).sort((a, b) => b - a)
+})
+
+const heatmapCells = computed(() => {
+    const year = selectedYear.value
+
+    // Grid starts on the Monday on or before Jan 1 (week starts Monday)
+    const jan1 = new Date(year, 0, 1)
+    const startDate = new Date(jan1)
+    const jan1Dow = startDate.getDay() // 0=Sun … 6=Sat
+    startDate.setDate(startDate.getDate() - (jan1Dow === 0 ? 6 : jan1Dow - 1))
+
+    // Grid ends on the Sunday on or after Dec 31
+    const dec31 = new Date(year, 11, 31)
+    const endDate = new Date(dec31)
+    const dec31Dow = endDate.getDay()
+    endDate.setDate(endDate.getDate() + (dec31Dow === 0 ? 0 : 7 - dec31Dow))
+
+    const dataMap = new Map()
+    let maxCount = 1
+    for (const item of routeTimeline.value) {
+        dataMap.set(item.period, item.count)
+        if (item.period.startsWith(`${year}-`) && item.count > maxCount) {
+            maxCount = item.count
+        }
+    }
+
+    const cells = []
+    const cursor = new Date(startDate)
+    while (cursor <= endDate) {
+        // Use local date components — toISOString() returns UTC and causes
+        // off-by-one errors for users in timezones ahead of UTC (e.g. UTC+1/+2).
+        const mm = String(cursor.getMonth() + 1).padStart(2, '0')
+        const dd = String(cursor.getDate()).padStart(2, '0')
+        const iso = `${cursor.getFullYear()}-${mm}-${dd}`
+        const inYear = cursor.getFullYear() === year
+        const count = dataMap.get(iso) ?? 0
+        const level = !inYear || count === 0 ? 0 : Math.min(4, Math.ceil((count / maxCount) * 4))
+        const formatted = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(iso + 'T00:00:00'))
+        cells.push({
+            date: iso,
+            count,
+            level,
+            inYear,
+            label: count > 0 ? `${formatted}: ${count}` : formatted,
+        })
+        cursor.setDate(cursor.getDate() + 1)
+    }
+    return cells
+})
+
+const heatmapMonthLabels = computed(() => {
+    const labels = []
+    let prevMonth = null
+    const cells = heatmapCells.value
+    for (let i = 0; i < cells.length; i++) {
+        const cell = cells[i]
+        if (!cell.inYear) continue
+        const month = cell.date.slice(0, 7)
+        if (month !== prevMonth) {
+            // Place label at the first full column (Sunday) within this month,
+            // not at the day itself (which may be mid-column / mid-week).
+            const nextSundayIdx = i % 7 === 0 ? i : i + (7 - (i % 7))
+            const weekCol = Math.floor(nextSundayIdx / 7) + 1
+            if (weekCol <= 54) {
+                labels.push({
+                    key: month,
+                    text: new Intl.DateTimeFormat(undefined, { month: 'short' }).format(
+                        new Date(cell.date + 'T00:00:00'),
+                    ),
+                    startCol: weekCol,
+                })
+            }
+            prevMonth = month
+        }
+    }
+    return labels
+})
+
 function aggregateByMonth(source) {
     const map = new Map()
     for (const item of source) {
@@ -504,7 +711,7 @@ const difficultyOption = computed(() => ({
     backgroundColor: 'transparent',
     tooltip: {
         ...tooltipBase.value,
-        formatter: (params) => buildTooltip(params[0].name, params[0].value, 'routes'),
+        formatter: (params) => buildTooltip(params[0].name, params[0].value, t('analytics.labels.routes')),
     },
     grid: gridBase,
     xAxis: makeXAxis(difficultyDistribution.value.map((item) => item.grade)),
@@ -528,7 +735,7 @@ const routeTimelineOption = computed(() => {
         backgroundColor: 'transparent',
         tooltip: {
             ...tooltipBase.value,
-            formatter: (params) => buildTooltip(params[0].name, params[0].value, 'routes'),
+            formatter: (params) => buildTooltip(params[0].name, params[0].value, t('analytics.labels.routes')),
         },
         grid: gridBase,
         xAxis: makeXAxis(labels),
@@ -604,7 +811,7 @@ const routeSettersOption = computed(() => {
             trigger: 'item',
             formatter: ({ name, value, percent }) =>
                 `<span style="font-size:13px;color:${tooltipMuted}">${name}</span><br/>
-                 <span style="font-weight:600;font-size:15px;color:${tooltipText}">${value} routes</span>
+                 <span style="font-weight:600;font-size:15px;color:${tooltipText}">${value} ${t('analytics.labels.routes')}</span>
                  <span style="font-size:12px;color:${tooltipMuted};margin-left:4px">(${percent}%)</span>`,
             backgroundColor: tooltipBg,
             borderColor: tooltipBorder,
@@ -737,6 +944,187 @@ function formatMonthLabel(monthKey) {
 .generated-at {
     font-size: 0.75rem;
     color: rgba(var(--v-theme-on-background), 0.4);
+}
+
+/* ── Activity heatmap ────────────────────────────────────────────────── */
+.heatmap-wrapper {
+    padding: 12px 16px 16px;
+}
+
+/* Outer flex: graph area + year list */
+.heatmap-outer {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+/* Graph: day-label column + scrollable grid */
+.heatmap-graph {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Day-of-week labels (Mon / Wed / Fri) */
+.heatmap-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 18px; /* align with grid rows below month labels */
+    flex-shrink: 0;
+}
+
+.heatmap-day-label {
+    height: 13px;
+    line-height: 13px;
+    font-size: 10px;
+    color: rgba(var(--v-theme-on-surface), 0.45);
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 2px;
+}
+
+/* Scrollable area — scroll on mobile, clips on desktop */
+.heatmap-scroll {
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+}
+
+.heatmap-month-labels {
+    display: grid;
+    grid-template-columns: repeat(54, 13px);
+    gap: 2px;
+    height: 16px;
+    margin-bottom: 2px;
+}
+
+.heatmap-month-label {
+    font-size: 10px;
+    color: rgba(var(--v-theme-on-surface), 0.45);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(54, 13px);
+    grid-template-rows: repeat(7, 13px);
+    grid-auto-flow: column;
+    gap: 2px;
+    width: fit-content;
+}
+
+.heatmap-cell {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+.heatmap-cell--outside {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Desktop year selector */
+.heatmap-years {
+    flex-shrink: 0;
+    padding-top: 18px;
+    gap: 2px !important;
+}
+
+.heatmap-year-btn {
+    display: block;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: rgba(var(--v-theme-on-surface), 0.5);
+    cursor: pointer;
+    text-align: right;
+    transition: color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+
+.heatmap-year-btn:hover {
+    color: rgb(var(--v-theme-on-surface));
+    background: rgba(var(--v-theme-on-surface), 0.06);
+}
+
+.heatmap-year-btn--active {
+    color: rgb(var(--v-theme-primary));
+    font-weight: 600;
+}
+
+/* Legend */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.heatmap-legend-label {
+    font-size: 10px;
+    color: rgba(var(--v-theme-on-surface), 0.45);
+}
+
+.heatmap-level-0 { background: rgba(var(--v-theme-on-surface), 0.07); }
+.heatmap-level-1 { background: #B7DFCE; }
+.heatmap-level-2 { background: #5DCAA5; }
+.heatmap-level-3 { background: #1D9E75; }
+.heatmap-level-4 { background: #0F6E56; }
+
+/* ── Desktop heatmap: scale to fill card width ───────────────────────── */
+@media (min-width: 600px) {
+    .heatmap-scroll {
+        overflow-x: clip;
+    }
+
+    .heatmap-month-labels {
+        grid-template-columns: repeat(54, 1fr);
+        width: 100%;
+    }
+
+    .heatmap-grid {
+        grid-template-columns: repeat(54, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        width: 100%;
+        aspect-ratio: 54 / 7;
+    }
+
+    /* Only scale grid cells — legend cells keep their explicit 13px size */
+    .heatmap-grid .heatmap-cell {
+        width: auto;
+        height: auto;
+    }
+
+    /* Align day-of-week labels with scaled grid rows */
+    .heatmap-day-labels {
+        padding-top: 0;
+        align-self: stretch;
+    }
+
+    /* First span = spacer matching the month-labels row height */
+    .heatmap-day-labels > span:first-child {
+        flex-shrink: 0;
+        height: 16px; /* matches .heatmap-month-labels height */
+    }
+
+    /* Remaining 7 spans stretch evenly to match grid rows */
+    .heatmap-day-labels > span:not(:first-child) {
+        flex: 1;
+        height: auto;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
 }
 
 /* ── Shared card shell ───────────────────────────────────────────────── */

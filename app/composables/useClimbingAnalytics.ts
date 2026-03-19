@@ -40,6 +40,7 @@ interface AnalyticsSummary {
     activeRoutes: number
     averageDifficulty: number
     totalComments: number
+    averageLifespanDays: number
     generatedAt: string
 }
 
@@ -59,6 +60,7 @@ const defaultResult: ClimbingAnalyticsResponse = {
         activeRoutes: 0,
         averageDifficulty: 0,
         totalComments: 0,
+        averageLifespanDays: 0,
         generatedAt: '',
     },
     difficultyDistribution: [],
@@ -140,6 +142,7 @@ function normalizeResponse(
                 formatNumber(response.summary.averageDifficulty).toFixed(2),
             ),
             totalComments: formatNumber(response.summary.totalComments),
+            averageLifespanDays: formatNumber(response.summary.averageLifespanDays ?? 0),
             generatedAt: response.summary.generatedAt || new Date().toISOString(),
         },
         difficultyDistribution: dedupe(response.difficultyDistribution ?? []).map((item) => ({

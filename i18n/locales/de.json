@@ -89,13 +89,16 @@
       "averageDifficulty": "Durchschnittliche Schwierigkeit",
       "averageDifficultySubtitle": "Mittlerer Grad",
       "totalComments": "Kommentare",
-      "totalCommentsSubtitle": "Gesamtes Feedback"
+      "totalCommentsSubtitle": "Gesamtes Feedback",
+      "averageLifespan": "Ø Lebensdauer",
+      "averageLifespanSubtitle": "Nur archivierte Routen"
     },
     "charts": {
       "difficultyDistribution": "Verteilung der Schwierigkeiten",
       "routeSetters": "Routen nach Schrauber",
       "routeTimeline": "Routen im Zeitverlauf",
-      "commentTimeline": "Kommentare im Zeitverlauf"
+      "commentTimeline": "Kommentare im Zeitverlauf",
+      "activityHeatmap": "Schrauberaktivität"
     },
     "sections": {
       "latestComments": "Neueste Kommentare",
@@ -113,6 +116,10 @@
       "routes": "Routen",
       "unknown": "Unbekannt",
       "other": "Andere"
+    },
+    "heatmap": {
+      "less": "Weniger",
+      "more": "Mehr"
     }
   },
   "climbing": {

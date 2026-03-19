@@ -89,13 +89,16 @@
       "averageDifficulty": "Середня складність",
       "averageDifficultySubtitle": "Середній рівень",
       "totalComments": "Коментарі",
-      "totalCommentsSubtitle": "Всі відгуки"
+      "totalCommentsSubtitle": "Всі відгуки",
+      "averageLifespan": "Сер. термін маршруту",
+      "averageLifespanSubtitle": "Лише архівні маршрути"
     },
     "charts": {
       "difficultyDistribution": "Розподіл складностей",
       "routeSetters": "Маршрути за автором",
       "routeTimeline": "Маршрути у часі",
-      "commentTimeline": "Коментарі у часі"
+      "commentTimeline": "Коментарі у часі",
+      "activityHeatmap": "Активність прокладання маршрутів"
     },
     "sections": {
       "latestComments": "Останні коментарі",
@@ -113,6 +116,10 @@
       "routes": "Маршрути",
       "unknown": "Невідомо",
       "other": "Інші"
+    },
+    "heatmap": {
+      "less": "Менше",
+      "more": "Більше"
     }
   },
   "climbing": {

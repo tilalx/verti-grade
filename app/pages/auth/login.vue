@@ -92,7 +92,7 @@
             />
             <v-btn
               variant="text"
-              color="success"
+              color="primary"
               size="small"
               class="text-none"
               @click="view = 'requestReset'"
@@ -103,7 +103,7 @@
 
           <v-btn
             type="submit"
-            color="success"
+            color="primary"
             block
             size="large"
             :loading="loading"
@@ -197,7 +197,7 @@
 
           <v-btn
             type="submit"
-            color="success"
+            color="primary"
             block
             size="large"
             :loading="loading"

@@ -1,18 +1,18 @@
 <template>
     <div>
-        <v-btn @click="dialog = true" color="error" dark>
+        <v-btn icon color="error" size="small" @click="dialog = true">
             <v-icon>mdi-delete</v-icon>
         </v-btn>
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-                <v-card-title class="headline">{{ $t('actions.confirm') }}</v-card-title>
+                <v-card-title class="text-h6 pa-4">{{ $t('actions.confirm') }}</v-card-title>
                 <v-card-text>
                     {{ $t('notifications.deleteItem') }}
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn @click="dialog = false">{{ $t('actions.cancel') }}</v-btn>
-                    <v-btn color="red darken-1" text @click="deleteComment"
+                    <v-btn color="error" variant="text" @click="deleteComment"
                         >{{ $t('actions.delete') }}</v-btn
                     >
                 </v-card-actions>
@@ -40,6 +40,7 @@ const deleteComment = async () => {
     try {
         await pb.collection('ratings').delete(props.commentId)
         dialog.value = false
+        emit('comment-deleted')
     } catch (error) {
         console.error('Error deleting comment:', error)
     }
