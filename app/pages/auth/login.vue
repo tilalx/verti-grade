@@ -225,6 +225,7 @@
 </template>
 
 <script setup>
+import { required, validEmail, minLength } from '~/utils/validation'
 defineOptions({ name: 'LoginPage' })
 
 const { t } = useI18n()
@@ -276,17 +277,13 @@ const viewTitle    = computed(() => ({ login: t('account.login'), requestReset: 
 const viewSubtitle = computed(() => ({ login: t('account.login_hint'), requestReset: t('account.reset_hint') }[view.value] ?? ''))
 
 // ── Validation ─────────────────────────────────────────────────────
-const required   = v => !!v || t('validation.required')
-const validEmail = v => /.+@.+\..+/.test(String(v ?? '')) || t('validation.email')
-const minLen     = n => v => (v && v.length >= n) || t('validation.minLength', { n })
-
 const identityRules = computed(() => {
-  const r = [required]
-  if (supportsEmail && !supportsUser) r.push(validEmail)
+  const r = [required(t)]
+  if (supportsEmail && !supportsUser) r.push(validEmail(t))
   return r
 })
-const passwordRules = [required, minLen(6)]
-const emailRules    = [required, validEmail]
+const passwordRules = [required(t), minLength(t, 6)]
+const emailRules    = [required(t), validEmail(t)]
 
 // ── OAuth icons ────────────────────────────────────────────────────
 const PROVIDER_ICONS = {

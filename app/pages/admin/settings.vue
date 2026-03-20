@@ -195,7 +195,6 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -212,9 +211,7 @@ definePageMeta({
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 
-const { data: settings } = await useAsyncData('settings', () =>
-    pb.collection('settings').getOne('settings_123456'),
-)
+const { data: settings } = useNuxtData('settings')
 
 // ── State ─────────────────────────────────────────────────────────────────────
 

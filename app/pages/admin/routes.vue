@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="route-manager">
-        <NewVersionAvailable />
+        <NotificationsNewVersionAvailable />
 
         <v-row align="start" class="mb-2">
             <v-col>
@@ -396,13 +396,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { useHead } from '#imports'
-import { useI18n } from 'vue-i18n'
-import { useDisplay } from 'vuetify'
-import { usePocketbase } from '@/composables/pocketbase.js'
-import RouteDetails from '@/components/RouteDetails.vue'
-import NewVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
+import { formatDifficulty, formatAnchorPoint, formatScore, normalizeCreators } from '~/utils/formatting'
+import { toPbSort } from '~/utils/sorting'
 
 const pb = usePocketbase()
 const { t, locale } = useI18n()
@@ -569,15 +564,7 @@ const removeSelectedIds = (ids) => {
     applySelectionToRoutes()
 }
 
-const toPbSort = (sortByArr) => {
-    if (!Array.isArray(sortByArr) || !sortByArr.length) {
-        return '-created'
-    }
-
-    return sortByArr
-        .map((sort) => (sort.order === 'desc' ? `-${sort.key}` : sort.key))
-        .join(',')
-}
+const toPbSortRoutes = (sortByArr) => toPbSort(sortByArr, '-created')
 
 const loadAllRouteIds = async () => {
     const cacheKey = buildSelectionCacheKey()
@@ -609,55 +596,6 @@ const loadAllRouteIds = async () => {
     }
 }
 
-const normalizeCreators = (raw) => {
-    if (Array.isArray(raw)) {
-        return raw
-            .map((value) => (typeof value === 'string' ? value.trim() : ''))
-            .filter(Boolean)
-    }
-
-    if (typeof raw === 'string') {
-        return raw
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    }
-
-    return []
-}
-
-const formatDifficulty = (route) => {
-    const base = route?.difficulty ?? ''
-    const sign = route?.difficulty_sign === true
-        ? '+'
-        : route?.difficulty_sign === false
-            ? '-'
-            : typeof route?.difficulty_sign === 'string'
-                ? route.difficulty_sign
-                : ''
-
-    return `${base}${sign}`.trim()
-}
-
-const formatAnchorPoint = (value) => {
-    if (value === null || value === undefined || value === '') {
-        return '—'
-    }
-
-    if (Number(value) === 0) {
-        return '-'
-    }
-
-    return value
-}
-
-const formatScore = (route) => {
-    const score = typeof route?.score === 'number' && Number.isFinite(route.score)
-        ? route.score
-        : null
-
-    return score !== null ? `${score.toFixed(2)}/5` : '—'
-}
 
 const formatDate = (value) => {
     if (!value) {
@@ -729,15 +667,18 @@ const loadRoutes = async (options = {}) => {
     loading.value = true
 
     try {
-        await loadAverageRatings()
-        const list = await pb.collection('routes').getList(
-            tableOptions.page,
-            tableOptions.itemsPerPage,
-            {
-                filter: pbFilter.value || undefined,
-                sort: toPbSort(tableOptions.sortBy),
-            },
-        )
+        const [list] = await Promise.all([
+            pb.collection('routes').getList(
+                tableOptions.page,
+                tableOptions.itemsPerPage,
+                {
+                    filter: pbFilter.value || undefined,
+                    sort: toPbSortRoutes(tableOptions.sortBy),
+                    requestKey: 'adminRoutesList',
+                },
+            ),
+            loadAverageRatings(),
+        ])
 
         const averageMap = averageRatings.value
 
@@ -924,14 +865,9 @@ const queueReload = () => {
     }, 250)
 }
 
-onMounted(async () => {
-    await loadAverageRatings()
-    await loadRoutes({
-        page: tableOptions.page,
-        itemsPerPage: tableOptions.itemsPerPage,
-        sortBy: tableOptions.sortBy,
-    })
-
+onMounted(() => {
+    // Initial data load is handled by @update:options="loadRoutes" on the VDataTable.
+    // Subscribing here for realtime updates is sufficient.
     pb.collection('routes').subscribe('*', queueReload)
     pb.collection('averageRating').subscribe('*', queueReload)
 })

@@ -1,20 +1,16 @@
 <template>
-    <NavBar :loggedIn="isLoggedIn" :settings="settings" />
+    <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
     <v-main>
         <NuxtPage />
     </v-main>
 
-    <FootBar :settings="settings" />
+    <LayoutFootBar :settings="settings" />
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import NavBar from '~/components/layout/NavBar.vue'
-import FootBar from '~/components/layout/FootBar.vue'
 
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
-let intervalId = null
 
 const getSettings = async () => {
   try {
@@ -36,9 +32,10 @@ const getSettings = async () => {
   }
 }
 
-const { data: settingsData } = await useAsyncData('settings', getSettings)
+const { data: settingsData } = await useAsyncData('settings', getSettings, { lazy: true })
 
-const settings = ref(settingsData.value)
+const settings = ref(settingsData.value ?? {})
+watch(settingsData, (val) => { if (val) settings.value = val })
 
 const refreshSession = async () => {
     try {
@@ -61,27 +58,58 @@ const setFavicon = () => {
     document.head.appendChild(link)
 }
 
-const checkSession = async () => {
-    isLoggedIn.value = pb.authStore.isValid
+let unsubAuthChange = null
+let unsubUser = null
+let unsubSettings = null
+
+async function subscribeToUser(userId) {
+    unsubUser?.()
+    unsubUser = await pb.collection('users').subscribe(userId, (e) => {
+        if (e.action === 'delete') {
+            pb.authStore.clear()
+        } else {
+            pb.authStore.save(pb.authStore.token, e.record)
+            isLoggedIn.value = true
+        }
+    })
 }
 
 onMounted(async () => {
     try {
-        if(pb.authStore.isValid)(
+        if (pb.authStore.isValid) {
             await refreshSession()
-        )
+        }
         setFavicon()
 
-        intervalId = setInterval(checkSession, 600)
+        // Reflect any local auth store changes immediately (login/logout on this tab)
+        unsubAuthChange = pb.authStore.onChange((token, record) => {
+            isLoggedIn.value = !!token
+            if (token && record?.id) {
+                subscribeToUser(record.id)
+            } else {
+                unsubUser?.()
+                unsubUser = null
+            }
+        })
+
+        // Subscribe to current user record for cross-device auth sync
+        if (pb.authStore.isValid && pb.authStore.record?.id) {
+            await subscribeToUser(pb.authStore.record.id)
+        }
+
+        // Realtime settings sync across devices
+        unsubSettings = await pb.collection('settings').subscribe('settings_123456', (e) => {
+            settings.value = e.record
+            setFavicon()
+        })
     } catch (error) {
-        // Handle error (e.g., display notification to user)
         console.error('Error during initialization:', error)
     }
 })
 
 onBeforeUnmount(() => {
-    if (intervalId) {
-        clearInterval(intervalId)
-    }
+    unsubAuthChange?.()
+    unsubUser?.()?.catch?.(() => {})
+    unsubSettings?.()?.catch?.(() => {})
 })
 </script>

@@ -71,8 +71,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { required, minLength, maxLength, validEmail, passwordsMatch } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -104,26 +103,11 @@ function showSnackbar(message, color = 'success') {
 }
 
 // --- Validation Rules ---
-const nameRules = [
-    (v) => !!v || t('validation.required'),
-    (v) => (v && v.length <= 30) || t('validation.maxLength', { n: 30 }),
-]
-const usernameRules = [
-    (v) => !!v || t('validation.required'),
-    (v) => (v && v.length >= 3) || t('validation.minLength', { n: 3 }),
-]
-const emailRules = [
-    (v) => !!v || t('validation.required'),
-    (v) => /.+@.+\..+/.test(v) || t('validation.email'),
-]
-const passwordRules = [
-    (v) => !!v || t('validation.required'),
-    (v) => (v && v.length >= 8) || t('validation.minLength', { n: 8 }),
-]
-const passwordConfirmRules = computed(() => [
-    (v) => !!v || t('validation.required'),
-    (v) => v === user.password || t('validation.passwordMismatch'),
-])
+const nameRules = [required(t), maxLength(t, 30)]
+const usernameRules = [required(t), minLength(t, 3)]
+const emailRules = [required(t), validEmail(t)]
+const passwordRules = [required(t), minLength(t, 8)]
+const passwordConfirmRules = computed(() => [required(t), passwordsMatch(t, () => user.password)])
 
 function openDialog() {
     dialog.value = true

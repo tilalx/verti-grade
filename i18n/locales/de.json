@@ -268,11 +268,41 @@
     "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
     "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
   },
+  "comments": {
+    "subtitle": "Kletterer-Bewertungen moderieren und verwalten",
+    "totalReviews": "Bewertungen gesamt",
+    "avgRating": "Ø Bewertung",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Diesen Monat",
+    "lowRated": "Schlecht bewertet (≤ 2★)",
+    "sortNewest": "Neueste zuerst",
+    "sortOldest": "Älteste zuerst",
+    "sortHighest": "Beste Bewertung",
+    "sortLowest": "Schlechteste Bewertung",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "noComments": "Keine Bewertungen gefunden",
+    "noCommentsHint": "Filter oder Suchbegriff anpassen",
+    "editReview": "Bewertung bearbeiten",
+    "anonymous": "Anonym",
+    "selected": "{n} ausgewählt",
+    "deleteSelected": "{n} löschen",
+    "bulkDeleteTitle": "{n} Bewertungen löschen?",
+    "showing": "{n} von {total} Bewertungen",
+    "select": "Auswählen",
+    "deselect": "Abwählen"
+  },
   "nav": {
     "openMenu": "Menü öffnen"
   },
   "users": {
     "create": "Benutzer erstellen",
     "edit": "Benutzer bearbeiten"
+  },
+  "time": {
+    "justNow": "Gerade eben",
+    "minutesAgo": "vor {n} Min.",
+    "hoursAgo": "vor {n} Std.",
+    "daysAgo": "vor {n} Tagen"
   }
 }

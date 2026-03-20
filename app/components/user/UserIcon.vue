@@ -38,7 +38,7 @@
         </v-card>
     </v-menu>
 
-    <EditUserSelf
+    <UserEditUserSelf
         v-if="user"
         v-model:dialog-open="dialogOpen"
         :user-id="user.id"
@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-import EditUserSelf from './EditUserSelf.vue'
 
 const router = useRouter()
 const pb = usePocketbase()

@@ -149,11 +149,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type PocketBase from 'pocketbase'
-import type { RouteRecord } from '../../types/models'
-import { usePocketbase } from '@/composables/pocketbase.js'
+import type { RouteRecord } from '~/types/models'
+import { normalizeCreators, formatDateToYYYYMMDD } from '~/utils/formatting'
+import { required } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -208,8 +207,7 @@ const typeItems = computed(() => [
     { title: t('routes.types.boulder'), value: 'Boulder' },
 ])
 
-const requiredRule = (v: unknown) =>
-    (v !== null && v !== undefined && v !== '') || t('validation.required')
+const requiredRule = required(t)
 
 const nameRules = [
     (v: string) => !!v || t('validation.required'),
@@ -232,29 +230,6 @@ const anchorPointRules = [
 
 const creatorRule = (v: string[]) => (Array.isArray(v) && v.length > 0) || t('validation.required')
 
-const normalizeCreators = (raw: RouteRecord['creator']): string[] => {
-    if (Array.isArray(raw)) {
-        return (raw as unknown[])
-            .map((v) => (typeof v === 'string' ? v.trim() : ''))
-            .filter(Boolean)
-    }
-    if (typeof raw === 'string') {
-        return raw
-            .split(',')
-            .map((v) => v.trim())
-            .filter(Boolean)
-    }
-    return []
-}
-
-const formatDateToYYYYMMDD = (date: string | null | undefined): string => {
-    if (!date) return ''
-    const parsed = new Date(date)
-    if (Number.isNaN(parsed.getTime())) return ''
-    const month = String(parsed.getMonth() + 1).padStart(2, '0')
-    const day = String(parsed.getDate()).padStart(2, '0')
-    return `${parsed.getFullYear()}-${month}-${day}`
-}
 
 const toDifficultySignInternal = (
     raw: RouteRecord['difficulty_sign'],

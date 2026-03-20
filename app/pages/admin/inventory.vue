@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="inventory-scan">
-        <NewVersionAvailable />
+        <NotificationsNewVersionAvailable />
 
         <v-alert v-if="!isMobile" type="warning" class="mb-4" variant="tonal">
             {{ $t('inventory.mobileOnly') }}
@@ -257,11 +257,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
-import { useI18n } from 'vue-i18n'
-import { usePocketbase } from '@/composables/pocketbase.js'
-import NewVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
+import { formatDifficulty } from '~/utils/formatting'
 
 definePageMeta({
     middleware: 'auth',
@@ -355,29 +351,31 @@ const hydrateScannedRoutes = async (ids) => {
 
     const token = ++hydrateRunId
     const uniqueIds = Array.from(new Set(ids))
-    const resolved = []
 
-    for (const id of uniqueIds) {
-        let route = allRoutes.value.find((item) => item.id === id)
+    const cachedMap = new Map(allRoutes.value.map((r) => [r.id, r]))
+    const uncachedIds = uniqueIds.filter((id) => !cachedMap.has(id))
 
-        if (!route) {
-            try {
-                route = await pb.collection('routes').getOne(id, {
+    if (uncachedIds.length > 0) {
+        const fetched = await Promise.all(
+            uncachedIds.map((id) =>
+                pb.collection('routes').getOne(id, {
                     fields: 'id,name,location,difficulty,difficulty_sign,archived',
+                }).catch((error) => {
+                    console.warn('Failed to hydrate scanned route:', id, error)
+                    return null
                 })
-                allRoutes.value = [...allRoutes.value, route]
-            } catch (error) {
-                console.warn('Failed to hydrate scanned route:', id, error)
-                continue
-            }
-        }
-
-        resolved.push(route)
+            )
+        )
+        const newRoutes = fetched.filter(Boolean)
+        allRoutes.value = [...allRoutes.value, ...newRoutes]
+        newRoutes.forEach((r) => cachedMap.set(r.id, r))
     }
 
     if (token !== hydrateRunId) {
         return
     }
+
+    const resolved = uniqueIds.map((id) => cachedMap.get(id)).filter(Boolean)
 
     if (
         process.client &&
@@ -513,32 +511,6 @@ const shouldIgnoreScanError = (error) => {
     )
 }
 
-function formatDifficulty(route) {
-    if (!route) {
-        return ''
-    }
-
-    const base = (() => {
-        if (typeof route.difficulty === 'number') {
-            return route.difficulty.toString()
-        }
-        if (typeof route.difficulty === 'string') {
-            return route.difficulty.trim()
-        }
-        return ''
-    })()
-
-    const sign =
-        route.difficulty_sign === true
-            ? '+'
-            : route.difficulty_sign === false
-              ? '-'
-              : typeof route.difficulty_sign === 'string'
-                ? route.difficulty_sign
-                : ''
-
-    return `${base}${sign}`.trim()
-}
 
 const loadRoutes = async () => {
     loadingRoutes.value = true

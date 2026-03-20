@@ -77,8 +77,6 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type PocketBase from 'pocketbase'
 import type { RatingRecord } from '~/types/models'
 

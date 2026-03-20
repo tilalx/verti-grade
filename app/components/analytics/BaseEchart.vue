@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 interface ChartProps {
     option: Record<string, unknown>

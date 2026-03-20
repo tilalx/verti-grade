@@ -180,7 +180,7 @@
                             :require-old-password="true" → current-password
                             field is shown and required (change flow).
                         -->
-                        <PasswordChangeFields
+                        <UserPasswordChangeFields
                             v-model:old-password="user.oldPassword"
                             v-model:password="user.password"
                             v-model:password-confirm="user.passwordConfirm"
@@ -263,7 +263,7 @@
 </template>
 
 <script setup>
-import PasswordChangeFields from '@/components/user/PasswordChangeFields.vue'
+import { required } from '~/utils/validation'
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
@@ -346,7 +346,7 @@ const showSecurityWarning = computed(
 
 // ── Profile-only validation rule (only "required" needed here) ────────────
 const rules = {
-    required: (v) => !!v || t('validation.required'),
+    required: required(t),
 }
 
 // ── Form ref (profile tab only) ───────────────────────────────────────────

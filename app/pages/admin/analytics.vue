@@ -43,7 +43,7 @@
                 md="3"
                 class="d-flex"
             >
-                <StatsCard
+                <AnalyticsStatsCard
                     class="w-100"
                     :title="card.title"
                     :value="card.value"
@@ -209,7 +209,7 @@
                     <v-divider />
                     <v-card-text>
                         <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
-                        <BaseEchart
+                        <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="difficultyOption"
                             :height="340"
@@ -229,7 +229,7 @@
                     <v-divider />
                     <v-card-text>
                         <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
-                        <BaseEchart
+                        <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="routeTimelineOption"
                             :height="340"
@@ -357,7 +357,7 @@
                     <v-divider />
                     <v-card-text>
                         <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
-                        <BaseEchart
+                        <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="routeSettersOption"
                             :height="340"
@@ -377,7 +377,7 @@
                     <v-divider />
                     <v-card-text>
                         <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
-                        <BaseEchart
+                        <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="commentTimelineOption"
                             :height="340"
@@ -391,11 +391,6 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useTheme } from 'vuetify'
-import BaseEchart from '@/components/analytics/BaseEchart.vue'
-import StatsCard from '@/components/analytics/StatsCard.vue'
-import { useClimbingAnalytics } from '@/composables/useClimbingAnalytics'
 
 const { t, locale } = useI18n()
 

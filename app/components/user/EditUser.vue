@@ -39,8 +39,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { required, minLength } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -58,11 +57,8 @@ const form = ref(null)
 const editableUser = reactive({ id: '', username: '', firstname: '', name: '', email: '' })
 const originalUser = reactive({ ...editableUser })
 
-const nameRules = [v => !!v || t('validation.required')]
-const usernameRules = [
-    v => !!v || t('validation.required'),
-    v => (v && v.length >= 3) || t('validation.minLength', { n: 3 }),
-]
+const nameRules = [required(t)]
+const usernameRules = [required(t), minLength(t, 3)]
 
 const hasChanges = computed(() => {
     return (

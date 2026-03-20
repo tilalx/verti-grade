@@ -271,6 +271,12 @@
   "nav": {
     "openMenu": "Menüyü aç"
   },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
+  },
   "users": {
     "create": "Kullanıcı Oluştur",
     "edit": "Kullanıcıyı Düzenle"

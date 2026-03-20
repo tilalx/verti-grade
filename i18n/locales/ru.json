@@ -271,6 +271,12 @@
   "nav": {
     "openMenu": "Открыть меню"
   },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
+  },
   "users": {
     "create": "Создать пользователя",
     "edit": "Редактировать пользователя"
