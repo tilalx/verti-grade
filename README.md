@@ -1,6 +1,10 @@
 # Verti-Grade
 
+A climbing route management system for gyms and outdoor venues.
+
 - [Setup Docker Compose](#setup-docker-compose)
+- [Getting Started](#getting-started)
+- [Custom TLS Certificate](#custom-tls-certificate)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -9,22 +13,16 @@
 
 ### Prerequisites
 
-Before setting up Verti-Grade, ensure you have the following installed on your system:
-
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Download Docker Compose File
 
-Download the `docker-compose.yml` file from the Verti-Grade GitHub repository:
-
 ```sh
-wget https://github.com/tilalx/verti-grade/blob/main/docker-compose.yml
+wget https://raw.githubusercontent.com/tilalx/verti-grade/main/docker-compose.yml
 ```
 
 ### Docker Compose Configuration
-
-The `docker-compose.yml` file provided below configures the Verti-Grade service.
 
 ```yaml
 services:
@@ -33,46 +31,96 @@ services:
     image: tilalx/verti-grade:latest
     ports:
       - "80:80"
-#    environment:
-#       SERVER_URL=http://example.com
+      - "443:443"
+    environment:
+      # Default superuser created on first boot. Change before deploying!
+      PB_SUPERUSER_EMAIL: admin@example.com
+      PB_SUPERUSER_PASSWORD: changeme123
     volumes:
-      - ./pb:/pb
+      - ./pb_data:/pb/pb_data
 ```
 
 ### Running the Project
 
-1. **Download Docker Compose File:**
-   Ensure you have downloaded the `docker-compose.yml` file as shown above.
+```sh
+docker-compose up -d
+```
 
-2. **Start Docker Compose:**
-   Navigate to the directory containing the `docker-compose.yml` file and run the following command to start the Verti-Grade service:
+## Getting Started
 
-   ```sh
-   docker-compose up -d
-   ```
+After `docker-compose up -d` completes, follow these steps to get the application ready.
 
-3. **Access Verti-Grade:**
-   Once the service is running, you can access Verti-Grade through your web browser at `http://localhost`.
+### 1. Open the Application
 
-### Additional Configuration
+Navigate to **`https://localhost`** in your browser.
 
-If you need to set the `SERVER_URL` environment variable, uncomment the relevant line in the `docker-compose.yml` file and set the URL appropriately.
+> The default setup uses a self-signed TLS certificate. Your browser will show a security warning — click "Advanced" → "Proceed" to continue. See [Custom TLS Certificate](#custom-tls-certificate) to use a real certificate.
 
-### Stopping the Service
+### 2. Log In as Superuser
 
-To stop the Verti-Grade service, run:
+The superuser account is created automatically on first boot using the credentials set in `docker-compose.yml`:
+
+| Field    | Default value         |
+|----------|-----------------------|
+| Email    | `admin@example.com`   |
+| Password | `changeme123`         |
+
+**Change these before deploying to production.**
+
+The superuser account is used to access the PocketBase admin panel at `https://localhost/_/` — it is separate from regular user accounts.
+
+### 3. Create Your First User Account
+
+Regular user accounts must be created via the PocketBase admin panel:
+
+1. Open `https://localhost/_/` and log in with the superuser credentials
+2. Navigate to **Collections → users → New record**
+3. Fill in the email, password, and any other required fields
+4. Set **verified** to `true` so the user can log in immediately
+5. Save the record
+
+After that the user can log in at `https://localhost/auth/login`.
+
+### 4. Configure Application Settings
+
+Go to **Admin → Settings** in the Verti-Grade UI to configure:
+
+- Organisation name and logo
+- Privacy policy / imprint URL
+- Sign image for route cards
+
+### 5. Start Adding Routes
+
+Once logged in as a regular user, use the dashboard to add and manage climbing routes.
+
+---
+
+## Custom TLS Certificate
+
+By default, a self-signed certificate is generated automatically at startup. To use your own certificate (e.g. from Let's Encrypt), mount it into the container:
+
+```yaml
+volumes:
+  - ./pb_data:/pb/pb_data
+  - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+  - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+```
+
+---
+
+## Stopping the Service
 
 ```sh
 docker-compose down
 ```
 
+Data is persisted in `./pb_data` and survives restarts.
+
 ## Usage
 
-Verti-Grade is designed to be simple and straightforward to use. Once set up, you can start managing and evaluating grades through the web interface. For detailed usage instructions and examples, refer to the [documentation](https://github.com/tilalx/verti-grade/wiki).
+Verti-Grade is designed to be simple and straightforward. Once set up, manage and evaluate climbing routes through the web interface. For detailed usage instructions refer to the [documentation](https://github.com/tilalx/verti-grade/wiki).
 
 ## Contributing
-
-We welcome contributions from the community! If you'd like to contribute to Verti-Grade, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature-branch`).
@@ -84,11 +132,3 @@ We welcome contributions from the community! If you'd like to contribute to Vert
 ## License
 
 Verti-Grade is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
----
-
-For more information and detailed documentation, visit the [Verti-Grade GitHub repository](https://github.com/tilalx/verti-grade). If you have any questions or need further assistance, feel free to open an issue or contact the maintainers.
-
----
-
-Thank you for using Verti-Grade! Your feedback and contributions are greatly appreciated.

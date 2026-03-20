@@ -56,6 +56,8 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 FROM node:25.8.1-trixie AS ui-build
 WORKDIR /app
 ENV NODE_ENV=production NITRO_PRESET=node-server
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
 RUN npm install -g corepack --force
 RUN corepack enable && corepack prepare yarn --activate
 COPY --from=ui-deps /app/ ./
@@ -69,11 +71,13 @@ RUN --mount=type=cache,target=/root/.cache yarn build \
 # --------------> Runtime (final stage)
 FROM node:25.8.1-trixie-slim
 # Install nginx (cacheable layer)
-RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl \
+RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl openssl \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
 
 # Copy artifacts only
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
@@ -88,8 +92,7 @@ RUN chmod +x /app/entrypoint.sh
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fs http://localhost:8080/api/health \
    && curl -fs http://localhost:3000/ \
-   && curl -fs http://localhost/ || exit 1
+   && curl -fsk https://localhost/ || exit 1
 
-# EXPOSE as needed
-EXPOSE 80
+EXPOSE 80 443
 ENTRYPOINT ["/app/entrypoint.sh"]

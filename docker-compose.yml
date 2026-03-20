@@ -1,10 +1,17 @@
 services:
   verti-grade:
     container_name: verti-grade-app
-    image: tilalx/verti-grade:1.4.3
+    image: docker.io/tilalx/verti-grade:rolling
     ports:
-      - "80:80"
-#    environment:
-#       SERVER_URL=http://example.com
+#      - "80:80"
+      - "8443:443"
+    environment:
+      # Default superuser created/updated on every boot (idempotent).
+      # Change these before first launch, or remove after initial setup.
+      PB_SUPERUSER_EMAIL: admin@example.com
+      PB_SUPERUSER_PASSWORD: changeme123
     volumes:
-      - ./pb_data:/pb/pb_data
+      - ./pb_data:/pb/pb_data:Z
+#     Mount custom TLS certificates to replace the auto-generated self-signed ones:
+#      - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+#      - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro

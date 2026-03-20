@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      appVersion: process.env.npm_package_version
+      appVersion: process.env.APP_VERSION || process.env.npm_package_version
     }
   },
   ssr: true,
