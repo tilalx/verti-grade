@@ -56,6 +56,12 @@ pipeline {
                         tagName = branchName
                     }
 
+                    // Compute APP_VERSION: for releases use the semver, otherwise use git-describe
+                    def appVersion = sh(script: "git describe --tags --always | sed 's/^v//'", returnStdout: true).trim()
+                    if (isReleaseCommit) {
+                        appVersion = releaseVersion
+                    }
+
                     def tags = "-t ${env.IMAGE_NAME}:${tagName}"
 
                     if (isReleaseCommit) {
@@ -63,7 +69,7 @@ pipeline {
                     }
 
                     sh """
-                        docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --memory 32g --memory-swap 16g ${tags} --push .
+                        docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --build-arg APP_VERSION=${appVersion} --memory 32g --memory-swap 16g ${tags} --push .
                     """
                 }
             }
