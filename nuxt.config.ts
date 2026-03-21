@@ -103,7 +103,7 @@ export default defineNuxtConfig({
          '@vue/devtools-kit',
          'pocketbase',
          'echarts',
-         "html5-qrcode",
+         "vue-qrcode-reader",
       ],
     },
   },

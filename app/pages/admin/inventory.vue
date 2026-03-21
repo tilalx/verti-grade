@@ -13,15 +13,20 @@
 
             <!-- Scanner viewport -->
             <div class="scanner-viewport">
-                <div
-                    :id="scannerElementId"
-                    ref="scannerRef"
-                    class="scanner-viewport__video"
+                <QrcodeStream
+                    v-if="cameraActive"
+                    :formats="['qr_code']"
+                    :constraints="{ facingMode: 'environment' }"
+                    :paused="paused"
+                    :track="trackQrCode"
+                    @detect="onDetect"
+                    @camera-on="onCameraOn"
+                    @error="onCameraError"
                 />
                 <!-- Overlay when not scanning -->
                 <div v-if="!scanning" class="scanner-viewport__placeholder">
                     <v-icon size="48" color="white" class="mb-2" style="opacity: 0.6">mdi-qrcode-scan</v-icon>
-                    <span class="text-body-2" style="color: rgba(255,255,255,0.6)">
+                    <span class="text-body-2 text-center px-6" style="color: rgba(255,255,255,0.6)">
                         {{ $t('inventory.subtitle') }}
                     </span>
                 </div>
@@ -30,16 +35,13 @@
             <!-- Status bar -->
             <div class="status-bar px-4 py-3">
                 <div class="d-flex align-center justify-space-between">
-                    <div>
-                        <div v-if="lastScannedRoute" class="text-body-1 font-weight-semibold">
-                            {{ lastScannedRoute.name }}
-                            <span v-if="currentDifficulty" class="text-medium-emphasis font-weight-regular ml-1">
-                                {{ currentDifficulty }}
-                            </span>
-                        </div>
-                        <div v-else class="text-body-2 text-medium-emphasis">
-                            {{ $t('inventory.noScans') }}
-                        </div>
+                    <div class="d-flex ga-3">
+                        <v-chip size="small" variant="tonal" color="success" prepend-icon="mdi-check-circle-outline">
+                            {{ scannedRouteIds.length }}
+                        </v-chip>
+                        <v-chip size="small" variant="tonal" color="warning" prepend-icon="mdi-help-circle-outline">
+                            {{ missingRoutes.length }}
+                        </v-chip>
                     </div>
                     <v-btn
                         icon
@@ -50,18 +52,10 @@
                         <v-icon>mdi-information-outline</v-icon>
                     </v-btn>
                 </div>
-                <div class="d-flex ga-3 mt-1">
-                    <v-chip size="small" variant="tonal" color="success" prepend-icon="mdi-check-circle-outline">
-                        {{ scannedRouteIds.length }}
-                    </v-chip>
-                    <v-chip size="small" variant="tonal" color="warning" prepend-icon="mdi-help-circle-outline">
-                        {{ missingRoutes.length }}
-                    </v-chip>
-                </div>
             </div>
 
             <!-- Alerts -->
-            <div v-if="successMessage || scannerError" class="px-4 pt-2">
+            <div v-if="successMessage || (!scanning && scannerError)" class="px-4 pt-2">
                 <v-alert
                     v-if="successMessage"
                     type="success"
@@ -74,7 +68,7 @@
                     {{ successMessage }}
                 </v-alert>
                 <v-alert
-                    v-if="scannerError"
+                    v-if="!scanning && scannerError"
                     type="error"
                     variant="tonal"
                     density="compact"
@@ -93,6 +87,7 @@
                     color="primary"
                     variant="flat"
                     rounded="lg"
+                    size="large"
                     class="flex-grow-1"
                     :disabled="loadingRoutes"
                     prepend-icon="mdi-camera"
@@ -105,6 +100,7 @@
                     color="warning"
                     variant="flat"
                     rounded="lg"
+                    size="large"
                     class="flex-grow-1"
                     prepend-icon="mdi-stop-circle"
                     @click="stopScanner()"
@@ -112,10 +108,11 @@
                     {{ $t('inventory.stop') }}
                 </v-btn>
                 <v-btn
-                    icon
                     variant="tonal"
                     color="error"
                     rounded="lg"
+                    size="large"
+                    min-width="0"
                     :disabled="scannedRouteIds.length === 0 && !scanning"
                     @click="resetInventory()"
                 >
@@ -163,14 +160,14 @@
             </div>
 
             <!-- Finish button -->
-            <div class="px-4 pb-6 pt-2">
+            <div v-if="scannedRouteIds.length > 0" class="px-4 pb-6 pt-2">
                 <v-btn
                     color="success"
                     variant="flat"
                     block
                     rounded="xl"
                     size="large"
-                    :disabled="loadingRoutes || allRoutes.length === 0"
+                    :disabled="loadingRoutes"
                     prepend-icon="mdi-check"
                     @click="openFinishDialog()"
                 >
@@ -302,6 +299,7 @@
 </template>
 
 <script setup>
+import { QrcodeStream } from 'vue-qrcode-reader'
 import { formatDifficulty } from '~/utils/formatting'
 
 definePageMeta({
@@ -314,9 +312,9 @@ const pb = usePocketbase()
 const { smAndDown } = useDisplay()
 
 const isMobile = computed(() => smAndDown.value)
-const scannerRef = ref(null)
-const scannerElementId = 'inventory-scanner-view'
 const scanning = ref(false)
+const cameraActive = ref(false)
+const paused = ref(false)
 const scannerError = ref('')
 const successMessage = ref('')
 const instructionsDialog = ref(false)
@@ -329,9 +327,6 @@ const loadingRoutes = ref(false)
 const finishDialog = ref(false)
 const archivePreview = ref([])
 
-let html5QrCodeInstance = null
-
-const CAMERA_PREFERENCE_REGEX = /(back|rear|environment)/i
 const STORAGE_KEY = 'inventory-scanned-route-ids'
 
 const activeRoutes = computed(() =>
@@ -445,7 +440,7 @@ const hydrateScannedRoutes = async (ids) => {
 const resetInventory = async (options = {}) => {
     const { preserveMessages = false } = options
 
-    await stopScanner()
+    stopScanner()
     if (!preserveMessages) {
         successMessage.value = ''
         scannerError.value = ''
@@ -461,7 +456,7 @@ const resetInventory = async (options = {}) => {
 watch(isMobile, (value) => {
     if (!value) {
         instructionsDialog.value = false
-        void stopScanner()
+        stopScanner()
     } else {
         instructionsDialog.value = true
     }
@@ -479,73 +474,54 @@ watch(
     { flush: 'post' },
 )
 
-const pickPreferredCameraId = async (Html5QrcodeClass) => {
-    try {
-        const cameras = await Html5QrcodeClass.getCameras()
-        if (!Array.isArray(cameras) || cameras.length === 0) {
-            return null
-        }
+const trackQrCode = (detectedCodes, ctx) => {
+    for (const code of detectedCodes) {
+        const { boundingBox } = code
+        if (!boundingBox) continue
+        const id = extractRouteId(code.rawValue)
+        const route = id ? allRoutes.value.find((r) => r.id === id) : null
+        const color = route ? '#1D9E75' : '#EF4444'
 
-        const normalised = cameras
-            .map((camera) => ({
-                id: camera.id ?? camera.deviceId ?? null,
-                label: camera.label ?? '',
-            }))
-            .filter((camera) => Boolean(camera.id))
+        ctx.lineWidth = 3
+        ctx.strokeStyle = color
+        ctx.strokeRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height)
 
-        if (normalised.length === 0) {
-            return null
-        }
+        const label = route ? route.name : t('inventory.invalidCode')
+        const fontSize = Math.max(14, boundingBox.width * 0.1)
+        ctx.font = `600 ${fontSize}px sans-serif`
+        const textWidth = ctx.measureText(label).width
+        const padding = 6
+        const labelX = boundingBox.x + (boundingBox.width - textWidth) / 2
+        const labelY = boundingBox.y + boundingBox.height + fontSize + padding
 
-        const preferred = normalised.find((camera) =>
-            CAMERA_PREFERENCE_REGEX.test(camera.label),
-        )
-        return preferred?.id ?? normalised[0]?.id ?? null
-    } catch (error) {
-        console.error('Failed to enumerate cameras:', error)
-        return null
+        ctx.fillStyle = color
+        ctx.fillRect(labelX - padding, labelY - fontSize, textWidth + padding * 2, fontSize + padding)
+        ctx.fillStyle = '#fff'
+        ctx.fillText(label, labelX, labelY - padding / 2)
     }
 }
 
-const buildCameraConfig = (deviceId) => {
-    if (deviceId) {
-        return { deviceId: { exact: deviceId } }
+const onDetect = (detectedCodes) => {
+    if (!Array.isArray(detectedCodes) || detectedCodes.length === 0) return
+    for (const code of detectedCodes) {
+        if (code.rawValue) void handleScanResult(code.rawValue)
     }
-
-    return { facingMode: { ideal: 'environment' } }
 }
 
-const resolveQrBoxSize = () => {
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-
-    let size = vw * 0.55
-    size = Math.min(size, vh * 0.70)
-
-    const MIN = 180
-    const MAX = 420
-
-    return Math.round(Math.max(MIN, Math.min(MAX, size)))
+const onCameraOn = () => {
+    scanning.value = true
+    scannerError.value = ''
 }
 
-const shouldIgnoreScanError = (error) => {
-    if (!error) {
-        return true
+const onCameraError = (error) => {
+    console.error('Camera error:', error)
+    scanning.value = false
+    cameraActive.value = false
+    if (error?.name === 'NotAllowedError' || error?.name === 'NotFoundError') {
+        scannerError.value = t('inventory.cameraError')
+    } else {
+        scannerError.value = error?.message || t('inventory.cameraError')
     }
-
-    const message = typeof error === 'string' ? error : error?.message
-    if (!message) {
-        return true
-    }
-
-    const lower = message.toLowerCase()
-
-    return (
-        message.includes('NotFoundException') ||
-        message.includes('FormatException') ||
-        lower.includes('qr code parse error') ||
-        lower.includes('no multiformat readers were able to detect the code')
-    )
 }
 
 const loadRoutes = async () => {
@@ -660,8 +636,7 @@ const addScannedRoute = async (id) => {
     }
 }
 
-let lastScanId = null
-let lastScanTime = 0
+const recentScans = new Map()
 const SCAN_COOLDOWN_MS = 2000
 
 const handleScanResult = async (text) => {
@@ -673,116 +648,32 @@ const handleScanResult = async (text) => {
 
     // Skip if same QR code scanned within cooldown window
     const now = Date.now()
-    if (id === lastScanId && now - lastScanTime < SCAN_COOLDOWN_MS) {
+    const lastTime = recentScans.get(id) ?? 0
+    if (now - lastTime < SCAN_COOLDOWN_MS) {
         return
     }
-    lastScanId = id
-    lastScanTime = now
+    recentScans.set(id, now)
 
     scannerError.value = ''
     await addScannedRoute(id)
 }
 
-const startScanner = async () => {
-    if (!process.client || scanning.value || !isMobile.value) {
-        return
-    }
-
-    if (!scannerRef.value) {
-        scannerError.value = t('inventory.cameraError')
-        return
-    }
-
+const startScanner = () => {
+    if (!process.client || !isMobile.value) return
     scannerError.value = ''
     successMessage.value = ''
-
-    try {
-        await nextTick()
-        const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import(
-            'html5-qrcode'
-        )
-
-        await stopScanner()
-
-        const deviceId = await pickPreferredCameraId(Html5Qrcode)
-        const cameraConfig = buildCameraConfig(deviceId)
-        const qrBox = resolveQrBoxSize()
-
-        html5QrCodeInstance = new Html5Qrcode(scannerElementId, {
-            verbose: false,
-        })
-
-        console.debug('Starting scanner with config:', {
-            cameraConfig,
-            qrBox,
-        })
-
-        const config = {
-            fps: 10,
-            qrbox: qrBox,
-            disableFlip: true,
-            rememberLastUsedCamera: true,
-            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true,
-            },
-        }
-
-        await html5QrCodeInstance.start(
-            cameraConfig,
-            config,
-            (decodedText) => {
-                console.debug('QR result', decodedText)
-                void handleScanResult(decodedText)
-            },
-            (errorMessage) => {
-                if (shouldIgnoreScanError(errorMessage)) {
-                    return
-                }
-
-                console.error('Scanner error:', errorMessage)
-                scannerError.value =
-                    (typeof errorMessage === 'string' && errorMessage) ||
-                    t('inventory.invalidCode')
-            },
-        )
-
-        scanning.value = true
-    } catch (error) {
-        console.error('Failed to start scanner:', error)
-        if (
-            error?.name === 'NotAllowedError' ||
-            error?.name === 'NotFoundError'
-        ) {
-            scannerError.value = t('inventory.cameraError')
-        } else {
-            scannerError.value = error?.message || t('inventory.invalidCode')
-        }
-        await stopScanner()
-    }
+    paused.value = false
+    cameraActive.value = true
 }
 
-const stopScanner = async () => {
-    if (!html5QrCodeInstance) {
-        scanning.value = false
-        return
-    }
-
-    try {
-        if (html5QrCodeInstance.isScanning) {
-            await html5QrCodeInstance.stop()
-        }
-        await html5QrCodeInstance.clear()
-    } catch (error) {
-        console.warn('Failed to stop scanner:', error)
-    } finally {
-        html5QrCodeInstance = null
-        scanning.value = false
-    }
+const stopScanner = () => {
+    cameraActive.value = false
+    scanning.value = false
+    paused.value = false
 }
 
-const openFinishDialog = async () => {
-    await stopScanner()
+const openFinishDialog = () => {
+    stopScanner()
     archivePreview.value = missingRoutes.value.map((route) => ({ ...route }))
     finishDialog.value = true
 }
@@ -831,7 +722,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    void stopScanner()
+    stopScanner()
 })
 </script>
 
@@ -848,19 +739,6 @@ onBeforeUnmount(() => {
     width: 100%;
     min-height: 250px;
     background: #111;
-}
-
-.scanner-viewport__video {
-    width: 100%;
-}
-
-.scanner-viewport__video :deep(video) {
-    width: 100%;
-    object-fit: cover;
-}
-
-.scanner-viewport__video :deep(canvas) {
-    display: none;
 }
 
 .scanner-viewport__placeholder {
