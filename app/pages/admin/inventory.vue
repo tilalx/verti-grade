@@ -1,31 +1,206 @@
 <template>
-    <v-container fluid class="inventory-scan">
-        <NewVersionAvailable />
+    <v-container fluid class="inventory-page pa-0">
+        <NotificationsNewVersionAvailable />
 
-        <v-alert v-if="!isMobile" type="warning" class="mb-4" variant="tonal">
-            {{ $t('inventory.mobileOnly') }}
-        </v-alert>
+        <!-- ── Desktop: not supported ─────────────────────────────────── -->
+        <v-card v-if="!isMobile" flat class="pa-8 text-center ma-4" rounded="xl" border>
+            <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-cellphone</v-icon>
+            <div class="text-h6 text-medium-emphasis mb-1">{{ $t('inventory.mobileOnly') }}</div>
+        </v-card>
 
-        <v-dialog v-model="instructionsDialog" max-width="420">
-            <v-card>
-                <v-card-title>{{
-                    $t('inventory.instructionsTitle')
-                }}</v-card-title>
-                <v-card-text>
-                    <p class="inventory-scan__instructions-intro">
+        <!-- ── Mobile scanner UI ──────────────────────────────────────── -->
+        <template v-if="isMobile">
+
+            <!-- Scanner viewport -->
+            <div class="scanner-viewport">
+                <div
+                    :id="scannerElementId"
+                    ref="scannerRef"
+                    class="scanner-viewport__video"
+                />
+                <!-- Overlay when not scanning -->
+                <div v-if="!scanning" class="scanner-viewport__placeholder">
+                    <v-icon size="48" color="white" class="mb-2" style="opacity: 0.6">mdi-qrcode-scan</v-icon>
+                    <span class="text-body-2" style="color: rgba(255,255,255,0.6)">
+                        {{ $t('inventory.subtitle') }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Status bar -->
+            <div class="status-bar px-4 py-3">
+                <div class="d-flex align-center justify-space-between">
+                    <div>
+                        <div v-if="lastScannedRoute" class="text-body-1 font-weight-semibold">
+                            {{ lastScannedRoute.name }}
+                            <span v-if="currentDifficulty" class="text-medium-emphasis font-weight-regular ml-1">
+                                {{ currentDifficulty }}
+                            </span>
+                        </div>
+                        <div v-else class="text-body-2 text-medium-emphasis">
+                            {{ $t('inventory.noScans') }}
+                        </div>
+                    </div>
+                    <v-btn
+                        icon
+                        variant="text"
+                        size="small"
+                        @click="instructionsDialog = true"
+                    >
+                        <v-icon>mdi-information-outline</v-icon>
+                    </v-btn>
+                </div>
+                <div class="d-flex ga-3 mt-1">
+                    <v-chip size="small" variant="tonal" color="success" prepend-icon="mdi-check-circle-outline">
+                        {{ scannedRouteIds.length }}
+                    </v-chip>
+                    <v-chip size="small" variant="tonal" color="warning" prepend-icon="mdi-help-circle-outline">
+                        {{ missingRoutes.length }}
+                    </v-chip>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div v-if="successMessage || scannerError" class="px-4 pt-2">
+                <v-alert
+                    v-if="successMessage"
+                    type="success"
+                    variant="tonal"
+                    density="compact"
+                    closable
+                    class="mb-2"
+                    @click:close="successMessage = ''"
+                >
+                    {{ successMessage }}
+                </v-alert>
+                <v-alert
+                    v-if="scannerError"
+                    type="error"
+                    variant="tonal"
+                    density="compact"
+                    closable
+                    class="mb-2"
+                    @click:close="scannerError = ''"
+                >
+                    {{ scannerError }}
+                </v-alert>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="d-flex ga-2 px-4 pt-3">
+                <v-btn
+                    v-if="!scanning"
+                    color="primary"
+                    variant="flat"
+                    rounded="lg"
+                    class="flex-grow-1"
+                    :disabled="loadingRoutes"
+                    prepend-icon="mdi-camera"
+                    @click="startScanner()"
+                >
+                    {{ $t('inventory.start') }}
+                </v-btn>
+                <v-btn
+                    v-else
+                    color="warning"
+                    variant="flat"
+                    rounded="lg"
+                    class="flex-grow-1"
+                    prepend-icon="mdi-stop-circle"
+                    @click="stopScanner()"
+                >
+                    {{ $t('inventory.stop') }}
+                </v-btn>
+                <v-btn
+                    icon
+                    variant="tonal"
+                    color="error"
+                    rounded="lg"
+                    :disabled="scannedRouteIds.length === 0 && !scanning"
+                    @click="resetInventory()"
+                >
+                    <v-icon>mdi-refresh</v-icon>
+                </v-btn>
+            </div>
+
+            <!-- Scanned routes list -->
+            <div class="px-4 pt-4 pb-2">
+                <div class="d-flex align-center justify-space-between mb-2">
+                    <span class="text-subtitle-2 font-weight-semibold text-medium-emphasis">
+                        {{ $t('inventory.reviewFoundTitle') }}
+                    </span>
+                    <v-chip v-if="scannedRoutes.length" size="x-small" variant="tonal" color="success">
+                        {{ scannedRoutes.length }}
+                    </v-chip>
+                </div>
+
+                <template v-if="scannedRoutes.length">
+                    <v-card
+                        v-for="route in scannedRoutes"
+                        :key="route.id"
+                        rounded="lg"
+                        border
+                        flat
+                        class="mb-2"
+                    >
+                        <div class="d-flex align-center pa-3">
+                            <v-icon size="18" color="success" class="mr-3">mdi-check-circle</v-icon>
+                            <div class="flex-grow-1">
+                                <div class="text-body-2 font-weight-medium">{{ route.name }}</div>
+                                <div class="text-caption text-medium-emphasis">{{ route.location || '—' }}</div>
+                            </div>
+                            <v-chip v-if="formatDifficulty(route)" size="x-small" variant="tonal" color="primary">
+                                {{ formatDifficulty(route) }}
+                            </v-chip>
+                        </div>
+                    </v-card>
+                </template>
+
+                <div v-else class="text-center py-6">
+                    <v-icon size="36" color="grey-lighten-1" class="mb-2">mdi-qrcode</v-icon>
+                    <div class="text-body-2 text-medium-emphasis">{{ $t('inventory.noScans') }}</div>
+                </div>
+            </div>
+
+            <!-- Finish button -->
+            <div class="px-4 pb-6 pt-2">
+                <v-btn
+                    color="success"
+                    variant="flat"
+                    block
+                    rounded="xl"
+                    size="large"
+                    :disabled="loadingRoutes || allRoutes.length === 0"
+                    prepend-icon="mdi-check"
+                    @click="openFinishDialog()"
+                >
+                    {{ $t('inventory.finish') }}
+                </v-btn>
+            </div>
+        </template>
+
+        <!-- ── Instructions dialog ────────────────────────────────────── -->
+        <v-dialog v-model="instructionsDialog" max-width="400">
+            <v-card rounded="xl">
+                <v-card-title class="text-body-1 font-weight-semibold pa-5 pb-2">
+                    {{ $t('inventory.instructionsTitle') }}
+                </v-card-title>
+                <v-card-text class="pa-5 pt-2">
+                    <p class="text-body-2 text-medium-emphasis mb-3">
                         {{ $t('inventory.instructionsIntro') }}
                     </p>
-                    <ol class="inventory-scan__instructions-list">
+                    <ol class="instructions-list text-body-2">
                         <li>{{ $t('inventory.instructionsStep1') }}</li>
                         <li>{{ $t('inventory.instructionsStep2') }}</li>
                         <li>{{ $t('inventory.instructionsStep3') }}</li>
                     </ol>
                 </v-card-text>
-                <v-card-actions>
+                <v-card-actions class="pa-5 pt-0">
                     <v-spacer />
                     <v-btn
                         color="primary"
                         variant="flat"
+                        rounded="lg"
                         @click="instructionsDialog = false"
                     >
                         {{ $t('inventory.instructionsClose') }}
@@ -34,220 +209,90 @@
             </v-card>
         </v-dialog>
 
-        <div v-if="isMobile" class="inventory-scan__toolbar">
-            <v-btn
-                color="primary"
-                variant="text"
-                @click="instructionsDialog = true"
-            >
-                <v-icon start>mdi-information-outline</v-icon>
-                {{ $t('inventory.showInstructions') }}
-            </v-btn>
-        </div>
-
-        <v-card
-            v-if="isMobile"
-            :loading="loadingRoutes"
-            class="inventory-scan__card"
-            elevation="2"
-        >
-            <v-card-text>
-                <div class="inventory-scan__video-wrapper">
-                    <div
-                        :id="scannerElementId"
-                        ref="scannerRef"
-                        class="inventory-scan__video"
-                    />
-                </div>
-                <v-alert
-                    type="info"
-                    variant="tonal"
-                    class="inventory-scan__info-bar"
-                >
-                    <div class="inventory-scan__info-main">
-                        <strong v-if="lastScannedRoute">
-                            {{ lastScannedRoute.name }}
-                        </strong>
-                        <strong v-else>{{ $t('inventory.noScans') }}</strong>
-                        <span v-if="lastScannedRoute">
-                            • {{ lastScannedRoute.location || '—' }}
-                            <template v-if="currentDifficulty">
-                                • {{ currentDifficulty }}
-                            </template>
-                        </span>
-                    </div>
-                    <div class="inventory-scan__info-meta">
-                        {{
-                            $t('inventory.scannedCount', {
-                                count: scannedRouteIds.length,
-                            })
-                        }}
-                        ·
-                        {{
-                            $t('inventory.pendingCount', {
-                                count: missingRoutes.length,
-                            })
-                        }}
-                    </div>
-                </v-alert>
-                <v-divider class="my-4" />
-                <v-alert
-                    v-if="successMessage"
-                    type="success"
-                    class="mb-4"
-                    variant="tonal"
-                    closable
-                    @click:close="successMessage = ''"
-                >
-                    {{ successMessage }}
-                </v-alert>
-
-                <v-alert
-                    v-if="scannerError"
-                    type="error"
-                    class="mb-4"
-                    variant="tonal"
-                    closable
-                    @click:close="scannerError = ''"
-                >
-                    {{ scannerError }}
-                </v-alert>
-            </v-card-text>
-            <v-card-actions class="inventory-scan__actions">
-                <v-btn
-                    v-if="!scanning"
-                    color="primary"
-                    variant="flat"
-                    :disabled="loadingRoutes"
-                    class="inventory-scan__action-btn"
-                    @click="startScanner()"
-                >
-                    <v-icon start>mdi-camera</v-icon>
-                    {{ $t('inventory.start') }}
-                </v-btn>
-                <v-btn
-                    v-else
-                    color="warning"
-                    variant="flat"
-                    @click="stopScanner()"
-                    class="inventory-scan__action-btn"
-                >
-                    <v-icon start>mdi-stop-circle</v-icon>
-                    {{ $t('inventory.stop') }}
-                </v-btn>
-                <v-btn
-                    color="error"
-                    variant="flat"
-                    :disabled="scannedRouteIds.length === 0 && !scanning"
-                    class="inventory-scan__action-btn"
-                    @click="resetInventory()"
-                >
-                    <v-icon start>mdi-refresh</v-icon>
-                    {{ $t('inventory.reset') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-
-        <v-card v-if="isMobile" class="inventory-scan__list" elevation="1">
-            <v-card-title>
-                {{
-                    $t('inventory.scannedCount', {
-                        count: scannedRouteIds.length,
-                    })
-                }}
-            </v-card-title>
-            <v-divider />
-            <v-list density="comfortable">
-                <v-list-item v-for="route in scannedRoutes" :key="route.id">
-                    <v-list-item-title>{{ route.name }}</v-list-item-title>
-                    <v-list-item-subtitle>
-                        {{ route.location || '—' }}
-                    </v-list-item-subtitle>
-                </v-list-item>
-                <v-list-item v-if="scannedRoutes.length === 0">
-                    <v-list-item-title>{{
-                        $t('inventory.noScans')
-                    }}</v-list-item-title>
-                </v-list-item>
-            </v-list>
-        </v-card>
-
-        <div v-if="isMobile" class="inventory-scan__footer">
-            <v-btn
-                color="success"
-                variant="flat"
-                class="inventory-scan__footer-btn"
-                :disabled="loadingRoutes || allRoutes.length === 0"
-                @click="openFinishDialog()"
-            >
-                <v-icon start>mdi-check</v-icon>
-                {{ $t('inventory.finish') }}
-            </v-btn>
-        </div>
-
+        <!-- ── Finish review dialog ───────────────────────────────────── -->
         <v-dialog v-model="finishDialog" max-width="480">
-            <v-card>
-                <v-card-title>{{ $t('inventory.reviewTitle') }}</v-card-title>
-                <v-card-text>
-                    <div class="inventory-scan__review-section">
-                        <h3>{{ $t('inventory.reviewFoundTitle') }}</h3>
-                        <v-list
-                            density="compact"
-                            class="inventory-scan__dialog-list"
-                        >
+            <v-card rounded="xl">
+                <v-card-title class="text-body-1 font-weight-semibold pa-5 pb-2">
+                    {{ $t('inventory.reviewTitle') }}
+                </v-card-title>
+                <v-card-text class="pa-5 pt-2">
+                    <!-- Found routes -->
+                    <div class="mb-4">
+                        <div class="text-subtitle-2 font-weight-semibold mb-2">
+                            {{ $t('inventory.reviewFoundTitle') }}
+                            <v-chip size="x-small" variant="tonal" color="success" class="ml-1">
+                                {{ scannedRoutes.length }}
+                            </v-chip>
+                        </div>
+                        <v-list density="compact" class="review-list rounded-lg" border>
                             <v-list-item
                                 v-for="route in scannedRoutes"
                                 :key="`found-${route.id}`"
                             >
-                                <v-list-item-title>
+                                <v-list-item-title class="text-body-2">
                                     {{ route.name || route.id }}
                                 </v-list-item-title>
-                                <v-list-item-subtitle>
+                                <v-list-item-subtitle class="text-caption">
                                     {{ route.location || '—' }}
                                 </v-list-item-subtitle>
+                                <template #prepend>
+                                    <v-icon size="16" color="success">mdi-check-circle</v-icon>
+                                </template>
                             </v-list-item>
                             <v-list-item v-if="scannedRoutes.length === 0">
-                                <v-list-item-title>{{
-                                    $t('inventory.noScans')
-                                }}</v-list-item-title>
+                                <v-list-item-title class="text-body-2 text-medium-emphasis">
+                                    {{ $t('inventory.noScans') }}
+                                </v-list-item-title>
                             </v-list-item>
                         </v-list>
                     </div>
-                    <div class="inventory-scan__review-section">
-                        <h3>{{ $t('inventory.reviewMissingTitle') }}</h3>
-                        <p v-if="archivePreview.length" class="inventory-scan__dialog-text">
+
+                    <!-- Missing routes -->
+                    <div>
+                        <div class="text-subtitle-2 font-weight-semibold mb-1">
+                            {{ $t('inventory.reviewMissingTitle') }}
+                            <v-chip size="x-small" variant="tonal" color="error" class="ml-1">
+                                {{ archivePreview.length }}
+                            </v-chip>
+                        </div>
+                        <p v-if="archivePreview.length" class="text-caption text-medium-emphasis mb-2">
                             {{ $t('inventory.reviewMissingDescription') }}
                         </p>
-                        <v-list
-                            density="compact"
-                            class="inventory-scan__dialog-list"
-                        >
+                        <v-list density="compact" class="review-list rounded-lg" border>
                             <v-list-item
                                 v-for="route in archivePreview"
                                 :key="`missing-${route.id}`"
                             >
-                                <v-list-item-title>{{
-                                    route.name
-                                }}</v-list-item-title>
-                                <v-list-item-subtitle>{{
-                                    route.location || '—'
-                                }}</v-list-item-subtitle>
+                                <v-list-item-title class="text-body-2">
+                                    {{ route.name }}
+                                </v-list-item-title>
+                                <v-list-item-subtitle class="text-caption">
+                                    {{ route.location || '—' }}
+                                </v-list-item-subtitle>
+                                <template #prepend>
+                                    <v-icon size="16" color="error">mdi-alert-circle</v-icon>
+                                </template>
                             </v-list-item>
                             <v-list-item v-if="archivePreview.length === 0">
-                                <v-list-item-title>{{
-                                    $t('inventory.nothingToArchive')
-                                }}</v-list-item-title>
+                                <v-list-item-title class="text-body-2 text-medium-emphasis">
+                                    {{ $t('inventory.nothingToArchive') }}
+                                </v-list-item-title>
                             </v-list-item>
                         </v-list>
                     </div>
                 </v-card-text>
-                <v-card-actions>
+                <v-card-actions class="pa-5 pt-0">
+                    <v-btn variant="text" @click="finishDialog = false">
+                        {{ $t('actions.cancel') }}
+                    </v-btn>
+                    <v-spacer />
                     <v-btn
                         color="primary"
                         variant="flat"
+                        rounded="lg"
+                        prepend-icon="mdi-check"
                         @click="confirmFinish"
                     >
-                        <v-icon start>mdi-check</v-icon>
                         {{ $t('actions.save') }}
                     </v-btn>
                 </v-card-actions>
@@ -257,11 +302,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
-import { useI18n } from 'vue-i18n'
-import { usePocketbase } from '@/composables/pocketbase.js'
-import NewVersionAvailable from '@/components/notifications/newVersionAvailable.vue'
+import { formatDifficulty } from '~/utils/formatting'
 
 definePageMeta({
     middleware: 'auth',
@@ -355,29 +396,31 @@ const hydrateScannedRoutes = async (ids) => {
 
     const token = ++hydrateRunId
     const uniqueIds = Array.from(new Set(ids))
-    const resolved = []
 
-    for (const id of uniqueIds) {
-        let route = allRoutes.value.find((item) => item.id === id)
+    const cachedMap = new Map(allRoutes.value.map((r) => [r.id, r]))
+    const uncachedIds = uniqueIds.filter((id) => !cachedMap.has(id))
 
-        if (!route) {
-            try {
-                route = await pb.collection('routes').getOne(id, {
+    if (uncachedIds.length > 0) {
+        const fetched = await Promise.all(
+            uncachedIds.map((id) =>
+                pb.collection('routes').getOne(id, {
                     fields: 'id,name,location,difficulty,difficulty_sign,archived',
+                }).catch((error) => {
+                    console.warn('Failed to hydrate scanned route:', id, error)
+                    return null
                 })
-                allRoutes.value = [...allRoutes.value, route]
-            } catch (error) {
-                console.warn('Failed to hydrate scanned route:', id, error)
-                continue
-            }
-        }
-
-        resolved.push(route)
+            )
+        )
+        const newRoutes = fetched.filter(Boolean)
+        allRoutes.value = [...allRoutes.value, ...newRoutes]
+        newRoutes.forEach((r) => cachedMap.set(r.id, r))
     }
 
     if (token !== hydrateRunId) {
         return
     }
+
+    const resolved = uniqueIds.map((id) => cachedMap.get(id)).filter(Boolean)
 
     if (
         process.client &&
@@ -473,25 +516,17 @@ const buildCameraConfig = (deviceId) => {
 }
 
 const resolveQrBoxSize = () => {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+    const vw = window.innerWidth
+    const vh = window.innerHeight
 
-  // On phones/iPads we size based on width,
-  // but ensure it also fits height (e.g. landscape mode)
+    let size = vw * 0.55
+    size = Math.min(size, vh * 0.70)
 
-  // Base size: 55% of viewport width
-  let size = vw * 0.55;
+    const MIN = 180
+    const MAX = 420
 
-  // Fit inside height in landscape mode (common issue on iPads)
-  size = Math.min(size, vh * 0.70);
-
-  // Reasonable constraints for mobile/iPad use
-  const MIN = 180; // small phones
-  const MAX = 420; // iPhone Pro Max / iPad
-
-  return Math.round(Math.max(MIN, Math.min(MAX, size)));
-};
-
+    return Math.round(Math.max(MIN, Math.min(MAX, size)))
+}
 
 const shouldIgnoreScanError = (error) => {
     if (!error) {
@@ -511,33 +546,6 @@ const shouldIgnoreScanError = (error) => {
         lower.includes('qr code parse error') ||
         lower.includes('no multiformat readers were able to detect the code')
     )
-}
-
-function formatDifficulty(route) {
-    if (!route) {
-        return ''
-    }
-
-    const base = (() => {
-        if (typeof route.difficulty === 'number') {
-            return route.difficulty.toString()
-        }
-        if (typeof route.difficulty === 'string') {
-            return route.difficulty.trim()
-        }
-        return ''
-    })()
-
-    const sign =
-        route.difficulty_sign === true
-            ? '+'
-            : route.difficulty_sign === false
-              ? '-'
-              : typeof route.difficulty_sign === 'string'
-                ? route.difficulty_sign
-                : ''
-
-    return `${base}${sign}`.trim()
 }
 
 const loadRoutes = async () => {
@@ -652,12 +660,24 @@ const addScannedRoute = async (id) => {
     }
 }
 
+let lastScanId = null
+let lastScanTime = 0
+const SCAN_COOLDOWN_MS = 2000
+
 const handleScanResult = async (text) => {
     const id = extractRouteId(text)
     if (!id) {
         scannerError.value = t('inventory.invalidCode')
         return
     }
+
+    // Skip if same QR code scanned within cooldown window
+    const now = Date.now()
+    if (id === lastScanId && now - lastScanTime < SCAN_COOLDOWN_MS) {
+        return
+    }
+    lastScanId = id
+    lastScanTime = now
 
     scannerError.value = ''
     await addScannedRoute(id)
@@ -816,128 +836,59 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.inventory-scan {
-    padding-bottom: 64px;
-    padding: 0px;
+.inventory-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-.inventory-scan__toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.inventory-scan__card {
-    margin-bottom: 16px;
-}
-
-.inventory-scan__video-wrapper {
+/* ── Scanner viewport ────────────────────────────────────────────────── */
+.scanner-viewport {
     position: relative;
     width: 100%;
+    min-height: 250px;
+    background: #111;
 }
 
-.inventory-scan__video {
-    position: absolute;
-    inset: 0;
+.scanner-viewport__video {
     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-.inventory-scan__video :deep(video) {
+.scanner-viewport__video :deep(video) {
     width: 100%;
-    height: 100%;
     object-fit: cover;
 }
 
-.inventory-scan__video :deep(canvas) {
+.scanner-viewport__video :deep(canvas) {
     display: none;
 }
 
-.inventory-scan__info-bar {
-    margin-top: 12px;
-}
-
-.inventory-scan__info-main {
+.scanner-viewport__placeholder {
+    position: absolute;
+    inset: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
-.inventory-scan__info-main strong {
-    font-weight: 600;
+/* ── Status bar ──────────────────────────────────────────────────────── */
+.status-bar {
+    border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
-.inventory-scan__info-meta {
-    margin-top: 4px;
-    font-size: 0.875rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-}
-
-.inventory-scan__instructions-intro {
-    margin-bottom: 8px;
-}
-
-.inventory-scan__instructions-list {
+/* ── Instructions list ───────────────────────────────────────────────── */
+.instructions-list {
     margin: 0;
     padding-left: 20px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
-.inventory-scan__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
-.inventory-scan__action-btn {
-    flex: 1 1 160px;
-    min-width: 140px;
-}
-
-@media (max-width: 360px) {
-    .inventory-scan__action-btn {
-        flex-basis: 100%;
-    }
-}
-
-.inventory-scan__footer {
-    margin-top: 24px;
-}
-
-.inventory-scan__footer-btn {
-    width: 100%;
-}
-
-.inventory-scan__review-section {
-    margin-bottom: 24px;
-}
-
-.inventory-scan__review-section h3 {
-    margin: 0 0 8px;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.inventory-scan__list {
-    margin-top: 16px;
-}
-
-.inventory-scan__dialog-text {
-    margin-bottom: 8px;
-}
-
-.inventory-scan__dialog-list {
-    max-height: 240px;
+/* ── Review dialog lists ─────────────────────────────────────────────── */
+.review-list {
+    max-height: 200px;
     overflow-y: auto;
 }
 </style>

@@ -89,13 +89,16 @@
       "averageDifficulty": "Avg. Difficulty",
       "averageDifficultySubtitle": "Mean grade",
       "totalComments": "Comments",
-      "totalCommentsSubtitle": "All route feedback"
+      "totalCommentsSubtitle": "All route feedback",
+      "averageLifespan": "Avg. Route Lifespan",
+      "averageLifespanSubtitle": "Archived routes only"
     },
     "charts": {
       "difficultyDistribution": "Difficulty Distribution",
       "routeSetters": "Routes by Setter",
       "routeTimeline": "Routes Over Time",
-      "commentTimeline": "Comments Over Time"
+      "commentTimeline": "Comments Over Time",
+      "activityHeatmap": "Route Setting Activity"
     },
     "sections": {
       "latestComments": "Latest Comments",
@@ -113,6 +116,10 @@
       "routes": "Routes",
       "unknown": "Unknown",
       "other": "Other"
+    },
+    "heatmap": {
+      "less": "Less",
+      "more": "More"
     }
   },
   "climbing": {
@@ -261,11 +268,44 @@
     "passwordTooWeak": "Password must be at least \"Good\" strength.",
     "email": "Please enter a valid email address."
   },
+  "comments": {
+    "subtitle": "Moderate and manage climber reviews",
+    "totalReviews": "Total reviews",
+    "avgRating": "Avg. rating",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "lowRated": "Low rated (≤ 2★)",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortHighest": "Highest rating",
+    "sortLowest": "Lowest rating",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "noComments": "No reviews found",
+    "noCommentsHint": "Try adjusting your filters or search term",
+    "editReview": "Edit review",
+    "anonymous": "Anonymous",
+    "selected": "{n} selected",
+    "deleteSelected": "Delete {n}",
+    "bulkDeleteTitle": "Delete {n} reviews?",
+    "showing": "Showing {n} of {total} reviews",
+    "select": "Select",
+    "deselect": "Deselect"
+  },
   "nav": {
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to content",
+    "mainNavigation": "Main navigation",
+    "userMenu": "User menu"
   },
   "users": {
     "create": "Create User",
     "edit": "Edit User"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
   }
 }

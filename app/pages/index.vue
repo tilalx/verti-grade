@@ -235,11 +235,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref, useId, watch } from 'vue'
-import { useDisplay } from 'vuetify'
-import { useHead, useI18n } from '#imports'
 import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+import { formatDifficulty, formatAnchorPoint, normalizeCreators } from '~/utils/formatting'
+import { toPbSort } from '~/utils/sorting'
 
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -332,10 +331,7 @@ const pbFilter = computed(() => {
   return parts.join(' && ')
 })
 
-function toPbSort(sortByArr: SortOption[]) {
-  if (!Array.isArray(sortByArr) || !sortByArr.length) return '-screw_date'
-  return sortByArr.map((sort) => (sort.order === 'desc' ? `-${sort.key}` : sort.key)).join(',')
-}
+const toPbSortIndex = (sortByArr: SortOption[]) => toPbSort(sortByArr, '-screw_date')
 
 async function loadRoutes(options: Partial<TableOptions> = {}, meta: { append?: boolean } = {}): Promise<void> {
   loading.value = true
@@ -344,7 +340,7 @@ async function loadRoutes(options: Partial<TableOptions> = {}, meta: { append?: 
   if (typeof options.itemsPerPage === 'number') tableOptions.itemsPerPage = options.itemsPerPage
   if (options.sortBy) tableOptions.sortBy = options.sortBy
 
-  const sort = toPbSort(tableOptions.sortBy)
+  const sort = toPbSortIndex(tableOptions.sortBy)
 
   try {
     const res = await pb
@@ -409,11 +405,14 @@ watch([selectedDifficulty, selectedLocation, selectedType, searchRouteName], () 
 
 let unsub: (() => void | Promise<void>) | null = null
 onMounted(async () => {
-  await loadRoutes({ ...tableOptions })
-  unsub = await pb.collection('routes').subscribe('*', () => {
-    tableOptions.page = 1
-    void loadRoutes({}, { append: false })
-  })
+  const [, sub] = await Promise.all([
+    loadRoutes({ ...tableOptions }),
+    pb.collection('routes').subscribe('*', () => {
+      tableOptions.page = 1
+      void loadRoutes({}, { append: false })
+    }),
+  ])
+  unsub = sub
 })
 
 onBeforeUnmount(() => {
@@ -432,38 +431,6 @@ function formatDate(date: string | null | undefined) {
   return new Date(date).toLocaleDateString('de-DE')
 }
 
-function formatDifficulty(item: RouteRecord | RouteListItem) {
-  const sign = item.difficulty_sign === true
-    ? '+'
-    : item.difficulty_sign === false
-      ? '-'
-      : typeof item.difficulty_sign === 'string'
-        ? item.difficulty_sign
-        : ''
-
-  return `${item.difficulty} ${sign}`.trim()
-}
-
-function formatAnchorPoint(value: number | string | null | undefined) {
-  return value === 0 || value === null || value === undefined || value === '' ? '—' : value
-}
-
-function normalizeCreators(raw: RouteRecord['creator']): string[] {
-  if (Array.isArray(raw)) {
-    return raw
-      .map((value) => (typeof value === 'string' ? value.trim() : ''))
-      .filter(Boolean)
-  }
-
-  if (typeof raw === 'string') {
-    return raw
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean)
-  }
-
-  return []
-}
 </script>
 
 <style scoped>

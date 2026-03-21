@@ -13,7 +13,7 @@
                 icon
                 variant="text"
                 class="mr-2"
-                aria-label="Open user menu"
+                :aria-label="$t('nav.userMenu')"
             >
                 <v-avatar size="36" :color="image ? undefined : 'primary'">
                     <v-img v-if="image" :src="image" :alt="displayName" cover />
@@ -38,7 +38,7 @@
         </v-card>
     </v-menu>
 
-    <EditUserSelf
+    <UserEditUserSelf
         v-if="user"
         v-model:dialog-open="dialogOpen"
         :user-id="user.id"
@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-import EditUserSelf from './EditUserSelf.vue'
 
 const router = useRouter()
 const pb = usePocketbase()

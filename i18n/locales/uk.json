@@ -89,13 +89,16 @@
       "averageDifficulty": "Середня складність",
       "averageDifficultySubtitle": "Середній рівень",
       "totalComments": "Коментарі",
-      "totalCommentsSubtitle": "Всі відгуки"
+      "totalCommentsSubtitle": "Всі відгуки",
+      "averageLifespan": "Сер. термін маршруту",
+      "averageLifespanSubtitle": "Лише архівні маршрути"
     },
     "charts": {
       "difficultyDistribution": "Розподіл складностей",
       "routeSetters": "Маршрути за автором",
       "routeTimeline": "Маршрути у часі",
-      "commentTimeline": "Коментарі у часі"
+      "commentTimeline": "Коментарі у часі",
+      "activityHeatmap": "Активність прокладання маршрутів"
     },
     "sections": {
       "latestComments": "Останні коментарі",
@@ -113,6 +116,10 @@
       "routes": "Маршрути",
       "unknown": "Невідомо",
       "other": "Інші"
+    },
+    "heatmap": {
+      "less": "Менше",
+      "more": "Більше"
     }
   },
   "climbing": {
@@ -262,7 +269,16 @@
     "email": "Будь ласка, введіть дійсну електронну адресу."
   },
   "nav": {
-    "openMenu": "Відкрити меню"
+    "openMenu": "Відкрити меню",
+    "skipToContent": "Перейти до вмісту",
+    "mainNavigation": "Основна навігація",
+    "userMenu": "Меню користувача"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
   },
   "users": {
     "create": "Створити користувача",

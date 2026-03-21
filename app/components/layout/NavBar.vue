@@ -10,7 +10,7 @@
         >
             <div class="nav-inner">
                 <!-- Logo -->
-                <router-link to="/" class="nav-logo">
+                <router-link to="/" class="nav-logo" :aria-label="$t('routes.home')">
                     <NuxtImg
                         v-if="logo_url"
                         :src="logo_url"
@@ -28,26 +28,26 @@
                 </router-link>
 
                 <!-- Desktop Nav Links -->
-                <nav v-if="isLoggedIn && mdAndUp" class="nav-links">
-                    <LayoutNavLink
-                        v-for="link in desktopLinks"
-                        :key="link.to"
-                        :to="link.to"
-                        :icon="link.icon"
-                        :label="$t(link.label)"
-                    />
-                </nav>
+                <ClientOnly>
+                    <nav v-if="isLoggedIn && mdAndUp" class="nav-links" :aria-label="$t('nav.mainNavigation')">
+                        <LayoutNavLink
+                            v-for="link in desktopLinks"
+                            :key="link.to"
+                            :to="link.to"
+                            :icon="link.icon"
+                            :label="$t(link.label)"
+                        />
+                    </nav>
+                </ClientOnly>
 
                 <v-spacer />
 
                 <!-- Right Side -->
                 <div class="nav-actions">
-                    <template v-if="isLoggedIn">
-                        <!-- Desktop: user icon only -->
-                        <UserIcon v-if="mdAndUp" />
-                        <!-- Mobile: hamburger only -->
+                    <ClientOnly>
+                        <UserIcon v-if="isLoggedIn && mdAndUp" />
                         <v-btn
-                            v-else
+                            v-else-if="isLoggedIn"
                             icon
                             variant="text"
                             class="nav-hamburger"
@@ -56,9 +56,8 @@
                         >
                             <v-icon>mdi-menu</v-icon>
                         </v-btn>
-                    </template>
-                    <template v-else>
                         <v-btn
+                            v-else
                             to="/auth/login"
                             variant="tonal"
                             rounded="lg"
@@ -67,7 +66,7 @@
                         >
                             {{ $t('routes.login') }}
                         </v-btn>
-                    </template>
+                    </ClientOnly>
                 </div>
             </div>
         </v-app-bar>
@@ -79,6 +78,7 @@
             temporary
             width="260"
             class="mobile-drawer"
+            :aria-label="$t('nav.mainNavigation')"
         >
 
             <v-list nav density="compact" class="drawer-list">
@@ -98,7 +98,9 @@
             <template #append>
                 <v-divider class="mx-4 mb-3" />
                 <div class="drawer-footer">
-                    <UserIcon v-if="isLoggedIn" />
+                    <ClientOnly>
+                        <UserIcon v-if="isLoggedIn" />
+                    </ClientOnly>
                 </div>
             </template>
         </v-navigation-drawer>
@@ -108,7 +110,6 @@
 </template>
 
 <script setup>
-import { useTheme, useDisplay } from 'vuetify'
 
 const pb = usePocketbase()
 const theme = useTheme()

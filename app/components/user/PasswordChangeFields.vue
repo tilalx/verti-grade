@@ -161,6 +161,7 @@
 </template>
 
 <script setup>
+import { required, minLength, maxLength, passwordsMatch as makePasswordsMatchRule } from '~/utils/validation'
 // ── Props ─────────────────────────────────────────────────────────────────
 const props = defineProps({
     /**
@@ -230,11 +231,11 @@ const passwordsMatch = computed(
 
 // ── Validation rules (referenced directly by v-text-field :rules) ─────────
 const rules = {
-    required:      (v) => !!v                       || t('validation.required'),
-    minLength:     (v) => v.length >= 8             || t('validation.minLength',      { n: 8  }),
-    maxLength:     (v) => v.length <= 72            || t('validation.maxLength',      { n: 72 }),
-    matchPassword: (v) => v === props.password      || t('validation.passwordMismatch'),
-    strength:      ()  => strengthScore.value >= 3  || t('validation.passwordTooWeak'),
+    required:      required(t),
+    minLength:     minLength(t, 8),
+    maxLength:     maxLength(t, 72),
+    matchPassword: makePasswordsMatchRule(t, () => props.password),
+    strength:      () => strengthScore.value >= 3 || t('validation.passwordTooWeak'),
 }
 
 // ── Computed overall validity ─────────────────────────────────────────────

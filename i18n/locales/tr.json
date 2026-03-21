@@ -89,13 +89,16 @@
       "averageDifficulty": "Ort. Zorluk",
       "averageDifficultySubtitle": "Ortalama derece",
       "totalComments": "Yorumlar",
-      "totalCommentsSubtitle": "Tüm geri bildirimler"
+      "totalCommentsSubtitle": "Tüm geri bildirimler",
+      "averageLifespan": "Ort. Rota Ömrü",
+      "averageLifespanSubtitle": "Yalnızca arşivlenen rotalar"
     },
     "charts": {
       "difficultyDistribution": "Zorluk Dağılımı",
       "routeSetters": "Rotalar Ayarlayıcıya Göre",
       "routeTimeline": "Zaman İçinde Rotalar",
-      "commentTimeline": "Zaman İçinde Yorumlar"
+      "commentTimeline": "Zaman İçinde Yorumlar",
+      "activityHeatmap": "Rota Kurma Aktivitesi"
     },
     "sections": {
       "latestComments": "En son yorumlar",
@@ -113,6 +116,10 @@
       "routes": "Rotalar",
       "unknown": "Bilinmiyor",
       "other": "Diğer"
+    },
+    "heatmap": {
+      "less": "Az",
+      "more": "Fazla"
     }
   },
   "climbing": {
@@ -262,7 +269,16 @@
     "email": "Lütfen geçerli bir e-posta adresi girin."
   },
   "nav": {
-    "openMenu": "Menüyü aç"
+    "openMenu": "Menüyü aç",
+    "skipToContent": "İçeriğe geç",
+    "mainNavigation": "Ana gezinme",
+    "userMenu": "Kullanıcı menüsü"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
   },
   "users": {
     "create": "Kullanıcı Oluştur",

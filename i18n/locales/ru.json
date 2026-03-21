@@ -89,13 +89,16 @@
       "averageDifficulty": "Средняя сложность",
       "averageDifficultySubtitle": "Средний уровень",
       "totalComments": "Комментарии",
-      "totalCommentsSubtitle": "Все отзывы"
+      "totalCommentsSubtitle": "Все отзывы",
+      "averageLifespan": "Ср. срок жизни",
+      "averageLifespanSubtitle": "Только архивные маршруты"
     },
     "charts": {
       "difficultyDistribution": "Распределение сложностей",
       "routeSetters": "Маршруты по авторам",
       "routeTimeline": "Маршруты по времени",
-      "commentTimeline": "Комментарии по времени"
+      "commentTimeline": "Комментарии по времени",
+      "activityHeatmap": "Активность прокладки маршрутов"
     },
     "sections": {
       "latestComments": "Последние комментарии",
@@ -113,6 +116,10 @@
       "routes": "Маршруты",
       "unknown": "Неизвестно",
       "other": "Прочие"
+    },
+    "heatmap": {
+      "less": "Меньше",
+      "more": "Больше"
     }
   },
   "climbing": {
@@ -262,7 +269,16 @@
     "email": "Пожалуйста, введите действительный адрес электронной почты."
   },
   "nav": {
-    "openMenu": "Открыть меню"
+    "openMenu": "Открыть меню",
+    "skipToContent": "Перейти к содержимому",
+    "mainNavigation": "Основная навигация",
+    "userMenu": "Меню пользователя"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "daysAgo": "{n} d ago"
   },
   "users": {
     "create": "Создать пользователя",

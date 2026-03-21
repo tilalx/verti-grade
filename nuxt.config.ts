@@ -1,5 +1,3 @@
-import { text } from "pdfkit";
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: {
@@ -105,6 +103,7 @@ export default defineNuxtConfig({
          '@vue/devtools-kit',
          'pocketbase',
          'echarts',
+         "html5-qrcode",
       ],
     },
   },
