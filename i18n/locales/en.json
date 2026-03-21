@@ -293,7 +293,10 @@
     "deselect": "Deselect"
   },
   "nav": {
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to content",
+    "mainNavigation": "Main navigation",
+    "userMenu": "User menu"
   },
   "users": {
     "create": "Create User",

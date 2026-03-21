@@ -13,7 +13,7 @@
                 icon
                 variant="text"
                 class="mr-2"
-                aria-label="Open user menu"
+                :aria-label="$t('nav.userMenu')"
             >
                 <v-avatar size="36" :color="image ? undefined : 'primary'">
                     <v-img v-if="image" :src="image" :alt="displayName" cover />

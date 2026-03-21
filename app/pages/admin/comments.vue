@@ -1,139 +1,146 @@
 <template>
     <v-container fluid class="comments-page">
 
-        <!-- ── Page Header ─────────────────────────────────────────────────── -->
-        <div class="d-flex align-start align-sm-center flex-column flex-sm-row justify-space-between mb-6 gap-2">
-            <div>
-                <h1 class="text-h5 font-weight-bold">{{ t('routes.comments') }}</h1>
-                <p class="text-body-2 text-medium-emphasis mt-1">{{ t('comments.subtitle') }}</p>
+        <!-- ── Page Header + inline stats ────────────────────────────────── -->
+        <div class="d-flex align-center justify-space-between mb-3">
+            <h1 class="text-h5 font-weight-bold">{{ t('routes.comments') }}</h1>
+        </div>
+
+        <!-- Stats: horizontal scroll on mobile, row on desktop -->
+        <div class="stats-scroll mb-3">
+            <div class="stats-scroll__inner">
+                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
+                    <div class="text-h6 font-weight-bold text-primary">{{ statsData.length }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ t('comments.totalReviews') }}</div>
+                </v-card>
+                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
+                    <div class="d-flex align-center justify-center ga-1">
+                        <span class="text-h6 font-weight-bold text-warning">{{ stats.avgRating }}</span>
+                        <v-icon color="yellow-darken-2" size="16">mdi-star</v-icon>
+                    </div>
+                    <div class="text-caption text-medium-emphasis">{{ t('comments.avgRating') }}</div>
+                </v-card>
+                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
+                    <div class="text-h6 font-weight-bold text-success">{{ stats.thisWeek }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ t('comments.thisWeek') }}</div>
+                </v-card>
+                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
+                    <div class="text-h6 font-weight-bold text-error">{{ stats.lowRated }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ t('comments.lowRated') }}</div>
+                </v-card>
             </div>
         </div>
 
-        <!-- ── Stats Row ───────────────────────────────────────────────────── -->
-        <v-row dense class="mb-4">
-            <v-col cols="6" sm="3">
-                <v-card rounded="xl" border flat class="text-center pa-4">
-                    <div class="text-h4 font-weight-bold text-primary">{{ statsData.length }}</div>
-                    <div class="text-caption text-medium-emphasis mt-1">{{ t('comments.totalReviews') }}</div>
-                </v-card>
-            </v-col>
-            <v-col cols="6" sm="3">
-                <v-card rounded="xl" border flat class="text-center pa-4">
-                    <div class="d-flex align-center justify-center ga-1">
-                        <span class="text-h4 font-weight-bold text-warning">{{ stats.avgRating }}</span>
-                        <v-icon color="yellow-darken-2" size="20">mdi-star</v-icon>
-                    </div>
-                    <div class="text-caption text-medium-emphasis mt-1">{{ t('comments.avgRating') }}</div>
-                </v-card>
-            </v-col>
-            <v-col cols="6" sm="3">
-                <v-card rounded="xl" border flat class="text-center pa-4">
-                    <div class="text-h4 font-weight-bold text-success">{{ stats.thisWeek }}</div>
-                    <div class="text-caption text-medium-emphasis mt-1">{{ t('comments.thisWeek') }}</div>
-                </v-card>
-            </v-col>
-            <v-col cols="6" sm="3">
-                <v-card rounded="xl" border flat class="text-center pa-4">
-                    <div class="text-h4 font-weight-bold text-error">{{ stats.lowRated }}</div>
-                    <div class="text-caption text-medium-emphasis mt-1">{{ t('comments.lowRated') }}</div>
-                </v-card>
-            </v-col>
-        </v-row>
-
-        <!-- ── Filter Card ─────────────────────────────────────────────────── -->
+        <!-- ── Filter bar ────────────────────────────────────────────────── -->
         <v-card rounded="xl" border flat class="mb-4">
             <v-card-text class="pb-2">
-                <v-row dense align="center">
-                    <v-col cols="12" sm="5" md="4">
-                        <v-text-field
-                            v-model="search"
-                            :label="t('actions.search')"
-                            prepend-inner-icon="mdi-magnify"
-                            clearable
-                            hide-details
-                            density="compact"
-                            variant="outlined"
-                            rounded="lg"
-                        />
-                    </v-col>
-                    <v-col cols="6" sm="4" md="3">
-                        <v-select
-                            v-model="selectedLocation"
-                            :label="t('climbing.location')"
-                            :items="locations"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            variant="outlined"
-                            rounded="lg"
-                        />
-                    </v-col>
-                    <v-col cols="6" sm="3" md="2">
-                        <v-select
-                            v-model="selectedDifficulty"
-                            :label="t('climbing.difficulty')"
-                            :items="difficulties"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            variant="outlined"
-                            rounded="lg"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                        <v-select
-                            v-model="sortOrder"
-                            :items="sortOptions"
-                            item-title="label"
-                            item-value="value"
-                            hide-details
-                            density="compact"
-                            variant="outlined"
-                            rounded="lg"
-                            prepend-inner-icon="mdi-sort"
-                        />
-                    </v-col>
-                </v-row>
+                <!-- Search + filter toggle row -->
+                <div class="d-flex align-center ga-2">
+                    <v-text-field
+                        v-model="search"
+                        :label="t('actions.search')"
+                        prepend-inner-icon="mdi-magnify"
+                        clearable
+                        hide-details
+                        density="compact"
+                        variant="outlined"
+                        rounded="lg"
+                        class="flex-grow-1"
+                    />
+                    <v-btn
+                        :icon="filtersExpanded ? 'mdi-filter-off' : 'mdi-filter-variant'"
+                        variant="tonal"
+                        density="compact"
+                        size="small"
+                        class="d-sm-none"
+                        @click="filtersExpanded = !filtersExpanded"
+                    />
+                </div>
 
-                <!-- Rating chips + date toggle -->
-                <v-row dense align="center" class="mt-1">
-                    <v-col cols="12" sm="auto">
-                        <v-chip-group v-model="selectedRating" color="warning" column mandatory>
-                            <v-chip filter :value="0" size="small" variant="tonal">
-                                {{ t('filter.all') }}
-                            </v-chip>
-                            <v-chip
-                                v-for="star in [1, 2, 3, 4, 5]"
-                                :key="star"
-                                filter
-                                :value="star"
-                                size="small"
-                                color="warning"
-                                variant="tonal"
-                            >
-                                {{ star }}★
-                            </v-chip>
-                        </v-chip-group>
-                    </v-col>
-                    <v-col cols="12" sm="auto">
-                        <v-btn-toggle
-                            v-model="dateFilter"
-                            density="compact"
-                            mandatory
-                            rounded="lg"
-                            divided
-                            variant="outlined"
-                        >
-                            <v-btn value="" size="small">{{ t('filter.all') }}</v-btn>
-                            <v-btn value="week" size="small">{{ t('comments.thisWeek') }}</v-btn>
-                            <v-btn value="month" size="small">{{ t('comments.thisMonth') }}</v-btn>
-                        </v-btn-toggle>
-                    </v-col>
-                </v-row>
+                <!-- Collapsible filters: always visible on sm+, toggle on mobile -->
+                <v-expand-transition>
+                    <div v-show="filtersExpanded || !isMobile">
+                        <v-row density="comfortable" align="center" class="mt-2">
+                            <v-col cols="6" sm="4" md="3">
+                                <v-select
+                                    v-model="selectedLocation"
+                                    :label="t('climbing.location')"
+                                    :items="locations"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="6" sm="3" md="2">
+                                <v-select
+                                    v-model="selectedDifficulty"
+                                    :label="t('climbing.difficulty')"
+                                    :items="difficulties"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="12" sm="5" md="3">
+                                <v-select
+                                    v-model="sortOrder"
+                                    :items="sortOptions"
+                                    item-title="label"
+                                    item-value="value"
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                    prepend-inner-icon="mdi-sort"
+                                />
+                            </v-col>
+                        </v-row>
+
+                        <!-- Rating chips + date toggle -->
+                        <v-row density="comfortable" align="center" class="mt-1">
+                            <v-col cols="12" sm="auto">
+                                <v-chip-group v-model="selectedRating" color="warning" column mandatory>
+                                    <v-chip filter :value="0" size="small" variant="tonal">
+                                        {{ t('filter.all') }}
+                                    </v-chip>
+                                    <v-chip
+                                        v-for="star in [1, 2, 3, 4, 5]"
+                                        :key="star"
+                                        filter
+                                        :value="star"
+                                        size="small"
+                                        color="warning"
+                                        variant="tonal"
+                                    >
+                                        {{ star }}★
+                                    </v-chip>
+                                </v-chip-group>
+                            </v-col>
+                            <v-col cols="12" sm="auto">
+                                <v-btn-toggle
+                                    v-model="dateFilter"
+                                    density="compact"
+                                    mandatory
+                                    rounded="lg"
+                                    divided
+                                    variant="outlined"
+                                >
+                                    <v-btn value="" size="small">{{ t('filter.all') }}</v-btn>
+                                    <v-btn value="week" size="small">{{ t('comments.thisWeek') }}</v-btn>
+                                    <v-btn value="month" size="small">{{ t('comments.thisMonth') }}</v-btn>
+                                </v-btn-toggle>
+                            </v-col>
+                        </v-row>
+                    </div>
+                </v-expand-transition>
             </v-card-text>
 
             <!-- Bulk-action bar, slides in when items are selected -->
@@ -361,6 +368,9 @@ definePageMeta({
 })
 
 // ── State ──────────────────────────────────────────────────────────────────
+
+const filtersExpanded = ref(false)
+const isMobile = ref(false)
 
 const loading = ref(true)
 const loadingMore = ref(false)
@@ -659,6 +669,11 @@ function showSnackbar(message, color = 'success') {
 
 let unsubscribe
 onMounted(async () => {
+    // Detect mobile for collapsible filters
+    const mql = window.matchMedia('(max-width: 599.98px)')
+    isMobile.value = mql.matches
+    mql.addEventListener('change', (e) => { isMobile.value = e.matches })
+
     // Fetch both in parallel: stats don't need to wait for the list
     await Promise.all([fetchList(), fetchStats()])
 
@@ -706,6 +721,34 @@ onBeforeUnmount(() => {
 .comments-page {
     max-width: 1400px;
     margin: 0 auto;
+}
+
+/* ── Stats horizontal scroll ─────────────────────────────────────────── */
+.stats-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.stats-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.stats-scroll__inner {
+    display: flex;
+    gap: 8px;
+}
+
+.stat-chip {
+    flex: 1 0 auto;
+    min-width: 100px;
+}
+
+@media (min-width: 600px) {
+    .stat-chip {
+        flex: 1 1 0;
+        min-width: 0;
+    }
 }
 
 /* Card selection highlight */

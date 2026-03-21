@@ -269,7 +269,10 @@
     "email": "Lütfen geçerli bir e-posta adresi girin."
   },
   "nav": {
-    "openMenu": "Menüyü aç"
+    "openMenu": "Menüyü aç",
+    "skipToContent": "İçeriğe geç",
+    "mainNavigation": "Ana gezinme",
+    "userMenu": "Kullanıcı menüsü"
   },
   "time": {
     "justNow": "Just now",

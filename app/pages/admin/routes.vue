@@ -865,9 +865,12 @@ const queueReload = () => {
     }, 250)
 }
 
-onMounted(() => {
-    // Initial data load is handled by @update:options="loadRoutes" on the VDataTable.
-    // Subscribing here for realtime updates is sufficient.
+onMounted(async () => {
+    await loadRoutes({
+        page: tableOptions.page,
+        itemsPerPage: tableOptions.itemsPerPage,
+        sortBy: tableOptions.sortBy,
+    })
     pb.collection('routes').subscribe('*', queueReload)
     pb.collection('averageRating').subscribe('*', queueReload)
 })

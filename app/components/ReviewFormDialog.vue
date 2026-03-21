@@ -6,6 +6,7 @@
             color="primary"
             size="large"
             block
+            rounded="xl"
             prepend-icon="mdi-star-plus-outline"
             @click="internalOpen = true"
         >

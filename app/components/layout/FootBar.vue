@@ -169,9 +169,9 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 
 /* ── Shared button styles ───────────────────────────────── */
 .footer-link-btn {
-  font-size: 11.5px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
-  color: rgba(var(--v-theme-on-surface), 0.4) !important;
+  color: rgba(var(--v-theme-on-surface), 0.6) !important;
   text-transform: none !important;
   min-width: unset !important;
   padding: 0 6px !important;
@@ -179,12 +179,12 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 }
 
 .footer-link-btn:hover {
-  color: rgba(var(--v-theme-on-surface), 0.85) !important;
+  color: rgba(var(--v-theme-on-surface), 0.9) !important;
 }
 
 .link-sep {
-  font-size: 11px;
-  color: rgba(var(--v-theme-on-surface), 0.2);
+  font-size: 13px;
+  color: rgba(var(--v-theme-on-surface), 0.35);
   user-select: none;
 }
 

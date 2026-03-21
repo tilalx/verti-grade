@@ -644,7 +644,7 @@ const heatmapCells = computed(() => {
         const iso = `${cursor.getFullYear()}-${mm}-${dd}`
         const inYear = cursor.getFullYear() === year
         const count = dataMap.get(iso) ?? 0
-        const level = !inYear || count === 0 ? 0 : Math.min(4, Math.ceil((count / maxCount) * 4))
+        const level = !inYear || count === 0 ? 0 : count >= 4 ? 4 : count >= 3 ? 3 : count >= 2 ? 2 : 1
         const formatted = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(iso + 'T00:00:00'))
         cells.push({
             date: iso,
@@ -1070,10 +1070,10 @@ function formatMonthLabel(monthKey) {
 }
 
 .heatmap-level-0 { background: rgba(var(--v-theme-on-surface), 0.07); }
-.heatmap-level-1 { background: #B7DFCE; }
-.heatmap-level-2 { background: #5DCAA5; }
-.heatmap-level-3 { background: #1D9E75; }
-.heatmap-level-4 { background: #0F6E56; }
+.heatmap-level-1 { background: #0F6E56; }
+.heatmap-level-2 { background: #1D9E75; }
+.heatmap-level-3 { background: #5DCAA5; }
+.heatmap-level-4 { background: #7FFFDB; }
 
 /* ── Desktop heatmap: scale to fill card width ───────────────────────── */
 @media (min-width: 600px) {

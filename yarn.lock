@@ -5,13 +5,6 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@antfu/utils@npm:^8.1.0":
-  version: 8.1.1
-  resolution: "@antfu/utils@npm:8.1.1"
-  checksum: 10c0/cd55d322496f0324323a7bd312bbdc305db02f5c74c53d59213a00a7ecfd66926b6755a41f27c6e664a687cd7a967d3a8b12d3ea57f264ae45dd1c5c181f5160
-  languageName: node
-  linkType: hard
-
 "@babel/code-frame@npm:^7.27.1, @babel/code-frame@npm:^7.28.6, @babel/code-frame@npm:^7.29.0":
   version: 7.29.0
   resolution: "@babel/code-frame@npm:7.29.0"
@@ -1831,7 +1824,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxt/kit@npm:4.4.2, @nuxt/kit@npm:^3.15.4 || ^4.0.0, @nuxt/kit@npm:^4.1.2, @nuxt/kit@npm:^4.2.0, @nuxt/kit@npm:^4.2.2, @nuxt/kit@npm:^4.3.1":
+"@nuxt/kit@npm:4.4.2, @nuxt/kit@npm:^4.1.2, @nuxt/kit@npm:^4.2.0, @nuxt/kit@npm:^4.2.2, @nuxt/kit@npm:^4.3.1":
   version: 4.4.2
   resolution: "@nuxt/kit@npm:4.4.2"
   dependencies:
@@ -3023,6 +3016,15 @@ __metadata:
   version: 1.2.3
   resolution: "@poppinss/exception@npm:1.2.3"
   checksum: 10c0/44e48400c9f2d33a4904bee99321b89239774bb9210049f1c55864725fd524ff55bc78a5a94a13d5edea93b84e13023c229c88ebba8c2dc717fb4b2205e42ac7
+  languageName: node
+  linkType: hard
+
+"@quansync/fs@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@quansync/fs@npm:1.0.0"
+  dependencies:
+    quansync: "npm:^1.0.0"
+  checksum: 10c0/41a7e145d4fc349eaeac20ee7ffe0c876a7c26b2268d5704b462b3e7379091221336e315b2b346d5b07a531502a41cad15c9f374800cc60b6339d074ef99aa16
   languageName: node
   linkType: hard
 
@@ -4688,17 +4690,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bundle-require@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "bundle-require@npm:5.1.0"
-  dependencies:
-    load-tsconfig: "npm:^0.2.3"
-  peerDependencies:
-    esbuild: ">=0.18"
-  checksum: 10c0/8bff9df68eb686f05af952003c78e70ffed2817968f92aebb2af620cc0b7428c8154df761d28f1b38508532204278950624ef86ce63644013dc57660a9d1810f
-  languageName: node
-  linkType: hard
-
 "c12@npm:3.3.3, c12@npm:^3.3.3":
   version: 3.3.3
   resolution: "c12@npm:3.3.3"
@@ -5657,7 +5648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.20.2 || ^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0 || ^0.25.0, esbuild@npm:^0.25.4":
+"esbuild@npm:^0.25.4":
   version: 0.25.12
   resolution: "esbuild@npm:0.25.12"
   dependencies:
@@ -5746,7 +5737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.27.0, esbuild@npm:^0.27.2, esbuild@npm:~0.27.0":
+"esbuild@npm:^0.27.0, esbuild@npm:^0.27.2":
   version: 0.27.4
   resolution: "esbuild@npm:0.27.4"
   dependencies:
@@ -6282,15 +6273,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-tsconfig@npm:^4.7.5":
-  version: 4.13.6
-  resolution: "get-tsconfig@npm:4.13.6"
-  dependencies:
-    resolve-pkg-maps: "npm:^1.0.0"
-  checksum: 10c0/bab6937302f542f97217cbe7cbbdfa7e85a56a377bc7a73e69224c1f0b7c9ae8365918e55752ae8648265903f506c1705f63c0de1d4bab1ec2830fef3e539a1a
-  languageName: node
-  linkType: hard
-
 "get-uri@npm:^6.0.1":
   version: 6.0.5
   resolution: "get-uri@npm:6.0.5"
@@ -6605,20 +6587,6 @@ __metadata:
   version: 5.1.5
   resolution: "immutable@npm:5.1.5"
   checksum: 10c0/8017ece1578e3c5939ba3305176aee059def1b8a90c7fa2a347ef583ebbd38cbe77ce1bbd786a5fab57e2da00bbcb0493b92e4332cdc4e1fe5cfb09a4688df31
-  languageName: node
-  linkType: hard
-
-"importx@npm:^0.5.1":
-  version: 0.5.2
-  resolution: "importx@npm:0.5.2"
-  dependencies:
-    bundle-require: "npm:^5.1.0"
-    debug: "npm:^4.4.0"
-    esbuild: "npm:^0.20.2 || ^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0 || ^0.25.0"
-    jiti: "npm:^2.4.2"
-    pathe: "npm:^2.0.3"
-    tsx: "npm:^4.19.2"
-  checksum: 10c0/5bd5680db70b55953e864ddd9def98288e39b0cca2ec8b2831bacedcb84f8d1432c1c185abb071ced5c9eb4197ae8203ed811cf7487a85a48e7f053c1dcf59a8
   languageName: node
   linkType: hard
 
@@ -7309,13 +7277,6 @@ __metadata:
     listen: bin/listhen.mjs
     listhen: bin/listhen.mjs
   checksum: 10c0/b13e732eec48a49017121013853bb0f184c6f40dc9839a8ccad03b57a50a29186a57edafe5807e892cf65b49cb710026ba95d064bdcf294e135b95c6553fe36b
-  languageName: node
-  linkType: hard
-
-"load-tsconfig@npm:^0.2.3":
-  version: 0.2.5
-  resolution: "load-tsconfig@npm:0.2.5"
-  checksum: 10c0/bf2823dd26389d3497b6567f07435c5a7a58d9df82e879b0b3892f87d8db26900f84c85bc329ef41c0540c0d6a448d1c23ddc64a80f3ff6838b940f3915a3fcb
   languageName: node
   linkType: hard
 
@@ -8155,7 +8116,7 @@ __metadata:
     vite: "npm:8.0.0"
     vitest: "npm:4.1.0"
     vue: "npm:3.5.30"
-    vuetify-nuxt-module: "npm:0.19.5"
+    vuetify-nuxt-module: "npm:v1.0.0-beta.1"
   languageName: unknown
   linkType: soft
 
@@ -8913,13 +8874,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"perfect-debounce@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "perfect-debounce@npm:1.0.0"
-  checksum: 10c0/e2baac416cae046ef1b270812cf9ccfb0f91c04ea36ac7f5b00bc84cb7f41bdbba087c0ab21b4e02a7ef3a1f1f6db399f137cecec46868bd7d8d88c2a9ee431f
-  languageName: node
-  linkType: hard
-
 "perfect-debounce@npm:^2.0.0, perfect-debounce@npm:^2.1.0":
   version: 2.1.0
   resolution: "perfect-debounce@npm:2.1.0"
@@ -9420,6 +9374,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"quansync@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "quansync@npm:1.0.0"
+  checksum: 10c0/076542634399a0cc46078baab6b31acee7a88c5a435234345f645aedaa42bc6a63836e655fb39b1b21a83c98ec86a4b73ec5e2b2d6f3fdc22711eeeff9463253
+  languageName: node
+  linkType: hard
+
 "queue-microtask@npm:^1.2.2":
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
@@ -9619,13 +9580,6 @@ __metadata:
   version: 5.0.0
   resolution: "resolve-from@npm:5.0.0"
   checksum: 10c0/b21cb7f1fb746de8107b9febab60095187781137fd803e6a59a76d421444b1531b641bba5857f5dc011974d8a5c635d61cec49e6bd3b7fc20e01f0fafc4efbf2
-  languageName: node
-  linkType: hard
-
-"resolve-pkg-maps@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "resolve-pkg-maps@npm:1.0.0"
-  checksum: 10c0/fb8f7bbe2ca281a73b7ef423a1cbc786fb244bd7a95cbe5c3fba25b27d327150beca8ba02f622baea65919a57e061eb5005204daa5f93ed590d9b77463a567ab
   languageName: node
   linkType: hard
 
@@ -10736,22 +10690,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:^4.19.2":
-  version: 4.21.0
-  resolution: "tsx@npm:4.21.0"
-  dependencies:
-    esbuild: "npm:~0.27.0"
-    fsevents: "npm:~2.3.3"
-    get-tsconfig: "npm:^4.7.5"
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  bin:
-    tsx: dist/cli.mjs
-  checksum: 10c0/f5072923cd8459a1f9a26df87823a2ab5754641739d69df2a20b415f61814322b751fa6be85db7c6ec73cf68ba8fac2fd1cfc76bdb0aa86ded984d84d5d2126b
-  languageName: node
-  linkType: hard
-
 "type-fest@npm:^2.5.1":
   version: 2.19.0
   resolution: "type-fest@npm:2.19.0"
@@ -10809,14 +10747,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unconfig@npm:^0.6.1":
-  version: 0.6.1
-  resolution: "unconfig@npm:0.6.1"
+"unconfig-core@npm:7.5.0":
+  version: 7.5.0
+  resolution: "unconfig-core@npm:7.5.0"
   dependencies:
-    "@antfu/utils": "npm:^8.1.0"
+    "@quansync/fs": "npm:^1.0.0"
+    quansync: "npm:^1.0.0"
+  checksum: 10c0/9c9f745254aa8e267140430a432353d17ee87f625b0ea0668e189d88736828d117b66bd2dd41f1d48bd40d44d5b7c7d160e8b7996a60c8f484e2975ef73c7cb7
+  languageName: node
+  linkType: hard
+
+"unconfig@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "unconfig@npm:7.5.0"
+  dependencies:
+    "@quansync/fs": "npm:^1.0.0"
     defu: "npm:^6.1.4"
-    importx: "npm:^0.5.1"
-  checksum: 10c0/cfdf536f366cf76294a83e05ae9388a534324ca4a7e39d3e87a1e14c2eeb62809a41267b3fb02e7794077d5224b011385afa83e812a0ee43d90284f1c653ef52
+    jiti: "npm:^2.6.1"
+    quansync: "npm:^1.0.0"
+    unconfig-core: "npm:7.5.0"
+  checksum: 10c0/940cb2b30d802e4edbb36c0469d122ec5d2402b20635aa71c223d24db431e2b83624672d1b42ba0023085111f3dddccc77516d23b79e1f0d6c67798a1351820c
   languageName: node
   linkType: hard
 
@@ -11670,29 +11620,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:0.19.5":
-  version: 0.19.5
-  resolution: "vuetify-nuxt-module@npm:0.19.5"
+"vuetify-nuxt-module@npm:v1.0.0-beta.1":
+  version: 1.0.0-beta.1
+  resolution: "vuetify-nuxt-module@npm:1.0.0-beta.1"
   dependencies:
-    "@nuxt/kit": "npm:^3.15.4 || ^4.0.0"
+    "@nuxt/kit": "npm:^4.3.1"
     defu: "npm:^6.1.4"
-    destr: "npm:^2.0.3"
+    destr: "npm:^2.0.5"
     local-pkg: "npm:^1.1.2"
-    pathe: "npm:^1.1.2"
-    perfect-debounce: "npm:^1.0.0"
-    semver: "npm:^7.7.3"
-    ufo: "npm:^1.5.4"
-    unconfig: "npm:^0.6.1"
+    pathe: "npm:^2.0.3"
+    perfect-debounce: "npm:^2.1.0"
+    semver: "npm:^7.7.4"
+    ufo: "npm:^1.6.3"
+    unconfig: "npm:^7.5.0"
     upath: "npm:^2.0.1"
     vite-plugin-vuetify: "npm:^2.1.3"
-    vuetify: "npm:^3.7.0 || ^4.0.0-0"
-  checksum: 10c0/037f4ad151b49527c3704803bb303b2f7ccbbc8a61c0dccb55d6f76ad59fe296cc15ac59f80fa1657ee68cfd7b6df8e2777877ef622297346ce42a11b1499700
+    vuetify: "npm:^4.0.1"
+  checksum: 10c0/6fbd5d25636b6ba32f2d24e4636cd68461cb0ec72dcf392388af6a3907e93ee80b01d80980a2572a88f422453d603160fd4878b927da8782da50b5f09e8c3226
   languageName: node
   linkType: hard
 
-"vuetify@npm:^3.7.0 || ^4.0.0-0":
-  version: 4.0.2
-  resolution: "vuetify@npm:4.0.2"
+"vuetify@npm:^4.0.1":
+  version: 4.0.3
+  resolution: "vuetify@npm:4.0.3"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ">=2.1.0"
@@ -11705,7 +11655,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/9cdd11aa42c26dc00d2abf6df084e2a78675911eefede0b0e54759b1920fda68cf173b1fda43abdf514bb6e6ce73210babdf114c15c226276f056fce66e2930b
+  checksum: 10c0/bcecdf1639c971ef7228ca6b30d65173b2ab10d463549b926b5f8cc8b226c207a9127dfcffdc8d5f64b78dc41fcc8526cb3a0821f062ad7ace2b4d23554652fd
   languageName: node
   linkType: hard
 

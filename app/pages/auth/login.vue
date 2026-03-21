@@ -136,7 +136,7 @@
               <v-divider />
             </div>
 
-            <v-row dense>
+            <v-row density="comfortable">
               <v-col
                 v-for="p in authMethods.oauth2.providers"
                 :key="p.name"

@@ -293,7 +293,10 @@
     "deselect": "Abwählen"
   },
   "nav": {
-    "openMenu": "Menü öffnen"
+    "openMenu": "Menü öffnen",
+    "skipToContent": "Zum Inhalt springen",
+    "mainNavigation": "Hauptnavigation",
+    "userMenu": "Benutzermenü"
   },
   "users": {
     "create": "Benutzer erstellen",

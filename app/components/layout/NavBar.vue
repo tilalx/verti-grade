@@ -10,7 +10,7 @@
         >
             <div class="nav-inner">
                 <!-- Logo -->
-                <router-link to="/" class="nav-logo">
+                <router-link to="/" class="nav-logo" :aria-label="$t('routes.home')">
                     <NuxtImg
                         v-if="logo_url"
                         :src="logo_url"
@@ -29,7 +29,7 @@
 
                 <!-- Desktop Nav Links -->
                 <ClientOnly>
-                    <nav v-if="isLoggedIn && mdAndUp" class="nav-links">
+                    <nav v-if="isLoggedIn && mdAndUp" class="nav-links" :aria-label="$t('nav.mainNavigation')">
                         <LayoutNavLink
                             v-for="link in desktopLinks"
                             :key="link.to"
@@ -78,6 +78,7 @@
             temporary
             width="260"
             class="mobile-drawer"
+            :aria-label="$t('nav.mainNavigation')"
         >
 
             <v-list nav density="compact" class="drawer-list">

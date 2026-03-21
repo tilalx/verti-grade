@@ -1,6 +1,7 @@
 <template>
+    <a href="#main-content" class="skip-link">{{ $t('nav.skipToContent') }}</a>
     <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
-    <v-main>
+    <v-main id="main-content" tabindex="-1">
         <NuxtPage />
     </v-main>
 
@@ -113,3 +114,24 @@ onBeforeUnmount(() => {
     unsubSettings?.()?.catch?.(() => {})
 })
 </script>
+
+<style scoped>
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 9999;
+    padding: 8px 16px;
+    background: rgb(var(--v-theme-primary));
+    color: #fff;
+    border-radius: 0 0 8px 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+</style>
