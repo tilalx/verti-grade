@@ -8,7 +8,7 @@
             @change="handleFileChange"
             accept="application/json"
         />
-        
+
         <!-- Import Preview Dialog -->
         <v-dialog v-model="showPreviewDialog" persistent max-width="900px">
             <v-card>
@@ -16,8 +16,11 @@
                     <span class="text-h5">Confirm Import</span>
                 </v-card-title>
                 <v-card-text>
-                    <p class="mb-4">The following routes and ratings will be imported. Please review the data before confirming.</p>
-                    
+                    <p class="mb-4">
+                        The following routes and ratings will be imported.
+                        Please review the data before confirming.
+                    </p>
+
                     <v-data-table
                         :headers="previewHeaders"
                         :items="routesToImport"
@@ -37,42 +40,74 @@
                         <template v-slot:expanded-row="{ columns, item }">
                             <tr>
                                 <td :colspan="columns.length">
-                                    <v-card v-if="item.ratings?.length" class="my-4" elevation="2">
-                                        <v-card-title class="text-subtitle-1">Ratings for {{ item.name }}</v-card-title>
+                                    <v-card
+                                        v-if="item.ratings?.length"
+                                        class="my-4"
+                                        elevation="2"
+                                    >
+                                        <v-card-title class="text-subtitle-1"
+                                            >Ratings for
+                                            {{ item.name }}</v-card-title
+                                        >
                                         <v-list density="compact">
-                                            <v-list-item v-for="(rating, i) in item.ratings" :key="i">
-                                                <v-list-item-title><strong>Rating:</strong> {{ rating.rating }}/5, <strong>Difficulty:</strong> {{ rating.difficulty }}</v-list-item-title>
-                                                <v-list-item-subtitle>{{ rating.comment || 'No comment' }}</v-list-item-subtitle>
+                                            <v-list-item
+                                                v-for="(
+                                                    rating, i
+                                                ) in item.ratings"
+                                                :key="i"
+                                            >
+                                                <v-list-item-title
+                                                    ><strong>Rating:</strong>
+                                                    {{ rating.rating }}/5,
+                                                    <strong>Difficulty:</strong>
+                                                    {{
+                                                        rating.difficulty
+                                                    }}</v-list-item-title
+                                                >
+                                                <v-list-item-subtitle>{{
+                                                    rating.comment ||
+                                                    'No comment'
+                                                }}</v-list-item-subtitle>
                                             </v-list-item>
                                         </v-list>
                                     </v-card>
-                                    <p v-else class="text-center pa-4">No ratings to import for this route.</p>
+                                    <p v-else class="text-center pa-4">
+                                        No ratings to import for this route.
+                                    </p>
                                 </td>
                             </tr>
                         </template>
                     </v-data-table>
-
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn text @click="cancelImport">Cancel</v-btn>
-                    <v-btn color="primary" @click="confirmImport" :loading="loading">Confirm & Import</v-btn>
+                    <v-btn
+                        color="primary"
+                        @click="confirmImport"
+                        :loading="loading"
+                        >Confirm & Import</v-btn
+                    >
                 </v-card-actions>
             </v-card>
         </v-dialog>
 
         <!-- Snackbar for feedback -->
-        <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="4000" top>
+        <v-snackbar
+            v-model="snackbar.show"
+            :color="snackbar.color"
+            timeout="4000"
+            top
+        >
             {{ snackbar.message }}
         </v-snackbar>
     </div>
 </template>
 
 <script setup>
-
 const pb = usePocketbase()
 const emit = defineEmits(['closed'])
-const currentUser = pb.authStore.model;
+const currentUser = pb.authStore.model
 
 const fileInput = ref(null)
 const showPreviewDialog = ref(false)
@@ -112,20 +147,23 @@ const handleFileChange = async (event) => {
         try {
             const parsedData = JSON.parse(reader.result)
             if (!Array.isArray(parsedData)) {
-                throw new Error("JSON file is not an array.")
+                throw new Error('JSON file is not an array.')
             }
-            routesToImport.value = parsedData.map(route => ({
+            routesToImport.value = parsedData.map((route) => ({
                 ...route,
-                ratingsCount: route.ratings?.length || 0
-            }));
+                ratingsCount: route.ratings?.length || 0,
+            }))
             showPreviewDialog.value = true
         } catch (error) {
-            console.error("Error parsing JSON file:", error)
-            showSnackbar("Invalid JSON file. Please check the file format.", "error")
+            console.error('Error parsing JSON file:', error)
+            showSnackbar(
+                'Invalid JSON file. Please check the file format.',
+                'error',
+            )
         }
     }
     reader.onerror = () => {
-        showSnackbar("Failed to read the file.", "error")
+        showSnackbar('Failed to read the file.', 'error')
     }
     reader.readAsText(file)
 
@@ -140,7 +178,7 @@ const cancelImport = () => {
 
 const confirmImport = async () => {
     loading.value = true
-    const jsonData = routesToImport.value;
+    const jsonData = routesToImport.value
 
     try {
         const fallbackCreator = buildFallbackCreator(currentUser)
@@ -149,9 +187,9 @@ const confirmImport = async () => {
 
         for (const route of jsonData) {
             try {
-                const createdRoute = await pb.collection('routes').create(
-                    sanitizeRoutePayload(route, fallbackCreator),
-                )
+                const createdRoute = await pb
+                    .collection('routes')
+                    .create(sanitizeRoutePayload(route, fallbackCreator))
 
                 if (Array.isArray(route.ratings) && route.ratings.length > 0) {
                     for (const rating of route.ratings) {
@@ -163,10 +201,15 @@ const confirmImport = async () => {
                                 }),
                             )
                         } catch (ratingError) {
-                            console.error('Failed to insert rating', ratingError)
+                            console.error(
+                                'Failed to insert rating',
+                                ratingError,
+                            )
                             ratingErrors.push({
                                 routeName: route.name,
-                                message: ratingError?.message ?? 'Unknown rating error',
+                                message:
+                                    ratingError?.message ??
+                                    'Unknown rating error',
                             })
                         }
                     }
@@ -197,7 +240,10 @@ const confirmImport = async () => {
         emit('closed')
     } catch (error) {
         console.error('Error during import:', error)
-        showSnackbar(error.message || 'An unexpected error occurred during import.', 'error')
+        showSnackbar(
+            error.message || 'An unexpected error occurred during import.',
+            'error',
+        )
     } finally {
         loading.value = false
         cancelImport()
@@ -235,11 +281,12 @@ function sanitizeRoutePayload(route, fallbackCreator) {
         location: route.location || null,
         type: route.type || null,
         comment: typeof route.comment === 'string' ? route.comment : '',
-        creator: normalizedCreators.length > 0
-            ? normalizedCreators
-            : fallbackCreator
-                ? [fallbackCreator]
-                : [],
+        creator:
+            normalizedCreators.length > 0
+                ? normalizedCreators
+                : fallbackCreator
+                  ? [fallbackCreator]
+                  : [],
         screw_date: route.screw_date || null,
         color: route.color || null,
         archived: Boolean(route.archived),
@@ -257,7 +304,9 @@ function sanitizeRatingPayload(rating, meta) {
 
     const payload = {
         route_id: meta.routeId,
-        rating: Number.isFinite(Number(rating.rating)) ? Number(rating.rating) : null,
+        rating: Number.isFinite(Number(rating.rating))
+            ? Number(rating.rating)
+            : null,
         difficulty: Number.isFinite(Number(rating.difficulty))
             ? Number(rating.difficulty)
             : 0,

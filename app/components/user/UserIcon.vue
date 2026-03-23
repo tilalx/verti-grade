@@ -17,7 +17,9 @@
             >
                 <v-avatar size="36" :color="image ? undefined : 'primary'">
                     <v-img v-if="image" :src="image" :alt="displayName" cover />
-                    <span v-else class="text-subtitle-2 font-weight-bold">{{ initials }}</span>
+                    <span v-else class="text-subtitle-2 font-weight-bold">{{
+                        initials
+                    }}</span>
                 </v-avatar>
             </v-btn>
         </template>
@@ -46,7 +48,6 @@
 </template>
 
 <script setup>
-
 const router = useRouter()
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -55,7 +56,10 @@ const { t } = useI18n()
 
 const user = computed(() => {
     try {
-        return JSON.parse(localStorage.getItem('pocketbase_auth') ?? '{}')?.record ?? null
+        return (
+            JSON.parse(localStorage.getItem('pocketbase_auth') ?? '{}')
+                ?.record ?? null
+        )
     } catch {
         return null
     }
@@ -66,8 +70,12 @@ const image = computed(() => {
     return pb.files.getURL(user.value, user.value.avatar, { thumb: '100x100' })
 })
 
-const displayName = computed(() =>
-    user.value?.name || user.value?.username || user.value?.email || t('account.unknownUser')
+const displayName = computed(
+    () =>
+        user.value?.name ||
+        user.value?.username ||
+        user.value?.email ||
+        t('account.unknownUser'),
 )
 
 const initials = computed(() => {

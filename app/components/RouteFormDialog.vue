@@ -2,7 +2,9 @@
     <v-dialog v-model="dialogOpen" max-width="560" scrollable>
         <v-card>
             <v-card-title class="pa-4 pb-3">
-                <span class="text-h6">{{ isEditMode ? $t('actions.edit') : $t('climbing.create') }}</span>
+                <span class="text-h6">{{
+                    isEditMode ? $t('actions.edit') : $t('climbing.create')
+                }}</span>
             </v-card-title>
             <v-divider />
             <v-card-text class="pa-4">
@@ -139,8 +141,15 @@
             <v-divider />
             <v-card-actions class="pa-3">
                 <v-spacer />
-                <v-btn variant="text" @click="close">{{ $t('actions.cancel') }}</v-btn>
-                <v-btn color="primary" variant="tonal" :loading="saving" @click="submit">
+                <v-btn variant="text" @click="close">{{
+                    $t('actions.cancel')
+                }}</v-btn>
+                <v-btn
+                    color="primary"
+                    variant="tonal"
+                    :loading="saving"
+                    @click="submit"
+                >
                     {{ isEditMode ? $t('actions.save') : $t('actions.create') }}
                 </v-btn>
             </v-card-actions>
@@ -157,16 +166,19 @@ import { required } from '~/utils/validation'
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
 
-type VFormHandle = { validate: () => Promise<{ valid: boolean }>; reset: () => void } | null
+type VFormHandle = {
+    validate: () => Promise<{ valid: boolean }>
+    reset: () => void
+} | null
 type DifficultySignInternal = '' | '+' | '-'
 
 const colorSwatches = [
-    ['#F44336', '#FF9800', '#FFC107'],  // red, orange, yellow
-    ['#4CAF50', '#009688', '#2196F3'],  // green, teal, blue
-    ['#673AB7', '#E91E63', '#FF5722'],  // purple, pink, deep orange
-    ['#8BC34A', '#00BCD4', '#795548'],  // lime, cyan, brown
-    ['#FFFFFF', '#9E9E9E', '#212121'],  // white, gray, black
-    ['#F8BBD0', '#B3E5FC', '#C8E6C9'],  // pastel pink, light blue, light green
+    ['#F44336', '#FF9800', '#FFC107'], // red, orange, yellow
+    ['#4CAF50', '#009688', '#2196F3'], // green, teal, blue
+    ['#673AB7', '#E91E63', '#FF5722'], // purple, pink, deep orange
+    ['#8BC34A', '#00BCD4', '#795548'], // lime, cyan, brown
+    ['#FFFFFF', '#9E9E9E', '#212121'], // white, gray, black
+    ['#F8BBD0', '#B3E5FC', '#C8E6C9'], // pastel pink, light blue, light green
 ]
 
 const dialogOpen = ref(false)
@@ -215,7 +227,8 @@ const nameRules = [
 ]
 
 const isAnchorPointValid = (value: number | null) => {
-    if (value === null || value === undefined || String(value) === '') return false
+    if (value === null || value === undefined || String(value) === '')
+        return false
     const n = Number(value)
     if (!Number.isInteger(n)) return false
     if (n === 0) return isBoulderRoute.value || originalAnchorPointIsZero.value
@@ -224,12 +237,14 @@ const isAnchorPointValid = (value: number | null) => {
 
 const anchorPointRules = [
     (v: number | null) =>
-        (v !== null && v !== undefined && String(v) !== '') || t('validation.required'),
-    (v: number | null) => isAnchorPointValid(v) || t('validation.anchorPointRange'),
+        (v !== null && v !== undefined && String(v) !== '') ||
+        t('validation.required'),
+    (v: number | null) =>
+        isAnchorPointValid(v) || t('validation.anchorPointRange'),
 ]
 
-const creatorRule = (v: string[]) => (Array.isArray(v) && v.length > 0) || t('validation.required')
-
+const creatorRule = (v: string[]) =>
+    (Array.isArray(v) && v.length > 0) || t('validation.required')
 
 const toDifficultySignInternal = (
     raw: RouteRecord['difficulty_sign'],

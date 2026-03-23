@@ -1,10 +1,10 @@
 import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js';
+import { createPocketBase } from '../../utils/pb-server.js'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const pb = createPocketBase();
+    const pb = createPocketBase()
     const res = event.node.res
 
     try {
@@ -38,13 +38,13 @@ export default eventHandler(async (event) => {
         }
 
         // ── Layout constants ───────────────────────────────────────────────
-        const QR_SIZE   = 110  // Rendered size of the QR code in PDF points (square)
-        const QR_PX     = 330  // Pixel size of the generated QR image (3× for sharpness)
+        const QR_SIZE = 110 // Rendered size of the QR code in PDF points (square)
+        const QR_PX = 330 // Pixel size of the generated QR image (3× for sharpness)
 
         // Color circle — centered on the QR code.
         // Error correction H (30%) supports up to ~15pt radius safely at QR_SIZE=110.
-        const CIRCLE_RADIUS = 12   // Radius of the route color circle
-        const CIRCLE_BORDER = 1.5  // Dark outline for light-color visibility
+        const CIRCLE_RADIUS = 12 // Radius of the route color circle
+        const CIRCLE_BORDER = 1.5 // Dark outline for light-color visibility
         // ──────────────────────────────────────────────────────────────────
 
         const doc = new PDFDocument({ size: [595.28, 841.89] })
@@ -103,20 +103,27 @@ export default eventHandler(async (event) => {
 
             doc.fillColor('black')
 
-            if (climbingRoute.anchor_point !== null && climbingRoute.anchor_point !== undefined && climbingRoute.anchor_point !== 0) {
+            if (
+                climbingRoute.anchor_point !== null &&
+                climbingRoute.anchor_point !== undefined &&
+                climbingRoute.anchor_point !== 0
+            ) {
                 const anchorValue = String(climbingRoute.anchor_point).trim()
 
                 const boxWidth = 32
                 const boxX = x + 65
                 const boxY = y + 5
 
-                doc.font('Helvetica').fontSize(8).fillColor('black')
+                doc.font('Helvetica')
+                    .fontSize(8)
+                    .fillColor('black')
                     .text('Seil', boxX, boxY + 4, {
                         width: boxWidth,
                         align: 'center',
                     })
 
-                doc.font('Helvetica-Bold').fontSize(12)
+                doc.font('Helvetica-Bold')
+                    .fontSize(12)
                     .text(anchorValue, boxX, boxY + 12, {
                         width: boxWidth,
                         align: 'center',
@@ -136,7 +143,12 @@ export default eventHandler(async (event) => {
                     creatorText,
                     calculateStartX(x + 80, creatorText, doc, creatorFontSize),
                     y + 130,
-                    { align: 'left', width: maxWidth, lineBreak: false, ellipsis: true },
+                    {
+                        align: 'left',
+                        width: maxWidth,
+                        lineBreak: false,
+                        ellipsis: true,
+                    },
                 )
             }
 
@@ -153,8 +165,8 @@ export default eventHandler(async (event) => {
             // ── QR code ────────────────────────────────────────────────────
             // width/height (not fit:[]) guarantees exact QR_SIZE × QR_SIZE
             // so the circle center calculation is always precise.
-            const qrX = x + 158
-            const qrY = y - 10
+            const qrX = x + 159
+            const qrY = y - 9
 
             const serverUrl = settings.application_url + `/route?id=${id}`
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
@@ -166,14 +178,19 @@ export default eventHandler(async (event) => {
                     light: '#FFFFFF',
                 },
             })
-            doc.image(qrCodeBuffer, qrX, qrY, { width: QR_SIZE, height: QR_SIZE })
+            doc.image(qrCodeBuffer, qrX, qrY, {
+                width: QR_SIZE,
+                height: QR_SIZE,
+            })
 
             // ── Color circle — precisely centered on the QR image ──────────
             const cx = qrX + QR_SIZE / 2
             const cy = qrY + QR_SIZE / 2
 
             // White clearing disc
-            doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER + 1).fill('#FFFFFF')
+            doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER + 1).fill(
+                '#FFFFFF',
+            )
             // Dark outline ring
             doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER).fill('#333333')
             // Thin white gap

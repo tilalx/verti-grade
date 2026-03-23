@@ -1,6 +1,5 @@
 <template>
     <v-container fluid class="comments-page">
-
         <!-- ── Page Header + inline stats ────────────────────────────────── -->
         <div class="d-flex align-center justify-space-between mb-3">
             <h1 class="text-h5 font-weight-bold">{{ t('routes.comments') }}</h1>
@@ -9,24 +8,62 @@
         <!-- Stats: horizontal scroll on mobile, row on desktop -->
         <div class="stats-scroll mb-3">
             <div class="stats-scroll__inner">
-                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
-                    <div class="text-h6 font-weight-bold text-primary">{{ statsData.length }}</div>
-                    <div class="text-caption text-medium-emphasis">{{ t('comments.totalReviews') }}</div>
-                </v-card>
-                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
-                    <div class="d-flex align-center justify-center ga-1">
-                        <span class="text-h6 font-weight-bold text-warning">{{ stats.avgRating }}</span>
-                        <v-icon color="yellow-darken-2" size="16">mdi-star</v-icon>
+                <v-card
+                    rounded="lg"
+                    border
+                    flat
+                    class="stat-chip pa-2 px-3 text-center"
+                >
+                    <div class="text-h6 font-weight-bold text-primary">
+                        {{ statsData.length }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">{{ t('comments.avgRating') }}</div>
+                    <div class="text-caption text-medium-emphasis">
+                        {{ t('comments.totalReviews') }}
+                    </div>
                 </v-card>
-                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
-                    <div class="text-h6 font-weight-bold text-success">{{ stats.thisWeek }}</div>
-                    <div class="text-caption text-medium-emphasis">{{ t('comments.thisWeek') }}</div>
+                <v-card
+                    rounded="lg"
+                    border
+                    flat
+                    class="stat-chip pa-2 px-3 text-center"
+                >
+                    <div class="d-flex align-center justify-center ga-1">
+                        <span class="text-h6 font-weight-bold text-warning">{{
+                            stats.avgRating
+                        }}</span>
+                        <v-icon color="yellow-darken-2" size="16"
+                            >mdi-star</v-icon
+                        >
+                    </div>
+                    <div class="text-caption text-medium-emphasis">
+                        {{ t('comments.avgRating') }}
+                    </div>
                 </v-card>
-                <v-card rounded="lg" border flat class="stat-chip pa-2 px-3 text-center">
-                    <div class="text-h6 font-weight-bold text-error">{{ stats.lowRated }}</div>
-                    <div class="text-caption text-medium-emphasis">{{ t('comments.lowRated') }}</div>
+                <v-card
+                    rounded="lg"
+                    border
+                    flat
+                    class="stat-chip pa-2 px-3 text-center"
+                >
+                    <div class="text-h6 font-weight-bold text-success">
+                        {{ stats.thisWeek }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis">
+                        {{ t('comments.thisWeek') }}
+                    </div>
+                </v-card>
+                <v-card
+                    rounded="lg"
+                    border
+                    flat
+                    class="stat-chip pa-2 px-3 text-center"
+                >
+                    <div class="text-h6 font-weight-bold text-error">
+                        {{ stats.lowRated }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis">
+                        {{ t('comments.lowRated') }}
+                    </div>
                 </v-card>
             </div>
         </div>
@@ -48,7 +85,11 @@
                         class="flex-grow-1"
                     />
                     <v-btn
-                        :icon="filtersExpanded ? 'mdi-filter-off' : 'mdi-filter-variant'"
+                        :icon="
+                            filtersExpanded
+                                ? 'mdi-filter-off'
+                                : 'mdi-filter-variant'
+                        "
                         variant="tonal"
                         density="compact"
                         size="small"
@@ -60,7 +101,11 @@
                 <!-- Collapsible filters: always visible on sm+, toggle on mobile -->
                 <v-expand-transition>
                     <div v-show="filtersExpanded || !isMobile">
-                        <v-row density="comfortable" align="center" class="mt-2">
+                        <v-row
+                            density="comfortable"
+                            align="center"
+                            class="mt-2"
+                        >
                             <v-col cols="6" sm="4" md="3">
                                 <v-select
                                     v-model="selectedLocation"
@@ -105,10 +150,24 @@
                         </v-row>
 
                         <!-- Rating chips + date toggle -->
-                        <v-row density="comfortable" align="center" class="mt-1">
+                        <v-row
+                            density="comfortable"
+                            align="center"
+                            class="mt-1"
+                        >
                             <v-col cols="12" sm="auto">
-                                <v-chip-group v-model="selectedRating" color="warning" column mandatory>
-                                    <v-chip filter :value="0" size="small" variant="tonal">
+                                <v-chip-group
+                                    v-model="selectedRating"
+                                    color="warning"
+                                    column
+                                    mandatory
+                                >
+                                    <v-chip
+                                        filter
+                                        :value="0"
+                                        size="small"
+                                        variant="tonal"
+                                    >
                                         {{ t('filter.all') }}
                                     </v-chip>
                                     <v-chip
@@ -133,9 +192,15 @@
                                     divided
                                     variant="outlined"
                                 >
-                                    <v-btn value="" size="small">{{ t('filter.all') }}</v-btn>
-                                    <v-btn value="week" size="small">{{ t('comments.thisWeek') }}</v-btn>
-                                    <v-btn value="month" size="small">{{ t('comments.thisMonth') }}</v-btn>
+                                    <v-btn value="" size="small">{{
+                                        t('filter.all')
+                                    }}</v-btn>
+                                    <v-btn value="week" size="small">{{
+                                        t('comments.thisWeek')
+                                    }}</v-btn>
+                                    <v-btn value="month" size="small">{{
+                                        t('comments.thisMonth')
+                                    }}</v-btn>
                                 </v-btn-toggle>
                             </v-col>
                         </v-row>
@@ -145,7 +210,10 @@
 
             <!-- Bulk-action bar, slides in when items are selected -->
             <v-slide-y-transition>
-                <div v-if="selectedCount > 0" class="bulk-bar px-4 py-2 d-flex align-center ga-2 flex-wrap">
+                <div
+                    v-if="selectedCount > 0"
+                    class="bulk-bar px-4 py-2 d-flex align-center ga-2 flex-wrap"
+                >
                     <v-icon size="18" color="primary">mdi-check-circle</v-icon>
                     <span class="text-body-2 font-weight-medium">
                         {{ t('comments.selected', { n: selectedCount }) }}
@@ -182,9 +250,15 @@
             flat
             class="py-16 text-center"
         >
-            <v-icon size="56" color="grey-lighten-2">mdi-comment-off-outline</v-icon>
-            <div class="text-h6 mt-4 text-medium-emphasis">{{ t('comments.noComments') }}</div>
-            <div class="text-body-2 text-disabled mt-1">{{ t('comments.noCommentsHint') }}</div>
+            <v-icon size="56" color="grey-lighten-2"
+                >mdi-comment-off-outline</v-icon
+            >
+            <div class="text-h6 mt-4 text-medium-emphasis">
+                {{ t('comments.noComments') }}
+            </div>
+            <div class="text-body-2 text-disabled mt-1">
+                {{ t('comments.noCommentsHint') }}
+            </div>
         </v-card>
 
         <!-- ── Comment Cards ───────────────────────────────────────────────── -->
@@ -201,30 +275,62 @@
                     border
                     flat
                     class="comment-card d-flex flex-column"
-                    :class="{ 'comment-card--selected': selectedMap[comment.id] }"
+                    :class="{
+                        'comment-card--selected': selectedMap[comment.id],
+                    }"
                 >
                     <!-- Header: avatar + user + date + star rating -->
                     <v-card-item class="pb-1 pt-3">
                         <template #prepend>
                             <v-avatar
                                 size="38"
-                                :color="selectedMap[comment.id] ? 'primary' : (comment.userAvatar ? undefined : avatarColor(comment.userName))"
+                                :color="
+                                    selectedMap[comment.id]
+                                        ? 'primary'
+                                        : comment.userAvatar
+                                          ? undefined
+                                          : avatarColor(comment.userName)
+                                "
                                 class="select-avatar"
-                                :title="t(selectedMap[comment.id] ? 'comments.deselect' : 'comments.select')"
+                                :title="
+                                    t(
+                                        selectedMap[comment.id]
+                                            ? 'comments.deselect'
+                                            : 'comments.select',
+                                    )
+                                "
                                 @click="toggleSelect(comment.id)"
                             >
-                                <v-icon v-if="selectedMap[comment.id]" color="white" size="20">mdi-check</v-icon>
-                                <v-img v-else-if="comment.userAvatar" :src="comment.userAvatar" cover />
-                                <span v-else class="text-caption font-weight-bold text-white">
+                                <v-icon
+                                    v-if="selectedMap[comment.id]"
+                                    color="white"
+                                    size="20"
+                                    >mdi-check</v-icon
+                                >
+                                <v-img
+                                    v-else-if="comment.userAvatar"
+                                    :src="comment.userAvatar"
+                                    cover
+                                />
+                                <span
+                                    v-else
+                                    class="text-caption font-weight-bold text-white"
+                                >
                                     {{ initials(comment.userName) }}
                                 </span>
                             </v-avatar>
                         </template>
 
-                        <v-card-title class="text-body-2 font-weight-semibold px-0 py-0" style="line-height:1.3">
+                        <v-card-title
+                            class="text-body-2 font-weight-semibold px-0 py-0"
+                            style="line-height: 1.3"
+                        >
                             {{ comment.userName }}
                         </v-card-title>
-                        <v-card-subtitle class="text-caption px-0 py-0" style="opacity:.7">
+                        <v-card-subtitle
+                            class="text-caption px-0 py-0"
+                            style="opacity: 0.7"
+                        >
                             {{ formatDate(comment.created) }}
                         </v-card-subtitle>
 
@@ -246,9 +352,16 @@
                             :to="`/route?id=${comment.expand?.route_id?.id}`"
                             class="text-body-2 font-weight-medium text-primary text-decoration-none route-link"
                         >
-                            <v-icon size="13" class="mb-1 mr-1">mdi-routes</v-icon>{{ comment.routeName }}
+                            <v-icon size="13" class="mb-1 mr-1"
+                                >mdi-routes</v-icon
+                            >{{ comment.routeName }}
                         </NuxtLink>
-                        <v-chip v-if="comment.location" size="x-small" variant="tonal" class="ml-1">
+                        <v-chip
+                            v-if="comment.location"
+                            size="x-small"
+                            variant="tonal"
+                            class="ml-1"
+                        >
                             {{ comment.location }}
                         </v-chip>
                         <v-chip
@@ -267,18 +380,32 @@
                     <v-card-text class="py-3 flex-grow-1">
                         <p
                             class="text-body-2 comment-text mb-0"
-                            :class="{ 'comment-collapsed': !expandedIds.has(comment.id) }"
-                        >{{ comment.comment }}</p>
+                            :class="{
+                                'comment-collapsed': !expandedIds.has(
+                                    comment.id,
+                                ),
+                            }"
+                        >
+                            {{ comment.comment }}
+                        </p>
                         <v-btn
                             v-if="isLong(comment.comment)"
                             variant="text"
                             density="compact"
                             size="x-small"
-                            :color="expandedIds.has(comment.id) ? 'default' : 'primary'"
+                            :color="
+                                expandedIds.has(comment.id)
+                                    ? 'default'
+                                    : 'primary'
+                            "
                             class="mt-1 px-0 text-none"
                             @click="toggleExpand(comment.id)"
                         >
-                            {{ expandedIds.has(comment.id) ? t('comments.showLess') : t('comments.showMore') }}
+                            {{
+                                expandedIds.has(comment.id)
+                                    ? t('comments.showLess')
+                                    : t('comments.showMore')
+                            }}
                         </v-btn>
                     </v-card-text>
 
@@ -289,18 +416,40 @@
                             variant="text"
                             density="compact"
                             class="text-none"
-                            :color="selectedMap[comment.id] ? 'primary' : 'default'"
-                            :prepend-icon="selectedMap[comment.id] ? 'mdi-check-circle' : 'mdi-circle-outline'"
+                            :color="
+                                selectedMap[comment.id] ? 'primary' : 'default'
+                            "
+                            :prepend-icon="
+                                selectedMap[comment.id]
+                                    ? 'mdi-check-circle'
+                                    : 'mdi-circle-outline'
+                            "
                             @click="toggleSelect(comment.id)"
                         >
-                            {{ t(selectedMap[comment.id] ? 'comments.deselect' : 'comments.select') }}
+                            {{
+                                t(
+                                    selectedMap[comment.id]
+                                        ? 'comments.deselect'
+                                        : 'comments.select',
+                                )
+                            }}
                         </v-btn>
                         <v-spacer />
-                        <v-btn icon size="small" variant="text" @click="openEdit(comment)">
+                        <v-btn
+                            icon
+                            size="small"
+                            variant="text"
+                            @click="openEdit(comment)"
+                        >
                             <v-icon size="18">mdi-pencil-outline</v-icon>
-                            <v-tooltip activator="parent" location="top">{{ t('actions.edit') }}</v-tooltip>
+                            <v-tooltip activator="parent" location="top">{{
+                                t('actions.edit')
+                            }}</v-tooltip>
                         </v-btn>
-                        <CommentsDeleteComment :commentId="comment.id" @comment-deleted="onCommentDeleted(comment.id)" />
+                        <CommentsDeleteComment
+                            :commentId="comment.id"
+                            @comment-deleted="onCommentDeleted(comment.id)"
+                        />
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -309,7 +458,12 @@
         <!-- Result count + load more -->
         <div v-if="!loading && comments.length" class="text-center mt-4">
             <p class="text-caption text-medium-emphasis mb-3">
-                {{ t('comments.showing', { n: comments.length, total: totalItems }) }}
+                {{
+                    t('comments.showing', {
+                        n: comments.length,
+                        total: totalItems,
+                    })
+                }}
             </p>
             <v-btn
                 v-if="hasMore"
@@ -323,21 +477,34 @@
         </div>
 
         <!-- ── Edit Dialog (shared ReviewFormDialog component) ────────────── -->
-        <ReviewFormDialog v-model="editDialog" :review="editingReview" @saved="onReviewSaved" />
+        <ReviewFormDialog
+            v-model="editDialog"
+            :review="editingReview"
+            @saved="onReviewSaved"
+        />
 
         <!-- ── Bulk Delete Dialog ───────────────────────────────────────────── -->
         <v-dialog v-model="bulkDeleteDialog" max-width="380">
             <v-card rounded="xl">
-                <v-card-title class="pa-5 pb-3 text-body-1 font-weight-semibold">
+                <v-card-title
+                    class="pa-5 pb-3 text-body-1 font-weight-semibold"
+                >
                     {{ t('comments.bulkDeleteTitle', { n: selectedCount }) }}
                 </v-card-title>
                 <v-card-text class="pa-5 pt-0 text-body-2 text-medium-emphasis">
                     {{ t('notifications.deleteMoreItems') }}
                 </v-card-text>
                 <v-card-actions class="pa-4 pt-0">
-                    <v-btn variant="text" @click="bulkDeleteDialog = false">{{ t('actions.cancel') }}</v-btn>
+                    <v-btn variant="text" @click="bulkDeleteDialog = false">{{
+                        t('actions.cancel')
+                    }}</v-btn>
                     <v-spacer />
-                    <v-btn color="error" variant="flat" :loading="bulkDeleting" @click="bulkDelete">
+                    <v-btn
+                        color="error"
+                        variant="flat"
+                        :loading="bulkDeleting"
+                        @click="bulkDelete"
+                    >
                         {{ t('actions.delete') }}
                     </v-btn>
                 </v-card-actions>
@@ -345,7 +512,12 @@
         </v-dialog>
 
         <!-- ── Snackbar ────────────────────────────────────────────────────── -->
-        <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="top" timeout="4000">
+        <v-snackbar
+            v-model="snackbar.show"
+            :color="snackbar.color"
+            location="top"
+            timeout="4000"
+        >
             {{ snackbar.message }}
         </v-snackbar>
     </v-container>
@@ -365,6 +537,7 @@ useHead({
 definePageMeta({
     authRequired: true,
     middleware: ['auth'],
+    requiredPermission: 'manage_comments',
 })
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -417,7 +590,10 @@ const snackbar = reactive({ show: false, message: '', color: 'success' })
 
 const difficulties = computed(() => [
     { text: t('filter.all'), value: null },
-    ...Array.from({ length: 10 }, (_, i) => ({ text: String(i + 1), value: i + 1 })),
+    ...Array.from({ length: 10 }, (_, i) => ({
+        text: String(i + 1),
+        value: i + 1,
+    })),
 ])
 
 const locations = computed(() => [
@@ -443,8 +619,12 @@ const stats = computed(() => {
     const avgRating = (sum / data.length).toFixed(1)
 
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-    const thisWeek = data.filter((c) => new Date(c.created).getTime() > weekAgo).length
-    const lowRated = data.filter((c) => c.rating !== null && c.rating <= 2).length
+    const thisWeek = data.filter(
+        (c) => new Date(c.created).getTime() > weekAgo,
+    ).length
+    const lowRated = data.filter(
+        (c) => c.rating !== null && c.rating <= 2,
+    ).length
 
     return { avgRating, thisWeek, lowRated }
 })
@@ -453,9 +633,12 @@ const stats = computed(() => {
 
 function buildFilter(searchTerm) {
     const parts = []
-    if (selectedRating.value !== 0) parts.push(`rating = ${selectedRating.value}`)
-    if (selectedLocation.value) parts.push(`route_id.location = "${selectedLocation.value}"`)
-    if (selectedDifficulty.value !== null) parts.push(`difficulty = ${selectedDifficulty.value}`)
+    if (selectedRating.value !== 0)
+        parts.push(`rating = ${selectedRating.value}`)
+    if (selectedLocation.value)
+        parts.push(`route_id.location = "${selectedLocation.value}"`)
+    if (selectedDifficulty.value !== null)
+        parts.push(`difficulty = ${selectedDifficulty.value}`)
     if (dateFilter.value === 'week') {
         const d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         parts.push(`created >= "${d}"`)
@@ -472,10 +655,14 @@ function buildFilter(searchTerm) {
 
 function buildSort() {
     switch (sortOrder.value) {
-        case 'oldest':  return '+created'
-        case 'highest': return '-rating'
-        case 'lowest':  return '+rating'
-        default:        return '-created'
+        case 'oldest':
+            return '+created'
+        case 'highest':
+            return '-rating'
+        case 'lowest':
+            return '+rating'
+        default:
+            return '-created'
     }
 }
 
@@ -491,7 +678,9 @@ function mapComment(c) {
             c.expand?.user?.username ||
             t('comments.anonymous'),
         userAvatar: c.expand?.user?.avatar
-            ? pb.files.getURL(c.expand.user, c.expand.user.avatar, { thumb: '100x100' })
+            ? pb.files.getURL(c.expand.user, c.expand.user.avatar, {
+                  thumb: '100x100',
+              })
             : null,
     }
 }
@@ -520,12 +709,14 @@ const fetchList = async (append = false) => {
     }
 
     try {
-        const result = await pb.collection('ratings').getList(page.value, PER_PAGE, {
-            sort: buildSort(),
-            filter: buildFilter(search.value.trim()),
-            expand: 'route_id,user',
-            requestKey: 'commentsList',
-        })
+        const result = await pb
+            .collection('ratings')
+            .getList(page.value, PER_PAGE, {
+                sort: buildSort(),
+                filter: buildFilter(search.value.trim()),
+                expand: 'route_id,user',
+                requestKey: 'commentsList',
+            })
         totalItems.value = result.totalItems
         const mapped = result.items.map(mapComment)
         comments.value = append ? [...comments.value, ...mapped] : mapped
@@ -554,7 +745,16 @@ watch(search, () => {
 })
 
 // Filters that should refetch immediately (no debounce)
-watch([selectedLocation, selectedDifficulty, selectedRating, dateFilter, sortOrder], () => fetchList())
+watch(
+    [
+        selectedLocation,
+        selectedDifficulty,
+        selectedRating,
+        dateFilter,
+        sortOrder,
+    ],
+    () => fetchList(),
+)
 
 // ── Edit ───────────────────────────────────────────────────────────────────
 
@@ -566,7 +766,10 @@ function openEdit(comment) {
 function onReviewSaved(updated) {
     const idx = comments.value.findIndex((c) => c.id === updated.id)
     if (idx !== -1) {
-        comments.value[idx] = mapComment({ ...updated, expand: comments.value[idx].expand })
+        comments.value[idx] = mapComment({
+            ...updated,
+            expand: comments.value[idx].expand,
+        })
     }
     showSnackbar(t('notifications.success.edit'))
     fetchStats()
@@ -640,8 +843,16 @@ function initials(name) {
 }
 
 const AVATAR_COLORS = [
-    'primary', 'secondary', 'success', 'info', 'deep-purple',
-    'teal', 'indigo', 'pink', 'cyan', 'orange',
+    'primary',
+    'secondary',
+    'success',
+    'info',
+    'deep-purple',
+    'teal',
+    'indigo',
+    'pink',
+    'cyan',
+    'orange',
 ]
 
 function avatarColor(name) {
@@ -672,7 +883,9 @@ onMounted(async () => {
     // Detect mobile for collapsible filters
     const mql = window.matchMedia('(max-width: 599.98px)')
     isMobile.value = mql.matches
-    mql.addEventListener('change', (e) => { isMobile.value = e.matches })
+    mql.addEventListener('change', (e) => {
+        isMobile.value = e.matches
+    })
 
     // Fetch both in parallel: stats don't need to wait for the list
     await Promise.all([fetchList(), fetchStats()])
@@ -688,10 +901,12 @@ onMounted(async () => {
             // Prepend to list only when showing newest-first on the first "page"
             if (sortOrder.value === 'newest' && !hasMore.value) {
                 try {
-                    const rec = await pb.collection('ratings').getOne(e.record.id, {
-                        expand: 'route_id,user',
-                        requestKey: null,
-                    })
+                    const rec = await pb
+                        .collection('ratings')
+                        .getOne(e.record.id, {
+                            expand: 'route_id,user',
+                            requestKey: null,
+                        })
                     comments.value = [mapComment(rec), ...comments.value]
                 } catch {}
             }
@@ -700,10 +915,12 @@ onMounted(async () => {
             const idx = comments.value.findIndex((c) => c.id === e.record.id)
             if (idx !== -1) {
                 try {
-                    const rec = await pb.collection('ratings').getOne(e.record.id, {
-                        expand: 'route_id,user',
-                        requestKey: null,
-                    })
+                    const rec = await pb
+                        .collection('ratings')
+                        .getOne(e.record.id, {
+                            expand: 'route_id,user',
+                            requestKey: null,
+                        })
                     comments.value[idx] = mapComment(rec)
                 } catch {}
                 fetchStats()
@@ -719,8 +936,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .comments-page {
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 100%;
 }
 
 /* ── Stats horizontal scroll ─────────────────────────────────────────── */
@@ -753,7 +969,9 @@ onBeforeUnmount(() => {
 
 /* Card selection highlight */
 .comment-card {
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .comment-card--selected {
@@ -764,7 +982,9 @@ onBeforeUnmount(() => {
 /* Avatar turns into a toggle button */
 .select-avatar {
     cursor: pointer;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        opacity 0.15s ease;
 }
 
 .select-avatar:hover {

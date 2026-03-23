@@ -1,16 +1,14 @@
 <template>
     <template v-if="$route.meta.navbar !== false">
         <!-- Main App Bar -->
-        <v-app-bar
-            app
-            flat
-            height="64"
-            color="transparent"
-            class="nav-bar"
-        >
+        <v-app-bar app flat height="64" color="transparent" class="nav-bar">
             <div class="nav-inner">
                 <!-- Logo -->
-                <router-link to="/" class="nav-logo" :aria-label="$t('routes.home')">
+                <router-link
+                    to="/"
+                    class="nav-logo"
+                    :aria-label="$t('routes.home')"
+                >
                     <NuxtImg
                         v-if="logo_url"
                         :src="logo_url"
@@ -29,7 +27,11 @@
 
                 <!-- Desktop Nav Links -->
                 <ClientOnly>
-                    <nav v-if="isLoggedIn && mdAndUp" class="nav-links" :aria-label="$t('nav.mainNavigation')">
+                    <nav
+                        v-if="isLoggedIn && mdAndUp"
+                        class="nav-links"
+                        :aria-label="$t('nav.mainNavigation')"
+                    >
                         <LayoutNavLink
                             v-for="link in desktopLinks"
                             :key="link.to"
@@ -80,10 +82,9 @@
             class="mobile-drawer"
             :aria-label="$t('nav.mainNavigation')"
         >
-
             <v-list nav density="compact" class="drawer-list">
                 <v-list-item
-                    v-for="link in navLinks"
+                    v-for="link in visibleNavLinks"
                     :key="link.to"
                     :to="link.to"
                     :prepend-icon="link.icon"
@@ -110,7 +111,6 @@
 </template>
 
 <script setup>
-
 const pb = usePocketbase()
 const theme = useTheme()
 const { mdAndUp } = useDisplay()
@@ -129,16 +129,60 @@ const props = defineProps({
 
 const { loggedIn, settings } = toRefs(props)
 
+const { can } = usePermissions()
+
 const navLinks = [
-    { to: '/',                  icon: 'mdi-home-outline',           label: 'routes.home'      },
-    { to: '/admin/routes',      icon: 'mdi-map-marker-path',        label: 'routes.dashboard' },
-    { to: '/admin/analytics',   icon: 'mdi-chart-line',             label: 'routes.analytics' },
-    { to: '/admin/comments',    icon: 'mdi-comment-outline',        label: 'routes.comments'  },
-    { to: '/admin/inventory',   icon: 'mdi-package-variant-closed', label: 'routes.inventory', mobileOnly: true },
-    { to: '/admin/settings',    icon: 'mdi-cog-outline',            label: 'routes.settings'  },
+    {
+        to: '/',
+        icon: 'mdi-home-outline',
+        label: 'routes.home',
+        permission: null,
+    },
+    {
+        to: '/admin/routes',
+        icon: 'mdi-map-marker-path',
+        label: 'routes.dashboard',
+        permission: 'manage_routes',
+    },
+    {
+        to: '/admin/analytics',
+        icon: 'mdi-chart-line',
+        label: 'routes.analytics',
+        permission: 'view_analytics',
+    },
+    {
+        to: '/admin/comments',
+        icon: 'mdi-comment-outline',
+        label: 'routes.comments',
+        permission: 'manage_comments',
+    },
+    {
+        to: '/admin/users',
+        icon: 'mdi-account-group-outline',
+        label: 'routes.users',
+        permission: 'manage_users',
+    },
+    {
+        to: '/admin/inventory',
+        icon: 'mdi-package-variant-closed',
+        label: 'routes.inventory',
+        permission: 'run_inventory',
+        mobileOnly: true,
+    },
+    {
+        to: '/admin/settings',
+        icon: 'mdi-cog-outline',
+        label: 'routes.settings',
+        permission: 'manage_settings',
+    },
 ]
 
-const desktopLinks = computed(() => navLinks.filter(l => !l.mobileOnly))
+const visibleNavLinks = computed(() =>
+    navLinks.filter((l) => !l.permission || can(l.permission)),
+)
+const desktopLinks = computed(() =>
+    visibleNavLinks.value.filter((l) => !l.mobileOnly),
+)
 
 watch(mdAndUp, (isDesktop) => {
     if (isDesktop) drawer.value = false
@@ -151,7 +195,7 @@ onMounted(async () => {
         logo_url.value = await pb.files.getURL(
             settings.value,
             settings.value.page_logo,
-            { thumb: '0x200' }
+            { thumb: '0x200' },
         )
     }
 })

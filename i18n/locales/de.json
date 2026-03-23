@@ -58,6 +58,7 @@
     "login": "Anmelden",
     "analytics": "Analysen",
     "comments": "Kommentare",
+    "users": "Benutzer",
     "settings": "Einstellungen",
     "route_setter": "Routen Schrauber",
     "screwed_at": "Geschraubt am",
@@ -248,6 +249,7 @@
       "route": "Route - Verti-Grade",
       "index": "Kletterrouten - Verti-Grade",
       "comments": "Kommentare - Verti-Grade",
+      "users": "Benutzer - Verti-Grade",
       "dashboard": "Routenverwaltung - Verti-Grade"
     },
     "content": {
@@ -255,6 +257,7 @@
       "route": "Bewertung erstellen",
       "index": "Kletterrouten",
       "comments": "Kommentare",
+      "users": "Benutzerverwaltung",
       "dashboard": "Routenverwaltung"
     }
   },
@@ -300,7 +303,36 @@
   },
   "users": {
     "create": "Benutzer erstellen",
-    "edit": "Benutzer bearbeiten"
+    "createHint": "Der Benutzer erhält eine E-Mail zum Zurücksetzen des Passworts.",
+    "edit": "Benutzer bearbeiten",
+    "title": "Benutzerverwaltung",
+    "delete": "Benutzer löschen",
+    "deleteConfirm": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteSuccess": "Benutzer erfolgreich gelöscht.",
+    "deleteError": "Benutzer konnte nicht gelöscht werden.",
+    "searchUsers": "Benutzer suchen…",
+    "role": "Rolle",
+    "totalUsers": "Benutzer gesamt",
+    "admins": "Admins",
+    "recentlyJoined": "Diese Woche beigetreten",
+    "noUsers": "Keine Benutzer gefunden",
+    "noUsersHint": "Suche oder Filter anpassen",
+    "showing": "{n} von {total} Benutzern"
+  },
+  "permissions": {
+    "title": "Rollenberechtigungen",
+    "role": "Rolle",
+    "noPermission": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
+    "features": {
+      "manage_routes": "Routen verwalten",
+      "view_analytics": "Analysen anzeigen",
+      "manage_comments": "Kommentare verwalten",
+      "manage_users": "Benutzer verwalten",
+      "manage_settings": "Einstellungen verwalten",
+      "run_inventory": "Inventur durchführen"
+    },
+    "updated": "Berechtigungen aktualisiert.",
+    "updateError": "Fehler beim Aktualisieren der Berechtigungen."
   },
   "time": {
     "justNow": "Gerade eben",

@@ -1,10 +1,7 @@
 <template>
     <div class="view-ratings-wrapper">
         <!-- The button that opens the ratings sheet -->
-        <v-btn 
-            @click="openSheet" 
-            color="primary"
-        >
+        <v-btn @click="openSheet" color="primary">
             {{ $t('ratings.ratings') }}
         </v-btn>
 
@@ -13,7 +10,7 @@
             On desktop, it behaves like a standard centered dialog.
         -->
         <v-bottom-sheet v-model="isSheetOpen" inset>
-            <v-card class="d-flex flex-column" style="max-height: 90vh;">
+            <v-card class="d-flex flex-column" style="max-height: 90vh">
                 <v-card-item class="py-2">
                     <v-card-title class="text-h5 text-center">
                         {{ $t('ratings.climber_reviews') }}
@@ -25,14 +22,18 @@
                     </template>
                 </v-card-item>
 
-                <v-progress-linear v-if="isLoading" indeterminate color="primary"></v-progress-linear>
+                <v-progress-linear
+                    v-if="isLoading"
+                    indeterminate
+                    color="primary"
+                ></v-progress-linear>
 
-                <v-card-text class="flex-grow-1" style="overflow-y: auto;">
+                <v-card-text class="flex-grow-1" style="overflow-y: auto">
                     <!-- List of Review Cards -->
                     <div v-if="!isLoading && ratings.length > 0">
-                        <v-card 
-                            v-for="(review, index) in ratings" 
-                            :key="index" 
+                        <v-card
+                            v-for="(review, index) in ratings"
+                            :key="index"
                             class="mb-4"
                             variant="tonal"
                         >
@@ -47,7 +48,7 @@
                                 <v-list-item-title class="font-weight-bold">
                                     {{ review.difficulty }}
                                 </v-list-item-title>
-                                
+
                                 <v-rating
                                     :model-value="review.rating"
                                     readonly
@@ -57,18 +58,27 @@
                                     class="mt-1"
                                 ></v-rating>
                             </v-list-item>
-                            
+
                             <v-card-text v-if="review.comment" class="pt-0">
-                                    {{ review.comment }}
+                                {{ review.comment }}
                             </v-card-text>
                         </v-card>
                     </div>
-                    
+
                     <!-- Empty State for No Reviews -->
-                    <div v-if="!isLoading && ratings.length === 0" class="text-center pa-8">
-                        <v-icon size="x-large" class="mb-4">mdi-comment-search-outline</v-icon>
-                        <h3 class="text-h6 mb-2">{{ $t('ratings.no_reviews_yet') }}</h3>
-                        <p class="text-body-1">{{ $t('ratings.be_the_first') }}</p>
+                    <div
+                        v-if="!isLoading && ratings.length === 0"
+                        class="text-center pa-8"
+                    >
+                        <v-icon size="x-large" class="mb-4"
+                            >mdi-comment-search-outline</v-icon
+                        >
+                        <h3 class="text-h6 mb-2">
+                            {{ $t('ratings.no_reviews_yet') }}
+                        </h3>
+                        <p class="text-body-1">
+                            {{ $t('ratings.be_the_first') }}
+                        </p>
                     </div>
                 </v-card-text>
             </v-card>
@@ -137,11 +147,13 @@ const subscribeToRatings = async () => {
     await unsubscribeFromRatings()
 
     try {
-        unsubscribe.value = await pb.collection('ratings').subscribe('*', (e) => {
-            if (e.record.route_id === props.route_id) {
-                fetchClimbingRatings()
-            }
-        })
+        unsubscribe.value = await pb
+            .collection('ratings')
+            .subscribe('*', (e) => {
+                if (e.record.route_id === props.route_id) {
+                    fetchClimbingRatings()
+                }
+            })
     } catch (error) {
         console.error('Failed to subscribe to ratings:', error)
     }
@@ -166,11 +178,12 @@ onBeforeUnmount(() => {
 
 function buildDifficultyLabel(rating: RatingRecord): string {
     const base = rating.difficulty ?? ''
-    const sign = rating.difficulty_sign === true
-        ? '+'
-        : rating.difficulty_sign === false
-            ? '-'
-            : typeof rating.difficulty_sign === 'string'
+    const sign =
+        rating.difficulty_sign === true
+            ? '+'
+            : rating.difficulty_sign === false
+              ? '-'
+              : typeof rating.difficulty_sign === 'string'
                 ? rating.difficulty_sign
                 : ''
 
@@ -178,5 +191,4 @@ function buildDifficultyLabel(rating: RatingRecord): string {
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
