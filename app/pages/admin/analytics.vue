@@ -1,6 +1,5 @@
 <template>
     <v-container fluid class="analytics-page py-6">
-
         <!-- ── Header ─────────────────────────────────────────────────── -->
         <v-row class="mb-6">
             <v-col
@@ -17,11 +16,15 @@
                 </div>
                 <div class="d-flex align-center ga-3">
                     <div v-if="summary.generatedAt" class="generated-at">
-                        {{ t('analytics.generatedAt', { value: formatDate(summary.generatedAt) }) }}
+                        {{
+                            t('analytics.generatedAt', {
+                                value: formatDate(summary.generatedAt),
+                            })
+                        }}
                     </div>
                     <v-btn
                         color="primary"
-                        variant="flat"
+                        variant="tonal"
                         rounded="lg"
                         :loading="loading"
                         @click="refresh"
@@ -63,10 +66,23 @@
         <!-- ── Error banner ───────────────────────────────────────────── -->
         <v-row v-if="error" class="mb-4">
             <v-col cols="12">
-                <v-alert type="error" variant="tonal" border="start" rounded="lg">
-                    <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-3">
+                <v-alert
+                    type="error"
+                    variant="tonal"
+                    border="start"
+                    rounded="lg"
+                >
+                    <div
+                        class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-3"
+                    >
                         <span>{{ error }}</span>
-                        <v-btn size="small" color="error" variant="outlined" rounded="lg" @click="refresh">
+                        <v-btn
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            rounded="lg"
+                            @click="refresh"
+                        >
                             {{ t('analytics.retry') }}
                         </v-btn>
                     </div>
@@ -77,7 +93,12 @@
         <!-- ── Empty state ────────────────────────────────────────────── -->
         <v-row v-if="!loading && !hasData && !error" class="mb-6">
             <v-col cols="12">
-                <v-alert type="info" variant="tonal" border="start" rounded="lg">
+                <v-alert
+                    type="info"
+                    variant="tonal"
+                    border="start"
+                    rounded="lg"
+                >
                     {{ t('analytics.empty') }}
                 </v-alert>
             </v-col>
@@ -85,24 +106,37 @@
 
         <!-- ── Latest activity ────────────────────────────────────────── -->
         <v-row v-if="!error" class="mb-6" density="comfortable">
-
             <!-- Latest comments -->
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#EEEDFE">
-                            <v-icon size="16" color="#534AB7">mdi-comment-text-multiple-outline</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #eeedfe"
+                        >
+                            <v-icon size="16" color="#534AB7"
+                                >mdi-comment-text-multiple-outline</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.sections.latestComments') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.sections.latestComments')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text class="pa-0">
                         <v-skeleton-loader
                             v-if="loading"
-                            :type="['list-item-two-line', 'list-item-two-line', 'list-item-two-line']"
+                            :type="[
+                                'list-item-two-line',
+                                'list-item-two-line',
+                                'list-item-two-line',
+                            ]"
                             class="px-4 py-2"
                         />
-                        <div v-else-if="!hasLatestComments" class="empty-list-msg">
+                        <div
+                            v-else-if="!hasLatestComments"
+                            class="empty-list-msg"
+                        >
                             {{ t('analytics.emptyComments') }}
                         </div>
                         <v-list v-else lines="two" class="py-1">
@@ -113,22 +147,40 @@
                             >
                                 <template #prepend>
                                     <div class="comment-avatar">
-                                        {{ (comment.routeName || '?').charAt(0).toUpperCase() }}
+                                        {{
+                                            (comment.routeName || '?')
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        }}
                                     </div>
                                 </template>
                                 <v-list-item-title class="item-title">
-                                    {{ comment.routeName || t('analytics.labels.unknown') }}
+                                    {{
+                                        comment.routeName ||
+                                        t('analytics.labels.unknown')
+                                    }}
                                 </v-list-item-title>
                                 <v-list-item-subtitle class="item-sub">
                                     {{ comment.comment }}
                                 </v-list-item-subtitle>
                                 <template #append>
-                                    <div class="d-flex flex-column align-end gap-1">
-                                        <div v-if="comment.rating !== null" class="rating-badge">
-                                            <v-icon size="12" color="warning">mdi-star</v-icon>
-                                            <span>{{ formatRating(comment.rating) }}</span>
+                                    <div
+                                        class="d-flex flex-column align-end gap-1"
+                                    >
+                                        <div
+                                            v-if="comment.rating !== null"
+                                            class="rating-badge"
+                                        >
+                                            <v-icon size="12" color="warning"
+                                                >mdi-star</v-icon
+                                            >
+                                            <span>{{
+                                                formatRating(comment.rating)
+                                            }}</span>
                                         </div>
-                                        <span class="time-label">{{ formatDate(comment.created) }}</span>
+                                        <span class="time-label">{{
+                                            formatDate(comment.created)
+                                        }}</span>
                                     </div>
                                 </template>
                             </v-list-item>
@@ -141,19 +193,33 @@
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#E1F5EE">
-                            <v-icon size="16" color="#0F6E56">mdi-map-marker-path</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #e1f5ee"
+                        >
+                            <v-icon size="16" color="#0F6E56"
+                                >mdi-map-marker-path</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.sections.latestRoutes') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.sections.latestRoutes')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text class="pa-0">
                         <v-skeleton-loader
                             v-if="loading"
-                            :type="['list-item-two-line', 'list-item-two-line', 'list-item-two-line']"
+                            :type="[
+                                'list-item-two-line',
+                                'list-item-two-line',
+                                'list-item-two-line',
+                            ]"
                             class="px-4 py-2"
                         />
-                        <div v-else-if="!hasLatestRoutes" class="empty-list-msg">
+                        <div
+                            v-else-if="!hasLatestRoutes"
+                            class="empty-list-msg"
+                        >
                             {{ t('analytics.emptyRoutes') }}
                         </div>
                         <v-list v-else lines="two" class="py-1">
@@ -164,30 +230,52 @@
                             >
                                 <template #prepend>
                                     <div class="route-avatar">
-                                        <v-icon size="16" color="#0F6E56">mdi-routes</v-icon>
+                                        <v-icon size="16" color="#0F6E56"
+                                            >mdi-routes</v-icon
+                                        >
                                     </div>
                                 </template>
                                 <v-list-item-title class="item-title">
-                                    {{ route.name || t('analytics.labels.unknown') }}
+                                    {{
+                                        route.name ||
+                                        t('analytics.labels.unknown')
+                                    }}
                                 </v-list-item-title>
                                 <v-list-item-subtitle>
                                     <div class="route-chips">
-                                        <span v-if="route.difficulty" class="route-chip chip-difficulty">
-                                            <v-icon size="10">mdi-tag-outline</v-icon>
+                                        <span
+                                            v-if="route.difficulty"
+                                            class="route-chip chip-difficulty"
+                                        >
+                                            <v-icon size="10"
+                                                >mdi-tag-outline</v-icon
+                                            >
                                             {{ route.difficulty }}
                                         </span>
-                                        <span v-if="route.location" class="route-chip chip-location">
-                                            <v-icon size="10">mdi-map-marker-outline</v-icon>
+                                        <span
+                                            v-if="route.location"
+                                            class="route-chip chip-location"
+                                        >
+                                            <v-icon size="10"
+                                                >mdi-map-marker-outline</v-icon
+                                            >
                                             {{ route.location }}
                                         </span>
-                                        <span v-if="route.creators?.length" class="route-chip chip-setter">
-                                            <v-icon size="10">mdi-account-hard-hat</v-icon>
+                                        <span
+                                            v-if="route.creators?.length"
+                                            class="route-chip chip-setter"
+                                        >
+                                            <v-icon size="10"
+                                                >mdi-account-hard-hat</v-icon
+                                            >
                                             {{ formatCreators(route.creators) }}
                                         </span>
                                     </div>
                                 </v-list-item-subtitle>
                                 <template #append>
-                                    <span class="time-label">{{ formatDate(route.screwDate) }}</span>
+                                    <span class="time-label">{{
+                                        formatDate(route.screwDate)
+                                    }}</span>
                                 </template>
                             </v-list-item>
                         </v-list>
@@ -201,14 +289,25 @@
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#E6F1FB">
-                            <v-icon size="16" color="#185FA5">mdi-chart-bar</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #e6f1fb"
+                        >
+                            <v-icon size="16" color="#185FA5"
+                                >mdi-chart-bar</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.charts.difficultyDistribution') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.charts.difficultyDistribution')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text>
-                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <v-skeleton-loader
+                            v-if="loading"
+                            type="image"
+                            class="chart-skeleton"
+                        />
                         <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="difficultyOption"
@@ -221,14 +320,25 @@
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#E1F5EE">
-                            <v-icon size="16" color="#0F6E56">mdi-chart-timeline-variant</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #e1f5ee"
+                        >
+                            <v-icon size="16" color="#0F6E56"
+                                >mdi-chart-timeline-variant</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.charts.routeTimeline') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.charts.routeTimeline')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text>
-                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <v-skeleton-loader
+                            v-if="loading"
+                            type="image"
+                            class="chart-skeleton"
+                        />
                         <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="routeTimelineOption"
@@ -244,25 +354,45 @@
             <v-col cols="12" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#E1F5EE">
-                            <v-icon size="16" color="#0F6E56">mdi-calendar-month-outline</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #e1f5ee"
+                        >
+                            <v-icon size="16" color="#0F6E56"
+                                >mdi-calendar-month-outline</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.charts.activityHeatmap') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.charts.activityHeatmap')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text class="heatmap-wrapper">
-                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <v-skeleton-loader
+                            v-if="loading"
+                            type="image"
+                            class="chart-skeleton"
+                        />
                         <template v-else-if="hasData">
                             <!-- Mobile year chips -->
                             <div class="d-flex d-sm-none flex-wrap ga-2 mb-3">
                                 <v-chip
                                     v-for="year in availableYears"
                                     :key="year"
-                                    :color="year === selectedYear ? 'primary' : undefined"
-                                    :variant="year === selectedYear ? 'flat' : 'outlined'"
+                                    :color="
+                                        year === selectedYear
+                                            ? 'primary'
+                                            : undefined
+                                    "
+                                    :variant="
+                                        year === selectedYear
+                                            ? 'flat'
+                                            : 'outlined'
+                                    "
                                     size="small"
                                     @click="selectedYear = year"
-                                >{{ year }}</v-chip>
+                                    >{{ year }}</v-chip
+                                >
                             </div>
 
                             <div class="heatmap-outer">
@@ -270,11 +400,17 @@
                                 <div class="heatmap-graph">
                                     <div class="heatmap-day-labels">
                                         <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{ heatmapDayLabels.mon }}</span>
+                                        <span class="heatmap-day-label">{{
+                                            heatmapDayLabels.mon
+                                        }}</span>
                                         <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{ heatmapDayLabels.wed }}</span>
+                                        <span class="heatmap-day-label">{{
+                                            heatmapDayLabels.wed
+                                        }}</span>
                                         <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{ heatmapDayLabels.fri }}</span>
+                                        <span class="heatmap-day-label">{{
+                                            heatmapDayLabels.fri
+                                        }}</span>
                                         <span class="heatmap-day-label" />
                                         <span class="heatmap-day-label" />
                                     </div>
@@ -284,8 +420,12 @@
                                                 v-for="label in heatmapMonthLabels"
                                                 :key="label.key"
                                                 class="heatmap-month-label"
-                                                :style="{ gridColumnStart: label.startCol }"
-                                            >{{ label.text }}</span>
+                                                :style="{
+                                                    gridColumnStart:
+                                                        label.startCol,
+                                                }"
+                                                >{{ label.text }}</span
+                                            >
                                         </div>
                                         <div class="heatmap-grid">
                                             <v-tooltip
@@ -294,11 +434,19 @@
                                                 :text="cell.label"
                                                 location="top"
                                             >
-                                                <template #activator="{ props: tp }">
+                                                <template
+                                                    #activator="{ props: tp }"
+                                                >
                                                     <div
                                                         v-bind="tp"
                                                         class="heatmap-cell"
-                                                        :class="[`heatmap-level-${cell.level}`, { 'heatmap-cell--outside': !cell.inYear }]"
+                                                        :class="[
+                                                            `heatmap-level-${cell.level}`,
+                                                            {
+                                                                'heatmap-cell--outside':
+                                                                    !cell.inYear,
+                                                            },
+                                                        ]"
                                                     />
                                                 </template>
                                             </v-tooltip>
@@ -307,26 +455,37 @@
                                 </div>
 
                                 <!-- Right: desktop year selector -->
-                                <div class="heatmap-years d-none d-sm-flex flex-column">
+                                <div
+                                    class="heatmap-years d-none d-sm-flex flex-column"
+                                >
                                     <button
                                         v-for="year in availableYears"
                                         :key="year"
                                         class="heatmap-year-btn"
-                                        :class="{ 'heatmap-year-btn--active': year === selectedYear }"
+                                        :class="{
+                                            'heatmap-year-btn--active':
+                                                year === selectedYear,
+                                        }"
                                         @click="selectedYear = year"
-                                    >{{ year }}</button>
+                                    >
+                                        {{ year }}
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Legend -->
                             <div class="heatmap-legend">
-                                <span class="heatmap-legend-label">{{ t('analytics.heatmap.less') }}</span>
+                                <span class="heatmap-legend-label">{{
+                                    t('analytics.heatmap.less')
+                                }}</span>
                                 <div class="heatmap-cell heatmap-level-0" />
                                 <div class="heatmap-cell heatmap-level-1" />
                                 <div class="heatmap-cell heatmap-level-2" />
                                 <div class="heatmap-cell heatmap-level-3" />
                                 <div class="heatmap-cell heatmap-level-4" />
-                                <span class="heatmap-legend-label">{{ t('analytics.heatmap.more') }}</span>
+                                <span class="heatmap-legend-label">{{
+                                    t('analytics.heatmap.more')
+                                }}</span>
                             </div>
                         </template>
                     </v-card-text>
@@ -339,10 +498,17 @@
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#FAEEDA">
-                            <v-icon size="16" color="#854F0B">mdi-account-hard-hat</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #faeeda"
+                        >
+                            <v-icon size="16" color="#854F0B"
+                                >mdi-account-hard-hat</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.charts.routeSetters') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.charts.routeSetters')
+                        }}</span>
                         <v-spacer />
                         <v-switch
                             v-model="showAllSetters"
@@ -356,7 +522,11 @@
                     </v-card-title>
                     <v-divider />
                     <v-card-text>
-                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <v-skeleton-loader
+                            v-if="loading"
+                            type="image"
+                            class="chart-skeleton"
+                        />
                         <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="routeSettersOption"
@@ -369,14 +539,25 @@
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
                     <v-card-title class="card-header">
-                        <div class="card-header-icon" style="background:#EEEDFE">
-                            <v-icon size="16" color="#534AB7">mdi-message-text-clock-outline</v-icon>
+                        <div
+                            class="card-header-icon"
+                            style="background: #eeedfe"
+                        >
+                            <v-icon size="16" color="#534AB7"
+                                >mdi-message-text-clock-outline</v-icon
+                            >
                         </div>
-                        <span class="card-header-title">{{ t('analytics.charts.commentTimeline') }}</span>
+                        <span class="card-header-title">{{
+                            t('analytics.charts.commentTimeline')
+                        }}</span>
                     </v-card-title>
                     <v-divider />
                     <v-card-text>
-                        <v-skeleton-loader v-if="loading" type="image" class="chart-skeleton" />
+                        <v-skeleton-loader
+                            v-if="loading"
+                            type="image"
+                            class="chart-skeleton"
+                        />
                         <AnalyticsBaseEchart
                             v-else-if="hasData"
                             :option="commentTimelineOption"
@@ -386,12 +567,10 @@
                 </v-card>
             </v-col>
         </v-row>
-
     </v-container>
 </template>
 
 <script setup>
-
 const { t, locale } = useI18n()
 
 useHead(() => ({
@@ -402,6 +581,7 @@ useHead(() => ({
 definePageMeta({
     authRequired: true,
     middleware: ['auth'],
+    requiredPermission: 'view_analytics',
 })
 
 const {
@@ -504,7 +684,9 @@ const hasLatestRoutes = computed(() => latestRoutes.value.length > 0)
 
 function getCSSColor(variable) {
     if (typeof window === 'undefined') return '#888'
-    return getComputedStyle(document.documentElement).getPropertyValue(variable).trim()
+    return getComputedStyle(document.documentElement)
+        .getPropertyValue(variable)
+        .trim()
 }
 
 const chartColors = computed(() => {
@@ -512,17 +694,28 @@ const chartColors = computed(() => {
     const isDark = useTheme().global.current.value.dark
 
     // Vuetify exposes RGB channels as CSS vars, e.g. --v-theme-on-surface = "0 0 0"
-    const onSurface = getCSSColor('--v-theme-on-surface') || (isDark ? '236 236 236' : '18 18 18')
-    const surface   = getCSSColor('--v-theme-surface')    || (isDark ? '30 30 30'    : '255 255 255')
+    const onSurface =
+        getCSSColor('--v-theme-on-surface') ||
+        (isDark ? '236 236 236' : '18 18 18')
+    const surface =
+        getCSSColor('--v-theme-surface') ||
+        (isDark ? '30 30 30' : '255 255 255')
 
-    const labelColor    = `rgba(${onSurface}, 0.45)`
-    const gridColor     = `rgba(${onSurface}, 0.08)`
-    const tooltipBg     = `rgba(${surface}, 0.96)`
-    const tooltipText   = `rgba(${onSurface}, 0.9)`
-    const tooltipMuted  = `rgba(${onSurface}, 0.45)`
+    const labelColor = `rgba(${onSurface}, 0.45)`
+    const gridColor = `rgba(${onSurface}, 0.08)`
+    const tooltipBg = `rgba(${surface}, 0.96)`
+    const tooltipText = `rgba(${onSurface}, 0.9)`
+    const tooltipMuted = `rgba(${onSurface}, 0.45)`
     const tooltipBorder = `rgba(${onSurface}, 0.1)`
 
-    return { labelColor, gridColor, tooltipBg, tooltipText, tooltipMuted, tooltipBorder }
+    return {
+        labelColor,
+        gridColor,
+        tooltipBg,
+        tooltipText,
+        tooltipMuted,
+        tooltipBorder,
+    }
 })
 
 // ── Shared chart helpers ──────────────────────────────────────────────────
@@ -542,11 +735,18 @@ const tooltipBase = computed(() => {
         backgroundColor: tooltipBg,
         borderColor: tooltipBorder,
         textStyle: { color: tooltipText },
-        extraCssText: 'border-radius:8px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12)',
+        extraCssText:
+            'border-radius:8px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12)',
     }
 })
 
-const gridBase = { left: '0%', right: '1%', bottom: '0%', top: '8%', containLabel: true }
+const gridBase = {
+    left: '0%',
+    right: '1%',
+    bottom: '0%',
+    top: '8%',
+    containLabel: true,
+}
 
 function makeXAxis(labels) {
     const { labelColor } = chartColors.value
@@ -644,8 +844,19 @@ const heatmapCells = computed(() => {
         const iso = `${cursor.getFullYear()}-${mm}-${dd}`
         const inYear = cursor.getFullYear() === year
         const count = dataMap.get(iso) ?? 0
-        const level = !inYear || count === 0 ? 0 : count >= 4 ? 4 : count >= 3 ? 3 : count >= 2 ? 2 : 1
-        const formatted = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(iso + 'T00:00:00'))
+        const level =
+            !inYear || count === 0
+                ? 0
+                : count >= 4
+                  ? 4
+                  : count >= 3
+                    ? 3
+                    : count >= 2
+                      ? 2
+                      : 1
+        const formatted = new Intl.DateTimeFormat(undefined, {
+            dateStyle: 'medium',
+        }).format(new Date(iso + 'T00:00:00'))
         cells.push({
             date: iso,
             count,
@@ -674,9 +885,9 @@ const heatmapMonthLabels = computed(() => {
             if (weekCol <= 54) {
                 labels.push({
                     key: month,
-                    text: new Intl.DateTimeFormat(undefined, { month: 'short' }).format(
-                        new Date(cell.date + 'T00:00:00'),
-                    ),
+                    text: new Intl.DateTimeFormat(undefined, {
+                        month: 'short',
+                    }).format(new Date(cell.date + 'T00:00:00')),
                     startCol: weekCol,
                 })
             }
@@ -706,7 +917,12 @@ const difficultyOption = computed(() => ({
     backgroundColor: 'transparent',
     tooltip: {
         ...tooltipBase.value,
-        formatter: (params) => buildTooltip(params[0].name, params[0].value, t('analytics.labels.routes')),
+        formatter: (params) =>
+            buildTooltip(
+                params[0].name,
+                params[0].value,
+                t('analytics.labels.routes'),
+            ),
     },
     grid: gridBase,
     xAxis: makeXAxis(difficultyDistribution.value.map((item) => item.grade)),
@@ -730,12 +946,24 @@ const routeTimelineOption = computed(() => {
         backgroundColor: 'transparent',
         tooltip: {
             ...tooltipBase.value,
-            formatter: (params) => buildTooltip(params[0].name, params[0].value, t('analytics.labels.routes')),
+            formatter: (params) =>
+                buildTooltip(
+                    params[0].name,
+                    params[0].value,
+                    t('analytics.labels.routes'),
+                ),
         },
         grid: gridBase,
         xAxis: makeXAxis(labels),
         yAxis: yAxisBase.value,
-        series: [makeBarSeries(t('analytics.charts.routeTimeline'), values, '#1D9E75', '#5DCAA5')],
+        series: [
+            makeBarSeries(
+                t('analytics.charts.routeTimeline'),
+                values,
+                '#1D9E75',
+                '#5DCAA5',
+            ),
+        ],
         animationEasing: 'cubicOut',
     }
 })
@@ -749,7 +977,8 @@ const commentTimelineOption = computed(() => {
     const rawStep = maxVal / 4
     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)))
     const niceStep =
-        [1, 2, 5, 10].map((f) => f * magnitude).find((s) => s >= rawStep) ?? magnitude * 10
+        [1, 2, 5, 10].map((f) => f * magnitude).find((s) => s >= rawStep) ??
+        magnitude * 10
     const yMax = Math.ceil(maxVal / niceStep) * niceStep
 
     return {
@@ -757,13 +986,22 @@ const commentTimelineOption = computed(() => {
         tooltip: {
             ...tooltipBase.value,
             formatter: (params) =>
-                buildTooltip(params[0].name, params[0].value, t('analytics.labels.comments')),
+                buildTooltip(
+                    params[0].name,
+                    params[0].value,
+                    t('analytics.labels.comments'),
+                ),
         },
         grid: gridBase,
         xAxis: makeXAxis(labels),
         yAxis: { ...yAxisBase.value, max: yMax, interval: niceStep },
         series: [
-            makeBarSeries(t('analytics.labels.comments'), values, '#7F77DD', '#AFA9EC'),
+            makeBarSeries(
+                t('analytics.labels.comments'),
+                values,
+                '#7F77DD',
+                '#AFA9EC',
+            ),
         ],
         animationEasing: 'cubicOut',
     }
@@ -776,7 +1014,10 @@ const routeSettersData = computed(() => {
     const unknownLabel = t('analytics.labels.unknown')
 
     const sorted = routeSetters.value
-        .map((item) => ({ name: item.setter?.trim() || unknownLabel, value: item.count }))
+        .map((item) => ({
+            name: item.setter?.trim() || unknownLabel,
+            value: item.count,
+        }))
         .sort((a, b) => b.value - a.value)
 
     if (showAllSetters.value) return sorted
@@ -793,13 +1034,23 @@ const routeSettersData = computed(() => {
 })
 
 const SETTER_COLORS = [
-    '#5B8DB8', '#4A9E7A', '#B8893A', '#7B72B8',
-    '#B86A4A', '#A85A7A', '#3A8A8A', '#6A9AB0',
-    '#6A9A5A', '#A89040', '#8A70B0', '#A86060',
+    '#5B8DB8',
+    '#4A9E7A',
+    '#B8893A',
+    '#7B72B8',
+    '#B86A4A',
+    '#A85A7A',
+    '#3A8A8A',
+    '#6A9AB0',
+    '#6A9A5A',
+    '#A89040',
+    '#8A70B0',
+    '#A86060',
 ]
 
 const routeSettersOption = computed(() => {
-    const { tooltipBg, tooltipText, tooltipMuted, tooltipBorder, labelColor } = chartColors.value
+    const { tooltipBg, tooltipText, tooltipMuted, tooltipBorder, labelColor } =
+        chartColors.value
     return {
         backgroundColor: 'transparent',
         tooltip: {
@@ -812,7 +1063,8 @@ const routeSettersOption = computed(() => {
             borderColor: tooltipBorder,
             borderWidth: 1,
             textStyle: { color: tooltipText },
-            extraCssText: 'border-radius:10px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12)',
+            extraCssText:
+                'border-radius:10px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12)',
         },
         legend: {
             type: 'scroll',
@@ -866,7 +1118,6 @@ const routeSettersOption = computed(() => {
     }
 })
 
-
 // ── Formatters ────────────────────────────────────────────────────────────
 
 function formatDate(isoString) {
@@ -891,7 +1142,8 @@ function formatRating(value) {
 }
 
 function formatCreators(creators) {
-    if (!Array.isArray(creators) || creators.length === 0) return t('analytics.labels.unknown')
+    if (!Array.isArray(creators) || creators.length === 0)
+        return t('analytics.labels.unknown')
     return creators.join(', ')
 }
 
@@ -908,9 +1160,10 @@ function formatMonthLabel(monthKey) {
     try {
         const [year, month] = monthKey.split('-').map(Number)
         if (!year || !month) return monthKey
-        return new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' }).format(
-            new Date(year, month - 1, 1),
-        )
+        return new Intl.DateTimeFormat(undefined, {
+            month: 'short',
+            year: 'numeric',
+        }).format(new Date(year, month - 1, 1))
     } catch (e) {
         console.error('Failed to format month label', e)
         return monthKey
@@ -1041,7 +1294,9 @@ function formatMonthLabel(monthKey) {
     color: rgba(var(--v-theme-on-surface), 0.5);
     cursor: pointer;
     text-align: right;
-    transition: color 0.15s, background 0.15s;
+    transition:
+        color 0.15s,
+        background 0.15s;
     white-space: nowrap;
 }
 
@@ -1069,11 +1324,21 @@ function formatMonthLabel(monthKey) {
     color: rgba(var(--v-theme-on-surface), 0.45);
 }
 
-.heatmap-level-0 { background: rgba(var(--v-theme-on-surface), 0.07); }
-.heatmap-level-1 { background: #0F6E56; }
-.heatmap-level-2 { background: #1D9E75; }
-.heatmap-level-3 { background: #5DCAA5; }
-.heatmap-level-4 { background: #7FFFDB; }
+.heatmap-level-0 {
+    background: rgba(var(--v-theme-on-surface), 0.07);
+}
+.heatmap-level-1 {
+    background: #0f6e56;
+}
+.heatmap-level-2 {
+    background: #1d9e75;
+}
+.heatmap-level-3 {
+    background: #5dcaa5;
+}
+.heatmap-level-4 {
+    background: #7fffdb;
+}
 
 /* ── Desktop heatmap: scale to fill card width ───────────────────────── */
 @media (min-width: 600px) {
@@ -1189,7 +1454,7 @@ function formatMonthLabel(monthKey) {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #E1F5EE;
+    background: #e1f5ee;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1232,9 +1497,18 @@ function formatMonthLabel(monthKey) {
     line-height: 1.6;
 }
 
-.chip-difficulty { background: #E6F1FB; color: #185FA5; }
-.chip-location   { background: #E1F5EE; color: #0F6E56; }
-.chip-setter     { background: #FAEEDA; color: #854F0B; }
+.chip-difficulty {
+    background: #e6f1fb;
+    color: #185fa5;
+}
+.chip-location {
+    background: #e1f5ee;
+    color: #0f6e56;
+}
+.chip-setter {
+    background: #faeeda;
+    color: #854f0b;
+}
 
 /* ── Badges ──────────────────────────────────────────────────────────── */
 .rating-badge {
@@ -1263,12 +1537,21 @@ function formatMonthLabel(monthKey) {
 }
 
 /* ── Misc ────────────────────────────────────────────────────────────── */
-.chart-skeleton { height: 300px; }
+.chart-skeleton {
+    height: 300px;
+}
 
-.setter-switch { font-size: 12px; flex-shrink: 0; }
+.setter-switch {
+    font-size: 12px;
+    flex-shrink: 0;
+}
 
 @media (max-width: 600px) {
-    .analytics-page { padding-inline: 12px; }
-    .page-title { font-size: 1.35rem; }
+    .analytics-page {
+        padding-inline: 12px;
+    }
+    .page-title {
+        font-size: 1.35rem;
+    }
 }
 </style>

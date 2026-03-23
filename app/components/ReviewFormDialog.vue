@@ -21,7 +21,11 @@
         <v-card class="py-2">
             <v-toolbar color="transparent" flat density="compact" class="pt-1">
                 <v-toolbar-title class="text-body-1 font-weight-semibold pl-2">
-                    {{ isEditMode ? $t('comments.editReview') : $t('ratings.createReview') }}
+                    {{
+                        isEditMode
+                            ? $t('comments.editReview')
+                            : $t('ratings.createReview')
+                    }}
                 </v-toolbar-title>
                 <v-btn icon variant="text" @click="close">
                     <v-icon>mdi-close</v-icon>
@@ -30,13 +34,23 @@
 
             <v-card-text>
                 <!-- Context row: shown only in edit mode -->
-                <div v-if="isEditMode && review" class="d-flex align-center ga-3 mb-5 pa-3 rounded-lg bg-surface-variant">
+                <div
+                    v-if="isEditMode && review"
+                    class="d-flex align-center ga-3 mb-5 pa-3 rounded-lg bg-surface-variant"
+                >
                     <v-avatar size="30" :color="avatarColor(review.userName)">
-                        <span class="text-caption font-weight-bold text-white">{{ initials(review.userName) }}</span>
+                        <span
+                            class="text-caption font-weight-bold text-white"
+                            >{{ initials(review.userName) }}</span
+                        >
                     </v-avatar>
                     <div>
-                        <div class="text-body-2 font-weight-medium">{{ review.userName }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ review.routeName }}</div>
+                        <div class="text-body-2 font-weight-medium">
+                            {{ review.userName }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis">
+                            {{ review.routeName }}
+                        </div>
                     </div>
                 </div>
 
@@ -45,7 +59,9 @@
                         <!-- Star rating -->
                         <v-col cols="12">
                             <div class="d-flex flex-column align-center">
-                                <label class="v-label mb-2">{{ $t('ratings.stars') }}</label>
+                                <label class="v-label mb-2">{{
+                                    $t('ratings.stars')
+                                }}</label>
                                 <v-rating
                                     v-model="form.rating"
                                     :rules="isEditMode ? [] : [rules.required]"
@@ -77,7 +93,11 @@
                             <v-textarea
                                 v-model="form.comment"
                                 :label="$t('ratings.comment')"
-                                :rules="isEditMode ? [] : [rules.requiredAndNotEmpty]"
+                                :rules="
+                                    isEditMode
+                                        ? []
+                                        : [rules.requiredAndNotEmpty]
+                                "
                                 variant="outlined"
                                 rows="4"
                                 auto-grow
@@ -90,7 +110,9 @@
             </v-card-text>
 
             <v-card-actions class="px-4 pb-4">
-                <v-btn variant="text" @click="close">{{ $t('actions.cancel') }}</v-btn>
+                <v-btn variant="text" @click="close">{{
+                    $t('actions.cancel')
+                }}</v-btn>
                 <v-spacer />
                 <v-btn
                     :disabled="!isEditMode && !isFormValid"
@@ -108,7 +130,6 @@
 </template>
 
 <script setup>
-
 const props = defineProps({
     // Controls open state externally (edit mode)
     modelValue: {
@@ -145,7 +166,9 @@ const internalOpen = ref(false)
 
 const sheetOpen = computed({
     get() {
-        return props.modelValue !== undefined ? props.modelValue : internalOpen.value
+        return props.modelValue !== undefined
+            ? props.modelValue
+            : internalOpen.value
     },
     set(val) {
         if (props.modelValue !== undefined) {
@@ -177,7 +200,8 @@ const combinedDifficulties = computed(() => {
 
 const rules = {
     required: (v) => (v !== null && v !== '') || t('validation.required'),
-    requiredAndNotEmpty: (v) => (v && v.trim() !== '') || t('validation.required'),
+    requiredAndNotEmpty: (v) =>
+        (v && v.trim() !== '') || t('validation.required'),
 }
 
 // Pre-fill form when review prop changes (edit mode)
@@ -186,7 +210,10 @@ watch(
     (review) => {
         if (review) {
             form.rating = review.rating
-            form.combinedDifficulty = toCombined(review.difficulty, review.difficulty_sign)
+            form.combinedDifficulty = toCombined(
+                review.difficulty,
+                review.difficulty_sign,
+            )
             form.comment = review.comment ?? ''
         }
     },
@@ -210,13 +237,25 @@ function fromCombined(combined) {
     if (!combined) return { difficulty: null, difficulty_sign: null }
     const num = parseInt(combined, 10)
     const trimmed = combined.trim()
-    const sign = trimmed.endsWith('+') ? true : trimmed.endsWith('-') ? false : null
+    const sign = trimmed.endsWith('+')
+        ? true
+        : trimmed.endsWith('-')
+          ? false
+          : null
     return { difficulty: Number.isNaN(num) ? null : num, difficulty_sign: sign }
 }
 
 const AVATAR_COLORS = [
-    'primary', 'secondary', 'success', 'info', 'deep-purple',
-    'teal', 'indigo', 'pink', 'cyan', 'orange',
+    'primary',
+    'secondary',
+    'success',
+    'info',
+    'deep-purple',
+    'teal',
+    'indigo',
+    'pink',
+    'cyan',
+    'orange',
 ]
 
 function avatarColor(name) {
@@ -250,15 +289,19 @@ function close() {
 async function submit() {
     saving.value = true
     try {
-        const { difficulty, difficulty_sign } = fromCombined(form.combinedDifficulty)
+        const { difficulty, difficulty_sign } = fromCombined(
+            form.combinedDifficulty,
+        )
 
         if (isEditMode.value) {
-            const updated = await pb.collection('ratings').update(props.review.id, {
-                rating: form.rating,
-                difficulty,
-                difficulty_sign,
-                comment: form.comment,
-            })
+            const updated = await pb
+                .collection('ratings')
+                .update(props.review.id, {
+                    rating: form.rating,
+                    difficulty,
+                    difficulty_sign,
+                    comment: form.comment,
+                })
             emit('saved', updated)
         } else {
             await pb.collection('ratings').create({

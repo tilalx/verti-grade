@@ -1,5 +1,5 @@
 import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js';
+import { createPocketBase } from '../../utils/pb-server.js'
 
 export default eventHandler(async (event) => {
     const { default: ExcelJS } = await import('exceljs')
@@ -51,8 +51,8 @@ export default eventHandler(async (event) => {
                     cr.difficulty_sign === true
                         ? '+'
                         : cr.difficulty_sign === false
-                            ? '-'
-                            : '',
+                          ? '-'
+                          : '',
                 anchor_point:
                     cr.anchor_point !== null && cr.anchor_point !== undefined
                         ? cr.anchor_point

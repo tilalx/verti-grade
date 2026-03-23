@@ -1,24 +1,33 @@
 import { usePocketbase } from '#imports'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Ensure the middleware runs only on the client side
-  if (process.client) {
-    const authRequired = to.meta.authRequired || true
-    const pb = usePocketbase()
+    if (process.client) {
+        const pb = usePocketbase()
+        const isValidSession = pb.authStore.isValid
 
-    // Retrieve the current session from Pocketbase
-    const isValidSession = pb.authStore.isValid
+        // Pages that opt out of auth (login, password reset)
+        if (to.meta.auth === false) {
+            if (isValidSession) {
+                return navigateTo('/admin/routes')
+            }
+            return
+        }
 
-    if (authRequired && to.path !== '/') {
-      if (!isValidSession) {
-        // If the session is not valid, redirect to the login page
-        return navigateTo('/auth/login')
-      }
+        // All non-root pages require authentication
+        if (to.path !== '/') {
+            if (!isValidSession) {
+                return navigateTo('/auth/login')
+            }
 
-      if (to.name === 'Login' && isValidSession) {
-        // Redirect to the dashboard if already logged in and trying to access the login page
-        return navigateTo('/admin/routes')
-      }
+            // Permission check for admin pages
+            const requiredPermission = to.meta.requiredPermission
+            if (requiredPermission) {
+                const { can, ensureLoaded } = usePermissions()
+                await ensureLoaded()
+                if (!can(requiredPermission)) {
+                    return navigateTo('/')
+                }
+            }
+        }
     }
-  }
 })

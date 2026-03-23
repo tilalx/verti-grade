@@ -9,40 +9,45 @@
 </template>
 
 <script setup>
-
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
+const { refreshPermissions } = usePermissions()
 
 const getSettings = async () => {
-  try {
-    return await pb.collection('settings').getOne('settings_123456')
-  } catch (error) {
-    if (error.data && error.data.code === 404) {
-      console.log('Settings not found, creating new settings')
-      try {
-        return await pb.collection('settings').create({
-          id: 'settings_123456',
-        })
-      } catch (createError) {
-        console.error('Error creating new settings:', createError)
-        throw createError
-      }
+    try {
+        return await pb.collection('settings').getOne('settings_123456')
+    } catch (error) {
+        if (error.data && error.data.code === 404) {
+            console.log('Settings not found, creating new settings')
+            try {
+                return await pb.collection('settings').create({
+                    id: 'settings_123456',
+                })
+            } catch (createError) {
+                console.error('Error creating new settings:', createError)
+                throw createError
+            }
+        }
+        console.error('An error occurred:', error)
+        throw error
     }
-    console.error('An error occurred:', error)
-    throw error
-  }
 }
 
-const { data: settingsData } = await useAsyncData('settings', getSettings, { lazy: true })
+const { data: settingsData } = await useAsyncData('settings', getSettings, {
+    lazy: true,
+})
 
 const settings = ref(settingsData.value ?? {})
-watch(settingsData, (val) => { if (val) settings.value = val })
+watch(settingsData, (val) => {
+    if (val) settings.value = val
+})
 
 const refreshSession = async () => {
     try {
         await pb.collection('users').authRefresh()
         isLoggedIn.value = pb.authStore.isValid
     } catch (error) {
+        pb.authStore.clear()
         isLoggedIn.value = false
         console.error('Error refreshing session:', error)
     }
@@ -62,6 +67,17 @@ const setFavicon = () => {
 let unsubAuthChange = null
 let unsubUser = null
 let unsubSettings = null
+let unsubRole = null
+
+async function subscribeToRole(roleId) {
+    unsubRole?.()?.catch?.(() => {})
+    if (!roleId) return
+    unsubRole = await pb
+        .collection('roles')
+        .subscribe(roleId, (e) => {
+            if (e.action === 'update') refreshPermissions()
+        })
+}
 
 async function subscribeToUser(userId) {
     unsubUser?.()
@@ -69,8 +85,14 @@ async function subscribeToUser(userId) {
         if (e.action === 'delete') {
             pb.authStore.clear()
         } else {
+            const oldRole = pb.authStore.record?.role
             pb.authStore.save(pb.authStore.token, e.record)
             isLoggedIn.value = true
+            // If the user's role changed, refresh permissions and resubscribe
+            if (e.record.role !== oldRole) {
+                refreshPermissions()
+                subscribeToRole(e.record.role)
+            }
         }
     })
 }
@@ -79,6 +101,7 @@ onMounted(async () => {
     try {
         if (pb.authStore.isValid) {
             await refreshSession()
+            await refreshPermissions()
         }
         setFavicon()
 
@@ -87,9 +110,11 @@ onMounted(async () => {
             isLoggedIn.value = !!token
             if (token && record?.id) {
                 subscribeToUser(record.id)
+                refreshPermissions()
             } else {
                 unsubUser?.()
                 unsubUser = null
+                refreshPermissions()
             }
         })
 
@@ -98,11 +123,18 @@ onMounted(async () => {
             await subscribeToUser(pb.authStore.record.id)
         }
 
+        // Subscribe to role changes for realtime permission updates
+        if (pb.authStore.isValid && pb.authStore.record?.role) {
+            await subscribeToRole(pb.authStore.record.role)
+        }
+
         // Realtime settings sync across devices
-        unsubSettings = await pb.collection('settings').subscribe('settings_123456', (e) => {
-            settings.value = e.record
-            setFavicon()
-        })
+        unsubSettings = await pb
+            .collection('settings')
+            .subscribe('settings_123456', (e) => {
+                settings.value = e.record
+                setFavicon()
+            })
     } catch (error) {
         console.error('Error during initialization:', error)
     }
@@ -111,6 +143,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     unsubAuthChange?.()
     unsubUser?.()?.catch?.(() => {})
+    unsubRole?.()?.catch?.(() => {})
     unsubSettings?.()?.catch?.(() => {})
 })
 </script>

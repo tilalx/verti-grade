@@ -41,7 +41,11 @@ const getGhVersion = async (currentVersion, repoOwner, repoName) => {
 }
 
 const checkForNewVersion = async () => {
-    newVersionAvailable.value = await getGhVersion(appVersion, repoOwner, repoName)
+    newVersionAvailable.value = await getGhVersion(
+        appVersion,
+        repoOwner,
+        repoName,
+    )
 }
 
 function compareVersions(v1, v2) {

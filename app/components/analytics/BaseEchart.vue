@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-
 interface ChartProps {
     option: Record<string, unknown>
     height?: string | number
@@ -25,7 +24,8 @@ let echartsModule: typeof import('echarts') | null = null
 
 const containerStyle = computed(() => ({
     width: '100%',
-    height: typeof props.height === 'number' ? `${props.height}px` : props.height,
+    height:
+        typeof props.height === 'number' ? `${props.height}px` : props.height,
 }))
 
 const resizeChart = () => {
@@ -54,7 +54,9 @@ const renderChart = async () => {
     }
 
     if (!chartInstance) {
-        chartInstance = echartsModule.init(chartEl.value, null, { renderer: props.renderer })
+        chartInstance = echartsModule.init(chartEl.value, null, {
+            renderer: props.renderer,
+        })
         if (props.responsive) {
             window.addEventListener('resize', resizeChart)
         }

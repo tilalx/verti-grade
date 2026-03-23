@@ -58,6 +58,7 @@
     "login": "Giriş Yap",
     "analytics": "Analitik",
     "comments": "Yorumlar",
+    "users": "Kullanıcılar",
     "settings": "Ayarlar",
     "route_setter": "Rota Ayarlayıcı",
     "screwed_at": "Vidalama Tarihi",
@@ -248,6 +249,7 @@
       "route": "Rota - Verti-Grade",
       "index": "Tırmanış Rotaları - Verti-Grade",
       "comments": "Yorumlar - Verti-Grade",
+      "users": "Kullanıcılar - Verti-Grade",
       "dashboard": "Rota Yönetimi - Verti-Grade"
     },
     "content": {
@@ -255,6 +257,7 @@
       "route": "İnceleme Oluştur",
       "index": "Tırmanış Rotaları",
       "comments": "Yorumlar",
+      "users": "Kullanıcı Yönetimi",
       "dashboard": "Rota Yönetimi"
     }
   },
@@ -268,11 +271,50 @@
     "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır.",
     "email": "Lütfen geçerli bir e-posta adresi girin."
   },
+  "comments": {
+    "subtitle": "Tırmanıcı yorumlarını yönetin",
+    "totalReviews": "Toplam yorum",
+    "avgRating": "Ort. puan",
+    "thisWeek": "Bu hafta",
+    "thisMonth": "Bu ay",
+    "lowRated": "Düşük puan (≤ 2★)",
+    "sortNewest": "En yeniler",
+    "sortOldest": "En eskiler",
+    "sortHighest": "En yüksek puan",
+    "sortLowest": "En düşük puan",
+    "showMore": "Daha fazla göster",
+    "showLess": "Daha az göster",
+    "noComments": "Yorum bulunamadı",
+    "noCommentsHint": "Filtrelerinizi veya arama teriminizi ayarlamayı deneyin",
+    "editReview": "Yorumu düzenle",
+    "anonymous": "Anonim",
+    "selected": "{n} seçildi",
+    "deleteSelected": "{n} sil",
+    "bulkDeleteTitle": "{n} yorum silinsin mi?",
+    "showing": "{total} yorumdan {n} tanesi gösteriliyor",
+    "select": "Seç",
+    "deselect": "Seçimi kaldır"
+  },
   "nav": {
     "openMenu": "Menüyü aç",
     "skipToContent": "İçeriğe geç",
     "mainNavigation": "Ana gezinme",
     "userMenu": "Kullanıcı menüsü"
+  },
+  "permissions": {
+    "title": "Rol Yetkileri",
+    "role": "Rol",
+    "noPermission": "Bu sayfaya erişim izniniz yok.",
+    "features": {
+      "manage_routes": "Rotaları Yönet",
+      "view_analytics": "Analitikleri Görüntüle",
+      "manage_comments": "Yorumları Yönet",
+      "manage_users": "Kullanıcıları Yönet",
+      "manage_settings": "Ayarları Yönet",
+      "run_inventory": "Envanter Taraması"
+    },
+    "updated": "Yetkiler güncellendi.",
+    "updateError": "Yetkiler güncellenemedi."
   },
   "time": {
     "justNow": "Just now",
@@ -282,6 +324,20 @@
   },
   "users": {
     "create": "Kullanıcı Oluştur",
-    "edit": "Kullanıcıyı Düzenle"
+    "createHint": "Kullanıcıya parola sıfırlama e-postası gönderilecektir.",
+    "edit": "Kullanıcıyı Düzenle",
+    "title": "Kullanıcı Yönetimi",
+    "delete": "Kullanıcıyı Sil",
+    "deleteConfirm": "Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "deleteSuccess": "Kullanıcı başarıyla silindi.",
+    "deleteError": "Kullanıcı silinemedi.",
+    "searchUsers": "Kullanıcı ara…",
+    "role": "Rol",
+    "totalUsers": "Toplam kullanıcı",
+    "admins": "Yöneticiler",
+    "recentlyJoined": "Bu hafta katıldı",
+    "noUsers": "Kullanıcı bulunamadı",
+    "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
+    "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
   }
 }

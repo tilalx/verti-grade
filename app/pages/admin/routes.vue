@@ -96,7 +96,11 @@
                 <v-row>
                     <v-col cols="12">
                         <div class="route-manager__actions">
-                            <v-btn @click="selectAll" color="primary" variant="tonal">
+                            <v-btn
+                                @click="selectAll"
+                                color="primary"
+                                variant="tonal"
+                            >
                                 <v-icon start>
                                     {{
                                         areAllSelected()
@@ -110,23 +114,48 @@
                                         : $t('actions.select_all')
                                 }}
                             </v-btn>
-                            <v-btn v-if="hasSelection" @click="printSelected" color="success" variant="tonal">
+                            <v-btn
+                                v-if="hasSelection"
+                                @click="printSelected"
+                                color="success"
+                                variant="tonal"
+                            >
                                 <v-icon start>mdi-printer</v-icon>
                                 {{ $t('actions.print') }}
                             </v-btn>
-                            <v-btn v-if="hasSelection" @click="exportSelectedExcel" color="success" variant="tonal">
+                            <v-btn
+                                v-if="hasSelection"
+                                @click="exportSelectedExcel"
+                                color="success"
+                                variant="tonal"
+                            >
                                 <v-icon start>mdi-file-excel</v-icon>
                                 XLSX
                             </v-btn>
-                            <v-btn v-if="hasSelection" @click="exportSelectedJson" color="success" variant="tonal">
+                            <v-btn
+                                v-if="hasSelection"
+                                @click="exportSelectedJson"
+                                color="success"
+                                variant="tonal"
+                            >
                                 <v-icon start>mdi-code-json</v-icon>
                                 JSON
                             </v-btn>
-                            <v-btn v-if="hasSelection" @click="handleArchiveClick" color="warning" variant="tonal">
+                            <v-btn
+                                v-if="hasSelection"
+                                @click="handleArchiveClick"
+                                color="warning"
+                                variant="tonal"
+                            >
                                 <v-icon start>mdi-archive</v-icon>
                                 {{ $t('actions.archive') }}
                             </v-btn>
-                            <v-btn v-if="hasSelection" @click="showDeleteConfirmation = true" color="error" variant="tonal">
+                            <v-btn
+                                v-if="hasSelection"
+                                @click="showDeleteConfirmation = true"
+                                color="error"
+                                variant="tonal"
+                            >
                                 <v-icon start>mdi-delete</v-icon>
                                 {{ $t('actions.delete') }}
                             </v-btn>
@@ -154,7 +183,9 @@
                             color="primary"
                             hide-details
                             density="compact"
-                            @update:modelValue="updateRouteSelection(item, $event)"
+                            @update:modelValue="
+                                updateRouteSelection(item, $event)
+                            "
                         />
                     </template>
                     <template #item.color="{ item }">
@@ -162,7 +193,9 @@
                     </template>
                     <template #item.name="{ item }">
                         <div class="route-manager__name">
-                            <span class="route-manager__name-text">{{ item.name }}</span>
+                            <span class="route-manager__name-text">{{
+                                item.name
+                            }}</span>
                             <v-icon
                                 v-if="item.has_ratings"
                                 color="yellow-darken-2"
@@ -186,7 +219,9 @@
                         {{ formatAnchorPoint(item.anchor_point) }}
                     </template>
                     <template #item.comment="{ item }">
-                        <div class="route-manager__comment">{{ item.comment }}</div>
+                        <div class="route-manager__comment">
+                            {{ item.comment }}
+                        </div>
                     </template>
                     <template #item.creator="{ item }">
                         <div class="route-manager__creator-chips">
@@ -205,7 +240,12 @@
                     </template>
                     <template #item.actions="{ item }">
                         <div class="route-manager__row-actions">
-                            <v-btn icon size="small" class="mr-1" @click="routeFormRef.open(item)">
+                            <v-btn
+                                icon
+                                size="small"
+                                class="mr-1"
+                                @click="routeFormRef.open(item)"
+                            >
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
                             <RouteDetails :route_id="item.id" />
@@ -220,26 +260,53 @@
                         class="mt-4"
                         :elevation="0"
                     />
-                    <div v-else-if="!loading && routes.length === 0" class="route-manager__mobile-empty">
-                        <v-icon size="x-large" class="mb-2">mdi-magnify-remove-outline</v-icon>
-                        <p class="text-body-1 mb-0">{{ $t('table.no_data') }}</p>
+                    <div
+                        v-else-if="!loading && routes.length === 0"
+                        class="route-manager__mobile-empty"
+                    >
+                        <v-icon size="x-large" class="mb-2"
+                            >mdi-magnify-remove-outline</v-icon
+                        >
+                        <p class="text-body-1 mb-0">
+                            {{ $t('table.no_data') }}
+                        </p>
                     </div>
                     <v-row v-else class="mt-2">
-                        <v-col v-for="route in routes" :key="route.id" cols="12">
-                            <v-card variant="outlined" class="route-manager__mobile-card">
-                                <div class="route-manager__mobile-difficulty">{{ formatDifficulty(route) }}</div>
+                        <v-col
+                            v-for="route in routes"
+                            :key="route.id"
+                            cols="12"
+                        >
+                            <v-card
+                                variant="outlined"
+                                class="route-manager__mobile-card"
+                            >
+                                <div class="route-manager__mobile-difficulty">
+                                    {{ formatDifficulty(route) }}
+                                </div>
                                 <div class="route-manager__mobile-header">
                                     <v-checkbox
                                         :model-value="route.selected"
                                         color="primary"
                                         hide-details
                                         density="compact"
-                                        @update:modelValue="updateRouteSelection(route, $event)"
+                                        @update:modelValue="
+                                            updateRouteSelection(route, $event)
+                                        "
                                     />
-                                    <v-avatar :color="route.color" size="32" class="mr-3" />
+                                    <v-avatar
+                                        :color="route.color"
+                                        size="32"
+                                        class="mr-3"
+                                    />
                                     <div class="route-manager__mobile-name">
-                                        <span class="route-manager__mobile-name-text">{{ route.name }}</span>
-                                        <div class="route-manager__mobile-name-meta">
+                                        <span
+                                            class="route-manager__mobile-name-text"
+                                            >{{ route.name }}</span
+                                        >
+                                        <div
+                                            class="route-manager__mobile-name-meta"
+                                        >
                                             <v-icon
                                                 v-if="route.has_ratings"
                                                 color="yellow-darken-2"
@@ -262,18 +329,30 @@
                                 <v-divider class="my-2" />
 
                                 <v-list density="compact" class="py-0">
-                                    <v-list-item :subtitle="route.comment || '—'">
+                                    <v-list-item
+                                        :subtitle="route.comment || '—'"
+                                    >
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-comment-text-outline</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-comment-text-outline</v-icon
+                                            >
                                         </template>
                                     </v-list-item>
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-account-hard-hat</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-account-hard-hat</v-icon
+                                            >
                                         </template>
-                                        <div class="route-manager__mobile-creators">
-                                            <v-chip v-for="creator in route.creator" :key="creator" size="x-small">
+                                        <div
+                                            class="route-manager__mobile-creators"
+                                        >
+                                            <v-chip
+                                                v-for="creator in route.creator"
+                                                :key="creator"
+                                                size="x-small"
+                                            >
                                                 {{ creator }}
                                             </v-chip>
                                         </div>
@@ -281,58 +360,97 @@
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-map-marker</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-map-marker</v-icon
+                                            >
                                         </template>
-                                        <v-list-item-title class="text-caption text-uppercase">
+                                        <v-list-item-title
+                                            class="text-caption text-uppercase"
+                                        >
                                             {{ $t('climbing.location') }}
                                         </v-list-item-title>
-                                        <v-list-item-subtitle>{{ route.location || '—' }}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>{{
+                                            route.location || '—'
+                                        }}</v-list-item-subtitle>
                                     </v-list-item>
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-shape</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-shape</v-icon
+                                            >
                                         </template>
-                                        <v-list-item-title class="text-caption text-uppercase">
+                                        <v-list-item-title
+                                            class="text-caption text-uppercase"
+                                        >
                                             {{ $t('climbing.type') }}
                                         </v-list-item-title>
-                                        <v-list-item-subtitle>{{ route.type || '—' }}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>{{
+                                            route.type || '—'
+                                        }}</v-list-item-subtitle>
                                     </v-list-item>
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-pound</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-pound</v-icon
+                                            >
                                         </template>
-                                        <v-list-item-title class="text-caption text-uppercase">
+                                        <v-list-item-title
+                                            class="text-caption text-uppercase"
+                                        >
                                             {{ $t('climbing.anchor_point') }}
                                         </v-list-item-title>
-                                        <v-list-item-subtitle>{{ formatAnchorPoint(route.anchor_point) }}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>{{
+                                            formatAnchorPoint(
+                                                route.anchor_point,
+                                            )
+                                        }}</v-list-item-subtitle>
                                     </v-list-item>
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-star</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-star</v-icon
+                                            >
                                         </template>
-                                        <v-list-item-title class="text-caption text-uppercase">
+                                        <v-list-item-title
+                                            class="text-caption text-uppercase"
+                                        >
                                             {{ $t('ratings.score') }}
                                         </v-list-item-title>
-                                        <v-list-item-subtitle>{{ formatScore(route) }}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>{{
+                                            formatScore(route)
+                                        }}</v-list-item-subtitle>
                                     </v-list-item>
 
                                     <v-list-item>
                                         <template #prepend>
-                                            <v-icon size="small" class="mr-3">mdi-calendar-month</v-icon>
+                                            <v-icon size="small" class="mr-3"
+                                                >mdi-calendar-month</v-icon
+                                            >
                                         </template>
-                                        <v-list-item-title class="text-caption text-uppercase">
+                                        <v-list-item-title
+                                            class="text-caption text-uppercase"
+                                        >
                                             {{ $t('routes.screwed_at') }}
                                         </v-list-item-title>
-                                        <v-list-item-subtitle>{{ formatDate(route.screw_date) }}</v-list-item-subtitle>
+                                        <v-list-item-subtitle>{{
+                                            formatDate(route.screw_date)
+                                        }}</v-list-item-subtitle>
                                     </v-list-item>
                                 </v-list>
 
-                                <v-card-actions class="pa-2 route-manager__mobile-actions">
+                                <v-card-actions
+                                    class="pa-2 route-manager__mobile-actions"
+                                >
                                     <v-spacer />
-                                    <v-btn icon size="small" class="mr-1" @click="routeFormRef.open(route)">
+                                    <v-btn
+                                        icon
+                                        size="small"
+                                        class="mr-1"
+                                        @click="routeFormRef.open(route)"
+                                    >
                                         <v-icon>mdi-pencil</v-icon>
                                     </v-btn>
                                     <RouteDetails :route_id="route.id" />
@@ -365,7 +483,9 @@
 
         <v-dialog v-model="showDeleteConfirmation" max-width="500px">
             <v-card>
-                <v-card-text>{{ $t('notifications.deleteMoreItems') }}</v-card-text>
+                <v-card-text>{{
+                    $t('notifications.deleteMoreItems')
+                }}</v-card-text>
                 <v-card-actions>
                     <v-spacer />
                     <v-btn @click="showDeleteConfirmation = false">
@@ -380,13 +500,19 @@
 
         <v-dialog v-model="showArchiveConfirmation" max-width="500px">
             <v-card>
-                <v-card-text>{{ $t('notifications.archiveMoreItems') }}</v-card-text>
+                <v-card-text>{{
+                    $t('notifications.archiveMoreItems')
+                }}</v-card-text>
                 <v-card-actions>
                     <v-spacer />
                     <v-btn @click="showArchiveConfirmation = false">
                         {{ $t('actions.cancel') }}
                     </v-btn>
-                    <v-btn color="warning" variant="flat" @click="archiveSelected">
+                    <v-btn
+                        color="warning"
+                        variant="flat"
+                        @click="archiveSelected"
+                    >
                         {{ $t('actions.archive') }}
                     </v-btn>
                 </v-card-actions>
@@ -396,8 +522,19 @@
 </template>
 
 <script setup>
-import { formatDifficulty, formatAnchorPoint, formatScore, normalizeCreators } from '~/utils/formatting'
+import {
+    formatDifficulty,
+    formatAnchorPoint,
+    formatScore,
+    normalizeCreators,
+} from '~/utils/formatting'
 import { toPbSort } from '~/utils/sorting'
+
+definePageMeta({
+    authRequired: true,
+    middleware: ['auth'],
+    requiredPermission: 'manage_routes',
+})
 
 const pb = usePocketbase()
 const { t, locale } = useI18n()
@@ -449,7 +586,10 @@ const locationId = 'location-select'
 
 const difficulties = computed(() => [
     { text: t('filter.all'), value: '' },
-    ...Array.from({ length: 10 }, (_, index) => ({ text: String(index + 1), value: String(index + 1) })),
+    ...Array.from({ length: 10 }, (_, index) => ({
+        text: String(index + 1),
+        value: String(index + 1),
+    })),
 ])
 
 const types = computed(() => [
@@ -475,7 +615,12 @@ const tableHeaders = computed(() => [
     { title: t('climbing.location'), key: 'location', sortable: false },
     { title: t('climbing.type'), key: 'type', sortable: false },
     { title: t('ratings.score'), key: 'score', sortable: false },
-    { title: t('table.actions'), key: 'actions', sortable: false, align: 'end' },
+    {
+        title: t('table.actions'),
+        key: 'actions',
+        sortable: false,
+        align: 'end',
+    },
 ])
 
 const pbFilter = computed(() => {
@@ -501,9 +646,10 @@ const pbFilter = computed(() => {
     return parts.join(' && ')
 })
 
-const buildSelectionCacheKey = () => JSON.stringify({
-    filter: pbFilter.value || null,
-})
+const buildSelectionCacheKey = () =>
+    JSON.stringify({
+        filter: pbFilter.value || null,
+    })
 
 const invalidateAllRouteIdsCache = () => {
     allRouteIdsCache.value = createAllRouteIdsCache()
@@ -511,9 +657,12 @@ const invalidateAllRouteIdsCache = () => {
 
 const selectedCount = computed(() => selectedRouteIds.value.size)
 const hasSelection = computed(() => selectedCount.value > 0)
-const pageLength = computed(() => Math.max(1, Math.ceil(totalItems.value / tableOptions.itemsPerPage)))
+const pageLength = computed(() =>
+    Math.max(1, Math.ceil(totalItems.value / tableOptions.itemsPerPage)),
+)
 
-const areAllSelected = () => totalItems.value > 0 && selectedCount.value >= totalItems.value
+const areAllSelected = () =>
+    totalItems.value > 0 && selectedCount.value >= totalItems.value
 
 const applySelectionToRoutes = () => {
     routes.value = routes.value.map((route) => ({
@@ -569,7 +718,10 @@ const toPbSortRoutes = (sortByArr) => toPbSort(sortByArr, '-created')
 const loadAllRouteIds = async () => {
     const cacheKey = buildSelectionCacheKey()
 
-    if (allRouteIdsCache.value.key === cacheKey && allRouteIdsCache.value.ids.length) {
+    if (
+        allRouteIdsCache.value.key === cacheKey &&
+        allRouteIdsCache.value.ids.length
+    ) {
         return allRouteIdsCache.value.ids
     }
 
@@ -595,7 +747,6 @@ const loadAllRouteIds = async () => {
         throw error
     }
 }
-
 
 const formatDate = (value) => {
     if (!value) {
@@ -635,7 +786,9 @@ const loadAverageRatings = async (force = false) => {
     averageRatingsLoading.value = true
 
     try {
-        const list = await pb.collection('averageRating').getFullList({ fields: 'id,average_rating' })
+        const list = await pb
+            .collection('averageRating')
+            .getFullList({ fields: 'id,average_rating' })
         averageRatings.value = new Map(
             list
                 .filter((record) => Boolean(record?.id))
@@ -668,15 +821,13 @@ const loadRoutes = async (options = {}) => {
 
     try {
         const [list] = await Promise.all([
-            pb.collection('routes').getList(
-                tableOptions.page,
-                tableOptions.itemsPerPage,
-                {
+            pb
+                .collection('routes')
+                .getList(tableOptions.page, tableOptions.itemsPerPage, {
                     filter: pbFilter.value || undefined,
                     sort: toPbSortRoutes(tableOptions.sortBy),
                     requestKey: 'adminRoutesList',
-                },
-            ),
+                }),
             loadAverageRatings(),
         ])
 
@@ -684,15 +835,18 @@ const loadRoutes = async (options = {}) => {
 
         const normalizedRoutes = list.items.map((route) => {
             const average = averageMap.get(route.id)
-            const baseScore = typeof route.score === 'number' ? route.score : null
-            const resolvedScore = typeof average === 'number' ? average : baseScore
+            const baseScore =
+                typeof route.score === 'number' ? route.score : null
+            const resolvedScore =
+                typeof average === 'number' ? average : baseScore
 
             return {
                 ...route,
                 comment: typeof route.comment === 'string' ? route.comment : '',
                 creator: normalizeCreators(route.creator),
                 score: resolvedScore,
-                has_ratings: typeof average === 'number' && !Number.isNaN(average),
+                has_ratings:
+                    typeof average === 'number' && !Number.isNaN(average),
                 selected: selectedRouteIds.value.has(route.id),
             }
         })
@@ -714,7 +868,10 @@ const reloadRoutes = async () => {
         sortBy: tableOptions.sortBy,
     })
 
-    const maxPage = Math.max(1, Math.ceil(totalItems.value / tableOptions.itemsPerPage))
+    const maxPage = Math.max(
+        1,
+        Math.ceil(totalItems.value / tableOptions.itemsPerPage),
+    )
     if (tableOptions.page > maxPage) {
         tableOptions.page = maxPage
         await loadRoutes({
@@ -809,9 +966,16 @@ const downloadExport = async (endpoint, extension, mimeType) => {
     }
 }
 
-const printSelected = () => downloadExport('/api/ui/pdf', 'pdf', 'application/pdf')
-const exportSelectedExcel = () => downloadExport('/api/ui/xlsx', 'xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-const exportSelectedJson = () => downloadExport('/api/ui/json', 'json', 'application/json')
+const printSelected = () =>
+    downloadExport('/api/ui/pdf', 'pdf', 'application/pdf')
+const exportSelectedExcel = () =>
+    downloadExport(
+        '/api/ui/xlsx',
+        'xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+const exportSelectedJson = () =>
+    downloadExport('/api/ui/json', 'json', 'application/json')
 
 const onMobilePageChange = (value) => {
     if (value === tableOptions.page) {
@@ -835,7 +999,13 @@ let filterDebounceTimer = null
 let subscriptionDebounceTimer = null
 
 watch(
-    [searchRouteName, selectedDifficulty, selectedType, selectedLocation, displayArchived],
+    [
+        searchRouteName,
+        selectedDifficulty,
+        selectedType,
+        selectedLocation,
+        displayArchived,
+    ],
     () => {
         if (filterDebounceTimer) {
             clearTimeout(filterDebounceTimer)
@@ -897,7 +1067,6 @@ useHead(() => ({
 .route-manager {
     padding-bottom: 64px;
 }
-
 
 .route-manager__actions {
     display: flex;

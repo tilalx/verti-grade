@@ -1,15 +1,17 @@
 <template>
     <v-dialog v-model="localDialog" max-width="640" :persistent="hasChanges">
         <v-card class="profile-card" rounded="xl" elevation="8">
-
             <!-- ── Header ─────────────────────────────────────────── -->
             <div class="profile-header pa-6 pb-0">
                 <div class="d-flex align-center gap-4">
-
                     <!-- Avatar with upload overlay -->
                     <div class="avatar-wrapper" @click="openAvatarPicker">
                         <v-avatar size="72" class="avatar-ring">
-                            <v-img v-if="avatarPreview" :src="avatarPreview" cover />
+                            <v-img
+                                v-if="avatarPreview"
+                                :src="avatarPreview"
+                                cover
+                            />
                             <v-icon
                                 v-else
                                 icon="mdi-account"
@@ -29,7 +31,9 @@
                         <div class="text-h6 font-weight-bold text-truncate">
                             {{ fullName || $t('account.userProfile') }}
                         </div>
-                        <div class="text-body-2 text-medium-emphasis text-truncate">
+                        <div
+                            class="text-body-2 text-medium-emphasis text-truncate"
+                        >
                             {{ user.email }}
                         </div>
                     </div>
@@ -44,12 +48,19 @@
                                 rounded="pill"
                                 class="flex-shrink-0"
                             >
-                                <span class="locale-flag mr-1">{{ currentLocale.flag }}</span>
+                                <span class="locale-flag mr-1">{{
+                                    currentLocale.flag
+                                }}</span>
                                 {{ currentLocale.code.toUpperCase() }}
                                 <v-icon end icon="mdi-chevron-down" size="16" />
                             </v-btn>
                         </template>
-                        <v-list density="compact" rounded="lg" min-width="170" elevation="4">
+                        <v-list
+                            density="compact"
+                            rounded="lg"
+                            min-width="170"
+                            elevation="4"
+                        >
                             <v-list-item
                                 v-for="loc in locales"
                                 :key="loc.code"
@@ -60,7 +71,9 @@
                                 @click="setLocale(loc.code)"
                             >
                                 <template #prepend>
-                                    <span class="locale-flag mr-3">{{ loc.flag }}</span>
+                                    <span class="locale-flag mr-3">{{
+                                        loc.flag
+                                    }}</span>
                                 </template>
                             </v-list-item>
                         </v-list>
@@ -75,11 +88,19 @@
                     density="compact"
                 >
                     <v-tab value="profile">
-                        <v-icon start icon="mdi-account-edit-outline" size="18" />
+                        <v-icon
+                            start
+                            icon="mdi-account-edit-outline"
+                            size="18"
+                        />
                         {{ $t('account.tabs.profile') }}
                     </v-tab>
                     <v-tab value="security">
-                        <v-icon start icon="mdi-shield-lock-outline" size="18" />
+                        <v-icon
+                            start
+                            icon="mdi-shield-lock-outline"
+                            size="18"
+                        />
                         {{ $t('account.tabs.security') }}
                         <!--
                             Dot badge: user started typing a password on the security tab
@@ -110,7 +131,6 @@
 
             <!-- ── Tab windows ────────────────────────────────────── -->
             <v-window v-model="activeTab">
-
                 <!-- ── Profile tab ────────────────────────────────── -->
                 <v-window-item value="profile">
                     <v-card-text class="pa-6">
@@ -120,7 +140,9 @@
                                     <v-text-field
                                         v-model="user.firstname"
                                         :label="$t('account.firstname')"
-                                        :placeholder="$t('account.placeholders.firstname')"
+                                        :placeholder="
+                                            $t('account.placeholders.firstname')
+                                        "
                                         autocomplete="given-name"
                                         variant="outlined"
                                         density="comfortable"
@@ -134,7 +156,9 @@
                                     <v-text-field
                                         v-model="user.name"
                                         :label="$t('account.lastname')"
-                                        :placeholder="$t('account.placeholders.lastname')"
+                                        :placeholder="
+                                            $t('account.placeholders.lastname')
+                                        "
                                         autocomplete="family-name"
                                         variant="outlined"
                                         density="comfortable"
@@ -155,9 +179,20 @@
                                         prepend-inner-icon="mdi-email-outline"
                                     >
                                         <template #append-inner>
-                                            <v-tooltip :text="$t('account.emailLocked')" location="top">
-                                                <template #activator="{ props: tp }">
-                                                    <v-icon v-bind="tp" icon="mdi-lock-outline" size="18" />
+                                            <v-tooltip
+                                                :text="
+                                                    $t('account.emailLocked')
+                                                "
+                                                location="top"
+                                            >
+                                                <template
+                                                    #activator="{ props: tp }"
+                                                >
+                                                    <v-icon
+                                                        v-bind="tp"
+                                                        icon="mdi-lock-outline"
+                                                        size="18"
+                                                    />
                                                 </template>
                                             </v-tooltip>
                                         </template>
@@ -249,14 +284,21 @@
         >
             <div class="d-flex align-center gap-2">
                 <v-icon
-                    :icon="snackbarColor === 'success'
-                        ? 'mdi-check-circle-outline'
-                        : 'mdi-alert-circle-outline'"
+                    :icon="
+                        snackbarColor === 'success'
+                            ? 'mdi-check-circle-outline'
+                            : 'mdi-alert-circle-outline'
+                    "
                 />
                 {{ snackbarMessage }}
             </div>
             <template #actions>
-                <v-btn variant="text" icon="mdi-close" size="small" @click="snackbar = false" />
+                <v-btn
+                    variant="text"
+                    icon="mdi-close"
+                    size="small"
+                    @click="snackbar = false"
+                />
             </template>
         </v-snackbar>
     </v-dialog>
@@ -269,39 +311,45 @@ import { required } from '~/utils/validation'
 const { t, locale, setLocale } = useI18n()
 
 const locales = [
-    { code: 'en', label: 'English',    flag: '🇬🇧' },
-    { code: 'de', label: 'Deutsch',    flag: '🇩🇪' },
-    { code: 'ru', label: 'Русский',    flag: '🇷🇺' },
-    { code: 'tr', label: 'Türkçe',     flag: '🇹🇷' },
+    { code: 'en', label: 'English', flag: '🇬🇧' },
+    { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+    { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+    { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
     { code: 'uk', label: 'Українська', flag: '🇺🇦' },
 ]
 const currentLocale = computed(
-    () => locales.find(l => l.code === locale.value) ?? locales[0],
+    () => locales.find((l) => l.code === locale.value) ?? locales[0],
 )
 
 // ── PocketBase ────────────────────────────────────────────────────────────
 const pb = usePocketbase()
-const pocketbaseAuth = JSON.parse(localStorage.getItem('pocketbase_auth') ?? 'null')
+const pocketbaseAuth = JSON.parse(
+    localStorage.getItem('pocketbase_auth') ?? 'null',
+)
 
 // ── User state ────────────────────────────────────────────────────────────
 const user = reactive({
     ...(pocketbaseAuth?.record ?? {
-        id: '', firstname: '', name: '', email: '', avatar: null,
+        id: '',
+        firstname: '',
+        name: '',
+        email: '',
+        avatar: null,
     }),
     // Password fields — owned here, bound into PasswordChangeFields via v-model
-    oldPassword:     '',
-    password:        '',
+    oldPassword: '',
+    password: '',
     passwordConfirm: '',
 })
 
-const fullName = computed(
-    () => [user.firstname, user.name].filter(Boolean).join(' '),
+const fullName = computed(() =>
+    [user.firstname, user.name].filter(Boolean).join(' '),
 )
 
 // ── Avatar ────────────────────────────────────────────────────────────────
-const avatarFile    = ref(null)
+const avatarFile = ref(null)
 const avatarPreview = ref(null)
-const avatarInput   = ref(null)
+const avatarInput = ref(null)
 
 onMounted(() => {
     avatarPreview.value = user.avatar
@@ -309,12 +357,14 @@ onMounted(() => {
         : null
 })
 
-function openAvatarPicker() { avatarInput.value?.click() }
+function openAvatarPicker() {
+    avatarInput.value?.click()
+}
 
 function onAvatarNative(e) {
     const file = e.target.files?.[0]
     if (file) {
-        avatarFile.value    = file
+        avatarFile.value = file
         avatarPreview.value = URL.createObjectURL(file)
     }
     e.target.value = ''
@@ -339,9 +389,10 @@ const passwordChangeRequested = computed(
 const passwordFieldsValid = ref(false)
 
 const showSecurityWarning = computed(
-    () => activeTab.value !== 'security' &&
-          passwordChangeRequested.value  &&
-          !passwordFieldsValid.value,
+    () =>
+        activeTab.value !== 'security' &&
+        passwordChangeRequested.value &&
+        !passwordFieldsValid.value,
 )
 
 // ── Profile-only validation rule (only "required" needed here) ────────────
@@ -368,19 +419,20 @@ const hasChanges = computed(() => {
  */
 const canSave = computed(() => {
     if (!hasChanges.value) return false
-    if (passwordChangeRequested.value && !passwordFieldsValid.value) return false
+    if (passwordChangeRequested.value && !passwordFieldsValid.value)
+        return false
     return true
 })
 
 // ── Snackbar ──────────────────────────────────────────────────────────────
-const snackbar        = ref(false)
+const snackbar = ref(false)
 const snackbarMessage = ref('')
-const snackbarColor   = ref('')
+const snackbarColor = ref('')
 
 function showSnackbar(message, color) {
     snackbarMessage.value = message
-    snackbarColor.value   = color
-    snackbar.value        = true
+    snackbarColor.value = color
+    snackbar.value = true
 }
 
 // ── Save ──────────────────────────────────────────────────────────────────
@@ -406,13 +458,13 @@ async function saveUser() {
 
     const formData = new FormData()
     formData.append('firstname', user.firstname)
-    formData.append('name',      user.name)
+    formData.append('name', user.name)
 
     if (passwordChangeRequested.value) {
         // oldPassword, password, passwordConfirm are owned by `user` reactive
         // and were kept in sync by PasswordChangeFields via v-model
-        formData.append('oldPassword',     user.oldPassword)
-        formData.append('password',        user.password)
+        formData.append('oldPassword', user.oldPassword)
+        formData.append('password', user.password)
         formData.append('passwordConfirm', user.passwordConfirm)
     }
 
@@ -430,10 +482,10 @@ async function saveUser() {
             : null
 
         // Clear password fields
-        user.oldPassword     = ''
-        user.password        = ''
+        user.oldPassword = ''
+        user.password = ''
         user.passwordConfirm = ''
-        avatarFile.value     = null
+        avatarFile.value = null
 
         // Persist updated record to localStorage (keeps app session fresh)
         const auth = JSON.parse(localStorage.getItem('pocketbase_auth'))
@@ -442,7 +494,7 @@ async function saveUser() {
 
         // Update original snapshot so hasChanges resets to false
         original.firstname = updated.firstname
-        original.name      = updated.name
+        original.name = updated.name
 
         showSnackbar(t('notifications.success.edit'), 'success')
         localDialog.value = false
@@ -466,8 +518,11 @@ const props = defineProps({
 const emit = defineEmits(['update:dialogOpen'])
 const localDialog = ref(props.dialogOpen)
 
-watch(localDialog,            (val) => emit('update:dialogOpen', val))
-watch(() => props.dialogOpen, (val) => (localDialog.value = val))
+watch(localDialog, (val) => emit('update:dialogOpen', val))
+watch(
+    () => props.dialogOpen,
+    (val) => (localDialog.value = val),
+)
 </script>
 
 <style scoped>

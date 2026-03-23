@@ -13,8 +13,8 @@
 
 <script setup>
 defineProps({
-    to:    { type: String, required: true },
-    icon:  { type: String, required: true },
+    to: { type: String, required: true },
+    icon: { type: String, required: true },
     label: { type: String, required: true },
 })
 </script>
@@ -34,7 +34,9 @@ defineProps({
     font-weight: 500;
     letter-spacing: 0.01em;
     color: rgba(var(--v-theme-on-surface), 0.65);
-    transition: color 0.18s ease, background 0.18s ease;
+    transition:
+        color 0.18s ease,
+        background 0.18s ease;
     white-space: nowrap;
     text-decoration: none;
 }
@@ -46,7 +48,7 @@ defineProps({
 
 .nav-link--active {
     color: rgb(var(--v-theme-primary));
-    background: rgba(var(--v-theme-primary), 0.10);
+    background: rgba(var(--v-theme-primary), 0.1);
     font-weight: 600;
 }
 
@@ -77,7 +79,13 @@ defineProps({
 }
 
 @keyframes pip-in {
-    from { opacity: 0; transform: translateX(-50%) scale(0); }
-    to   { opacity: 1; transform: translateX(-50%) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
 }
 </style>
