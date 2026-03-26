@@ -1,5 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  future: {
+    compatibilityVersion: 5,
+  },
   devtools: {
     enabled: true,
     timeline: {
@@ -86,9 +89,7 @@ export default defineNuxtConfig({
   image: {
     formats: ['avif', 'webp'],
   },
-  build: {
-    transpile: ['vuetify'],
-  },
+  build: {},
   imports: {
     autoImport: true,
   },
@@ -98,12 +99,11 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: [
-         'vuetify',
-         '@vue/devtools-core',
-         '@vue/devtools-kit',
          'pocketbase',
          'echarts',
-         "vue-qrcode-reader",
+         'vue-qrcode-reader',
+         '@vue/devtools-core',
+         '@vue/devtools-kit',
       ],
     },
   },
