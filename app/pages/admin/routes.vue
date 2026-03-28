@@ -639,7 +639,7 @@ const pbFilter = computed(() => {
         parts.push(`location = "${selectedLocation.value}"`)
     }
     if (searchRouteName.value.trim()) {
-        const term = searchRouteName.value.replace(/"/g, '\\"')
+        const term = searchRouteName.value.trim().replace(/"/g, '\\"')
         parts.push(`name ~ "${term}"`)
     }
 

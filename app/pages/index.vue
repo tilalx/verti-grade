@@ -440,7 +440,7 @@ const pbFilter = computed(() => {
         parts.push(`location = "${selectedLocation.value}"`)
     if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
     if (searchRouteName.value.trim()) {
-        const term = searchRouteName.value.replace(/"/g, '\\"')
+        const term = searchRouteName.value.trim().replace(/"/g, '\\"')
         parts.push(`name ~ "${term}"`)
     }
     return parts.join(' && ')
