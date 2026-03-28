@@ -89,7 +89,9 @@ export default defineNuxtConfig({
   image: {
     formats: ['avif', 'webp'],
   },
-  build: {},
+  build: {
+    transpile: ['vuetify'],
+  },
   imports: {
     autoImport: true,
   },
