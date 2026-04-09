@@ -354,7 +354,7 @@ interface ReviewDisplay {
 }
 
 const reviews = ref<ReviewDisplay[]>([])
-let unsubscribe: (() => void | Promise<void>) | null = null
+const { subscribe } = usePbSubscription()
 
 // ── Page meta ──────────────────────────────────────────────────────────────
 
@@ -568,18 +568,11 @@ onMounted(async () => {
     await Promise.all([getRouteMetadata(), getAllRouteRatings()])
     loading.value = false
 
-    unsubscribe = await pb.collection('ratings').subscribe('*', (event) => {
+    await subscribe('ratings', (event) => {
         if (event.record.route_id === route_id.value) {
             void getAllRouteRatings()
         }
     })
-})
-
-onBeforeUnmount(async () => {
-    if (unsubscribe) {
-        await unsubscribe()
-        unsubscribe = null
-    }
 })
 </script>
 

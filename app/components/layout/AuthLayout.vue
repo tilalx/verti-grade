@@ -116,19 +116,6 @@
             </v-container>
         </v-main>
 
-        <!-- Snackbar -->
-        <v-snackbar
-            v-model="snackbarVisible"
-            :color="snackbarColor"
-            location="top right"
-            timeout="4000"
-            rounded="lg"
-        >
-            <div class="d-flex align-center ga-2">
-                <v-icon size="18">{{ snackbarIcon }}</v-icon>
-                {{ snackbarMessage }}
-            </div>
-        </v-snackbar>
     </v-app>
 </template>
 
@@ -145,24 +132,7 @@ const props = defineProps({
     headingKey: { type: String, default: 'heading' },
 })
 
-const snackbarVisible = ref(false)
-const snackbarMessage = ref('')
-const snackbarColor = ref('success')
-const snackbarIcon = computed(
-    () =>
-        ({
-            success: 'mdi-check-circle-outline',
-            error: 'mdi-alert-circle-outline',
-            info: 'mdi-information-outline',
-            warning: 'mdi-alert-outline',
-        })[snackbarColor.value] ?? 'mdi-information-outline',
-)
-
-function notify(msg, color = 'success') {
-    snackbarMessage.value = msg
-    snackbarColor.value = color
-    snackbarVisible.value = true
-}
+const { notify } = useNotification()
 
 defineExpose({ notify })
 </script>

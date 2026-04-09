@@ -2,133 +2,60 @@
     <v-app>
         <v-main>
             <v-container fluid>
-                <!-- DESKTOP Filters -->
-                <v-row v-if="mdAndUp">
-                    <v-col cols="12" md="3">
-                        <v-text-field
-                            :id="routeNameId"
-                            :label="$t('climbing.searchRouteName')"
-                            v-model="searchRouteName"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                        <v-select
-                            :id="difficultyId"
-                            :label="$t('climbing.difficulty')"
-                            :items="difficulties"
-                            v-model="selectedDifficulty"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                        <v-select
-                            :id="typeId"
-                            :label="$t('climbing.type')"
-                            :items="types"
-                            v-model="selectedType"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                        <v-select
-                            :id="locationId"
-                            :label="$t('climbing.location')"
-                            :items="locations"
-                            v-model="selectedLocation"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                </v-row>
-
-                <!-- MOBILE Filters -->
-                <v-row v-if="smAndDown" align="center" class="mb-2">
-                    <v-col>
-                        <v-text-field
-                            :id="routeNameId"
-                            :label="$t('climbing.searchRouteName')"
-                            v-model="searchRouteName"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                    <v-col cols="auto">
-                        <v-btn @click="isFilterSheetOpen = true" icon>
-                            <v-badge
-                                :content="activeFilterCount"
-                                color="primary"
-                                :model-value="activeFilterCount > 0"
-                            >
-                                <v-icon>mdi-filter-variant</v-icon>
-                            </v-badge>
-                        </v-btn>
-                    </v-col>
-                </v-row>
-
-                <!-- Filter Bottom Sheet for Mobile -->
-                <v-bottom-sheet v-model="isFilterSheetOpen" v-if="smAndDown">
-                    <v-card>
-                        <v-card-title class="text-h5 text-center">{{
-                            $t('filter.title')
-                        }}</v-card-title>
-                        <v-card-text>
-                            <v-select
-                                :id="difficultyId"
-                                :label="$t('climbing.difficulty')"
-                                :items="difficulties"
-                                v-model="selectedDifficulty"
-                                item-title="text"
-                                item-value="value"
-                                density="comfortable"
-                                hide-details
-                                class="mb-4"
-                            />
-                            <v-select
-                                :id="typeId"
-                                :label="$t('climbing.type')"
-                                :items="types"
-                                v-model="selectedType"
-                                item-title="text"
-                                item-value="value"
-                                density="comfortable"
-                                hide-details
-                                class="mb-4"
-                            />
-                            <v-select
-                                :id="locationId"
-                                :label="$t('climbing.location')"
-                                :items="locations"
-                                v-model="selectedLocation"
-                                item-title="text"
-                                item-value="value"
-                                density="comfortable"
-                                hide-details
-                            />
-                        </v-card-text>
-                        <v-card-actions>
-                            <v-btn @click="clearFilters" variant="text">{{
-                                $t('actions.clear')
-                            }}</v-btn>
-                            <v-spacer />
-                            <v-btn
-                                color="primary"
-                                @click="isFilterSheetOpen = false"
-                                variant="flat"
-                                >{{ $t('actions.search') }}</v-btn
-                            >
-                        </v-card-actions>
-                    </v-card>
-                </v-bottom-sheet>
+                <!-- Filter Bar -->
+                <FilterBar
+                    v-model="searchRouteName"
+                    :search-label="$t('climbing.searchRouteName')"
+                    :active-filter-count="activeFilterCount"
+                    @clear="clearFilters"
+                >
+                    <template #filters>
+                        <v-row density="comfortable">
+                            <v-col cols="12" sm="4">
+                                <v-select
+                                    :label="$t('climbing.difficulty')"
+                                    :items="difficulties"
+                                    v-model="selectedDifficulty"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="12" sm="4">
+                                <v-select
+                                    :label="$t('climbing.type')"
+                                    :items="types"
+                                    v-model="selectedType"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="12" sm="4">
+                                <v-select
+                                    :label="$t('climbing.location')"
+                                    :items="locations"
+                                    v-model="selectedLocation"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                        </v-row>
+                    </template>
+                </FilterBar>
 
                 <!-- DESKTOP VIEW: Data Table -->
                 <v-data-table-server
@@ -340,6 +267,19 @@ const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { smAndDown, mdAndUp } = useDisplay()
 
+const {
+    searchRouteName,
+    selectedDifficulty,
+    selectedType,
+    selectedLocation,
+    difficulties,
+    types,
+    locations,
+    activeFilterCount,
+    pbFilter: baseFilter,
+    clearFilters,
+} = useRouteFilters()
+
 useHead({
     title: t('page.title.index'),
     meta: [
@@ -351,11 +291,6 @@ useHead({
     ],
 })
 
-const routeNameId = useId()
-const difficultyId = useId()
-const typeId = useId()
-const locationId = useId()
-
 type SortDirection = 'asc' | 'desc' | undefined
 interface SortOption {
     key: string
@@ -366,27 +301,6 @@ interface TableOptions {
     page: number
     itemsPerPage: number
     sortBy: SortOption[]
-}
-
-const selectedDifficulty = ref('')
-const selectedLocation = ref('')
-const selectedType = ref('')
-const searchRouteName = ref('')
-const isFilterSheetOpen = ref(false)
-
-const activeFilterCount = computed(() => {
-    return [
-        selectedDifficulty.value,
-        selectedLocation.value,
-        selectedType.value,
-    ].filter(Boolean).length
-})
-
-function clearFilters() {
-    selectedDifficulty.value = ''
-    selectedLocation.value = ''
-    selectedType.value = ''
-    isFilterSheetOpen.value = false
 }
 
 const tableOptions = reactive<TableOptions>({
@@ -414,36 +328,9 @@ const headersDesktop: Array<{
     { title: t('table.actions'), key: 'actions', sortable: false },
 ]
 
-const difficulties = [
-    { text: t('filter.all'), value: '' },
-    ...Array.from({ length: 10 }, (_, index) => ({
-        text: String(index + 1),
-        value: String(index + 1),
-    })),
-]
-const locations = [
-    { text: t('filter.all'), value: '' },
-    { text: 'Hanau', value: 'Hanau' },
-    { text: 'Gelnhausen', value: 'Gelnhausen' },
-]
-const types = [
-    { text: t('routes.types.boulder'), value: 'Boulder' },
-    { text: t('filter.all'), value: '' },
-    { text: t('routes.types.route'), value: 'Route' },
-]
-
 const pbFilter = computed(() => {
-    const parts = ['archived = false']
-    if (selectedDifficulty.value)
-        parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
-    if (selectedLocation.value)
-        parts.push(`location = "${selectedLocation.value}"`)
-    if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
-    if (searchRouteName.value.trim()) {
-        const term = searchRouteName.value.trim().replace(/"/g, '\\"')
-        parts.push(`name ~ "${term}"`)
-    }
-    return parts.join(' && ')
+    const base = baseFilter.value
+    return base ? `archived = false && ${base}` : 'archived = false'
 })
 
 const toPbSortIndex = (sortByArr: SortOption[]) =>
@@ -523,37 +410,30 @@ function loadMore() {
 }
 
 let debounceT: ReturnType<typeof setTimeout> | null = null
-watch(
-    [selectedDifficulty, selectedLocation, selectedType, searchRouteName],
-    () => {
-        if (debounceT) {
-            clearTimeout(debounceT)
-        }
+watch(pbFilter, () => {
+    if (debounceT) {
+        clearTimeout(debounceT)
+    }
 
-        debounceT = setTimeout(() => {
-            tableOptions.page = 1
-            void loadRoutes({}, { append: false })
-        }, 300)
-    },
-)
+    debounceT = setTimeout(() => {
+        tableOptions.page = 1
+        void loadRoutes({}, { append: false })
+    }, 300)
+})
 
-let unsub: (() => void | Promise<void>) | null = null
+const { subscribe } = usePbSubscription()
+
 onMounted(async () => {
-    const [, sub] = await Promise.all([
+    await Promise.all([
         loadRoutes({ ...tableOptions }),
-        pb.collection('routes').subscribe('*', () => {
+        subscribe('routes', () => {
             tableOptions.page = 1
             void loadRoutes({}, { append: false })
         }),
     ])
-    unsub = sub
 })
 
 onBeforeUnmount(() => {
-    if (unsub) {
-        void unsub()
-        unsub = null
-    }
     if (debounceT) {
         clearTimeout(debounceT)
         debounceT = null

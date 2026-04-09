@@ -1,343 +1,344 @@
 {
-  "account": {
-    "profile": "Profil",
-    "login": "Anmelden",
-    "logout": "Abmelden",
-    "firstname": "Vorname",
-    "lastname": "Nachname",
-    "username": "Benutzername",
-    "password": "Passwort",
-    "newPassword": "Neues Passwort",
-    "email": "E-Mail",
-    "username_or_email": "Benutzername oder E-Mail",
-    "login_hint": "Benutzername oder E-Mail eingeben.",
-    "reset_password": "Passwort zurücksetzen",
-    "reset_hint": "Link zum Zurücksetzen wird per E-Mail gesendet.",
-    "confirmPassword": "Passwort bestätigen",
-    "userProfile": "Benutzerprofil",
-    "oldPassword": "Aktuelles Passwort",
-    "or_login_with": "Oder mit OAuth anmelden",
-    "remember_me": "Angemeldet bleiben",
-    "changeAvatar": "Avatar ändern",
-    "emailLocked": "E-Mail kann hier nicht geändert werden",
-    "passwordStrength": "Passwortstärke",
-    "passwordHint": "Lassen Sie die Passwortfelder leer, um das aktuelle Passwort beizubehalten.",
-    "unsavedChanges": "Ungespeicherte Änderungen",
-    "wrongOldPassword": "Aktuelles Passwort ist falsch",
-    "unknownUser": "Unbekannter Benutzer",
-    "tabs": {
-      "profile": "Profil",
-      "security": "Sicherheit"
+    "account": {
+        "profile": "Profil",
+        "login": "Anmelden",
+        "logout": "Abmelden",
+        "firstname": "Vorname",
+        "lastname": "Nachname",
+        "username": "Benutzername",
+        "password": "Passwort",
+        "newPassword": "Neues Passwort",
+        "email": "E-Mail",
+        "username_or_email": "Benutzername oder E-Mail",
+        "login_hint": "Benutzername oder E-Mail eingeben.",
+        "reset_password": "Passwort zurücksetzen",
+        "reset_hint": "Link zum Zurücksetzen wird per E-Mail gesendet.",
+        "confirmPassword": "Passwort bestätigen",
+        "userProfile": "Benutzerprofil",
+        "oldPassword": "Aktuelles Passwort",
+        "or_login_with": "Oder mit OAuth anmelden",
+        "remember_me": "Angemeldet bleiben",
+        "changeAvatar": "Avatar ändern",
+        "emailLocked": "E-Mail kann hier nicht geändert werden",
+        "passwordStrength": "Passwortstärke",
+        "passwordHint": "Lassen Sie die Passwortfelder leer, um das aktuelle Passwort beizubehalten.",
+        "unsavedChanges": "Ungespeicherte Änderungen",
+        "wrongOldPassword": "Aktuelles Passwort ist falsch",
+        "unknownUser": "Unbekannter Benutzer",
+        "tabs": {
+            "profile": "Profil",
+            "security": "Sicherheit"
+        },
+        "placeholders": {
+            "firstname": "Max",
+            "lastname": "Mustermann",
+            "oldPassword": "Ihr aktuelles Passwort",
+            "newPassword": "Ihr neues Passwort",
+            "confirmPassword": "Neues Passwort wiederholen"
+        },
+        "strength": {
+            "weak": "Schwach",
+            "fair": "Mäßig",
+            "good": "Gut",
+            "strong": "Stark"
+        },
+        "requirements": {
+            "minLength": "Mindestens 8 Zeichen",
+            "maxLength": "Maximal 72 Zeichen",
+            "uppercase": "Großbuchstabe (A–Z)",
+            "lowercase": "Kleinbuchstabe (a–z)",
+            "number": "Zahl (0–9)",
+            "special": "Sonderzeichen (!{'@'}#...)"
+        }
     },
-    "placeholders": {
-      "firstname": "Max",
-      "lastname": "Mustermann",
-      "oldPassword": "Ihr aktuelles Passwort",
-      "newPassword": "Ihr neues Passwort",
-      "confirmPassword": "Neues Passwort wiederholen"
+    "routes": {
+        "home": "Startseite",
+        "dashboard": "Routenverwaltung",
+        "inventory": "Inventur",
+        "login": "Anmelden",
+        "analytics": "Analysen",
+        "comments": "Kommentare",
+        "users": "Benutzer",
+        "settings": "Einstellungen",
+        "route_setter": "Routen Schrauber",
+        "screwed_at": "Geschraubt am",
+        "types": {
+            "route": "Route",
+            "boulder": "Boulder"
+        },
+        "name": "Name"
     },
-    "strength": {
-      "weak": "Schwach",
-      "fair": "Mäßig",
-      "good": "Gut",
-      "strong": "Stark"
+    "dashboard": {
+        "online": "{0} Online"
     },
-    "requirements": {
-      "minLength": "Mindestens 8 Zeichen",
-      "maxLength": "Maximal 72 Zeichen",
-      "uppercase": "Großbuchstabe (A–Z)",
-      "lowercase": "Kleinbuchstabe (a–z)",
-      "number": "Zahl (0–9)",
-      "special": "Sonderzeichen (!{'@'}#...)"
-    }
-  },
-  "routes": {
-    "home": "Startseite",
-    "dashboard": "Routenverwaltung",
-    "inventory": "Inventur",
-    "login": "Anmelden",
-    "analytics": "Analysen",
-    "comments": "Kommentare",
-    "users": "Benutzer",
-    "settings": "Einstellungen",
-    "route_setter": "Routen Schrauber",
-    "screwed_at": "Geschraubt am",
-    "types": {
-      "route": "Route",
-      "boulder": "Boulder"
+    "analytics": {
+        "title": "Routen-Analyse",
+        "subtitle": "Überwache wichtige Kennzahlen aller Kletterrouten.",
+        "refresh": "Aktualisieren",
+        "retry": "Erneut versuchen",
+        "empty": "Noch keine Analysedaten verfügbar.",
+        "generatedAt": "Zuletzt aktualisiert {value}",
+        "meta": {
+            "title": "Analysen - Verti-Grade",
+            "description": "Administratives Analyse-Dashboard für Kletterrouten."
+        },
+        "cards": {
+            "totalRoutes": "Gesamtanzahl Routen",
+            "totalRoutesSubtitle": "Über alle Standorte",
+            "activeRoutes": "Aktive Routen",
+            "activeRoutesSubtitle": "Derzeit verfügbar",
+            "averageDifficulty": "Durchschnittliche Schwierigkeit",
+            "averageDifficultySubtitle": "Mittlerer Grad",
+            "totalComments": "Kommentare",
+            "totalCommentsSubtitle": "Gesamtes Feedback",
+            "averageLifespan": "Ø Lebensdauer",
+            "averageLifespanSubtitle": "Nur archivierte Routen"
+        },
+        "charts": {
+            "difficultyDistribution": "Verteilung der Schwierigkeiten",
+            "routeSetters": "Routen nach Schrauber",
+            "routeTimeline": "Routen im Zeitverlauf",
+            "commentTimeline": "Kommentare im Zeitverlauf",
+            "activityHeatmap": "Schrauberaktivität"
+        },
+        "sections": {
+            "latestComments": "Neueste Kommentare",
+            "latestRoutes": "Neueste Routen"
+        },
+        "emptyComments": "Noch keine Kommentare vorhanden.",
+        "emptyRoutes": "Noch keine neuen Routen vorhanden.",
+        "actions": {
+            "showAllSetters": "Alle Schrauber anzeigen"
+        },
+        "labels": {
+            "attempts": "Versuche",
+            "sends": "Begehungen",
+            "comments": "Kommentare",
+            "routes": "Routen",
+            "unknown": "Unbekannt",
+            "other": "Andere"
+        },
+        "heatmap": {
+            "less": "Weniger",
+            "more": "Mehr"
+        },
+        "error": "Analysedaten konnten nicht geladen werden. Bitte erneut versuchen."
     },
-    "name": "Name"
-  },
-  "dashboard": {
-    "online": "{0} Online"
-  },
-  "analytics": {
-    "title": "Routen-Analyse",
-    "subtitle": "Überwache wichtige Kennzahlen aller Kletterrouten.",
-    "refresh": "Aktualisieren",
-    "retry": "Erneut versuchen",
-    "empty": "Noch keine Analysedaten verfügbar.",
-    "generatedAt": "Zuletzt aktualisiert {value}",
-    "meta": {
-      "title": "Analysen - Verti-Grade",
-      "description": "Administratives Analyse-Dashboard für Kletterrouten."
+    "climbing": {
+        "create": "Route erstellen",
+        "color": "Farbe",
+        "routename": "Routenname",
+        "difficulty": "Schwierigkeitsgrad",
+        "difficulty_sign": "Schwierigkeitszeichen",
+        "anchor_point": "Umlenkerpunkt",
+        "location": "Ort",
+        "searchRouteName": "Suchen",
+        "type": "Typ",
+        "archived": "Archiviert",
+        "comment": "Kommentar",
+        "creators": "Ersteller"
     },
-    "cards": {
-      "totalRoutes": "Gesamtanzahl Routen",
-      "totalRoutesSubtitle": "Über alle Standorte",
-      "activeRoutes": "Aktive Routen",
-      "activeRoutesSubtitle": "Derzeit verfügbar",
-      "averageDifficulty": "Durchschnittliche Schwierigkeit",
-      "averageDifficultySubtitle": "Mittlerer Grad",
-      "totalComments": "Kommentare",
-      "totalCommentsSubtitle": "Gesamtes Feedback",
-      "averageLifespan": "Ø Lebensdauer",
-      "averageLifespanSubtitle": "Nur archivierte Routen"
+    "ratings": {
+        "ratings": "Bewertungen",
+        "createReview": "Bewertung erstellen",
+        "no_reviews_yet": "Noch keine Bewertungen vorhanden",
+        "be_the_first": "Sei der Erste",
+        "stars": "Sterne",
+        "difficulty": "Schwierigkeitsgrad",
+        "score": "Punktzahl",
+        "comment": "Kommentar",
+        "climber_reviews": "Kletterer Bewertungen"
     },
-    "charts": {
-      "difficultyDistribution": "Verteilung der Schwierigkeiten",
-      "routeSetters": "Routen nach Schrauber",
-      "routeTimeline": "Routen im Zeitverlauf",
-      "commentTimeline": "Kommentare im Zeitverlauf",
-      "activityHeatmap": "Schrauberaktivität"
+    "table": {
+        "actions": "Aktionen",
+        "no_data": "Keine Daten",
+        "created_at": "Erstellt am"
     },
-    "sections": {
-      "latestComments": "Neueste Kommentare",
-      "latestRoutes": "Neueste Routen"
-    },
-    "emptyComments": "Noch keine Kommentare vorhanden.",
-    "emptyRoutes": "Noch keine neuen Routen vorhanden.",
     "actions": {
-      "showAllSetters": "Alle Schrauber anzeigen"
+        "search": "Suchen",
+        "clear": "Löschen",
+        "import": "Routen importieren",
+        "print": "Drucken",
+        "create": "Erstellen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "archive": "Archivieren",
+        "submit": "Absenden",
+        "confirm": "Löschen bestätigen",
+        "select_all": "Alle auswählen",
+        "deselect_all": "Alle abwählen",
+        "back_to_home": "Zurück zur Startseite",
+        "load_more": "Mehr laden"
     },
-    "labels": {
-      "attempts": "Versuche",
-      "sends": "Begehungen",
-      "comments": "Kommentare",
-      "routes": "Routen",
-      "unknown": "Unbekannt",
-      "other": "Andere"
+    "inventory": {
+        "title": "Routeninventur",
+        "subtitle": "Scanne nacheinander alle QR-Codes, um die Route zu erfassen.",
+        "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
+        "start": "Scan starten",
+        "stop": "Scan stoppen",
+        "finish": "Inventur abschließen",
+        "scannedCount": "Gescannt: {count}",
+        "pendingCount": "Noch offen: {count}",
+        "lastScanned": "Zuletzt gescannt",
+        "invalidCode": "Der Code konnte keiner Route zugeordnet werden.",
+        "unknownRoute": "Die Route wurde nicht gefunden.",
+        "noScans": "Noch keine Routen gescannt.",
+        "dialogTitle": "Fehlende Routen archivieren?",
+        "dialogDescription": "Die folgenden Routen wurden nicht gescannt und werden archiviert:",
+        "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
+        "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
+        "archiveError": "Fehler beim Archivieren der fehlenden Routen.",
+        "loadError": "Aktive Routen konnten nicht geladen werden.",
+        "cameraError": "Auf die Gerätekamera konnte nicht zugegriffen werden. Bitte Kamerazugriff erlauben oder ein anderes Gerät verwenden.",
+        "restoreSuccess": "Route {name} wurde reaktiviert.",
+        "restoreError": "Fehler beim Reaktivieren der Route.",
+        "showInstructions": "Anleitung anzeigen",
+        "instructionsTitle": "Inventur-Anleitung",
+        "instructionsIntro": "Folge diesen Schritten, um alle Routen-QR-Codes zu scannen.",
+        "instructionsStep1": "Erlaube den Kamerazugriff und richte dein Gerät auf einen Routen-QR-Code.",
+        "instructionsStep2": "Prüfe die angezeigten Routeninformationen in der Informationsleiste.",
+        "instructionsStep3": "Tippe auf \"Inventur abschließen\", um fehlende Routen zu archivieren.",
+        "instructionsClose": "Verstanden",
+        "reset": "Inventur zurücksetzen",
+        "reviewTitle": "Inventur überprüfen",
+        "reviewFoundTitle": "Gescannt",
+        "reviewMissingTitle": "Nicht gescannt",
+        "reviewMissingDescription": "Diese Routen wurden nicht gescannt und werden automatisch archiviert."
     },
-    "heatmap": {
-      "less": "Weniger",
-      "more": "Mehr"
+    "notifications": {
+        "success": {
+            "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
+            "create": "Erfolgreich erstellt",
+            "edit": "Erfolgreich gespeichert",
+            "delete": "Erfolgreich gelöscht",
+            "login": "Anmeldung erfolgreich. Weiterleitung zur Routenverwaltung...",
+            "health": "Status: OK",
+            "userCreated": "Benutzer erfolgreich erstellt."
+        },
+        "error": {
+            "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
+            "create": "Fehler beim Erstellen",
+            "edit": "Fehler beim Speichern des Profils",
+            "delete": "Fehler beim Löschen",
+            "health": "Status: Schlecht",
+            "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar",
+            "invalid_credentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie Benutzernamen und Passwort.",
+            "email_not_verified": "Ihre E-Mail-Adresse wurde noch nicht verifiziert.",
+            "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
+            "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+            "generic": "Ein unerwarteter Fehler ist aufgetreten."
+        },
+        "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
+        "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
+        "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
+        "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
+    },
+    "filter": {
+        "title": "Filter",
+        "all": "Alle",
+        "archived": "Archiviert"
+    },
+    "legal": {
+        "privacy": "Datenschutz",
+        "imprint": "Impressum"
+    },
+    "page": {
+        "title": {
+            "settings": "Einstellungen - Verti-Grade",
+            "route": "Route - Verti-Grade",
+            "index": "Kletterrouten - Verti-Grade",
+            "comments": "Kommentare - Verti-Grade",
+            "users": "Benutzer - Verti-Grade",
+            "dashboard": "Routenverwaltung - Verti-Grade"
+        },
+        "content": {
+            "settings": "Einstellungen",
+            "route": "Bewertung erstellen",
+            "index": "Kletterrouten",
+            "comments": "Kommentare",
+            "users": "Benutzerverwaltung",
+            "dashboard": "Routenverwaltung"
+        }
+    },
+    "validation": {
+        "required": "Das Feld ist erforderlich.",
+        "requiredAndNotEmpty": "Das Feld darf nicht leer sein.",
+        "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen, bei Bouldern ist auch 0 erlaubt.",
+        "minLength": "Mindestens {n} Zeichen.",
+        "maxLength": "Maximal {n} Zeichen.",
+        "passwordMismatch": "Passwörter stimmen nicht überein.",
+        "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
+        "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+    },
+    "comments": {
+        "subtitle": "Kletterer-Bewertungen moderieren und verwalten",
+        "totalReviews": "Bewertungen gesamt",
+        "avgRating": "Ø Bewertung",
+        "thisWeek": "Diese Woche",
+        "thisMonth": "Diesen Monat",
+        "lowRated": "Schlecht bewertet (≤ 2★)",
+        "sortNewest": "Neueste zuerst",
+        "sortOldest": "Älteste zuerst",
+        "sortHighest": "Beste Bewertung",
+        "sortLowest": "Schlechteste Bewertung",
+        "showMore": "Mehr anzeigen",
+        "showLess": "Weniger anzeigen",
+        "noComments": "Keine Bewertungen gefunden",
+        "noCommentsHint": "Filter oder Suchbegriff anpassen",
+        "editReview": "Bewertung bearbeiten",
+        "anonymous": "Anonym",
+        "selected": "{n} ausgewählt",
+        "deleteSelected": "{n} löschen",
+        "bulkDeleteTitle": "{n} Bewertungen löschen?",
+        "showing": "{n} von {total} Bewertungen",
+        "select": "Auswählen",
+        "deselect": "Abwählen"
+    },
+    "nav": {
+        "openMenu": "Menü öffnen",
+        "skipToContent": "Zum Inhalt springen",
+        "mainNavigation": "Hauptnavigation",
+        "userMenu": "Benutzermenü"
+    },
+    "users": {
+        "create": "Benutzer erstellen",
+        "createHint": "Der Benutzer erhält eine E-Mail zum Zurücksetzen des Passworts.",
+        "edit": "Benutzer bearbeiten",
+        "title": "Benutzerverwaltung",
+        "delete": "Benutzer löschen",
+        "deleteConfirm": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "deleteSuccess": "Benutzer erfolgreich gelöscht.",
+        "deleteError": "Benutzer konnte nicht gelöscht werden.",
+        "searchUsers": "Benutzer suchen…",
+        "role": "Rolle",
+        "totalUsers": "Benutzer gesamt",
+        "admins": "Admins",
+        "recentlyJoined": "Diese Woche beigetreten",
+        "noUsers": "Keine Benutzer gefunden",
+        "noUsersHint": "Suche oder Filter anpassen",
+        "showing": "{n} von {total} Benutzern"
+    },
+    "permissions": {
+        "title": "Rollenberechtigungen",
+        "role": "Rolle",
+        "noPermission": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
+        "features": {
+            "manage_routes": "Routen verwalten",
+            "view_analytics": "Analysen anzeigen",
+            "manage_comments": "Kommentare verwalten",
+            "manage_users": "Benutzer verwalten",
+            "manage_settings": "Einstellungen verwalten",
+            "run_inventory": "Inventur durchführen"
+        },
+        "updated": "Berechtigungen aktualisiert.",
+        "updateError": "Fehler beim Aktualisieren der Berechtigungen."
+    },
+    "time": {
+        "justNow": "Gerade eben",
+        "minutesAgo": "vor {n} Min.",
+        "hoursAgo": "vor {n} Std.",
+        "daysAgo": "vor {n} Tagen"
     }
-  },
-  "climbing": {
-    "create": "Route erstellen",
-    "color": "Farbe",
-    "routename": "Routenname",
-    "difficulty": "Schwierigkeitsgrad",
-    "difficulty_sign": "Schwierigkeitszeichen",
-    "anchor_point": "Umlenkerpunkt",
-    "location": "Ort",
-    "searchRouteName": "Suchen",
-    "type": "Typ",
-    "archived": "Archiviert",
-    "comment": "Kommentar",
-    "creators": "Ersteller"
-  },
-  "ratings": {
-    "ratings": "Bewertungen",
-    "createReview": "Bewertung erstellen",
-    "no_reviews_yet": "Noch keine Bewertungen vorhanden",
-    "be_the_first": "Sei der Erste",
-    "stars": "Sterne",
-    "difficulty": "Schwierigkeitsgrad",
-    "score": "Punktzahl",
-    "comment": "Kommentar",
-    "climber_reviews": "Kletterer Bewertungen"
-  },
-  "table": {
-    "actions": "Aktionen",
-    "no_data": "Keine Daten",
-    "created_at": "Erstellt am"
-  },
-  "actions": {
-    "search": "Suchen",
-    "clear": "Löschen",
-    "import": "Routen importieren",
-    "print": "Drucken",
-    "create": "Erstellen",
-    "edit": "Bearbeiten",
-    "delete": "Löschen",
-    "save": "Speichern",
-    "cancel": "Abbrechen",
-    "archive": "Archivieren",
-    "submit": "Absenden",
-    "confirm": "Löschen bestätigen",
-    "select_all": "Alle auswählen",
-    "deselect_all": "Alle abwählen",
-    "back_to_home": "Zurück zur Startseite",
-    "load_more": "Mehr laden"
-  },
-  "inventory": {
-    "title": "Routeninventur",
-    "subtitle": "Scanne nacheinander alle QR-Codes, um die Route zu erfassen.",
-    "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
-    "start": "Scan starten",
-    "stop": "Scan stoppen",
-    "finish": "Inventur abschließen",
-    "scannedCount": "Gescannt: {count}",
-    "pendingCount": "Noch offen: {count}",
-    "lastScanned": "Zuletzt gescannt",
-    "invalidCode": "Der Code konnte keiner Route zugeordnet werden.",
-    "unknownRoute": "Die Route wurde nicht gefunden.",
-    "noScans": "Noch keine Routen gescannt.",
-    "dialogTitle": "Fehlende Routen archivieren?",
-    "dialogDescription": "Die folgenden Routen wurden nicht gescannt und werden archiviert:",
-    "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
-    "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
-    "archiveError": "Fehler beim Archivieren der fehlenden Routen.",
-    "loadError": "Aktive Routen konnten nicht geladen werden.",
-    "cameraError": "Auf die Gerätekamera konnte nicht zugegriffen werden. Bitte Kamerazugriff erlauben oder ein anderes Gerät verwenden.",
-    "restoreSuccess": "Route {name} wurde reaktiviert.",
-    "restoreError": "Fehler beim Reaktivieren der Route.",
-    "showInstructions": "Anleitung anzeigen",
-    "instructionsTitle": "Inventur-Anleitung",
-    "instructionsIntro": "Folge diesen Schritten, um alle Routen-QR-Codes zu scannen.",
-    "instructionsStep1": "Erlaube den Kamerazugriff und richte dein Gerät auf einen Routen-QR-Code.",
-    "instructionsStep2": "Prüfe die angezeigten Routeninformationen in der Informationsleiste.",
-    "instructionsStep3": "Tippe auf \"Inventur abschließen\", um fehlende Routen zu archivieren.",
-    "instructionsClose": "Verstanden",
-    "reset": "Inventur zurücksetzen",
-    "reviewTitle": "Inventur überprüfen",
-    "reviewFoundTitle": "Gescannt",
-    "reviewMissingTitle": "Nicht gescannt",
-    "reviewMissingDescription": "Diese Routen wurden nicht gescannt und werden automatisch archiviert."
-  },
-  "notifications": {
-    "success": {
-      "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
-      "create": "Erfolgreich erstellt",
-      "edit": "Erfolgreich gespeichert",
-      "delete": "Erfolgreich gelöscht",
-      "login": "Anmeldung erfolgreich. Weiterleitung zur Routenverwaltung...",
-      "health": "Status: OK",
-      "userCreated": "Benutzer erfolgreich erstellt."
-    },
-    "error": {
-      "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
-      "create": "Fehler beim Erstellen",
-      "edit": "Fehler beim Speichern des Profils",
-      "delete": "Fehler beim Löschen",
-      "health": "Status: Schlecht",
-      "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar",
-      "invalid_credentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie Benutzernamen und Passwort.",
-      "email_not_verified": "Ihre E-Mail-Adresse wurde noch nicht verifiziert.",
-      "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
-      "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-      "generic": "Ein unerwarteter Fehler ist aufgetreten."
-    },
-    "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-    "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
-    "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
-    "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
-  },
-  "filter": {
-    "title": "Filter",
-    "all": "Alle",
-    "archived": "Archiviert"
-  },
-  "legal": {
-    "privacy": "Datenschutz",
-    "imprint": "Impressum"
-  },
-  "page": {
-    "title": {
-      "settings": "Einstellungen - Verti-Grade",
-      "route": "Route - Verti-Grade",
-      "index": "Kletterrouten - Verti-Grade",
-      "comments": "Kommentare - Verti-Grade",
-      "users": "Benutzer - Verti-Grade",
-      "dashboard": "Routenverwaltung - Verti-Grade"
-    },
-    "content": {
-      "settings": "Einstellungen",
-      "route": "Bewertung erstellen",
-      "index": "Kletterrouten",
-      "comments": "Kommentare",
-      "users": "Benutzerverwaltung",
-      "dashboard": "Routenverwaltung"
-    }
-  },
-  "validation": {
-    "required": "Das Feld ist erforderlich.",
-    "requiredAndNotEmpty": "Das Feld darf nicht leer sein.",
-    "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen, bei Bouldern ist auch 0 erlaubt.",
-    "minLength": "Mindestens {n} Zeichen.",
-    "maxLength": "Maximal {n} Zeichen.",
-    "passwordMismatch": "Passwörter stimmen nicht überein.",
-    "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
-    "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
-  },
-  "comments": {
-    "subtitle": "Kletterer-Bewertungen moderieren und verwalten",
-    "totalReviews": "Bewertungen gesamt",
-    "avgRating": "Ø Bewertung",
-    "thisWeek": "Diese Woche",
-    "thisMonth": "Diesen Monat",
-    "lowRated": "Schlecht bewertet (≤ 2★)",
-    "sortNewest": "Neueste zuerst",
-    "sortOldest": "Älteste zuerst",
-    "sortHighest": "Beste Bewertung",
-    "sortLowest": "Schlechteste Bewertung",
-    "showMore": "Mehr anzeigen",
-    "showLess": "Weniger anzeigen",
-    "noComments": "Keine Bewertungen gefunden",
-    "noCommentsHint": "Filter oder Suchbegriff anpassen",
-    "editReview": "Bewertung bearbeiten",
-    "anonymous": "Anonym",
-    "selected": "{n} ausgewählt",
-    "deleteSelected": "{n} löschen",
-    "bulkDeleteTitle": "{n} Bewertungen löschen?",
-    "showing": "{n} von {total} Bewertungen",
-    "select": "Auswählen",
-    "deselect": "Abwählen"
-  },
-  "nav": {
-    "openMenu": "Menü öffnen",
-    "skipToContent": "Zum Inhalt springen",
-    "mainNavigation": "Hauptnavigation",
-    "userMenu": "Benutzermenü"
-  },
-  "users": {
-    "create": "Benutzer erstellen",
-    "createHint": "Der Benutzer erhält eine E-Mail zum Zurücksetzen des Passworts.",
-    "edit": "Benutzer bearbeiten",
-    "title": "Benutzerverwaltung",
-    "delete": "Benutzer löschen",
-    "deleteConfirm": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "deleteSuccess": "Benutzer erfolgreich gelöscht.",
-    "deleteError": "Benutzer konnte nicht gelöscht werden.",
-    "searchUsers": "Benutzer suchen…",
-    "role": "Rolle",
-    "totalUsers": "Benutzer gesamt",
-    "admins": "Admins",
-    "recentlyJoined": "Diese Woche beigetreten",
-    "noUsers": "Keine Benutzer gefunden",
-    "noUsersHint": "Suche oder Filter anpassen",
-    "showing": "{n} von {total} Benutzern"
-  },
-  "permissions": {
-    "title": "Rollenberechtigungen",
-    "role": "Rolle",
-    "noPermission": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
-    "features": {
-      "manage_routes": "Routen verwalten",
-      "view_analytics": "Analysen anzeigen",
-      "manage_comments": "Kommentare verwalten",
-      "manage_users": "Benutzer verwalten",
-      "manage_settings": "Einstellungen verwalten",
-      "run_inventory": "Inventur durchführen"
-    },
-    "updated": "Berechtigungen aktualisiert.",
-    "updateError": "Fehler beim Aktualisieren der Berechtigungen."
-  },
-  "time": {
-    "justNow": "Gerade eben",
-    "minutesAgo": "vor {n} Min.",
-    "hoursAgo": "vor {n} Std.",
-    "daysAgo": "vor {n} Tagen"
-  }
 }

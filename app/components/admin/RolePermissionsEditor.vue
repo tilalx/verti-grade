@@ -61,14 +61,6 @@
             </tbody>
         </v-table>
 
-        <v-snackbar
-            v-model="snackbar.show"
-            :color="snackbar.color"
-            location="top"
-            timeout="3000"
-        >
-            {{ snackbar.message }}
-        </v-snackbar>
     </v-card>
 </template>
 
@@ -80,7 +72,7 @@ const loading = ref(true)
 const saving = ref(false)
 const roles = ref([])
 const allPermissions = ref([])
-const snackbar = reactive({ show: false, message: '', color: 'success' })
+const { notify } = useNotification()
 
 function hasPermission(role, permId) {
     const perms = role.permissions ?? []
@@ -102,14 +94,10 @@ async function togglePermission(role, perm) {
             permissions: currentPerms,
         })
         role.permissions = currentPerms
-        snackbar.message = t('permissions.updated')
-        snackbar.color = 'success'
-        snackbar.show = true
+        notify(t('permissions.updated'), 'success')
     } catch (err) {
         console.error('Failed to update role permissions:', err)
-        snackbar.message = t('permissions.updateError')
-        snackbar.color = 'error'
-        snackbar.show = true
+        notify(t('permissions.updateError'), 'error')
     } finally {
         saving.value = false
     }

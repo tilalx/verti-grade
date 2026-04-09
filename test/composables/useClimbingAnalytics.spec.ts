@@ -54,7 +54,7 @@ describe('useClimbingAnalytics', () => {
         const { loading, error, hasData } = useClimbingAnalytics()
 
         expect(loading.value).toBe(false)
-        expect(error.value).toBeNull()
+        expect(error.value).toBe(false)
         expect(hasData.value).toBe(false)
     })
 
@@ -84,23 +84,23 @@ describe('useClimbingAnalytics', () => {
         expect(latestComments.value[0].comment).toBe('Great!')
     })
 
-    it('sets error message and clears data when the request fails', async () => {
+    it('sets error flag and clears data when the request fails', async () => {
         fetchMock.mockRejectedValue(new Error('Network failure'))
         const { load, error, hasData } = useClimbingAnalytics()
 
         await load()
 
-        expect(error.value).toBe('Network failure')
+        expect(error.value).toBe(true)
         expect(hasData.value).toBe(false)
     })
 
-    it('uses a custom error message from API response', async () => {
+    it('sets error flag when API returns an error response', async () => {
         fetchMock.mockRejectedValue({ data: { message: 'Unauthorized' } })
         const { load, error } = useClimbingAnalytics()
 
         await load()
 
-        expect(error.value).toBe('Unauthorized')
+        expect(error.value).toBe(true)
     })
 
     it('normalizes NaN averageDifficulty to 0', async () => {

@@ -1,343 +1,344 @@
 {
-  "account": {
-    "profile": "Profil",
-    "login": "Giriş Yap",
-    "logout": "Çıkış Yap",
-    "firstname": "Ad",
-    "lastname": "Soyad",
-    "username": "Kullanıcı Adı",
-    "password": "Şifre",
-    "newPassword": "Yeni Şifre",
-    "email": "E-posta",
-    "username_or_email": "Kullanıcı Adı veya E-posta",
-    "login_hint": "Kullanıcı adınızı veya e-posta adresinizi girin.",
-    "reset_password": "Şifreyi Sıfırla",
-    "reset_hint": "Şifre sıfırlama bağlantısı e-posta ile gönderilecektir.",
-    "confirmPassword": "Şifreyi Onayla",
-    "userProfile": "Kullanıcı Profili",
-    "oldPassword": "Mevcut Şifre",
-    "or_login_with": "Veya OAuth ile giriş yapın",
-    "remember_me": "Beni Hatırla",
-    "changeAvatar": "Avatar değiştir",
-    "emailLocked": "E-posta burada değiştirilemez",
-    "passwordStrength": "Şifre güvenliği",
-    "passwordHint": "Mevcut şifrenizi korumak için şifre alanlarını boş bırakın.",
-    "unsavedChanges": "Kaydedilmemiş değişiklikler",
-    "wrongOldPassword": "Mevcut şifre yanlış",
-    "unknownUser": "Bilinmeyen Kullanıcı",
-    "tabs": {
-      "profile": "Profil",
-      "security": "Güvenlik"
+    "account": {
+        "profile": "Profil",
+        "login": "Giriş Yap",
+        "logout": "Çıkış Yap",
+        "firstname": "Ad",
+        "lastname": "Soyad",
+        "username": "Kullanıcı Adı",
+        "password": "Şifre",
+        "newPassword": "Yeni Şifre",
+        "email": "E-posta",
+        "username_or_email": "Kullanıcı Adı veya E-posta",
+        "login_hint": "Kullanıcı adınızı veya e-posta adresinizi girin.",
+        "reset_password": "Şifreyi Sıfırla",
+        "reset_hint": "Şifre sıfırlama bağlantısı e-posta ile gönderilecektir.",
+        "confirmPassword": "Şifreyi Onayla",
+        "userProfile": "Kullanıcı Profili",
+        "oldPassword": "Mevcut Şifre",
+        "or_login_with": "Veya OAuth ile giriş yapın",
+        "remember_me": "Beni Hatırla",
+        "changeAvatar": "Avatar değiştir",
+        "emailLocked": "E-posta burada değiştirilemez",
+        "passwordStrength": "Şifre güvenliği",
+        "passwordHint": "Mevcut şifrenizi korumak için şifre alanlarını boş bırakın.",
+        "unsavedChanges": "Kaydedilmemiş değişiklikler",
+        "wrongOldPassword": "Mevcut şifre yanlış",
+        "unknownUser": "Bilinmeyen Kullanıcı",
+        "tabs": {
+            "profile": "Profil",
+            "security": "Güvenlik"
+        },
+        "placeholders": {
+            "firstname": "Ahmet",
+            "lastname": "Yılmaz",
+            "oldPassword": "Mevcut şifreniz",
+            "newPassword": "Yeni şifreniz",
+            "confirmPassword": "Yeni şifreyi tekrar girin"
+        },
+        "strength": {
+            "weak": "Zayıf",
+            "fair": "Orta",
+            "good": "İyi",
+            "strong": "Güçlü"
+        },
+        "requirements": {
+            "minLength": "En az 8 karakter",
+            "maxLength": "En fazla 72 karakter",
+            "uppercase": "Büyük harf (A–Z)",
+            "lowercase": "Küçük harf (a–z)",
+            "number": "Rakam (0–9)",
+            "special": "Özel karakter (!{'@'}#...)"
+        }
     },
-    "placeholders": {
-      "firstname": "Ahmet",
-      "lastname": "Yılmaz",
-      "oldPassword": "Mevcut şifreniz",
-      "newPassword": "Yeni şifreniz",
-      "confirmPassword": "Yeni şifreyi tekrar girin"
+    "routes": {
+        "home": "Ana Sayfa",
+        "dashboard": "Rota Yönetimi",
+        "inventory": "Envanter Taraması",
+        "login": "Giriş Yap",
+        "analytics": "Analitik",
+        "comments": "Yorumlar",
+        "users": "Kullanıcılar",
+        "settings": "Ayarlar",
+        "route_setter": "Rota Ayarlayıcı",
+        "screwed_at": "Vidalama Tarihi",
+        "types": {
+            "route": "Rota",
+            "boulder": "Boulder"
+        },
+        "name": "İsim"
     },
-    "strength": {
-      "weak": "Zayıf",
-      "fair": "Orta",
-      "good": "İyi",
-      "strong": "Güçlü"
+    "dashboard": {
+        "online": "{0} Çevrimiçi"
     },
-    "requirements": {
-      "minLength": "En az 8 karakter",
-      "maxLength": "En fazla 72 karakter",
-      "uppercase": "Büyük harf (A–Z)",
-      "lowercase": "Küçük harf (a–z)",
-      "number": "Rakam (0–9)",
-      "special": "Özel karakter (!{'@'}#...)"
-    }
-  },
-  "routes": {
-    "home": "Ana Sayfa",
-    "dashboard": "Rota Yönetimi",
-    "inventory": "Envanter Taraması",
-    "login": "Giriş Yap",
-    "analytics": "Analitik",
-    "comments": "Yorumlar",
-    "users": "Kullanıcılar",
-    "settings": "Ayarlar",
-    "route_setter": "Rota Ayarlayıcı",
-    "screwed_at": "Vidalama Tarihi",
-    "types": {
-      "route": "Rota",
-      "boulder": "Boulder"
+    "analytics": {
+        "title": "Tırmanış Rota Analitiği",
+        "subtitle": "Tüm rotalar için temel metrikleri izleyin.",
+        "refresh": "Yenile",
+        "retry": "Tekrar dene",
+        "empty": "Henüz analitik verisi mevcut değil.",
+        "generatedAt": "Son güncelleme {value}",
+        "meta": {
+            "title": "Analitik - Verti-Grade",
+            "description": "Tırmanış rotaları için yönetici analitik paneli."
+        },
+        "cards": {
+            "totalRoutes": "Toplam Rota",
+            "totalRoutesSubtitle": "Tüm lokasyonlar",
+            "activeRoutes": "Aktif Rotalar",
+            "activeRoutesSubtitle": "Şu anda erişilebilir",
+            "averageDifficulty": "Ort. Zorluk",
+            "averageDifficultySubtitle": "Ortalama derece",
+            "totalComments": "Yorumlar",
+            "totalCommentsSubtitle": "Tüm geri bildirimler",
+            "averageLifespan": "Ort. Rota Ömrü",
+            "averageLifespanSubtitle": "Yalnızca arşivlenen rotalar"
+        },
+        "charts": {
+            "difficultyDistribution": "Zorluk Dağılımı",
+            "routeSetters": "Rotalar Ayarlayıcıya Göre",
+            "routeTimeline": "Zaman İçinde Rotalar",
+            "commentTimeline": "Zaman İçinde Yorumlar",
+            "activityHeatmap": "Rota Kurma Aktivitesi"
+        },
+        "sections": {
+            "latestComments": "En son yorumlar",
+            "latestRoutes": "En yeni rotalar"
+        },
+        "emptyComments": "Henüz yorum yok.",
+        "emptyRoutes": "Henüz yeni rota yok.",
+        "actions": {
+            "showAllSetters": "Tüm ayarlayıcıları göster"
+        },
+        "labels": {
+            "attempts": "Denemeler",
+            "sends": "Tamamlamalar",
+            "comments": "Yorumlar",
+            "routes": "Rotalar",
+            "unknown": "Bilinmiyor",
+            "other": "Diğer"
+        },
+        "heatmap": {
+            "less": "Az",
+            "more": "Fazla"
+        },
+        "error": "Analiz verileri yüklenemedi. Lütfen tekrar deneyin."
     },
-    "name": "İsim"
-  },
-  "dashboard": {
-    "online": "{0} Çevrimiçi"
-  },
-  "analytics": {
-    "title": "Tırmanış Rota Analitiği",
-    "subtitle": "Tüm rotalar için temel metrikleri izleyin.",
-    "refresh": "Yenile",
-    "retry": "Tekrar dene",
-    "empty": "Henüz analitik verisi mevcut değil.",
-    "generatedAt": "Son güncelleme {value}",
-    "meta": {
-      "title": "Analitik - Verti-Grade",
-      "description": "Tırmanış rotaları için yönetici analitik paneli."
+    "climbing": {
+        "create": "Rota Oluştur",
+        "color": "Renk",
+        "routename": "Rota Adı",
+        "difficulty": "Zorluk",
+        "difficulty_sign": "Zorluk İşareti",
+        "anchor_point": "Ankraj noktası",
+        "location": "Konum",
+        "searchRouteName": "Ara",
+        "type": "Tür",
+        "archived": "Arşivlendi",
+        "comment": "Yorum",
+        "creators": "Yaratıcılar"
     },
-    "cards": {
-      "totalRoutes": "Toplam Rota",
-      "totalRoutesSubtitle": "Tüm lokasyonlar",
-      "activeRoutes": "Aktif Rotalar",
-      "activeRoutesSubtitle": "Şu anda erişilebilir",
-      "averageDifficulty": "Ort. Zorluk",
-      "averageDifficultySubtitle": "Ortalama derece",
-      "totalComments": "Yorumlar",
-      "totalCommentsSubtitle": "Tüm geri bildirimler",
-      "averageLifespan": "Ort. Rota Ömrü",
-      "averageLifespanSubtitle": "Yalnızca arşivlenen rotalar"
+    "ratings": {
+        "ratings": "Değerlendirmeler",
+        "createReview": "İnceleme Oluştur",
+        "no_reviews_yet": "Henüz hiç inceleme yok",
+        "be_the_first": "İlk olun",
+        "stars": "Yıldızlar",
+        "difficulty": "Zorluk",
+        "score": "Puan",
+        "comment": "Yorum",
+        "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri"
     },
-    "charts": {
-      "difficultyDistribution": "Zorluk Dağılımı",
-      "routeSetters": "Rotalar Ayarlayıcıya Göre",
-      "routeTimeline": "Zaman İçinde Rotalar",
-      "commentTimeline": "Zaman İçinde Yorumlar",
-      "activityHeatmap": "Rota Kurma Aktivitesi"
+    "table": {
+        "actions": "İşlemler",
+        "no_data": "Veri Yok",
+        "created_at": "Oluşturulma Tarihi"
     },
-    "sections": {
-      "latestComments": "En son yorumlar",
-      "latestRoutes": "En yeni rotalar"
-    },
-    "emptyComments": "Henüz yorum yok.",
-    "emptyRoutes": "Henüz yeni rota yok.",
     "actions": {
-      "showAllSetters": "Tüm ayarlayıcıları göster"
+        "search": "Ara",
+        "clear": "Temizle",
+        "import": "Rotaları İçe Aktar",
+        "print": "Yazdır",
+        "create": "Oluştur",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "save": "Kaydet",
+        "cancel": "İptal",
+        "archive": "Arşivle",
+        "submit": "Gönder",
+        "confirm": "Silme Onayı",
+        "select_all": "Tümünü Seç",
+        "deselect_all": "Seçimi Kaldır",
+        "back_to_home": "Ana Sayfaya Dön",
+        "load_more": "Daha fazla yükle"
     },
-    "labels": {
-      "attempts": "Denemeler",
-      "sends": "Tamamlamalar",
-      "comments": "Yorumlar",
-      "routes": "Rotalar",
-      "unknown": "Bilinmiyor",
-      "other": "Diğer"
+    "inventory": {
+        "title": "Rota Envanter Taraması",
+        "subtitle": "Rotayı kaydetmek için kameranızı her QR koda doğrultun.",
+        "mobileOnly": "Bu araç yalnızca mobil cihazlarda kullanılabilir. Lütfen bir telefon veya tablet kullanın.",
+        "start": "Taramayı Başlat",
+        "stop": "Taramayı Durdur",
+        "finish": "Envanteri Bitir",
+        "scannedCount": "Taranan rotalar: {count}",
+        "pendingCount": "Bulunacak rotalar: {count}",
+        "lastScanned": "Son taranan",
+        "invalidCode": "Taranan kod tanınan bir rota değil.",
+        "unknownRoute": "Taranan rota bulunamadı.",
+        "noScans": "Henüz hiç rota taranmadı.",
+        "dialogTitle": "Eksik rotalar arşivlensin mi?",
+        "dialogDescription": "Aşağıdaki rotalar taranmadı ve arşivlenecek:",
+        "archiveSuccess": "Envanter tamamlandı. {count} rota arşivlendi.",
+        "nothingToArchive": "Tüm rotalar tarandı. Arşivlenecek bir şey yok.",
+        "archiveError": "Eksik rotalar arşivlenemedi.",
+        "loadError": "Aktif rotalar yüklenemedi.",
+        "cameraError": "Cihaz kamerasına erişilemiyor. Lütfen kamera izinlerine izin verin veya başka bir cihaz deneyin.",
+        "restoreSuccess": "{name} yeniden etkinleştirildi.",
+        "restoreError": "Rotayı yeniden etkinleştiremedik.",
+        "showInstructions": "Talimatları göster",
+        "instructionsTitle": "Envanter talimatları",
+        "instructionsIntro": "Tüm rota QR kodlarını taramak için şu adımları izleyin.",
+        "instructionsStep1": "Kamera erişimine izin verin ve cihazınızı bir rota QR koduna doğrultun.",
+        "instructionsStep2": "Aşağıdaki bilgi çubuğunda görüntülenen rota bilgilerini kontrol edin.",
+        "instructionsStep3": "Bitirdiğinizde, eksik rotaları arşivlemek için Envanteri Bitir'e dokunun.",
+        "instructionsClose": "Anladım",
+        "reset": "Envanteri sıfırla",
+        "reviewTitle": "Taramayı gözden geçirin",
+        "reviewFoundTitle": "Taranan rotalar",
+        "reviewMissingTitle": "Tarama sırasında bulunmayanlar",
+        "reviewMissingDescription": "Bu rotalar taranmadı ve otomatik olarak arşivlenecek."
     },
-    "heatmap": {
-      "less": "Az",
-      "more": "Fazla"
+    "notifications": {
+        "success": {
+            "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
+            "create": "Başarıyla oluşturuldu",
+            "edit": "Başarıyla kaydedildi",
+            "delete": "Başarıyla silindi",
+            "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
+            "health": "Durum: İyi",
+            "userCreated": "Kullanıcı başarıyla oluşturuldu."
+        },
+        "error": {
+            "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
+            "create": "Oluşturma hatası",
+            "edit": "Profil kaydedilemedi",
+            "delete": "Silme hatası",
+            "health": "Durum: Kötü",
+            "no_auth_methods_available": "Kimlik doğrulama yöntemi mevcut değil",
+            "invalid_credentials": "Geçersiz kimlik bilgileri. Lütfen kullanıcı adınızı ve şifrenizi kontrol edin.",
+            "email_not_verified": "E-posta adresiniz henüz doğrulanmamış.",
+            "too_many_attempts": "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
+            "unknown": "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+            "generic": "Beklenmeyen bir hata oluştu."
+        },
+        "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
+        "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
+        "archiveMoreItems": "Seçili öğeleri arşivlemek istediğinizden emin misiniz?",
+        "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
+    },
+    "filter": {
+        "title": "Filtre",
+        "all": "Tümü",
+        "archived": "Arşivlendi"
+    },
+    "legal": {
+        "privacy": "Gizlilik",
+        "imprint": "Künye"
+    },
+    "page": {
+        "title": {
+            "settings": "Ayarlar - Verti-Grade",
+            "route": "Rota - Verti-Grade",
+            "index": "Tırmanış Rotaları - Verti-Grade",
+            "comments": "Yorumlar - Verti-Grade",
+            "users": "Kullanıcılar - Verti-Grade",
+            "dashboard": "Rota Yönetimi - Verti-Grade"
+        },
+        "content": {
+            "settings": "Ayarlar",
+            "route": "İnceleme Oluştur",
+            "index": "Tırmanış Rotaları",
+            "comments": "Yorumlar",
+            "users": "Kullanıcı Yönetimi",
+            "dashboard": "Rota Yönetimi"
+        }
+    },
+    "validation": {
+        "required": "Bu alan gereklidir.",
+        "requiredAndNotEmpty": "Bu alan boş olmamalıdır.",
+        "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır, boulder'lar için 0 da kabul edilir.",
+        "minLength": "En az {n} karakter.",
+        "maxLength": "En fazla {n} karakter.",
+        "passwordMismatch": "Şifreler eşleşmiyor.",
+        "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır.",
+        "email": "Lütfen geçerli bir e-posta adresi girin."
+    },
+    "comments": {
+        "subtitle": "Tırmanıcı yorumlarını yönetin",
+        "totalReviews": "Toplam yorum",
+        "avgRating": "Ort. puan",
+        "thisWeek": "Bu hafta",
+        "thisMonth": "Bu ay",
+        "lowRated": "Düşük puan (≤ 2★)",
+        "sortNewest": "En yeniler",
+        "sortOldest": "En eskiler",
+        "sortHighest": "En yüksek puan",
+        "sortLowest": "En düşük puan",
+        "showMore": "Daha fazla göster",
+        "showLess": "Daha az göster",
+        "noComments": "Yorum bulunamadı",
+        "noCommentsHint": "Filtrelerinizi veya arama teriminizi ayarlamayı deneyin",
+        "editReview": "Yorumu düzenle",
+        "anonymous": "Anonim",
+        "selected": "{n} seçildi",
+        "deleteSelected": "{n} sil",
+        "bulkDeleteTitle": "{n} yorum silinsin mi?",
+        "showing": "{total} yorumdan {n} tanesi gösteriliyor",
+        "select": "Seç",
+        "deselect": "Seçimi kaldır"
+    },
+    "nav": {
+        "openMenu": "Menüyü aç",
+        "skipToContent": "İçeriğe geç",
+        "mainNavigation": "Ana gezinme",
+        "userMenu": "Kullanıcı menüsü"
+    },
+    "permissions": {
+        "title": "Rol Yetkileri",
+        "role": "Rol",
+        "noPermission": "Bu sayfaya erişim izniniz yok.",
+        "features": {
+            "manage_routes": "Rotaları Yönet",
+            "view_analytics": "Analitikleri Görüntüle",
+            "manage_comments": "Yorumları Yönet",
+            "manage_users": "Kullanıcıları Yönet",
+            "manage_settings": "Ayarları Yönet",
+            "run_inventory": "Envanter Taraması"
+        },
+        "updated": "Yetkiler güncellendi.",
+        "updateError": "Yetkiler güncellenemedi."
+    },
+    "time": {
+        "justNow": "Just now",
+        "minutesAgo": "{n} min ago",
+        "hoursAgo": "{n} h ago",
+        "daysAgo": "{n} d ago"
+    },
+    "users": {
+        "create": "Kullanıcı Oluştur",
+        "createHint": "Kullanıcıya parola sıfırlama e-postası gönderilecektir.",
+        "edit": "Kullanıcıyı Düzenle",
+        "title": "Kullanıcı Yönetimi",
+        "delete": "Kullanıcıyı Sil",
+        "deleteConfirm": "Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+        "deleteSuccess": "Kullanıcı başarıyla silindi.",
+        "deleteError": "Kullanıcı silinemedi.",
+        "searchUsers": "Kullanıcı ara…",
+        "role": "Rol",
+        "totalUsers": "Toplam kullanıcı",
+        "admins": "Yöneticiler",
+        "recentlyJoined": "Bu hafta katıldı",
+        "noUsers": "Kullanıcı bulunamadı",
+        "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
+        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
     }
-  },
-  "climbing": {
-    "create": "Rota Oluştur",
-    "color": "Renk",
-    "routename": "Rota Adı",
-    "difficulty": "Zorluk",
-    "difficulty_sign": "Zorluk İşareti",
-    "anchor_point": "Ankraj noktası",
-    "location": "Konum",
-    "searchRouteName": "Ara",
-    "type": "Tür",
-    "archived": "Arşivlendi",
-    "comment": "Yorum",
-    "creators": "Yaratıcılar"
-  },
-  "ratings": {
-    "ratings": "Değerlendirmeler",
-    "createReview": "İnceleme Oluştur",
-    "no_reviews_yet": "Henüz hiç inceleme yok",
-    "be_the_first": "İlk olun",
-    "stars": "Yıldızlar",
-    "difficulty": "Zorluk",
-    "score": "Puan",
-    "comment": "Yorum",
-    "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri"
-  },
-  "table": {
-    "actions": "İşlemler",
-    "no_data": "Veri Yok",
-    "created_at": "Oluşturulma Tarihi"
-  },
-  "actions": {
-    "search": "Ara",
-    "clear": "Temizle",
-    "import": "Rotaları İçe Aktar",
-    "print": "Yazdır",
-    "create": "Oluştur",
-    "edit": "Düzenle",
-    "delete": "Sil",
-    "save": "Kaydet",
-    "cancel": "İptal",
-    "archive": "Arşivle",
-    "submit": "Gönder",
-    "confirm": "Silme Onayı",
-    "select_all": "Tümünü Seç",
-    "deselect_all": "Seçimi Kaldır",
-    "back_to_home": "Ana Sayfaya Dön",
-    "load_more": "Daha fazla yükle"
-  },
-  "inventory": {
-    "title": "Rota Envanter Taraması",
-    "subtitle": "Rotayı kaydetmek için kameranızı her QR koda doğrultun.",
-    "mobileOnly": "Bu araç yalnızca mobil cihazlarda kullanılabilir. Lütfen bir telefon veya tablet kullanın.",
-    "start": "Taramayı Başlat",
-    "stop": "Taramayı Durdur",
-    "finish": "Envanteri Bitir",
-    "scannedCount": "Taranan rotalar: {count}",
-    "pendingCount": "Bulunacak rotalar: {count}",
-    "lastScanned": "Son taranan",
-    "invalidCode": "Taranan kod tanınan bir rota değil.",
-    "unknownRoute": "Taranan rota bulunamadı.",
-    "noScans": "Henüz hiç rota taranmadı.",
-    "dialogTitle": "Eksik rotalar arşivlensin mi?",
-    "dialogDescription": "Aşağıdaki rotalar taranmadı ve arşivlenecek:",
-    "archiveSuccess": "Envanter tamamlandı. {count} rota arşivlendi.",
-    "nothingToArchive": "Tüm rotalar tarandı. Arşivlenecek bir şey yok.",
-    "archiveError": "Eksik rotalar arşivlenemedi.",
-    "loadError": "Aktif rotalar yüklenemedi.",
-    "cameraError": "Cihaz kamerasına erişilemiyor. Lütfen kamera izinlerine izin verin veya başka bir cihaz deneyin.",
-    "restoreSuccess": "{name} yeniden etkinleştirildi.",
-    "restoreError": "Rotayı yeniden etkinleştiremedik.",
-    "showInstructions": "Talimatları göster",
-    "instructionsTitle": "Envanter talimatları",
-    "instructionsIntro": "Tüm rota QR kodlarını taramak için şu adımları izleyin.",
-    "instructionsStep1": "Kamera erişimine izin verin ve cihazınızı bir rota QR koduna doğrultun.",
-    "instructionsStep2": "Aşağıdaki bilgi çubuğunda görüntülenen rota bilgilerini kontrol edin.",
-    "instructionsStep3": "Bitirdiğinizde, eksik rotaları arşivlemek için Envanteri Bitir'e dokunun.",
-    "instructionsClose": "Anladım",
-    "reset": "Envanteri sıfırla",
-    "reviewTitle": "Taramayı gözden geçirin",
-    "reviewFoundTitle": "Taranan rotalar",
-    "reviewMissingTitle": "Tarama sırasında bulunmayanlar",
-    "reviewMissingDescription": "Bu rotalar taranmadı ve otomatik olarak arşivlenecek."
-  },
-  "notifications": {
-    "success": {
-      "resetPassword": "Şifre sıfırlama isteği gönderildi. Lütfen e-postanızı kontrol edin.",
-      "create": "Başarıyla oluşturuldu",
-      "edit": "Başarıyla kaydedildi",
-      "delete": "Başarıyla silindi",
-      "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
-      "health": "Durum: İyi",
-      "userCreated": "Kullanıcı başarıyla oluşturuldu."
-    },
-    "error": {
-      "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
-      "create": "Oluşturma hatası",
-      "edit": "Profil kaydedilemedi",
-      "delete": "Silme hatası",
-      "health": "Durum: Kötü",
-      "no_auth_methods_available": "Kimlik doğrulama yöntemi mevcut değil",
-      "invalid_credentials": "Geçersiz kimlik bilgileri. Lütfen kullanıcı adınızı ve şifrenizi kontrol edin.",
-      "email_not_verified": "E-posta adresiniz henüz doğrulanmamış.",
-      "too_many_attempts": "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
-      "unknown": "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.",
-      "generic": "Beklenmeyen bir hata oluştu."
-    },
-    "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
-    "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
-    "archiveMoreItems": "Seçili öğeleri arşivlemek istediğinizden emin misiniz?",
-    "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
-  },
-  "filter": {
-    "title": "Filtre",
-    "all": "Tümü",
-    "archived": "Arşivlendi"
-  },
-  "legal": {
-    "privacy": "Gizlilik",
-    "imprint": "Künye"
-  },
-  "page": {
-    "title": {
-      "settings": "Ayarlar - Verti-Grade",
-      "route": "Rota - Verti-Grade",
-      "index": "Tırmanış Rotaları - Verti-Grade",
-      "comments": "Yorumlar - Verti-Grade",
-      "users": "Kullanıcılar - Verti-Grade",
-      "dashboard": "Rota Yönetimi - Verti-Grade"
-    },
-    "content": {
-      "settings": "Ayarlar",
-      "route": "İnceleme Oluştur",
-      "index": "Tırmanış Rotaları",
-      "comments": "Yorumlar",
-      "users": "Kullanıcı Yönetimi",
-      "dashboard": "Rota Yönetimi"
-    }
-  },
-  "validation": {
-    "required": "Bu alan gereklidir.",
-    "requiredAndNotEmpty": "Bu alan boş olmamalıdır.",
-    "anchorPointRange": "Ankraj noktası numarası 1 ile 100 arasında olmalıdır, boulder'lar için 0 da kabul edilir.",
-    "minLength": "En az {n} karakter.",
-    "maxLength": "En fazla {n} karakter.",
-    "passwordMismatch": "Şifreler eşleşmiyor.",
-    "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır.",
-    "email": "Lütfen geçerli bir e-posta adresi girin."
-  },
-  "comments": {
-    "subtitle": "Tırmanıcı yorumlarını yönetin",
-    "totalReviews": "Toplam yorum",
-    "avgRating": "Ort. puan",
-    "thisWeek": "Bu hafta",
-    "thisMonth": "Bu ay",
-    "lowRated": "Düşük puan (≤ 2★)",
-    "sortNewest": "En yeniler",
-    "sortOldest": "En eskiler",
-    "sortHighest": "En yüksek puan",
-    "sortLowest": "En düşük puan",
-    "showMore": "Daha fazla göster",
-    "showLess": "Daha az göster",
-    "noComments": "Yorum bulunamadı",
-    "noCommentsHint": "Filtrelerinizi veya arama teriminizi ayarlamayı deneyin",
-    "editReview": "Yorumu düzenle",
-    "anonymous": "Anonim",
-    "selected": "{n} seçildi",
-    "deleteSelected": "{n} sil",
-    "bulkDeleteTitle": "{n} yorum silinsin mi?",
-    "showing": "{total} yorumdan {n} tanesi gösteriliyor",
-    "select": "Seç",
-    "deselect": "Seçimi kaldır"
-  },
-  "nav": {
-    "openMenu": "Menüyü aç",
-    "skipToContent": "İçeriğe geç",
-    "mainNavigation": "Ana gezinme",
-    "userMenu": "Kullanıcı menüsü"
-  },
-  "permissions": {
-    "title": "Rol Yetkileri",
-    "role": "Rol",
-    "noPermission": "Bu sayfaya erişim izniniz yok.",
-    "features": {
-      "manage_routes": "Rotaları Yönet",
-      "view_analytics": "Analitikleri Görüntüle",
-      "manage_comments": "Yorumları Yönet",
-      "manage_users": "Kullanıcıları Yönet",
-      "manage_settings": "Ayarları Yönet",
-      "run_inventory": "Envanter Taraması"
-    },
-    "updated": "Yetkiler güncellendi.",
-    "updateError": "Yetkiler güncellenemedi."
-  },
-  "time": {
-    "justNow": "Just now",
-    "minutesAgo": "{n} min ago",
-    "hoursAgo": "{n} h ago",
-    "daysAgo": "{n} d ago"
-  },
-  "users": {
-    "create": "Kullanıcı Oluştur",
-    "createHint": "Kullanıcıya parola sıfırlama e-postası gönderilecektir.",
-    "edit": "Kullanıcıyı Düzenle",
-    "title": "Kullanıcı Yönetimi",
-    "delete": "Kullanıcıyı Sil",
-    "deleteConfirm": "Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-    "deleteSuccess": "Kullanıcı başarıyla silindi.",
-    "deleteError": "Kullanıcı silinemedi.",
-    "searchUsers": "Kullanıcı ara…",
-    "role": "Rol",
-    "totalUsers": "Toplam kullanıcı",
-    "admins": "Yöneticiler",
-    "recentlyJoined": "Bu hafta katıldı",
-    "noUsers": "Kullanıcı bulunamadı",
-    "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
-    "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
-  }
 }

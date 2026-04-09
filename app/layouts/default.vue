@@ -6,6 +6,7 @@
     </v-main>
 
     <LayoutFootBar :settings="settings" />
+    <GlobalSnackbar />
 </template>
 
 <script setup>

@@ -160,24 +160,6 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar
-            v-model="snackbar"
-            :color="snackbarColor"
-            location="top"
-            rounded="pill"
-            timeout="4000"
-        >
-            <div class="d-flex align-center ga-2">
-                <v-icon
-                    :icon="
-                        snackbarColor === 'success'
-                            ? 'mdi-check-circle-outline'
-                            : 'mdi-alert-circle-outline'
-                    "
-                />
-                {{ snackbarMessage }}
-            </div>
-        </v-snackbar>
     </div>
 </template>
 
@@ -230,16 +212,7 @@ async function fetchRoles() {
 
 onMounted(fetchRoles)
 
-// ── Snackbar ──────────────────────────────────────────────────────────────
-const snackbar = ref(false)
-const snackbarMessage = ref('')
-const snackbarColor = ref('success')
-
-function showSnackbar(message, color = 'success') {
-    snackbarMessage.value = message
-    snackbarColor.value = color
-    snackbar.value = true
-}
+const { notify: showSnackbar } = useNotification()
 
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]
