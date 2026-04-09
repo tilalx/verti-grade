@@ -32,66 +32,69 @@
 
         <v-row>
             <v-col>
-                <v-row align="center" density="comfortable" class="mb-2">
-                    <v-col cols="12" md="3">
-                        <v-text-field
-                            :id="routeNameId"
-                            :label="$t('climbing.searchRouteName')"
-                            v-model="searchRouteName"
-                            density="comfortable"
-                            hide-details
-                        />
-                    </v-col>
-                    <v-col cols="6" md="2">
-                        <v-select
-                            :id="difficultyId"
-                            :label="$t('climbing.difficulty')"
-                            :items="difficulties"
-                            v-model="selectedDifficulty"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                            clearable
-                        />
-                    </v-col>
-                    <v-col cols="6" md="2">
-                        <v-select
-                            :id="typeId"
-                            :label="$t('climbing.type')"
-                            :items="types"
-                            v-model="selectedType"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                            clearable
-                        />
-                    </v-col>
-                    <v-col cols="6" md="2">
-                        <v-select
-                            :id="locationId"
-                            :label="$t('climbing.location')"
-                            :items="locations"
-                            v-model="selectedLocation"
-                            item-title="text"
-                            item-value="value"
-                            density="comfortable"
-                            hide-details
-                            clearable
-                        />
-                    </v-col>
-                    <v-col cols="6" md="auto" class="d-flex align-center">
-                        <v-chip
-                            :color="displayArchived ? 'warning' : undefined"
-                            :variant="displayArchived ? 'tonal' : 'outlined'"
-                            prepend-icon="mdi-archive-outline"
-                            @click="displayArchived = !displayArchived"
-                        >
-                            {{ $t('filter.archived') }}
-                        </v-chip>
-                    </v-col>
-                </v-row>
+                <FilterBar
+                    v-model="searchRouteName"
+                    :search-label="$t('climbing.searchRouteName')"
+                    :active-filter-count="activeFilterCount"
+                    @clear="clearFilters"
+                >
+                    <template #filters>
+                        <v-row density="comfortable" align="center">
+                            <v-col cols="6" sm="3">
+                                <v-select
+                                    :label="$t('climbing.difficulty')"
+                                    :items="difficulties"
+                                    v-model="selectedDifficulty"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="6" sm="3">
+                                <v-select
+                                    :label="$t('climbing.type')"
+                                    :items="types"
+                                    v-model="selectedType"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="6" sm="3">
+                                <v-select
+                                    :label="$t('climbing.location')"
+                                    :items="locations"
+                                    v-model="selectedLocation"
+                                    item-title="text"
+                                    item-value="value"
+                                    clearable
+                                    hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    rounded="lg"
+                                />
+                            </v-col>
+                            <v-col cols="6" sm="auto" class="d-flex align-center">
+                                <v-chip
+                                    :color="displayArchived ? 'warning' : undefined"
+                                    :variant="displayArchived ? 'tonal' : 'outlined'"
+                                    prepend-icon="mdi-archive-outline"
+                                    @click="displayArchived = !displayArchived"
+                                >
+                                    {{ $t('filter.archived') }}
+                                </v-chip>
+                            </v-col>
+                        </v-row>
+                    </template>
+                </FilterBar>
 
                 <v-row>
                     <v-col cols="12">
@@ -149,15 +152,6 @@
                             >
                                 <v-icon start>mdi-archive</v-icon>
                                 {{ $t('actions.archive') }}
-                            </v-btn>
-                            <v-btn
-                                v-if="hasSelection"
-                                @click="showDeleteConfirmation = true"
-                                color="error"
-                                variant="tonal"
-                            >
-                                <v-icon start>mdi-delete</v-icon>
-                                {{ $t('actions.delete') }}
                             </v-btn>
                         </div>
                     </v-col>
@@ -481,43 +475,13 @@
             </v-col>
         </v-row>
 
-        <v-dialog v-model="showDeleteConfirmation" max-width="500px">
-            <v-card>
-                <v-card-text>{{
-                    $t('notifications.deleteMoreItems')
-                }}</v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn @click="showDeleteConfirmation = false">
-                        {{ $t('actions.cancel') }}
-                    </v-btn>
-                    <v-btn color="error" variant="flat" @click="deleteSelected">
-                        {{ $t('actions.delete') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="showArchiveConfirmation" max-width="500px">
-            <v-card>
-                <v-card-text>{{
-                    $t('notifications.archiveMoreItems')
-                }}</v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn @click="showArchiveConfirmation = false">
-                        {{ $t('actions.cancel') }}
-                    </v-btn>
-                    <v-btn
-                        color="warning"
-                        variant="flat"
-                        @click="archiveSelected"
-                    >
-                        {{ $t('actions.archive') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <ConfirmDialog
+            v-model="showArchiveConfirmation"
+            :message="$t('notifications.archiveMoreItems')"
+            confirm-color="warning"
+            :confirm-text="$t('actions.archive')"
+            @confirm="archiveSelected"
+        />
     </v-container>
 </template>
 
@@ -542,13 +506,30 @@ const { smAndDown } = useDisplay()
 
 const isMobile = computed(() => smAndDown.value)
 
-const searchRouteName = ref('')
-const selectedDifficulty = ref('')
-const selectedType = ref('')
-const selectedLocation = ref('')
+const {
+    searchRouteName,
+    selectedDifficulty,
+    selectedType,
+    selectedLocation,
+    difficulties,
+    types,
+    locations,
+    activeFilterCount: routeFilterCount,
+    pbFilter: baseFilter,
+    clearFilters: clearRouteFilters,
+} = useRouteFilters()
+
 const displayArchived = ref(false)
 
-const showDeleteConfirmation = ref(false)
+const activeFilterCount = computed(
+    () => routeFilterCount.value + (displayArchived.value ? 1 : 0),
+)
+
+function clearFilters() {
+    clearRouteFilters()
+    displayArchived.value = false
+}
+
 const showArchiveConfirmation = ref(false)
 
 const routes = ref([])
@@ -579,31 +560,6 @@ const averageRatingsLoading = ref(false)
 const routeFormRef = useTemplateRef('routeFormRef')
 const importRouteRef = useTemplateRef('importRouteRef')
 
-const routeNameId = 'route-name-input'
-const difficultyId = 'difficulty-select'
-const typeId = 'type-select'
-const locationId = 'location-select'
-
-const difficulties = computed(() => [
-    { text: t('filter.all'), value: '' },
-    ...Array.from({ length: 10 }, (_, index) => ({
-        text: String(index + 1),
-        value: String(index + 1),
-    })),
-])
-
-const types = computed(() => [
-    { text: t('filter.all'), value: '' },
-    { text: t('routes.types.route'), value: 'Route' },
-    { text: t('routes.types.boulder'), value: 'Boulder' },
-])
-
-const locations = computed(() => [
-    { text: t('filter.all'), value: '' },
-    { text: 'Hanau', value: 'Hanau' },
-    { text: 'Gelnhausen', value: 'Gelnhausen' },
-])
-
 const tableHeaders = computed(() => [
     { title: '', key: 'selected', sortable: false, width: 56 },
     { title: t('climbing.color'), key: 'color', sortable: false },
@@ -625,24 +581,9 @@ const tableHeaders = computed(() => [
 
 const pbFilter = computed(() => {
     const parts = []
-
-    if (!displayArchived.value) {
-        parts.push('archived = false')
-    }
-    if (selectedDifficulty.value) {
-        parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
-    }
-    if (selectedType.value) {
-        parts.push(`type = "${selectedType.value}"`)
-    }
-    if (selectedLocation.value) {
-        parts.push(`location = "${selectedLocation.value}"`)
-    }
-    if (searchRouteName.value.trim()) {
-        const term = searchRouteName.value.trim().replace(/"/g, '\\"')
-        parts.push(`name ~ "${term}"`)
-    }
-
+    if (!displayArchived.value) parts.push('archived = false')
+    const base = baseFilter.value
+    if (base) parts.push(base)
     return parts.join(' && ')
 })
 
@@ -890,27 +831,6 @@ const handleArchiveClick = () => {
     }
 }
 
-const deleteSelected = async () => {
-    const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length) {
-        return
-    }
-
-    try {
-        const batch = pb.createBatch()
-        ids.forEach((id) => {
-            batch.collection('routes').delete(id)
-        })
-        await batch.send()
-        invalidateAllRouteIdsCache()
-        removeSelectedIds(ids)
-        showDeleteConfirmation.value = false
-        await reloadRoutes()
-    } catch (error) {
-        console.error('Exception in deleteSelected:', error)
-    }
-}
-
 const archiveSelected = async () => {
     const ids = Array.from(selectedRouteIds.value)
     if (!ids.length) {
@@ -998,31 +918,21 @@ const onMobileItemsPerPageChange = (value) => {
 let filterDebounceTimer = null
 let subscriptionDebounceTimer = null
 
-watch(
-    [
-        searchRouteName,
-        selectedDifficulty,
-        selectedType,
-        selectedLocation,
-        displayArchived,
-    ],
-    () => {
-        if (filterDebounceTimer) {
-            clearTimeout(filterDebounceTimer)
-        }
+watch(pbFilter, () => {
+    if (filterDebounceTimer) {
+        clearTimeout(filterDebounceTimer)
+    }
 
-        filterDebounceTimer = setTimeout(() => {
-            invalidateAllRouteIdsCache()
-            clearSelection()
-            tableOptions.page = 1
-            void loadRoutes({
-                page: 1,
-                itemsPerPage: tableOptions.itemsPerPage,
-                sortBy: tableOptions.sortBy,
-            })
-        }, 300)
-    },
-)
+    filterDebounceTimer = setTimeout(() => {
+        invalidateAllRouteIdsCache()
+        tableOptions.page = 1
+        void loadRoutes({
+            page: 1,
+            itemsPerPage: tableOptions.itemsPerPage,
+            sortBy: tableOptions.sortBy,
+        })
+    }, 300)
+})
 
 const queueReload = () => {
     clearTimeout(subscriptionDebounceTimer)
@@ -1035,21 +945,23 @@ const queueReload = () => {
     }, 250)
 }
 
+const { subscribe } = usePbSubscription()
+
 onMounted(async () => {
     await loadRoutes({
         page: tableOptions.page,
         itemsPerPage: tableOptions.itemsPerPage,
         sortBy: tableOptions.sortBy,
     })
-    pb.collection('routes').subscribe('*', queueReload)
-    pb.collection('averageRating').subscribe('*', queueReload)
+    await Promise.all([
+        subscribe('routes', queueReload),
+        subscribe('averageRating', queueReload),
+    ])
 })
 
 onBeforeUnmount(() => {
     clearTimeout(filterDebounceTimer)
     clearTimeout(subscriptionDebounceTimer)
-    pb.collection('routes').unsubscribe('*')
-    pb.collection('averageRating').unsubscribe('*')
 })
 
 useHead(() => ({

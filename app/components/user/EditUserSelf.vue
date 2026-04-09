@@ -274,33 +274,6 @@
             </v-card-actions>
         </v-card>
 
-        <!-- ── Snackbar ──────────────────────────────────────────── -->
-        <v-snackbar
-            v-model="snackbar"
-            :color="snackbarColor"
-            location="top"
-            rounded="pill"
-            timeout="5000"
-        >
-            <div class="d-flex align-center gap-2">
-                <v-icon
-                    :icon="
-                        snackbarColor === 'success'
-                            ? 'mdi-check-circle-outline'
-                            : 'mdi-alert-circle-outline'
-                    "
-                />
-                {{ snackbarMessage }}
-            </div>
-            <template #actions>
-                <v-btn
-                    variant="text"
-                    icon="mdi-close"
-                    size="small"
-                    @click="snackbar = false"
-                />
-            </template>
-        </v-snackbar>
     </v-dialog>
 </template>
 
@@ -424,16 +397,7 @@ const canSave = computed(() => {
     return true
 })
 
-// ── Snackbar ──────────────────────────────────────────────────────────────
-const snackbar = ref(false)
-const snackbarMessage = ref('')
-const snackbarColor = ref('')
-
-function showSnackbar(message, color) {
-    snackbarMessage.value = message
-    snackbarColor.value = color
-    snackbar.value = true
-}
+const { notify: showSnackbar } = useNotification()
 
 // ── Save ──────────────────────────────────────────────────────────────────
 const saving = ref(false)

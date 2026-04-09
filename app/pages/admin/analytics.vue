@@ -63,49 +63,8 @@
             </v-col>
         </v-row>
 
-        <!-- ── Error banner ───────────────────────────────────────────── -->
-        <v-row v-if="error" class="mb-4">
-            <v-col cols="12">
-                <v-alert
-                    type="error"
-                    variant="tonal"
-                    border="start"
-                    rounded="lg"
-                >
-                    <div
-                        class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-3"
-                    >
-                        <span>{{ error }}</span>
-                        <v-btn
-                            size="small"
-                            color="error"
-                            variant="outlined"
-                            rounded="lg"
-                            @click="refresh"
-                        >
-                            {{ t('analytics.retry') }}
-                        </v-btn>
-                    </div>
-                </v-alert>
-            </v-col>
-        </v-row>
-
-        <!-- ── Empty state ────────────────────────────────────────────── -->
-        <v-row v-if="!loading && !hasData && !error" class="mb-6">
-            <v-col cols="12">
-                <v-alert
-                    type="info"
-                    variant="tonal"
-                    border="start"
-                    rounded="lg"
-                >
-                    {{ t('analytics.empty') }}
-                </v-alert>
-            </v-col>
-        </v-row>
-
         <!-- ── Latest activity ────────────────────────────────────────── -->
-        <v-row v-if="!error" class="mb-6" density="comfortable">
+        <v-row class="mb-6" density="comfortable">
             <!-- Latest comments -->
             <v-col cols="12" md="6" class="d-flex">
                 <v-card class="analytics-card w-100" elevation="0">
@@ -598,6 +557,12 @@ const {
     refresh,
     load,
 } = useClimbingAnalytics()
+
+const { error: notifyError } = useNotification()
+
+watch(error, (hasError) => {
+    if (hasError) notifyError(t('analytics.error'))
+})
 
 onMounted(() => load())
 

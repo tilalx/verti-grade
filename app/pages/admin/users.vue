@@ -7,37 +7,31 @@
         </div>
 
         <!-- ── Filter bar ────────────────────────────────────────────────── -->
-        <v-card rounded="xl" border flat class="mb-4">
-            <v-card-text class="pb-2">
-                <div class="d-flex align-center ga-2">
-                    <v-text-field
-                        v-model="search"
-                        :label="t('users.searchUsers')"
-                        prepend-inner-icon="mdi-magnify"
-                        clearable
-                        hide-details
-                        density="compact"
-                        variant="outlined"
-                        rounded="lg"
-                        class="flex-grow-1"
-                    />
-                    <v-select
-                        v-model="selectedRole"
-                        :label="t('users.role')"
-                        :items="roleOptions"
-                        item-title="text"
-                        item-value="value"
-                        clearable
-                        hide-details
-                        density="compact"
-                        variant="outlined"
-                        rounded="lg"
-                        style="max-width: 180px"
-                        class="d-none d-sm-flex"
-                    />
-                </div>
-            </v-card-text>
-        </v-card>
+        <FilterBar
+            v-model="search"
+            :search-label="t('users.searchUsers')"
+            :active-filter-count="selectedRole ? 1 : 0"
+            @clear="clearFilters"
+        >
+            <template #filters>
+                <v-row density="comfortable">
+                    <v-col cols="12" sm="6" md="4">
+                        <v-select
+                            v-model="selectedRole"
+                            :label="t('users.role')"
+                            :items="roleOptions"
+                            item-title="text"
+                            item-value="value"
+                            clearable
+                            hide-details
+                            density="compact"
+                            variant="outlined"
+                            rounded="lg"
+                        />
+                    </v-col>
+                </v-row>
+            </template>
+        </FilterBar>
 
         <!-- ── Loading skeletons ─────────────────────────────────────────── -->
         <v-row v-if="loading && !users.length">
@@ -200,47 +194,19 @@
         />
 
         <!-- ── Delete Confirmation Dialog ────────────────────────────────── -->
-        <v-dialog v-model="deleteDialog" max-width="380">
-            <v-card rounded="xl">
-                <v-card-title
-                    class="pa-5 pb-3 text-body-1 font-weight-semibold"
-                >
-                    {{ t('users.delete') }}
-                </v-card-title>
-                <v-card-text class="pa-5 pt-0 text-body-2 text-medium-emphasis">
-                    {{ t('users.deleteConfirm') }}
-                </v-card-text>
-                <v-card-actions class="pa-4 pt-0">
-                    <v-btn variant="text" @click="deleteDialog = false">{{
-                        t('actions.cancel')
-                    }}</v-btn>
-                    <v-spacer />
-                    <v-btn
-                        color="error"
-                        variant="flat"
-                        :loading="deleting"
-                        @click="deleteUser"
-                    >
-                        {{ t('actions.delete') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <ConfirmDialog
+            v-model="deleteDialog"
+            :title="t('users.delete')"
+            :message="t('users.deleteConfirm')"
+            :loading="deleting"
+            @confirm="deleteUser"
+        />
 
         <!-- ── Role Permissions Editor ────────────────────────────────────── -->
         <div class="mt-8">
             <AdminRolePermissionsEditor />
         </div>
 
-        <!-- ── Snackbar ──────────────────────────────────────────────────── -->
-        <v-snackbar
-            v-model="snackbar.show"
-            :color="snackbar.color"
-            location="top"
-            timeout="4000"
-        >
-            {{ snackbar.message }}
-        </v-snackbar>
     </v-container>
 </template>
 
@@ -278,7 +244,7 @@ const editingUser = ref(null)
 const deletingUser = ref(null)
 const deleteDialog = ref(false)
 
-const snackbar = reactive({ show: false, message: '', color: 'success' })
+const { notify: showSnackbar } = useNotification()
 
 const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
@@ -375,6 +341,10 @@ function reloadUsers() {
 
 // ── Watchers ───────────────────────────────────────────────────────────────
 
+function clearFilters() {
+    selectedRole.value = null
+}
+
 let searchDebounce = null
 watch(search, () => {
     clearTimeout(searchDebounce)
@@ -454,23 +424,19 @@ function formatDate(date) {
     })
 }
 
-function showSnackbar(message, color = 'success') {
-    snackbar.message = message
-    snackbar.color = color
-    snackbar.show = true
-}
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-let unsubscribe
+const { subscribe } = usePbSubscription()
+
 onMounted(async () => {
     await Promise.all([fetchList(), fetchRoles()])
 
-    unsubscribe = await pb.collection('users').subscribe('*', async (e) => {
+    await subscribe('users', async (e) => {
         if (e.action === 'delete') {
             users.value = users.value.filter((u) => u.id !== e.record.id)
             totalItems.value = Math.max(0, totalItems.value - 1)
-            } else if (e.action === 'create') {
+        } else if (e.action === 'create') {
             totalItems.value++
             try {
                 const rec = await pb.collection('users').getOne(e.record.id, {
@@ -479,7 +445,7 @@ onMounted(async () => {
                 })
                 users.value = [mapUser(rec), ...users.value]
             } catch {}
-            } else if (e.action === 'update') {
+        } else if (e.action === 'update') {
             const idx = users.value.findIndex((u) => u.id === e.record.id)
             if (idx !== -1) {
                 try {
@@ -492,12 +458,8 @@ onMounted(async () => {
                     users.value[idx] = mapUser(rec)
                 } catch {}
             }
-            }
+        }
     })
-})
-
-onBeforeUnmount(() => {
-    unsubscribe?.()?.catch?.(() => {})
 })
 </script>
 

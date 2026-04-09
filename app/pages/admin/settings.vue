@@ -217,17 +217,6 @@
             </v-btn>
         </div>
 
-        <!-- Snackbar feedback -->
-        <v-snackbar
-            v-model="snackbar.show"
-            :color="snackbar.color"
-            :timeout="3000"
-            location="bottom right"
-            rounded="md"
-        >
-            <v-icon class="mr-2">{{ snackbar.icon }}</v-icon>
-            {{ snackbar.text }}
-        </v-snackbar>
     </v-container>
 </template>
 
@@ -275,22 +264,13 @@ const iconPreview = ref(null)
 const signPreview = ref(null)
 
 const saving = ref(false)
-const snackbar = reactive({
-    show: false,
-    color: 'success',
-    icon: 'mdi-check-circle',
-    text: '',
-})
+const { notify } = useNotification()
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function pbFileUrl(rec, filename) {
     if (!filename) return null
     return pb.files.getURL(rec, filename)
-}
-
-function notify(text, color = 'success', icon = 'mdi-check-circle') {
-    Object.assign(snackbar, { show: true, color, icon, text })
 }
 
 // ── Asset field descriptors (drives the template v-for) ───────────────────────
@@ -458,11 +438,7 @@ async function saveSettings() {
         notify('Settings saved successfully.')
     } catch (err) {
         console.error('Save failed:', err)
-        notify(
-            'Failed to save settings. Please try again.',
-            'error',
-            'mdi-alert-circle',
-        )
+        notify('Failed to save settings. Please try again.', 'error')
     } finally {
         saving.value = false
     }

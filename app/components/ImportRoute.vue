@@ -92,15 +92,6 @@
             </v-card>
         </v-dialog>
 
-        <!-- Snackbar for feedback -->
-        <v-snackbar
-            v-model="snackbar.show"
-            :color="snackbar.color"
-            timeout="4000"
-            top
-        >
-            {{ snackbar.message }}
-        </v-snackbar>
     </div>
 </template>
 
@@ -115,7 +106,7 @@ const loading = ref(false)
 const routesToImport = ref([])
 const expanded = ref([])
 
-const snackbar = reactive({ show: false, message: '', color: 'success' })
+const { notify: showSnackbar } = useNotification()
 
 const previewHeaders = [
     { title: 'Color', value: 'color', sortable: false },
@@ -125,12 +116,6 @@ const previewHeaders = [
     { title: 'Location', value: 'location' },
     { title: 'Ratings', value: 'ratings' },
 ]
-
-function showSnackbar(message, color = 'success') {
-    snackbar.message = message
-    snackbar.color = color
-    snackbar.show = true
-}
 
 const open = () => {
     fileInput.value.click()

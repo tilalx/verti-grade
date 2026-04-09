@@ -98,24 +98,26 @@ interface RatingDisplay {
     comment: string | null
 }
 
-type Unsubscribe = (() => void | Promise<void>) | null
-
 const props = defineProps<{
     route_id: string
 }>()
 
 const pb = usePocketbase() as PocketBase
+const { subscribe, unsubscribeFrom } = usePbSubscription()
 
 // Component State
 const isSheetOpen = ref(false)
 const isLoading = ref(false)
 const ratings = ref<RatingDisplay[]>([])
-const unsubscribe = ref<Unsubscribe>(null)
 
 const openSheet = async () => {
     isSheetOpen.value = true
     await fetchClimbingRatings()
-    await subscribeToRatings()
+    await subscribe('ratings', (e) => {
+        if (e.record.route_id === props.route_id) {
+            fetchClimbingRatings()
+        }
+    })
 }
 
 const fetchClimbingRatings = async () => {
@@ -143,37 +145,8 @@ const fetchClimbingRatings = async () => {
     }
 }
 
-const subscribeToRatings = async () => {
-    await unsubscribeFromRatings()
-
-    try {
-        unsubscribe.value = await pb
-            .collection('ratings')
-            .subscribe('*', (e) => {
-                if (e.record.route_id === props.route_id) {
-                    fetchClimbingRatings()
-                }
-            })
-    } catch (error) {
-        console.error('Failed to subscribe to ratings:', error)
-    }
-}
-
-const unsubscribeFromRatings = async () => {
-    if (unsubscribe.value) {
-        await unsubscribe.value()
-        unsubscribe.value = null
-    }
-}
-
 watch(isSheetOpen, (isOpen) => {
-    if (!isOpen) {
-        void unsubscribeFromRatings()
-    }
-})
-
-onBeforeUnmount(() => {
-    void unsubscribeFromRatings()
+    if (!isOpen) void unsubscribeFrom('ratings')
 })
 
 function buildDifficultyLabel(rating: RatingRecord): string {

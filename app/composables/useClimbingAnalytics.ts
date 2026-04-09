@@ -74,7 +74,7 @@ const defaultResult: ClimbingAnalyticsResponse = {
 export function useClimbingAnalytics() {
     const analytics = ref<ClimbingAnalyticsResponse | null>(null)
     const loading = ref(false)
-    const error = ref<string | null>(null)
+    const error = ref(false)
 
     const normalized = computed(() => analytics.value ?? defaultResult)
     const hasData = computed(() => normalized.value.summary.totalRoutes > 0)
@@ -83,7 +83,7 @@ export function useClimbingAnalytics() {
 
     const load = async () => {
         loading.value = true
-        error.value = null
+        error.value = false
 
         try {
             const response = await requestFetch<ClimbingAnalyticsResponse>(
@@ -91,10 +91,8 @@ export function useClimbingAnalytics() {
             )
 
             analytics.value = normalizeResponse(response)
-        } catch (err: any) {
-            const message =
-                err?.data?.message || err?.message || 'Unable to load analytics data'
-            error.value = message
+        } catch {
+            error.value = true
             analytics.value = null
         } finally {
             loading.value = false
