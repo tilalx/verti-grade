@@ -1,7 +1,5 @@
 <template>
-    <v-app>
-        <v-main>
-            <v-container fluid>
+    <v-container fluid>
                 <!-- Filter Bar -->
                 <FilterBar
                     v-model="searchRouteName"
@@ -248,9 +246,7 @@
                     >
                     <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
                 </div>
-            </v-container>
-        </v-main>
-    </v-app>
+    </v-container>
 </template>
 
 <script setup lang="ts">
