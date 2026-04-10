@@ -2,7 +2,6 @@
     <v-footer
         v-if="$route.meta.footer !== false"
         class="app-footer"
-        color="transparent"
         elevation="0"
     >
         <div class="footer-inner">
@@ -58,7 +57,17 @@
                     }}</span>
                 </div>
 
-                <div class="status-pill">
+                <a
+                    v-if="versionUrl"
+                    :href="versionUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="status-pill status-pill--link"
+                >
+                    <v-icon size="11">mdi-tag-outline</v-icon>
+                    <span class="status-label">{{ appVersion }}</span>
+                </a>
+                <div v-else class="status-pill">
                     <v-icon size="11">mdi-tag-outline</v-icon>
                     <span class="status-label">{{ appVersion }}</span>
                 </div>
@@ -73,7 +82,7 @@
                     density="compact"
                     class="footer-brand-btn"
                 >
-                    © {{ currentYear }} Verti-Grade
+                    © {{ currentYear }} verti-grade
                 </v-btn>
             </div>
         </div>
@@ -92,6 +101,22 @@ const pb = usePocketbase()
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
 const currentYear = computed(() => new Date().getFullYear())
+
+const versionUrl = computed(() => {
+    const v = appVersion
+    if (!v) return null
+    // semver: "1.8.2" or "v1.8.2"
+    if (/^v?\d+\.\d+/.test(v)) {
+        const tag = v.startsWith('v') ? v : `v${v}`
+        return `https://github.com/tilalx/verti-grade/releases/tag/${tag}`
+    }
+    // git hash: "git-abc1234" or bare hex hash
+    const hash = v.replace(/^git-/, '')
+    if (/^[0-9a-f]{4,40}$/i.test(hash)) {
+        return `https://github.com/tilalx/verti-grade/commit/${hash}`
+    }
+    return null
+})
 
 const { data: health } = await useAsyncData(
     'footer:health',
@@ -117,8 +142,10 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 
 <style scoped>
 .app-footer {
-    border-top: 1px solid rgba(var(--v-border-color), 0.07);
-    padding: 0;
+    flex: 0 0 auto !important;
+    background: transparent !important;
+    border-top: 1px solid rgba(var(--v-border-color), 0.08);
+    padding: 0 !important;
 }
 
 .footer-inner {
@@ -211,14 +238,25 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 .footer-brand-btn {
     font-size: 11.5px !important;
     font-weight: 500 !important;
-    color: rgba(var(--v-theme-on-surface), 0.3) !important;
+    color: rgba(var(--v-theme-on-surface), 0.6) !important;
     text-transform: none !important;
     min-width: unset !important;
     letter-spacing: 0 !important;
 }
 
 .footer-brand-btn:hover {
-    color: rgba(var(--v-theme-on-surface), 0.7) !important;
+    color: rgba(var(--v-theme-on-surface), 0.9) !important;
+}
+
+.status-pill--link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.status-pill--link:hover {
+    background: rgba(var(--v-theme-surface-variant), 0.7);
+    border-color: rgba(var(--v-border-color), 0.18);
 }
 
 @media (max-width: 599px) {

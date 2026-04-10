@@ -1,11 +1,12 @@
 <template>
     <a href="#main-content" class="skip-link">{{ $t('nav.skipToContent') }}</a>
     <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
-    <v-main id="main-content" tabindex="-1">
-        <NuxtPage />
-    </v-main>
-
-    <LayoutFootBar :settings="settings" />
+    <div class="page-body">
+        <v-main id="main-content" tabindex="-1">
+            <NuxtPage />
+        </v-main>
+        <LayoutFootBar :settings="settings" />
+    </div>
     <GlobalSnackbar />
 </template>
 
@@ -150,6 +151,16 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.page-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.page-body :deep(.v-main) {
+    flex: 1 0 auto;
+}
+
 .skip-link {
     position: absolute;
     top: -100%;
