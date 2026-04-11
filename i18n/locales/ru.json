@@ -135,6 +135,7 @@
         "searchRouteName": "Поиск",
         "type": "Тип",
         "archived": "Архивировано",
+        "active": "Активный",
         "comment": "Комментарий",
         "creators": "Создатели"
     },
@@ -147,7 +148,9 @@
         "difficulty": "Сложность",
         "score": "Оценка",
         "comment": "Комментарий",
-        "climber_reviews": "Отзывы скалолазов"
+        "climber_reviews": "Отзывы скалолазов",
+        "felt": "ощущение",
+        "perceived_difficulty": "Ощущаемая сложность"
     },
     "table": {
         "actions": "Действия",

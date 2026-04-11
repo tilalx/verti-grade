@@ -135,6 +135,7 @@
         "searchRouteName": "Пошук",
         "type": "Тип",
         "archived": "Архівовано",
+        "active": "Активний",
         "comment": "Коментар",
         "creators": "Автори"
     },
@@ -147,7 +148,9 @@
         "difficulty": "Складність",
         "score": "Оцінка",
         "comment": "Коментар",
-        "climber_reviews": "Відгуки скелелазів"
+        "climber_reviews": "Відгуки скелелазів",
+        "felt": "відчуття",
+        "perceived_difficulty": "Відчутна складність"
     },
     "table": {
         "actions": "Дії",

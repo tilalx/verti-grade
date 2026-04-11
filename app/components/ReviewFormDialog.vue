@@ -36,7 +36,8 @@
                 <!-- Context row: shown only in edit mode -->
                 <div
                     v-if="isEditMode && review"
-                    class="d-flex align-center ga-3 mb-5 pa-3 rounded-lg bg-surface-variant"
+                    class="d-flex align-center ga-3 mb-5 pa-3 rounded-lg"
+                    style="background: rgba(var(--v-theme-on-surface), 0.06)"
                 >
                     <v-avatar size="30" :color="avatarColor(review.userName)">
                         <span
