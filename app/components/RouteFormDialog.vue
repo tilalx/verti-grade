@@ -126,14 +126,26 @@
                     <div class="color-picker-section">
                         <v-color-picker
                             v-model="form.color"
-                            show-swatches
                             hide-inputs
-                            :swatches="colorSwatches"
-                            swatches-max-height="140"
                             :modes="['hex']"
                             width="100%"
                             elevation="0"
                         />
+
+                        <!-- Palette: similar colors when picker changed, default otherwise -->
+                        <div class="d-flex flex-wrap ga-1 mt-2 mb-1">
+                            <button
+                                v-for="c in activePalette"
+                                :key="c"
+                                type="button"
+                                class="color-dot"
+                                :style="{
+                                    backgroundColor: c,
+                                    boxShadow: form.color?.toUpperCase() === c.toUpperCase() ? '0 0 0 2px white, 0 0 0 4px ' + c : 'none',
+                                }"
+                                @click="form.color = c"
+                            />
+                        </div>
                     </div>
                 </v-form>
             </v-card-text>
@@ -187,14 +199,57 @@ type VFormHandle = {
     reset: () => void
 } | null
 
-const colorSwatches = [
-    ['#F44336', '#FF9800', '#FFC107'], // red, orange, yellow
-    ['#4CAF50', '#009688', '#2196F3'], // green, teal, blue
-    ['#673AB7', '#E91E63', '#FF5722'], // purple, pink, deep orange
-    ['#8BC34A', '#00BCD4', '#795548'], // lime, cyan, brown
-    ['#FFFFFF', '#9E9E9E', '#212121'], // white, gray, black
-    ['#F8BBD0', '#B3E5FC', '#C8E6C9'], // pastel pink, light blue, light green
+const fallbackColors = [
+    '#F44336', '#FF9800', '#FFC107',
+    '#4CAF50', '#009688', '#2196F3',
+    '#673AB7', '#E91E63', '#FF5722',
+    '#8BC34A', '#00BCD4', '#795548',
+    '#FFFFFF', '#9E9E9E', '#212121',
+    '#F8BBD0', '#B3E5FC', '#C8E6C9',
 ]
+
+const usedColorsList = ref<string[]>([])
+const defaultPalette = ref<string[]>([])
+
+function hexToRgb(hex: string): [number, number, number] {
+    const h = hex.replace('#', '')
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
+
+function colorDistance(a: string, b: string): number {
+    const [r1, g1, b1] = hexToRgb(a)
+    const [r2, g2, b2] = hexToRgb(b)
+    return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2)
+}
+
+const colorModified = ref(false)
+
+const similarColors = computed(() => {
+    if (!usedColorsList.value.length || !form.color) return []
+    const current = form.color.toUpperCase()
+    return [...usedColorsList.value]
+        .filter((c) => c.toUpperCase() !== current)
+        .sort((a, b) => colorDistance(current, a) - colorDistance(current, b))
+        .slice(0, 12)
+})
+
+const activePalette = computed(() =>
+    colorModified.value && similarColors.value.length ? similarColors.value : defaultPalette.value
+)
+
+async function fetchUsedColors() {
+    try {
+        const records = await pb.collection('usedColors').getFullList<{ color: string }>({ fields: 'color' })
+        usedColorsList.value = records.map((r) => r.color).filter(Boolean)
+    } catch {
+        usedColorsList.value = []
+    }
+}
+
+function buildDefaultPalette() {
+    const pool = usedColorsList.value.length ? usedColorsList.value : fallbackColors
+    defaultPalette.value = [...pool].sort(() => Math.random() - 0.5).slice(0, 12)
+}
 
 const dialogOpen = ref(false)
 const saving = ref(false)
@@ -325,13 +380,18 @@ const getSetters = async () => {
     }
 }
 
-function open(route?: RouteRecord) {
+async function open(route?: RouteRecord) {
     resetForm()
+    colorModified.value = false
     if (route) {
         loadFromRoute(route)
     }
     dialogOpen.value = true
     void getSetters()
+    await fetchUsedColors()
+    buildDefaultPalette()
+    await nextTick()
+    colorModified.value = false
 }
 
 function close() {
@@ -347,6 +407,13 @@ const emit = defineEmits<{
 watch(dialogOpen, (val) => {
     if (!val) emit('closed')
 })
+
+watch(
+    () => form.color,
+    () => {
+        if (dialogOpen.value) colorModified.value = true
+    },
+)
 
 async function submit() {
     if (!formRef.value) return
@@ -408,5 +475,19 @@ defineExpose({ open })
 <style scoped>
 .color-picker-section :deep(.v-color-picker) {
     box-shadow: none;
+}
+
+.color-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: box-shadow 0.15s;
+}
+
+.color-dot:hover {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
 }
 </style>
