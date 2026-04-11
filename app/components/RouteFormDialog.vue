@@ -9,6 +9,7 @@
             <v-divider />
             <v-card-text class="pa-4">
                 <v-form ref="formRef" @submit.prevent="submit">
+                    <!-- Name -->
                     <v-text-field
                         v-model="form.name"
                         :label="$t('routes.name')"
@@ -20,30 +21,18 @@
                         class="mb-1"
                     />
 
+                    <!-- Difficulty and Type -->
                     <v-row density="comfortable" class="mb-1">
                         <v-col cols="6">
                             <v-select
-                                v-model="form.difficulty"
+                                v-model="form.combinedDifficulty"
                                 :label="$t('climbing.difficulty')"
-                                :items="difficulties"
+                                :items="combinedDifficulties"
                                 :rules="[requiredRule]"
                                 required
                                 density="comfortable"
                             />
                         </v-col>
-                        <v-col cols="6">
-                            <v-select
-                                v-model="form.difficulty_sign"
-                                :label="$t('climbing.difficulty_sign')"
-                                :items="difficultySignItems"
-                                item-title="title"
-                                item-value="value"
-                                density="comfortable"
-                            />
-                        </v-col>
-                    </v-row>
-
-                    <v-row density="comfortable" class="mb-1">
                         <v-col cols="6">
                             <v-select
                                 v-model="form.type"
@@ -52,6 +41,23 @@
                                 item-title="title"
                                 item-value="value"
                                 :rules="[requiredRule]"
+                                required
+                                density="comfortable"
+                            />
+                        </v-col>
+                    </v-row>
+
+                    <!-- Anchor Point and Location -->
+                    <v-row density="comfortable" class="mb-1">
+                        <v-col cols="6">
+                            <v-text-field
+                                v-model.number="form.anchor_point"
+                                :label="$t('climbing.anchor_point')"
+                                :rules="anchorPointRules"
+                                type="number"
+                                :min="isBoulderRoute ? 0 : 1"
+                                max="100"
+                                step="1"
                                 required
                                 density="comfortable"
                             />
@@ -68,19 +74,7 @@
                         </v-col>
                     </v-row>
 
-                    <v-text-field
-                        v-model.number="form.anchor_point"
-                        :label="$t('climbing.anchor_point')"
-                        :rules="anchorPointRules"
-                        type="number"
-                        :min="isBoulderRoute ? 0 : 1"
-                        max="100"
-                        step="1"
-                        required
-                        density="comfortable"
-                        class="mb-1"
-                    />
-
+                    <!-- Route Setter -->
                     <v-combobox
                         v-model="form.creator"
                         :label="$t('routes.route_setter')"
@@ -94,16 +88,30 @@
                         class="mb-1"
                     />
 
-                    <v-text-field
-                        v-model="form.screw_date"
-                        :label="$t('routes.screwed_at')"
-                        type="date"
-                        :rules="[requiredRule]"
-                        required
-                        density="comfortable"
-                        class="mb-1"
-                    />
+                    <!-- Screwed at and Archived -->
+                    <v-row density="comfortable" class="mb-1">
+                        <v-col cols="6">
+                            <v-text-field
+                                v-model="form.screw_date"
+                                :label="$t('routes.screwed_at')"
+                                type="date"
+                                :rules="[requiredRule]"
+                                required
+                                density="comfortable"
+                            />
+                        </v-col>
+                        <v-col v-if="isEditMode" cols="6" style="align-self: stretch; display: flex; align-items: center; justify-content: center;">
+                            <v-switch
+                                v-model="form.archived"
+                                :label="$t('climbing.archived')"
+                                color="primary"
+                                density="compact"
+                                hide-details
+                            />
+                        </v-col>
+                    </v-row>
 
+                    <!-- Comment -->
                     <v-textarea
                         v-model="form.comment"
                         :label="$t('climbing.comment')"
@@ -114,16 +122,7 @@
                         class="mb-2"
                     />
 
-                    <v-switch
-                        v-if="isEditMode"
-                        v-model="form.archived"
-                        :label="$t('climbing.archived')"
-                        :true-value="true"
-                        :false-value="false"
-                        density="comfortable"
-                        class="mb-2"
-                    />
-
+                    <!-- Color picker -->
                     <div class="color-picker-section">
                         <v-color-picker
                             v-model="form.color"
@@ -140,6 +139,15 @@
             </v-card-text>
             <v-divider />
             <v-card-actions class="pa-3">
+                <v-btn
+                    v-if="isEditMode"
+                    color="error"
+                    variant="text"
+                    prepend-icon="mdi-delete-outline"
+                    @click="deleteDialog = true"
+                >
+                    {{ $t('actions.delete') }}
+                </v-btn>
                 <v-spacer />
                 <v-btn variant="text" @click="close">{{
                     $t('actions.cancel')
@@ -155,6 +163,14 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <ConfirmDialog
+        v-model="deleteDialog"
+        :title="$t('actions.confirm')"
+        :message="$t('notifications.deleteItem')"
+        :loading="deleting"
+        @confirm="deleteRoute"
+    />
 </template>
 
 <script setup lang="ts">
@@ -170,7 +186,6 @@ type VFormHandle = {
     validate: () => Promise<{ valid: boolean }>
     reset: () => void
 } | null
-type DifficultySignInternal = '' | '+' | '-'
 
 const colorSwatches = [
     ['#F44336', '#FF9800', '#FFC107'], // red, orange, yellow
@@ -183,6 +198,8 @@ const colorSwatches = [
 
 const dialogOpen = ref(false)
 const saving = ref(false)
+const deleting = ref(false)
+const deleteDialog = ref(false)
 const formRef = ref<VFormHandle>(null)
 const setterItems = ref<string[]>([])
 const editRouteId = ref<string | null>(null)
@@ -190,8 +207,7 @@ const originalAnchorPointIsZero = ref(false)
 
 const form = reactive({
     name: '',
-    difficulty: '',
-    difficulty_sign: '' as DifficultySignInternal,
+    combinedDifficulty: null as string | null,
     anchor_point: null as number | null,
     location: '',
     type: '',
@@ -205,14 +221,12 @@ const form = reactive({
 const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
 
-const difficulties = Array.from({ length: 10 }, (_, i) => String(i + 1))
 const locations = ['Hanau', 'Gelnhausen']
 
-const difficultySignItems = [
-    { title: '—', value: '' },
-    { title: '+', value: '+' },
-    { title: '-', value: '-' },
-]
+const combinedDifficulties = Array.from({ length: 10 }, (_, i) => {
+    const d = i + 1
+    return [`${d} -`, String(d), `${d} +`]
+}).flat()
 
 const typeItems = computed(() => [
     { title: t('routes.types.route'), value: 'Route' },
@@ -246,18 +260,31 @@ const anchorPointRules = [
 const creatorRule = (v: string[]) =>
     (Array.isArray(v) && v.length > 0) || t('validation.required')
 
-const toDifficultySignInternal = (
-    raw: RouteRecord['difficulty_sign'],
-): DifficultySignInternal => {
-    if (raw === true || raw === '+') return '+'
-    if (raw === false || raw === '-') return '-'
-    return ''
+const toCombinedDifficulty = (
+    difficulty: RouteRecord['difficulty'],
+    sign: RouteRecord['difficulty_sign'],
+): string | null => {
+    if (difficulty === null || difficulty === undefined) return null
+    const d = String(difficulty)
+    if (sign === true || sign === '+') return `${d} +`
+    if (sign === false || sign === '-') return `${d} -`
+    return d
+}
+
+const parseCombinedDifficulty = (
+    combined: string | null,
+): { difficulty: number | null; difficulty_sign: boolean | null } => {
+    if (!combined) return { difficulty: null, difficulty_sign: null }
+    if (combined.endsWith(' +'))
+        return { difficulty: Number(combined.slice(0, -2)), difficulty_sign: true }
+    if (combined.endsWith(' -'))
+        return { difficulty: Number(combined.slice(0, -2)), difficulty_sign: false }
+    return { difficulty: Number(combined), difficulty_sign: null }
 }
 
 const resetForm = () => {
     form.name = ''
-    form.difficulty = ''
-    form.difficulty_sign = ''
+    form.combinedDifficulty = null
     form.anchor_point = null
     form.location = ''
     form.type = ''
@@ -275,8 +302,7 @@ const loadFromRoute = (route: RouteRecord) => {
     originalAnchorPointIsZero.value = Number(route.anchor_point) === 0
 
     form.name = route.name ?? ''
-    form.difficulty = String(route.difficulty ?? '')
-    form.difficulty_sign = toDifficultySignInternal(route.difficulty_sign)
+    form.combinedDifficulty = toCombinedDifficulty(route.difficulty, route.difficulty_sign)
     form.anchor_point = route.anchor_point ?? null
     form.location = route.location ?? ''
     form.type = route.type ?? ''
@@ -315,6 +341,7 @@ function close() {
 const emit = defineEmits<{
     saved: [payload: Partial<RouteRecord>]
     closed: []
+    deleted: [id: string]
 }>()
 
 watch(dialogOpen, (val) => {
@@ -328,17 +355,12 @@ async function submit() {
 
     saving.value = true
     try {
-        const signValue =
-            form.difficulty_sign === '+'
-                ? true
-                : form.difficulty_sign === '-'
-                  ? false
-                  : null
+        const { difficulty, difficulty_sign } = parseCombinedDifficulty(form.combinedDifficulty)
 
         const payload: Partial<RouteRecord> = {
             name: form.name,
-            difficulty: Number(form.difficulty),
-            difficulty_sign: signValue,
+            difficulty: difficulty ?? undefined,
+            difficulty_sign,
             anchor_point: form.anchor_point,
             location: form.location,
             type: form.type,
@@ -361,6 +383,22 @@ async function submit() {
         console.error('Failed to save route:', error)
     } finally {
         saving.value = false
+    }
+}
+
+async function deleteRoute() {
+    if (!editRouteId.value) return
+    deleting.value = true
+    try {
+        await pb.collection('routes').delete(editRouteId.value)
+        const id = editRouteId.value
+        deleteDialog.value = false
+        close()
+        emit('deleted', id)
+    } catch (error) {
+        console.error('Failed to delete route:', error)
+    } finally {
+        deleting.value = false
     }
 }
 

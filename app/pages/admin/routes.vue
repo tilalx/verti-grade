@@ -2,32 +2,38 @@
     <v-container fluid class="route-manager">
         <NotificationsNewVersionAvailable />
 
-        <v-row align="start" class="mb-2">
-            <v-col>
-                <h1>{{ $t('routes.dashboard') }}</h1>
-            </v-col>
-            <v-col cols="auto" class="d-flex pt-3 ga-2">
-                <v-btn
-                    color="primary"
-                    variant="tonal"
-                    prepend-icon="mdi-routes"
-                    @click="routeFormRef.open()"
-                >
-                    {{ $t('climbing.create') }}
-                </v-btn>
-
-                <v-btn
-                    color="primary"
-                    variant="tonal"
-                    prepend-icon="mdi-file-import-outline"
-                    @click="importRouteRef.open()"
-                >
-                    {{ $t('actions.import') }}
-                </v-btn>
+        <v-row class="mb-4">
+            <v-col
+                cols="12"
+                class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4"
+            >
+                <h1 class="route-manager__page-title">
+                    {{ $t('routes.dashboard') }}
+                </h1>
+                <div class="d-flex align-center ga-2">
+                    <v-btn
+                        color="primary"
+                        variant="tonal"
+                        rounded="lg"
+                        prepend-icon="mdi-routes"
+                        @click="routeFormRef.open()"
+                    >
+                        {{ $t('climbing.create') }}
+                    </v-btn>
+                    <v-btn
+                        color="primary"
+                        variant="tonal"
+                        rounded="lg"
+                        prepend-icon="mdi-file-import-outline"
+                        @click="importRouteRef.open()"
+                    >
+                        {{ $t('actions.import') }}
+                    </v-btn>
+                </div>
             </v-col>
         </v-row>
 
-        <RouteFormDialog ref="routeFormRef" @saved="reloadRoutes" />
+        <RouteFormDialog ref="routeFormRef" @saved="reloadRoutes" @deleted="reloadRoutes" />
         <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
 
         <v-row>
@@ -223,10 +229,8 @@
                                 v-for="creator in item.creator"
                                 :key="creator"
                                 size="small"
-                                class="route-manager__creator-chip"
-                            >
-                                {{ creator }}
-                            </v-chip>
+                                class="ma-0"
+                            >{{ creator }}</v-chip>
                         </div>
                     </template>
                     <template #item.score="{ item }">
@@ -271,185 +275,25 @@
                             :key="route.id"
                             cols="12"
                         >
-                            <v-card
-                                variant="outlined"
-                                class="route-manager__mobile-card"
+                            <RouteCard
+                                :route="route"
+                                selectable
+                                :model-value="route.selected"
+                                @update:model-value="
+                                    updateRouteSelection(route, $event)
+                                "
                             >
-                                <div class="route-manager__mobile-difficulty">
-                                    {{ formatDifficulty(route) }}
-                                </div>
-                                <div class="route-manager__mobile-header">
-                                    <v-checkbox
-                                        :model-value="route.selected"
-                                        color="primary"
-                                        hide-details
-                                        density="compact"
-                                        @update:modelValue="
-                                            updateRouteSelection(route, $event)
-                                        "
-                                    />
-                                    <v-avatar
-                                        :color="route.color"
-                                        size="32"
-                                        class="mr-3"
-                                    />
-                                    <div class="route-manager__mobile-name">
-                                        <span
-                                            class="route-manager__mobile-name-text"
-                                            >{{ route.name }}</span
-                                        >
-                                        <div
-                                            class="route-manager__mobile-name-meta"
-                                        >
-                                            <v-icon
-                                                v-if="route.has_ratings"
-                                                color="yellow-darken-2"
-                                                size="small"
-                                            >
-                                                mdi-star-circle
-                                            </v-icon>
-                                            <v-chip
-                                                v-if="route.archived"
-                                                size="x-small"
-                                                variant="outlined"
-                                                class="ml-2"
-                                            >
-                                                {{ $t('filter.archived') }}
-                                            </v-chip>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <v-divider class="my-2" />
-
-                                <v-list density="compact" class="py-0">
-                                    <v-list-item
-                                        :subtitle="route.comment || '—'"
-                                    >
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-comment-text-outline</v-icon
-                                            >
-                                        </template>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-account-hard-hat</v-icon
-                                            >
-                                        </template>
-                                        <div
-                                            class="route-manager__mobile-creators"
-                                        >
-                                            <v-chip
-                                                v-for="creator in route.creator"
-                                                :key="creator"
-                                                size="x-small"
-                                            >
-                                                {{ creator }}
-                                            </v-chip>
-                                        </div>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-map-marker</v-icon
-                                            >
-                                        </template>
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                        >
-                                            {{ $t('climbing.location') }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>{{
-                                            route.location || '—'
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-shape</v-icon
-                                            >
-                                        </template>
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                        >
-                                            {{ $t('climbing.type') }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>{{
-                                            route.type || '—'
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-pound</v-icon
-                                            >
-                                        </template>
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                        >
-                                            {{ $t('climbing.anchor_point') }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>{{
-                                            formatAnchorPoint(
-                                                route.anchor_point,
-                                            )
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-star</v-icon
-                                            >
-                                        </template>
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                        >
-                                            {{ $t('ratings.score') }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>{{
-                                            formatScore(route)
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-
-                                    <v-list-item>
-                                        <template #prepend>
-                                            <v-icon size="small" class="mr-3"
-                                                >mdi-calendar-month</v-icon
-                                            >
-                                        </template>
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                        >
-                                            {{ $t('routes.screwed_at') }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>{{
-                                            formatDate(route.screw_date)
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-                                </v-list>
-
-                                <v-card-actions
-                                    class="pa-2 route-manager__mobile-actions"
-                                >
-                                    <v-spacer />
+                                <template #actions>
+                                    <RouteDetails :route_id="route.id" />
                                     <v-btn
                                         icon
                                         size="small"
-                                        class="mr-1"
                                         @click="routeFormRef.open(route)"
                                     >
                                         <v-icon>mdi-pencil</v-icon>
                                     </v-btn>
-                                    <RouteDetails :route_id="route.id" />
-                                </v-card-actions>
-                            </v-card>
+                                </template>
+                            </RouteCard>
                         </v-col>
                     </v-row>
 
@@ -980,6 +824,13 @@ useHead(() => ({
     padding-bottom: 64px;
 }
 
+.route-manager__page-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: rgb(var(--v-theme-on-background));
+}
+
 .route-manager__actions {
     display: flex;
     flex-wrap: wrap;
@@ -1015,12 +866,6 @@ useHead(() => ({
     gap: 4px;
 }
 
-.route-manager__creator-chip {
-    max-width: 120px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
 .route-manager__row-actions {
     display: flex;
     gap: 4px;
@@ -1031,55 +876,6 @@ useHead(() => ({
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.route-manager__mobile-card {
-    position: relative;
-    overflow: hidden;
-}
-
-.route-manager__mobile-difficulty {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-weight: 600;
-    color: rgba(var(--v-theme-on-surface), 0.6);
-}
-
-.route-manager__mobile-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 16px 8px;
-}
-
-.route-manager__mobile-name {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.route-manager__mobile-name-text {
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.route-manager__mobile-name-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.route-manager__mobile-creators {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.route-manager__mobile-actions {
-    justify-content: flex-end;
-    gap: 8px;
 }
 
 .route-manager__mobile-empty {

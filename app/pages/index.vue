@@ -100,8 +100,8 @@
                                 v-for="c in item.creator"
                                 :key="c"
                                 size="small"
-                                >{{ c }}</v-chip
-                            >
+                                class="ma-0"
+                            >{{ c }}</v-chip>
                         </div>
                     </template>
                     <template #item.screw_date="{ item }">
@@ -120,113 +120,23 @@
                             :key="route.id"
                             cols="12"
                         >
-                            <v-card
-                                variant="outlined"
-                                class="mobile-route-card"
-                            >
-                                <div
-                                    class="route-difficulty-display text-h5 font-weight-bold"
-                                >
-                                    {{ formatDifficulty(route) }}
-                                </div>
-                                <v-list-item class="pt-3 pb-2 pr-12">
-                                    <template #prepend>
-                                        <v-avatar
-                                            :color="route.color"
-                                            size="32"
-                                            class="mr-4"
-                                        />
-                                    </template>
-                                    <v-list-item-title
-                                        class="text-h6 font-weight-bold d-flex align-center"
-                                    >
-                                        {{ route.name }}
-                                        <v-icon
-                                            v-if="route.has_ratings"
-                                            color="yellow-darken-2"
-                                            size="small"
-                                            class="ml-2"
-                                            >mdi-star-circle</v-icon
-                                        >
-                                    </v-list-item-title>
-                                </v-list-item>
-                                <v-divider />
-                                <v-list density="compact" class="py-1">
-                                    <v-list-item
-                                        :subtitle="route.comment || '—'"
-                                    >
-                                        <template #prepend
-                                            ><v-icon size="small" class="mr-3"
-                                                >mdi-comment-text-outline</v-icon
-                                            ></template
-                                        >
-                                    </v-list-item>
-                                    <v-list-item>
-                                        <template #prepend
-                                            ><v-icon size="small" class="mr-3"
-                                                >mdi-account-hard-hat</v-icon
-                                            ></template
-                                        >
-                                        <div class="d-flex ga-1 flex-wrap mt-1">
-                                            <v-chip
-                                                v-for="c in route.creator"
-                                                :key="c"
-                                                size="x-small"
-                                                >{{ c }}</v-chip
-                                            >
-                                        </div>
-                                    </v-list-item>
-                                    <v-list-item>
-                                        <template #prepend
-                                            ><v-icon size="small" class="mr-3"
-                                                >mdi-pound</v-icon
-                                            ></template
-                                        >
-                                        <v-list-item-title
-                                            class="text-caption text-uppercase"
-                                            >{{
-                                                $t('climbing.anchor_point')
-                                            }}</v-list-item-title
-                                        >
-                                        <v-list-item-subtitle>{{
-                                            formatAnchorPoint(
-                                                route.anchor_point,
-                                            )
-                                        }}</v-list-item-subtitle>
-                                    </v-list-item>
-                                    <v-list-item
-                                        :subtitle="
-                                            formatDate(route.screw_date) || '—'
-                                        "
-                                    >
-                                        <template #prepend
-                                            ><v-icon size="small" class="mr-3"
-                                                >mdi-calendar-month</v-icon
-                                            ></template
-                                        >
-                                    </v-list-item>
-                                </v-list>
-                                <v-card-actions class="pa-2">
-                                    <v-spacer />
+                            <RouteCard :route="route">
+                                <template #actions>
                                     <RouteDetails :route_id="route.id" />
-                                </v-card-actions>
-                            </v-card>
+                                </template>
+                            </RouteCard>
                         </v-col>
                     </v-row>
 
-                    <!-- "Load More" Button for Mobile -->
-                    <div
-                        v-if="routes.length < totalItems"
-                        class="text-center pa-4"
-                    >
-                        <v-btn
-                            :loading="loading"
-                            @click="loadMore"
-                            variant="tonal"
+                    <!-- Infinite scroll sentinel -->
+                    <div ref="sentinelRef" class="pa-4 text-center">
+                        <v-progress-circular
+                            v-if="loading && routes.length > 0"
+                            indeterminate
+                            size="24"
+                            width="2"
                             color="primary"
-                        >
-                            {{ $t('actions.load_more') }}
-                        </v-btn>
+                        />
                     </div>
                 </div>
 
@@ -251,7 +161,7 @@
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
-import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+import type { AverageRatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import {
     formatDifficulty,
     formatAnchorPoint,
@@ -308,6 +218,7 @@ const tableOptions = reactive<TableOptions>({
 const loading = ref(true)
 const routes = ref<RouteListItem[]>([])
 const totalItems = ref(0)
+const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 
 const headersDesktop: Array<{
     title: string
@@ -358,33 +269,34 @@ async function loadRoutes(
             )
 
         const routeIds = res.items.map((route) => route.id)
-        let ratedRouteIds = new Set<string>()
+        let averageMap = new Map<string, number | null>()
 
         if (routeIds.length > 0) {
-            const ratingsFilter = routeIds
-                .map((id) => `route_id = "${id}"`)
-                .join(' || ')
-            const ratingsRecords = await pb
-                .collection('ratings')
-                .getFullList<RatingRecord>({
-                    filter: ratingsFilter,
-                    fields: 'route_id',
-                })
-
-            const ids = ratingsRecords
-                .map((rating) => rating.route_id)
-                .filter(
-                    (routeId): routeId is string =>
-                        typeof routeId === 'string' && routeId.length > 0,
+            try {
+                const filter = routeIds.map((id) => `id = "${id}"`).join(' || ')
+                const avgRecords = await pb
+                    .collection('averageRating')
+                    .getFullList<AverageRatingRecord>({
+                        filter,
+                        fields: 'id,average_rating',
+                    })
+                averageMap = new Map(
+                    avgRecords.map((r) => [r.id, r.average_rating ?? null]),
                 )
-            ratedRouteIds = new Set(ids)
+            } catch {
+                // ratings are optional — don't block route display
+            }
         }
 
-        const newRoutes: RouteListItem[] = res.items.map((route) => ({
-            ...route,
-            creator: normalizeCreators(route.creator),
-            has_ratings: ratedRouteIds.has(route.id),
-        }))
+        const newRoutes: RouteListItem[] = res.items.map((route) => {
+            const avg = averageMap.get(route.id)
+            return {
+                ...route,
+                creator: normalizeCreators(route.creator),
+                has_ratings: typeof avg === 'number' && !Number.isNaN(avg),
+                score: typeof avg === 'number' ? avg : undefined,
+            }
+        })
 
         if (meta.append) {
             routes.value = routes.value.concat(newRoutes)
@@ -401,8 +313,22 @@ async function loadRoutes(
 }
 
 function loadMore() {
+    if (loading.value || routes.value.length >= totalItems.value) return
     tableOptions.page += 1
     void loadRoutes({}, { append: true })
+}
+
+let scrollObserver: IntersectionObserver | null = null
+
+function setupScrollObserver() {
+    if (!sentinelRef.value) return
+    scrollObserver = new IntersectionObserver(
+        (entries) => {
+            if (entries[0]?.isIntersecting) loadMore()
+        },
+        { rootMargin: '200px' },
+    )
+    scrollObserver.observe(sentinelRef.value)
 }
 
 let debounceT: ReturnType<typeof setTimeout> | null = null
@@ -427,6 +353,7 @@ onMounted(async () => {
             void loadRoutes({}, { append: false })
         }),
     ])
+    setupScrollObserver()
 })
 
 onBeforeUnmount(() => {
@@ -434,12 +361,14 @@ onBeforeUnmount(() => {
         clearTimeout(debounceT)
         debounceT = null
     }
+    scrollObserver?.disconnect()
 })
 
 function formatDate(date: string | null | undefined) {
     if (!date) return ''
-    return new Date(date).toLocaleDateString('de-DE')
+    return new Date(date).toLocaleDateString()
 }
+
 </script>
 
 <style scoped>
@@ -457,21 +386,8 @@ function formatDate(date: string | null | undefined) {
     white-space: nowrap;
 }
 .creator-chips {
-    max-height: 40px;
-    overflow: hidden;
     display: flex;
-    gap: 4px;
     flex-wrap: wrap;
-}
-.mobile-route-card {
-    position: relative;
-    overflow: hidden;
-}
-.route-difficulty-display {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    z-index: 1;
-    color: rgba(var(--v-theme-on-surface), 0.6);
+    gap: 4px;
 }
 </style>

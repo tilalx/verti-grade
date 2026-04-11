@@ -1,8 +1,8 @@
 <template>
     <v-container fluid class="comments-page">
         <!-- ── Page Header + inline stats ────────────────────────────────── -->
-        <div class="d-flex align-center justify-space-between mb-3">
-            <h1 class="text-h5 font-weight-bold">{{ t('routes.comments') }}</h1>
+        <div class="d-flex align-center justify-space-between mb-4">
+            <h1 class="comments-page__title">{{ t('routes.comments') }}</h1>
         </div>
 
         <!-- Stats: horizontal scroll on mobile, row on desktop -->
@@ -247,171 +247,14 @@
                 sm="6"
                 lg="4"
             >
-                <v-card
-                    rounded="xl"
-                    border
-                    flat
-                    class="comment-card d-flex flex-column"
-                    :class="{
-                        'comment-card--selected': selectedMap[comment.id],
-                    }"
+                <CommentsCard
+                    :comment="comment"
+                    selectable
+                    :selected="!!selectedMap[comment.id]"
+                    show-route
+                    @toggle-select="toggleSelect(comment.id)"
                 >
-                    <!-- Header: avatar + user + date + star rating -->
-                    <v-card-item class="pb-1 pt-3">
-                        <template #prepend>
-                            <v-avatar
-                                size="38"
-                                :color="
-                                    selectedMap[comment.id]
-                                        ? 'primary'
-                                        : comment.userAvatar
-                                          ? undefined
-                                          : avatarColor(comment.userName)
-                                "
-                                class="select-avatar"
-                                :title="
-                                    t(
-                                        selectedMap[comment.id]
-                                            ? 'comments.deselect'
-                                            : 'comments.select',
-                                    )
-                                "
-                                @click="toggleSelect(comment.id)"
-                            >
-                                <v-icon
-                                    v-if="selectedMap[comment.id]"
-                                    color="white"
-                                    size="20"
-                                    >mdi-check</v-icon
-                                >
-                                <v-img
-                                    v-else-if="comment.userAvatar"
-                                    :src="comment.userAvatar"
-                                    cover
-                                />
-                                <span
-                                    v-else
-                                    class="text-caption font-weight-bold text-white"
-                                >
-                                    {{ initials(comment.userName) }}
-                                </span>
-                            </v-avatar>
-                        </template>
-
-                        <v-card-title
-                            class="text-body-2 font-weight-semibold px-0 py-0"
-                            style="line-height: 1.3"
-                        >
-                            {{ comment.userName }}
-                        </v-card-title>
-                        <v-card-subtitle
-                            class="text-caption px-0 py-0"
-                            style="opacity: 0.7"
-                        >
-                            {{ formatDate(comment.created) }}
-                        </v-card-subtitle>
-
-                        <template #append>
-                            <v-rating
-                                :model-value="comment.rating"
-                                readonly
-                                density="compact"
-                                size="small"
-                                active-color="yellow-darken-2"
-                                color="grey-lighten-2"
-                            />
-                        </template>
-                    </v-card-item>
-
-                    <!-- Route name + location + difficulty chips -->
-                    <div class="px-4 pb-2 d-flex flex-wrap align-center ga-1">
-                        <NuxtLink
-                            :to="`/route?id=${comment.expand?.route_id?.id}`"
-                            class="text-body-2 font-weight-medium text-primary text-decoration-none route-link"
-                        >
-                            <v-icon size="13" class="mb-1 mr-1"
-                                >mdi-routes</v-icon
-                            >{{ comment.routeName }}
-                        </NuxtLink>
-                        <v-chip
-                            v-if="comment.location"
-                            size="x-small"
-                            variant="tonal"
-                            class="ml-1"
-                        >
-                            {{ comment.location }}
-                        </v-chip>
-                        <v-chip
-                            v-if="comment.difficulty != null"
-                            size="x-small"
-                            color="primary"
-                            variant="tonal"
-                        >
-                            {{ formatDifficulty(comment) }}
-                        </v-chip>
-                    </div>
-
-                    <v-divider class="mx-4" />
-
-                    <!-- Comment body (collapsible) -->
-                    <v-card-text class="py-3 flex-grow-1">
-                        <p
-                            class="text-body-2 comment-text mb-0"
-                            :class="{
-                                'comment-collapsed': !expandedIds.has(
-                                    comment.id,
-                                ),
-                            }"
-                        >
-                            {{ comment.comment }}
-                        </p>
-                        <v-btn
-                            v-if="isLong(comment.comment)"
-                            variant="text"
-                            density="compact"
-                            size="x-small"
-                            :color="
-                                expandedIds.has(comment.id)
-                                    ? 'default'
-                                    : 'primary'
-                            "
-                            class="mt-1 px-0 text-none"
-                            @click="toggleExpand(comment.id)"
-                        >
-                            {{
-                                expandedIds.has(comment.id)
-                                    ? t('comments.showLess')
-                                    : t('comments.showMore')
-                            }}
-                        </v-btn>
-                    </v-card-text>
-
-                    <!-- Actions -->
-                    <v-card-actions class="pt-0 px-2 pb-2">
-                        <v-btn
-                            size="small"
-                            variant="text"
-                            density="compact"
-                            class="text-none"
-                            :color="
-                                selectedMap[comment.id] ? 'primary' : 'default'
-                            "
-                            :prepend-icon="
-                                selectedMap[comment.id]
-                                    ? 'mdi-check-circle'
-                                    : 'mdi-circle-outline'
-                            "
-                            @click="toggleSelect(comment.id)"
-                        >
-                            {{
-                                t(
-                                    selectedMap[comment.id]
-                                        ? 'comments.deselect'
-                                        : 'comments.select',
-                                )
-                            }}
-                        </v-btn>
-                        <v-spacer />
+                    <template #actions>
                         <v-btn
                             icon
                             size="small"
@@ -427,8 +270,8 @@
                             :commentId="comment.id"
                             @comment-deleted="onCommentDeleted(comment.id)"
                         />
-                    </v-card-actions>
-                </v-card>
+                    </template>
+                </CommentsCard>
             </v-col>
         </v-row>
 
@@ -513,9 +356,6 @@ const selectedDifficulty = ref(null)
 const selectedRating = ref(0) // 0 = sentinel for "all ratings"
 const dateFilter = ref('')
 const sortOrder = ref('newest')
-
-// Expanded set (recreated on mutation to stay reactive)
-const expandedIds = ref(new Set())
 
 // Selection: reactive object { [id]: true } — Vue tracks per-key access,
 // so toggling one ID only re-renders that one card instead of all of them.
@@ -632,8 +472,10 @@ function buildSort() {
 function mapComment(c) {
     return {
         ...c,
+        routeId: c.expand?.route_id?.id ?? null,
         routeName: c.expand?.route_id?.name ?? 'N/A',
         location: c.expand?.route_id?.location ?? null,
+        difficultyLabel: c.difficulty != null ? formatDifficulty(c) : null,
         userName:
             c.expand?.user?.name ||
             c.expand?.user?.username ||
@@ -777,60 +619,6 @@ function clearSelection() {
     Object.keys(selectedMap).forEach((k) => delete selectedMap[k])
 }
 
-// ── Expand/collapse helpers ────────────────────────────────────────────────
-
-const LONG_THRESHOLD = 200
-
-function isLong(text) {
-    return typeof text === 'string' && text.length > LONG_THRESHOLD
-}
-
-function toggleExpand(id) {
-    const next = new Set(expandedIds.value)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    expandedIds.value = next
-}
-
-// ── Display helpers ────────────────────────────────────────────────────────
-
-function initials(name) {
-    if (!name) return '?'
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? '')
-        .join('')
-}
-
-const AVATAR_COLORS = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'deep-purple',
-    'teal',
-    'indigo',
-    'pink',
-    'cyan',
-    'orange',
-]
-
-function avatarColor(name) {
-    if (!name) return 'primary'
-    const code = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-    return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function formatDate(date) {
-    if (!date) return '—'
-    return new Date(date).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    })
-}
-
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
 const { subscribe } = usePbSubscription()
@@ -885,6 +673,13 @@ onMounted(async () => {
     max-width: 100%;
 }
 
+.comments-page__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: rgb(var(--v-theme-on-background));
+}
+
 /* ── Stats horizontal scroll ─────────────────────────────────────────── */
 .stats-scroll {
     overflow-x: auto;
@@ -911,49 +706,6 @@ onMounted(async () => {
         flex: 1 1 0;
         min-width: 0;
     }
-}
-
-/* Card selection highlight */
-.comment-card {
-    transition:
-        border-color 0.15s ease,
-        box-shadow 0.15s ease;
-}
-
-.comment-card--selected {
-    border-color: rgb(var(--v-theme-primary)) !important;
-    box-shadow: 0 0 0 2px rgba(var(--v-theme-primary), 0.18) !important;
-}
-
-/* Avatar turns into a toggle button */
-.select-avatar {
-    cursor: pointer;
-    transition:
-        background-color 0.15s ease,
-        opacity 0.15s ease;
-}
-
-.select-avatar:hover {
-    opacity: 0.85;
-}
-
-/* Route name link */
-.route-link:hover {
-    text-decoration: underline !important;
-}
-
-/* Comment text: collapsed = 4 lines max */
-.comment-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-    line-height: 1.5;
-}
-
-.comment-collapsed {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 /* Bulk action bar that slides in at the bottom of the filter card */

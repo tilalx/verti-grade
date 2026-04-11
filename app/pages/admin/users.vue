@@ -1,8 +1,8 @@
 <template>
     <v-container fluid class="users-page">
         <!-- ── Page Header ───────────────────────────────────────────────── -->
-        <div class="d-flex align-center justify-space-between mb-3">
-            <h1 class="text-h5 font-weight-bold">{{ t('users.title') }}</h1>
+        <div class="d-flex align-center justify-space-between mb-4">
+            <h1 class="users-page__title">{{ t('users.title') }}</h1>
             <UserCreateUser @user-created="reloadUsers" />
         </div>
 
@@ -466,6 +466,13 @@ onMounted(async () => {
 <style scoped>
 .users-page {
     max-width: 100%;
+}
+
+.users-page__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: rgb(var(--v-theme-on-background));
 }
 
 .user-card {

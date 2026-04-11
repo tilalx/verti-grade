@@ -135,6 +135,7 @@
         "searchRouteName": "Search",
         "type": "Type",
         "archived": "Archived",
+        "active": "Active",
         "comment": "Comment",
         "creators": "Creators"
     },
@@ -147,7 +148,9 @@
         "difficulty": "Difficulty",
         "score": "Score",
         "comment": "Comment",
-        "climber_reviews": "Climber Reviews"
+        "climber_reviews": "Climber Reviews",
+        "felt": "felt",
+        "perceived_difficulty": "Perceived difficulty"
     },
     "table": {
         "actions": "Actions",

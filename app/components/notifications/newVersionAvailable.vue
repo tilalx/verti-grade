@@ -1,6 +1,6 @@
 <template>
-    <v-container>
-        <v-row justify="center" v-if="newVersionAvailable">
+    <v-container v-if="newVersionAvailable">
+        <v-row justify="center">
             <v-col cols="auto">
                 <v-alert type="info" dense>
                     {{ $t('notifications.newVersionAvailable') }}

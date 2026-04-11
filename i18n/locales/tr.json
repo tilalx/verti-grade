@@ -135,6 +135,7 @@
         "searchRouteName": "Ara",
         "type": "Tür",
         "archived": "Arşivlendi",
+        "active": "Aktif",
         "comment": "Yorum",
         "creators": "Yaratıcılar"
     },
@@ -147,7 +148,9 @@
         "difficulty": "Zorluk",
         "score": "Puan",
         "comment": "Yorum",
-        "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri"
+        "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri",
+        "felt": "hissedilen",
+        "perceived_difficulty": "Hissedilen zorluk"
     },
     "table": {
         "actions": "İşlemler",

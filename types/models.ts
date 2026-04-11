@@ -41,6 +41,7 @@ export interface RouteListItem extends Omit<RouteRecord, 'creator'> {
     creator: string[]
     has_ratings?: boolean
     average_rating?: number | null
+    score?: number | null
 }
 
 export interface RatingRecord extends BaseRecord {

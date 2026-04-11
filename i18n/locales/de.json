@@ -135,6 +135,7 @@
         "searchRouteName": "Suchen",
         "type": "Typ",
         "archived": "Archiviert",
+        "active": "Aktiv",
         "comment": "Kommentar",
         "creators": "Ersteller"
     },
@@ -147,7 +148,9 @@
         "difficulty": "Schwierigkeitsgrad",
         "score": "Punktzahl",
         "comment": "Kommentar",
-        "climber_reviews": "Kletterer Bewertungen"
+        "climber_reviews": "Kletterer Bewertungen",
+        "felt": "gefühlt",
+        "perceived_difficulty": "Gefühlte Schwierigkeit"
     },
     "table": {
         "actions": "Aktionen",

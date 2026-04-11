@@ -215,88 +215,13 @@
 
                 <!-- Review list -->
                 <template v-if="reviews.length">
-                    <v-card
-                        v-for="(review, idx) in reviews"
+                    <CommentsCard
+                        v-for="review in reviews"
                         :key="review.id"
-                        rounded="xl"
-                        border
-                        flat
-                        :class="[
-                            'review-card',
-                            'mb-3',
-                            { 'review-card--first': idx === 0 },
-                        ]"
-                    >
-                        <div class="pa-4">
-                            <!-- Header: avatar + name + time -->
-                            <div class="d-flex align-center mb-3">
-                                <v-avatar
-                                    size="40"
-                                    :color="
-                                        review.userAvatar
-                                            ? undefined
-                                            : avatarColor(review.userName)
-                                    "
-                                    class="mr-3"
-                                >
-                                    <v-img
-                                        v-if="review.userAvatar"
-                                        :src="review.userAvatar"
-                                        cover
-                                    />
-                                    <span
-                                        v-else
-                                        class="text-caption font-weight-bold text-white"
-                                    >
-                                        {{ initials(review.userName) }}
-                                    </span>
-                                </v-avatar>
-                                <div class="flex-grow-1">
-                                    <div
-                                        class="text-body-2 font-weight-semibold"
-                                    >
-                                        {{ review.userName }}
-                                    </div>
-                                    <div
-                                        class="text-caption text-medium-emphasis"
-                                    >
-                                        {{ timeAgo(review.created) }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Rating + difficulty row -->
-                            <div class="d-flex align-center ga-3 mb-2">
-                                <v-rating
-                                    v-if="review.rating"
-                                    :model-value="review.rating"
-                                    readonly
-                                    density="compact"
-                                    size="18"
-                                    active-color="yellow-darken-2"
-                                    color="grey-lighten-2"
-                                />
-                                <v-chip
-                                    v-if="review.difficulty"
-                                    size="x-small"
-                                    color="primary"
-                                    variant="tonal"
-                                    class="font-weight-bold"
-                                >
-                                    {{ review.difficulty }}
-                                </v-chip>
-                            </div>
-
-                            <!-- Comment -->
-                            <p
-                                v-if="review.comment"
-                                class="text-body-2 mb-0"
-                                style="line-height: 1.5"
-                            >
-                                {{ review.comment }}
-                            </p>
-                        </div>
-                    </v-card>
+                        :comment="review"
+                        date-format="relative"
+                        class="mb-3"
+                    />
                 </template>
 
                 <!-- Empty state -->
@@ -346,7 +271,7 @@ const metadata = ref<RouteListItem | null>(null)
 interface ReviewDisplay {
     id: string
     rating: number | null
-    difficulty: string
+    difficultyLabel: string
     comment: string | null
     created: string
     userName: string
@@ -409,11 +334,11 @@ const avgRating = computed(() => {
 })
 
 const avgPerceivedDifficulty = computed(() => {
-    const withDiff = reviews.value.filter((r) => r.difficulty)
+    const withDiff = reviews.value.filter((r) => r.difficultyLabel)
     if (!withDiff.length) return null
     const counts: Record<string, number> = {}
     withDiff.forEach((r) => {
-        counts[r.difficulty] = (counts[r.difficulty] ?? 0) + 1
+        counts[r.difficultyLabel] = (counts[r.difficultyLabel] ?? 0) + 1
     })
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
 })
@@ -473,7 +398,7 @@ function mapReview(
     return {
         id: r.id,
         rating: typeof r.rating === 'number' ? r.rating : null,
-        difficulty: formatDifficulty(r),
+        difficultyLabel: formatDifficulty(r),
         comment: r.comment ?? null,
         created: r.created ?? '',
         userName,
@@ -483,53 +408,6 @@ function mapReview(
 
 function onReviewSaved() {
     void getAllRouteRatings()
-}
-
-// ── Display helpers ────────────────────────────────────────────────────────
-
-const AVATAR_COLORS = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'deep-purple',
-    'teal',
-    'indigo',
-    'pink',
-    'cyan',
-    'orange',
-]
-
-function avatarColor(name: string): string {
-    if (!name) return 'primary'
-    const code = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-    return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function initials(name: string): string {
-    if (!name) return '?'
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? '')
-        .join('')
-}
-
-function timeAgo(dateStr: string): string {
-    if (!dateStr) return ''
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const mins = Math.floor(diff / 60_000)
-    const hours = Math.floor(diff / 3_600_000)
-    const days = Math.floor(diff / 86_400_000)
-    if (mins < 1) return t('time.justNow')
-    if (mins < 60) return t('time.minutesAgo', { n: mins })
-    if (hours < 24) return t('time.hoursAgo', { n: hours })
-    if (days < 30) return t('time.daysAgo', { n: days })
-    return new Date(dateStr).toLocaleDateString(locale.value, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    })
 }
 
 function isLightColor(hex: string): boolean {
@@ -638,11 +516,6 @@ onMounted(async () => {
 
 .stats-card {
     background: rgb(var(--v-theme-surface)) !important;
-}
-
-/* ── Review cards ────────────────────────────────────────────────────────── */
-.review-card {
-    transition: transform 0.15s ease;
 }
 
 /* ── Empty state icon animation ──────────────────────────────────────────── */

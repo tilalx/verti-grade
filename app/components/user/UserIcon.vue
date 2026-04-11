@@ -25,7 +25,7 @@
         </template>
 
         <v-card rounded="xl" elevation="3" border>
-            <v-list density="compact" nav class="py-2">
+            <v-list density="compact" :lines="false" nav slim class="py-1">
                 <v-list-item
                     v-for="item in menuItems"
                     :key="item.key"
@@ -33,6 +33,7 @@
                     :title="item.title"
                     :base-color="item.color"
                     :disabled="item.disabled"
+                    density="compact"
                     rounded="lg"
                     @click="handleAction(item)"
                 />
