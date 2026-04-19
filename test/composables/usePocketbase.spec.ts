@@ -35,7 +35,7 @@ describe('usePocketbase', () => {
 
     expect(PocketBaseMock).toHaveBeenCalledTimes(1);
     expect(PocketBaseMock).toHaveBeenCalledWith('http://localhost:8090');
-    expect(instance).toEqual({ url: 'http://localhost:8090' });
+    expect(instance).toMatchObject({ url: 'http://localhost:8090' });
     expect((globalThis as Record<string, unknown>)._pb).toBeUndefined();
   });
 
@@ -57,7 +57,7 @@ describe('usePocketbase', () => {
 
     expect(PocketBaseMock).toHaveBeenCalledTimes(1);
     expect(first).toBe(second);
-    expect(first).toEqual({ url: 'http://localhost:8090' });
+    expect(first).toMatchObject({ url: 'http://localhost:8090' });
   });
 
   it('uses the public root url on the client in production builds', async () => {

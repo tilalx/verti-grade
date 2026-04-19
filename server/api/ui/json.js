@@ -1,8 +1,21 @@
-import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js'
+import { eventHandler, getQuery, readBody, createError, getHeader } from 'h3'
+import { createAuthedPocketBase } from '../../utils/pb-auth.js'
+import { resolveTenantFromHost } from '../../utils/tenant.ts'
+
+const ID_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/
+
+function validateId(id) {
+    return typeof id === 'string' && ID_PATTERN.test(id)
+}
 
 export default eventHandler(async (event) => {
-    const pb = createPocketBase()
+    const pb = createAuthedPocketBase(event)
+
+    const host = getHeader(event, 'host') ?? ''
+    const tenant = await resolveTenantFromHost(host)
+    if (!tenant?.id) {
+        return createError({ statusCode: 400, statusMessage: 'Tenant not resolved.' })
+    }
 
     try {
         const ids = await resolveRouteIds(event)
@@ -18,12 +31,15 @@ export default eventHandler(async (event) => {
             collection: 'routes',
             ids: uniqueIds,
             field: 'id',
+            tenantId: tenant.id,
             requestKey: 'export-json-routes',
         })
+        const validRouteIds = routes.map((r) => r.id)
         const ratings = await fetchRecordsByIds(pb, {
             collection: 'ratings',
-            ids: uniqueIds,
+            ids: validRouteIds,
             field: 'route_id',
+            tenantId: tenant.id,
             requestKey: 'export-json-ratings',
         })
 
@@ -68,7 +84,7 @@ async function resolveRouteIds(event) {
         if (body && Array.isArray(body.ids)) {
             return body.ids
                 .map((value) => (typeof value === 'string' ? value.trim() : ''))
-                .filter(Boolean)
+                .filter((id) => validateId(id))
         }
     } catch (error) {
         // ignore body parsing errors and fall back to query params
@@ -79,21 +95,22 @@ async function resolveRouteIds(event) {
         return params.id
             .split(',')
             .map((value) => value.trim())
-            .filter(Boolean)
+            .filter((id) => validateId(id))
     }
 
     return []
 }
 
-function buildFilter(ids, field) {
+function buildFilter(ids, field, tenantId) {
     if (ids.length === 0) {
         return ''
     }
-    return ids.map((id) => `${field} = "${id}"`).join(' || ')
+    const idFilter = ids.map((id) => `${field} = "${id}"`).join(' || ')
+    return tenantId ? `(${idFilter}) && tenant_id = "${tenantId}"` : idFilter
 }
 
 async function fetchRecordsByIds(pb, options) {
-    const { collection, ids, field, requestKey } = options
+    const { collection, ids, field, tenantId, requestKey } = options
     if (ids.length === 0) {
         return []
     }
@@ -101,7 +118,7 @@ async function fetchRecordsByIds(pb, options) {
     const chunks = chunk(ids, 25)
     const requests = chunks.map((chunkIds, index) => {
         return pb.collection(collection).getFullList({
-            filter: buildFilter(chunkIds, field),
+            filter: buildFilter(chunkIds, field, tenantId),
             requestKey: `${requestKey}-${index}`,
         })
     })
@@ -120,7 +137,6 @@ function chunk(source, size) {
 
 function mapRoute(route, ratings) {
     return {
-        id: route.id ?? null,
         name: route.name ?? '',
         color: route.color ?? null,
         difficulty: normalizeNumber(route.difficulty),
@@ -131,10 +147,7 @@ function mapRoute(route, ratings) {
         comment: route.comment ?? '',
         creator: normalizeCreators(route.creator),
         screw_date: route.screw_date ?? null,
-        score: route.score ?? null,
         archived: Boolean(route.archived),
-        created: route.created ?? null,
-        updated: route.updated ?? null,
         ratings,
     }
 }
@@ -145,8 +158,6 @@ function mapRating(rating) {
         difficulty: normalizeNumber(rating.difficulty),
         difficulty_sign: rating.difficulty_sign ?? null,
         comment: rating.comment ?? '',
-        created: rating.created ?? null,
-        updated: rating.updated ?? null,
     }
 }
 

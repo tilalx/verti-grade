@@ -5,6 +5,14 @@ const navigateToMock = vi.fn()
 vi.stubGlobal('defineNuxtRouteMiddleware', (handler: Function) => handler)
 vi.stubGlobal('navigateTo', navigateToMock)
 
+const useStateMocks: Record<string, { value: unknown }> = {}
+vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
+    if (!useStateMocks[key]) {
+        useStateMocks[key] = { value: init ? init() : undefined }
+    }
+    return useStateMocks[key]
+})
+
 // usePermissions mock
 const canMock = vi.fn().mockReturnValue(true)
 const ensureLoadedMock = vi.fn().mockResolvedValue(undefined)
@@ -20,6 +28,12 @@ describe('auth middleware', () => {
         canMock.mockReset().mockReturnValue(true)
         ensureLoadedMock.mockReset().mockResolvedValue(undefined)
         process.client = true
+        // Clear useState cache between tests
+        for (const key of Object.keys(useStateMocks)) {
+            delete useStateMocks[key]
+        }
+        // $fetch must return a thenable so .catch() works in the middleware
+        globalThis.$fetch = vi.fn().mockResolvedValue(null)
     })
 
     afterEach(() => {
@@ -46,13 +60,13 @@ describe('auth middleware', () => {
         expect(navigateToMock).not.toHaveBeenCalled()
     })
 
-    it('allows unauthenticated access to the home page', async () => {
+    it('redirects unauthenticated users to /auth/login from home page', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware({ path: '/', meta: {} }, {})
 
-        expect(navigateToMock).not.toHaveBeenCalled()
+        expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
     })
 
     it('does not run on the server side', async () => {

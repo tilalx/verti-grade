@@ -347,6 +347,7 @@ definePageMeta({
 const pb = usePocketbase()
 const { t, locale } = useI18n()
 const { smAndDown } = useDisplay()
+const { tenantFilter, tenantId } = useTenant()
 
 const isMobile = computed(() => smAndDown.value)
 
@@ -424,7 +425,7 @@ const tableHeaders = computed(() => [
 ])
 
 const pbFilter = computed(() => {
-    const parts = []
+    const parts = [tenantFilter.value]
     if (!displayArchived.value) parts.push('archived = false')
     const base = baseFilter.value
     if (base) parts.push(base)
@@ -573,7 +574,7 @@ const loadAverageRatings = async (force = false) => {
     try {
         const list = await pb
             .collection('averageRating')
-            .getFullList({ fields: 'id,average_rating' })
+            .getFullList({ fields: 'id,average_rating', filter: tenantFilter.value || undefined })
         averageRatings.value = new Map(
             list
                 .filter((record) => Boolean(record?.id))
@@ -639,6 +640,7 @@ const loadRoutes = async (options = {}) => {
         routes.value = normalizedRoutes
         totalItems.value = list.totalItems
     } catch (error) {
+        if (error?.isAbort) return
         console.error('Failed to load routes:', error)
     } finally {
         loading.value = false
@@ -701,9 +703,13 @@ const downloadExport = async (endpoint, extension, mimeType) => {
     if (!ids.length) return
 
     try {
+        const token = pb.authStore.token
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify({ ids }),
         })
 

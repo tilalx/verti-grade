@@ -75,6 +75,25 @@ export interface UserRecord extends BaseRecord {
     lastname?: string | null
     avatar?: string | null
     role?: RecordId | null
+    is_super_admin?: boolean
+}
+
+export interface TenantRecord extends BaseRecord {
+    name: string
+    slug: string
+    domains?: string[]
+    active?: boolean
+}
+
+export interface TenantUserRecord extends BaseRecord {
+    tenant_id: RecordId
+    user_id: RecordId
+}
+
+export interface LocationRecord extends BaseRecord {
+    tenant_id: RecordId
+    name: string
+    order?: number
 }
 
 export interface SettingsRecord extends BaseRecord {
