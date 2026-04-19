@@ -253,9 +253,10 @@ const hasAnyAuth = !!(
     authMethods?.password?.enabled || authMethods?.oauth2?.enabled
 )
 
+const { tenantFilter } = useTenant()
 let _settings = null
 try {
-    _settings = await pb.collection('settings').getOne('settings_123456')
+    _settings = await pb.collection('settings').getFirstListItem(tenantFilter.value)
 } catch {}
 const orgName = _settings?.organization_name || ''
 const orgUnitName = _settings?.organization_unit_name || ''
