@@ -223,6 +223,7 @@
 <script setup>
 const pb = usePocketbase()
 const { t } = useI18n()
+const { tenantId } = useTenant()
 
 useHead({
     title: t('page.title.settings'),
@@ -327,7 +328,7 @@ onMounted(async () => {
     // subscribe() returns a Promise<unsubscribe fn> in PocketBase JS SDK v0.21+
     unsubscribe = await pb
         .collection('settings')
-        .subscribe('settings_123456', (e) => {
+        .subscribe(settings.value?.id ?? '', (e) => {
             const d = e.record
             logoPreview.value = pbFileUrl(d, d.page_logo)
             iconPreview.value = pbFileUrl(d, d.page_icon)

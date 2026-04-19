@@ -320,6 +320,7 @@ import { formatDifficulty } from '~/utils/formatting'
 
 const { t } = useI18n()
 const pb = usePocketbase()
+const { tenantFilter } = useTenant()
 
 useHead({
     title: t('page.title.comments'),
@@ -397,10 +398,24 @@ const difficulties = computed(() => [
     })),
 ])
 
+const { tenantId } = useTenant()
+const locationItems = ref([])
+async function loadCommentLocations() {
+    const tid = tenantId.value
+    if (!tid) return
+    try {
+        const records = await pb
+            .collection('locations')
+            .getFullList({ filter: `tenant_id = "${tid}"`, sort: 'order,name', fields: 'name' })
+        locationItems.value = records.map((r) => ({ text: r.name, value: r.name }))
+    } catch {
+        locationItems.value = []
+    }
+}
+onMounted(() => { void loadCommentLocations() })
 const locations = computed(() => [
     { text: t('filter.all'), value: null },
-    { text: 'Hanau', value: 'Hanau' },
-    { text: 'Gelnhausen', value: 'Gelnhausen' },
+    ...locationItems.value,
 ])
 
 const sortOptions = computed(() => [
@@ -433,7 +448,7 @@ const stats = computed(() => {
 // ── Query builders ─────────────────────────────────────────────────────────
 
 function buildFilter(searchTerm) {
-    const parts = []
+    const parts = [tenantFilter.value]
     if (selectedRating.value !== 0)
         parts.push(`rating = ${selectedRating.value}`)
     if (selectedLocation.value)
@@ -493,6 +508,7 @@ const fetchStats = async () => {
     try {
         const data = await pb.collection('ratings').getFullList({
             fields: 'id,rating,created',
+            filter: tenantFilter.value || undefined,
             requestKey: 'commentsStats',
         })
         statsData.value = data
@@ -558,6 +574,11 @@ watch(
     ],
     () => fetchList(),
 )
+
+watch(tenantFilter, () => {
+    fetchList()
+    fetchStats()
+})
 
 // ── Edit ───────────────────────────────────────────────────────────────────
 
@@ -634,6 +655,7 @@ onMounted(async () => {
             totalItems.value = Math.max(0, totalItems.value - 1)
             fetchStats()
         } else if (e.action === 'create') {
+            if (e.record.tenant_id !== tenantId.value) return
             totalItems.value++
             // Prepend to list only when showing newest-first on the first "page"
             if (sortOrder.value === 'newest' && !hasMore.value) {

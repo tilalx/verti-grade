@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "build": "nuxt build",
-        "dev": "concurrently \"nuxt dev\" \"npm run start:db\"",
+        "dev": "concurrently \"nuxt dev --host 0.0.0.0\" \"npm run start:db\"",
         "start:db": "cd pocketbase && ./pocketbase serve --http=0.0.0.0:8090",
         "generate": "nuxt generate",
         "preview": "nuxt preview",

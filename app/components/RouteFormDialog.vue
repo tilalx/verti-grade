@@ -193,6 +193,7 @@ import { required } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
+const { tenantId, tenantFilter } = useTenant()
 
 type VFormHandle = {
     validate: () => Promise<{ valid: boolean }>
@@ -239,7 +240,10 @@ const activePalette = computed(() =>
 
 async function fetchUsedColors() {
     try {
-        const records = await pb.collection('usedColors').getFullList<{ color: string }>({ fields: 'color' })
+        const filter = tenantId.value ? `tenant_id = "${tenantId.value}"` : undefined
+        const records = await pb
+            .collection('usedColors')
+            .getFullList<{ color: string }>({ fields: 'color', filter })
         usedColorsList.value = records.map((r) => r.color).filter(Boolean)
     } catch {
         usedColorsList.value = []
@@ -276,7 +280,22 @@ const form = reactive({
 const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
 
-const locations = ['Hanau', 'Gelnhausen']
+// Dynamic locations from the locations collection (per tenant)
+const locationItems = ref<string[]>([])
+const locations = computed(() => locationItems.value)
+
+async function loadLocations() {
+    const tid = tenantId.value
+    if (!tid) return
+    try {
+        const records = await pb
+            .collection('locations')
+            .getFullList({ filter: `tenant_id = "${tid}"`, sort: 'order,name', fields: 'name' })
+        locationItems.value = records.map((r) => r.name as string)
+    } catch {
+        locationItems.value = []
+    }
+}
 
 const combinedDifficulties = Array.from({ length: 10 }, (_, i) => {
     const d = i + 1
@@ -372,7 +391,7 @@ const getSetters = async () => {
     try {
         const records = await pb
             .collection('routes')
-            .getFullList<RouteRecord>({ fields: 'creator', sort: '-created' })
+            .getFullList<RouteRecord>({ fields: 'creator', sort: '-created', filter: tenantFilter.value || undefined })
         const creators = records.flatMap((r) => normalizeCreators(r.creator))
         setterItems.value = Array.from(new Set(creators.filter(Boolean)))
     } catch (error) {
@@ -388,6 +407,7 @@ async function open(route?: RouteRecord) {
     }
     dialogOpen.value = true
     void getSetters()
+    void loadLocations()
     await fetchUsedColors()
     buildDefaultPalette()
     await nextTick()
