@@ -20,7 +20,6 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 # Now copy the rest needed to build
 COPY pocketbase/main.go ./
-COPY pocketbase/pb_hooks ./pb_hooks
 COPY pocketbase/pb_migrations ./pb_migrations
 
 # Compile to /out; -trimpath makes cache keys stable
