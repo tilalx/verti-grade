@@ -213,7 +213,6 @@
 <script setup>
 const { t } = useI18n()
 const pb = usePocketbase()
-const { tenantId } = useTenant()
 
 useHead({
     title: t('page.title.users'),
@@ -310,42 +309,16 @@ async function fetchList(append = false) {
     }
 
     try {
-        const tid = tenantId.value
-        if (!tid) {
-            users.value = []
-            totalItems.value = 0
-            return
-        }
-
-        // Fetch tenant members via tenant_users junction, then expand user data
-        const filterParts = [`tenant_id = "${tid}"`]
-        const userFilter = buildFilter()
-        if (userFilter) {
-            // Prefix each condition with user_id. to filter via relation
-            filterParts.push(
-                userFilter
-                    .split(' && ')
-                    .map((p) => `user_id.${p}`)
-                    .join(' && '),
-            )
-        }
-
         const result = await pb
-            .collection('tenant_users')
+            .collection('users')
             .getList(page.value, PER_PAGE, {
-                filter: filterParts.join(' && '),
-                expand: 'user_id,user_id.role',
+                sort: '-created',
+                filter: buildFilter(),
+                expand: 'role',
                 requestKey: 'usersList',
             })
-
         totalItems.value = result.totalItems
-        const mapped = result.items
-            .map((tu) => {
-                const u = tu.expand?.user_id
-                if (!u) return null
-                return mapUser(u)
-            })
-            .filter(Boolean)
+        const mapped = result.items.map(mapUser)
         users.value = append ? [...users.value, ...mapped] : mapped
     } catch (err) {
         if (err?.isAbort) return
@@ -401,21 +374,14 @@ function confirmDelete(user) {
 async function deleteUser() {
     deleting.value = true
     try {
-        // Remove the user from this tenant only (tenant_users membership).
-        // Deleting the user record globally cascades across all tenants — never do that here.
-        const tu = await pb
-            .collection('tenant_users')
-            .getFirstListItem(
-                `tenant_id = "${tenantId.value}" && user_id = "${deletingUser.value.id}"`,
-            )
-        await pb.collection('tenant_users').delete(tu.id)
+        await pb.collection('users').delete(deletingUser.value.id)
         users.value = users.value.filter((u) => u.id !== deletingUser.value.id)
         totalItems.value = Math.max(0, totalItems.value - 1)
         showSnackbar(t('users.deleteSuccess'))
         deleteDialog.value = false
         deletingUser.value = null
     } catch (err) {
-        console.error('Error removing user from tenant:', err)
+        console.error('Error deleting user:', err)
         showSnackbar(t('users.deleteError'), 'error')
     } finally {
         deleting.value = false
@@ -471,9 +437,14 @@ onMounted(async () => {
             users.value = users.value.filter((u) => u.id !== e.record.id)
             totalItems.value = Math.max(0, totalItems.value - 1)
         } else if (e.action === 'create') {
-            // Refetch instead of prepending — avoids double-display when the
-            // admin's own CreateUser dialog also triggers reloadUsers().
-            void fetchList()
+            totalItems.value++
+            try {
+                const rec = await pb.collection('users').getOne(e.record.id, {
+                    expand: 'role',
+                    requestKey: null,
+                })
+                users.value = [mapUser(rec), ...users.value]
+            } catch {}
         } else if (e.action === 'update') {
             const idx = users.value.findIndex((u) => u.id === e.record.id)
             if (idx !== -1) {

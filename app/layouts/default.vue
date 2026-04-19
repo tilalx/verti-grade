@@ -15,74 +15,34 @@ const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 const { refreshPermissions } = usePermissions()
 
-// ── Tenant detection (SSR-safe, keyed by hostname) ────────────────────────
-// Pass hostname as a query param — internal Nitro $fetch calls don't reliably
-// forward the Host header, so header-based forwarding breaks in SSR.
-const requestUrl = useRequestURL()
-const { data: tenantData } = await useAsyncData(
-    'tenant',
-    async () => (await $fetch('/api/tenant', { query: { host: requestUrl.hostname } })) ?? null,
-    { lazy: false },
-)
-
-// ── Auth-based tenant fallback ────────────────────────────────────────────
-// If domain resolution returns null (e.g. localhost dev with multiple tenants),
-// and the user is authenticated, resolve the tenant from their membership.
-// Runs client-only; picks the user's first active tenant membership.
-async function resolveTenantFromAuth() {
-    if (tenantData.value) return
-    if (!pb.authStore.isValid) return
-    try {
-        const tu = await pb
-            .collection('tenant_users')
-            .getFirstListItem(`user_id = "${pb.authStore.record?.id}"`, {
-                expand: 'tenant_id',
-                sort: 'created',
-            })
-        const t = tu?.expand?.tenant_id
-        if (t?.id) {
-            tenantData.value = { id: t.id, name: t.name, slug: t.slug }
-        }
-    } catch {
-        // no membership → leave as null
-    }
-}
-
-// ── Per-tenant settings ───────────────────────────────────────────────────
 const getSettings = async () => {
-    const tenantId = tenantData.value?.id
-    if (!tenantId) return {}
     try {
-        return await pb
-            .collection('settings')
-            .getFirstListItem(`tenant_id = "${tenantId}"`)
+        return await pb.collection('settings').getOne('settings_123456')
     } catch (error) {
-        if (error?.data?.code === 404 || error?.status === 404) {
-            return {}
+        if (error.data && error.data.code === 404) {
+            console.log('Settings not found, creating new settings')
+            try {
+                return await pb.collection('settings').create({
+                    id: 'settings_123456',
+                })
+            } catch (createError) {
+                console.error('Error creating new settings:', createError)
+                throw createError
+            }
         }
-        console.error('An error occurred fetching settings:', error)
-        return {}
+        console.error('An error occurred:', error)
+        throw error
     }
 }
 
-const { data: settingsData, refresh: refreshSettings } = await useAsyncData(
-    'settings',
-    getSettings,
-    { lazy: true },
-)
+const { data: settingsData } = await useAsyncData('settings', getSettings, {
+    lazy: true,
+})
 
 const settings = ref(settingsData.value ?? {})
 watch(settingsData, (val) => {
     if (val) settings.value = val
 })
-
-// Re-fetch settings if the tenant changes (e.g., during dev HMR)
-watch(
-    () => tenantData.value?.id,
-    async (id) => {
-        if (id) await refreshSettings()
-    },
-)
 
 const refreshSession = async () => {
     try {
@@ -114,9 +74,11 @@ let unsubRole = null
 async function subscribeToRole(roleId) {
     unsubRole?.()?.catch?.(() => {})
     if (!roleId) return
-    unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
-        if (e.action === 'update') refreshPermissions()
-    })
+    unsubRole = await pb
+        .collection('roles')
+        .subscribe(roleId, (e) => {
+            if (e.action === 'update') refreshPermissions()
+        })
 }
 
 async function subscribeToUser(userId) {
@@ -128,6 +90,7 @@ async function subscribeToUser(userId) {
             const oldRole = pb.authStore.record?.role
             pb.authStore.save(pb.authStore.token, e.record)
             isLoggedIn.value = true
+            // If the user's role changed, refresh permissions and resubscribe
             if (e.record.role !== oldRole) {
                 refreshPermissions()
                 subscribeToRole(e.record.role)
@@ -142,15 +105,14 @@ onMounted(async () => {
             await refreshSession()
             await refreshPermissions()
         }
-        await resolveTenantFromAuth()
         setFavicon()
 
-        unsubAuthChange = pb.authStore.onChange(async (token, record) => {
+        // Reflect any local auth store changes immediately (login/logout on this tab)
+        unsubAuthChange = pb.authStore.onChange((token, record) => {
             isLoggedIn.value = !!token
             if (token && record?.id) {
                 subscribeToUser(record.id)
                 refreshPermissions()
-                await resolveTenantFromAuth()
             } else {
                 unsubUser?.()
                 unsubUser = null
@@ -158,24 +120,23 @@ onMounted(async () => {
             }
         })
 
+        // Subscribe to current user record for cross-device auth sync
         if (pb.authStore.isValid && pb.authStore.record?.id) {
             await subscribeToUser(pb.authStore.record.id)
         }
 
+        // Subscribe to role changes for realtime permission updates
         if (pb.authStore.isValid && pb.authStore.record?.role) {
             await subscribeToRole(pb.authStore.record.role)
         }
 
-        // Subscribe to per-tenant settings for realtime branding sync
-        const settingsRecord = settings.value
-        if (settingsRecord?.id) {
-            unsubSettings = await pb
-                .collection('settings')
-                .subscribe(settingsRecord.id, (e) => {
-                    settings.value = e.record
-                    setFavicon()
-                })
-        }
+        // Realtime settings sync across devices
+        unsubSettings = await pb
+            .collection('settings')
+            .subscribe('settings_123456', (e) => {
+                settings.value = e.record
+                setFavicon()
+            })
     } catch (error) {
         console.error('Error during initialization:', error)
     }

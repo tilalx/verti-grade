@@ -263,7 +263,6 @@ import { formatDifficulty, normalizeCreators } from '~/utils/formatting'
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
 const nuxtRoute = useRoute()
-const { tenantFilter, tenantId } = useTenant()
 
 const route_id = ref<string | null>((nuxtRoute.query.id as string) || null)
 const loading = ref(true)
@@ -354,9 +353,7 @@ const getRouteMetadata = async (): Promise<void> => {
     try {
         const record = await pb
             .collection('routes')
-            .getFirstListItem<RouteRecord>(
-                `id = "${route_id.value}" && ${tenantFilter.value}`,
-            )
+            .getOne<RouteRecord>(route_id.value)
         metadata.value = {
             ...record,
             creator: normalizeCreators(record.creator),
@@ -370,7 +367,7 @@ const getAllRouteRatings = async (): Promise<void> => {
     if (!route_id.value) return
     try {
         const data = await pb.collection('ratings').getFullList<RatingRecord>({
-            filter: `route_id = "${route_id.value}" && ${tenantFilter.value}`,
+            filter: `route_id = "${route_id.value}"`,
             sort: '-created',
             expand: 'user',
             requestKey: 'routeRatings',
@@ -450,7 +447,7 @@ onMounted(async () => {
     loading.value = false
 
     await subscribe('ratings', (event) => {
-        if (event.record.route_id === route_id.value && event.record.tenant_id === tenantId.value) {
+        if (event.record.route_id === route_id.value) {
             void getAllRouteRatings()
         }
     })

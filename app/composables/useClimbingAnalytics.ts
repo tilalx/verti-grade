@@ -86,16 +86,12 @@ export function useClimbingAnalytics() {
         error.value = false
 
         try {
-            const pb = usePocketbase()
-            const token = pb.authStore.token
             const response = await requestFetch<ClimbingAnalyticsResponse>(
                 '/api/admin/analytics',
-                token ? { headers: { Authorization: `Bearer ${token}` } } : {},
             )
 
             analytics.value = normalizeResponse(response)
-        } catch (e) {
-            console.error('[analytics] fetch failed:', e)
+        } catch {
             error.value = true
             analytics.value = null
         } finally {

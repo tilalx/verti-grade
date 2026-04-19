@@ -1,27 +1,18 @@
-import { createError, eventHandler, getHeader } from 'h3'
-import { resolveTenantFromHost } from '../../utils/tenant.js'
-import { createAuthedPocketBase } from '../../utils/pb-auth.js'
+import { createError, eventHandler } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
-export default eventHandler(async (event) => {
-    const pb = createAuthedPocketBase(event)
-
-    const host = getHeader(event, 'host') ?? ''
-    const tenant = await resolveTenantFromHost(host)
-    const tenantFilter = tenant?.id
-        ? `tenant_id = "${tenant.id}"`
-        : 'id = "___no_tenant___"'
+export default eventHandler(async () => {
+    const pb = createPocketBase()
 
     try {
         const [routeRecords, ratingRecords] = await Promise.all([
             pb.collection('routes').getFullList<RouteRecord>({
                 batch: 200,
-                filter: tenantFilter,
                 requestKey: 'analytics-routes',
             }),
             pb.collection('ratings').getFullList<RatingRecord>({
                 batch: 200,
-                filter: tenantFilter,
                 requestKey: 'analytics-ratings',
             }),
         ])
@@ -132,7 +123,6 @@ export default eventHandler(async (event) => {
             latestComments,
         }
     } catch (error: any) {
-        console.error('[analytics] data fetch failed:', error?.status, error?.message, error?.data)
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to load analytics data',

@@ -120,7 +120,7 @@ const versionUrl = computed(() => {
 
 const { data: health } = await useAsyncData(
     'footer:health',
-    async () => (await pb.health.check()) ?? null,
+    () => pb.health.check(),
     {
         default: () => null,
         lazy: true,
@@ -129,7 +129,7 @@ const { data: health } = await useAsyncData(
 
 const { data: online } = await useAsyncData(
     'footer:online',
-    async () => (await pb.send('/api/online', { method: 'GET' })) ?? null,
+    () => pb.send('/api/online', { method: 'GET' }),
     {
         default: () => ({ clients: 0 }),
         lazy: true,

@@ -1,7 +1,5 @@
 export function useRouteFilters() {
     const { t } = useI18n()
-    const pb = usePocketbase()
-    const { tenantId } = useTenant()
 
     const searchRouteName = ref('')
     const selectedDifficulty = ref('')
@@ -22,59 +20,30 @@ export function useRouteFilters() {
         { text: t('routes.types.boulder'), value: 'Boulder' },
     ])
 
-    // Dynamic locations fetched from the locations collection per tenant
-    const locationItems = ref<{ text: string; value: string }[]>([])
-
-    async function loadLocations() {
-        const tid = tenantId.value
-        if (!tid) {
-            locationItems.value = []
-            return
-        }
-        try {
-            const records = await pb
-                .collection('locations')
-                .getFullList({ filter: `tenant_id = "${tid}"`, sort: 'order,name' })
-            locationItems.value = records.map((r) => ({
-                text: r.name as string,
-                value: r.name as string,
-            }))
-        } catch {
-            locationItems.value = []
-        }
-    }
-
     const locations = computed(() => [
         { text: t('filter.all'), value: '' },
-        ...locationItems.value,
+        { text: 'Hanau', value: 'Hanau' },
+        { text: 'Gelnhausen', value: 'Gelnhausen' },
     ])
-
-    // Load locations when tenant changes
-    watch(tenantId, (tid) => {
-        if (tid) loadLocations()
-    }, { immediate: true })
 
     const activeFilterCount = computed(
         () =>
-            [selectedDifficulty.value, selectedType.value, selectedLocation.value].filter(
-                Boolean,
-            ).length,
+            [
+                selectedDifficulty.value,
+                selectedType.value,
+                selectedLocation.value,
+            ].filter(Boolean).length,
     )
 
     const pbFilter = computed(() => {
         const parts: string[] = []
         if (selectedDifficulty.value)
             parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
-        if (selectedLocation.value) {
-            const loc = selectedLocation.value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-            parts.push(`location = "${loc}"`)
-        }
-        if (selectedType.value) {
-            const type = selectedType.value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-            parts.push(`type = "${type}"`)
-        }
+        if (selectedLocation.value)
+            parts.push(`location = "${selectedLocation.value}"`)
+        if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
         if (searchRouteName.value.trim()) {
-            const term = searchRouteName.value.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+            const term = searchRouteName.value.trim().replace(/"/g, '\\"')
             parts.push(`name ~ "${term}"`)
         }
         return parts.join(' && ')
@@ -98,6 +67,5 @@ export function useRouteFilters() {
         activeFilterCount,
         pbFilter,
         clearFilters,
-        loadLocations,
     }
 }

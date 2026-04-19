@@ -169,7 +169,6 @@ import { required, maxLength, validEmail } from '~/utils/validation'
 const { t } = useI18n()
 const pb = usePocketbase()
 const emit = defineEmits(['user-created', 'closed'])
-const { tenantId } = useTenant()
 
 const dialog = ref(false)
 const valid = ref(false)
@@ -243,12 +242,8 @@ async function submit() {
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
 
-        // Generate a random password (user will reset via email).
-        // Uses getRandomValues instead of randomUUID — works in non-secure HTTP contexts too.
-        const randomPassword = Array.from(
-            crypto.getRandomValues(new Uint8Array(32)),
-            (b) => b.toString(16).padStart(2, '0'),
-        ).join('')
+        // Generate a random password (user will reset via email)
+        const randomPassword = crypto.randomUUID()
 
         const formData = new FormData()
         formData.append('username', username)

@@ -1,18 +1,11 @@
-import { eventHandler, getQuery, readBody, createError, getHeader } from 'h3'
-import { createAuthedPocketBase } from '../../utils/pb-auth.js'
-import { resolveTenantFromHost } from '../../utils/tenant.ts'
+import { eventHandler, getQuery, readBody, createError } from 'h3'
+import { createPocketBase } from '../../utils/pb-server.js'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const pb = createAuthedPocketBase(event)
+    const pb = createPocketBase()
     const res = event.node.res
-
-    const host = getHeader(event, 'host') ?? ''
-    const tenant = await resolveTenantFromHost(host)
-    if (!tenant?.id) {
-        return createError({ statusCode: 400, statusMessage: 'Tenant not resolved.' })
-    }
 
     try {
         const ids = await resolveRouteIds(event)
@@ -23,12 +16,9 @@ export default eventHandler(async (event) => {
             })
         }
 
-        const settings = tenant?.id
-            ? await pb
-                  .collection('settings')
-                  .getFirstListItem(`tenant_id = "${tenant.id}"`)
-                  .catch(() => ({}))
-            : {}
+        const settings = await pb
+            .collection('settings')
+            .getOne('settings_123456')
 
         const logoUrl = await pb.files.getURL(settings, settings.sign_image)
         const logo = await fetchLogo(logoUrl)
@@ -64,9 +54,7 @@ export default eventHandler(async (event) => {
         let entryCount = 0
 
         for (let id of ids) {
-            const climbingRoute = await pb
-                .collection('routes')
-                .getFirstListItem(`id = "${id}" && tenant_id = "${tenant.id}"`)
+            const climbingRoute = await pb.collection('routes').getOne(id)
 
             // Every 8 entries, add a new page
             if (entryCount % 8 === 0 && entryCount > 0) {
@@ -248,15 +236,13 @@ async function fetchLogo(url) {
     }
 }
 
-const ID_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/
-
 async function resolveRouteIds(event) {
     try {
         const body = await readBody(event)
         if (body && Array.isArray(body.ids)) {
             return body.ids
                 .map((value) => (typeof value === 'string' ? value.trim() : ''))
-                .filter((id) => typeof id === 'string' && ID_PATTERN.test(id))
+                .filter(Boolean)
         }
     } catch (error) {
         // ignore body parsing errors and fallback to query string
@@ -267,7 +253,7 @@ async function resolveRouteIds(event) {
         return params.id
             .split(',')
             .map((value) => value.trim())
-            .filter((id) => ID_PATTERN.test(id))
+            .filter(Boolean)
     }
 
     return []

@@ -157,7 +157,6 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const pb = usePocketbase()
 const { t } = useI18n()
-const { tenantId } = useTenant()
 
 const isEditMode = computed(() => !!props.review)
 

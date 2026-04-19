@@ -1,8 +1,9 @@
 export function usePermissions() {
     const pb = usePocketbase()
-    const { tenantId } = useTenant()
-
-    const permissions = useState<string[]>('user-permissions', () => [])
+    const permissions = useState<string[]>(
+        'user-permissions',
+        () => [],
+    )
     const roleName = useState<string>('user-role-name', () => '')
     const loading = ref(false)
     const loaded = useState<boolean>('user-permissions-loaded', () => false)
@@ -41,44 +42,13 @@ export function usePermissions() {
     }
 
     function can(featureName: string): boolean {
-        if (!loaded.value) return false
+        // Before permissions are loaded, allow navigation
+        // (PocketBase rules enforce server-side anyway)
+        if (!loaded.value) return true
+        // Admin safety net: always has all permissions
         if (roleName.value === 'admin') return true
         return permissions.value.includes(featureName)
     }
 
-    const isSuperAdmin = computed<boolean>(
-        () => !!(pb.authStore.record as any)?.is_super_admin,
-    )
-
-    /**
-     * Returns true if the current user is a member of the current tenant.
-     * Used as a guard — the PocketBase rules are the authoritative check.
-     */
-    async function isInCurrentTenant(): Promise<boolean> {
-        const userId = pb.authStore.record?.id
-        const tid = tenantId.value
-        if (!userId || !tid) return false
-        try {
-            await pb
-                .collection('tenant_users')
-                .getFirstListItem(`user_id = "${userId}" && tenant_id = "${tid}"`, {
-                    requestKey: 'tenantMembership',
-                })
-            return true
-        } catch {
-            return false
-        }
-    }
-
-    return {
-        permissions,
-        roleName,
-        loading,
-        loaded,
-        can,
-        isSuperAdmin,
-        isInCurrentTenant,
-        ensureLoaded,
-        refreshPermissions,
-    }
+    return { permissions, roleName, loading, loaded, can, ensureLoaded, refreshPermissions }
 }

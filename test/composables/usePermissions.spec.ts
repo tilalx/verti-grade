@@ -13,13 +13,10 @@ vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
 
 vi.stubGlobal('ref', vueRef)
 
-vi.stubGlobal('computed', (fn: () => unknown) => ({ value: fn() }))
-
 // PocketBase mock
 let pbMock: any
 
 vi.stubGlobal('usePocketbase', () => pbMock)
-vi.stubGlobal('useTenant', () => ({ tenantId: vueRef(null) }))
 
 describe('usePermissions', () => {
     beforeEach(() => {
@@ -45,11 +42,11 @@ describe('usePermissions', () => {
 
     // ── can() before loading ─────────────────────────────────────────────
 
-    it('returns false for any feature before permissions are loaded', async () => {
+    it('returns true for any feature before permissions are loaded', async () => {
         const { can } = await loadComposable()
 
-        expect(can('manage_routes')).toBe(false)
-        expect(can('anything')).toBe(false)
+        expect(can('manage_routes')).toBe(true)
+        expect(can('anything')).toBe(true)
     })
 
     // ── refreshPermissions ───────────────────────────────────────────────

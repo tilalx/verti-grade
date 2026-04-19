@@ -118,9 +118,6 @@ func main() {
 		return se.Next()
 	})
 
-	// Register Go hooks (tenant enforcement, etc.)
-	registerHooks(app)
-
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

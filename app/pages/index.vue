@@ -172,7 +172,6 @@ import { toPbSort } from '~/utils/sorting'
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { smAndDown, mdAndUp } = useDisplay()
-const { tenantFilter } = useTenant()
 
 const {
     searchRouteName,
@@ -237,9 +236,8 @@ const headersDesktop: Array<{
 ]
 
 const pbFilter = computed(() => {
-    const parts = [tenantFilter.value, 'archived = false']
-    if (baseFilter.value) parts.push(baseFilter.value)
-    return parts.join(' && ')
+    const base = baseFilter.value
+    return base ? `archived = false && ${base}` : 'archived = false'
 })
 
 const toPbSortIndex = (sortByArr: SortOption[]) =>
@@ -275,10 +273,7 @@ async function loadRoutes(
 
         if (routeIds.length > 0) {
             try {
-                const idFilter = routeIds.map((id) => `id = "${id}"`).join(' || ')
-                const filter = tenantFilter.value
-                    ? `(${idFilter}) && ${tenantFilter.value}`
-                    : idFilter
+                const filter = routeIds.map((id) => `id = "${id}"`).join(' || ')
                 const avgRecords = await pb
                     .collection('averageRating')
                     .getFullList<AverageRatingRecord>({
@@ -311,7 +306,6 @@ async function loadRoutes(
 
         totalItems.value = res.totalItems
     } catch (error) {
-        if ((error as any)?.isAbort) return
         console.error('Failed to load routes:', error)
     } finally {
         loading.value = false

@@ -99,7 +99,6 @@
 const pb = usePocketbase()
 const emit = defineEmits(['closed'])
 const currentUser = pb.authStore.model
-const { tenantId } = useTenant()
 
 const fileInput = ref(null)
 const showPreviewDialog = ref(false)
@@ -124,17 +123,9 @@ const open = () => {
 
 defineExpose({ open })
 
-const MAX_IMPORT_SIZE = 10 * 1024 * 1024 // 10 MB
-
 const handleFileChange = async (event) => {
     const file = event.target.files[0]
     if (!file) return
-
-    if (file.size > MAX_IMPORT_SIZE) {
-        showSnackbar('File too large. Maximum size is 10 MB.', 'error')
-        event.target.value = ''
-        return
-    }
 
     const reader = new FileReader()
     reader.onload = () => {
@@ -308,8 +299,9 @@ function sanitizeRatingPayload(rating, meta) {
         comment: typeof rating.comment === 'string' ? rating.comment : '',
     }
 
-    if (meta.fallbackUserId) {
-        payload.user = meta.fallbackUserId
+    const userId = rating.user || meta.fallbackUserId
+    if (userId) {
+        payload.user = userId
     }
 
     return payload

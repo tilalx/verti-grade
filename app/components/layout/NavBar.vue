@@ -129,7 +129,7 @@ const props = defineProps({
 
 const { loggedIn, settings } = toRefs(props)
 
-const { can, isSuperAdmin } = usePermissions()
+const { can } = usePermissions()
 
 const navLinks = [
     {
@@ -177,23 +177,8 @@ const navLinks = [
     },
 ]
 
-const superAdminLinks = [
-    {
-        to: '/super-admin/tenants',
-        icon: 'mdi-domain',
-        label: 'Tenants',
-        permission: null,
-        superAdminOnly: true,
-    },
-]
-
-const allNavLinks = computed(() => [
-    ...navLinks,
-    ...(isSuperAdmin.value ? superAdminLinks : []),
-])
-
 const visibleNavLinks = computed(() =>
-    allNavLinks.value.filter((l) => !l.permission || can(l.permission)),
+    navLinks.filter((l) => !l.permission || can(l.permission)),
 )
 const desktopLinks = computed(() =>
     visibleNavLinks.value.filter((l) => !l.mobileOnly),
