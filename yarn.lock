@@ -8187,7 +8187,7 @@ __metadata:
     pocketbase: "npm:^0.26.8"
     prettier: "npm:3.8.2"
     qrcode: "npm:1.5.4"
-    release-it: "npm:20.0.0-1"
+    release-it: "npm:20.0.0"
     sass: "npm:1.99.0"
     typescript: "npm:6.0.2"
     vite: "npm:8.0.8"
@@ -9645,9 +9645,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"release-it@npm:20.0.0-1":
-  version: 20.0.0-1
-  resolution: "release-it@npm:20.0.0-1"
+"release-it@npm:20.0.0":
+  version: 20.0.0
+  resolution: "release-it@npm:20.0.0"
   dependencies:
     "@inquirer/prompts": "npm:8.3.2"
     "@nodeutils/defaults-deep": "npm:1.1.0"
@@ -9674,7 +9674,7 @@ __metadata:
     yargs-parser: "npm:22.0.0"
   bin:
     release-it: bin/release-it.js
-  checksum: 10c0/5aa45fda164f76d1166fdd04b30fbf6c2def4824601efd6bac8475624e486b8937677b827c3900a53934e6f8bec6bb10a4e970ba7bf20219372f36d68e18d41f
+  checksum: 10c0/7aa8967d3ffd0d0ec89d08941edee9de7c62a646a5fb7f6134bd36db963eb9c7320746be27ed2e6858a162cde48a847ea9a13079bc0cc4551521f56697aae548
   languageName: node
   linkType: hard
 
