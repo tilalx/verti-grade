@@ -17,7 +17,7 @@
     "devDependencies": {
         "@mdi/font": "7.4.47",
         "@nuxt/image": "2.0.0",
-        "@nuxtjs/i18n": "10.2.4",
+        "@nuxtjs/i18n": "10.3.0",
         "@types/pdfkit": "0.17.5",
         "@types/qrcode": "1.5.6",
         "@vitejs/plugin-vue": "6.0.6",
