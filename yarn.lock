@@ -3775,12 +3775,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pdfkit@npm:0.17.5":
-  version: 0.17.5
-  resolution: "@types/pdfkit@npm:0.17.5"
+"@types/pdfkit@npm:0.17.6":
+  version: 0.17.6
+  resolution: "@types/pdfkit@npm:0.17.6"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/4b854f5172f899684d231d45feb4018fee5806e639859b55bbdc93c0abe185c83194ac82da5f82d7e7716eb042079df4e21806d2ab628b955bb407be8dfbe2ea
+  checksum: 10c0/78c86ec829ad54afab58340a40c7b126ddc378315f735eae786a68da5abd97be82d3b11a77a1fb3d0f53c654e3656a7ace715a544a6964d001836dfab696c4b1
   languageName: node
   linkType: hard
 
@@ -8307,7 +8307,7 @@ __metadata:
     "@mdi/font": "npm:7.4.47"
     "@nuxt/image": "npm:2.0.0"
     "@nuxtjs/i18n": "npm:10.2.4"
-    "@types/pdfkit": "npm:0.17.5"
+    "@types/pdfkit": "npm:0.17.6"
     "@types/qrcode": "npm:1.5.6"
     "@vitejs/plugin-vue": "npm:6.0.6"
     "@vue/test-utils": "npm:2.4.6"
