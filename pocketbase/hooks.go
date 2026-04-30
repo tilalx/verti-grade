@@ -118,11 +118,8 @@ func registerSideEffectHooks(app core.App) {
 // ── Tenant enforcement: auto-inject tenant_id on record create ────────────────
 
 func registerTenantEnforcement(app core.App) {
-	// The client sends X-Tenant-Id header (set globally via pb.beforeSend in the
-	// Nuxt frontend). The hook verifies the authenticated user is a member of the
-	// claimed tenant, then sets tenant_id on the record — ignoring whatever value
-	// the client body may have included.
-	app.OnRecordCreateRequest("routes", "ratings", "locations").BindFunc(
+	// Routes and locations require authentication + tenant membership.
+	app.OnRecordCreateRequest("routes", "locations").BindFunc(
 		func(e *core.RecordRequestEvent) error {
 			tenantId := e.Request.Header.Get("X-Tenant-Id")
 			if tenantId == "" {
@@ -146,9 +143,29 @@ func registerTenantEnforcement(app core.App) {
 				}
 			}
 
-			// Server authority: set tenant_id, overriding any client-supplied value
 			e.Record.Set("tenant_id", tenantId)
+			return e.Next()
+		},
+	)
 
+	// Ratings allow unauthenticated submission — verify tenant exists but skip auth check.
+	app.OnRecordCreateRequest("ratings").BindFunc(
+		func(e *core.RecordRequestEvent) error {
+			tenantId := e.Request.Header.Get("X-Tenant-Id")
+			if tenantId == "" {
+				return apis.NewBadRequestError("X-Tenant-Id header is required", nil)
+			}
+
+			_, err := e.App.FindFirstRecordByFilter(
+				"tenants",
+				"id = {:tenantId} && active = true",
+				dbx.Params{"tenantId": tenantId},
+			)
+			if err != nil {
+				return apis.NewNotFoundError("tenant not found", nil)
+			}
+
+			e.Record.Set("tenant_id", tenantId)
 			return e.Next()
 		},
 	)
