@@ -8503,7 +8503,7 @@ __metadata:
     vue: "npm:3.5.33"
     vue-qrcode-reader: "npm:^5.7.3"
     vuetify: "npm:4.0.6"
-    vuetify-nuxt-module: "npm:v1.0.0-beta.2"
+    vuetify-nuxt-module: "npm:v1.0.0-beta.3"
   languageName: unknown
   linkType: soft
 
@@ -12023,14 +12023,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-beta.2":
-  version: 1.0.0-beta.2
-  resolution: "vuetify-nuxt-module@npm:1.0.0-beta.2"
+"vuetify-nuxt-module@npm:v1.0.0-beta.3":
+  version: 1.0.0-beta.3
+  resolution: "vuetify-nuxt-module@npm:1.0.0-beta.3"
   dependencies:
     "@nuxt/kit": "npm:^4.3.1"
     defu: "npm:^6.1.4"
     destr: "npm:^2.0.5"
-    local-pkg: "npm:^1.1.2"
     pathe: "npm:^2.0.3"
     perfect-debounce: "npm:^2.1.0"
     semver: "npm:^7.7.4"
@@ -12039,7 +12038,7 @@ __metadata:
     upath: "npm:^2.0.1"
     vite-plugin-vuetify: "npm:^2.1.3"
     vuetify: "npm:^4.0.1"
-  checksum: 10c0/2ea973824dd4e8d78280611dba49ae91a58b322ed45f0c604bf7fdff4918bf91e1193cb88fa88dc1f6e0a13df30dec614cf6c6368590e649ad383fcc5086bc42
+  checksum: 10c0/638b8ee03dd969a8baae99ec2a33723ec454fc666f17841c466095e5e79b30cfaa0054f18ab2dda2fa15bf954611052e74545f157a5e06965bb39331eb7ce1c8
   languageName: node
   linkType: hard
 
