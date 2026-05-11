@@ -30,7 +30,7 @@
         "install": "^0.13.0",
         "nuxt": "^4.4.4",
         "pdfkit": "0.18.0",
-        "pocketbase": "^0.26.8",
+        "pocketbase": "^0.26.9",
         "prettier": "3.8.3",
         "qrcode": "1.5.4",
         "release-it": "20.0.1",

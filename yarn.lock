@@ -8492,7 +8492,7 @@ __metadata:
     install: "npm:^0.13.0"
     nuxt: "npm:^4.4.4"
     pdfkit: "npm:0.18.0"
-    pocketbase: "npm:^0.26.8"
+    pocketbase: "npm:^0.26.9"
     prettier: "npm:3.8.3"
     qrcode: "npm:1.5.4"
     release-it: "npm:20.0.1"
@@ -9340,10 +9340,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pocketbase@npm:^0.26.8":
-  version: 0.26.8
-  resolution: "pocketbase@npm:0.26.8"
-  checksum: 10c0/1effa38aca4741e75dcfa627b86ad21f255e94a717c88c9ab66812ad51d9bc00ebb059282346f8172ef339610f8acfa9b76e41c04681a2f0f473dd7f2ac6e133
+"pocketbase@npm:^0.26.9":
+  version: 0.26.9
+  resolution: "pocketbase@npm:0.26.9"
+  checksum: 10c0/25e1a981f4f9105e89c5c841b05e10296b7402336aa5ac0d43cd5fda6e0bd1b58933d55a38d946e73de52f744229f46bb53b156ec882196de11ac2fa9b0902e9
   languageName: node
   linkType: hard
 
