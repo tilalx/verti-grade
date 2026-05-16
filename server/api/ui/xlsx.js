@@ -1,11 +1,18 @@
-import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js'
+import { eventHandler, getQuery, readBody, createError, getHeader } from 'h3'
+import { createAuthedPocketBase } from '../../utils/pb-auth.js'
+import { resolveTenantFromHost } from '../../utils/tenant.ts'
 
 export default eventHandler(async (event) => {
     const { default: ExcelJS } = await import('exceljs')
 
-    const pb = createPocketBase()
+    const pb = createAuthedPocketBase(event)
     const res = event.node.res
+
+    const host = getHeader(event, 'host') ?? ''
+    const tenant = await resolveTenantFromHost(host)
+    if (!tenant?.id) {
+        return createError({ statusCode: 400, statusMessage: 'Tenant not resolved.' })
+    }
 
     try {
         const ids = await resolveRouteIds(event)
@@ -18,7 +25,9 @@ export default eventHandler(async (event) => {
 
         const climbingRoutes = []
         for (let id of ids) {
-            const climbingRoute = await pb.collection('routes').getOne(id, {})
+            const climbingRoute = await pb
+                .collection('routes')
+                .getFirstListItem(`id = "${id}" && tenant_id = "${tenant.id}"`)
             climbingRoutes.push(climbingRoute)
         }
 
@@ -42,10 +51,11 @@ export default eventHandler(async (event) => {
             { header: 'Schraubdatum', key: 'screw_date', width: 15 },
         ]
 
-        // Add rows
+        // Add rows — prefix string cells with \t to prevent formula injection
         climbingRoutes.forEach((cr) => {
+            const safeStr = (v) => (typeof v === 'string' && /^[=+\-@|]/.test(v) ? `\t${v}` : v)
             worksheet.addRow({
-                name: cr.name,
+                name: safeStr(cr.name),
                 difficulty: cr.difficulty,
                 difficulty_sign:
                     cr.difficulty_sign === true
@@ -57,10 +67,10 @@ export default eventHandler(async (event) => {
                     cr.anchor_point !== null && cr.anchor_point !== undefined
                         ? cr.anchor_point
                         : '',
-                location: cr.location,
-                type: cr.type,
-                comment: cr.comment,
-                creator: cr.creator.join(', '),
+                location: safeStr(cr.location),
+                type: safeStr(cr.type),
+                comment: safeStr(cr.comment),
+                creator: safeStr(cr.creator.join(', ')),
                 screw_date: new Date(cr.screw_date).toLocaleDateString('de-DE'),
             })
         })
@@ -83,13 +93,15 @@ export default eventHandler(async (event) => {
     }
 })
 
+const ID_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/
+
 async function resolveRouteIds(event) {
     try {
         const body = await readBody(event)
         if (body && Array.isArray(body.ids)) {
             return body.ids
                 .map((value) => (typeof value === 'string' ? value.trim() : ''))
-                .filter(Boolean)
+                .filter((id) => typeof id === 'string' && ID_PATTERN.test(id))
         }
     } catch (error) {
         // ignore body parsing errors and fall back to query parameters
@@ -100,7 +112,7 @@ async function resolveRouteIds(event) {
         return params.id
             .split(',')
             .map((value) => value.trim())
-            .filter(Boolean)
+            .filter((id) => ID_PATTERN.test(id))
     }
 
     return []

@@ -253,9 +253,10 @@ const hasAnyAuth = !!(
     authMethods?.password?.enabled || authMethods?.oauth2?.enabled
 )
 
+const { tenantFilter } = useTenant()
 let _settings = null
 try {
-    _settings = await pb.collection('settings').getOne('settings_123456')
+    _settings = await pb.collection('settings').getFirstListItem(tenantFilter.value)
 } catch {}
 const orgName = _settings?.organization_name || ''
 const orgUnitName = _settings?.organization_unit_name || ''
@@ -378,6 +379,23 @@ function resolveAuthError(err) {
     return msg || t('notifications.error.unknown')
 }
 
+// ── Tenant membership check ────────────────────────────────────────
+async function checkTenantMembership() {
+    if (pb.authStore.record?.is_super_admin) return true
+    try {
+        const tenant = await $fetch('/api/tenant').catch(() => null)
+        if (!tenant?.id) return true
+        await pb
+            .collection('tenant_users')
+            .getFirstListItem(
+                `tenant_id = "${tenant.id}" && user_id = "${pb.authStore.record?.id}"`,
+            )
+        return true
+    } catch {
+        return false
+    }
+}
+
 // ── Auth handlers ──────────────────────────────────────────────────
 async function submitLogin() {
     if (!(await validate(loginForm))) return
@@ -388,6 +406,14 @@ async function submitLogin() {
             .authWithPassword(identity.value, password.value, {
                 autoRefreshThreshold: 0,
             })
+        if (!(await checkTenantMembership())) {
+            pb.authStore.clear()
+            layout.value.notify(
+                t('notifications.error.not_authorized_for_org', 'Not authorized for this organization.'),
+                'error',
+            )
+            return
+        }
         layout.value.notify(t('notifications.success.login'), 'success')
         await navigateTo('/admin/routes', { replace: true })
     } catch (err) {
@@ -416,6 +442,14 @@ async function loginWithOAuth(provider) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })
+        if (!(await checkTenantMembership())) {
+            pb.authStore.clear()
+            layout.value.notify(
+                t('notifications.error.not_authorized_for_org', 'Not authorized for this organization.'),
+                'error',
+            )
+            return
+        }
         layout.value.notify(t('notifications.success.login'), 'success')
         await navigateTo('/admin/routes', { replace: true })
     } catch (err) {
