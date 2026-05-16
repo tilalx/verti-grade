@@ -343,5 +343,11 @@
         "noUsers": "Kullanıcı bulunamadı",
         "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
         "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
+    },
+    "settings": {
+        "changed": "Değiştirildi",
+        "revertChange": "Değişikliği geri al",
+        "removeImage": "Kaldır",
+        "replace": "Değiştir"
     }
 }

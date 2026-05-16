@@ -9,6 +9,7 @@ dist
 
 # PocketBase
 pb_data/
+pb_data_backup/
 pb_public/
 pb_temp/
 

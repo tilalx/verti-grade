@@ -343,5 +343,11 @@
         "minutesAgo": "vor {n} Min.",
         "hoursAgo": "vor {n} Std.",
         "daysAgo": "vor {n} Tagen"
+    },
+    "settings": {
+        "changed": "Geändert",
+        "revertChange": "Änderung zurücksetzen",
+        "removeImage": "Entfernen",
+        "replace": "Ersetzen"
     }
 }

@@ -12,24 +12,35 @@
                     rounded="lg"
                     border
                     flat
+                    height="100%"
                     :class="{ 'border-primary': asset.isDirty }"
                     style="transition: border-color 0.2s"
                 >
                     <v-card-text class="pa-4">
-                        <div
-                            class="d-flex align-center justify-space-between mb-3"
-                        >
+                        <div class="d-flex align-center justify-space-between mb-3">
                             <span class="text-subtitle-2 font-weight-semibold">
                                 {{ asset.label }}
                             </span>
-                            <v-chip
-                                v-if="asset.isDirty"
-                                color="warning"
-                                size="x-small"
-                                variant="tonal"
-                            >
-                                Changed
-                            </v-chip>
+                            <div class="d-flex align-center gap-1">
+                                <v-chip
+                                    v-if="asset.isDirty"
+                                    color="warning"
+                                    size="x-small"
+                                    variant="tonal"
+                                >
+                                    {{ $t('settings.changed') }}
+                                </v-chip>
+                                <v-btn
+                                    v-if="asset.isDirty"
+                                    icon
+                                    size="x-small"
+                                    variant="text"
+                                    :title="$t('settings.revertChange')"
+                                    @click.stop="asset.onRevert()"
+                                >
+                                    <v-icon size="16">mdi-close</v-icon>
+                                </v-btn>
+                            </div>
                         </div>
 
                         <!-- Preview + Upload combined area -->
@@ -67,9 +78,9 @@
                                 >
                             </template>
 
-                            <!-- Hover overlay -->
+                            <!-- Hover overlay: replace + optional delete -->
                             <div
-                                class="asset-hover-overlay d-flex flex-column align-center justify-center rounded-lg"
+                                class="asset-hover-overlay rounded-lg"
                                 style="
                                     position: absolute;
                                     inset: 0;
@@ -78,12 +89,23 @@
                                     transition: opacity 0.18s;
                                 "
                             >
-                                <v-icon color="white" size="24" class="mb-1"
-                                    >mdi-upload-outline</v-icon
+                                <div
+                                    class="d-flex align-center justify-center"
+                                    style="height: 100%; gap: 16px"
                                 >
-                                <span class="text-caption text-white"
-                                    >Replace</span
-                                >
+                                    <div class="d-flex flex-column align-center">
+                                        <v-icon color="white" size="24" class="mb-1">mdi-upload-outline</v-icon>
+                                        <span class="text-caption text-white">{{ $t('settings.replace') }}</span>
+                                    </div>
+                                    <div
+                                        v-if="asset.preview.value && !asset.isDirty"
+                                        class="d-flex flex-column align-center"
+                                        @click.stop="asset.onDelete()"
+                                    >
+                                        <v-icon color="error" size="24" class="mb-1">mdi-delete-outline</v-icon>
+                                        <span class="text-caption text-white">{{ $t('settings.removeImage') }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -255,6 +277,10 @@ const logoFile = ref(null)
 const iconFile = ref(null)
 const signFile = ref(null)
 
+const logoClear = ref(false)
+const iconClear = ref(false)
+const signClear = ref(false)
+
 const logoInputRef = ref(null)
 const iconInputRef = ref(null)
 const signInputRef = ref(null)
@@ -283,8 +309,10 @@ const assetFields = computed(() => [
         file: logoFile,
         preview: logoPreview,
         inputRef: logoInputRef,
-        isDirty: !!logoFile.value,
+        isDirty: !!logoFile.value || logoClear.value,
         onSelect: onLogoSelected,
+        onRevert: onLogoRevert,
+        onDelete: onLogoDelete,
         triggerInput: () =>
             logoInputRef.value?.$el?.querySelector('input')?.click(),
     },
@@ -295,8 +323,10 @@ const assetFields = computed(() => [
         file: iconFile,
         preview: iconPreview,
         inputRef: iconInputRef,
-        isDirty: !!iconFile.value,
+        isDirty: !!iconFile.value || iconClear.value,
         onSelect: onIconSelected,
+        onRevert: onIconRevert,
+        onDelete: onIconDelete,
         triggerInput: () =>
             iconInputRef.value?.$el?.querySelector('input')?.click(),
     },
@@ -307,8 +337,10 @@ const assetFields = computed(() => [
         file: signFile,
         preview: signPreview,
         inputRef: signInputRef,
-        isDirty: !!signFile.value,
+        isDirty: !!signFile.value || signClear.value,
         onSelect: onSignSelected,
+        onRevert: onSignRevert,
+        onDelete: onSignDelete,
         triggerInput: () =>
             signInputRef.value?.$el?.querySelector('input')?.click(),
     },
@@ -357,6 +389,7 @@ onUnmounted(() => {
 
 function onLogoSelected(file) {
     logoFile.value = file
+    logoClear.value = false
     logoPreview.value = file
         ? URL.createObjectURL(file)
         : pbFileUrl(settings.value, settings.value.page_logo)
@@ -364,6 +397,7 @@ function onLogoSelected(file) {
 
 function onIconSelected(file) {
     iconFile.value = file
+    iconClear.value = false
     iconPreview.value = file
         ? URL.createObjectURL(file)
         : pbFileUrl(settings.value, settings.value.page_icon)
@@ -371,15 +405,47 @@ function onIconSelected(file) {
 
 function onSignSelected(file) {
     signFile.value = file
+    signClear.value = false
     signPreview.value = file
         ? URL.createObjectURL(file)
         : pbFileUrl(settings.value, settings.value.sign_image)
+}
+
+function onLogoRevert() {
+    logoFile.value = null
+    logoClear.value = false
+    logoPreview.value = pbFileUrl(settings.value, settings.value.page_logo)
+}
+function onLogoDelete() {
+    logoClear.value = true
+    logoPreview.value = null
+}
+
+function onIconRevert() {
+    iconFile.value = null
+    iconClear.value = false
+    iconPreview.value = pbFileUrl(settings.value, settings.value.page_icon)
+}
+function onIconDelete() {
+    iconClear.value = true
+    iconPreview.value = null
+}
+
+function onSignRevert() {
+    signFile.value = null
+    signClear.value = false
+    signPreview.value = pbFileUrl(settings.value, settings.value.sign_image)
+}
+function onSignDelete() {
+    signClear.value = true
+    signPreview.value = null
 }
 
 // ── Dirty flag ────────────────────────────────────────────────────────────────
 
 const hasChanges = computed(() => {
     if (logoFile.value || iconFile.value || signFile.value) return true
+    if (logoClear.value || iconClear.value || signClear.value) return true
     return (
         copySettings.application_url !== original.application_url ||
         copySettings.imprint_url !== original.imprint_url ||
@@ -405,8 +471,11 @@ async function saveSettings() {
             organization_unit_name: copySettings.organization_unit_name,
         }
         if (logoFile.value) payload.page_logo = logoFile.value
+        else if (logoClear.value) payload.page_logo = null
         if (iconFile.value) payload.page_icon = iconFile.value
+        else if (iconClear.value) payload.page_icon = null
         if (signFile.value) payload.sign_image = signFile.value
+        else if (signClear.value) payload.sign_image = null
 
         const updated = await pb
             .collection('settings')
@@ -417,8 +486,9 @@ async function saveSettings() {
         iconPreview.value = pbFileUrl(updated, updated.page_icon)
         signPreview.value = pbFileUrl(updated, updated.sign_image)
 
-        // Clear staged file refs
+        // Clear staged file refs and clear flags
         logoFile.value = iconFile.value = signFile.value = null
+        logoClear.value = iconClear.value = signClear.value = false
 
         // Advance the original snapshot so hasChanges resets
         original.application_url = updated.application_url

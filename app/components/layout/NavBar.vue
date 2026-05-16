@@ -17,9 +17,9 @@
                     />
                     <NuxtImg
                         v-else
-                        src="/DAVLogoHanau.png"
+                        :src="theme.global.current.value.dark ? '/verti-grade-dark.svg' : '/verti-grade-light.svg'"
                         alt="Logo"
-                        :style="logoStyle"
+                        :style="defaultLogoStyle"
                         height="36"
                         densities="x1 x2"
                     />
@@ -205,6 +205,11 @@ const logoStyle = computed(() => ({
     filter: `brightness(0) invert(${theme.global.current.value.dark ? 1 : 0})`,
     transition: 'filter 0.3s ease',
 }))
+
+const defaultLogoStyle = {
+    maxWidth: '120px',
+    height: '36px',
+}
 
 const isLoggedIn = computed(() => loggedIn.value)
 const drawer = ref(false)
