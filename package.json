@@ -46,7 +46,7 @@
     "browserslist": [
         "defaults and fully supports es6-module"
     ],
-    "packageManager": "yarn@4.14.1",
+    "packageManager": "yarn@4.16.0",
     "release-it": {
         "$schema": "https://unpkg.com/release-it/schema/release-it.json",
         "git": {
