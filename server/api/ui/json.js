@@ -1,18 +1,19 @@
-import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js'
+import { eventHandler, createError } from 'h3'
+import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { resolveRouteIds, fetchRecordsByIds } from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
-    const pb = createPocketBase()
+    const pb = getAuthenticatedPb(event)
+    const ids = await resolveRouteIds(event)
+
+    if (ids.length === 0) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'No IDs provided.',
+        })
+    }
 
     try {
-        const ids = await resolveRouteIds(event)
-        if (ids.length === 0) {
-            return createError({
-                statusCode: 400,
-                statusMessage: 'No IDs provided.',
-            })
-        }
-
         const uniqueIds = Array.from(new Set(ids))
         const routes = await fetchRecordsByIds(pb, {
             collection: 'routes',
@@ -55,68 +56,12 @@ export default eventHandler(async (event) => {
         return payload
     } catch (error) {
         console.error('Failed to export routes as JSON:', error)
-        return createError({
+        throw createError({
             statusCode: 500,
             statusMessage: 'Failed to export routes as JSON',
         })
     }
 })
-
-async function resolveRouteIds(event) {
-    try {
-        const body = await readBody(event)
-        if (body && Array.isArray(body.ids)) {
-            return body.ids
-                .map((value) => (typeof value === 'string' ? value.trim() : ''))
-                .filter(Boolean)
-        }
-    } catch (error) {
-        // ignore body parsing errors and fall back to query params
-    }
-
-    const params = getQuery(event)
-    if (typeof params?.id === 'string') {
-        return params.id
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    }
-
-    return []
-}
-
-function buildFilter(ids, field) {
-    if (ids.length === 0) {
-        return ''
-    }
-    return ids.map((id) => `${field} = "${id}"`).join(' || ')
-}
-
-async function fetchRecordsByIds(pb, options) {
-    const { collection, ids, field, requestKey } = options
-    if (ids.length === 0) {
-        return []
-    }
-
-    const chunks = chunk(ids, 25)
-    const requests = chunks.map((chunkIds, index) => {
-        return pb.collection(collection).getFullList({
-            filter: buildFilter(chunkIds, field),
-            requestKey: `${requestKey}-${index}`,
-        })
-    })
-
-    const results = await Promise.all(requests)
-    return results.flat()
-}
-
-function chunk(source, size) {
-    const output = []
-    for (let index = 0; index < source.length; index += size) {
-        output.push(source.slice(index, index + size))
-    }
-    return output
-}
 
 function mapRoute(route, ratings) {
     return {

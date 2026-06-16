@@ -4,10 +4,7 @@
             <!-- Header with avatar -->
             <div class="dialog-header pa-6 pb-4">
                 <div class="d-flex align-center ga-3">
-                    <div
-                        class="avatar-wrapper"
-                        @click="avatarInput?.click()"
-                    >
+                    <div class="avatar-wrapper" @click="avatarInput?.click()">
                         <v-avatar size="64" class="avatar-ring">
                             <v-img
                                 v-if="avatarPreview"
@@ -22,11 +19,7 @@
                             />
                         </v-avatar>
                         <div class="avatar-overlay">
-                            <v-icon
-                                icon="mdi-camera"
-                                size="18"
-                                color="white"
-                            />
+                            <v-icon icon="mdi-camera" size="18" color="white" />
                         </div>
                         <v-tooltip activator="parent" location="bottom">
                             {{ $t('account.changeAvatar') }}

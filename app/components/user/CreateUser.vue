@@ -32,11 +32,7 @@
                 <v-divider />
 
                 <v-card-text class="pa-6">
-                    <v-form
-                        ref="form"
-                        v-model="valid"
-                        @submit.prevent="submit"
-                    >
+                    <v-form ref="form" v-model="valid" @submit.prevent="submit">
                         <!-- Avatar upload -->
                         <div class="d-flex justify-center mb-6">
                             <div
@@ -159,7 +155,6 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-
     </div>
 </template>
 
@@ -235,10 +230,7 @@ async function submit() {
     saving.value = true
     try {
         // Generate username from firstname + lastname
-        const username = (
-            (user.firstname || '') +
-            (user.name || '')
-        )
+        const username = ((user.firstname || '') + (user.name || ''))
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
 

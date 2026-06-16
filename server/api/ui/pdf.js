@@ -1,41 +1,44 @@
-import { eventHandler, getQuery, readBody, createError } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js'
+import { eventHandler, createError, getRequestURL } from 'h3'
+import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { resolveRouteIds } from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const pb = createPocketBase()
+    const pb = getAuthenticatedPb(event)
     const res = event.node.res
 
-    try {
-        const ids = await resolveRouteIds(event)
-        if (ids.length === 0) {
-            return createError({
-                statusCode: 400,
-                statusMessage: 'No IDs provided.',
-            })
-        }
+    const ids = await resolveRouteIds(event)
+    if (ids.length === 0) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'No IDs provided.',
+        })
+    }
 
+    try {
         const settings = await pb
             .collection('settings')
             .getOne('settings_123456')
 
-        const logoUrl = await pb.files.getURL(settings, settings.sign_image)
-        const logo = await fetchLogo(logoUrl)
-
-        if (!logo) {
-            return createError({
-                statusCode: 500,
-                statusMessage: 'Failed to fetch logo.',
-            })
+        // The sign image is optional — if none is configured (or it fails to
+        // load), the PDF is still generated without the logo.
+        let logo = null
+        if (settings.sign_image) {
+            const logoUrl = pb.files.getURL(settings, settings.sign_image)
+            logo = await fetchLogo(logoUrl)
         }
 
-        if (!settings.application_url) {
-            return createError({
-                statusCode: 500,
-                statusMessage: 'No application url provided.',
-            })
-        }
+        // Prefer the configured application URL; otherwise fall back to the
+        // origin of the incoming request (e.g. localhost in dev, the real
+        // host such as https://dav.aelx.de in production behind the proxy).
+        const applicationUrl = (
+            settings.application_url ||
+            getRequestURL(event, {
+                xForwardedHost: true,
+                xForwardedProto: true,
+            }).origin
+        ).replace(/\/+$/, '')
 
         // ── Layout constants ───────────────────────────────────────────────
         const QR_SIZE = 110 // Rendered size of the QR code in PDF points (square)
@@ -168,7 +171,7 @@ export default eventHandler(async (event) => {
             const qrX = x + 159
             const qrY = y - 9
 
-            const serverUrl = settings.application_url + `/route?id=${id}`
+            const serverUrl = applicationUrl + `/route?id=${id}`
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
                 errorCorrectionLevel: 'H',
                 width: QR_PX,
@@ -199,11 +202,13 @@ export default eventHandler(async (event) => {
             doc.circle(cx, cy, CIRCLE_RADIUS).fill(climbingRoute.color)
             // ──────────────────────────────────────────────────────────────
 
-            doc.image(logo, {
-                fit: [100, 100],
-                y: y + 100,
-                x: x + 165,
-            })
+            if (logo) {
+                doc.image(logo, {
+                    fit: [100, 100],
+                    y: y + 100,
+                    x: x + 165,
+                })
+            }
 
             entryCount++
         }
@@ -211,7 +216,7 @@ export default eventHandler(async (event) => {
         doc.end()
     } catch (error) {
         console.error(error)
-        return createError({ statusCode: 500, statusMessage: 'Server error' })
+        throw createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
 
@@ -225,36 +230,15 @@ function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
 }
 
 async function fetchLogo(url) {
+    if (!url) {
+        return null
+    }
     try {
         const response = await fetch(url)
         if (!response.ok) throw new Error('Failed to fetch logo')
-        const logoBuffer = await response.arrayBuffer()
-        return logoBuffer
+        return await response.arrayBuffer()
     } catch (error) {
-        console.error(error)
-        throw new Error('Failed to fetch logo')
+        console.error('Failed to fetch logo:', error)
+        return null
     }
-}
-
-async function resolveRouteIds(event) {
-    try {
-        const body = await readBody(event)
-        if (body && Array.isArray(body.ids)) {
-            return body.ids
-                .map((value) => (typeof value === 'string' ? value.trim() : ''))
-                .filter(Boolean)
-        }
-    } catch (error) {
-        // ignore body parsing errors and fallback to query string
-    }
-
-    const params = getQuery(event)
-    if (typeof params?.id === 'string') {
-        return params.id
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    }
-
-    return []
 }

@@ -74,11 +74,9 @@ let unsubRole = null
 async function subscribeToRole(roleId) {
     unsubRole?.()?.catch?.(() => {})
     if (!roleId) return
-    unsubRole = await pb
-        .collection('roles')
-        .subscribe(roleId, (e) => {
-            if (e.action === 'update') refreshPermissions()
-        })
+    unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
+        if (e.action === 'update') refreshPermissions()
+    })
 }
 
 async function subscribeToUser(userId) {

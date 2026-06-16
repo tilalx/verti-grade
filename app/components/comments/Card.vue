@@ -13,7 +13,11 @@
             />
             <v-avatar
                 size="32"
-                :color="comment.userAvatar ? undefined : avatarColor(comment.userName)"
+                :color="
+                    comment.userAvatar
+                        ? undefined
+                        : avatarColor(comment.userName)
+                "
                 class="flex-shrink-0"
             >
                 <v-img
@@ -57,8 +61,12 @@
                 <div class="comment-card__comment-wrap">
                     <span
                         class="comment-card__comment"
-                        :class="{ 'comment-card__comment--collapsed': collapsible && !expanded && isLong }"
-                    >{{ comment.comment }}</span>
+                        :class="{
+                            'comment-card__comment--collapsed':
+                                collapsible && !expanded && isLong,
+                        }"
+                        >{{ comment.comment }}</span
+                    >
                     <v-btn
                         v-if="collapsible && isLong"
                         variant="text"
@@ -68,7 +76,11 @@
                         class="mt-1 px-0 text-none d-block"
                         @click="expanded = !expanded"
                     >
-                        {{ expanded ? t('comments.showLess') : t('comments.showMore') }}
+                        {{
+                            expanded
+                                ? t('comments.showLess')
+                                : t('comments.showMore')
+                        }}
                     </v-btn>
                 </div>
             </div>
@@ -88,7 +100,9 @@
                 >
                     {{ comment.routeName }}
                 </NuxtLink>
-                <span v-else class="text-body-2 font-weight-medium">{{ comment.routeName }}</span>
+                <span v-else class="text-body-2 font-weight-medium">{{
+                    comment.routeName
+                }}</span>
             </div>
 
             <!-- Pills: location · difficulty -->
@@ -97,11 +111,19 @@
                     <v-icon size="13">mdi-map-marker</v-icon>
                     {{ comment.location }}
                 </span>
-                <v-tooltip v-if="comment.difficultyLabel" location="top" :text="t('ratings.perceived_difficulty')">
+                <v-tooltip
+                    v-if="comment.difficultyLabel"
+                    location="top"
+                    :text="t('ratings.perceived_difficulty')"
+                >
                     <template #activator="{ props: tooltipProps }">
-                        <span v-bind="tooltipProps" class="comment-card__pill comment-card__pill--primary">
+                        <span
+                            v-bind="tooltipProps"
+                            class="comment-card__pill comment-card__pill--primary"
+                        >
                             <v-icon size="13">mdi-gauge</v-icon>
-                            {{ t('ratings.felt') }} {{ comment.difficultyLabel }}
+                            {{ t('ratings.felt') }}
+                            {{ comment.difficultyLabel }}
                         </span>
                     </template>
                 </v-tooltip>
@@ -340,7 +362,6 @@ function initials(name: string): string {
     color: rgb(var(--v-theme-primary));
     background: rgba(var(--v-theme-primary), 0.08);
 }
-
 
 .comment-card__actions {
     padding: 6px 10px 8px;

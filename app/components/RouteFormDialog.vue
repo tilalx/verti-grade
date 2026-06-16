@@ -100,7 +100,16 @@
                                 density="comfortable"
                             />
                         </v-col>
-                        <v-col v-if="isEditMode" cols="6" style="align-self: stretch; display: flex; align-items: center; justify-content: center;">
+                        <v-col
+                            v-if="isEditMode"
+                            cols="6"
+                            style="
+                                align-self: stretch;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            "
+                        >
                             <v-switch
                                 v-model="form.archived"
                                 :label="$t('climbing.archived')"
@@ -141,7 +150,11 @@
                                 class="color-dot"
                                 :style="{
                                     backgroundColor: c,
-                                    boxShadow: form.color?.toUpperCase() === c.toUpperCase() ? '0 0 0 2px white, 0 0 0 4px ' + c : 'none',
+                                    boxShadow:
+                                        form.color?.toUpperCase() ===
+                                        c.toUpperCase()
+                                            ? '0 0 0 2px white, 0 0 0 4px ' + c
+                                            : 'none',
                                 }"
                                 @click="form.color = c"
                             />
@@ -200,12 +213,24 @@ type VFormHandle = {
 } | null
 
 const fallbackColors = [
-    '#F44336', '#FF9800', '#FFC107',
-    '#4CAF50', '#009688', '#2196F3',
-    '#673AB7', '#E91E63', '#FF5722',
-    '#8BC34A', '#00BCD4', '#795548',
-    '#FFFFFF', '#9E9E9E', '#212121',
-    '#F8BBD0', '#B3E5FC', '#C8E6C9',
+    '#F44336',
+    '#FF9800',
+    '#FFC107',
+    '#4CAF50',
+    '#009688',
+    '#2196F3',
+    '#673AB7',
+    '#E91E63',
+    '#FF5722',
+    '#8BC34A',
+    '#00BCD4',
+    '#795548',
+    '#FFFFFF',
+    '#9E9E9E',
+    '#212121',
+    '#F8BBD0',
+    '#B3E5FC',
+    '#C8E6C9',
 ]
 
 const usedColorsList = ref<string[]>([])
@@ -213,7 +238,11 @@ const defaultPalette = ref<string[]>([])
 
 function hexToRgb(hex: string): [number, number, number] {
     const h = hex.replace('#', '')
-    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+    return [
+        parseInt(h.slice(0, 2), 16),
+        parseInt(h.slice(2, 4), 16),
+        parseInt(h.slice(4, 6), 16),
+    ]
 }
 
 function colorDistance(a: string, b: string): number {
@@ -234,12 +263,16 @@ const similarColors = computed(() => {
 })
 
 const activePalette = computed(() =>
-    colorModified.value && similarColors.value.length ? similarColors.value : defaultPalette.value
+    colorModified.value && similarColors.value.length
+        ? similarColors.value
+        : defaultPalette.value,
 )
 
 async function fetchUsedColors() {
     try {
-        const records = await pb.collection('usedColors').getFullList<{ color: string }>({ fields: 'color' })
+        const records = await pb
+            .collection('usedColors')
+            .getFullList<{ color: string }>({ fields: 'color' })
         usedColorsList.value = records.map((r) => r.color).filter(Boolean)
     } catch {
         usedColorsList.value = []
@@ -247,8 +280,12 @@ async function fetchUsedColors() {
 }
 
 function buildDefaultPalette() {
-    const pool = usedColorsList.value.length ? usedColorsList.value : fallbackColors
-    defaultPalette.value = [...pool].sort(() => Math.random() - 0.5).slice(0, 12)
+    const pool = usedColorsList.value.length
+        ? usedColorsList.value
+        : fallbackColors
+    defaultPalette.value = [...pool]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 12)
 }
 
 const dialogOpen = ref(false)
@@ -331,9 +368,15 @@ const parseCombinedDifficulty = (
 ): { difficulty: number | null; difficulty_sign: boolean | null } => {
     if (!combined) return { difficulty: null, difficulty_sign: null }
     if (combined.endsWith(' +'))
-        return { difficulty: Number(combined.slice(0, -2)), difficulty_sign: true }
+        return {
+            difficulty: Number(combined.slice(0, -2)),
+            difficulty_sign: true,
+        }
     if (combined.endsWith(' -'))
-        return { difficulty: Number(combined.slice(0, -2)), difficulty_sign: false }
+        return {
+            difficulty: Number(combined.slice(0, -2)),
+            difficulty_sign: false,
+        }
     return { difficulty: Number(combined), difficulty_sign: null }
 }
 
@@ -357,7 +400,10 @@ const loadFromRoute = (route: RouteRecord) => {
     originalAnchorPointIsZero.value = Number(route.anchor_point) === 0
 
     form.name = route.name ?? ''
-    form.combinedDifficulty = toCombinedDifficulty(route.difficulty, route.difficulty_sign)
+    form.combinedDifficulty = toCombinedDifficulty(
+        route.difficulty,
+        route.difficulty_sign,
+    )
     form.anchor_point = route.anchor_point ?? null
     form.location = route.location ?? ''
     form.type = route.type ?? ''
@@ -422,7 +468,9 @@ async function submit() {
 
     saving.value = true
     try {
-        const { difficulty, difficulty_sign } = parseCombinedDifficulty(form.combinedDifficulty)
+        const { difficulty, difficulty_sign } = parseCombinedDifficulty(
+            form.combinedDifficulty,
+        )
 
         const payload: Partial<RouteRecord> = {
             name: form.name,

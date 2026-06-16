@@ -17,7 +17,9 @@
                     style="transition: border-color 0.2s"
                 >
                     <v-card-text class="pa-4">
-                        <div class="d-flex align-center justify-space-between mb-3">
+                        <div
+                            class="d-flex align-center justify-space-between mb-3"
+                        >
                             <span class="text-subtitle-2 font-weight-semibold">
                                 {{ asset.label }}
                             </span>
@@ -93,17 +95,36 @@
                                     class="d-flex align-center justify-center"
                                     style="height: 100%; gap: 16px"
                                 >
-                                    <div class="d-flex flex-column align-center">
-                                        <v-icon color="white" size="24" class="mb-1">mdi-upload-outline</v-icon>
-                                        <span class="text-caption text-white">{{ $t('settings.replace') }}</span>
+                                    <div
+                                        class="d-flex flex-column align-center"
+                                    >
+                                        <v-icon
+                                            color="white"
+                                            size="24"
+                                            class="mb-1"
+                                            >mdi-upload-outline</v-icon
+                                        >
+                                        <span class="text-caption text-white">{{
+                                            $t('settings.replace')
+                                        }}</span>
                                     </div>
                                     <div
-                                        v-if="asset.preview.value && !asset.isDirty"
+                                        v-if="
+                                            asset.preview.value &&
+                                            !asset.isDirty
+                                        "
                                         class="d-flex flex-column align-center"
                                         @click.stop="asset.onDelete()"
                                     >
-                                        <v-icon color="error" size="24" class="mb-1">mdi-delete-outline</v-icon>
-                                        <span class="text-caption text-white">{{ $t('settings.removeImage') }}</span>
+                                        <v-icon
+                                            color="error"
+                                            size="24"
+                                            class="mb-1"
+                                            >mdi-delete-outline</v-icon
+                                        >
+                                        <span class="text-caption text-white">{{
+                                            $t('settings.removeImage')
+                                        }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +259,6 @@
                 Save Changes
             </v-btn>
         </div>
-
     </v-container>
 </template>
 

@@ -1,167 +1,168 @@
 <template>
     <v-container fluid>
-                <!-- Filter Bar -->
-                <FilterBar
-                    v-model="searchRouteName"
-                    :search-label="$t('climbing.searchRouteName')"
-                    :active-filter-count="activeFilterCount"
-                    @clear="clearFilters"
-                >
-                    <template #filters>
-                        <v-row density="comfortable">
-                            <v-col cols="12" sm="4">
-                                <v-select
-                                    :label="$t('climbing.difficulty')"
-                                    :items="difficulties"
-                                    v-model="selectedDifficulty"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
-                                />
-                            </v-col>
-                            <v-col cols="12" sm="4">
-                                <v-select
-                                    :label="$t('climbing.type')"
-                                    :items="types"
-                                    v-model="selectedType"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
-                                />
-                            </v-col>
-                            <v-col cols="12" sm="4">
-                                <v-select
-                                    :label="$t('climbing.location')"
-                                    :items="locations"
-                                    v-model="selectedLocation"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
-                                />
-                            </v-col>
-                        </v-row>
-                    </template>
-                </FilterBar>
-
-                <!-- DESKTOP VIEW: Data Table -->
-                <v-data-table-server
-                    v-if="mdAndUp"
-                    class="mt-4"
-                    :headers="headersDesktop"
-                    :items="routes"
-                    :items-length="totalItems"
-                    :loading="loading"
-                    :page="tableOptions.page"
-                    :items-per-page="tableOptions.itemsPerPage"
-                    :sort-by="tableOptions.sortBy"
-                    item-value="id"
-                    density="comfortable"
-                    @update:options="loadRoutes"
-                >
-                    <template #item.color="{ item }">
-                        <v-avatar :color="item.color" size="30" />
-                    </template>
-                    <template #item.name="{ item }">
-                        <div class="d-flex align-center">
-                            <span class="route-name">{{ item.name }}</span>
-                            <v-icon
-                                v-if="item.has_ratings"
-                                color="yellow-darken-2"
-                                size="small"
-                                class="ml-2"
-                                >mdi-star-circle</v-icon
-                            >
-                        </div>
-                    </template>
-                    <template #item.difficulty="{ item }">
-                        <span>{{ formatDifficulty(item) }}</span>
-                    </template>
-                    <template #item.anchor_point="{ item }">
-                        <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
-                    </template>
-                    <template #item.comment="{ item }">
-                        <div class="route-comment">{{ item.comment }}</div>
-                    </template>
-                    <template #item.creator="{ item }">
-                        <div class="creator-chips">
-                            <v-chip
-                                v-for="c in item.creator"
-                                :key="c"
-                                size="small"
-                                class="ma-0"
-                            >{{ c }}</v-chip>
-                        </div>
-                    </template>
-                    <template #item.screw_date="{ item }">
-                        {{ formatDate(item.screw_date) }}
-                    </template>
-                    <template #item.actions="{ item }">
-                        <RouteDetails :route_id="item.id" />
-                    </template>
-                </v-data-table-server>
-
-                <!-- MOBILE VIEW: Card List -->
-                <div v-if="smAndDown">
-                    <v-row class="mt-2">
-                        <v-col
-                            v-for="route in routes"
-                            :key="route.id"
-                            cols="12"
-                        >
-                            <RouteCard :route="route">
-                                <template #actions>
-                                    <RouteDetails :route_id="route.id" />
-                                </template>
-                            </RouteCard>
-                        </v-col>
-                    </v-row>
-
-                    <!-- Infinite scroll sentinel -->
-                    <div ref="sentinelRef" class="pa-4 text-center">
-                        <v-progress-circular
-                            v-if="loading && routes.length > 0"
-                            indeterminate
-                            size="24"
-                            width="2"
-                            color="primary"
+        <!-- Filter Bar -->
+        <FilterBar
+            v-model="searchRouteName"
+            :search-label="$t('climbing.searchRouteName')"
+            :active-filter-count="activeFilterCount"
+            @clear="clearFilters"
+        >
+            <template #filters>
+                <v-row density="comfortable">
+                    <v-col cols="12" sm="4">
+                        <v-select
+                            :label="$t('climbing.difficulty')"
+                            :items="difficulties"
+                            v-model="selectedDifficulty"
+                            item-title="text"
+                            item-value="value"
+                            clearable
+                            hide-details
+                            density="compact"
+                            variant="outlined"
+                            rounded="lg"
                         />
-                    </div>
-                </div>
+                    </v-col>
+                    <v-col cols="12" sm="4">
+                        <v-select
+                            :label="$t('climbing.type')"
+                            :items="types"
+                            v-model="selectedType"
+                            item-title="text"
+                            item-value="value"
+                            clearable
+                            hide-details
+                            density="compact"
+                            variant="outlined"
+                            rounded="lg"
+                        />
+                    </v-col>
+                    <v-col cols="12" sm="4">
+                        <v-select
+                            :label="$t('climbing.location')"
+                            :items="locations"
+                            v-model="selectedLocation"
+                            item-title="text"
+                            item-value="value"
+                            clearable
+                            hide-details
+                            density="compact"
+                            variant="outlined"
+                            rounded="lg"
+                        />
+                    </v-col>
+                </v-row>
+            </template>
+        </FilterBar>
 
-                <!-- Empty State / Skeleton Loader on Mobile -->
-                <v-skeleton-loader
-                    v-if="loading && routes.length === 0 && smAndDown"
-                    type="card"
-                    class="mt-4"
-                    :elevation="0"
-                />
-                <div
-                    v-if="!loading && routes.length === 0 && smAndDown"
-                    class="text-center pa-8 mt-4"
-                >
-                    <v-icon size="x-large" class="mb-4"
-                        >mdi-magnify-remove-outline</v-icon
+        <!-- DESKTOP VIEW: Data Table -->
+        <v-data-table-server
+            v-if="mdAndUp"
+            class="mt-4"
+            :headers="headersDesktop"
+            :items="routes"
+            :items-length="totalItems"
+            :loading="loading"
+            :page="tableOptions.page"
+            :items-per-page="tableOptions.itemsPerPage"
+            :sort-by="tableOptions.sortBy"
+            item-value="id"
+            density="comfortable"
+            @update:options="loadRoutes"
+        >
+            <template #item.color="{ item }">
+                <v-avatar :color="item.color" size="30" />
+            </template>
+            <template #item.name="{ item }">
+                <div class="d-flex align-center">
+                    <span class="route-name">{{ item.name }}</span>
+                    <v-icon
+                        v-if="item.has_ratings"
+                        color="yellow-darken-2"
+                        size="small"
+                        class="ml-2"
+                        >mdi-star-circle</v-icon
                     >
-                    <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
                 </div>
+            </template>
+            <template #item.difficulty="{ item }">
+                <span>{{ formatDifficulty(item) }}</span>
+            </template>
+            <template #item.anchor_point="{ item }">
+                <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
+            </template>
+            <template #item.comment="{ item }">
+                <div class="route-comment">{{ item.comment }}</div>
+            </template>
+            <template #item.creator="{ item }">
+                <div class="creator-chips">
+                    <v-chip
+                        v-for="c in item.creator"
+                        :key="c"
+                        size="small"
+                        class="ma-0"
+                        >{{ c }}</v-chip
+                    >
+                </div>
+            </template>
+            <template #item.screw_date="{ item }">
+                {{ formatDate(item.screw_date) }}
+            </template>
+            <template #item.actions="{ item }">
+                <RouteDetails :route_id="item.id" />
+            </template>
+        </v-data-table-server>
+
+        <!-- MOBILE VIEW: Card List -->
+        <div v-if="smAndDown">
+            <v-row class="mt-2">
+                <v-col v-for="route in routes" :key="route.id" cols="12">
+                    <RouteCard :route="route">
+                        <template #actions>
+                            <RouteDetails :route_id="route.id" />
+                        </template>
+                    </RouteCard>
+                </v-col>
+            </v-row>
+
+            <!-- Infinite scroll sentinel -->
+            <div ref="sentinelRef" class="pa-4 text-center">
+                <v-progress-circular
+                    v-if="loading && routes.length > 0"
+                    indeterminate
+                    size="24"
+                    width="2"
+                    color="primary"
+                />
+            </div>
+        </div>
+
+        <!-- Empty State / Skeleton Loader on Mobile -->
+        <v-skeleton-loader
+            v-if="loading && routes.length === 0 && smAndDown"
+            type="card"
+            class="mt-4"
+            :elevation="0"
+        />
+        <div
+            v-if="!loading && routes.length === 0 && smAndDown"
+            class="text-center pa-8 mt-4"
+        >
+            <v-icon size="x-large" class="mb-4"
+                >mdi-magnify-remove-outline</v-icon
+            >
+            <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
+        </div>
     </v-container>
 </template>
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
-import type { AverageRatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+import type {
+    AverageRatingRecord,
+    RouteListItem,
+    RouteRecord,
+} from '~/types/models'
 import {
     formatDifficulty,
     formatAnchorPoint,
@@ -368,7 +369,6 @@ function formatDate(date: string | null | undefined) {
     if (!date) return ''
     return new Date(date).toLocaleDateString()
 }
-
 </script>
 
 <style scoped>

@@ -17,7 +17,11 @@
                     />
                     <NuxtImg
                         v-else
-                        :src="theme.global.current.value.dark ? '/verti-grade-dark.svg' : '/verti-grade-light.svg'"
+                        :src="
+                            theme.global.current.value.dark
+                                ? '/verti-grade-dark.svg'
+                                : '/verti-grade-light.svg'
+                        "
                         alt="Logo"
                         :style="defaultLogoStyle"
                         height="36"

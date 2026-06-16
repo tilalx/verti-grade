@@ -39,7 +39,11 @@
             </div>
             <div v-if="difficulty" class="route-card__difficulty">
                 <span>{{ difficultySplit.base }}</span
-                ><span v-if="difficultySplit.sign" class="route-card__difficulty-sign">{{ difficultySplit.sign }}</span>
+                ><span
+                    v-if="difficultySplit.sign"
+                    class="route-card__difficulty-sign"
+                    >{{ difficultySplit.sign }}</span
+                >
             </div>
         </div>
 
@@ -66,7 +70,7 @@
                 <v-icon size="15" class="route-card__meta-icon"
                     >mdi-account-hard-hat</v-icon
                 >
-                <div class="d-flex flex-wrap" style="gap: 4px 4px;">
+                <div class="d-flex flex-wrap" style="gap: 4px 4px">
                     <v-chip
                         v-for="c in route.creator"
                         :key="c"

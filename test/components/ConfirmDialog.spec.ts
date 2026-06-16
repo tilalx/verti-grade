@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import ConfirmDialog from '~/components/shared/ConfirmDialog.vue';
+import ConfirmDialog from '~/components/ConfirmDialog.vue';
 
 const dialogStub = {
   props: ['modelValue'],
@@ -9,21 +9,18 @@ const dialogStub = {
 
 const simpleSlotStub = { template: '<div><slot /></div>' };
 const buttonStub = {
+  props: ['loading'],
   template: '<button @click="$emit(\'click\')"><slot /></button>',
 };
 
-type ConfirmDialogVM = {
-  open: (title: string, message: string, options?: Record<string, unknown>) => Promise<boolean>;
-  dialog: boolean;
-  title: string;
-  message: string;
-  options: { color: string; width: number };
-  agree: () => void;
-  cancel: () => void;
-};
-
-function createWrapper() {
+function createWrapper(props: Record<string, unknown> = {}) {
   return mount(ConfirmDialog, {
+    props: {
+      modelValue: true,
+      title: 'Delete route',
+      message: 'Do you really want to delete this route?',
+      ...props,
+    },
     global: {
       mocks: {
         $t: (key: string) => key,
@@ -31,8 +28,7 @@ function createWrapper() {
       stubs: {
         'v-dialog': dialogStub,
         'v-card': simpleSlotStub,
-        'v-toolbar': simpleSlotStub,
-        'v-toolbar-title': simpleSlotStub,
+        'v-card-title': simpleSlotStub,
         'v-card-text': simpleSlotStub,
         'v-card-actions': simpleSlotStub,
         'v-btn': buttonStub,
@@ -43,36 +39,46 @@ function createWrapper() {
 }
 
 describe('ConfirmDialog', () => {
-  it('opens a dialog and merges custom options', async () => {
+  it('renders the title and message', () => {
     const wrapper = createWrapper();
-    const vm = wrapper.vm as unknown as ConfirmDialogVM;
-    const promise = vm.open(
-      'Delete route',
+
+    expect(wrapper.text()).toContain('Delete route');
+    expect(wrapper.text()).toContain(
       'Do you really want to delete this route?',
-      { color: 'error', width: 520 },
     );
-
-    expect(vm.dialog).toBe(true);
-    expect(vm.title).toBe('Delete route');
-    expect(vm.message).toBe('Do you really want to delete this route?');
-    expect(vm.options).toMatchObject({
-      color: 'error',
-      width: 520,
-    });
-
-    vm.agree();
-    await expect(promise).resolves.toBe(true);
-    expect(vm.dialog).toBe(false);
   });
 
-  it('resolves false when the dialog is cancelled', async () => {
+  it('emits confirm when the confirm button is clicked', async () => {
     const wrapper = createWrapper();
-    const vm = wrapper.vm as unknown as ConfirmDialogVM;
-    const promise = vm.open('Confirm', 'Please confirm');
+    const buttons = wrapper.findAll('button');
 
-    vm.cancel();
+    // Last button is the confirm action.
+    await buttons[buttons.length - 1].trigger('click');
 
-    await expect(promise).resolves.toBe(false);
-    expect(vm.dialog).toBe(false);
+    expect(wrapper.emitted('confirm')).toBeTruthy();
+  });
+
+  it('closes the dialog when cancel is clicked', async () => {
+    const wrapper = createWrapper();
+    const buttons = wrapper.findAll('button');
+
+    // First button is the cancel action.
+    await buttons[0].trigger('click');
+
+    const updates = wrapper.emitted('update:modelValue');
+    expect(updates).toBeTruthy();
+    expect(updates![updates!.length - 1]).toEqual([false]);
+  });
+
+  it('falls back to the default delete label when confirmText is absent', () => {
+    const wrapper = createWrapper();
+
+    expect(wrapper.text()).toContain('actions.delete');
+  });
+
+  it('uses a custom confirm label when provided', () => {
+    const wrapper = createWrapper({ confirmText: 'Remove' });
+
+    expect(wrapper.text()).toContain('Remove');
   });
 });

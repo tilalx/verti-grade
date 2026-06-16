@@ -48,6 +48,9 @@ const sampleResponse = {
 describe('useClimbingAnalytics', () => {
     beforeEach(() => {
         fetchMock.mockReset()
+        globalThis.__POCKETBASE_CLIENT__ = {
+            authStore: { token: 'test-token' },
+        }
     })
 
     it('starts with loading=false and no data', () => {

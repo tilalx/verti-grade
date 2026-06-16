@@ -56,6 +56,17 @@ export interface RouteComment extends RatingRecord {
     comment: string
 }
 
+export interface PermissionRecord extends BaseRecord {
+    name: string
+    label: string
+}
+
+export interface RoleRecord extends BaseRecord {
+    name: string
+    description?: string | null
+    permissions?: RecordId[] | null
+}
+
 export interface UserRecord extends BaseRecord {
     username: string
     email?: string
@@ -64,7 +75,7 @@ export interface UserRecord extends BaseRecord {
     firstname?: string | null
     lastname?: string | null
     avatar?: string | null
-    role?: string | null
+    role?: RecordId | null
 }
 
 export interface SettingsRecord extends BaseRecord {
@@ -88,6 +99,8 @@ export type PocketBaseRecord =
     | RouteListItem
     | RatingRecord
     | RouteComment
+    | PermissionRecord
+    | RoleRecord
     | UserRecord
     | SettingsRecord
     | AverageRatingRecord

@@ -1,9 +1,9 @@
 import { createError, eventHandler } from 'h3'
-import { createPocketBase } from '../../utils/pb-server.js'
+import { getAuthenticatedPb } from '../../utils/pb-server.js'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
-export default eventHandler(async () => {
-    const pb = createPocketBase()
+export default eventHandler(async (event) => {
+    const pb = getAuthenticatedPb(event)
 
     try {
         const [routeRecords, ratingRecords] = await Promise.all([
