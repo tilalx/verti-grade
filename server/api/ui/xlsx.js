@@ -2,7 +2,7 @@ import { eventHandler, getQuery, readBody, createError } from 'h3'
 import { createPocketBase } from '../../utils/pb-server.js'
 
 export default eventHandler(async (event) => {
-    const { default: ExcelJS } = await import('exceljs')
+    const { Workbook } = await import('@cj-tech-master/excelts')
 
     const pb = createPocketBase()
     const res = event.node.res
@@ -22,7 +22,7 @@ export default eventHandler(async (event) => {
             climbingRoutes.push(climbingRoute)
         }
 
-        const workbook = new ExcelJS.Workbook()
+        const workbook = new Workbook()
         const worksheet = workbook.addWorksheet('Climbing Routes')
 
         // Define columns
