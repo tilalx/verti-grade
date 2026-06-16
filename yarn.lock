@@ -6830,13 +6830,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"install@npm:^0.13.0":
-  version: 0.13.0
-  resolution: "install@npm:0.13.0"
-  checksum: 10c0/364d7d1e9404ff7ae3015dee7266b4ffb0e2aae348474b7ffd3e42fcbb78b37e29848e18ca94f93166f6ddb248be0f775fbed87cc92dafb018c289a86d010cf1
-  languageName: node
-  linkType: hard
-
 "ioredis@npm:^5.10.1":
   version: 5.10.1
   resolution: "ioredis@npm:5.10.1"
@@ -8138,7 +8131,6 @@ __metadata:
     echarts: "npm:6.1.0"
     h3: "npm:1.15.11"
     happy-dom: "npm:20.10.3"
-    install: "npm:^0.13.0"
     nuxt: "npm:^4.4.8"
     pdfkit: "npm:0.19.1"
     pocketbase: "npm:^0.27.0"

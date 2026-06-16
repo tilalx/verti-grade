@@ -83,7 +83,9 @@ migrate(
         app.save(collection)
 
         // Re-fetch the collection so Record gets proper context
-        const savedCollection = app.findCollectionByNameOrId('roles_collection_id')
+        const savedCollection = app.findCollectionByNameOrId(
+            'roles_collection_id',
+        )
 
         // Seed default roles
         const adminRole = new Record(savedCollection)

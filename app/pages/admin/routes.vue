@@ -33,7 +33,11 @@
             </v-col>
         </v-row>
 
-        <RouteFormDialog ref="routeFormRef" @saved="reloadRoutes" @deleted="reloadRoutes" />
+        <RouteFormDialog
+            ref="routeFormRef"
+            @saved="reloadRoutes"
+            @deleted="reloadRoutes"
+        />
         <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
 
         <v-row>
@@ -88,10 +92,18 @@
                                     rounded="lg"
                                 />
                             </v-col>
-                            <v-col cols="6" sm="auto" class="d-flex align-center">
+                            <v-col
+                                cols="6"
+                                sm="auto"
+                                class="d-flex align-center"
+                            >
                                 <v-chip
-                                    :color="displayArchived ? 'warning' : undefined"
-                                    :variant="displayArchived ? 'tonal' : 'outlined'"
+                                    :color="
+                                        displayArchived ? 'warning' : undefined
+                                    "
+                                    :variant="
+                                        displayArchived ? 'tonal' : 'outlined'
+                                    "
                                     prepend-icon="mdi-archive-outline"
                                     @click="displayArchived = !displayArchived"
                                 >
@@ -128,6 +140,11 @@
                                 @click="printSelected"
                                 color="success"
                                 variant="tonal"
+                                :loading="exportingFormat === 'pdf'"
+                                :disabled="
+                                    !!exportingFormat &&
+                                    exportingFormat !== 'pdf'
+                                "
                             >
                                 <v-icon start>mdi-printer</v-icon>
                                 {{ $t('actions.print') }}
@@ -137,6 +154,11 @@
                                 @click="exportSelectedExcel"
                                 color="success"
                                 variant="tonal"
+                                :loading="exportingFormat === 'xlsx'"
+                                :disabled="
+                                    !!exportingFormat &&
+                                    exportingFormat !== 'xlsx'
+                                "
                             >
                                 <v-icon start>mdi-file-excel</v-icon>
                                 XLSX
@@ -146,6 +168,11 @@
                                 @click="exportSelectedJson"
                                 color="success"
                                 variant="tonal"
+                                :loading="exportingFormat === 'json'"
+                                :disabled="
+                                    !!exportingFormat &&
+                                    exportingFormat !== 'json'
+                                "
                             >
                                 <v-icon start>mdi-code-json</v-icon>
                                 JSON
@@ -230,7 +257,8 @@
                                 :key="creator"
                                 size="small"
                                 class="ma-0"
-                            >{{ creator }}</v-chip>
+                                >{{ creator }}</v-chip
+                            >
                         </div>
                     </template>
                     <template #item.score="{ item }">
@@ -696,14 +724,22 @@ const archiveSelected = async () => {
     }
 }
 
+const exportingFormat = ref(null)
+
 const downloadExport = async (endpoint, extension, mimeType) => {
     const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length) return
+    if (!ids.length || exportingFormat.value) return
 
+    exportingFormat.value = extension
     try {
+        const headers = { 'Content-Type': 'application/json' }
+        if (pb.authStore.token) {
+            headers.Authorization = pb.authStore.token
+        }
+
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ ids }),
         })
 
@@ -727,6 +763,8 @@ const downloadExport = async (endpoint, extension, mimeType) => {
         document.body.removeChild(link)
     } catch (error) {
         console.error(`Export error (${extension}):`, error)
+    } finally {
+        exportingFormat.value = null
     }
 }
 

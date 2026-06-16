@@ -80,6 +80,7 @@ export function useClimbingAnalytics() {
     const hasData = computed(() => normalized.value.summary.totalRoutes > 0)
 
     const requestFetch = useRequestFetch()
+    const pb = usePocketbase()
 
     const load = async () => {
         loading.value = true
@@ -88,6 +89,11 @@ export function useClimbingAnalytics() {
         try {
             const response = await requestFetch<ClimbingAnalyticsResponse>(
                 '/api/admin/analytics',
+                {
+                    headers: pb.authStore.token
+                        ? { Authorization: pb.authStore.token }
+                        : undefined,
+                },
             )
 
             analytics.value = normalizeResponse(response)

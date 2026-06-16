@@ -28,7 +28,9 @@ export default defineNuxtConfig({
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
         prefersColorSchemeOptions: {
-          cookieName: 'color-scheme', // Stores user's preferred color scheme
+          cookie: {
+            name: 'color-scheme', // Stores user's preferred color scheme
+          },
           useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection

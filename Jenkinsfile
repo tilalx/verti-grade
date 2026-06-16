@@ -18,7 +18,8 @@ pipeline {
             steps {
                 script {
                     sh 'docker run --rm --privileged tonistiigi/binfmt --install all'
-                    def builderName = "builder-${env.BUILD_ID}-${env.BRANCH_NAME}"
+                    def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
+                    def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
                     sh "docker buildx create --name ${builderName} --use"
                     sh 'docker buildx inspect --bootstrap'
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
@@ -53,7 +54,7 @@ pipeline {
                     } else if (branchName.startsWith("PR-")) {
                         tagName = "pr-${branchName.split('-')[1]}"
                     } else {
-                        tagName = branchName
+                        tagName = branchName.replaceAll(/[^a-zA-Z0-9._-]/, '-')
                     }
 
                     // Compute APP_VERSION: for releases use the semver, otherwise use git-describe
@@ -80,7 +81,8 @@ pipeline {
     post {
         always {
             script {
-                def builderName = "builder-${env.BUILD_ID}-${env.BRANCH_NAME}"
+                def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
+                def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
                 sh "docker buildx rm ${builderName}"
             }
             cleanWs()

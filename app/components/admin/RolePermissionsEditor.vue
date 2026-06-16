@@ -31,9 +31,7 @@
                         <v-chip
                             size="small"
                             :color="
-                                role.name === 'admin'
-                                    ? 'primary'
-                                    : 'default'
+                                role.name === 'admin' ? 'primary' : 'default'
                             "
                             variant="tonal"
                         >
@@ -47,20 +45,15 @@
                     >
                         <v-checkbox-btn
                             :model-value="hasPermission(role, perm.id)"
-                            :disabled="
-                                role.name === 'admin' || saving
-                            "
+                            :disabled="role.name === 'admin' || saving"
                             density="compact"
                             class="d-inline-flex"
-                            @update:model-value="
-                                togglePermission(role, perm)
-                            "
+                            @update:model-value="togglePermission(role, perm)"
                         />
                     </td>
                 </tr>
             </tbody>
         </v-table>
-
     </v-card>
 </template>
 
@@ -127,4 +120,3 @@ async function fetchData() {
 
 onMounted(fetchData)
 </script>
-

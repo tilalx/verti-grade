@@ -311,7 +311,6 @@
             :loading="bulkDeleting"
             @confirm="bulkDelete"
         />
-
     </v-container>
 </template>
 
@@ -665,7 +664,6 @@ onMounted(async () => {
         }
     })
 })
-
 </script>
 
 <style scoped>

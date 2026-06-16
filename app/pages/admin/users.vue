@@ -206,7 +206,6 @@
         <div class="mt-8">
             <AdminRolePermissionsEditor />
         </div>
-
     </v-container>
 </template>
 
@@ -297,7 +296,6 @@ function buildFilter() {
     // Note: role is a relation ID, filter works directly with the ID
     return parts.join(' && ')
 }
-
 
 async function fetchList(append = false) {
     if (append) {
@@ -423,7 +421,6 @@ function formatDate(date) {
         day: 'numeric',
     })
 }
-
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
