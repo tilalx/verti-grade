@@ -2042,7 +2042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxt/kit@npm:4.4.8, @nuxt/kit@npm:^4.2.0, @nuxt/kit@npm:^4.3.1, @nuxt/kit@npm:^4.4.2, @nuxt/kit@npm:^4.4.4":
+"@nuxt/kit@npm:4.4.8, @nuxt/kit@npm:^4.2.0, @nuxt/kit@npm:^4.4.2, @nuxt/kit@npm:^4.4.4, @nuxt/kit@npm:^4.4.8":
   version: 4.4.8
   resolution: "@nuxt/kit@npm:4.4.8"
   dependencies:
@@ -7398,6 +7398,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"local-pkg@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "local-pkg@npm:1.2.1"
+  dependencies:
+    mlly: "npm:^1.7.4"
+    pkg-types: "npm:^2.3.0"
+    quansync: "npm:^0.2.11"
+  checksum: 10c0/d21ccfc2595b2eddf7369f19797533573feb06820d8b5766467902a7a54e36b3a1f2b8cc2aa4481a2ad432c8e798576eabfac2f1ec0646a8e11a68694c2ef9d4
+  languageName: node
+  linkType: hard
+
 "locate-path@npm:^5.0.0":
   version: 5.0.0
   resolution: "locate-path@npm:5.0.0"
@@ -8144,7 +8155,7 @@ __metadata:
     vue: "npm:3.5.38"
     vue-qrcode-reader: "npm:^5.7.3"
     vuetify: "npm:4.1.1"
-    vuetify-nuxt-module: "npm:v1.0.0-beta.11"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.1"
   languageName: unknown
   linkType: soft
 
@@ -9978,6 +9989,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:^7.8.4":
+  version: 7.8.5
+  resolution: "semver@npm:7.8.5"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/b1f3127a5be8125a94f37188b361c212466c292c6910adce3ec106cff5dc211ccaedc4739c11bb70fda59d6fc1f040a9bca289f4e093451521a2372e5231fe0c
+  languageName: node
+  linkType: hard
+
 "send@npm:^1.2.0":
   version: 1.2.1
   resolution: "send@npm:1.2.1"
@@ -11536,23 +11556,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-beta.11":
-  version: 1.0.0-beta.11
-  resolution: "vuetify-nuxt-module@npm:1.0.0-beta.11"
+"vuetify-nuxt-module@npm:v1.0.0-rc.1":
+  version: 1.0.0-rc.1
+  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.1"
   dependencies:
-    "@nuxt/kit": "npm:^4.3.1"
+    "@nuxt/kit": "npm:^4.4.8"
     "@vuetify/loader-shared": "npm:^2.1.2"
     "@vuetify/unplugin-styles": "npm:^1.0.0-beta.11"
     defu: "npm:^6.1.7"
-    local-pkg: "npm:^1.1.2"
+    local-pkg: "npm:^1.2.1"
     pathe: "npm:^2.0.3"
     perfect-debounce: "npm:^2.1.0"
-    semver: "npm:^7.7.4"
-    ufo: "npm:^1.6.3"
+    semver: "npm:^7.8.4"
+    ufo: "npm:^1.6.4"
     unconfig: "npm:^7.5.0"
   peerDependencies:
     vuetify: ^3.4.0 || ^4.0.0
-  checksum: 10c0/44d32f559b5476bbbf3db82270193fdccc410dc06c4b410e977c0a5a0af7a69ee7f80384742a7c81f3048569f531c7a201f7c7c3979ba333791da6cd2f869ca9
+  checksum: 10c0/c6dd866880d3ea60771c286a05fd4e589d81ef0c39670c9ae5ca7cbacaa891664a759d2223aaa7f2b7c86db7e4bd116a45c3bafc611ca920d6a806ee3f6a32ec
   languageName: node
   linkType: hard
 
