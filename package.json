@@ -39,7 +39,7 @@
         "vitest": "4.1.9",
         "vue": "3.5.38",
         "vue-qrcode-reader": "^5.7.3",
-        "vuetify": "4.1.1",
+        "vuetify": "4.1.2",
         "vuetify-nuxt-module": "v1.0.0-rc.1"
     },
     "browserslist": [
