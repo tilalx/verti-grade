@@ -57,20 +57,18 @@
                     }}</span>
                 </div>
 
-                <a
-                    v-if="versionUrl"
-                    :href="versionUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="status-pill status-pill--link"
-                >
-                    <v-icon size="11">mdi-tag-outline</v-icon>
-                    <span class="status-label">{{ appVersion }}</span>
-                </a>
-                <div v-else class="status-pill">
-                    <v-icon size="11">mdi-tag-outline</v-icon>
-                    <span class="status-label">{{ appVersion }}</span>
-                </div>
+                <NotificationsReleaseNotesDialog :version="appVersion">
+                    <template #activator="{ props: activatorProps }">
+                        <button
+                            v-bind="activatorProps"
+                            type="button"
+                            class="status-pill status-pill--link"
+                        >
+                            <v-icon size="11">mdi-tag-outline</v-icon>
+                            <span class="status-label">{{ appVersion }}</span>
+                        </button>
+                    </template>
+                </NotificationsReleaseNotesDialog>
             </div>
 
             <!-- Right: copyright -->
@@ -101,22 +99,6 @@ const pb = usePocketbase()
 const config = useRuntimeConfig()
 const appVersion = config.public.appVersion
 const currentYear = computed(() => new Date().getFullYear())
-
-const versionUrl = computed(() => {
-    const v = appVersion
-    if (!v) return null
-    // semver: "1.8.2" or "v1.8.2"
-    if (/^v?\d+\.\d+/.test(v)) {
-        const tag = v.startsWith('v') ? v : `v${v}`
-        return `https://github.com/tilalx/verti-grade/releases/tag/${tag}`
-    }
-    // git hash: "git-abc1234" or bare hex hash
-    const hash = v.replace(/^git-/, '')
-    if (/^[0-9a-f]{4,40}$/i.test(hash)) {
-        return `https://github.com/tilalx/verti-grade/commit/${hash}`
-    }
-    return null
-})
 
 const { data: health } = await useAsyncData(
     'footer:health',
@@ -252,6 +234,8 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
     text-decoration: none;
     cursor: pointer;
     transition: background 0.15s ease;
+    font: inherit;
+    appearance: none;
 }
 
 .status-pill--link:hover {

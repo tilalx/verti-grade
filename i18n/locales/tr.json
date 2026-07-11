@@ -155,7 +155,10 @@
     "table": {
         "actions": "İşlemler",
         "no_data": "Veri Yok",
-        "created_at": "Oluşturulma Tarihi"
+        "created_at": "Oluşturulma Tarihi",
+        "sort_by": "Sıralama ölçütü",
+        "sort_asc": "Artan",
+        "sort_desc": "Azalan"
     },
     "actions": {
         "search": "Ara",
@@ -236,7 +239,13 @@
         "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
         "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
         "archiveMoreItems": "Seçili öğeleri arşivlemek istediğinizden emin misiniz?",
-        "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin."
+        "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin.",
+        "releaseNotes": {
+            "title": "Sürüm notları",
+            "installedVersion": "Yüklü sürüm: {0}",
+            "installed": "Yüklü",
+            "error": "Sürüm notları yüklenemedi."
+        }
     },
     "filter": {
         "title": "Filtre",

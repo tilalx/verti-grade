@@ -1,10 +1,13 @@
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import NewVersionAvailable from '~/components/notifications/newVersionAvailable.vue';
 
 const containerStub = { template: '<div><slot /></div>' };
 const rowStub = containerStub;
 const colStub = containerStub;
 const alertStub = containerStub;
+const releaseDialogStub = {
+  template: '<div><slot name="activator" :props="{}" /></div>',
+};
 
 function createWrapper(appVersion = '1.0.0') {
   globalThis.__NUXT_RUNTIME_CONFIG__ = {
@@ -20,6 +23,7 @@ function createWrapper(appVersion = '1.0.0') {
         'v-row': rowStub,
         'v-col': colStub,
         'v-alert': alertStub,
+        NotificationsReleaseNotesDialog: releaseDialogStub,
       },
       mocks: {
         $t: (key: string) => key,
@@ -30,6 +34,11 @@ function createWrapper(appVersion = '1.0.0') {
 
 describe('newVersionAvailable notification', () => {
   it('compares semantic versions correctly', () => {
+    globalThis.$fetch.mockResolvedValue({
+      tag_name: 'v0.0.0',
+      draft: false,
+      prerelease: false,
+    });
     const wrapper = createWrapper();
     const vm = wrapper.vm as unknown as {
       compareVersions: (a: string, b: string) => number;
@@ -39,17 +48,20 @@ describe('newVersionAvailable notification', () => {
     expect(vm.compareVersions('1.3.0', '1.2.9')).toBe(1);
     expect(vm.compareVersions('1.2', '1.2.5')).toBe(-1);
     expect(vm.compareVersions('1.2.0', '1.2')).toBe(0);
+    // rolling builds: git-describe suffix is ignored
+    expect(vm.compareVersions('v1.9.0', '1.9.0-5-gabc1234')).toBe(0);
+    expect(vm.compareVersions('1.9.1', '1.9.0-5-gabc1234')).toBe(1);
   });
 
   it('marks newVersionAvailable true when GitHub reports a newer stable release', async () => {
     globalThis.$fetch
       .mockResolvedValueOnce({
-        name: 'v1.1.0',
+        tag_name: 'v1.1.0',
         draft: false,
         prerelease: false,
       })
       .mockResolvedValueOnce({
-        name: 'v1.0.0',
+        tag_name: 'v1.0.0',
         draft: false,
         prerelease: false,
       });
@@ -60,7 +72,8 @@ describe('newVersionAvailable notification', () => {
       checkForNewVersion: () => Promise<void>;
     };
 
-    await vm.checkForNewVersion();
+    // onMounted triggers the first check automatically
+    await flushPromises();
     expect(globalThis.$fetch).toHaveBeenNthCalledWith(
       1,
       'https://api.github.com/repos/tilalx/verti-grade/releases/latest',
@@ -73,6 +86,12 @@ describe('newVersionAvailable notification', () => {
   });
 
   it('fetches GitHub release info and filters drafts/prereleases', async () => {
+    const fetchMock = globalThis.$fetch.mockResolvedValue({
+      tag_name: 'v1.1.0',
+      draft: false,
+      prerelease: false,
+    });
+
     const wrapper = createWrapper('1.0.0');
     const vm = wrapper.vm as unknown as {
       getGhVersion: (
@@ -83,12 +102,6 @@ describe('newVersionAvailable notification', () => {
       compareVersions: (a: string, b: string) => number;
     };
 
-    const fetchMock = globalThis.$fetch.mockResolvedValue({
-      name: 'v1.1.0',
-      draft: false,
-      prerelease: false,
-    });
-
     const result = await vm.getGhVersion('1.0.0', 'tilalx', 'verti-grade');
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -97,7 +110,7 @@ describe('newVersionAvailable notification', () => {
     expect(result).toBe(true);
 
     globalThis.$fetch.mockResolvedValue({
-      name: 'v1.2.0',
+      tag_name: 'v1.2.0',
       draft: true,
       prerelease: false,
     });

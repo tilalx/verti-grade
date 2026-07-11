@@ -386,30 +386,34 @@
                                                 >{{ label.text }}</span
                                             >
                                         </div>
-                                        <div class="heatmap-grid">
-                                            <v-tooltip
+                                        <div
+                                            class="heatmap-grid"
+                                            @mouseover="onHeatmapCellHover"
+                                            @mouseleave="heatmapTooltipVisible = false"
+                                        >
+                                            <div
                                                 v-for="cell in heatmapCells"
                                                 :key="cell.date"
-                                                :text="cell.label"
-                                                location="top"
-                                            >
-                                                <template
-                                                    #activator="{ props: tp }"
-                                                >
-                                                    <div
-                                                        v-bind="tp"
-                                                        class="heatmap-cell"
-                                                        :class="[
-                                                            `heatmap-level-${cell.level}`,
-                                                            {
-                                                                'heatmap-cell--outside':
-                                                                    !cell.inYear,
-                                                            },
-                                                        ]"
-                                                    />
-                                                </template>
-                                            </v-tooltip>
+                                                class="heatmap-cell"
+                                                :class="[
+                                                    `heatmap-level-${cell.level}`,
+                                                    {
+                                                        'heatmap-cell--outside':
+                                                            !cell.inYear,
+                                                    },
+                                                ]"
+                                                :data-label="cell.label"
+                                            />
                                         </div>
+                                        <teleport to="body">
+                                            <div
+                                                v-if="heatmapTooltipVisible"
+                                                class="heatmap-float-tooltip"
+                                                :style="heatmapTooltipStyle"
+                                            >
+                                                {{ heatmapTooltipText }}
+                                            </div>
+                                        </teleport>
                                     </div>
                                 </div>
 
@@ -567,6 +571,26 @@ watch(error, (hasError) => {
 onMounted(() => load())
 
 const showAllSetters = ref(false)
+
+// ── Heatmap tooltip (single floating instance instead of 365+ v-tooltip) ──
+const heatmapTooltipVisible = ref(false)
+const heatmapTooltipText = ref('')
+const heatmapTooltipStyle = ref({})
+
+function onHeatmapCellHover(event) {
+    const label = event.target?.dataset?.label
+    if (label) {
+        const rect = event.target.getBoundingClientRect()
+        heatmapTooltipText.value = label
+        heatmapTooltipStyle.value = {
+            left: `${rect.left + rect.width / 2}px`,
+            top: `${rect.top - 6}px`,
+        }
+        heatmapTooltipVisible.value = true
+    } else {
+        heatmapTooltipVisible.value = false
+    }
+}
 
 // ── Summary cards ─────────────────────────────────────────────────────────
 
@@ -801,6 +825,7 @@ const heatmapCells = computed(() => {
 
     const cells = []
     const cursor = new Date(startDate)
+    const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
     while (cursor <= endDate) {
         // Use local date components — toISOString() returns UTC and causes
         // off-by-one errors for users in timezones ahead of UTC (e.g. UTC+1/+2).
@@ -819,9 +844,7 @@ const heatmapCells = computed(() => {
                     : count >= 2
                       ? 2
                       : 1
-        const formatted = new Intl.DateTimeFormat(undefined, {
-            dateStyle: 'medium',
-        }).format(new Date(iso + 'T00:00:00'))
+        const formatted = dateFormatter.format(new Date(iso + 'T00:00:00'))
         cells.push({
             date: iso,
             count,

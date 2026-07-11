@@ -155,7 +155,10 @@
     "table": {
         "actions": "Aktionen",
         "no_data": "Keine Daten",
-        "created_at": "Erstellt am"
+        "created_at": "Erstellt am",
+        "sort_by": "Sortieren nach",
+        "sort_asc": "Aufsteigend",
+        "sort_desc": "Absteigend"
     },
     "actions": {
         "search": "Suchen",
@@ -236,7 +239,13 @@
         "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
         "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
         "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
-        "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version."
+        "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version.",
+        "releaseNotes": {
+            "title": "Versionshinweise",
+            "installedVersion": "Installierte Version: {0}",
+            "installed": "Installiert",
+            "error": "Versionshinweise konnten nicht geladen werden."
+        }
     },
     "filter": {
         "title": "Filter",

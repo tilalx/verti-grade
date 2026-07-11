@@ -383,8 +383,7 @@ function mapReview(
     r: RatingRecord & { expand?: Record<string, unknown> },
 ): ReviewDisplay {
     const user = r.expand?.user as
-        | { name?: string; username?: string; avatar?: string }
-        | undefined
+        { name?: string; username?: string; avatar?: string } | undefined
     const userName = user?.name || user?.username || t('comments.anonymous')
     const userAvatar =
         user?.avatar && user && r.expand?.user

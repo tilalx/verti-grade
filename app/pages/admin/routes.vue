@@ -50,6 +50,14 @@
                 >
                     <template #filters>
                         <v-row density="comfortable" align="center">
+                            <!-- Sorting for the mobile card list (desktop sorts via table headers) -->
+                            <v-col v-if="isMobile" cols="12" sm="6">
+                                <RouteSortControl
+                                    :model-value="tableOptions.sortBy"
+                                    :items="sortItemsMobile"
+                                    @update:modelValue="onMobileSortChange"
+                                />
+                            </v-col>
                             <v-col cols="6" sm="3">
                                 <v-select
                                     :label="$t('climbing.difficulty')"
@@ -425,24 +433,20 @@ const allRouteIdsCache = ref(createAllRouteIdsCache())
 
 const pageSizeOptions = [10, 25, 50, 100]
 
-const averageRatings = ref(new Map())
-const averageRatingsLoaded = ref(false)
-const averageRatingsLoading = ref(false)
-
 const routeFormRef = useTemplateRef('routeFormRef')
 const importRouteRef = useTemplateRef('importRouteRef')
 
 const tableHeaders = computed(() => [
     { title: '', key: 'selected', sortable: false, width: 56 },
     { title: t('climbing.color'), key: 'color', sortable: false },
-    { title: t('climbing.routename'), key: 'name', sortable: false },
-    { title: t('climbing.difficulty'), key: 'difficulty', sortable: false },
-    { title: t('climbing.anchor_point'), key: 'anchor_point', sortable: false },
+    { title: t('climbing.routename'), key: 'name' },
+    { title: t('climbing.difficulty'), key: 'difficulty' },
+    { title: t('climbing.anchor_point'), key: 'anchor_point' },
     { title: t('climbing.comment'), key: 'comment', sortable: false },
     { title: t('routes.route_setter'), key: 'creator', sortable: false },
-    { title: t('climbing.location'), key: 'location', sortable: false },
-    { title: t('climbing.type'), key: 'type', sortable: false },
-    { title: t('ratings.score'), key: 'score', sortable: false },
+    { title: t('climbing.location'), key: 'location' },
+    { title: t('climbing.type'), key: 'type' },
+    { title: t('ratings.score'), key: 'score' },
     {
         title: t('table.actions'),
         key: 'actions',
@@ -526,7 +530,22 @@ const removeSelectedIds = (ids) => {
     applySelectionToRoutes()
 }
 
-const toPbSortRoutes = (sortByArr) => toPbSort(sortByArr, '-created')
+const toPbSortRoutes = (sortByArr) =>
+    toPbSort(sortByArr, '-created', { score: 'average_rating' })
+
+const sortItemsMobile = computed(() => [
+    { title: t('table.created_at'), key: 'screw_date', defaultOrder: 'desc' },
+    { title: t('ratings.score'), key: 'score', defaultOrder: 'desc' },
+    { title: t('climbing.routename'), key: 'name' },
+    { title: t('climbing.difficulty'), key: 'difficulty' },
+    { title: t('climbing.anchor_point'), key: 'anchor_point' },
+    { title: t('climbing.location'), key: 'location' },
+    { title: t('climbing.type'), key: 'type' },
+])
+
+const onMobileSortChange = (sortBy) => {
+    void loadRoutes({ page: 1, sortBy })
+}
 
 const loadAllRouteIds = async () => {
     const cacheKey = buildSelectionCacheKey()
@@ -587,34 +606,6 @@ const generateFilename = () => {
     return `${name}-${timestamp}`
 }
 
-const loadAverageRatings = async (force = false) => {
-    if (averageRatingsLoading.value) {
-        return
-    }
-
-    if (averageRatingsLoaded.value && !force) {
-        return
-    }
-
-    averageRatingsLoading.value = true
-
-    try {
-        const list = await pb
-            .collection('averageRating')
-            .getFullList({ fields: 'id,average_rating' })
-        averageRatings.value = new Map(
-            list
-                .filter((record) => Boolean(record?.id))
-                .map((record) => [record.id, record.average_rating ?? null]),
-        )
-        averageRatingsLoaded.value = true
-    } catch (error) {
-        console.error('Failed to load average ratings:', error)
-    } finally {
-        averageRatingsLoading.value = false
-    }
-}
-
 const loadRoutes = async (options = {}) => {
     const { page, itemsPerPage, sortBy } = options
 
@@ -633,33 +624,25 @@ const loadRoutes = async (options = {}) => {
     loading.value = true
 
     try {
-        const [list] = await Promise.all([
-            pb
-                .collection('routes')
-                .getList(tableOptions.page, tableOptions.itemsPerPage, {
-                    filter: pbFilter.value || undefined,
-                    sort: toPbSortRoutes(tableOptions.sortBy),
-                    requestKey: 'adminRoutesList',
-                }),
-            loadAverageRatings(),
-        ])
-
-        const averageMap = averageRatings.value
+        const list = await pb
+            .collection('averageRating')
+            .getList(tableOptions.page, tableOptions.itemsPerPage, {
+                filter: pbFilter.value || undefined,
+                sort: toPbSortRoutes(tableOptions.sortBy),
+                requestKey: 'adminRoutesList',
+            })
 
         const normalizedRoutes = list.items.map((route) => {
-            const average = averageMap.get(route.id)
-            const baseScore =
-                typeof route.score === 'number' ? route.score : null
-            const resolvedScore =
-                typeof average === 'number' ? average : baseScore
+            const hasRatings =
+                Number(route.ratings_count ?? 0) > 0 &&
+                typeof route.average_rating === 'number'
 
             return {
                 ...route,
                 comment: typeof route.comment === 'string' ? route.comment : '',
                 creator: normalizeCreators(route.creator),
-                score: resolvedScore,
-                has_ratings:
-                    typeof average === 'number' && !Number.isNaN(average),
+                score: hasRatings ? route.average_rating : null,
+                has_ratings: hasRatings,
                 selected: selectedRouteIds.value.has(route.id),
             }
         })
@@ -821,7 +804,6 @@ const queueReload = () => {
     subscriptionDebounceTimer = setTimeout(() => {
         void (async () => {
             invalidateAllRouteIdsCache()
-            await loadAverageRatings(true)
             await reloadRoutes()
         })()
     }, 250)
@@ -837,7 +819,7 @@ onMounted(async () => {
     })
     await Promise.all([
         subscribe('routes', queueReload),
-        subscribe('averageRating', queueReload),
+        subscribe('ratings', queueReload),
     ])
 })
 

@@ -9,6 +9,14 @@
         >
             <template #filters>
                 <v-row density="comfortable">
+                    <!-- Sorting for the mobile card list (desktop sorts via table headers) -->
+                    <v-col v-if="smAndDown" cols="12" sm="4">
+                        <RouteSortControl
+                            :model-value="tableOptions.sortBy"
+                            :items="sortItemsMobile"
+                            @update:modelValue="onMobileSortChange"
+                        />
+                    </v-col>
                     <v-col cols="12" sm="4">
                         <v-select
                             :label="$t('climbing.difficulty')"
@@ -105,6 +113,9 @@
                     >
                 </div>
             </template>
+            <template #item.score="{ item }">
+                {{ formatScore(item) }}
+            </template>
             <template #item.screw_date="{ item }">
                 {{ formatDate(item.screw_date) }}
             </template>
@@ -158,17 +169,14 @@
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
-import type {
-    AverageRatingRecord,
-    RouteListItem,
-    RouteRecord,
-} from '~/types/models'
+import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 import {
     formatDifficulty,
     formatAnchorPoint,
+    formatScore,
     normalizeCreators,
 } from '~/utils/formatting'
-import { toPbSort } from '~/utils/sorting'
+import { toPbSort, type SortOption } from '~/utils/sorting'
 
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -198,12 +206,6 @@ useHead({
     ],
 })
 
-type SortDirection = 'asc' | 'desc' | undefined
-interface SortOption {
-    key: string
-    order?: SortDirection
-}
-
 interface TableOptions {
     page: number
     itemsPerPage: number
@@ -232,6 +234,7 @@ const headersDesktop: Array<{
     { title: t('climbing.anchor_point'), key: 'anchor_point' },
     { title: t('climbing.comment'), key: 'comment' },
     { title: t('climbing.creators'), key: 'creator' },
+    { title: t('ratings.score'), key: 'score' },
     { title: t('table.created_at'), key: 'screw_date' },
     { title: t('table.actions'), key: 'actions', sortable: false },
 ]
@@ -241,8 +244,30 @@ const pbFilter = computed(() => {
     return base ? `archived = false && ${base}` : 'archived = false'
 })
 
+const sortItemsMobile = computed(() => [
+    {
+        title: t('table.created_at'),
+        key: 'screw_date',
+        defaultOrder: 'desc' as const,
+    },
+    {
+        title: t('ratings.score'),
+        key: 'score',
+        defaultOrder: 'desc' as const,
+    },
+    { title: t('climbing.routename'), key: 'name' },
+    { title: t('climbing.difficulty'), key: 'difficulty' },
+    { title: t('climbing.anchor_point'), key: 'anchor_point' },
+])
+
+function onMobileSortChange(sortBy: SortOption[]) {
+    tableOptions.sortBy = sortBy
+    tableOptions.page = 1
+    void loadRoutes({}, { append: false })
+}
+
 const toPbSortIndex = (sortByArr: SortOption[]) =>
-    toPbSort(sortByArr, '-screw_date')
+    toPbSort(sortByArr, '-screw_date', { score: 'average_rating' })
 
 async function loadRoutes(
     options: Partial<TableOptions> = {},
@@ -259,8 +284,8 @@ async function loadRoutes(
 
     try {
         const res = await pb
-            .collection('routes')
-            .getList<RouteRecord>(
+            .collection('averageRating')
+            .getList<RouteScoreRecord>(
                 tableOptions.page,
                 tableOptions.itemsPerPage,
                 {
@@ -269,33 +294,15 @@ async function loadRoutes(
                 },
             )
 
-        const routeIds = res.items.map((route) => route.id)
-        let averageMap = new Map<string, number | null>()
-
-        if (routeIds.length > 0) {
-            try {
-                const filter = routeIds.map((id) => `id = "${id}"`).join(' || ')
-                const avgRecords = await pb
-                    .collection('averageRating')
-                    .getFullList<AverageRatingRecord>({
-                        filter,
-                        fields: 'id,average_rating',
-                    })
-                averageMap = new Map(
-                    avgRecords.map((r) => [r.id, r.average_rating ?? null]),
-                )
-            } catch {
-                // ratings are optional — don't block route display
-            }
-        }
-
         const newRoutes: RouteListItem[] = res.items.map((route) => {
-            const avg = averageMap.get(route.id)
+            const hasRatings =
+                Number(route.ratings_count ?? 0) > 0 &&
+                typeof route.average_rating === 'number'
             return {
                 ...route,
                 creator: normalizeCreators(route.creator),
-                has_ratings: typeof avg === 'number' && !Number.isNaN(avg),
-                score: typeof avg === 'number' ? avg : undefined,
+                has_ratings: hasRatings,
+                score: hasRatings ? route.average_rating : undefined,
             }
         })
 

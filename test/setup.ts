@@ -1,5 +1,9 @@
 import { beforeEach, vi } from 'vitest';
-import { ref as vueRef } from 'vue';
+import {
+  ref as vueRef,
+  onMounted as vueOnMounted,
+  watch as vueWatch,
+} from 'vue';
 
 type VitestMock = ReturnType<typeof vi.fn>;
 type RuntimeConfig = { public?: Record<string, unknown> };
@@ -17,6 +21,8 @@ declare global {
   var usePocketbase: () => unknown;
   var useI18n: () => { t: (key: string) => string };
   var ref: typeof vueRef;
+  var onMounted: typeof vueOnMounted;
+  var watch: typeof vueWatch;
 }
 
 const defaultRuntimeConfig = {
@@ -45,6 +51,16 @@ if (!('ref' in globalThis)) {
   vi.stubGlobal('ref', vueRef);
 } else {
   globalThis.ref = vueRef;
+}
+if (!('onMounted' in globalThis)) {
+  vi.stubGlobal('onMounted', vueOnMounted);
+} else {
+  globalThis.onMounted = vueOnMounted;
+}
+if (!('watch' in globalThis)) {
+  vi.stubGlobal('watch', vueWatch);
+} else {
+  globalThis.watch = vueWatch;
 }
 
 beforeEach(() => {

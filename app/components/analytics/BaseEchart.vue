@@ -87,7 +87,6 @@ watch(
         }
         chartInstance.setOption(next, true)
     },
-    { deep: true },
 )
 
 watch(

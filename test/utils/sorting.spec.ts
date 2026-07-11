@@ -40,4 +40,33 @@ describe('toPbSort', () => {
         // @ts-expect-error intentional bad input
         expect(toPbSort(null)).toBe('-created')
     })
+
+    it('maps column keys to field names via keyMap', () => {
+        expect(
+            toPbSort([{ key: 'score', order: 'asc' }], '-created', {
+                score: 'average_rating',
+            }),
+        ).toBe('average_rating')
+    })
+
+    it('keeps the desc prefix on mapped keys', () => {
+        expect(
+            toPbSort([{ key: 'score', order: 'desc' }], '-created', {
+                score: 'average_rating',
+            }),
+        ).toBe('-average_rating')
+    })
+
+    it('leaves keys not present in keyMap untouched', () => {
+        expect(
+            toPbSort(
+                [
+                    { key: 'name', order: 'asc' },
+                    { key: 'score', order: 'desc' },
+                ],
+                '-created',
+                { score: 'average_rating' },
+            ),
+        ).toBe('name,-average_rating')
+    })
 })

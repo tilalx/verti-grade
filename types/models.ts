@@ -89,9 +89,9 @@ export interface SettingsRecord extends BaseRecord {
     organization_unit_name?: string | null
 }
 
-export interface AverageRatingRecord extends BaseRecord {
-    route_id: RecordId
+export interface RouteScoreRecord extends RouteRecord {
     average_rating?: number | null
+    ratings_count?: number
 }
 
 export type PocketBaseRecord =
@@ -103,7 +103,7 @@ export type PocketBaseRecord =
     | RoleRecord
     | UserRecord
     | SettingsRecord
-    | AverageRatingRecord
+    | RouteScoreRecord
 
 export interface ListResult<T> {
     page: number
