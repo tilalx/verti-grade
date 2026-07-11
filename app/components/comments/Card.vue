@@ -35,15 +35,28 @@
                 <span class="comment-card__date">{{ formattedDate }}</span>
             </div>
 
-            <v-rating
+            <!-- Static star row: far cheaper than a readonly v-rating -->
+            <div
                 v-if="comment.rating != null"
-                :model-value="comment.rating"
-                readonly
-                density="compact"
-                active-color="yellow-darken-2"
-                color="grey-lighten-2"
                 class="flex-shrink-0 comment-card__rating"
-            />
+                role="img"
+                :aria-label="`${comment.rating}/5`"
+            >
+                <v-icon
+                    v-for="star in 5"
+                    :key="star"
+                    size="18"
+                    :color="
+                        star <= comment.rating
+                            ? 'yellow-darken-2'
+                            : 'grey-lighten-2'
+                    "
+                >
+                    {{
+                        star <= comment.rating ? 'mdi-star' : 'mdi-star-outline'
+                    }}
+                </v-icon>
+            </div>
         </div>
 
         <v-divider />
@@ -73,7 +86,7 @@
                         density="compact"
                         size="x-small"
                         :color="expanded ? 'default' : 'primary'"
-                        class="mt-1 px-0 text-none d-block"
+                        class="mt-1 px-0 text-none d-block justify-start"
                         @click="expanded = !expanded"
                     >
                         {{
@@ -303,6 +316,7 @@ function initials(name: string): string {
 
 .comment-card__meta-row--full {
     width: 100%;
+    align-items: flex-start;
 }
 
 .comment-card__meta-icon {
@@ -335,12 +349,13 @@ function initials(name: string): string {
     text-decoration: underline !important;
 }
 
-/* Inline pill row */
+/* Inline pill row — indent to match text column (icon 15px + gap 7px) */
 .comment-card__pills {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 2px;
+    padding-left: 22px;
 }
 
 .comment-card__pill :deep(.v-icon) {

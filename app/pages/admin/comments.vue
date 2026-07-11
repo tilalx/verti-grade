@@ -15,7 +15,7 @@
                     class="stat-chip pa-2 px-3 text-center"
                 >
                     <div class="text-h6 font-weight-bold text-primary">
-                        {{ statsData.length }}
+                        {{ stats.totalReviews }}
                     </div>
                     <div class="text-caption text-medium-emphasis">
                         {{ t('comments.totalReviews') }}
@@ -247,35 +247,42 @@
                 sm="6"
                 lg="4"
             >
-                <CommentsCard
-                    :comment="comment"
-                    selectable
-                    :selected="!!selectedMap[comment.id]"
-                    show-route
-                    @toggle-select="toggleSelect(comment.id)"
-                >
-                    <template #actions>
-                        <v-btn
-                            icon
-                            size="small"
-                            variant="text"
-                            @click="openEdit(comment)"
-                        >
-                            <v-icon size="18">mdi-pencil-outline</v-icon>
-                            <v-tooltip activator="parent" location="top">{{
-                                t('actions.edit')
-                            }}</v-tooltip>
-                        </v-btn>
-                        <CommentsDeleteComment
-                            :commentId="comment.id"
-                            @comment-deleted="onCommentDeleted(comment.id)"
-                        />
-                    </template>
-                </CommentsCard>
+                <VirtualWindow :estimated-height="240">
+                    <CommentsCard
+                        :comment="comment"
+                        selectable
+                        :selected="!!selectedMap[comment.id]"
+                        show-route
+                        @toggle-select="toggleSelect(comment.id)"
+                    >
+                        <template #actions>
+                            <v-btn
+                                icon
+                                size="small"
+                                variant="text"
+                                @click="openEdit(comment)"
+                            >
+                                <v-icon size="18">mdi-pencil-outline</v-icon>
+                                <v-tooltip activator="parent" location="top">{{
+                                    t('actions.edit')
+                                }}</v-tooltip>
+                            </v-btn>
+                            <v-btn
+                                icon
+                                color="error"
+                                size="small"
+                                variant="text"
+                                @click="openDelete(comment)"
+                            >
+                                <v-icon size="18">mdi-delete</v-icon>
+                            </v-btn>
+                        </template>
+                    </CommentsCard>
+                </VirtualWindow>
             </v-col>
         </v-row>
 
-        <!-- Result count + load more -->
+        <!-- Result count + infinite-scroll sentinel -->
         <div v-if="!loading && comments.length" class="text-center mt-4">
             <p class="text-caption text-medium-emphasis mb-3">
                 {{
@@ -285,15 +292,13 @@
                     })
                 }}
             </p>
-            <v-btn
-                v-if="hasMore"
-                variant="tonal"
-                rounded="lg"
-                :loading="loadingMore"
-                @click="loadMore"
-            >
-                {{ t('actions.load_more') }}
-            </v-btn>
+            <div ref="sentinelRef" class="load-sentinel">
+                <v-progress-circular
+                    v-if="loadingMore"
+                    indeterminate
+                    size="24"
+                />
+            </div>
         </div>
 
         <!-- ── Edit Dialog (shared ReviewFormDialog component) ────────────── -->
@@ -301,6 +306,15 @@
             v-model="editDialog"
             :review="editingReview"
             @saved="onReviewSaved"
+        />
+
+        <!-- ── Single Delete Dialog (shared across all cards) ──────────────── -->
+        <ConfirmDialog
+            v-model="deleteDialog"
+            :title="t('actions.confirm')"
+            :message="t('notifications.deleteItem')"
+            :loading="deleting"
+            @confirm="confirmDelete"
         />
 
         <!-- ── Bulk Delete Dialog ───────────────────────────────────────────── -->
@@ -339,8 +353,8 @@ const bulkDeleting = ref(false)
 
 // Display list (current page accumulation)
 const comments = ref([])
-// Lightweight stats dataset (id + rating + created, no expand)
-const statsData = ref([])
+// Header stats, aggregated server-side by the ratingsStats view
+const stats = ref({ totalReviews: 0, avgRating: '—', thisWeek: 0, lowRated: 0 })
 
 // Pagination
 const page = ref(1)
@@ -409,26 +423,6 @@ const sortOptions = computed(() => [
     { label: t('comments.sortLowest'), value: 'lowest' },
 ])
 
-// ── Stats (computed from lightweight dataset — no expand, all records) ──────
-
-const stats = computed(() => {
-    const data = statsData.value
-    if (!data.length) return { avgRating: '—', thisWeek: 0, lowRated: 0 }
-
-    const sum = data.reduce((acc, c) => acc + (c.rating ?? 0), 0)
-    const avgRating = (sum / data.length).toFixed(1)
-
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-    const thisWeek = data.filter(
-        (c) => new Date(c.created).getTime() > weekAgo,
-    ).length
-    const lowRated = data.filter(
-        (c) => c.rating !== null && c.rating <= 2,
-    ).length
-
-    return { avgRating, thisWeek, lowRated }
-})
-
 // ── Query builders ─────────────────────────────────────────────────────────
 
 function buildFilter(searchTerm) {
@@ -468,6 +462,19 @@ function buildSort() {
 
 // ── Data fetching ──────────────────────────────────────────────────────────
 
+// Trim expanded records to what mapComment actually reads
+const LIST_FIELDS = [
+    '*',
+    'expand.route_id.id',
+    'expand.route_id.name',
+    'expand.route_id.location',
+    'expand.user.id',
+    'expand.user.collectionId',
+    'expand.user.name',
+    'expand.user.username',
+    'expand.user.avatar',
+].join(',')
+
 function mapComment(c) {
     return {
         ...c,
@@ -487,17 +494,35 @@ function mapComment(c) {
     }
 }
 
-// Lightweight: fetch all records with minimal fields for stats (no expand)
+// Single-row aggregate from the ratingsStats view — one tiny request instead
+// of downloading the whole collection to count client-side.
 const fetchStats = async () => {
     try {
-        const data = await pb.collection('ratings').getFullList({
-            fields: 'id,rating,created',
+        const result = await pb.collection('ratingsStats').getList(1, 1, {
+            skipTotal: true,
             requestKey: 'commentsStats',
         })
-        statsData.value = data
+        const rec = result.items[0]
+        if (!rec) return
+        stats.value = {
+            totalReviews: Number(rec.totalReviews) || 0,
+            // View aggregates come back as JSON values; AVG is null when empty
+            avgRating:
+                rec.avgRating != null ? Number(rec.avgRating).toFixed(1) : '—',
+            thisWeek: Number(rec.thisWeek) || 0,
+            lowRated: Number(rec.lowRated) || 0,
+        }
     } catch (err) {
         if (err?.isAbort) return
     }
+}
+
+// Coalesce stats refreshes: bulk operations and realtime bursts trigger one
+// trailing refresh instead of one request per event.
+let statsDebounce = null
+function scheduleStatsRefresh() {
+    clearTimeout(statsDebounce)
+    statsDebounce = setTimeout(() => fetchStats(), 500)
 }
 
 // Paginated list with server-side filtering and sorting
@@ -517,6 +542,7 @@ const fetchList = async (append = false) => {
                 sort: buildSort(),
                 filter: buildFilter(search.value.trim()),
                 expand: 'route_id,user',
+                fields: LIST_FIELDS,
                 requestKey: 'commentsList',
             })
         totalItems.value = result.totalItems
@@ -535,7 +561,40 @@ const fetchList = async (append = false) => {
 async function loadMore() {
     page.value++
     await fetchList(true)
+    // Re-arm the sentinel: observe() fires immediately, so if it is still in
+    // range another page loads until the viewport is filled
+    await nextTick()
+    if (sentinelRef.value && scrollObserver) {
+        scrollObserver.unobserve(sentinelRef.value)
+        scrollObserver.observe(sentinelRef.value)
+    }
 }
+
+// ── Infinite scroll ────────────────────────────────────────────────────────
+
+const sentinelRef = ref(null)
+let scrollObserver = null
+
+function maybeLoadMore() {
+    if (loading.value || loadingMore.value || !hasMore.value) return
+    loadMore()
+}
+
+// The sentinel unmounts whenever the list re-renders empty (filter changes),
+// so (re)observe the element itself instead of setting up once on mount
+watch(sentinelRef, (el) => {
+    scrollObserver?.disconnect()
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    if (!scrollObserver) {
+        scrollObserver = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) maybeLoadMore()
+            },
+            { rootMargin: '400px 0px' },
+        )
+    }
+    scrollObserver.observe(el)
+})
 
 // ── Watchers ───────────────────────────────────────────────────────────────
 
@@ -574,15 +633,37 @@ function onReviewSaved(updated) {
         })
     }
     showSnackbar(t('notifications.success.edit'))
-    fetchStats()
+    scheduleStatsRefresh()
 }
 
-// ── Single comment deleted (from CommentsDeleteComment component) ────────────
+// ── Single delete (one shared ConfirmDialog for all cards) ─────────────────
 
-function onCommentDeleted(id) {
-    comments.value = comments.value.filter((c) => c.id !== id)
-    totalItems.value = Math.max(0, totalItems.value - 1)
-    fetchStats()
+const deleteDialog = ref(false)
+const deleting = ref(false)
+const deleteTarget = ref(null)
+
+function openDelete(comment) {
+    deleteTarget.value = comment
+    deleteDialog.value = true
+}
+
+async function confirmDelete() {
+    if (!deleteTarget.value) return
+    deleting.value = true
+    try {
+        const id = deleteTarget.value.id
+        await pb.collection('ratings').delete(id)
+        comments.value = comments.value.filter((c) => c.id !== id)
+        totalItems.value = Math.max(0, totalItems.value - 1)
+        deleteDialog.value = false
+        deleteTarget.value = null
+        scheduleStatsRefresh()
+    } catch (err) {
+        console.error('Error deleting comment:', err)
+        showSnackbar(t('notifications.error.generic'), 'error')
+    } finally {
+        deleting.value = false
+    }
 }
 
 // ── Bulk delete ────────────────────────────────────────────────────────────
@@ -591,14 +672,17 @@ async function bulkDelete() {
     bulkDeleting.value = true
     try {
         const ids = Object.keys(selectedMap)
-        await Promise.all(ids.map((id) => pb.collection('ratings').delete(id)))
+        // Single batch request instead of one DELETE per record
+        const batch = pb.createBatch()
+        ids.forEach((id) => batch.collection('ratings').delete(id))
+        await batch.send()
         // Remove from local list — avoid full refetch
         comments.value = comments.value.filter((c) => !ids.includes(c.id))
         totalItems.value = Math.max(0, totalItems.value - ids.length)
         showSnackbar(t('notifications.success.delete'))
         clearSelection()
         bulkDeleteDialog.value = false
-        fetchStats()
+        scheduleStatsRefresh()
     } catch (err) {
         console.error('Error bulk deleting:', err)
         showSnackbar(t('notifications.error.generic'), 'error')
@@ -631,7 +715,7 @@ onMounted(async () => {
         if (e.action === 'delete') {
             comments.value = comments.value.filter((c) => c.id !== e.record.id)
             totalItems.value = Math.max(0, totalItems.value - 1)
-            fetchStats()
+            scheduleStatsRefresh()
         } else if (e.action === 'create') {
             totalItems.value++
             // Prepend to list only when showing newest-first on the first "page"
@@ -641,12 +725,13 @@ onMounted(async () => {
                         .collection('ratings')
                         .getOne(e.record.id, {
                             expand: 'route_id,user',
+                            fields: LIST_FIELDS,
                             requestKey: null,
                         })
                     comments.value = [mapComment(rec), ...comments.value]
                 } catch {}
             }
-            fetchStats()
+            scheduleStatsRefresh()
         } else if (e.action === 'update') {
             const idx = comments.value.findIndex((c) => c.id === e.record.id)
             if (idx !== -1) {
@@ -655,14 +740,22 @@ onMounted(async () => {
                         .collection('ratings')
                         .getOne(e.record.id, {
                             expand: 'route_id,user',
+                            fields: LIST_FIELDS,
                             requestKey: null,
                         })
                     comments.value[idx] = mapComment(rec)
                 } catch {}
-                fetchStats()
+                scheduleStatsRefresh()
             }
         }
     })
+})
+
+onBeforeUnmount(() => {
+    clearTimeout(searchDebounce)
+    clearTimeout(statsDebounce)
+    scrollObserver?.disconnect()
+    scrollObserver = null
 })
 </script>
 
@@ -704,6 +797,11 @@ onMounted(async () => {
         flex: 1 1 0;
         min-width: 0;
     }
+}
+
+/* Observable target even when the loader is hidden */
+.load-sentinel {
+    min-height: 32px;
 }
 
 /* Bulk action bar that slides in at the bottom of the filter card */

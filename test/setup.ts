@@ -2,6 +2,7 @@ import { beforeEach, vi } from 'vitest';
 import {
   ref as vueRef,
   onMounted as vueOnMounted,
+  onBeforeUnmount as vueOnBeforeUnmount,
   watch as vueWatch,
 } from 'vue';
 
@@ -22,6 +23,7 @@ declare global {
   var useI18n: () => { t: (key: string) => string };
   var ref: typeof vueRef;
   var onMounted: typeof vueOnMounted;
+  var onBeforeUnmount: typeof vueOnBeforeUnmount;
   var watch: typeof vueWatch;
 }
 
@@ -56,6 +58,11 @@ if (!('onMounted' in globalThis)) {
   vi.stubGlobal('onMounted', vueOnMounted);
 } else {
   globalThis.onMounted = vueOnMounted;
+}
+if (!('onBeforeUnmount' in globalThis)) {
+  vi.stubGlobal('onBeforeUnmount', vueOnBeforeUnmount);
+} else {
+  globalThis.onBeforeUnmount = vueOnBeforeUnmount;
 }
 if (!('watch' in globalThis)) {
   vi.stubGlobal('watch', vueWatch);

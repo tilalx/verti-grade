@@ -389,7 +389,9 @@
                                         <div
                                             class="heatmap-grid"
                                             @mouseover="onHeatmapCellHover"
-                                            @mouseleave="heatmapTooltipVisible = false"
+                                            @mouseleave="
+                                                heatmapTooltipVisible = false
+                                            "
                                         >
                                             <div
                                                 v-for="cell in heatmapCells"
@@ -825,7 +827,9 @@ const heatmapCells = computed(() => {
 
     const cells = []
     const cursor = new Date(startDate)
-    const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
+    const dateFormatter = new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium',
+    })
     while (cursor <= endDate) {
         // Use local date components — toISOString() returns UTC and causes
         // off-by-one errors for users in timezones ahead of UTC (e.g. UTC+1/+2).
