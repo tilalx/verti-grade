@@ -13,6 +13,11 @@ vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
 
 vi.stubGlobal('ref', vueRef)
 
+vi.stubGlobal('useI18n', () => ({ t: (key: string) => key }))
+
+const notifyErrorMock = vi.fn()
+vi.stubGlobal('useNotification', () => ({ error: notifyErrorMock }))
+
 // PocketBase mock
 let pbMock: any
 

@@ -84,6 +84,7 @@
                                 <v-img
                                     v-if="user.avatarUrl"
                                     :src="user.avatarUrl"
+                                    :alt="user.username"
                                     cover
                                 />
                                 <span

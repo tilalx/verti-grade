@@ -116,6 +116,10 @@ const route = useRoute()
 
 definePageMeta({ layout: 'blank', auth: false })
 
+useHead({
+    title: t('page.title.resetPassword'),
+})
+
 let _settings = null
 try {
     _settings = await pb.collection('settings').getOne('settings_123456')

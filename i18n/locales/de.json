@@ -62,6 +62,7 @@
         "settings": "Einstellungen",
         "route_setter": "Routen Schrauber",
         "screwed_at": "Geschraubt am",
+        "selectAllError": "Alle Routen konnten nicht ausgewählt werden.",
         "types": {
             "route": "Route",
             "boulder": "Boulder"
@@ -150,7 +151,8 @@
         "comment": "Kommentar",
         "climber_reviews": "Kletterer Bewertungen",
         "felt": "gefühlt",
-        "perceived_difficulty": "Gefühlte Schwierigkeit"
+        "perceived_difficulty": "Gefühlte Schwierigkeit",
+        "loadError": "Bewertungen konnten nicht geladen werden."
     },
     "table": {
         "actions": "Aktionen",
@@ -176,7 +178,8 @@
         "select_all": "Alle auswählen",
         "deselect_all": "Alle abwählen",
         "back_to_home": "Zurück zur Startseite",
-        "load_more": "Mehr laden"
+        "load_more": "Mehr laden",
+        "close": "Schließen"
     },
     "inventory": {
         "title": "Routeninventur",
@@ -200,6 +203,7 @@
         "cameraError": "Auf die Gerätekamera konnte nicht zugegriffen werden. Bitte Kamerazugriff erlauben oder ein anderes Gerät verwenden.",
         "restoreSuccess": "Route {name} wurde reaktiviert.",
         "restoreError": "Fehler beim Reaktivieren der Route.",
+        "storageWarning": "Der Scan-Fortschritt konnte auf diesem Gerät nicht gespeichert werden. Ihr Fortschritt könnte verloren gehen, wenn Sie diese Seite verlassen.",
         "showInstructions": "Anleitung anzeigen",
         "instructionsTitle": "Inventur-Anleitung",
         "instructionsIntro": "Folge diesen Schritten, um alle Routen-QR-Codes zu scannen.",
@@ -276,7 +280,10 @@
             "index": "Kletterrouten - Verti-Grade",
             "comments": "Kommentare - Verti-Grade",
             "users": "Benutzer - Verti-Grade",
-            "dashboard": "Routenverwaltung - Verti-Grade"
+            "dashboard": "Routenverwaltung - Verti-Grade",
+            "login": "Anmelden - Verti-Grade",
+            "resetPassword": "Passwort zurücksetzen - Verti-Grade",
+            "notFound": "Seite nicht gefunden - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -343,7 +350,8 @@
         "recentlyJoined": "Diese Woche beigetreten",
         "noUsers": "Keine Benutzer gefunden",
         "noUsersHint": "Suche oder Filter anpassen",
-        "showing": "{n} von {total} Benutzern"
+        "showing": "{n} von {total} Benutzern",
+        "rolesLoadError": "Rollen konnten nicht geladen werden."
     },
     "permissions": {
         "title": "Rollenberechtigungen",
@@ -358,7 +366,8 @@
             "run_inventory": "Inventur durchführen"
         },
         "updated": "Berechtigungen aktualisiert.",
-        "updateError": "Fehler beim Aktualisieren der Berechtigungen."
+        "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
+        "loadError": "Ihre Berechtigungen konnten nicht geladen werden. Einige Funktionen sind möglicherweise nicht verfügbar."
     },
     "time": {
         "justNow": "Gerade eben",
@@ -370,6 +379,15 @@
         "changed": "Geändert",
         "revertChange": "Änderung zurücksetzen",
         "removeImage": "Entfernen",
-        "replace": "Ersetzen"
+        "replace": "Ersetzen",
+        "clickToUpload": "Zum Hochladen klicken",
+        "loadError": "Einstellungen konnten nicht geladen werden.",
+        "initError": "Einstellungen konnten nicht initialisiert werden."
+    },
+    "errors": {
+        "notFound": {
+            "title": "Seite nicht gefunden",
+            "subtitle": "Die angeforderte Seite konnte nicht gefunden werden."
+        }
     }
 }

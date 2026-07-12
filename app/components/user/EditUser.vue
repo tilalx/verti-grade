@@ -9,6 +9,7 @@
                             <v-img
                                 v-if="avatarPreview"
                                 :src="avatarPreview"
+                                :alt="$t('account.changeAvatar')"
                                 cover
                             />
                             <v-icon
@@ -214,6 +215,8 @@ function initAvatarPreview(user) {
     }
 }
 
+const { error: notifyError } = useNotification()
+
 // ── Roles ─────────────────────────────────────────────────────────────────
 async function fetchRoles() {
     try {
@@ -223,6 +226,7 @@ async function fetchRoles() {
         })
     } catch (err) {
         console.error('Failed to fetch roles:', err)
+        notifyError(t('users.rolesLoadError'))
     }
 }
 

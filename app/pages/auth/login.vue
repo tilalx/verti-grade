@@ -239,6 +239,10 @@ const pb = usePocketbase()
 
 definePageMeta({ layout: 'blank', auth: false })
 
+useHead({
+    title: t('page.title.login'),
+})
+
 if (pb.authStore.isValid) {
     try {
         await pb.collection('users').authRefresh()

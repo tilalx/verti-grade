@@ -27,7 +27,12 @@
                             : $t('ratings.createReview')
                     }}
                 </v-toolbar-title>
-                <v-btn icon variant="text" @click="close">
+                <v-btn
+                    icon
+                    variant="text"
+                    :aria-label="$t('actions.close')"
+                    @click="close"
+                >
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-toolbar>

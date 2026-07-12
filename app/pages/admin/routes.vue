@@ -381,6 +381,7 @@ definePageMeta({
 const pb = usePocketbase()
 const { t, locale } = useI18n()
 const { smAndDown } = useDisplay()
+const { error: notifyError } = useNotification()
 
 const isMobile = computed(() => smAndDown.value)
 
@@ -509,6 +510,7 @@ const selectAll = async () => {
         applySelectionToRoutes()
     } catch (error) {
         console.error('Failed to select all routes:', error)
+        notifyError(t('routes.selectAllError'))
     }
 }
 

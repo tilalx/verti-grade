@@ -280,6 +280,7 @@ interface ReviewDisplay {
 
 const reviews = ref<ReviewDisplay[]>([])
 const { subscribe } = usePbSubscription()
+const { error: notifyError } = useNotification()
 
 // ── Page meta ──────────────────────────────────────────────────────────────
 
@@ -376,6 +377,7 @@ const getAllRouteRatings = async (): Promise<void> => {
     } catch (err: unknown) {
         if ((err as { isAbort?: boolean })?.isAbort) return
         console.error('Error fetching ratings:', err)
+        notifyError(t('ratings.loadError'))
     }
 }
 

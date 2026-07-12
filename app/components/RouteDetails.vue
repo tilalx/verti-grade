@@ -16,7 +16,12 @@
                         {{ $t('ratings.climber_reviews') }}
                     </v-card-title>
                     <template v-slot:append>
-                        <v-btn icon @click="isSheetOpen = false" variant="text">
+                        <v-btn
+                            icon
+                            variant="text"
+                            :aria-label="$t('actions.close')"
+                            @click="isSheetOpen = false"
+                        >
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
                     </template>
@@ -104,6 +109,7 @@ const props = defineProps<{
 
 const pb = usePocketbase() as PocketBase
 const { subscribe, unsubscribeFrom } = usePbSubscription()
+const { error: notifyError } = useNotification()
 
 // Component State
 const isSheetOpen = ref(false)
@@ -140,6 +146,7 @@ const fetchClimbingRatings = async () => {
     } catch (error) {
         console.error('Error fetching ratings:', error)
         ratings.value = []
+        notifyError(t('ratings.loadError'))
     } finally {
         isLoading.value = false
     }

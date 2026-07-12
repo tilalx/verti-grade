@@ -395,6 +395,8 @@ definePageMeta({
 const { t } = useI18n()
 const pb = usePocketbase()
 const { smAndDown } = useDisplay()
+const { warning: notifyStorageWarning } = useNotification()
+let storageWarningShown = false
 
 const isMobile = computed(() => smAndDown.value)
 const scanning = ref(false)
@@ -447,8 +449,15 @@ const loadStoredScannedIds = () => {
         )
     } catch (error) {
         console.warn('Failed to restore scanned routes from storage:', error)
+        warnStorageUnavailable()
         return []
     }
+}
+
+const warnStorageUnavailable = () => {
+    if (storageWarningShown) return
+    storageWarningShown = true
+    notifyStorageWarning(t('inventory.storageWarning'))
 }
 
 const persistScannedIds = (ids) => {
@@ -464,6 +473,7 @@ const persistScannedIds = (ids) => {
         }
     } catch (error) {
         console.warn('Failed to persist scanned routes to storage:', error)
+        warnStorageUnavailable()
     }
 }
 

@@ -60,6 +60,7 @@
                             <NuxtImg
                                 v-if="asset.preview.value"
                                 :src="asset.preview.value"
+                                :alt="asset.label"
                                 style="
                                     max-height: 130px;
                                     max-width: 100%;
@@ -75,8 +76,9 @@
                                     class="mb-2 text-medium-emphasis"
                                     >mdi-image-plus-outline</v-icon
                                 >
-                                <span class="text-caption text-medium-emphasis"
-                                    >Click to upload</span
+                                <span
+                                    class="text-caption text-medium-emphasis"
+                                    >{{ $t('settings.clickToUpload') }}</span
                                 >
                             </template>
 

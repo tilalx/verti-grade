@@ -43,6 +43,7 @@
                                     <v-img
                                         v-if="avatarPreview"
                                         :src="avatarPreview"
+                                        :alt="$t('account.changeAvatar')"
                                         cover
                                     />
                                     <v-icon
@@ -193,6 +194,8 @@ function onAvatarPicked(e) {
     e.target.value = ''
 }
 
+const { notify: showSnackbar, error: notifyError } = useNotification()
+
 // ── Roles ─────────────────────────────────────────────────────────────────
 async function fetchRoles() {
     try {
@@ -202,12 +205,11 @@ async function fetchRoles() {
         })
     } catch (err) {
         console.error('Failed to fetch roles:', err)
+        notifyError(t('users.rolesLoadError'))
     }
 }
 
 onMounted(fetchRoles)
-
-const { notify: showSnackbar } = useNotification()
 
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]

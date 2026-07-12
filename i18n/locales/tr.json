@@ -62,6 +62,7 @@
         "settings": "Ayarlar",
         "route_setter": "Rota Ayarlayıcı",
         "screwed_at": "Vidalama Tarihi",
+        "selectAllError": "Tüm rotalar seçilemedi.",
         "types": {
             "route": "Rota",
             "boulder": "Boulder"
@@ -150,7 +151,8 @@
         "comment": "Yorum",
         "climber_reviews": "Kaya Tırmanışı Değerlendirmeleri",
         "felt": "hissedilen",
-        "perceived_difficulty": "Hissedilen zorluk"
+        "perceived_difficulty": "Hissedilen zorluk",
+        "loadError": "Değerlendirmeler yüklenemedi."
     },
     "table": {
         "actions": "İşlemler",
@@ -176,7 +178,8 @@
         "select_all": "Tümünü Seç",
         "deselect_all": "Seçimi Kaldır",
         "back_to_home": "Ana Sayfaya Dön",
-        "load_more": "Daha fazla yükle"
+        "load_more": "Daha fazla yükle",
+        "close": "Kapat"
     },
     "inventory": {
         "title": "Rota Envanter Taraması",
@@ -200,6 +203,7 @@
         "cameraError": "Cihaz kamerasına erişilemiyor. Lütfen kamera izinlerine izin verin veya başka bir cihaz deneyin.",
         "restoreSuccess": "{name} yeniden etkinleştirildi.",
         "restoreError": "Rotayı yeniden etkinleştiremedik.",
+        "storageWarning": "Tarama ilerlemesi bu cihazda kaydedilemedi. Bu sayfadan ayrılırsanız ilerlemeniz kaybolabilir.",
         "showInstructions": "Talimatları göster",
         "instructionsTitle": "Envanter talimatları",
         "instructionsIntro": "Tüm rota QR kodlarını taramak için şu adımları izleyin.",
@@ -276,7 +280,10 @@
             "index": "Tırmanış Rotaları - Verti-Grade",
             "comments": "Yorumlar - Verti-Grade",
             "users": "Kullanıcılar - Verti-Grade",
-            "dashboard": "Rota Yönetimi - Verti-Grade"
+            "dashboard": "Rota Yönetimi - Verti-Grade",
+            "login": "Giriş Yap - Verti-Grade",
+            "resetPassword": "Parolayı Sıfırla - Verti-Grade",
+            "notFound": "Sayfa Bulunamadı - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -340,7 +347,8 @@
             "run_inventory": "Envanter Taraması"
         },
         "updated": "Yetkiler güncellendi.",
-        "updateError": "Yetkiler güncellenemedi."
+        "updateError": "Yetkiler güncellenemedi.",
+        "loadError": "Yetkileriniz yüklenemedi. Bazı özellikler kullanılamayabilir."
     },
     "time": {
         "justNow": "Just now",
@@ -364,12 +372,22 @@
         "recentlyJoined": "Bu hafta katıldı",
         "noUsers": "Kullanıcı bulunamadı",
         "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
-        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
+        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor",
+        "rolesLoadError": "Roller yüklenemedi."
     },
     "settings": {
         "changed": "Değiştirildi",
         "revertChange": "Değişikliği geri al",
         "removeImage": "Kaldır",
-        "replace": "Değiştir"
+        "replace": "Değiştir",
+        "clickToUpload": "Yüklemek için tıklayın",
+        "loadError": "Ayarlar yüklenemedi.",
+        "initError": "Ayarlar başlatılamadı."
+    },
+    "errors": {
+        "notFound": {
+            "title": "Sayfa bulunamadı",
+            "subtitle": "İstenen sayfa bulunamadı."
+        }
     }
 }

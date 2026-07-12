@@ -96,7 +96,12 @@ function handleClear() {
                     >
                         {{ $t('actions.clear') }}
                     </v-btn>
-                    <v-btn icon variant="text" @click="sheetOpen = false">
+                    <v-btn
+                        icon
+                        variant="text"
+                        :aria-label="$t('actions.close')"
+                        @click="sheetOpen = false"
+                    >
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
                 </template>

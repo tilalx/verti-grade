@@ -62,6 +62,7 @@
         "settings": "Settings",
         "route_setter": "Route Setter",
         "screwed_at": "Screwed at",
+        "selectAllError": "Failed to select all routes.",
         "types": {
             "route": "Route",
             "boulder": "Boulder"
@@ -150,7 +151,8 @@
         "comment": "Comment",
         "climber_reviews": "Climber Reviews",
         "felt": "felt",
-        "perceived_difficulty": "Perceived difficulty"
+        "perceived_difficulty": "Perceived difficulty",
+        "loadError": "Failed to load reviews."
     },
     "table": {
         "actions": "Actions",
@@ -176,7 +178,8 @@
         "select_all": "Select All",
         "deselect_all": "Deselect All",
         "back_to_home": "Back to Home",
-        "load_more": "Load More"
+        "load_more": "Load More",
+        "close": "Close"
     },
     "inventory": {
         "title": "Route Inventory Scan",
@@ -200,6 +203,7 @@
         "cameraError": "Could not access the device camera. Please allow camera permissions or try another device.",
         "restoreSuccess": "Reactivated {name}.",
         "restoreError": "Failed to reactivate the route.",
+        "storageWarning": "Scan progress could not be saved on this device. Your progress may be lost if you leave this page.",
         "showInstructions": "Show instructions",
         "instructionsTitle": "Inventory instructions",
         "instructionsIntro": "Follow these steps to scan every route QR code.",
@@ -276,7 +280,10 @@
             "index": "Climbing Routes - Verti-Grade",
             "comments": "Comments - Verti-Grade",
             "users": "Users - Verti-Grade",
-            "dashboard": "Route Management - Verti-Grade"
+            "dashboard": "Route Management - Verti-Grade",
+            "login": "Sign In - Verti-Grade",
+            "resetPassword": "Reset Password - Verti-Grade",
+            "notFound": "Page Not Found - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -343,7 +350,8 @@
         "recentlyJoined": "Joined this week",
         "noUsers": "No users found",
         "noUsersHint": "Try adjusting your search or filters",
-        "showing": "Showing {n} of {total} users"
+        "showing": "Showing {n} of {total} users",
+        "rolesLoadError": "Failed to load roles."
     },
     "permissions": {
         "title": "Role Permissions",
@@ -358,7 +366,8 @@
             "run_inventory": "Run Inventory"
         },
         "updated": "Permissions updated.",
-        "updateError": "Failed to update permissions."
+        "updateError": "Failed to update permissions.",
+        "loadError": "Failed to load your permissions. Some features may be unavailable."
     },
     "time": {
         "justNow": "Just now",
@@ -370,6 +379,15 @@
         "changed": "Changed",
         "revertChange": "Revert change",
         "removeImage": "Remove",
-        "replace": "Replace"
+        "replace": "Replace",
+        "clickToUpload": "Click to upload",
+        "loadError": "Failed to load settings.",
+        "initError": "Failed to initialize settings."
+    },
+    "errors": {
+        "notFound": {
+            "title": "Page not found",
+            "subtitle": "The requested page could not be found."
+        }
     }
 }

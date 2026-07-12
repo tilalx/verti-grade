@@ -23,6 +23,7 @@
                 <v-img
                     v-if="comment.userAvatar"
                     :src="comment.userAvatar"
+                    :alt="comment.userName"
                     cover
                 />
                 <span v-else class="text-caption font-weight-bold text-white">

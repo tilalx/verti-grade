@@ -10,6 +10,7 @@
                             <v-img
                                 v-if="avatarPreview"
                                 :src="avatarPreview"
+                                :alt="$t('account.changeAvatar')"
                                 cover
                             />
                             <v-icon

@@ -15,23 +15,26 @@
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 const { refreshPermissions } = usePermissions()
+const { t } = useI18n()
+const { error: notifyError } = useNotification()
 
 const getSettings = async () => {
     try {
         return await pb.collection('settings').getOne('settings_123456')
     } catch (error) {
         if (error.data && error.data.code === 404) {
-            console.log('Settings not found, creating new settings')
             try {
                 return await pb.collection('settings').create({
                     id: 'settings_123456',
                 })
             } catch (createError) {
                 console.error('Error creating new settings:', createError)
+                notifyError(t('settings.initError'))
                 throw createError
             }
         }
         console.error('An error occurred:', error)
+        notifyError(t('settings.loadError'))
         throw error
     }
 }
