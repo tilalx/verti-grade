@@ -8391,39 +8391,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nuxt-app@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "nuxt-app@workspace:."
-  dependencies:
-    "@cj-tech-master/excelts": "npm:10.2.0"
-    "@mdi/font": "npm:7.4.47"
-    "@nuxt/image": "npm:2.0.0"
-    "@nuxtjs/i18n": "npm:10.4.0"
-    "@types/pdfkit": "npm:0.17.6"
-    "@types/qrcode": "npm:1.5.6"
-    "@vitejs/plugin-vue": "npm:6.0.7"
-    "@vue/test-utils": "npm:2.4.11"
-    concurrently: "npm:10.0.3"
-    echarts: "npm:6.1.0"
-    h3: "npm:1.15.11"
-    happy-dom: "npm:20.10.6"
-    nuxt: "npm:^4.4.8"
-    pdfkit: "npm:0.19.1"
-    pocketbase: "npm:^0.27.0"
-    prettier: "npm:3.9.5"
-    qrcode: "npm:1.5.4"
-    release-it: "npm:20.2.1"
-    sass: "npm:1.101.0"
-    typescript: "npm:6.0.3"
-    vite: "npm:8.1.4"
-    vitest: "npm:4.1.10"
-    vue: "npm:3.5.39"
-    vue-qrcode-reader: "npm:^5.7.3"
-    vuetify: "npm:4.1.4"
-    vuetify-nuxt-module: "npm:v1.0.0-rc.2"
-  languageName: unknown
-  linkType: soft
-
 "nuxt-define@npm:^1.0.0":
   version: 1.0.0
   resolution: "nuxt-define@npm:1.0.0"
@@ -11482,6 +11449,39 @@ __metadata:
   checksum: 10c0/41a5bdd214df2f6c3ecf8622745e4a366c4adced864bc3c833739791aeeeb1838119af7daed4ba36428114b5c67dcda034a79c882e97e43c03e66a4dd7389942
   languageName: node
   linkType: hard
+
+"verti-grade@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "verti-grade@workspace:."
+  dependencies:
+    "@cj-tech-master/excelts": "npm:10.2.0"
+    "@mdi/font": "npm:7.4.47"
+    "@nuxt/image": "npm:2.0.0"
+    "@nuxtjs/i18n": "npm:10.4.0"
+    "@types/pdfkit": "npm:0.17.6"
+    "@types/qrcode": "npm:1.5.6"
+    "@vitejs/plugin-vue": "npm:6.0.7"
+    "@vue/test-utils": "npm:2.4.11"
+    concurrently: "npm:10.0.3"
+    echarts: "npm:6.1.0"
+    h3: "npm:1.15.11"
+    happy-dom: "npm:20.10.6"
+    nuxt: "npm:^4.4.8"
+    pdfkit: "npm:0.19.1"
+    pocketbase: "npm:^0.27.0"
+    prettier: "npm:3.9.5"
+    qrcode: "npm:1.5.4"
+    release-it: "npm:20.2.1"
+    sass: "npm:1.101.0"
+    typescript: "npm:6.0.3"
+    vite: "npm:8.1.4"
+    vitest: "npm:4.1.10"
+    vue: "npm:3.5.39"
+    vue-qrcode-reader: "npm:^5.7.3"
+    vuetify: "npm:4.1.4"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.2"
+  languageName: unknown
+  linkType: soft
 
 "vite-dev-rpc@npm:^1.1.0":
   version: 1.1.0
