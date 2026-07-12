@@ -240,11 +240,24 @@
         "deleteMoreItems": "Are you sure you want to delete the selected items?",
         "archiveMoreItems": "Are you sure you want to archive the selected items?",
         "newVersionAvailable": "A new version is available! Please update to the latest version.",
+        "updateBanner": {
+            "title": "Update available —",
+            "message": "version {0} is out.",
+            "commitsMessage": "{0} new commits are available.",
+            "viewChangelog": "View changelog",
+            "viewCommits": "View commits",
+            "dismiss": "Dismiss"
+        },
         "releaseNotes": {
             "title": "Release notes",
             "installedVersion": "Installed version: {0}",
             "installed": "Installed",
             "error": "Could not load release notes."
+        },
+        "commitList": {
+            "title": "New commits",
+            "installedCommit": "Installed commit: {0}",
+            "empty": "No new commits found."
         }
     },
     "filter": {

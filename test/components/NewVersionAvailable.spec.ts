@@ -1,15 +1,15 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import NewVersionAvailable from '~/components/notifications/newVersionAvailable.vue';
 
-const containerStub = { template: '<div><slot /></div>' };
-const rowStub = containerStub;
-const colStub = containerStub;
-const alertStub = containerStub;
 const releaseDialogStub = {
   template: '<div><slot name="activator" :props="{}" /></div>',
 };
+const commitDialogStub = {
+  props: ['commits', 'installedSha'],
+  template: '<div><slot name="activator" :props="{}" /></div>',
+};
 
-function createWrapper(appVersion = '1.0.0') {
+function createWrapper(appVersion: string) {
   globalThis.__NUXT_RUNTIME_CONFIG__ = {
     public: {
       appVersion,
@@ -19,114 +19,102 @@ function createWrapper(appVersion = '1.0.0') {
   return mount(NewVersionAvailable, {
     global: {
       stubs: {
-        'v-container': containerStub,
-        'v-row': rowStub,
-        'v-col': colStub,
-        'v-alert': alertStub,
         NotificationsReleaseNotesDialog: releaseDialogStub,
+        NotificationsCommitListDialog: commitDialogStub,
       },
       mocks: {
-        $t: (key: string) => key,
+        $t: (key: string, params?: unknown[]) =>
+          params ? `${key}:${params.join(',')}` : key,
       },
     },
   });
 }
 
 describe('newVersionAvailable notification', () => {
-  it('compares semantic versions correctly', () => {
+  it('stays hidden for a stable release with no newer tag published', async () => {
     globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v0.0.0',
+      tag_name: 'v1.9.0',
       draft: false,
       prerelease: false,
     });
-    const wrapper = createWrapper();
-    const vm = wrapper.vm as unknown as {
-      compareVersions: (a: string, b: string) => number;
-    };
 
-    expect(vm.compareVersions('v1.2.3', '1.2.3')).toBe(0);
-    expect(vm.compareVersions('1.3.0', '1.2.9')).toBe(1);
-    expect(vm.compareVersions('1.2', '1.2.5')).toBe(-1);
-    expect(vm.compareVersions('1.2.0', '1.2')).toBe(0);
-    // rolling builds: git-describe suffix is ignored
-    expect(vm.compareVersions('v1.9.0', '1.9.0-5-gabc1234')).toBe(0);
-    expect(vm.compareVersions('1.9.1', '1.9.0-5-gabc1234')).toBe(1);
-  });
-
-  it('marks newVersionAvailable true when GitHub reports a newer stable release', async () => {
-    globalThis.$fetch
-      .mockResolvedValueOnce({
-        tag_name: 'v1.1.0',
-        draft: false,
-        prerelease: false,
-      })
-      .mockResolvedValueOnce({
-        tag_name: 'v1.0.0',
-        draft: false,
-        prerelease: false,
-      });
-
-    const wrapper = createWrapper('1.0.0');
-    const vm = wrapper.vm as unknown as {
-      newVersionAvailable: boolean;
-      checkForNewVersion: () => Promise<void>;
-    };
-
-    // onMounted triggers the first check automatically
+    const wrapper = createWrapper('1.9.0');
     await flushPromises();
-    expect(globalThis.$fetch).toHaveBeenNthCalledWith(
-      1,
-      'https://api.github.com/repos/tilalx/verti-grade/releases/latest',
-    );
-    expect(vm.newVersionAvailable).toBe(true);
 
-    await vm.checkForNewVersion();
-    expect(globalThis.$fetch).toHaveBeenCalledTimes(2);
-    expect(vm.newVersionAvailable).toBe(false);
+    expect(wrapper.find('.update-banner').exists()).toBe(false);
   });
 
-  it('fetches GitHub release info and filters drafts/prereleases', async () => {
-    const fetchMock = globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v1.1.0',
+  it('shows the banner when a newer stable release is published', async () => {
+    globalThis.$fetch.mockResolvedValue({
+      tag_name: 'v1.10.0',
       draft: false,
       prerelease: false,
     });
 
-    const wrapper = createWrapper('1.0.0');
-    const vm = wrapper.vm as unknown as {
-      getGhVersion: (
-        currentVersion: string,
-        owner: string,
-        repo: string,
-      ) => Promise<boolean>;
-      compareVersions: (a: string, b: string) => number;
-    };
+    const wrapper = createWrapper('1.9.0');
+    await flushPromises();
 
-    const result = await vm.getGhVersion('1.0.0', 'tilalx', 'verti-grade');
-
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(globalThis.$fetch).toHaveBeenCalledWith(
       'https://api.github.com/repos/tilalx/verti-grade/releases/latest',
     );
-    expect(result).toBe(true);
+    expect(wrapper.find('.update-banner').exists()).toBe(true);
+    expect(wrapper.text()).toContain('v1.10.0');
+  });
 
+  it('stays hidden for a rolling commit build already at HEAD', async () => {
     globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v1.2.0',
-      draft: true,
+      ahead_by: 0,
+      commits: [],
+    });
+
+    const wrapper = createWrapper('4f6a192');
+    await flushPromises();
+
+    expect(globalThis.$fetch).toHaveBeenCalledWith(
+      'https://api.github.com/repos/tilalx/verti-grade/compare/4f6a192...main',
+    );
+    expect(wrapper.find('.update-banner').exists()).toBe(false);
+  });
+
+  it('shows the banner and commit count for a rolling build behind HEAD', async () => {
+    globalThis.$fetch.mockResolvedValue({
+      ahead_by: 2,
+      commits: [
+        {
+          sha: 'aaaaaaaaaa',
+          commit: { message: 'first\nbody', author: { date: '2026-01-01' } },
+          html_url: 'https://github.com/x/y/commit/aaaaaaaaaa',
+        },
+        {
+          sha: 'bbbbbbbbbb',
+          commit: { message: 'second', author: { date: '2026-01-02' } },
+          html_url: 'https://github.com/x/y/commit/bbbbbbbbbb',
+        },
+      ],
+    });
+
+    const wrapper = createWrapper('4f6a192');
+    await flushPromises();
+
+    expect(wrapper.find('.update-banner').exists()).toBe(true);
+    expect(wrapper.text()).toContain(
+      'notifications.updateBanner.commitsMessage:2',
+    );
+  });
+
+  it('hides the banner when dismissed and does not reappear on its own', async () => {
+    globalThis.$fetch.mockResolvedValue({
+      tag_name: 'v1.10.0',
+      draft: false,
       prerelease: false,
     });
-    expect(
-      await vm.getGhVersion('1.0.0', 'tilalx', 'verti-grade'),
-    ).toBe(false);
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    globalThis.$fetch.mockRejectedValue(new Error('network'));
-    expect(
-      await vm.getGhVersion('1.0.0', 'tilalx', 'verti-grade'),
-    ).toBe(false);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Error fetching the latest release:',
-      expect.any(Error),
-    );
-    consoleSpy.mockRestore();
+    const wrapper = createWrapper('1.9.0');
+    await flushPromises();
+    expect(wrapper.find('.update-banner').exists()).toBe(true);
+
+    await wrapper.find('.update-banner__close').trigger('click');
+
+    expect(wrapper.find('.update-banner').exists()).toBe(false);
   });
 });

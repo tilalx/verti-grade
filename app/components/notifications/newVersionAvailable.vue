@@ -1,86 +1,131 @@
 <template>
-    <v-container v-if="newVersionAvailable">
-        <v-row justify="center">
-            <v-col cols="auto">
-                <NotificationsReleaseNotesDialog>
+    <div v-if="newVersionAvailable && !dismissed" class="update-banner">
+        <div class="update-banner__text">
+            <span class="update-banner__title">
+                {{ $t('notifications.updateBanner.title') }}
+            </span>
+
+            <template v-if="mode === 'release'">
+                <span class="update-banner__message">
+                    {{
+                        $t('notifications.updateBanner.message', [
+                            latestVersion,
+                        ])
+                    }}
+                </span>
+                <NotificationsReleaseNotesDialog :version="latestVersion">
                     <template #activator="{ props: activatorProps }">
-                        <v-alert
+                        <a
+                            href="#"
+                            class="update-banner__link"
                             v-bind="activatorProps"
-                            type="info"
-                            dense
-                            class="version-alert"
+                            @click.prevent
                         >
-                            {{ $t('notifications.newVersionAvailable') }}
-                        </v-alert>
+                            {{ $t('notifications.updateBanner.viewChangelog') }}
+                        </a>
                     </template>
                 </NotificationsReleaseNotesDialog>
-            </v-col>
-        </v-row>
-    </v-container>
+            </template>
+
+            <template v-else>
+                <span class="update-banner__message">
+                    {{
+                        $t('notifications.updateBanner.commitsMessage', [
+                            commits.length,
+                        ])
+                    }}
+                </span>
+                <NotificationsCommitListDialog
+                    :commits="commits"
+                    :installed-sha="appVersion"
+                >
+                    <template #activator="{ props: activatorProps }">
+                        <a
+                            href="#"
+                            class="update-banner__link"
+                            v-bind="activatorProps"
+                            @click.prevent
+                        >
+                            {{ $t('notifications.updateBanner.viewCommits') }}
+                        </a>
+                    </template>
+                </NotificationsCommitListDialog>
+            </template>
+        </div>
+
+        <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            density="comfortable"
+            class="update-banner__close"
+            :aria-label="$t('notifications.updateBanner.dismiss')"
+            @click="dismissed = true"
+        />
+    </div>
 </template>
 
 <script setup>
-const config = useRuntimeConfig()
-const appVersion = config.public.appVersion
+const {
+    appVersion,
+    mode,
+    newVersionAvailable,
+    latestVersion,
+    commits,
+    checkForNewVersion,
+} = useVersionCheck()
 
-const repoOwner = 'tilalx'
-const repoName = 'verti-grade'
+const dismissed = ref(false)
 
-const newVersionAvailable = ref(false)
-
-const getGhVersion = async (currentVersion, repoOwner, repoName) => {
-    const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
-
-    try {
-        const response = await $fetch(apiUrl)
-        const latestVersion = response.tag_name
-        const draft = response.draft
-        const prerelease = response.prerelease
-
-        if (draft || prerelease || !latestVersion || !currentVersion) {
-            return false
-        }
-
-        // Compare versions
-        return compareVersions(latestVersion, currentVersion) > 0
-    } catch (error) {
-        console.error('Error fetching the latest release:', error)
-        return false
-    }
-}
-
-const checkForNewVersion = async () => {
-    newVersionAvailable.value = await getGhVersion(
-        appVersion,
-        repoOwner,
-        repoName,
-    )
-}
-
-onMounted(checkForNewVersion)
-
-function compareVersions(v1, v2) {
-    // Rolling builds use git-describe versions ("1.9.0-5-gabc1234");
-    // compare on the base semver and ignore the commit suffix.
-    const parseVersion = (v) =>
-        String(v).replace(/^v/, '').split('-')[0].split('.').map(Number)
-    const v1Parts = parseVersion(v1)
-    const v2Parts = parseVersion(v2)
-
-    for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-        const v1Part = v1Parts[i] || 0
-        const v2Part = v2Parts[i] || 0
-
-        if (v1Part > v2Part) return 1
-        if (v1Part < v2Part) return -1
-    }
-
-    return 0
-}
+onMounted(() => {
+    if (!newVersionAvailable.value) checkForNewVersion()
+})
 </script>
 
 <style scoped>
-.version-alert {
-    cursor: pointer;
+.update-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 24px;
+    background-color: #0f2a1c;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.update-banner__text {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.875rem;
+}
+
+.update-banner__title {
+    color: #fff;
+    font-weight: 600;
+}
+
+.update-banner__message {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.update-banner__link {
+    color: #58a6ff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.update-banner__link:hover {
+    text-decoration: underline;
+}
+
+.update-banner__close {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.update-banner__close:hover {
+    color: #fff !important;
 }
 </style>

@@ -240,11 +240,24 @@
         "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
         "archiveMoreItems": "Seçili öğeleri arşivlemek istediğinizden emin misiniz?",
         "newVersionAvailable": "Yeni bir Verti-Grade sürümü mevcut! Lütfen en son sürüme güncelleyin.",
+        "updateBanner": {
+            "title": "Güncelleme mevcut —",
+            "message": "{0} sürümü yayınlandı.",
+            "commitsMessage": "{0} yeni commit mevcut.",
+            "viewChangelog": "Değişiklik günlüğünü görüntüle",
+            "viewCommits": "Commit'leri görüntüle",
+            "dismiss": "Kapat"
+        },
         "releaseNotes": {
             "title": "Sürüm notları",
             "installedVersion": "Yüklü sürüm: {0}",
             "installed": "Yüklü",
             "error": "Sürüm notları yüklenemedi."
+        },
+        "commitList": {
+            "title": "Yeni commit'ler",
+            "installedCommit": "Yüklü commit: {0}",
+            "empty": "Yeni commit bulunamadı."
         }
     },
     "filter": {

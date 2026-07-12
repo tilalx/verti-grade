@@ -3,6 +3,7 @@
     <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
     <div class="page-body">
         <v-main id="main-content" tabindex="-1">
+            <NotificationsNewVersionAvailable v-if="isLoggedIn" />
             <NuxtPage />
         </v-main>
         <LayoutFootBar :settings="settings" />

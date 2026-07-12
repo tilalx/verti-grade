@@ -240,11 +240,24 @@
         "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
         "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
         "newVersionAvailable": "Eine neue Version von Verti-Grade ist verfügbar. Bitte updaten sie auf die neueste Version.",
+        "updateBanner": {
+            "title": "Update verfügbar —",
+            "message": "Version {0} ist verfügbar.",
+            "commitsMessage": "{0} neue Commits verfügbar.",
+            "viewChangelog": "Änderungsprotokoll ansehen",
+            "viewCommits": "Commits ansehen",
+            "dismiss": "Schließen"
+        },
         "releaseNotes": {
             "title": "Versionshinweise",
             "installedVersion": "Installierte Version: {0}",
             "installed": "Installiert",
             "error": "Versionshinweise konnten nicht geladen werden."
+        },
+        "commitList": {
+            "title": "Neue Commits",
+            "installedCommit": "Installierter Commit: {0}",
+            "empty": "Keine neuen Commits gefunden."
         }
     },
     "filter": {

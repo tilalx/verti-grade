@@ -1,7 +1,5 @@
 <template>
     <v-container fluid class="inventory-page pa-0">
-        <NotificationsNewVersionAvailable />
-
         <!-- ── Desktop: not supported ─────────────────────────────────── -->
         <v-card
             v-if="!isMobile"

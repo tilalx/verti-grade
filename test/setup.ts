@@ -5,6 +5,7 @@ import {
   onBeforeUnmount as vueOnBeforeUnmount,
   watch as vueWatch,
 } from 'vue';
+import { useVersionCheck } from '~/composables/useVersionCheck';
 
 type VitestMock = ReturnType<typeof vi.fn>;
 type RuntimeConfig = { public?: Record<string, unknown> };
@@ -25,6 +26,7 @@ declare global {
   var onMounted: typeof vueOnMounted;
   var onBeforeUnmount: typeof vueOnBeforeUnmount;
   var watch: typeof vueWatch;
+  var useState: <T>(key: string, init?: () => T) => { value: T };
 }
 
 const defaultRuntimeConfig = {
@@ -46,9 +48,21 @@ const i18nGetter = () => ({
   t: (key: string) => key,
 });
 
+// Shared key/value store backing the useState() Nuxt auto-import stub;
+// cleared each test so state doesn't leak between specs.
+const useStateMocks: Record<string, { value: unknown }> = {};
+const useStateGetter = <T>(key: string, init?: () => T) => {
+  if (!useStateMocks[key]) {
+    useStateMocks[key] = vueRef(init ? init() : undefined);
+  }
+  return useStateMocks[key] as { value: T };
+};
+
 vi.stubGlobal('useRuntimeConfig', runtimeConfigGetter);
 vi.stubGlobal('usePocketbase', pocketbaseGetter);
 vi.stubGlobal('useI18n', i18nGetter);
+vi.stubGlobal('useState', useStateGetter);
+vi.stubGlobal('useVersionCheck', useVersionCheck);
 if (!('ref' in globalThis)) {
   vi.stubGlobal('ref', vueRef);
 } else {
@@ -75,6 +89,9 @@ beforeEach(() => {
   delete (globalThis as Record<string, unknown>)._pb;
   globalThis.__POCKETBASE_CLIENT__ = undefined;
   globalThis.__NUXT_RUNTIME_CONFIG__ = undefined;
+  for (const key of Object.keys(useStateMocks)) {
+    delete useStateMocks[key];
+  }
   if (!('$fetch' in globalThis)) {
     vi.stubGlobal('$fetch', vi.fn());
   } else {
