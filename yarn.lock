@@ -4259,7 +4259,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-vue@npm:6.0.7, @vitejs/plugin-vue@npm:^6.0.7":
+"@vitejs/plugin-vue@npm:6.0.8":
+  version: 6.0.8
+  resolution: "@vitejs/plugin-vue@npm:6.0.8"
+  dependencies:
+    "@rolldown/pluginutils": "npm:^1.0.1"
+  peerDependencies:
+    vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+    vue: ^3.2.25
+  checksum: 10c0/28640e62f5f36bafd5f5be70726883af7c14db35bdcc04f348a5a1a4cc4f5d56dc2b59dd3409b048f9577f61af238149a0f55f96a2bfc9b3c24f98288bf5b8ab
+  languageName: node
+  linkType: hard
+
+"@vitejs/plugin-vue@npm:^6.0.7":
   version: 6.0.7
   resolution: "@vitejs/plugin-vue@npm:6.0.7"
   dependencies:
@@ -11537,7 +11549,7 @@ __metadata:
     "@nuxtjs/i18n": "npm:10.4.1"
     "@types/pdfkit": "npm:0.17.6"
     "@types/qrcode": "npm:1.5.6"
-    "@vitejs/plugin-vue": "npm:6.0.7"
+    "@vitejs/plugin-vue": "npm:6.0.8"
     "@vue/test-utils": "npm:2.4.11"
     concurrently: "npm:10.0.3"
     echarts: "npm:6.1.0"
