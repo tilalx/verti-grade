@@ -37,7 +37,7 @@
         "typescript": "6.0.3",
         "vite": "8.1.4",
         "vitest": "4.1.10",
-        "vue": "3.5.39",
+        "vue": "3.5.40",
         "vue-qrcode-reader": "^5.7.3",
         "vuetify": "4.1.4",
         "vuetify-nuxt-module": "v1.0.0-rc.2"
