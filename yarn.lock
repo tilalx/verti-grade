@@ -12048,7 +12048,7 @@ __metadata:
     vue: "npm:3.5.40"
     vue-qrcode-reader: "npm:^5.7.3"
     vuetify: "npm:4.1.5"
-    vuetify-nuxt-module: "npm:v1.0.0-rc.2"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.3"
   languageName: unknown
   linkType: soft
 
@@ -12469,9 +12469,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-rc.2":
-  version: 1.0.0-rc.2
-  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.2"
+"vuetify-nuxt-module@npm:v1.0.0-rc.3":
+  version: 1.0.0-rc.3
+  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.3"
   dependencies:
     "@nuxt/kit": "npm:^4.4.8"
     "@vuetify/loader-shared": "npm:^2.1.2"
@@ -12485,7 +12485,7 @@ __metadata:
     unconfig: "npm:^7.5.0"
   peerDependencies:
     vuetify: ^3.4.0 || ^4.0.0
-  checksum: 10c0/2fe65968b64dade4d7eeacf3c3d2ee216e7f932346abac6013dc922752a3699d4c5478aab2762dcc11e4410e380f5e4c88265e7b038ad691895f9d3ca3916e44
+  checksum: 10c0/ab71f6d86940673f20e3cdfbb000a0bff38b5f203a4927a5f5a261521c691822a25e003948b265880aae5d8321f07d9805e89f04834f6f624db73465669834a8
   languageName: node
   linkType: hard
 
