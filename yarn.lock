@@ -7169,9 +7169,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:20.11.0":
-  version: 20.11.0
-  resolution: "happy-dom@npm:20.11.0"
+"happy-dom@npm:20.11.1":
+  version: 20.11.1
+  resolution: "happy-dom@npm:20.11.1"
   dependencies:
     "@types/node": "npm:>=20.0.0"
     "@types/whatwg-mimetype": "npm:^3.0.2"
@@ -7180,7 +7180,7 @@ __metadata:
     entities: "npm:^7.0.1"
     whatwg-mimetype: "npm:^3.0.0"
     ws: "npm:^8.21.0"
-  checksum: 10c0/ef63674e3c3485c3793bbf4b18f842bc443cc53f430a36c278008fed6b2c873c14e29cd840d010565cc99038b851a47a566c96b984bcf534ab94ead099aa0529
+  checksum: 10c0/f2335e8b87f1917c3725051c22dd7dafef13229af0dde9412d146fbaa961713a81ca4dcc741ecef8bf5fb64ea4182e3886305ac93ecb822dec7be028a6f7c51e
   languageName: node
   linkType: hard
 
@@ -12096,7 +12096,7 @@ __metadata:
     concurrently: "npm:10.0.3"
     echarts: "npm:6.1.0"
     h3: "npm:1.15.11"
-    happy-dom: "npm:20.11.0"
+    happy-dom: "npm:20.11.1"
     nuxt: "npm:^4.5.0"
     pdfkit: "npm:0.19.1"
     pocketbase: "npm:^0.27.0"
