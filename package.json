@@ -23,7 +23,7 @@
         "@types/qrcode": "1.5.6",
         "@vitejs/plugin-vue": "6.0.8",
         "@vue/test-utils": "2.4.11",
-        "concurrently": "10.0.3",
+        "concurrently": "10.0.4",
         "echarts": "6.1.0",
         "h3": "1.15.11",
         "happy-dom": "20.11.1",
