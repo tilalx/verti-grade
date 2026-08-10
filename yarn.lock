@@ -9188,9 +9188,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"release-it@npm:21.0.0":
-  version: 21.0.0
-  resolution: "release-it@npm:21.0.0"
+"release-it@npm:21.0.1":
+  version: 21.0.1
+  resolution: "release-it@npm:21.0.1"
   dependencies:
     "@inquirer/prompts": "npm:8.5.2"
     "@octokit/rest": "npm:22.0.1"
@@ -9216,7 +9216,7 @@ __metadata:
     wildcard-match: "npm:5.1.4"
   bin:
     release-it: bin/release-it.js
-  checksum: 10c0/7592f907ed276e8f326d1ef32cd990689f60bcdafd9b4b0c0dce34a282ebc365f60a05ac2d9723e48ad6068893ce93e1187cf3c5f778321afb6abcebf2f7554e
+  checksum: 10c0/a93b972bfdaeda2c9147466287ae90dff11277b25d5fe3bee02e28e21cdffe49353355bf05635b43e52f44103ca5f7eb5bfe147bc31d06e9d8f62abd5cb49794
   languageName: node
   linkType: hard
 
@@ -10972,7 +10972,7 @@ __metadata:
     pocketbase: "npm:^0.27.0"
     prettier: "npm:3.9.6"
     qrcode: "npm:1.5.4"
-    release-it: "npm:21.0.0"
+    release-it: "npm:21.0.1"
     sass: "npm:1.102.0"
     typescript: "npm:7.0.2"
     vite: "npm:8.2.0"
