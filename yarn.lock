@@ -4178,9 +4178,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vuetify/unplugin-styles@npm:^1.0.0-beta.11":
-  version: 1.0.0-beta.11
-  resolution: "@vuetify/unplugin-styles@npm:1.0.0-beta.11"
+"@vuetify/unplugin-styles@npm:^1.0.0-rc.1":
+  version: 1.0.0-rc.1
+  resolution: "@vuetify/unplugin-styles@npm:1.0.0-rc.1"
   dependencies:
     pathe: "npm:^2.0.3"
     semver: "npm:^7.7.4"
@@ -4189,7 +4189,7 @@ __metadata:
     "@nuxt/kit": ^3 || ^4
     "@nuxt/schema": ^3 || ^4
     "@rspack/core": ^1
-    astro: ^4 || ^5
+    astro: ^4 || ^5 || ^6 || ^7
     sass: ^1.77.0
     sass-embedded: ^1.77.0
     vite: ">=3"
@@ -4211,7 +4211,7 @@ __metadata:
       optional: true
     webpack:
       optional: true
-  checksum: 10c0/fc6d324be0bbcb54b16a217a1bbd544ad741c228861ccebdafb0d79d1b9c4c39a6bbf3363007cad0a63e16e630a11e0cd7d0a916dd16880d8ebfe45fb96d3e17
+  checksum: 10c0/48d1f20948f4110593d0fbc5d7216267240c29062ff790e675a4d9192fe72b2e270ac6e41e9dc3fc1487990147d14820f62a18dffb0fac369d39e425a061fb47
   languageName: node
   linkType: hard
 
@@ -10930,7 +10930,7 @@ __metadata:
     vue: "npm:3.5.40"
     vue-qrcode-reader: "npm:^5.7.3"
     vuetify: "npm:4.1.7"
-    vuetify-nuxt-module: "npm:v1.0.0-rc.3"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.4"
   languageName: unknown
   linkType: soft
 
@@ -11358,13 +11358,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-rc.3":
-  version: 1.0.0-rc.3
-  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.3"
+"vuetify-nuxt-module@npm:v1.0.0-rc.4":
+  version: 1.0.0-rc.4
+  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.4"
   dependencies:
-    "@nuxt/kit": "npm:^4.4.8"
+    "@nuxt/kit": "npm:^4.5.1"
     "@vuetify/loader-shared": "npm:^2.1.2"
-    "@vuetify/unplugin-styles": "npm:^1.0.0-beta.11"
+    "@vuetify/unplugin-styles": "npm:^1.0.0-rc.1"
     defu: "npm:^6.1.7"
     local-pkg: "npm:^1.2.1"
     pathe: "npm:^2.0.3"
@@ -11374,7 +11374,7 @@ __metadata:
     unconfig: "npm:^7.5.0"
   peerDependencies:
     vuetify: ^3.4.0 || ^4.0.0
-  checksum: 10c0/ab71f6d86940673f20e3cdfbb000a0bff38b5f203a4927a5f5a261521c691822a25e003948b265880aae5d8321f07d9805e89f04834f6f624db73465669834a8
+  checksum: 10c0/7cea032a1a21b9b31adfc4a7ce44613d8159a1e08be9df7d1bafb43569e0ffc03fa0dda7d3e220f0a0964b66a72da8f64921a98d231d80373472b97960290eb6
   languageName: node
   linkType: hard
 
