@@ -8542,10 +8542,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pocketbase@npm:^0.27.0":
-  version: 0.27.0
-  resolution: "pocketbase@npm:0.27.0"
-  checksum: 10c0/ce39a943af81dc2329ded76e8d1f530bcf592c9877cb2b44831dcc282c72e394dd8a44204f0c96f08de66c93b23d0060d6ece64ded947ff750d3aca5843ff8d8
+"pocketbase@npm:^0.27.1":
+  version: 0.27.1
+  resolution: "pocketbase@npm:0.27.1"
+  checksum: 10c0/a53f776190ac5be00eded64aa5915eb53ed494bd041a16ed9425c4dfd49142a753fc38dd979e85240da5e4b9d6eaac0e8f2bb12920d1163b6eda46043cb0a5be
   languageName: node
   linkType: hard
 
@@ -10988,7 +10988,7 @@ __metadata:
     happy-dom: "npm:20.11.2"
     nuxt: "npm:^4.5.2"
     pdfkit: "npm:0.19.1"
-    pocketbase: "npm:^0.27.0"
+    pocketbase: "npm:^0.27.1"
     prettier: "npm:3.9.6"
     qrcode: "npm:1.5.4"
     release-it: "npm:21.0.1"
