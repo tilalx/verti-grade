@@ -33,7 +33,7 @@
         "prettier": "3.9.6",
         "qrcode": "1.5.4",
         "release-it": "21.0.2",
-        "sass": "1.102.0",
+        "sass": "1.103.1",
         "typescript": "7.0.2",
         "vite": "8.2.1",
         "vitest": "4.1.10",
