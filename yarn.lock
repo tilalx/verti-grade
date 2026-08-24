@@ -10998,7 +10998,7 @@ __metadata:
     vitest: "npm:4.1.10"
     vue: "npm:3.5.41"
     vue-qrcode-reader: "npm:^5.7.3"
-    vuetify: "npm:4.1.9"
+    vuetify: "npm:4.1.11"
     vuetify-nuxt-module: "npm:v1.0.0-rc.4"
   languageName: unknown
   linkType: soft
@@ -11465,9 +11465,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:4.1.9":
-  version: 4.1.9
-  resolution: "vuetify@npm:4.1.9"
+"vuetify@npm:4.1.11":
+  version: 4.1.11
+  resolution: "vuetify@npm:4.1.11"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ">=2.1.0"
@@ -11480,7 +11480,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/2d4ebfeb9c5b65affedf27ced2ad9abbdd213a84f2c71d91d5fc6834aa07bf3e0084a52f0a90aa684ef1db0663876f4327958076dab431740e65cb22ad0b8e59
+  checksum: 10c0/7b1917e4abb22b4c24042b83cb958b08f2169dad07d776845becbeb7cbe554227f4c8fbdedd2ccad89cd3157a88d0eb5bc3cf0883c276131fb7cc8197230c184
   languageName: node
   linkType: hard
 
