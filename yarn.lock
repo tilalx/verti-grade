@@ -1936,7 +1936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxt/kit@npm:4.5.2":
+"@nuxt/kit@npm:4.5.2, @nuxt/kit@npm:^4.5.2":
   version: 4.5.2
   resolution: "@nuxt/kit@npm:4.5.2"
   dependencies:
@@ -9589,7 +9589,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.8.5, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.7.3, semver@npm:^7.7.4, semver@npm:^7.8.4, semver@npm:^7.8.5":
+"semver@npm:7.8.5, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.7.3, semver@npm:^7.7.4, semver@npm:^7.8.5":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
   bin:
@@ -10999,7 +10999,7 @@ __metadata:
     vue: "npm:3.5.41"
     vue-qrcode-reader: "npm:^5.7.3"
     vuetify: "npm:4.1.11"
-    vuetify-nuxt-module: "npm:v1.0.0-rc.4"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.5"
   languageName: unknown
   linkType: soft
 
@@ -11445,23 +11445,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-rc.4":
-  version: 1.0.0-rc.4
-  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.4"
+"vuetify-nuxt-module@npm:v1.0.0-rc.5":
+  version: 1.0.0-rc.5
+  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.5"
   dependencies:
-    "@nuxt/kit": "npm:^4.5.1"
+    "@nuxt/kit": "npm:^4.5.2"
     "@vuetify/loader-shared": "npm:^2.1.2"
     "@vuetify/unplugin-styles": "npm:^1.0.0-rc.1"
     defu: "npm:^6.1.7"
     local-pkg: "npm:^1.2.1"
     pathe: "npm:^2.0.3"
     perfect-debounce: "npm:^2.1.0"
-    semver: "npm:^7.8.4"
+    semver: "npm:^7.8.5"
     ufo: "npm:^1.6.4"
     unconfig: "npm:^7.5.0"
   peerDependencies:
     vuetify: ^3.4.0 || ^4.0.0
-  checksum: 10c0/7cea032a1a21b9b31adfc4a7ce44613d8159a1e08be9df7d1bafb43569e0ffc03fa0dda7d3e220f0a0964b66a72da8f64921a98d231d80373472b97960290eb6
+  checksum: 10c0/c1bcfb107e4f6f9f80fede3531c6a5cf0bf013b74a047a2e585c8cf4bf5cefdd2673bfa6517f66d79aa131e85703c14400554321c28576559a436a263696b6a5
   languageName: node
   linkType: hard
 
