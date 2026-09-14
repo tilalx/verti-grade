@@ -29,7 +29,7 @@
         "happy-dom": "20.14.0",
         "nuxt": "^4.5.2",
         "pdfkit": "0.20.2",
-        "pocketbase": "^0.28.0",
+        "pocketbase": "^0.28.1",
         "prettier": "3.9.6",
         "qrcode": "1.5.4",
         "release-it": "21.0.2",
