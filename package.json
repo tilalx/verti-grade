@@ -40,7 +40,7 @@
         "vue": "3.5.42",
         "vue-qrcode-reader": "^5.7.3",
         "vuetify": "4.2.1",
-        "vuetify-nuxt-module": "v1.0.0-rc.5"
+        "vuetify-nuxt-module": "v1.0.0-rc.6"
     },
     "browserslist": [
         "defaults and fully supports es6-module"
