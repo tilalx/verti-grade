@@ -10,7 +10,7 @@
             <v-progress-circular indeterminate color="primary" />
         </v-card-text>
 
-        <v-table v-else>
+        <v-table v-else data-testid="role-permissions-table">
             <thead>
                 <tr>
                     <th class="text-left">
@@ -26,7 +26,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="role in roles" :key="role.id">
+                <tr
+                    v-for="role in roles"
+                    :key="role.id"
+                    :data-testid="`role-permissions-row-${role.name}`"
+                >
                     <td>
                         <v-chip
                             size="small"
@@ -48,6 +52,7 @@
                             :disabled="role.name === 'admin' || saving"
                             density="compact"
                             class="d-inline-flex"
+                            :data-testid="`role-permissions-${role.name}-${perm.name}`"
                             @update:model-value="togglePermission(role, perm)"
                         />
                     </td>

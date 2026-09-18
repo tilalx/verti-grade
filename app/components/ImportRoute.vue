@@ -5,13 +5,14 @@
             type="file"
             ref="fileInput"
             style="display: none"
+            data-testid="import-route-file-input"
             @change="handleFileChange"
             accept="application/json"
         />
 
         <!-- Import Preview Dialog -->
         <v-dialog v-model="showPreviewDialog" persistent max-width="900px">
-            <v-card>
+            <v-card data-testid="import-route-dialog">
                 <v-card-title>
                     <span class="text-h5">Confirm Import</span>
                 </v-card-title>
@@ -81,9 +82,15 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn text @click="cancelImport">Cancel</v-btn>
+                    <v-btn
+                        text
+                        data-testid="import-route-cancel"
+                        @click="cancelImport"
+                        >Cancel</v-btn
+                    >
                     <v-btn
                         color="primary"
+                        data-testid="import-route-confirm"
                         @click="confirmImport"
                         :loading="loading"
                         >Confirm & Import</v-btn

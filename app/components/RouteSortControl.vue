@@ -45,6 +45,7 @@ function toggleOrder() {
             variant="outlined"
             rounded="lg"
             class="flex-grow-1"
+            data-testid="sort-field"
             @update:modelValue="onKeyChange"
         />
         <v-btn
@@ -53,6 +54,7 @@ function toggleOrder() {
             size="small"
             icon
             :disabled="!activeKey"
+            data-testid="sort-order-toggle"
             :aria-label="
                 isDescending ? $t('table.sort_desc') : $t('table.sort_asc')
             "

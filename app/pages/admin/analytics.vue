@@ -27,6 +27,7 @@
                         variant="tonal"
                         rounded="lg"
                         :loading="loading"
+                        data-testid="analytics-refresh"
                         @click="refresh"
                     >
                         <v-icon start size="18">mdi-refresh</v-icon>
@@ -48,6 +49,7 @@
             >
                 <AnalyticsStatsCard
                     class="w-100"
+                    :data-testid="`analytics-stat-${card.key}`"
                     :title="card.title"
                     :value="card.value"
                     :icon="card.icon"
@@ -271,6 +273,7 @@
                             v-else-if="hasData"
                             :option="difficultyOption"
                             :height="340"
+                            testid="analytics-chart-difficulty"
                         />
                     </v-card-text>
                 </v-card>
@@ -302,6 +305,7 @@
                             v-else-if="hasData"
                             :option="routeTimelineOption"
                             :height="340"
+                            testid="analytics-chart-route-timeline"
                         />
                     </v-card-text>
                 </v-card>
@@ -496,6 +500,7 @@
                             v-else-if="hasData"
                             :option="routeSettersOption"
                             :height="340"
+                            testid="analytics-chart-route-setters"
                         />
                     </v-card-text>
                 </v-card>
@@ -527,6 +532,7 @@
                             v-else-if="hasData"
                             :option="commentTimelineOption"
                             :height="340"
+                            testid="analytics-chart-comment-timeline"
                         />
                     </v-card-text>
                 </v-card>

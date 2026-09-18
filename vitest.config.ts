@@ -30,6 +30,8 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./test/setup.ts'],
+    include: ['test/**/*.spec.ts'],
+    exclude: ['e2e/**', 'node_modules/**'],
     coverage: {
       reporter: ['text', 'lcov'],
     },

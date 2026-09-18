@@ -54,6 +54,7 @@
                                 overflow: hidden;
                                 cursor: pointer;
                             "
+                            :data-testid="`settings-asset-${asset.key}`"
                             @click="() => asset.triggerInput()"
                         >
                             <!-- Preview image when available -->
@@ -169,6 +170,7 @@
                             placeholder="e.g. Deutscher Alpenverein"
                             :maxlength="50"
                             counter
+                            data-testid="settings-org-name"
                         />
                     </v-col>
                     <v-col cols="12" md="6">
@@ -183,6 +185,7 @@
                             placeholder="e.g. Sektion Hanau"
                             :maxlength="50"
                             counter
+                            data-testid="settings-org-unit"
                         />
                     </v-col>
                 </v-row>
@@ -206,6 +209,7 @@
                             hide-details="auto"
                             prepend-inner-icon="mdi-web"
                             placeholder="https://app.example.com"
+                            data-testid="settings-application-url"
                         />
                     </v-col>
                     <v-col cols="12" md="4">
@@ -256,6 +260,7 @@
                 rounded="md"
                 :loading="saving"
                 prepend-icon="mdi-content-save-outline"
+                data-testid="settings-save"
                 @click="saveSettings"
             >
                 Save Changes

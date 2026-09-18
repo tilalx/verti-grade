@@ -1,6 +1,6 @@
 <template>
     <v-dialog v-model="dialogOpen" max-width="560" scrollable>
-        <v-card>
+        <v-card data-testid="route-form-dialog">
             <v-card-title class="pa-4 pb-3">
                 <span class="text-h6">{{
                     isEditMode ? $t('actions.edit') : $t('climbing.create')
@@ -19,6 +19,7 @@
                         required
                         density="comfortable"
                         class="mb-1"
+                        data-testid="route-form-name"
                     />
 
                     <!-- Difficulty and Type -->
@@ -31,6 +32,7 @@
                                 :rules="[requiredRule]"
                                 required
                                 density="comfortable"
+                                data-testid="route-form-difficulty"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -43,6 +45,7 @@
                                 :rules="[requiredRule]"
                                 required
                                 density="comfortable"
+                                data-testid="route-form-type"
                             />
                         </v-col>
                     </v-row>
@@ -60,6 +63,7 @@
                                 step="1"
                                 required
                                 density="comfortable"
+                                data-testid="route-form-anchor-point"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -70,6 +74,7 @@
                                 :rules="[requiredRule]"
                                 required
                                 density="comfortable"
+                                data-testid="route-form-location"
                             />
                         </v-col>
                     </v-row>
@@ -86,6 +91,7 @@
                         required
                         density="comfortable"
                         class="mb-1"
+                        data-testid="route-form-creator"
                     />
 
                     <!-- Screwed at and Archived -->
@@ -98,6 +104,7 @@
                                 :rules="[requiredRule]"
                                 required
                                 density="comfortable"
+                                data-testid="route-form-screw-date"
                             />
                         </v-col>
                         <v-col
@@ -116,6 +123,7 @@
                                 color="primary"
                                 density="compact"
                                 hide-details
+                                data-testid="route-form-archived"
                             />
                         </v-col>
                     </v-row>
@@ -129,6 +137,7 @@
                         counter="255"
                         density="comfortable"
                         class="mb-2"
+                        data-testid="route-form-comment"
                     />
 
                     <!-- Color picker -->
@@ -169,18 +178,23 @@
                     color="error"
                     variant="text"
                     prepend-icon="mdi-delete-outline"
+                    data-testid="route-form-delete"
                     @click="deleteDialog = true"
                 >
                     {{ $t('actions.delete') }}
                 </v-btn>
                 <v-spacer />
-                <v-btn variant="text" @click="close">{{
-                    $t('actions.cancel')
-                }}</v-btn>
+                <v-btn
+                    variant="text"
+                    data-testid="route-form-cancel"
+                    @click="close"
+                    >{{ $t('actions.cancel') }}</v-btn
+                >
                 <v-btn
                     color="primary"
                     variant="tonal"
                     :loading="saving"
+                    data-testid="route-form-submit"
                     @click="submit"
                 >
                     {{ isEditMode ? $t('actions.save') : $t('actions.create') }}

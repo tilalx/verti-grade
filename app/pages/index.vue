@@ -29,6 +29,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="index-filter-difficulty"
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -43,6 +44,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="index-filter-type"
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -57,6 +59,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="index-filter-location"
                         />
                     </v-col>
                 </v-row>
@@ -64,65 +67,69 @@
         </FilterBar>
 
         <!-- DESKTOP VIEW: Data Table -->
-        <v-data-table-server
-            v-if="mdAndUp"
-            class="mt-4"
-            :headers="headersDesktop"
-            :items="routes"
-            :items-length="totalItems"
-            :loading="loading"
-            :page="tableOptions.page"
-            :items-per-page="tableOptions.itemsPerPage"
-            :sort-by="tableOptions.sortBy"
-            item-value="id"
-            density="comfortable"
-            @update:options="loadRoutes"
-        >
-            <template #item.color="{ item }">
-                <v-avatar :color="item.color" size="30" />
-            </template>
-            <template #item.name="{ item }">
-                <div class="d-flex align-center">
-                    <span class="route-name">{{ item.name }}</span>
-                    <v-icon
-                        v-if="item.has_ratings"
-                        color="yellow-darken-2"
-                        size="small"
-                        class="ml-2"
-                        >mdi-star-circle</v-icon
+        <div v-if="mdAndUp" data-testid="index-table">
+            <v-data-table-server
+                class="mt-4"
+                :headers="headersDesktop"
+                :items="routes"
+                :items-length="totalItems"
+                :loading="loading"
+                :page="tableOptions.page"
+                :items-per-page="tableOptions.itemsPerPage"
+                :sort-by="tableOptions.sortBy"
+                item-value="id"
+                density="comfortable"
+                @update:options="loadRoutes"
+            >
+                <template #item.color="{ item }">
+                    <v-avatar :color="item.color" size="30" />
+                </template>
+                <template #item.name="{ item }">
+                    <div
+                        class="d-flex align-center"
+                        :data-testid="`index-row-${item.id}`"
                     >
-                </div>
-            </template>
-            <template #item.difficulty="{ item }">
-                <span>{{ formatDifficulty(item) }}</span>
-            </template>
-            <template #item.anchor_point="{ item }">
-                <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
-            </template>
-            <template #item.comment="{ item }">
-                <div class="route-comment">{{ item.comment }}</div>
-            </template>
-            <template #item.creator="{ item }">
-                <div class="creator-chips">
-                    <v-chip
-                        v-for="c in item.creator"
-                        :key="c"
-                        size="small"
-                        class="ma-0"
-                        >{{ c }}</v-chip
-                    >
-                </div>
-            </template>
-            <template #item.score="{ item }">
-                {{ formatScore(item) }}
-            </template>
-            <template #item.screw_date="{ item }">
-                {{ formatDate(item.screw_date) }}
-            </template>
-            <template #item.actions="{ item }">
-                <RouteDetails :route_id="item.id" />
-            </template>
-        </v-data-table-server>
+                        <span class="route-name">{{ item.name }}</span>
+                        <v-icon
+                            v-if="item.has_ratings"
+                            color="yellow-darken-2"
+                            size="small"
+                            class="ml-2"
+                            >mdi-star-circle</v-icon
+                        >
+                    </div>
+                </template>
+                <template #item.difficulty="{ item }">
+                    <span>{{ formatDifficulty(item) }}</span>
+                </template>
+                <template #item.anchor_point="{ item }">
+                    <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
+                </template>
+                <template #item.comment="{ item }">
+                    <div class="route-comment">{{ item.comment }}</div>
+                </template>
+                <template #item.creator="{ item }">
+                    <div class="creator-chips">
+                        <v-chip
+                            v-for="c in item.creator"
+                            :key="c"
+                            size="small"
+                            class="ma-0"
+                            >{{ c }}</v-chip
+                        >
+                    </div>
+                </template>
+                <template #item.score="{ item }">
+                    {{ formatScore(item) }}
+                </template>
+                <template #item.screw_date="{ item }">
+                    {{ formatDate(item.screw_date) }}
+                </template>
+                <template #item.actions="{ item }">
+                    <RouteDetails :route_id="item.id" />
+                </template>
+            </v-data-table-server>
+        </div>
 
         <!-- MOBILE VIEW: Card List -->
         <div v-if="smAndDown">

@@ -1,6 +1,6 @@
 <template>
     <v-dialog v-model="dialog" max-width="520" :persistent="hasChanges">
-        <v-card rounded="xl" elevation="8">
+        <v-card rounded="xl" elevation="8" data-testid="user-edit-dialog">
             <!-- Header with avatar -->
             <div class="dialog-header pa-6 pb-4">
                 <div class="d-flex align-center ga-3">
@@ -65,6 +65,7 @@
                                 variant="outlined"
                                 density="comfortable"
                                 rounded="lg"
+                                data-testid="user-edit-firstname"
                             />
                         </v-col>
                         <v-col cols="12" sm="6">
@@ -79,6 +80,7 @@
                                 variant="outlined"
                                 density="comfortable"
                                 rounded="lg"
+                                data-testid="user-edit-lastname"
                             />
                         </v-col>
                     </v-row>
@@ -122,6 +124,7 @@
                         density="comfortable"
                         rounded="lg"
                         clearable
+                        data-testid="user-edit-role"
                     />
                 </v-form>
             </v-card-text>
@@ -130,7 +133,11 @@
 
             <!-- Actions -->
             <v-card-actions class="pa-4">
-                <v-btn variant="text" @click="close">
+                <v-btn
+                    variant="text"
+                    data-testid="user-edit-cancel"
+                    @click="close"
+                >
                     {{ $t('actions.cancel') }}
                 </v-btn>
                 <v-spacer />
@@ -151,6 +158,7 @@
                     variant="flat"
                     rounded="lg"
                     prepend-icon="mdi-content-save-outline"
+                    data-testid="user-edit-submit"
                     @click="save"
                 >
                     {{ $t('actions.save') }}

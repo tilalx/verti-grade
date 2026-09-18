@@ -14,6 +14,7 @@
                         variant="tonal"
                         rounded="lg"
                         prepend-icon="mdi-routes"
+                        data-testid="routes-create-open"
                         @click="routeFormRef.open()"
                     >
                         {{ $t('climbing.create') }}
@@ -23,6 +24,7 @@
                         variant="tonal"
                         rounded="lg"
                         prepend-icon="mdi-file-import-outline"
+                        data-testid="routes-import-open"
                         @click="importRouteRef.open()"
                     >
                         {{ $t('actions.import') }}
@@ -68,6 +70,7 @@
                                     density="compact"
                                     variant="outlined"
                                     rounded="lg"
+                                    data-testid="routes-filter-difficulty"
                                 />
                             </v-col>
                             <v-col cols="6" sm="3">
@@ -82,6 +85,7 @@
                                     density="compact"
                                     variant="outlined"
                                     rounded="lg"
+                                    data-testid="routes-filter-type"
                                 />
                             </v-col>
                             <v-col cols="6" sm="3">
@@ -96,6 +100,7 @@
                                     density="compact"
                                     variant="outlined"
                                     rounded="lg"
+                                    data-testid="routes-filter-location"
                                 />
                             </v-col>
                             <v-col
@@ -111,6 +116,7 @@
                                         displayArchived ? 'tonal' : 'outlined'
                                     "
                                     prepend-icon="mdi-archive-outline"
+                                    data-testid="routes-filter-archived"
                                     @click="displayArchived = !displayArchived"
                                 >
                                     {{ $t('filter.archived') }}
@@ -127,6 +133,7 @@
                                 @click="selectAll"
                                 color="primary"
                                 variant="tonal"
+                                data-testid="routes-select-all"
                             >
                                 <v-icon start>
                                     {{
@@ -151,6 +158,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'pdf'
                                 "
+                                data-testid="routes-export-pdf"
                             >
                                 <v-icon start>mdi-printer</v-icon>
                                 {{ $t('actions.print') }}
@@ -165,6 +173,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'xlsx'
                                 "
+                                data-testid="routes-export-xlsx"
                             >
                                 <v-icon start>mdi-file-excel</v-icon>
                                 XLSX
@@ -179,6 +188,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'json'
                                 "
+                                data-testid="routes-export-json"
                             >
                                 <v-icon start>mdi-code-json</v-icon>
                                 JSON
@@ -188,6 +198,7 @@
                                 @click="handleArchiveClick"
                                 color="warning"
                                 variant="tonal"
+                                data-testid="routes-archive-selected"
                             >
                                 <v-icon start>mdi-archive</v-icon>
                                 {{ $t('actions.archive') }}
@@ -196,94 +207,100 @@
                     </v-col>
                 </v-row>
 
-                <v-data-table-server
-                    v-if="!isMobile"
-                    class="route-manager__table"
-                    :headers="tableHeaders"
-                    :items="routes"
-                    :items-length="totalItems"
-                    :items-per-page="tableOptions.itemsPerPage"
-                    :sort-by="tableOptions.sortBy"
-                    :loading="loading"
-                    :items-per-page-options="pageSizeOptions"
-                    item-value="id"
-                    density="comfortable"
-                    @update:options="loadRoutes"
-                >
-                    <template #item.selected="{ item }">
-                        <v-checkbox
-                            :model-value="item.selected"
-                            color="primary"
-                            hide-details
-                            density="compact"
-                            @update:modelValue="
-                                updateRouteSelection(item, $event)
-                            "
-                        />
-                    </template>
-                    <template #item.color="{ item }">
-                        <v-avatar :color="item.color" size="24" />
-                    </template>
-                    <template #item.name="{ item }">
-                        <div class="route-manager__name">
-                            <span class="route-manager__name-text">{{
-                                item.name
-                            }}</span>
-                            <v-icon
-                                v-if="item.has_ratings"
-                                color="yellow-darken-2"
-                                size="small"
+                <div v-if="!isMobile" data-testid="routes-table">
+                    <v-data-table-server
+                        class="route-manager__table"
+                        :headers="tableHeaders"
+                        :items="routes"
+                        :items-length="totalItems"
+                        :items-per-page="tableOptions.itemsPerPage"
+                        :sort-by="tableOptions.sortBy"
+                        :loading="loading"
+                        :items-per-page-options="pageSizeOptions"
+                        item-value="id"
+                        density="comfortable"
+                        @update:options="loadRoutes"
+                    >
+                        <template #item.selected="{ item }">
+                            <v-checkbox
+                                :model-value="item.selected"
+                                color="primary"
+                                hide-details
+                                density="compact"
+                                data-testid="routes-row-checkbox"
+                                @update:modelValue="
+                                    updateRouteSelection(item, $event)
+                                "
+                            />
+                        </template>
+                        <template #item.color="{ item }">
+                            <v-avatar :color="item.color" size="24" />
+                        </template>
+                        <template #item.name="{ item }">
+                            <div
+                                class="route-manager__name"
+                                :data-testid="`routes-row-${item.id}`"
                             >
-                                mdi-star-circle
-                            </v-icon>
-                            <v-chip
-                                v-if="item.archived"
-                                size="x-small"
-                                variant="outlined"
-                            >
-                                {{ $t('filter.archived') }}
-                            </v-chip>
-                        </div>
-                    </template>
-                    <template #item.difficulty="{ item }">
-                        {{ formatDifficulty(item) }}
-                    </template>
-                    <template #item.anchor_point="{ item }">
-                        {{ formatAnchorPoint(item.anchor_point) }}
-                    </template>
-                    <template #item.comment="{ item }">
-                        <div class="route-manager__comment">
-                            {{ item.comment }}
-                        </div>
-                    </template>
-                    <template #item.creator="{ item }">
-                        <div class="route-manager__creator-chips">
-                            <v-chip
-                                v-for="creator in item.creator"
-                                :key="creator"
-                                size="small"
-                                class="ma-0"
-                                >{{ creator }}</v-chip
-                            >
-                        </div>
-                    </template>
-                    <template #item.score="{ item }">
-                        {{ formatScore(item) }}
-                    </template>
-                    <template #item.actions="{ item }">
-                        <div class="route-manager__row-actions">
-                            <v-btn
-                                icon
-                                size="small"
-                                class="mr-1"
-                                @click="routeFormRef.open(item)"
-                            >
-                                <v-icon>mdi-pencil</v-icon>
-                            </v-btn>
-                            <RouteDetails :route_id="item.id" />
-                        </div>
-                    </template>
-                </v-data-table-server>
+                                <span class="route-manager__name-text">{{
+                                    item.name
+                                }}</span>
+                                <v-icon
+                                    v-if="item.has_ratings"
+                                    color="yellow-darken-2"
+                                    size="small"
+                                >
+                                    mdi-star-circle
+                                </v-icon>
+                                <v-chip
+                                    v-if="item.archived"
+                                    size="x-small"
+                                    variant="outlined"
+                                >
+                                    {{ $t('filter.archived') }}
+                                </v-chip>
+                            </div>
+                        </template>
+                        <template #item.difficulty="{ item }">
+                            {{ formatDifficulty(item) }}
+                        </template>
+                        <template #item.anchor_point="{ item }">
+                            {{ formatAnchorPoint(item.anchor_point) }}
+                        </template>
+                        <template #item.comment="{ item }">
+                            <div class="route-manager__comment">
+                                {{ item.comment }}
+                            </div>
+                        </template>
+                        <template #item.creator="{ item }">
+                            <div class="route-manager__creator-chips">
+                                <v-chip
+                                    v-for="creator in item.creator"
+                                    :key="creator"
+                                    size="small"
+                                    class="ma-0"
+                                    >{{ creator }}</v-chip
+                                >
+                            </div>
+                        </template>
+                        <template #item.score="{ item }">
+                            {{ formatScore(item) }}
+                        </template>
+                        <template #item.actions="{ item }">
+                            <div class="route-manager__row-actions">
+                                <v-btn
+                                    icon
+                                    size="small"
+                                    class="mr-1"
+                                    data-testid="routes-row-edit"
+                                    @click="routeFormRef.open(item)"
+                                >
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                                <RouteDetails :route_id="item.id" />
+                            </div>
+                        </template>
+                    </v-data-table-server>
+                </div>
 
                 <div v-else class="route-manager__mobile-section">
                     <v-skeleton-loader
@@ -337,6 +354,7 @@
                             :length="pageLength"
                             total-visible="5"
                             size="small"
+                            data-testid="routes-mobile-pagination"
                             @update:modelValue="onMobilePageChange"
                         />
                         <v-select
@@ -346,6 +364,7 @@
                             hide-details
                             variant="outlined"
                             class="route-manager__page-size"
+                            data-testid="routes-mobile-page-size"
                             @update:modelValue="onMobileItemsPerPageChange"
                         />
                     </div>
@@ -381,7 +400,7 @@ definePageMeta({
 const pb = usePocketbase()
 const { t, locale } = useI18n()
 const { smAndDown } = useDisplay()
-const { error: notifyError } = useNotification()
+const { notify, error: notifyError } = useNotification()
 
 const isMobile = computed(() => smAndDown.value)
 
@@ -701,9 +720,11 @@ const archiveSelected = async () => {
         invalidateAllRouteIdsCache()
         removeSelectedIds(ids)
         showArchiveConfirmation.value = false
+        notify(t('notifications.success.edit'))
         await reloadRoutes()
     } catch (error) {
         console.error('Exception in archiveSelected:', error)
+        notifyError(t('notifications.error.generic'))
     }
 }
 

@@ -13,6 +13,7 @@
                 icon
                 variant="text"
                 class="mr-2"
+                data-testid="user-menu-activator"
                 :aria-label="$t('nav.userMenu')"
             >
                 <v-avatar size="36" :color="image ? undefined : 'primary'">
@@ -35,6 +36,7 @@
                     :disabled="item.disabled"
                     density="compact"
                     rounded="lg"
+                    :data-testid="`user-menu-${item.key}`"
                     @click="handleAction(item)"
                 />
             </v-list>

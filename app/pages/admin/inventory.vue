@@ -57,6 +57,7 @@
                             variant="tonal"
                             color="success"
                             prepend-icon="mdi-check-circle-outline"
+                            data-testid="inventory-found-count"
                         >
                             {{ scannedRouteIds.length }}
                         </v-chip>
@@ -65,6 +66,7 @@
                             variant="tonal"
                             color="warning"
                             prepend-icon="mdi-help-circle-outline"
+                            data-testid="inventory-missing-count"
                         >
                             {{ missingRoutes.length }}
                         </v-chip>
@@ -120,6 +122,7 @@
                     class="flex-grow-1"
                     :disabled="loadingRoutes"
                     prepend-icon="mdi-camera"
+                    data-testid="inventory-start"
                     @click="startScanner()"
                 >
                     {{ $t('inventory.start') }}
@@ -132,6 +135,7 @@
                     size="large"
                     class="flex-grow-1"
                     prepend-icon="mdi-stop-circle"
+                    data-testid="inventory-stop"
                     @click="stopScanner()"
                 >
                     {{ $t('inventory.stop') }}
@@ -143,6 +147,7 @@
                     size="large"
                     min-width="0"
                     :disabled="scannedRouteIds.length === 0 && !scanning"
+                    data-testid="inventory-reset"
                     @click="resetInventory()"
                 >
                     <v-icon>mdi-refresh</v-icon>
@@ -175,6 +180,7 @@
                         border
                         flat
                         class="mb-2"
+                        :data-testid="`inventory-scanned-${route.id}`"
                     >
                         <div class="d-flex align-center pa-3">
                             <v-icon size="18" color="success" class="mr-3"
@@ -220,6 +226,7 @@
                     size="large"
                     :disabled="loadingRoutes"
                     prepend-icon="mdi-check"
+                    data-testid="inventory-finish-open"
                     @click="openFinishDialog()"
                 >
                     {{ $t('inventory.finish') }}
@@ -261,7 +268,7 @@
 
         <!-- ── Finish review dialog ───────────────────────────────────── -->
         <v-dialog v-model="finishDialog" max-width="480">
-            <v-card rounded="xl">
+            <v-card rounded="xl" data-testid="inventory-finish-dialog">
                 <v-card-title
                     class="text-body-1 font-weight-semibold pa-5 pb-2"
                 >
@@ -363,7 +370,11 @@
                     </div>
                 </v-card-text>
                 <v-card-actions class="pa-5 pt-0">
-                    <v-btn variant="text" @click="finishDialog = false">
+                    <v-btn
+                        variant="text"
+                        data-testid="inventory-finish-cancel"
+                        @click="finishDialog = false"
+                    >
                         {{ $t('actions.cancel') }}
                     </v-btn>
                     <v-spacer />
@@ -372,6 +383,7 @@
                         variant="flat"
                         rounded="lg"
                         prepend-icon="mdi-check"
+                        data-testid="inventory-finish-confirm"
                         @click="confirmFinish"
                     >
                         {{ $t('actions.save') }}

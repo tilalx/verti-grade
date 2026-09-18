@@ -1,0 +1,40 @@
+services:
+  app:
+    image: ${E2E_IMAGE:?E2E_IMAGE must be set}
+    environment:
+      PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
+      PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'sh',
+          '-c',
+          'curl -fs http://localhost:8080/api/health && curl -fs http://localhost:3000/ && curl -fsk https://localhost/',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    working_dir: /work
+    volumes:
+      # :Z relabels the bind mount for SELinux hosts (Fedora/RHEL Jenkins
+      # agents); a harmless no-op everywhere else.
+      - ..:/work:Z
+    environment:
+      E2E_BASE_URL: https://app
+      E2E_PB_URL: https://app
+      PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
+      PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
+      CI: 'true'
+      # global-setup.ts talks to the app over plain Node fetch (via the
+      # pocketbase SDK), which doesn't share Playwright's ignoreHTTPSErrors —
+      # the container generates its own self-signed cert, so this is safe.
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+    depends_on:
+      app:
+        condition: service_healthy
+    command: sh -c "corepack enable && yarn install --immutable && yarn test:e2e"

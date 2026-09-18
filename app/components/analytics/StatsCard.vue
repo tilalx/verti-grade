@@ -35,7 +35,9 @@
                 <v-skeleton-loader type="text" width="80" />
             </div>
             <template v-else>
-                <div class="card-value">{{ formattedValue }}</div>
+                <div class="card-value" data-testid="stats-card-value">
+                    {{ formattedValue }}
+                </div>
                 <div class="card-footer mt-1">
                     <template v-if="delta !== null && delta !== undefined">
                         <span :class="delta >= 0 ? 'delta-up' : 'delta-down'">

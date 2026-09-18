@@ -3,6 +3,7 @@
         <button
             @click="navigate"
             :class="['nav-link', { 'nav-link--active': isActive }]"
+            :data-testid="`nav-link-${to.replace(/^\//, '').replaceAll('/', '-') || 'home'}`"
         >
             <v-icon :icon="icon" size="16" class="nav-link-icon" />
             <span class="nav-link-label">{{ label }}</span>

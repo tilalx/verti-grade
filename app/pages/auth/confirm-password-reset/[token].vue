@@ -34,6 +34,7 @@
                         :disabled="loading || !fieldsValid"
                         rounded="lg"
                         class="mb-3 font-weight-semibold"
+                        data-testid="confirm-reset-submit"
                         @click="submitReset"
                     >
                         {{ $t('actions.save') }}
@@ -57,6 +58,7 @@
                     v-else-if="step === 'done'"
                     key="done"
                     class="text-center py-6"
+                    data-testid="reset-done"
                 >
                     <div class="success-ring mb-6">
                         <v-icon size="40" color="success"
@@ -85,6 +87,7 @@
                     v-else-if="step === 'invalid'"
                     key="invalid"
                     class="text-center py-6"
+                    data-testid="reset-invalid"
                 >
                     <v-icon size="48" color="error" class="mb-4"
                         >mdi-link-off</v-icon
