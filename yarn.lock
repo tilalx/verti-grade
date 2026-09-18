@@ -4364,6 +4364,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vuetify/v0@npm:^1.2.1":
+  version: 1.2.2
+  resolution: "@vuetify/v0@npm:1.2.2"
+  peerDependencies:
+    "@adobe/leonardo-contrast-colors": ">=1.0.0"
+    "@ant-design/colors": ">=7.0.0"
+    "@flagsmith/flagsmith": ">=11.0.0"
+    "@floating-ui/dom": ">=1.8.0"
+    "@js-temporal/polyfill": ">=0.5.0"
+    "@material/material-color-utilities": ">=0.3.0"
+    launchdarkly-js-client-sdk: ^3.0.0
+    posthog-js: ^1.0.0
+    vue: ">=3.5.0 || >=3.6.0-0"
+    vue-i18n: ">=10.0.0"
+  peerDependenciesMeta:
+    "@adobe/leonardo-contrast-colors":
+      optional: true
+    "@ant-design/colors":
+      optional: true
+    "@flagsmith/flagsmith":
+      optional: true
+    "@floating-ui/dom":
+      optional: true
+    "@js-temporal/polyfill":
+      optional: true
+    "@material/material-color-utilities":
+      optional: true
+    launchdarkly-js-client-sdk:
+      optional: true
+    posthog-js:
+      optional: true
+    vue-i18n:
+      optional: true
+  checksum: 10c0/03f3f270b5d8cbf6a68015c70fc67ad4cb36a2177c060160bd1e6f3b9083321279513bec31c19f96a5e353cc5b47d5a9caecd6dd01ae01c923d5531755a8effa
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^3.0.0":
   version: 3.0.1
   resolution: "abbrev@npm:3.0.1"
@@ -11195,8 +11232,8 @@ __metadata:
     vitest: "npm:5.0.0"
     vue: "npm:3.5.42"
     vue-qrcode-reader: "npm:^5.7.3"
-    vuetify: "npm:4.1.12"
-    vuetify-nuxt-module: "npm:v1.0.0-rc.5"
+    vuetify: "npm:4.2.1"
+    vuetify-nuxt-module: "npm:v1.0.0-rc.6"
   languageName: unknown
   linkType: soft
 
@@ -11692,9 +11729,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify-nuxt-module@npm:v1.0.0-rc.5":
-  version: 1.0.0-rc.5
-  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.5"
+"vuetify-nuxt-module@npm:v1.0.0-rc.6":
+  version: 1.0.0-rc.6
+  resolution: "vuetify-nuxt-module@npm:1.0.0-rc.6"
   dependencies:
     "@nuxt/kit": "npm:^4.5.2"
     "@vuetify/loader-shared": "npm:^2.1.2"
@@ -11708,13 +11745,15 @@ __metadata:
     unconfig: "npm:^7.5.0"
   peerDependencies:
     vuetify: ^3.4.0 || ^4.0.0
-  checksum: 10c0/c1bcfb107e4f6f9f80fede3531c6a5cf0bf013b74a047a2e585c8cf4bf5cefdd2673bfa6517f66d79aa131e85703c14400554321c28576559a436a263696b6a5
+  checksum: 10c0/357ab2f9ce85ff6900d1983a8e0586c05efb7ef59bb9e69d854ce7dea586f5f9e3ea87d3d25e4127722fd701d8ba5be66fe69bb0eee2b21b596fef9e51783fa4
   languageName: node
   linkType: hard
 
-"vuetify@npm:4.1.12":
-  version: 4.1.12
-  resolution: "vuetify@npm:4.1.12"
+"vuetify@npm:4.2.1":
+  version: 4.2.1
+  resolution: "vuetify@npm:4.2.1"
+  dependencies:
+    "@vuetify/v0": "npm:^1.2.1"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ">=2.1.0"
@@ -11727,7 +11766,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/2d88b30196f3b1184f8d84b3e7951af16ac8d08e0a215d07f471cb948734de5131a25b2090eb8bd362ed0c5bb265b171b63cf47b7056b239fac3f1de0ded7f3e
+  checksum: 10c0/21124f03e997e42898ea6119d3369e3102493fe2bda58e70b7be547352bc579752f54ecb913cec54897dbe1ddcb8a7683cb966aaefaf34ba429c683ac97c47d9
   languageName: node
   linkType: hard
 
