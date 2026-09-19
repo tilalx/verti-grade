@@ -64,8 +64,9 @@ test('blocks submit when required fields are empty', async ({
 
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
-    await page.getByTestId('user-create-submit').click()
 
-    // Client-side validation blocks it — dialog never closes.
+    // Required fields empty — client-side validation keeps the submit
+    // button disabled, so it's never clickable.
+    await expect(page.getByTestId('user-create-submit')).toBeDisabled()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
 })

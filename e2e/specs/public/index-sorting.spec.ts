@@ -9,13 +9,13 @@ test('sorting the desktop table by name header actually reorders rows', async ({
 
     const beforeAsc = await names()
     await page.getByRole('columnheader', { name: /name/i }).click()
-    await expect(page.getByTestId('index-table')).toBeVisible()
+    // Sorting refetches server-side — wait for the row order to actually
+    // change instead of racing the request.
+    await expect.poll(names).not.toEqual(beforeAsc)
     const afterAsc = await names()
-    expect(afterAsc).not.toEqual(beforeAsc)
     expect(afterAsc).toEqual([...afterAsc].sort((a, b) => a.localeCompare(b)))
 
     // Click again to flip to descending — order should invert too.
     await page.getByRole('columnheader', { name: /name/i }).click()
-    const afterDesc = await names()
-    expect(afterDesc).toEqual([...afterAsc].reverse())
+    await expect.poll(names).toEqual([...afterAsc].reverse())
 })
