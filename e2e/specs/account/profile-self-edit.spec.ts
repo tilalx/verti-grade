@@ -12,7 +12,10 @@ test.describe('self-service profile', () => {
         await expect(page.getByTestId('profile-dialog')).toBeVisible()
 
         const newLastname = `${testPrefix}-lastname`
-        await page.getByTestId('profile-lastname').fill(newLastname)
+        await page
+            .getByTestId('profile-lastname')
+            .locator('input')
+            .fill(newLastname)
         await page.getByTestId('profile-save').click()
 
         await expect(page.getByTestId('global-snackbar-message')).toBeVisible()
@@ -21,9 +24,9 @@ test.describe('self-service profile', () => {
         // Reopen to confirm the change was persisted, not just local state.
         await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-profile').click()
-        await expect(page.getByTestId('profile-lastname')).toHaveValue(
-            newLastname,
-        )
+        await expect(
+            page.getByTestId('profile-lastname').locator('input'),
+        ).toHaveValue(newLastname)
     })
 
     test('rejects a password change with the wrong current password', async ({
@@ -34,9 +37,18 @@ test.describe('self-service profile', () => {
         await page.getByTestId('user-menu-profile').click()
         await page.getByTestId('profile-tab-security').click()
 
-        await page.getByTestId('password-old').fill('definitely-wrong')
-        await page.getByTestId('password-new').fill('NewPassw0rd!234')
-        await page.getByTestId('password-confirm').fill('NewPassw0rd!234')
+        await page
+            .getByTestId('password-old')
+            .locator('input')
+            .fill('definitely-wrong')
+        await page
+            .getByTestId('password-new')
+            .locator('input')
+            .fill('NewPassw0rd!234')
+        await page
+            .getByTestId('password-confirm')
+            .locator('input')
+            .fill('NewPassw0rd!234')
 
         await page.getByTestId('profile-save').click()
 
@@ -60,7 +72,10 @@ test.describe('self-service profile', () => {
             route.abort('failed'),
         )
 
-        await page.getByTestId('profile-lastname').fill(`${testPrefix}-fail`)
+        await page
+            .getByTestId('profile-lastname')
+            .locator('input')
+            .fill(`${testPrefix}-fail`)
         await page.getByTestId('profile-save').click()
 
         await expect(page.getByTestId('global-snackbar-message')).toBeVisible()
@@ -72,13 +87,21 @@ test.describe('self-service profile', () => {
         await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-profile').click()
 
-        const original = await page.getByTestId('profile-lastname').inputValue()
-        await page.getByTestId('profile-lastname').fill('should-not-persist')
+        const original = await page
+            .getByTestId('profile-lastname')
+            .locator('input')
+            .inputValue()
+        await page
+            .getByTestId('profile-lastname')
+            .locator('input')
+            .fill('should-not-persist')
         await page.getByTestId('profile-cancel').click()
         await expect(page.getByTestId('profile-dialog')).toBeHidden()
 
         await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-profile').click()
-        await expect(page.getByTestId('profile-lastname')).toHaveValue(original)
+        await expect(
+            page.getByTestId('profile-lastname').locator('input'),
+        ).toHaveValue(original)
     })
 })

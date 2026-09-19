@@ -219,6 +219,7 @@ import { normalizeCreators, formatDateToYYYYMMDD } from '~/utils/formatting'
 import { required } from '~/utils/validation'
 
 const { t } = useI18n()
+const { error: notifyError } = useNotification()
 const pb = usePocketbase() as PocketBase
 
 type VFormHandle = {
@@ -510,6 +511,7 @@ async function submit() {
         emit('saved', payload)
     } catch (error) {
         console.error('Failed to save route:', error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         saving.value = false
     }
@@ -526,6 +528,7 @@ async function deleteRoute() {
         emit('deleted', id)
     } catch (error) {
         console.error('Failed to delete route:', error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         deleting.value = false
     }

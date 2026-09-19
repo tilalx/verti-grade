@@ -60,9 +60,7 @@ test('keeps the dialog open when the review submit fails', async ({ page }) => {
         .fill('Should not be submitted, network fails')
     await page.getByTestId('review-form-submit').click()
 
-    // NOTE: the app currently shows no error feedback on a failed submit
-    // (ReviewFormDialog.vue only console.errors) — this only pins down that
-    // the dialog doesn't silently close/lose the user's input.
+    await expect(page.getByTestId('global-snackbar')).toBeVisible()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 })
 

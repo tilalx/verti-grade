@@ -301,6 +301,7 @@ async function save() {
         close()
     } catch (error) {
         console.error('Failed to update user:', error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         saving.value = false
     }

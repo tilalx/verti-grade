@@ -108,7 +108,7 @@
                 <v-divider class="mx-4 mb-3" />
                 <div class="drawer-footer">
                     <ClientOnly>
-                        <UserIcon v-if="isLoggedIn" />
+                        <UserIcon v-if="isLoggedIn && !mdAndUp" />
                     </ClientOnly>
                 </div>
             </template>

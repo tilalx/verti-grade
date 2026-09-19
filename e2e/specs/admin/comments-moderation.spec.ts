@@ -40,7 +40,7 @@ test('edits a comment', async ({ adminPage: page, testPrefix }) => {
     const newComment = `${testPrefix}-edited-comment`
     await page
         .getByTestId('review-form-comment')
-        .locator('textarea')
+        .getByRole('textbox')
         .fill(newComment)
     await page.getByTestId('review-form-submit').click()
 

@@ -41,14 +41,8 @@ test('shows an error and does not persist the change when the update fails', asy
 
     await checkbox.click()
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(checkbox.locator('input')).not.toBeChecked()
 
-    // NOTE: the checkbox itself isn't asserted here — it's one-way bound
-    // (:model-value + @update:model-value, no real v-model), so Vuetify's
-    // selection control keeps its optimistic checked state on failure and
-    // never re-syncs from the (unchanged) prop. That's a real UI bug: the
-    // admin sees no visual indication the toggle didn't actually save,
-    // beyond the transient error snackbar. What's verified here is the
-    // thing that actually matters — the permission was NOT persisted.
     await page.unroute('**/api/collections/roles/records/**')
     await gotoSettled(page, '/admin/users')
     await expect(

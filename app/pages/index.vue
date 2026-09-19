@@ -188,6 +188,7 @@ import { toPbSort, type SortOption } from '~/utils/sorting'
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { smAndDown, mdAndUp } = useDisplay()
+const { error: notifyError } = useNotification()
 
 const {
     searchRouteName,
@@ -321,7 +322,9 @@ async function loadRoutes(
 
         totalItems.value = res.totalItems
     } catch (error) {
+        if (error?.isAbort) return
         console.error('Failed to load routes:', error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         loading.value = false
     }

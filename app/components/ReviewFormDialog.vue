@@ -175,6 +175,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const pb = usePocketbase()
 const { t } = useI18n()
+const { error: notifyError } = useNotification()
 
 const isEditMode = computed(() => !!props.review)
 
@@ -239,9 +240,25 @@ watch(
     { immediate: true },
 )
 
-// Reset form when create-mode sheet closes
+// Re-sync the form every time the sheet opens, so a cancelled edit never
+// survives into the next time the same record is reopened (props.review's
+// object reference doesn't change on reopen, so the watch above alone
+// wouldn't refire).
 watch(sheetOpen, (open) => {
-    if (!open && !isEditMode.value) resetForm()
+    if (open) {
+        if (props.review) {
+            form.rating = props.review.rating
+            form.combinedDifficulty = toCombined(
+                props.review.difficulty,
+                props.review.difficulty_sign,
+            )
+            form.comment = props.review.comment ?? ''
+        } else {
+            resetForm()
+        }
+    } else if (!isEditMode.value) {
+        resetForm()
+    }
 })
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -336,6 +353,7 @@ async function submit() {
         close()
     } catch (err) {
         console.error('Failed to save review:', err)
+        notifyError(t('notifications.error.generic'))
     } finally {
         saving.value = false
     }

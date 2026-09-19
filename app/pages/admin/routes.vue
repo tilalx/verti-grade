@@ -669,7 +669,9 @@ const loadRoutes = async (options = {}) => {
         routes.value = normalizedRoutes
         totalItems.value = list.totalItems
     } catch (error) {
+        if (error?.isAbort) return
         console.error('Failed to load routes:', error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         loading.value = false
     }
@@ -767,6 +769,7 @@ const downloadExport = async (endpoint, extension, mimeType) => {
         document.body.removeChild(link)
     } catch (error) {
         console.error(`Export error (${extension}):`, error)
+        notifyError(t('notifications.error.generic'))
     } finally {
         exportingFormat.value = null
     }

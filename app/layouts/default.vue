@@ -105,8 +105,12 @@ onMounted(async () => {
     try {
         if (pb.authStore.isValid) {
             await refreshSession()
-            await refreshPermissions()
         }
+        // Always resolve permissions, even when logged out — refreshPermissions()
+        // handles the anonymous case itself (empty permissions, loaded=true).
+        // Skipping this for anonymous visitors left `can()`'s fail-open default
+        // in effect forever, showing every admin nav link to logged-out users.
+        await refreshPermissions()
         setFavicon()
 
         // Reflect any local auth store changes immediately (login/logout on this tab)
@@ -180,5 +184,17 @@ onBeforeUnmount(() => {
 
 .skip-link:focus {
     top: 0;
+}
+
+/*
+ * Vuetify's v-main padding-top (offsetting the fixed app-bar) is computed
+ * client-side by its layout system once the app-bar registers its height,
+ * so server-rendered HTML has no top padding — content briefly renders
+ * behind the navbar until hydration applies the inline style. This fallback
+ * matches NavBar.vue's hardcoded app-bar height so first paint is correct;
+ * Vuetify's own inline style takes over (and matches) once hydrated.
+ */
+#main-content {
+    padding-top: 64px;
 }
 </style>

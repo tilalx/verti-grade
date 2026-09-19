@@ -254,7 +254,7 @@
                 <v-btn
                     variant="text"
                     data-testid="profile-cancel"
-                    @click="localDialog = false"
+                    @click="cancelEdit"
                 >
                     {{ $t('actions.cancel') }}
                 </v-btn>
@@ -396,6 +396,19 @@ const hasChanges = computed(() => {
     if (passwordChangeRequested.value) return true
     return user.firstname !== original.firstname || user.name !== original.name
 })
+
+function cancelEdit() {
+    user.firstname = original.firstname
+    user.name = original.name
+    user.oldPassword = ''
+    user.password = ''
+    user.passwordConfirm = ''
+    avatarFile.value = null
+    avatarPreview.value = user.avatar
+        ? pb.files.getURL(user, user.avatar, { thumb: '100x100' })
+        : null
+    localDialog.value = false
+}
 
 /**
  * Save is only enabled when:
