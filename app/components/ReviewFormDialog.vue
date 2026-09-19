@@ -8,17 +8,23 @@
             block
             rounded="xl"
             prepend-icon="mdi-star-plus-outline"
+            data-testid="review-open-cta"
             @click="internalOpen = true"
         >
             {{ $t('ratings.createReview') }}
         </v-btn>
-        <v-btn v-else variant="tonal" @click="internalOpen = true">
+        <v-btn
+            v-else
+            variant="tonal"
+            data-testid="review-open"
+            @click="internalOpen = true"
+        >
             {{ $t('ratings.createReview') }}
         </v-btn>
     </template>
 
     <v-bottom-sheet v-model="sheetOpen" inset>
-        <v-card class="py-2">
+        <v-card class="py-2" data-testid="review-form-dialog">
             <v-toolbar color="transparent" flat density="compact" class="pt-1">
                 <v-toolbar-title class="text-body-1 font-weight-semibold pl-2">
                     {{
@@ -77,6 +83,7 @@
                                     density="compact"
                                     size="x-large"
                                     clearable
+                                    data-testid="review-form-rating"
                                 />
                             </div>
                         </v-col>
@@ -91,6 +98,7 @@
                                 clearable
                                 variant="outlined"
                                 density="compact"
+                                data-testid="review-form-difficulty"
                             />
                         </v-col>
 
@@ -109,6 +117,7 @@
                                 auto-grow
                                 density="compact"
                                 :counter="isEditMode ? 1000 : undefined"
+                                data-testid="review-form-comment"
                             />
                         </v-col>
                     </v-row>
@@ -116,9 +125,12 @@
             </v-card-text>
 
             <v-card-actions class="px-4 pb-4">
-                <v-btn variant="text" @click="close">{{
-                    $t('actions.cancel')
-                }}</v-btn>
+                <v-btn
+                    variant="text"
+                    data-testid="review-form-cancel"
+                    @click="close"
+                    >{{ $t('actions.cancel') }}</v-btn
+                >
                 <v-spacer />
                 <v-btn
                     :disabled="!isEditMode && !isFormValid"
@@ -126,6 +138,7 @@
                     color="primary"
                     variant="flat"
                     size="large"
+                    data-testid="review-form-submit"
                     @click="submit"
                 >
                     {{ isEditMode ? $t('actions.save') : $t('actions.submit') }}
@@ -162,6 +175,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 
 const pb = usePocketbase()
 const { t } = useI18n()
+const { error: notifyError } = useNotification()
 
 const isEditMode = computed(() => !!props.review)
 
@@ -226,9 +240,25 @@ watch(
     { immediate: true },
 )
 
-// Reset form when create-mode sheet closes
+// Re-sync the form every time the sheet opens, so a cancelled edit never
+// survives into the next time the same record is reopened (props.review's
+// object reference doesn't change on reopen, so the watch above alone
+// wouldn't refire).
 watch(sheetOpen, (open) => {
-    if (!open && !isEditMode.value) resetForm()
+    if (open) {
+        if (props.review) {
+            form.rating = props.review.rating
+            form.combinedDifficulty = toCombined(
+                props.review.difficulty,
+                props.review.difficulty_sign,
+            )
+            form.comment = props.review.comment ?? ''
+        } else {
+            resetForm()
+        }
+    } else if (!isEditMode.value) {
+        resetForm()
+    }
 })
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -323,6 +353,7 @@ async function submit() {
         close()
     } catch (err) {
         console.error('Failed to save review:', err)
+        notifyError(t('notifications.error.generic'))
     } finally {
         saving.value = false
     }

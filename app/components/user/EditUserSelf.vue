@@ -1,6 +1,11 @@
 <template>
     <v-dialog v-model="localDialog" max-width="640" :persistent="hasChanges">
-        <v-card class="profile-card" rounded="xl" elevation="8">
+        <v-card
+            class="profile-card"
+            rounded="xl"
+            elevation="8"
+            data-testid="profile-dialog"
+        >
             <!-- ── Header ─────────────────────────────────────────── -->
             <div class="profile-header pa-6 pb-0">
                 <div class="d-flex align-center gap-4">
@@ -88,7 +93,7 @@
                     color="primary"
                     density="compact"
                 >
-                    <v-tab value="profile">
+                    <v-tab value="profile" data-testid="profile-tab-profile">
                         <v-icon
                             start
                             icon="mdi-account-edit-outline"
@@ -96,7 +101,7 @@
                         />
                         {{ $t('account.tabs.profile') }}
                     </v-tab>
-                    <v-tab value="security">
+                    <v-tab value="security" data-testid="profile-tab-security">
                         <v-icon
                             start
                             icon="mdi-shield-lock-outline"
@@ -150,6 +155,7 @@
                                         :rules="[rules.required]"
                                         counter="50"
                                         prepend-inner-icon="mdi-account-outline"
+                                        data-testid="profile-firstname"
                                     />
                                 </v-col>
 
@@ -166,6 +172,7 @@
                                         :rules="[rules.required]"
                                         counter="50"
                                         prepend-inner-icon="mdi-account-outline"
+                                        data-testid="profile-lastname"
                                     />
                                 </v-col>
 
@@ -244,7 +251,11 @@
 
             <!-- ── Actions ─────────────────────────────────────────── -->
             <v-card-actions class="pa-4">
-                <v-btn variant="text" @click="localDialog = false">
+                <v-btn
+                    variant="text"
+                    data-testid="profile-cancel"
+                    @click="cancelEdit"
+                >
                     {{ $t('actions.cancel') }}
                 </v-btn>
 
@@ -268,6 +279,7 @@
                     :disabled="!canSave || saving"
                     :loading="saving"
                     prepend-icon="mdi-content-save-outline"
+                    data-testid="profile-save"
                     @click="saveUser"
                 >
                     {{ $t('actions.save') }}
@@ -384,6 +396,19 @@ const hasChanges = computed(() => {
     if (passwordChangeRequested.value) return true
     return user.firstname !== original.firstname || user.name !== original.name
 })
+
+function cancelEdit() {
+    user.firstname = original.firstname
+    user.name = original.name
+    user.oldPassword = ''
+    user.password = ''
+    user.passwordConfirm = ''
+    avatarFile.value = null
+    avatarPreview.value = user.avatar
+        ? pb.files.getURL(user, user.avatar, { thumb: '100x100' })
+        : null
+    localDialog.value = false
+}
 
 /**
  * Save is only enabled when:

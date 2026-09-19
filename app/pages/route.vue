@@ -58,6 +58,7 @@
                                     line-height: 1.2;
                                     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
                                 "
+                                data-testid="route-page-name"
                             >
                                 {{ metadata.name }}
                             </h1>
@@ -105,9 +106,11 @@
                             <v-icon color="yellow-darken-2" size="22"
                                 >mdi-star</v-icon
                             >
-                            <span class="text-h6 font-weight-bold">{{
-                                avgRating
-                            }}</span>
+                            <span
+                                class="text-h6 font-weight-bold"
+                                data-testid="route-avg-rating"
+                                >{{ avgRating }}</span
+                            >
                         </div>
                         <div class="text-caption text-medium-emphasis">
                             {{ t('ratings.score') }}

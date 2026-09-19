@@ -21,7 +21,7 @@ const emit = defineEmits<{ confirm: [] }>()
 
 <template>
     <v-dialog v-model="open" :max-width="maxWidth">
-        <v-card rounded="xl">
+        <v-card rounded="xl" data-testid="confirm-dialog">
             <v-card-title
                 v-if="title"
                 class="pa-5 pb-2 text-body-1 font-weight-semibold"
@@ -35,7 +35,11 @@ const emit = defineEmits<{ confirm: [] }>()
                 {{ message }}
             </v-card-text>
             <v-card-actions class="pa-4 pt-0">
-                <v-btn variant="text" @click="open = false">
+                <v-btn
+                    variant="text"
+                    data-testid="confirm-dialog-cancel"
+                    @click="open = false"
+                >
                     {{ $t('actions.cancel') }}
                 </v-btn>
                 <v-spacer />
@@ -43,6 +47,7 @@ const emit = defineEmits<{ confirm: [] }>()
                     :color="confirmColor"
                     variant="flat"
                     :loading="loading"
+                    data-testid="confirm-dialog-confirm"
                     @click="emit('confirm')"
                 >
                     {{ confirmText ?? $t('actions.delete') }}

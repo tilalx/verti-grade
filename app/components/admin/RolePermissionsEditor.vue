@@ -10,7 +10,7 @@
             <v-progress-circular indeterminate color="primary" />
         </v-card-text>
 
-        <v-table v-else>
+        <v-table v-else data-testid="role-permissions-table">
             <thead>
                 <tr>
                     <th class="text-left">
@@ -26,7 +26,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="role in roles" :key="role.id">
+                <tr
+                    v-for="role in roles"
+                    :key="role.id"
+                    :data-testid="`role-permissions-row-${role.name}`"
+                >
                     <td>
                         <v-chip
                             size="small"
@@ -48,6 +52,7 @@
                             :disabled="role.name === 'admin' || saving"
                             density="compact"
                             class="d-inline-flex"
+                            :data-testid="`role-permissions-${role.name}-${perm.name}`"
                             @update:model-value="togglePermission(role, perm)"
                         />
                     </td>
@@ -73,7 +78,8 @@ function hasPermission(role, permId) {
 }
 
 async function togglePermission(role, perm) {
-    const currentPerms = [...(role.permissions ?? [])]
+    const previousPerms = role.permissions ?? []
+    const currentPerms = [...previousPerms]
     const idx = currentPerms.indexOf(perm.id)
     if (idx === -1) {
         currentPerms.push(perm.id)
@@ -81,15 +87,20 @@ async function togglePermission(role, perm) {
         currentPerms.splice(idx, 1)
     }
 
+    // Apply optimistically so the checkbox (bound to role.permissions via
+    // hasPermission) always reflects the click immediately, then roll back
+    // on failure — otherwise a rejected update leaves the prop unchanged
+    // and Vuetify's checkbox never resyncs to the (correct) prior state.
+    role.permissions = currentPerms
     saving.value = true
     try {
         await pb.collection('roles').update(role.id, {
             permissions: currentPerms,
         })
-        role.permissions = currentPerms
         notify(t('permissions.updated'), 'success')
     } catch (err) {
         console.error('Failed to update role permissions:', err)
+        role.permissions = previousPerms
         notify(t('permissions.updateError'), 'error')
     } finally {
         saving.value = false
@@ -112,7 +123,9 @@ async function fetchData() {
         roles.value = rolesData
         allPermissions.value = permsData
     } catch (err) {
+        if (err?.isAbort) return
         console.error('Failed to fetch roles/permissions:', err)
+        notify(t('permissions.loadError'), 'error')
     } finally {
         loading.value = false
     }

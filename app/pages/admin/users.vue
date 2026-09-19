@@ -27,6 +27,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="users-filter-role"
                         />
                     </v-col>
                 </v-row>
@@ -70,6 +71,7 @@
                     border
                     flat
                     class="user-card d-flex flex-column"
+                    :data-testid="`user-card-${user.id}`"
                 >
                     <v-card-item class="pb-1 pt-3">
                         <template #prepend>
@@ -145,6 +147,7 @@
                             icon
                             size="small"
                             variant="text"
+                            data-testid="user-card-edit"
                             @click="editUser(user)"
                         >
                             <v-icon size="18">mdi-pencil-outline</v-icon>
@@ -157,6 +160,7 @@
                             size="small"
                             variant="text"
                             :disabled="user.id === currentUserId"
+                            data-testid="user-card-delete"
                             @click="confirmDelete(user)"
                         >
                             <v-icon size="18" color="error"
@@ -181,6 +185,7 @@
                 variant="tonal"
                 rounded="lg"
                 :loading="loadingMore"
+                data-testid="users-load-more"
                 @click="loadMore"
             >
                 {{ t('actions.load_more') }}

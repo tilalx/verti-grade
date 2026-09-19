@@ -57,6 +57,7 @@
                             icon
                             variant="text"
                             class="nav-hamburger"
+                            data-testid="nav-hamburger"
                             @click="drawer = !drawer"
                             :aria-label="$t('nav.openMenu')"
                         >
@@ -69,6 +70,7 @@
                             rounded="lg"
                             prepend-icon="mdi-login"
                             class="nav-login-btn"
+                            data-testid="nav-login"
                         >
                             {{ $t('routes.login') }}
                         </v-btn>
@@ -84,6 +86,7 @@
             temporary
             width="260"
             class="mobile-drawer"
+            data-testid="nav-drawer"
             :aria-label="$t('nav.mainNavigation')"
         >
             <v-list nav density="compact" class="drawer-list">
@@ -96,6 +99,7 @@
                     rounded="lg"
                     class="drawer-item"
                     active-class="drawer-item--active"
+                    :data-testid="`nav-drawer-link-${link.to.replace(/^\//, '').replaceAll('/', '-') || 'home'}`"
                     @click="drawer = false"
                 />
             </v-list>
@@ -104,7 +108,7 @@
                 <v-divider class="mx-4 mb-3" />
                 <div class="drawer-footer">
                     <ClientOnly>
-                        <UserIcon v-if="isLoggedIn" />
+                        <UserIcon v-if="isLoggedIn && !mdAndUp" />
                     </ClientOnly>
                 </div>
             </template>

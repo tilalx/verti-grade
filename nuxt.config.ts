@@ -24,14 +24,20 @@ export default defineNuxtConfig({
     moduleOptions: {
       autoimport: true, // Automatically imports Vuetify components
       ssrClientHints: {
-        reloadOnFirstRequest: true, // Reloads the page on first request to apply the theme
+        // false: the module's own guard cookie (vuetify-nuxt-client-hints-
+        // reloaded) that's supposed to stop repeat reloads isn't reliably
+        // surviving the write-then-reload round trip in every browser here
+        // (worst in WebKit) — seen reloading the same URL 15-20+ times in a
+        // row instead of settling. defaultTheme is pinned to 'light' below
+        // regardless, so the client-hint-driven theme reload had no upside
+        // to justify that risk.
+        reloadOnFirstRequest: false,
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
         prefersColorSchemeOptions: {
           cookie: {
             name: 'color-scheme', // Stores user's preferred color scheme
           },
-          useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }

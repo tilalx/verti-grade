@@ -39,6 +39,7 @@ function handleClear() {
                     variant="outlined"
                     rounded="lg"
                     class="flex-grow-1"
+                    data-testid="filter-search"
                 />
                 <!-- Mobile: open bottom sheet -->
                 <v-btn
@@ -47,6 +48,7 @@ function handleClear() {
                     density="compact"
                     size="small"
                     icon
+                    data-testid="filter-open-sheet"
                     @click="sheetOpen = true"
                 >
                     <v-badge
@@ -64,6 +66,7 @@ function handleClear() {
                     density="compact"
                     size="small"
                     prepend-icon="mdi-close"
+                    data-testid="filter-clear"
                     @click="handleClear"
                 >
                     {{ $t('actions.clear') }}
@@ -80,7 +83,7 @@ function handleClear() {
 
     <!-- Mobile: filters in bottom sheet (same pattern as ReviewFormDialog) -->
     <v-bottom-sheet v-if="!smAndUp" v-model="sheetOpen" inset>
-        <v-card class="py-2">
+        <v-card class="py-2" data-testid="filter-sheet">
             <v-toolbar color="transparent" flat density="compact" class="pt-1">
                 <v-toolbar-title class="text-body-1 font-weight-semibold pl-2">
                     {{ $t('filter.title') }}

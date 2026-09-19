@@ -1,7 +1,11 @@
 <template>
     <div class="view-ratings-wrapper">
         <!-- The button that opens the ratings sheet -->
-        <v-btn @click="openSheet" color="primary">
+        <v-btn
+            @click="openSheet"
+            color="primary"
+            data-testid="route-details-open"
+        >
             {{ $t('ratings.ratings') }}
         </v-btn>
 
@@ -10,7 +14,11 @@
             On desktop, it behaves like a standard centered dialog.
         -->
         <v-bottom-sheet v-model="isSheetOpen" inset>
-            <v-card class="d-flex flex-column" style="max-height: 90vh">
+            <v-card
+                class="d-flex flex-column"
+                style="max-height: 90vh"
+                data-testid="route-details-sheet"
+            >
                 <v-card-item class="py-2">
                     <v-card-title class="text-h5 text-center">
                         {{ $t('ratings.climber_reviews') }}

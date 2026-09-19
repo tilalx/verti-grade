@@ -5,8 +5,12 @@
         location="top"
         timeout="4000"
         rounded="lg"
+        data-testid="global-snackbar"
     >
-        <div class="d-flex align-center ga-2">
+        <div
+            class="d-flex align-center ga-2"
+            data-testid="global-snackbar-message"
+        >
             <v-icon size="18">{{ icon }}</v-icon>
             {{ message }}
         </div>

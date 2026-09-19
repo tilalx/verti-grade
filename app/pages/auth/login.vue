@@ -33,6 +33,7 @@
                     ref="loginForm"
                     v-model="loginValid"
                     validate-on="submit"
+                    data-testid="login-form"
                     @submit.prevent="submitLogin"
                 >
                     <v-text-field
@@ -48,6 +49,7 @@
                         density="comfortable"
                         color="success"
                         class="mb-2"
+                        data-testid="login-identity"
                         autofocus
                         clearable
                         @keydown.enter.prevent="submitLogin"
@@ -64,6 +66,7 @@
                         prepend-inner-icon="mdi-lock-outline"
                         autocomplete="current-password"
                         name="password"
+                        data-testid="login-password"
                         :rules="passwordRules"
                         :disabled="loading"
                         variant="outlined"
@@ -98,6 +101,7 @@
                             color="primary"
                             size="small"
                             class="text-none"
+                            data-testid="login-goto-reset"
                             @click="view = 'requestReset'"
                         >
                             {{ $t('account.reset_password') }}
@@ -113,6 +117,7 @@
                         :disabled="loading"
                         rounded="lg"
                         class="mb-3 font-weight-semibold"
+                        data-testid="login-submit"
                     >
                         {{ $t('account.login') }}
                     </v-btn>
@@ -173,6 +178,7 @@
                     ref="resetForm"
                     v-model="resetValid"
                     validate-on="submit"
+                    data-testid="reset-form"
                     @submit.prevent="submitReset"
                 >
                     <v-alert
@@ -198,6 +204,7 @@
                         density="comfortable"
                         color="success"
                         class="mb-5"
+                        data-testid="reset-email"
                         autofocus
                         clearable
                     />
@@ -211,6 +218,7 @@
                         :disabled="loading"
                         rounded="lg"
                         class="mb-3 font-weight-semibold"
+                        data-testid="reset-submit"
                     >
                         {{ $t('actions.submit') }}
                     </v-btn>

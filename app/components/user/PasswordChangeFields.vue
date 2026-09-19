@@ -61,6 +61,7 @@
             :append-inner-icon="
                 showOld ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
             "
+            data-testid="password-old"
             @update:model-value="emit('update:oldPassword', $event)"
             @click:append-inner="showOld = !showOld"
         />
@@ -85,6 +86,7 @@
             :append-inner-icon="
                 showNew ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
             "
+            data-testid="password-new"
             @update:model-value="emit('update:password', $event)"
             @click:append-inner="showNew = !showNew"
         />
@@ -153,6 +155,7 @@
             validate-on="blur"
             :rules="[rules.required, rules.matchPassword]"
             prepend-inner-icon="mdi-lock-check-outline"
+            data-testid="password-confirm"
             @update:model-value="emit('update:passwordConfirm', $event)"
         >
             <!-- Eye icon swaps to check-circle once passwords match (no remount) -->

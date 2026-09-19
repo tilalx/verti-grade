@@ -13,6 +13,7 @@
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
+                    data-testid="comments-stat-total"
                 >
                     <div class="text-h6 font-weight-bold text-primary">
                         {{ stats.totalReviews }}
@@ -26,6 +27,7 @@
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
+                    data-testid="comments-stat-avg-rating"
                 >
                     <div class="d-flex align-center justify-center ga-1">
                         <span class="text-h6 font-weight-bold text-warning">{{
@@ -44,6 +46,7 @@
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
+                    data-testid="comments-stat-this-week"
                 >
                     <div class="text-h6 font-weight-bold text-success">
                         {{ stats.thisWeek }}
@@ -57,6 +60,7 @@
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
+                    data-testid="comments-stat-low-rated"
                 >
                     <div class="text-h6 font-weight-bold text-error">
                         {{ stats.lowRated }}
@@ -89,6 +93,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="comments-filter-location"
                         />
                     </v-col>
                     <v-col cols="6" sm="3" md="2">
@@ -103,6 +108,7 @@
                             density="compact"
                             variant="outlined"
                             rounded="lg"
+                            data-testid="comments-filter-difficulty"
                         />
                     </v-col>
                     <v-col cols="12" sm="5" md="3">
@@ -116,6 +122,7 @@
                             variant="outlined"
                             rounded="lg"
                             prepend-inner-icon="mdi-sort"
+                            data-testid="comments-sort"
                         />
                     </v-col>
                 </v-row>
@@ -134,6 +141,7 @@
                                 :value="0"
                                 size="small"
                                 variant="tonal"
+                                data-testid="comments-filter-rating-all"
                             >
                                 {{ t('filter.all') }}
                             </v-chip>
@@ -145,6 +153,7 @@
                                 size="small"
                                 color="warning"
                                 variant="tonal"
+                                :data-testid="`comments-filter-rating-${star}`"
                             >
                                 {{ star }}★
                             </v-chip>
@@ -158,6 +167,7 @@
                             rounded="lg"
                             divided
                             variant="outlined"
+                            data-testid="comments-filter-date"
                         >
                             <v-btn value="" size="small">{{
                                 t('filter.all')
@@ -190,6 +200,7 @@
                         <v-btn
                             size="small"
                             variant="text"
+                            data-testid="comments-bulk-cancel"
                             @click="clearSelection"
                         >
                             {{ t('actions.cancel') }}
@@ -199,6 +210,7 @@
                             color="error"
                             variant="tonal"
                             prepend-icon="mdi-delete"
+                            data-testid="comments-bulk-delete"
                             @click="bulkDeleteDialog = true"
                         >
                             {{
@@ -260,6 +272,7 @@
                                 icon
                                 size="small"
                                 variant="text"
+                                data-testid="comment-card-edit"
                                 @click="openEdit(comment)"
                             >
                                 <v-icon size="18">mdi-pencil-outline</v-icon>
@@ -272,6 +285,7 @@
                                 color="error"
                                 size="small"
                                 variant="text"
+                                data-testid="comment-card-delete"
                                 @click="openDelete(comment)"
                             >
                                 <v-icon size="18">mdi-delete</v-icon>
@@ -657,6 +671,7 @@ async function confirmDelete() {
         totalItems.value = Math.max(0, totalItems.value - 1)
         deleteDialog.value = false
         deleteTarget.value = null
+        showSnackbar(t('notifications.success.delete'))
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error deleting comment:', err)

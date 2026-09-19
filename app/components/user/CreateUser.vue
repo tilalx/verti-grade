@@ -6,12 +6,13 @@
             variant="tonal"
             rounded="lg"
             prepend-icon="mdi-account-plus-outline"
+            data-testid="user-create-open"
         >
             {{ $t('users.create') }}
         </v-btn>
 
         <v-dialog v-model="dialog" max-width="520" persistent>
-            <v-card rounded="xl" elevation="8">
+            <v-card rounded="xl" elevation="8" data-testid="user-create-dialog">
                 <!-- Header -->
                 <div class="dialog-header pa-6 pb-4">
                     <div class="d-flex align-center ga-3">
@@ -87,6 +88,7 @@
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
+                                    data-testid="user-create-firstname"
                                 />
                             </v-col>
                             <v-col cols="12" sm="6">
@@ -101,6 +103,7 @@
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
+                                    data-testid="user-create-lastname"
                                 />
                             </v-col>
                         </v-row>
@@ -116,6 +119,7 @@
                             density="comfortable"
                             rounded="lg"
                             class="mb-1"
+                            data-testid="user-create-email"
                         />
 
                         <!-- Role -->
@@ -130,6 +134,7 @@
                             density="comfortable"
                             rounded="lg"
                             clearable
+                            data-testid="user-create-role"
                         />
                     </v-form>
                 </v-card-text>
@@ -138,7 +143,11 @@
 
                 <!-- Actions -->
                 <v-card-actions class="pa-4">
-                    <v-btn variant="text" @click="closeDialog">
+                    <v-btn
+                        variant="text"
+                        data-testid="user-create-cancel"
+                        @click="closeDialog"
+                    >
                         {{ $t('actions.cancel') }}
                     </v-btn>
                     <v-spacer />
@@ -149,6 +158,7 @@
                         variant="flat"
                         rounded="lg"
                         prepend-icon="mdi-check"
+                        data-testid="user-create-submit"
                         @click="submit"
                     >
                         {{ $t('actions.create') }}
