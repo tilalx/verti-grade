@@ -36,6 +36,9 @@ export default defineNuxtConfig({
   vuetify: {
     moduleOptions: {
       autoimport: true, // Automatically imports Vuetify components
+      // Vuetify's useLayout collides with Nuxt 4.5's built-in auto-import
+      // (NUXT_B6002) — vuetify's is exposed as useVLayout instead.
+      prefixComposables: ['useLayout'],
       ssrClientHints: {
         // false: the module's reload-loop guard doesn't reliably survive
         // the write-then-reload round trip (esp. WebKit) — caused an
