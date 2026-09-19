@@ -1,20 +1,12 @@
 import type { Page } from '@playwright/test'
 
 /**
- * ssrClientHints.reloadOnFirstRequest triggers a client-side reload on a
- * fresh browser context's first request, and auth middleware runs client-side
- * only (app/middleware/auth.js), so the first paint is not the settled state.
- * Always navigate through this helper instead of a bare page.goto().
- *
- * Every page keeps a PocketBase realtime SSE connection open (layouts/
- * default.vue and friends), so the network never goes idle — don't wait on
- * 'networkidle', it hangs until timeout (esp. in WebKit). NavBar only
- * renders its right-side action client-side (inside <ClientOnly>) — login
- * button (logged out), hamburger (logged in + mobile), or the user menu
- * (logged in + desktop) — after any ssrClientHints reload has already
- * happened, so waiting for any one of those is a reliable "hydrated" signal.
- * Layouts without a NavBar (layouts/blank.vue, used by the auth pages) expose
- * an equivalent client-only 'page-hydrated' marker instead.
+ * Auth middleware runs client-side only, so first paint isn't the settled
+ * state — always navigate through this helper instead of a bare page.goto().
+ * Don't wait on 'networkidle': PocketBase's realtime SSE connection keeps
+ * the network busy forever, hanging this past timeout. Instead wait for
+ * NavBar's client-only right-side action (login/hamburger/user-menu) or,
+ * on NavBar-less layouts (blank.vue), the 'page-hydrated' marker.
  */
 export async function gotoSettled(page: Page, path: string) {
     await page.goto(path)

@@ -71,8 +71,7 @@ test('blocks submit when no rating is selected', async ({ page }) => {
     await page.getByTestId('review-open-cta').click()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 
-    // Leave rating/difficulty/comment empty — client-side validation keeps
-    // the submit button disabled, so it's never clickable.
+    // Empty form — submit stays disabled, never clickable.
     await expect(page.getByTestId('review-form-submit')).toBeDisabled()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 })
