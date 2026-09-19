@@ -30,3 +30,17 @@ test('icon-only close buttons have an accessible name', async ({
     await page.getByTestId('route-details-open').first().click()
     await expect(page.getByRole('button', { name: /close/i })).toBeVisible()
 })
+
+test('a blocked-submit validation error is exposed to assistive tech', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/routes')
+    await page.getByTestId('routes-create-open').click()
+    await page.getByTestId('route-form-submit').click()
+
+    // Vuetify surfaces field errors via role="alert" on the messages slot —
+    // a red border alone would fail a screen-reader user silently.
+    await expect(
+        page.getByTestId('route-form-name').getByRole('alert').first(),
+    ).toBeVisible()
+})

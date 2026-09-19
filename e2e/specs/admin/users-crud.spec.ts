@@ -33,3 +33,39 @@ test('creates and edits a user', async ({ adminPage: page }) => {
     await page.getByTestId('user-edit-submit').click()
     await expect(page.getByTestId('user-edit-dialog')).toBeHidden()
 })
+
+test('rejects creating a user with a duplicate email', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/users')
+
+    await page.getByTestId('user-create-open').click()
+    await expect(page.getByTestId('user-create-dialog')).toBeVisible()
+    await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
+    await page
+        .getByTestId('user-create-lastname')
+        .locator('input')
+        .fill('Duplicate')
+    await page
+        .getByTestId('user-create-email')
+        .locator('input')
+        .fill('e2e-admin@verti-grade.test')
+    await page.getByTestId('user-create-submit').click()
+
+    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    // Failed create — dialog stays open, nothing was submitted successfully.
+    await expect(page.getByTestId('user-create-dialog')).toBeVisible()
+})
+
+test('blocks submit when required fields are empty', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/users')
+
+    await page.getByTestId('user-create-open').click()
+    await expect(page.getByTestId('user-create-dialog')).toBeVisible()
+    await page.getByTestId('user-create-submit').click()
+
+    // Client-side validation blocks it — dialog never closes.
+    await expect(page.getByTestId('user-create-dialog')).toBeVisible()
+})

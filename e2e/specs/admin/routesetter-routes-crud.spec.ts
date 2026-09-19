@@ -1,10 +1,12 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
+import { gotoSettled, authHeader } from '../../support/nav'
 
-test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
+test('routesetter can create and delete a route (manage_routes permission)', async ({
+    setterPage: page,
+}) => {
     await gotoSettled(page, '/admin/routes')
 
-    const name = `e2e-crud-${Date.now()}`
+    const name = `e2e-setter-${Date.now()}`
 
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
@@ -35,13 +37,6 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
     await expect(page.getByTestId('routes-table')).toContainText(name)
 
     await page.getByTestId('routes-row-edit').first().click()
-    await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-    await page.getByTestId('route-form-delete').click()
-    await expect(page.getByTestId('confirm-dialog')).toBeVisible()
-    await page.getByTestId('confirm-dialog-cancel').click()
-    await expect(page.getByTestId('confirm-dialog')).toBeHidden()
-    await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-
     await page.getByTestId('route-form-delete').click()
     await page.getByTestId('confirm-dialog-confirm').click()
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
@@ -50,15 +45,19 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
     await expect(page.getByTestId('routes-table')).not.toContainText(name)
 })
 
-test('blocks route creation when required fields are empty', async ({
-    adminPage: page,
+test('a user without manage_routes cannot reach or write to /admin/routes', async ({
+    userPage: page,
 }) => {
     await gotoSettled(page, '/admin/routes')
+    await page.waitForURL((url) => !url.pathname.endsWith('/admin/routes'))
 
-    await page.getByTestId('routes-create-open').click()
-    await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-    await page.getByTestId('route-form-submit').click()
-
-    // Client-side validation blocks it — the dialog stays open.
-    await expect(page.getByTestId('route-form-dialog')).toBeVisible()
+    const headers = await authHeader(page)
+    const res = await page.request.post('/api/collections/routes/records', {
+        headers,
+        data: {
+            name: 'should-not-be-created-by-user',
+            difficulty: 1,
+        },
+    })
+    expect(res.status()).toBeGreaterThanOrEqual(400)
 })

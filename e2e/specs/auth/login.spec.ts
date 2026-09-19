@@ -34,6 +34,27 @@ test.describe('login', () => {
         await expect(page).toHaveURL(/\/auth\/login/)
     })
 
+    test('shows an error when the login request fails outright', async ({
+        page,
+    }) => {
+        await gotoSettled(page, '/auth/login')
+        await page.route(
+            '**/api/collections/users/auth-with-password',
+            (route) => route.abort('failed'),
+        )
+        await page
+            .getByTestId('login-identity')
+            .locator('input')
+            .fill('e2e-admin@verti-grade.test')
+        await page
+            .getByTestId('login-password')
+            .locator('input')
+            .fill('E2ePassw0rd!')
+        await page.getByTestId('login-submit').click()
+        await expect(page.getByTestId('global-snackbar')).toBeVisible()
+        await expect(page).toHaveURL(/\/auth\/login/)
+    })
+
     test('navigates to the password-reset request form', async ({ page }) => {
         await gotoSettled(page, '/auth/login')
         await page.getByTestId('login-goto-reset').click()

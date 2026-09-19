@@ -19,6 +19,17 @@ test.describe('unauthenticated guard', () => {
     }
 })
 
+test.describe('anonymous guard', () => {
+    test('the routes API refuses a create with no session', async ({
+        page,
+    }) => {
+        const res = await page.request.post('/api/collections/routes/records', {
+            data: { name: 'should-not-be-created', difficulty: 1 },
+        })
+        expect(res.status()).toBeGreaterThanOrEqual(400)
+    })
+})
+
 test.describe('routesetter guard', () => {
     // manage_users / manage_settings are admin-only permissions; the
     // routesetter role has manage_routes, view_analytics, manage_comments,

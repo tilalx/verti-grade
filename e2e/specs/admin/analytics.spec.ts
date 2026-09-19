@@ -25,3 +25,13 @@ test('refresh button reloads analytics data', async ({ adminPage: page }) => {
     await page.getByTestId('analytics-refresh').click()
     await expect(page.getByTestId('analytics-refresh')).toBeEnabled()
 })
+
+test('shows an error notification when the analytics fetch fails', async ({
+    adminPage: page,
+}) => {
+    await page.route('**/api/admin/analytics*', (route) =>
+        route.fulfill({ status: 500, body: 'boom' }),
+    )
+    await gotoSettled(page, '/admin/analytics')
+    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+})

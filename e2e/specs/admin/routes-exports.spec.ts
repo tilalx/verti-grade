@@ -30,7 +30,9 @@ test.describe('exports', () => {
         )
     })
 
-    test('exports selected routes as JSON', async ({ adminPage: page }) => {
+    test('exports selected routes as JSON with real route content', async ({
+        adminPage: page,
+    }) => {
         await gotoSettled(page, '/admin/routes')
         await page.getByTestId('routes-select-all').click()
         const downloadPromise = page.waitForEvent('download')
@@ -41,5 +43,19 @@ test.describe('exports', () => {
         const fs = await import('node:fs')
         const parsed = JSON.parse(fs.readFileSync(filePath!, 'utf8'))
         expect(Array.isArray(parsed)).toBe(true)
+        expect(parsed.length).toBeGreaterThan(0)
+
+        // Content, not just shape: every exported record must carry real
+        // route data (not an empty stub) and the seeded routes must actually
+        // be present — catches regressions where the export handler resolves
+        // IDs but drops fields or returns blanks.
+        for (const route of parsed) {
+            expect(route.id).toBeTruthy()
+            expect(route.name).toBeTruthy()
+            expect(Array.isArray(route.ratings)).toBe(true)
+        }
+        expect(
+            parsed.some((r: { name: string }) => r.name.includes('e2e-route-')),
+        ).toBe(true)
     })
 })

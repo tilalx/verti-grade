@@ -34,3 +34,48 @@ test('an anonymous visitor can submit a review', async ({ page }) => {
 
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
 })
+
+test('keeps the dialog open when the review submit fails', async ({ page }) => {
+    const id = await firstSeededRouteId(page)
+    await gotoSettled(page, `/route?id=${id}`)
+
+    await page.getByTestId('review-open-cta').click()
+    await expect(page.getByTestId('review-form-dialog')).toBeVisible()
+
+    await page.route('**/api/collections/ratings/records', (route) =>
+        route.abort('failed'),
+    )
+
+    await page
+        .getByTestId('review-form-rating')
+        .locator('button, [role="radio"]')
+        .last()
+        .click()
+    await page.getByTestId('review-form-difficulty').click()
+    await page.getByRole('option').first().click()
+    await page
+        .getByTestId('review-form-comment')
+        .locator('textarea')
+        .first()
+        .fill('Should not be submitted, network fails')
+    await page.getByTestId('review-form-submit').click()
+
+    // NOTE: the app currently shows no error feedback on a failed submit
+    // (ReviewFormDialog.vue only console.errors) — this only pins down that
+    // the dialog doesn't silently close/lose the user's input.
+    await expect(page.getByTestId('review-form-dialog')).toBeVisible()
+})
+
+test('blocks submit when no rating is selected', async ({ page }) => {
+    const id = await firstSeededRouteId(page)
+    await gotoSettled(page, `/route?id=${id}`)
+
+    await page.getByTestId('review-open-cta').click()
+    await expect(page.getByTestId('review-form-dialog')).toBeVisible()
+
+    // Leave rating/difficulty/comment empty and submit straight away.
+    await page.getByTestId('review-form-submit').click()
+
+    // Client-side validation blocks it — the dialog stays open.
+    await expect(page.getByTestId('review-form-dialog')).toBeVisible()
+})
