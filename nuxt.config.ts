@@ -24,20 +24,20 @@ export default defineNuxtConfig({
     moduleOptions: {
       autoimport: true, // Automatically imports Vuetify components
       ssrClientHints: {
-        reloadOnFirstRequest: true, // Reloads the page on first request to apply the theme
+        // false: the module's own guard cookie (vuetify-nuxt-client-hints-
+        // reloaded) that's supposed to stop repeat reloads isn't reliably
+        // surviving the write-then-reload round trip in every browser here
+        // (worst in WebKit) — seen reloading the same URL 15-20+ times in a
+        // row instead of settling. defaultTheme is pinned to 'light' below
+        // regardless, so the client-hint-driven theme reload had no upside
+        // to justify that risk.
+        reloadOnFirstRequest: false,
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
         prefersColorSchemeOptions: {
           cookie: {
             name: 'color-scheme', // Stores user's preferred color scheme
           },
-          // false (default): fall back to the 'color-scheme' cookie when the
-          // Sec-CH-Prefers-Color-Scheme header is absent. true breaks WebKit
-          // and Firefox — neither sends User-Agent Client Hints, so with no
-          // cookie fallback reloadOnFirstRequest can never tell "no header
-          // yet" from "already reloaded" and reloads forever (theme is
-          // pinned to 'light' below regardless, so this had no upside).
-          useBrowserThemeOnly: false,
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }
