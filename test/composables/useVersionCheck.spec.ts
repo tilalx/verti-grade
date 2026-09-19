@@ -1,238 +1,107 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ref as vueRef } from 'vue';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { flushPromises } from '@vue/test-utils';
+import { useVersionCheck } from '~/composables/useVersionCheck';
 
-const useStateMocks: Record<string, { value: unknown }> = {};
-
-vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
-  if (!useStateMocks[key]) {
-    useStateMocks[key] = vueRef(init ? init() : undefined);
-  }
-  return useStateMocks[key];
+const payload = (overrides = {}) => ({
+  installed: {
+    raw: '1.9.0',
+    base: '1.9.0',
+    ahead: 0,
+    sha: null,
+    notes: 'installed notes',
+  },
+  latest: { tag: 'v1.10.0', notes: 'latest notes', publishedAt: '2026-01-01' },
+  commits: [],
+  mode: 'release',
+  updateAvailable: true,
+  error: null,
+  ...overrides,
 });
-
-let runtimeConfig: { public: { appVersion: string } };
-vi.stubGlobal('useRuntimeConfig', () => runtimeConfig);
-vi.stubGlobal('$fetch', vi.fn());
 
 describe('useVersionCheck', () => {
   beforeEach(() => {
-    vi.resetModules();
-    for (const key of Object.keys(useStateMocks)) {
-      delete useStateMocks[key];
-    }
-    runtimeConfig = { public: { appVersion: '1.9.0' } };
-    (globalThis.$fetch as ReturnType<typeof vi.fn>).mockReset();
+    globalThis.__NUXT_RUNTIME_CONFIG__ = { public: { appVersion: '1.9.0' } };
   });
 
-  async function loadComposable() {
-    const mod = await import('~/composables/useVersionCheck');
-    return mod.useVersionCheck();
-  }
+  it('requests the cached server endpoint, never GitHub directly', async () => {
+    globalThis.$fetch.mockResolvedValue(payload());
 
-  describe('release installs (clean semver)', () => {
-    it('marks newVersionAvailable true when a newer stable release is published', async () => {
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-        tag_name: 'v1.10.0',
-        draft: false,
-        prerelease: false,
-      });
+    useVersionCheck();
+    await flushPromises();
 
-      const { mode, newVersionAvailable, latestVersion, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-
-      expect(globalThis.$fetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/tilalx/verti-grade/releases/latest',
-      );
-      expect(mode.value).toBe('release');
-      expect(newVersionAvailable.value).toBe(true);
-      expect(latestVersion.value).toBe('v1.10.0');
-    });
-
-    it('stays hidden when the installed tag is already the latest release', async () => {
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-        tag_name: 'v1.9.0',
-        draft: false,
-        prerelease: false,
-      });
-
-      const { newVersionAvailable, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-
-      expect(newVersionAvailable.value).toBe(false);
-    });
-
-    it('ignores draft and prerelease releases', async () => {
-      const fetchMock = globalThis.$fetch as ReturnType<typeof vi.fn>;
-      fetchMock.mockResolvedValue({
-        tag_name: 'v1.10.0',
-        draft: true,
-        prerelease: false,
-      });
-
-      const { newVersionAvailable, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-      expect(newVersionAvailable.value).toBe(false);
-    });
-
-    it('logs and leaves state untouched when the fetch fails', async () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('network'),
-      );
-
-      const { newVersionAvailable, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-
-      expect(newVersionAvailable.value).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error fetching the latest release:',
-        expect.any(Error),
-      );
-      consoleSpy.mockRestore();
-    });
+    expect(globalThis.$fetch).toHaveBeenCalledWith('/api/version');
+    expect(globalThis.$fetch).toHaveBeenCalledTimes(1);
   });
 
-  describe('rolling commit installs (short SHA)', () => {
-    beforeEach(() => {
-      runtimeConfig = { public: { appVersion: '4f6a192' } };
-    });
+  it('exposes appVersion synchronously so the footer does not wait on the fetch', () => {
+    globalThis.$fetch.mockResolvedValue(payload());
 
-    it('marks newVersionAvailable true and lists commits when behind HEAD', async () => {
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-        ahead_by: 2,
+    // Read before flushing: the value must already be there.
+    expect(useVersionCheck().appVersion).toBe('1.9.0');
+  });
+
+  it('surfaces release-mode state', async () => {
+    globalThis.$fetch.mockResolvedValue(payload());
+
+    const { mode, updateAvailable, latest, updateId } = useVersionCheck();
+    await flushPromises();
+
+    expect(mode.value).toBe('release');
+    expect(updateAvailable.value).toBe(true);
+    expect(latest.value?.tag).toBe('v1.10.0');
+    expect(updateId.value).toBe('v1.10.0');
+  });
+
+  it('surfaces commit-mode state and keys the update on the newest sha', async () => {
+    globalThis.$fetch.mockResolvedValue(
+      payload({
+        mode: 'commit',
+        latest: null,
         commits: [
-          {
-            sha: 'aaaaaaaaaaaaaaaa',
-            commit: {
-              message: 'first commit\nbody text',
-              author: { date: '2026-01-01T00:00:00Z' },
-            },
-            html_url: 'https://github.com/x/y/commit/aaaaaaaaaaaaaaaa',
-          },
-          {
-            sha: 'bbbbbbbbbbbbbbbb',
-            commit: {
-              message: 'second commit',
-              author: { date: '2026-01-02T00:00:00Z' },
-            },
-            html_url: 'https://github.com/x/y/commit/bbbbbbbbbbbbbbbb',
-          },
+          { sha: 'bbbbbbb', message: 'second', date: '2026-01-02' },
+          { sha: 'aaaaaaa', message: 'first', date: '2026-01-01' },
         ],
-      });
+      }),
+    );
 
-      const { mode, newVersionAvailable, commits, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
+    const { mode, commits, updateId } = useVersionCheck();
+    await flushPromises();
 
-      expect(globalThis.$fetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/tilalx/verti-grade/compare/4f6a192...main',
-      );
-      expect(mode.value).toBe('commit');
-      expect(newVersionAvailable.value).toBe(true);
-      // newest commit first
-      expect(commits.value).toEqual([
-        {
-          sha: 'bbbbbbb',
-          message: 'second commit',
-          date: '2026-01-02T00:00:00Z',
-          url: 'https://github.com/x/y/commit/bbbbbbbbbbbbbbbb',
-        },
-        {
-          sha: 'aaaaaaa',
-          message: 'first commit',
-          date: '2026-01-01T00:00:00Z',
-          url: 'https://github.com/x/y/commit/aaaaaaaaaaaaaaaa',
-        },
-      ]);
-    });
-
-    it('stays hidden when the installed commit is already at HEAD', async () => {
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-        ahead_by: 0,
-        commits: [],
-      });
-
-      const { newVersionAvailable, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-
-      expect(newVersionAvailable.value).toBe(false);
-    });
-
-    it('logs and leaves state untouched when the compare request fails', async () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      (globalThis.$fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('network'),
-      );
-
-      const { newVersionAvailable, checkForNewVersion } =
-        await loadComposable();
-      await checkForNewVersion();
-
-      expect(newVersionAvailable.value).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error comparing commits:',
-        expect.any(Error),
-      );
-      consoleSpy.mockRestore();
-    });
+    expect(mode.value).toBe('commit');
+    expect(commits.value).toHaveLength(2);
+    expect(updateId.value).toBe('bbbbbbb');
   });
 
-  describe('simulateUpdate', () => {
-    it('forces the release banner on when installed on a stable tag', async () => {
-      const { mode, newVersionAvailable, latestVersion, simulateUpdate } =
-        await loadComposable();
+  it('degrades to a quiet no-update state when the endpoint fails', async () => {
+    globalThis.$fetch.mockRejectedValue(new Error('network'));
 
-      simulateUpdate();
+    const { mode, updateAvailable, commits, latest } = useVersionCheck();
+    await flushPromises();
 
-      expect(mode.value).toBe('release');
-      expect(newVersionAvailable.value).toBe(true);
-      expect(latestVersion.value).toBe('v1.9.0');
-    });
+    expect(mode.value).toBe('none');
+    expect(updateAvailable.value).toBe(false);
+    expect(latest.value).toBeNull();
+    expect(commits.value).toEqual([]);
+  });
 
-    it('forces the commit banner on with a placeholder commit when on a rolling build', async () => {
-      runtimeConfig = { public: { appVersion: '4f6a192' } };
+  it('surfaces a rate-limit error so dialogs can distinguish it from empty notes', async () => {
+    globalThis.$fetch.mockResolvedValue(
+      payload({ error: 'rate_limited', latest: null, updateAvailable: false }),
+    );
 
-      const { mode, newVersionAvailable, commits, simulateUpdate } =
-        await loadComposable();
+    const { error } = useVersionCheck();
+    await flushPromises();
 
-      simulateUpdate();
+    expect(error.value).toBe('rate_limited');
+  });
 
-      expect(mode.value).toBe('commit');
-      expect(newVersionAvailable.value).toBe(true);
-      expect(commits.value).toHaveLength(1);
-    });
+  it('exposes the installed release notes for the footer dialog', async () => {
+    globalThis.$fetch.mockResolvedValue(payload());
 
-    it('forces the commit banner when explicitly requested, even on a stable tag install', async () => {
-      const { mode, newVersionAvailable, commits, simulateUpdate } =
-        await loadComposable();
+    const { installedNotes, installedBase } = useVersionCheck();
+    await flushPromises();
 
-      simulateUpdate('commit');
-
-      expect(mode.value).toBe('commit');
-      expect(newVersionAvailable.value).toBe(true);
-      expect(commits.value).toHaveLength(1);
-    });
-
-    it('forces the release banner when explicitly requested, even on a rolling build install', async () => {
-      runtimeConfig = { public: { appVersion: '4f6a192' } };
-
-      const { mode, newVersionAvailable, latestVersion, simulateUpdate } =
-        await loadComposable();
-
-      simulateUpdate('release');
-
-      expect(mode.value).toBe('release');
-      expect(newVersionAvailable.value).toBe(true);
-      expect(latestVersion.value).toBe('v1.0.0');
-    });
+    expect(installedNotes.value).toBe('installed notes');
+    expect(installedBase.value).toBe('1.9.0');
   });
 });

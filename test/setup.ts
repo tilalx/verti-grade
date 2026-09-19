@@ -22,7 +22,22 @@ declare global {
   var $fetch: VitestMock;
   var useRuntimeConfig: () => RuntimeConfig;
   var usePocketbase: () => unknown;
-  var useI18n: () => { t: (key: string) => string };
+  var useI18n: () => {
+    t: (key: string) => string;
+    locale: { value: string };
+  };
+  var useAsyncData: <T>(
+    key: string,
+    handler: () => Promise<T>,
+    options?: { default?: () => T },
+  ) => {
+    data: { value: T | null };
+    error: { value: unknown };
+    pending: { value: boolean };
+    status: { value: string };
+    refresh: () => Promise<void>;
+    execute: () => Promise<void>;
+  };
   var ref: typeof vueRef;
   var computed: typeof vueComputed;
   var onMounted: typeof vueOnMounted;
@@ -48,7 +63,40 @@ const pocketbaseGetter = () => {
 };
 const i18nGetter = () => ({
   t: (key: string) => key,
+  locale: vueRef('en'),
 });
+
+// Minimal useAsyncData stub: runs the handler immediately and exposes the
+// same refs the real composable returns. Specs drive it via the $fetch mock
+// and await flushPromises().
+const useAsyncDataGetter = <T>(
+  _key: string,
+  handler: () => Promise<T>,
+  options?: { default?: () => T },
+) => {
+  const data = vueRef<T | null>(options?.default ? options.default() : null);
+  const error = vueRef<unknown>(null);
+  const pending = vueRef(true);
+  const status = vueRef<'pending' | 'success' | 'error'>('pending');
+
+  const run = async () => {
+    pending.value = true;
+    status.value = 'pending';
+    try {
+      data.value = await handler();
+      error.value = null;
+      status.value = 'success';
+    } catch (caught) {
+      error.value = caught;
+      status.value = 'error';
+    } finally {
+      pending.value = false;
+    }
+  };
+
+  void run();
+  return { data, error, pending, status, refresh: run, execute: run };
+};
 
 // Shared key/value store backing the useState() Nuxt auto-import stub;
 // cleared each test so state doesn't leak between specs.
@@ -64,6 +112,7 @@ vi.stubGlobal('useRuntimeConfig', runtimeConfigGetter);
 vi.stubGlobal('usePocketbase', pocketbaseGetter);
 vi.stubGlobal('useI18n', i18nGetter);
 vi.stubGlobal('useState', useStateGetter);
+vi.stubGlobal('useAsyncData', useAsyncDataGetter);
 vi.stubGlobal('useVersionCheck', useVersionCheck);
 if (!('ref' in globalThis)) {
   vi.stubGlobal('ref', vueRef);

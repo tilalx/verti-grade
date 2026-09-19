@@ -10,8 +10,14 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    github: {
+      owner: process.env.GITHUB_OWNER || 'tilalx',
+      repo: process.env.GITHUB_REPO || 'verti-grade',
+      branch: process.env.GITHUB_BRANCH || 'main'
+    },
     public: {
-      appVersion: process.env.APP_VERSION || process.env.npm_package_version
+      appVersion:
+        process.env.APP_VERSION || process.env.npm_package_version || 'dev'
     }
   },
   ssr: true,

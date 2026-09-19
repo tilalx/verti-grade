@@ -15,6 +15,20 @@ export function formatDateToYYYYMMDD(date: string | null | undefined): string {
     return `${parsed.getFullYear()}-${month}-${day}`
 }
 
+/**
+ * Formats a date string for display in the given locale.  Returns `''` for
+ * invalid or absent values.
+ */
+export function formatDisplayDate(
+    date: string | null | undefined,
+    locale?: string,
+): string {
+    if (!date) return ''
+    const parsed = new Date(date)
+    if (Number.isNaN(parsed.getTime())) return ''
+    return parsed.toLocaleDateString(locale || undefined)
+}
+
 export interface DifficultySource {
     difficulty?: number | string | null
     difficulty_sign?: boolean | string | null

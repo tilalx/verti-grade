@@ -4,7 +4,7 @@
             <slot name="activator" :props="activatorProps" />
         </template>
 
-        <v-card>
+        <v-card data-testid="commit-list-dialog">
             <v-card-title class="d-flex align-center">
                 <v-icon start size="20">mdi-source-commit</v-icon>
                 {{ $t('notifications.commitList.title') }}
@@ -13,6 +13,7 @@
                     icon="mdi-close"
                     variant="text"
                     density="comfortable"
+                    :aria-label="$t('notifications.commitList.close')"
                     @click="dialog = false"
                 />
             </v-card-title>
@@ -44,7 +45,7 @@
                     <div class="d-flex align-center flex-wrap ga-2 mb-1">
                         <span class="commit-sha">{{ commit.sha }}</span>
                         <span class="commit-date">
-                            {{ formatDate(commit.date) }}
+                            {{ formatDisplayDate(commit.date, locale) }}
                         </span>
                     </div>
                     <div class="commit-message">{{ commit.message }}</div>
@@ -54,24 +55,20 @@
     </v-dialog>
 </template>
 
-<script setup>
-const props = defineProps({
-    commits: {
-        type: Array,
-        default: () => [],
-    },
-    installedSha: {
-        type: String,
-        default: '',
-    },
-})
+<script setup lang="ts">
+import { formatDisplayDate } from '~/utils/formatting'
+import type { VersionCommit } from '~/composables/useVersionCheck'
 
+const props = withDefaults(
+    defineProps<{
+        commits?: VersionCommit[]
+        installedSha?: string
+    }>(),
+    { commits: () => [], installedSha: '' },
+)
+
+const { locale } = useI18n()
 const dialog = ref(false)
-
-const formatDate = (dateString) => {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString()
-}
 </script>
 
 <style scoped>

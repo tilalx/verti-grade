@@ -1,120 +1,143 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import NewVersionAvailable from '~/components/notifications/newVersionAvailable.vue';
 
-const releaseDialogStub = {
-  template: '<div><slot name="activator" :props="{}" /></div>',
+const DISMISS_KEY = 'verti-grade:update-dismissed';
+
+// v-alert renders its own close button; the stub exposes one so the dismiss
+// path is exercised without pulling Vuetify into the unit environment.
+const alertStub = {
+  props: ['closable', 'closeLabel'],
+  emits: ['click:close'],
+  template:
+    '<div class="v-alert"><slot /><button class="close" @click="$emit(\'click:close\')" /></div>',
 };
-const commitDialogStub = {
-  props: ['commits', 'installedSha'],
+const dialogStub = {
   template: '<div><slot name="activator" :props="{}" /></div>',
 };
 
-function createWrapper(appVersion: string) {
-  globalThis.__NUXT_RUNTIME_CONFIG__ = {
-    public: {
-      appVersion,
-    },
-  };
+const payload = (overrides = {}) => ({
+  installed: { raw: '1.9.0', base: '1.9.0', ahead: 0, sha: null, notes: null },
+  latest: { tag: 'v1.10.0', notes: 'notes', publishedAt: '2026-01-01' },
+  commits: [],
+  mode: 'release',
+  updateAvailable: true,
+  error: null,
+  ...overrides,
+});
 
+function createWrapper() {
   return mount(NewVersionAvailable, {
     global: {
       stubs: {
-        NotificationsReleaseNotesDialog: releaseDialogStub,
-        NotificationsCommitListDialog: commitDialogStub,
+        'v-alert': alertStub,
+        'v-btn': { template: '<button><slot /></button>' },
+        NotificationsReleaseNotesDialog: dialogStub,
+        NotificationsCommitListDialog: dialogStub,
       },
       mocks: {
-        $t: (key: string, params?: unknown[]) =>
-          params ? `${key}:${params.join(',')}` : key,
+        $t: (key: string, params?: unknown) =>
+          params === undefined ? key : `${key}:${params}`,
       },
     },
   });
 }
 
-describe('newVersionAvailable notification', () => {
-  it('stays hidden for a stable release with no newer tag published', async () => {
-    globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v1.9.0',
-      draft: false,
-      prerelease: false,
-    });
-
-    const wrapper = createWrapper('1.9.0');
-    await flushPromises();
-
-    expect(wrapper.find('.update-banner').exists()).toBe(false);
+describe('newVersionAvailable banner', () => {
+  beforeEach(() => {
+    globalThis.__NUXT_RUNTIME_CONFIG__ = { public: { appVersion: '1.9.0' } };
+    localStorage.clear();
   });
 
-  it('shows the banner when a newer stable release is published', async () => {
-    globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v1.10.0',
-      draft: false,
-      prerelease: false,
-    });
+  it('stays hidden when no update is available', async () => {
+    globalThis.$fetch.mockResolvedValue(
+      payload({ mode: 'none', updateAvailable: false, latest: null }),
+    );
 
-    const wrapper = createWrapper('1.9.0');
+    const wrapper = createWrapper();
     await flushPromises();
 
-    expect(globalThis.$fetch).toHaveBeenCalledWith(
-      'https://api.github.com/repos/tilalx/verti-grade/releases/latest',
-    );
-    expect(wrapper.find('.update-banner').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="update-banner"]').exists()).toBe(false);
+  });
+
+  it('stays hidden while the check is still in flight', () => {
+    globalThis.$fetch.mockResolvedValue(payload());
+
+    // No flushPromises: nothing should render optimistically.
+    expect(
+      createWrapper().find('[data-testid="update-banner"]').exists(),
+    ).toBe(false);
+  });
+
+  it('announces a newer release with a changelog link', async () => {
+    globalThis.$fetch.mockResolvedValue(payload());
+
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="update-banner"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('v1.10.0');
+    expect(
+      wrapper.find('[data-testid="update-banner-changelog"]').exists(),
+    ).toBe(true);
   });
 
-  it('stays hidden for a rolling commit build already at HEAD', async () => {
-    globalThis.$fetch.mockResolvedValue({
-      ahead_by: 0,
-      commits: [],
-    });
-
-    const wrapper = createWrapper('4f6a192');
-    await flushPromises();
-
-    expect(globalThis.$fetch).toHaveBeenCalledWith(
-      'https://api.github.com/repos/tilalx/verti-grade/compare/4f6a192...main',
+  it('announces new commits with a pluralised count', async () => {
+    globalThis.$fetch.mockResolvedValue(
+      payload({
+        mode: 'commit',
+        latest: null,
+        commits: [
+          { sha: 'bbbbbbb', message: 'second', date: null },
+          { sha: 'aaaaaaa', message: 'first', date: null },
+        ],
+      }),
     );
-    expect(wrapper.find('.update-banner').exists()).toBe(false);
-  });
 
-  it('shows the banner and commit count for a rolling build behind HEAD', async () => {
-    globalThis.$fetch.mockResolvedValue({
-      ahead_by: 2,
-      commits: [
-        {
-          sha: 'aaaaaaaaaa',
-          commit: { message: 'first\nbody', author: { date: '2026-01-01' } },
-          html_url: 'https://github.com/x/y/commit/aaaaaaaaaa',
-        },
-        {
-          sha: 'bbbbbbbbbb',
-          commit: { message: 'second', author: { date: '2026-01-02' } },
-          html_url: 'https://github.com/x/y/commit/bbbbbbbbbb',
-        },
-      ],
-    });
-
-    const wrapper = createWrapper('4f6a192');
+    const wrapper = createWrapper();
     await flushPromises();
 
-    expect(wrapper.find('.update-banner').exists()).toBe(true);
+    // The count is passed as the plural choice, not as a positional param.
     expect(wrapper.text()).toContain(
       'notifications.updateBanner.commitsMessage:2',
     );
+    expect(wrapper.find('[data-testid="update-banner-commits"]').exists()).toBe(
+      true,
+    );
   });
 
-  it('hides the banner when dismissed and does not reappear on its own', async () => {
-    globalThis.$fetch.mockResolvedValue({
-      tag_name: 'v1.10.0',
-      draft: false,
-      prerelease: false,
-    });
+  it('persists a dismissal so it survives a reload', async () => {
+    globalThis.$fetch.mockResolvedValue(payload());
 
-    const wrapper = createWrapper('1.9.0');
+    const wrapper = createWrapper();
     await flushPromises();
-    expect(wrapper.find('.update-banner').exists()).toBe(true);
+    await wrapper.find('.close').trigger('click');
 
-    await wrapper.find('.update-banner__close').trigger('click');
+    expect(wrapper.find('[data-testid="update-banner"]').exists()).toBe(false);
+    expect(localStorage.getItem(DISMISS_KEY)).toBe('v1.10.0');
+  });
 
-    expect(wrapper.find('.update-banner').exists()).toBe(false);
+  it('stays dismissed on remount for the same update', async () => {
+    localStorage.setItem(DISMISS_KEY, 'v1.10.0');
+    globalThis.$fetch.mockResolvedValue(payload());
+
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="update-banner"]').exists()).toBe(false);
+  });
+
+  it('reappears for a newer update than the dismissed one', async () => {
+    localStorage.setItem(DISMISS_KEY, 'v1.10.0');
+    globalThis.$fetch.mockResolvedValue(
+      payload({
+        latest: { tag: 'v1.11.0', notes: null, publishedAt: null },
+      }),
+    );
+
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="update-banner"]').exists()).toBe(true);
   });
 });

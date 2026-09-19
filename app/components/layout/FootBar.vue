@@ -57,12 +57,20 @@
                     }}</span>
                 </div>
 
-                <NotificationsReleaseNotesDialog :version="appVersion">
+                <NotificationsReleaseNotesDialog
+                    :tag="installedBase ? `v${installedBase}` : appVersion"
+                    :notes="installedNotes"
+                    :installed-version="appVersion"
+                    :error="error"
+                    :loading="loading"
+                    installed
+                >
                     <template #activator="{ props: activatorProps }">
                         <button
                             v-bind="activatorProps"
                             type="button"
                             class="status-pill status-pill--link"
+                            data-testid="footer-version"
                         >
                             <v-icon size="11">mdi-tag-outline</v-icon>
                             <span class="status-label">{{ appVersion }}</span>
@@ -96,8 +104,8 @@ const props = defineProps({
 })
 
 const pb = usePocketbase()
-const config = useRuntimeConfig()
-const appVersion = config.public.appVersion
+const { appVersion, installedNotes, installedBase, error, loading } =
+    useVersionCheck()
 const currentYear = computed(() => new Date().getFullYear())
 
 const { data: health } = await useAsyncData(
