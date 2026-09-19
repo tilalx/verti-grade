@@ -1,6 +1,10 @@
 import { eventHandler, createError } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server.js'
-import { resolveRouteIds, fetchRecordsByIds } from '../../utils/export.js'
+import {
+    resolveRouteIds,
+    fetchRecordsByIds,
+    normalizeCreators,
+} from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
     const pb = getAuthenticatedPb(event)
@@ -98,19 +102,4 @@ function mapRating(rating) {
 function normalizeNumber(value) {
     const numeric = Number(value)
     return Number.isFinite(numeric) ? numeric : null
-}
-
-function normalizeCreators(creators) {
-    if (Array.isArray(creators)) {
-        return creators
-            .map((value) => (typeof value === 'string' ? value.trim() : ''))
-            .filter(Boolean)
-    }
-    if (typeof creators === 'string') {
-        return creators
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    }
-    return []
 }

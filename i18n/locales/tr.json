@@ -179,7 +179,8 @@
         "deselect_all": "Seçimi Kaldır",
         "back_to_home": "Ana Sayfaya Dön",
         "load_more": "Daha fazla yükle",
-        "close": "Kapat"
+        "close": "Kapat",
+        "export": "Dışa aktar"
     },
     "inventory": {
         "title": "Rota Envanter Taraması",
@@ -389,5 +390,12 @@
             "title": "Sayfa bulunamadı",
             "subtitle": "İstenen sayfa bulunamadı."
         }
+    },
+    "export": {
+        "title": "Excel olarak dışa aktar",
+        "columns": "Sütunlar",
+        "qr_code": "QR kodu",
+        "move_up": "Yukarı taşı",
+        "move_down": "Aşağı taşı"
     }
 }

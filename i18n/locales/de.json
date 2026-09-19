@@ -179,7 +179,8 @@
         "deselect_all": "Alle abwählen",
         "back_to_home": "Zurück zur Startseite",
         "load_more": "Mehr laden",
-        "close": "Schließen"
+        "close": "Schließen",
+        "export": "Exportieren"
     },
     "inventory": {
         "title": "Routeninventur",
@@ -389,5 +390,12 @@
             "title": "Seite nicht gefunden",
             "subtitle": "Die angeforderte Seite konnte nicht gefunden werden."
         }
+    },
+    "export": {
+        "title": "Als Excel exportieren",
+        "columns": "Spalten",
+        "qr_code": "QR-Code",
+        "move_up": "Nach oben",
+        "move_down": "Nach unten"
     }
 }

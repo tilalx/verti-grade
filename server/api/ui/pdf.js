@@ -1,6 +1,6 @@
-import { eventHandler, createError, getRequestURL } from 'h3'
+import { eventHandler, createError } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server.js'
-import { resolveRouteIds } from '../../utils/export.js'
+import { resolveRouteIds, resolveApplicationUrl } from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
@@ -29,16 +29,7 @@ export default eventHandler(async (event) => {
             logo = await fetchLogo(logoUrl)
         }
 
-        // Prefer the configured application URL; otherwise fall back to the
-        // origin of the incoming request (e.g. localhost in dev, the real
-        // host such as https://dav.aelx.de in production behind the proxy).
-        const applicationUrl = (
-            settings.application_url ||
-            getRequestURL(event, {
-                xForwardedHost: true,
-                xForwardedProto: true,
-            }).origin
-        ).replace(/\/+$/, '')
+        const applicationUrl = resolveApplicationUrl(event, settings)
 
         // ── Layout constants ───────────────────────────────────────────────
         const QR_SIZE = 110 // Rendered size of the QR code in PDF points (square)

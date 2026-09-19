@@ -165,7 +165,7 @@
                             </v-btn>
                             <v-btn
                                 v-if="hasSelection"
-                                @click="exportSelectedExcel"
+                                @click="showExportOptions = true"
                                 color="success"
                                 variant="tonal"
                                 :loading="exportingFormat === 'xlsx'"
@@ -371,6 +371,11 @@
                 </div>
             </v-col>
         </v-row>
+
+        <ExportOptionsDialog
+            v-model="showExportOptions"
+            @confirm="exportSelectedExcel"
+        />
 
         <ConfirmDialog
             v-model="showArchiveConfirmation"
@@ -732,7 +737,7 @@ const archiveSelected = async () => {
 
 const exportingFormat = ref(null)
 
-const downloadExport = async (endpoint, extension, mimeType) => {
+const downloadExport = async (endpoint, extension, mimeType, payload = {}) => {
     const ids = Array.from(selectedRouteIds.value)
     if (!ids.length || exportingFormat.value) return
 
@@ -746,7 +751,7 @@ const downloadExport = async (endpoint, extension, mimeType) => {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ ids }),
+            body: JSON.stringify({ ids, ...payload }),
         })
 
         if (!response.ok) {
@@ -777,11 +782,13 @@ const downloadExport = async (endpoint, extension, mimeType) => {
 
 const printSelected = () =>
     downloadExport('/api/ui/pdf', 'pdf', 'application/pdf')
-const exportSelectedExcel = () =>
+const showExportOptions = ref(false)
+const exportSelectedExcel = (payload) =>
     downloadExport(
         '/api/ui/xlsx',
         'xlsx',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        payload,
     )
 const exportSelectedJson = () =>
     downloadExport('/api/ui/json', 'json', 'application/json')

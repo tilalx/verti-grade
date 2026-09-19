@@ -179,7 +179,8 @@
         "deselect_all": "Deselect All",
         "back_to_home": "Back to Home",
         "load_more": "Load More",
-        "close": "Close"
+        "close": "Close",
+        "export": "Export"
     },
     "inventory": {
         "title": "Route Inventory Scan",
@@ -389,5 +390,12 @@
             "title": "Page not found",
             "subtitle": "The requested page could not be found."
         }
+    },
+    "export": {
+        "title": "Export as Excel",
+        "columns": "Columns",
+        "qr_code": "QR code",
+        "move_up": "Move up",
+        "move_down": "Move down"
     }
 }
