@@ -13,12 +13,14 @@ import type { Page } from '@playwright/test'
  * button (logged out), hamburger (logged in + mobile), or the user menu
  * (logged in + desktop) — after any ssrClientHints reload has already
  * happened, so waiting for any one of those is a reliable "hydrated" signal.
+ * Layouts without a NavBar (layouts/blank.vue, used by the auth pages) expose
+ * an equivalent client-only 'page-hydrated' marker instead.
  */
 export async function gotoSettled(page: Page, path: string) {
     await page.goto(path)
     await page
         .locator(
-            '[data-testid="nav-login"], [data-testid="nav-hamburger"], [data-testid="user-menu-activator"]',
+            '[data-testid="nav-login"], [data-testid="nav-hamburger"], [data-testid="user-menu-activator"], [data-testid="page-hydrated"]',
         )
         .first()
         .waitFor({ state: 'attached' })

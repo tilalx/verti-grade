@@ -64,7 +64,10 @@ test('shows an error and keeps the comment when delete fails', async ({
 
     // .last() rather than .first(), so this doesn't race the other tests in
     // this file that grab the first card concurrently in other workers.
-    const card = page.locator('[data-testid^="comment-card-"]').last()
+    // Match the card class, not a 'comment-card-' testid prefix — that prefix
+    // also matches the card's own checkbox/edit/delete children, and .last()
+    // would resolve to one of those instead of the card.
+    const card = page.locator('.comment-card').last()
     await expect(card).toBeVisible()
     const testId = await card.getAttribute('data-testid')
 

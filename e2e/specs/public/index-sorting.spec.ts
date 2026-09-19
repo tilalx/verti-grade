@@ -15,7 +15,11 @@ test('sorting the desktop table by name header actually reorders rows', async ({
     const afterAsc = await names()
     expect(afterAsc).toEqual([...afterAsc].sort((a, b) => a.localeCompare(b)))
 
-    // Click again to flip to descending — order should invert too.
+    // Click again to flip to descending. Sorting and pagination are both
+    // server-side, so descending page 1 holds the alphabetically *last* rows —
+    // not the reverse of ascending page 1. Assert the order, not the rows.
     await page.getByRole('columnheader', { name: /name/i }).click()
-    await expect.poll(names).toEqual([...afterAsc].reverse())
+    await expect.poll(names).not.toEqual(afterAsc)
+    const afterDesc = await names()
+    expect(afterDesc).toEqual([...afterDesc].sort((a, b) => b.localeCompare(a)))
 })
