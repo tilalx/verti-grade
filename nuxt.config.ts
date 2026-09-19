@@ -21,6 +21,13 @@ export default defineNuxtConfig({
     }
   },
   ssr: true,
+  app: {
+    // Paints the browser canvas per OS preference before any CSS loads —
+    // without it a dark-mode first paint is white.
+    head: {
+      meta: [{ name: 'color-scheme', content: 'light dark' }],
+    },
+  },
   modules: ['@nuxtjs/i18n', '@nuxt/image', 'vuetify-nuxt-module'],
   css: [
     '~/assets/css/main.css',
