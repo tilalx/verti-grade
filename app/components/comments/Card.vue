@@ -1,5 +1,9 @@
 <template>
-    <v-card variant="tonal" class="comment-card">
+    <v-card
+        variant="tonal"
+        class="comment-card"
+        :data-testid="`comment-card-${comment.id}`"
+    >
         <!-- Header: [checkbox?] avatar · name + date · star rating -->
         <div class="comment-card__header">
             <v-checkbox
@@ -9,6 +13,7 @@
                 hide-details
                 density="compact"
                 class="comment-card__checkbox"
+                data-testid="comment-card-checkbox"
                 @update:modelValue="$emit('toggle-select')"
             />
             <v-avatar

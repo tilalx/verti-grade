@@ -1,5 +1,9 @@
 <template>
-    <v-card variant="tonal" class="route-card">
+    <v-card
+        variant="tonal"
+        class="route-card"
+        :data-testid="`route-card-${route.id}`"
+    >
         <!-- Header: [checkbox?] avatar · name + badges · difficulty -->
         <div class="route-card__header">
             <v-checkbox
@@ -9,6 +13,7 @@
                 hide-details
                 density="compact"
                 class="route-card__checkbox"
+                data-testid="route-card-checkbox"
                 @update:modelValue="$emit('update:modelValue', $event)"
             />
             <v-avatar
@@ -17,7 +22,9 @@
                 class="flex-shrink-0"
             />
             <div class="route-card__title">
-                <span class="route-card__name">{{ route.name }}</span>
+                <span class="route-card__name" data-testid="route-card-name">{{
+                    route.name
+                }}</span>
                 <span
                     v-if="route.has_ratings || route.archived"
                     class="route-card__badges"

@@ -24,14 +24,19 @@ export default defineNuxtConfig({
     moduleOptions: {
       autoimport: true, // Automatically imports Vuetify components
       ssrClientHints: {
-        reloadOnFirstRequest: true, // Reloads the page on first request to apply the theme
+        // false: the module's reload-loop guard doesn't reliably survive
+        // the write-then-reload round trip (esp. WebKit) — caused an
+        // infinite reload loop.
+        reloadOnFirstRequest: false,
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
         prefersColorSchemeOptions: {
           cookie: {
             name: 'color-scheme', // Stores user's preferred color scheme
           },
-          useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
+          // Must stay true — enables the live matchMedia listener for OS
+          // theme changes. false silently breaks live theme switching.
+          useBrowserThemeOnly: true,
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }

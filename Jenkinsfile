@@ -6,6 +6,7 @@ pipeline {
         DOCKER_BUILDKIT = 1
         PIPELINE_NAME = "${JOB_NAME.replaceAll('/', '_')}-${BUILD_NUMBER}"
         DOCKER_CLI_EXPERIMENTAL = 'enabled'
+        E2E_IMAGE = "verti-grade:e2e-${BUILD_NUMBER}"
     }
 
     options {
@@ -25,22 +26,13 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
                     }
-                }
-            }
-        }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
+                    // Resolve tags/version once, reused by the test-image build and the release build.
                     def branchName = env.BRANCH_NAME
-                    def tagName = ""
                     def isReleaseCommit = false
                     def releaseVersion = ""
 
-                    // Retrieve and convert the latest commit message to lowercase
                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim().toLowerCase()
-
-                    // Check if the commit message contains "release vX.X.X" or "release X.X.X"
                     if (commitMessage ==~ /.*release\s+v?(\d+\.\d+\.\d+).*/) {
                         def matcher = (commitMessage =~ /release\s+v?(\d+\.\d+\.\d+)/)
                         if (matcher) {
@@ -49,6 +41,7 @@ pipeline {
                         }
                     }
 
+                    def tagName = ""
                     if (branchName == "main") {
                         tagName = "rolling"
                     } else if (branchName.startsWith("PR-")) {
@@ -57,22 +50,50 @@ pipeline {
                         tagName = branchName.replaceAll(/[^a-zA-Z0-9._-]/, '-')
                     }
 
-                    // Compute APP_VERSION: for releases use the semver, otherwise use git-describe
                     def appVersion = sh(script: "git describe --tags --always | sed 's/^v//'", returnStdout: true).trim()
                     if (isReleaseCommit) {
                         appVersion = releaseVersion
                     }
 
                     def tags = "-t ${env.IMAGE_NAME}:${tagName}"
-
                     if (isReleaseCommit) {
                         tags += " -t ${env.IMAGE_NAME}:latest -t ${env.IMAGE_NAME}:${releaseVersion}"
                     }
 
-                    sh """
-                        docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --build-arg APP_VERSION=${appVersion} --memory 32g --memory-swap 16g ${tags} --push .
-                    """
+                    env.APP_VERSION = appVersion
+                    env.RELEASE_TAGS = tags
                 }
+            }
+        }
+
+        stage('Build (test image)') {
+            steps {
+                sh """
+                    docker buildx build --platform linux/amd64 --load --build-arg APP_VERSION=${env.APP_VERSION} -t ${env.E2E_IMAGE} .
+                """
+            }
+        }
+
+        stage('E2E Tests') {
+            steps {
+                sh """
+                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --abort-on-container-exit --exit-code-from e2e
+                """
+            }
+            post {
+                always {
+                    junit testResults: 'e2e/results/junit.xml', allowEmptyResults: true
+                    archiveArtifacts artifacts: 'e2e/results/html/**, e2e/results/artifacts/**', allowEmptyArchive: true
+                    sh "docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
+                }
+            }
+        }
+
+        stage('Build & Push (release image)') {
+            steps {
+                sh """
+                    docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --build-arg APP_VERSION=${env.APP_VERSION} --memory 32g --memory-swap 16g ${env.RELEASE_TAGS} --push .
+                """
             }
         }
     }
@@ -84,6 +105,7 @@ pipeline {
                 def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
                 def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
                 sh "docker buildx rm ${builderName}"
+                sh "docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
             }
             cleanWs()
         }

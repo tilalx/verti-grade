@@ -1,6 +1,11 @@
 <template>
     <client-only>
-        <div ref="chartEl" :style="containerStyle" class="base-echart"></div>
+        <div
+            ref="chartEl"
+            :style="containerStyle"
+            class="base-echart"
+            :data-testid="testid"
+        ></div>
     </client-only>
 </template>
 
@@ -10,12 +15,14 @@ interface ChartProps {
     height?: string | number
     responsive?: boolean
     renderer?: 'canvas' | 'svg'
+    testid?: string
 }
 
 const props = withDefaults(defineProps<ChartProps>(), {
     height: '320px',
     responsive: true,
     renderer: 'svg',
+    testid: 'chart',
 })
 
 const chartEl = ref<HTMLElement | null>(null)
