@@ -28,9 +28,10 @@ export default defineNuxtConfig({
         // reloaded) that's supposed to stop repeat reloads isn't reliably
         // surviving the write-then-reload round trip in every browser here
         // (worst in WebKit) — seen reloading the same URL 15-20+ times in a
-        // row instead of settling. defaultTheme is pinned to 'light' below
-        // regardless, so the client-hint-driven theme reload had no upside
-        // to justify that risk.
+        // row instead of settling. This only affects the *first* request's
+        // SSR theme guess (it may briefly flash the wrong theme before the
+        // client corrects it below) — live switching is unaffected, see
+        // useBrowserThemeOnly.
         reloadOnFirstRequest: false,
         prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
         viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
@@ -38,6 +39,13 @@ export default defineNuxtConfig({
           cookie: {
             name: 'color-scheme', // Stores user's preferred color scheme
           },
+          // Must stay true: this is what makes the module attach a live
+          // matchMedia('prefers-color-scheme') listener that flips the
+          // theme immediately when the OS/browser preference changes —
+          // unrelated to reloadOnFirstRequest above. false removes that
+          // listener entirely, so the theme only reflects whatever was set
+          // at the last full reload and stops responding to further changes.
+          useBrowserThemeOnly: true,
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }
