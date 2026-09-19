@@ -9,14 +9,17 @@ import type { Page } from '@playwright/test'
  * Every page keeps a PocketBase realtime SSE connection open (layouts/
  * default.vue and friends), so the network never goes idle — don't wait on
  * 'networkidle', it hangs until timeout (esp. in WebKit). NavBar only
- * renders its login/hamburger button client-side (inside <ClientOnly>),
- * after any ssrClientHints reload has already happened, so waiting for one
- * of those is a reliable "hydrated" signal instead.
+ * renders its right-side action client-side (inside <ClientOnly>) — login
+ * button (logged out), hamburger (logged in + mobile), or the user menu
+ * (logged in + desktop) — after any ssrClientHints reload has already
+ * happened, so waiting for any one of those is a reliable "hydrated" signal.
  */
 export async function gotoSettled(page: Page, path: string) {
     await page.goto(path)
     await page
-        .locator('[data-testid="nav-login"], [data-testid="nav-hamburger"]')
+        .locator(
+            '[data-testid="nav-login"], [data-testid="nav-hamburger"], [data-testid="user-menu-activator"]',
+        )
         .first()
         .waitFor({ state: 'attached' })
 }
