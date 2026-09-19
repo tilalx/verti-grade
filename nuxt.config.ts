@@ -31,7 +31,13 @@ export default defineNuxtConfig({
           cookie: {
             name: 'color-scheme', // Stores user's preferred color scheme
           },
-          useBrowserThemeOnly: true, // Strictly uses the browser theme without relying on cookies
+          // false (default): fall back to the 'color-scheme' cookie when the
+          // Sec-CH-Prefers-Color-Scheme header is absent. true breaks WebKit
+          // and Firefox — neither sends User-Agent Client Hints, so with no
+          // cookie fallback reloadOnFirstRequest can never tell "no header
+          // yet" from "already reloaded" and reloads forever (theme is
+          // pinned to 'light' below regardless, so this had no upside).
+          useBrowserThemeOnly: false,
         },
         prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
       }
