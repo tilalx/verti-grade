@@ -12,7 +12,9 @@ import { gotoSettled } from '../../support/nav'
 async function routeWithComment(page: import('@playwright/test').Page) {
     const res = await page.request.get(
         '/api/collections/ratings/records?filter=' +
-            encodeURIComponent('comment ~ "e2e-rating-"') +
+            encodeURIComponent(
+                'comment ~ "e2e-rating-" && route_id.archived = false',
+            ) +
             '&perPage=1&expand=route_id',
     )
     const rating = (await res.json()).items[0]
