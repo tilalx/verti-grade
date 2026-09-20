@@ -23,12 +23,12 @@
                                 </v-avatar>
                                 <div>
                                     <div
-                                        class="text-subtitle-2 font-weight-bold text-white"
+                                        class="text-title-small font-weight-bold text-white"
                                     >
                                         {{ orgName }}
                                     </div>
                                     <div
-                                        class="text-caption text-medium-emphasis"
+                                        class="text-body-small text-medium-emphasis"
                                     >
                                         {{ orgUnitName }}
                                     </div>
@@ -37,7 +37,7 @@
 
                             <div class="brand-headline">
                                 <div
-                                    class="text-overline text-success mb-3"
+                                    class="text-label-medium text-success mb-3"
                                     style="letter-spacing: 0.2em"
                                 >
                                     ROUTE MANAGEMENT
@@ -70,11 +70,13 @@
                                     >
                                 </v-avatar>
                                 <div>
-                                    <div class="text-body-2 font-weight-bold">
+                                    <div
+                                        class="text-body-medium font-weight-bold"
+                                    >
                                         {{ orgName }}
                                     </div>
                                     <div
-                                        class="text-caption text-medium-emphasis"
+                                        class="text-body-small text-medium-emphasis"
                                     >
                                         {{ orgUnitName }}
                                     </div>
@@ -85,15 +87,19 @@
                             <Transition name="txt-swap" mode="out-in">
                                 <div :key="headingKey" class="mb-8">
                                     <div
-                                        class="text-overline text-medium-emphasis mb-1"
+                                        class="text-label-medium text-medium-emphasis mb-1"
                                         style="letter-spacing: 0.18em"
                                     >
                                         {{ eyebrow }}
                                     </div>
-                                    <h2 class="text-h5 font-weight-bold mb-1">
+                                    <h2
+                                        class="text-headline-small font-weight-bold mb-1"
+                                    >
                                         {{ title }}
                                     </h2>
-                                    <p class="text-body-2 text-medium-emphasis">
+                                    <p
+                                        class="text-body-medium text-medium-emphasis"
+                                    >
                                         {{ subtitle }}
                                     </p>
                                 </div>

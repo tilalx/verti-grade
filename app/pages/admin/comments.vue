@@ -11,10 +11,10 @@
                     class="stat-chip pa-2 px-3 text-center"
                     data-testid="comments-stat-total"
                 >
-                    <div class="text-h6 font-weight-bold text-primary">
+                    <div class="text-title-large font-weight-bold text-primary">
                         {{ stats.totalReviews }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-body-small text-medium-emphasis">
                         {{ t('comments.totalReviews') }}
                     </div>
                 </v-card>
@@ -25,14 +25,15 @@
                     data-testid="comments-stat-avg-rating"
                 >
                     <div class="d-flex align-center justify-center ga-1">
-                        <span class="text-h6 font-weight-bold text-warning">{{
-                            stats.avgRating
-                        }}</span>
+                        <span
+                            class="text-title-large font-weight-bold text-warning"
+                            >{{ stats.avgRating }}</span
+                        >
                         <v-icon color="yellow-darken-2" size="16"
                             >mdi-star</v-icon
                         >
                     </div>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-body-small text-medium-emphasis">
                         {{ t('comments.avgRating') }}
                     </div>
                 </v-card>
@@ -42,10 +43,10 @@
                     class="stat-chip pa-2 px-3 text-center"
                     data-testid="comments-stat-this-week"
                 >
-                    <div class="text-h6 font-weight-bold text-success">
+                    <div class="text-title-large font-weight-bold text-success">
                         {{ stats.thisWeek }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-body-small text-medium-emphasis">
                         {{ t('comments.thisWeek') }}
                     </div>
                 </v-card>
@@ -55,10 +56,10 @@
                     class="stat-chip pa-2 px-3 text-center"
                     data-testid="comments-stat-low-rated"
                 >
-                    <div class="text-h6 font-weight-bold text-error">
+                    <div class="text-title-large font-weight-bold text-error">
                         {{ stats.lowRated }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-body-small text-medium-emphasis">
                         {{ t('comments.lowRated') }}
                     </div>
                 </v-card>
@@ -180,7 +181,7 @@
                         <v-icon size="18" color="primary"
                             >mdi-check-circle-outline</v-icon
                         >
-                        <span class="text-body-2 font-weight-medium">
+                        <span class="text-body-medium font-weight-medium">
                             {{ t('comments.selected', { n: selectedCount }) }}
                         </span>
                         <v-spacer />
@@ -274,7 +275,7 @@
 
         <!-- Result count + infinite-scroll sentinel -->
         <div v-if="!loading && comments.length" class="text-center mt-4">
-            <p class="text-caption text-medium-emphasis mb-3">
+            <p class="text-body-small text-medium-emphasis mb-3">
                 {{
                     t('comments.showing', {
                         n: comments.length,
@@ -624,7 +625,7 @@ function onReviewSaved(updated) {
             expand: comments.value[idx].expand,
         })
     }
-    notifyError(t('notifications.success.edit'))
+    notify(t('notifications.success.edit'))
     scheduleStatsRefresh()
 }
 
@@ -653,7 +654,7 @@ async function confirmDelete() {
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error deleting comment:', err)
-        notify(t('notifications.error.generic'))
+        notifyError(t('notifications.error.generic'))
     } finally {
         deleting.value = false
     }
@@ -672,13 +673,13 @@ async function bulkDelete() {
         // Remove from local list — avoid full refetch
         comments.value = comments.value.filter((c) => !ids.includes(c.id))
         totalItems.value = Math.max(0, totalItems.value - ids.length)
-        notifyError(t('notifications.success.delete'))
+        notify(t('notifications.success.delete'))
         clearSelection()
         bulkDeleteDialog.value = false
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error bulk deleting:', err)
-        notify(t('notifications.error.generic'))
+        notifyError(t('notifications.error.generic'))
     } finally {
         bulkDeleting.value = false
     }

@@ -1,6 +1,10 @@
 import { eventHandler, createError } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server.js'
-import { resolveRouteIds, resolveApplicationUrl } from '../../utils/export.js'
+import {
+    resolveRouteIds,
+    resolveApplicationUrl,
+    fetchRecordsByIds,
+} from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
@@ -41,14 +45,27 @@ export default eventHandler(async (event) => {
         const CIRCLE_BORDER = 1.5 // Dark outline for light-color visibility
         // ──────────────────────────────────────────────────────────────────
 
+        // Fetched in bulk before a single byte is written, like the JSON and
+        // XLSX handlers: one round trip per 25 ids instead of per id, and a
+        // route deleted between selection and export simply drops out of the
+        // sheet instead of throwing halfway through the response body.
+        const records = await fetchRecordsByIds(pb, {
+            collection: 'routes',
+            ids,
+            field: 'id',
+            requestKey: 'pdfExport',
+        })
+        const byId = new Map(records.map((record) => [record.id, record]))
+        const routes = ids.map((id) => byId.get(id)).filter(Boolean)
+
         const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
         doc.pipe(res)
 
         let entryCount = 0
 
-        for (let id of ids) {
-            const climbingRoute = await pb.collection('routes').getOne(id)
+        for (const climbingRoute of routes) {
+            const id = climbingRoute.id
 
             // Every 8 entries, add a new page
             if (entryCount % 8 === 0 && entryCount > 0) {
@@ -207,6 +224,13 @@ export default eventHandler(async (event) => {
         doc.end()
     } catch (error) {
         console.error(error)
+        // Once the PDF stream has started the status line is already on the
+        // wire: throwing here would leave the client waiting on a body that
+        // never ends, so close the response instead.
+        if (res.headersSent) {
+            res.end()
+            return
+        }
         throw createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })

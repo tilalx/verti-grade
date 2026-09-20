@@ -1,18 +1,18 @@
 <template>
     <v-card
         variant="tonal"
-        class="route-card"
+        class="list-card route-card"
         :data-testid="`route-card-${route.id}`"
     >
         <!-- Header: [checkbox?] avatar · name + badges · difficulty -->
-        <div class="route-card__header">
+        <div class="list-card__header">
             <v-checkbox
                 v-if="selectable"
                 :model-value="modelValue"
                 color="primary"
                 hide-details
                 density="compact"
-                class="route-card__checkbox"
+                class="list-card__checkbox"
                 data-testid="route-card-checkbox"
                 @update:modelValue="$emit('update:modelValue', $event)"
             />
@@ -21,8 +21,8 @@
                 size="32"
                 class="flex-shrink-0"
             />
-            <div class="route-card__title">
-                <span class="route-card__name" data-testid="route-card-name">{{
+            <div class="list-card__title">
+                <span class="list-card__name" data-testid="route-card-name">{{
                     route.name
                 }}</span>
                 <span
@@ -57,13 +57,13 @@
         <v-divider />
 
         <!-- Compact meta section -->
-        <div class="route-card__meta">
+        <div class="list-card__meta">
             <!-- Comment -->
             <div
                 v-if="route.comment"
-                class="route-card__meta-row route-card__meta-row--full"
+                class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="route-card__meta-icon"
+                <v-icon size="15" class="list-card__meta-icon"
                     >mdi-comment-text-outline</v-icon
                 >
                 <span class="route-card__comment">{{ route.comment }}</span>
@@ -72,9 +72,9 @@
             <!-- Creators -->
             <div
                 v-if="route.creator?.length"
-                class="route-card__meta-row route-card__meta-row--full"
+                class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="route-card__meta-icon"
+                <v-icon size="15" class="list-card__meta-icon"
                     >mdi-account-hard-hat-outline</v-icon
                 >
                 <div class="d-flex flex-wrap" style="gap: 4px 4px">
@@ -89,30 +89,30 @@
             </div>
 
             <!-- Inline pills: anchor · date · location · type · score -->
-            <div class="route-card__pills">
-                <span v-if="anchorPoint !== '—'" class="route-card__pill">
+            <div class="list-card__pills">
+                <span v-if="anchorPoint !== '—'" class="list-card__pill">
                     {{ $t('climbing.anchor_point') }} {{ anchorPoint }}
                 </span>
-                <span v-if="screwDate" class="route-card__pill">
+                <span v-if="screwDate" class="list-card__pill">
                     <v-icon size="13">mdi-calendar-month-outline</v-icon>
                     {{ screwDate }}
                 </span>
-                <span v-if="route.location" class="route-card__pill">
+                <span v-if="route.location" class="list-card__pill">
                     <v-icon size="13">mdi-map-marker-outline</v-icon>
                     {{ route.location }}
                 </span>
-                <span v-if="route.type" class="route-card__pill">
+                <span v-if="route.type" class="list-card__pill">
                     <v-icon size="13">mdi-shape</v-icon>
                     {{ route.type }}
                 </span>
-                <span v-if="hasScore" class="route-card__pill">
+                <span v-if="hasScore" class="list-card__pill">
                     <v-icon size="13">mdi-star</v-icon>
                     {{ score }}
                 </span>
             </div>
         </div>
 
-        <v-card-actions v-if="$slots.actions" class="route-card__actions">
+        <v-card-actions v-if="$slots.actions" class="list-card__actions">
             <v-spacer />
             <slot name="actions" />
         </v-card-actions>
@@ -172,18 +172,7 @@ const score = computed(() => formatScore(props.route))
 </script>
 
 <style scoped>
-.route-card {
-    position: relative;
-    overflow: hidden;
-}
-
-.route-card__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-}
-
+/* Structure lives in .list-card (main.css); only route-specific bits here. */
 .route-card__difficulty {
     margin-left: auto;
     font-size: 1.4rem;
@@ -197,59 +186,13 @@ const score = computed(() => formatScore(props.route))
     margin-left: 3px;
 }
 
-.route-card__checkbox {
-    margin: 0;
-    padding: 0;
-    flex-shrink: 0;
-}
-
-.route-card__title {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.route-card__name {
-    font-weight: 600;
-    font-size: 1rem;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .route-card__badges {
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-/* Meta block */
-.route-card__meta {
-    padding: 10px 16px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.route-card__meta-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-}
-
-.route-card__meta-row--full {
-    width: 100%;
-}
-
-.route-card__meta-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-    opacity: 0.65;
-}
-
+/* Clamped to two lines — the list view shows a preview, not the full text. */
 .route-card__comment {
     font-size: 0.8rem;
     color: rgba(var(--v-theme-on-surface), 0.7);
@@ -257,29 +200,5 @@ const score = computed(() => formatScore(props.route))
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-}
-
-/* Inline pill row */
-.route-card__pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 2px;
-}
-
-.route-card__pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    background: rgba(var(--v-theme-on-surface), 0.06);
-    border-radius: 6px;
-    padding: 3px 8px;
-}
-
-.route-card__actions {
-    padding: 6px 10px 8px;
-    min-height: unset;
 }
 </style>

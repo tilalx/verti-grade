@@ -8,7 +8,7 @@ defineOptions({ inheritAttrs: false })
 
 const open = defineModel<boolean>({ default: false })
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         title?: string
         subtitle?: string
@@ -19,15 +19,35 @@ withDefaults(
         scrollable?: boolean
         /** Drop the body padding when the slot brings its own (tabs, windows). */
         flush?: boolean
+        /** Slide up from the bottom edge on phones instead of centering. */
+        sheetOnMobile?: boolean
     }>(),
     { maxWidth: 520, scrollable: true },
+)
+
+const { smAndDown } = useDisplay()
+const asSheet = computed(() => props.sheetOnMobile && smAndDown.value)
+
+// A VDialog docked to the bottom edge. Vuetify's own `v-bottom-sheet` classes
+// are not reusable here: their CSS ships in the VBottomSheet chunk, so it is
+// absent on any page that renders no real bottom sheet. The styles below are
+// ours; `dialog-bottom-transition` lives in Vuetify's always-loaded core.
+const sheetProps = computed(() =>
+    asSheet.value
+        ? {
+              contentClass: 'dialog-shell--sheet',
+              transition: 'dialog-bottom-transition',
+              location: 'bottom center',
+              origin: 'bottom center',
+          }
+        : { maxWidth: props.maxWidth },
 )
 </script>
 
 <template>
     <v-dialog
         v-model="open"
-        :max-width="maxWidth"
+        v-bind="sheetProps"
         :persistent="persistent"
         :scrollable="scrollable"
     >
@@ -38,7 +58,7 @@ withDefaults(
         <v-card rounded="xl" v-bind="$attrs">
             <v-card-title
                 v-if="title || $slots.title"
-                class="d-flex align-center ga-2 pa-5 pb-2 text-body-1 font-weight-semibold"
+                class="d-flex align-center ga-2 pa-5 pb-2 text-body-large font-weight-semibold"
             >
                 <slot name="title">{{ title }}</slot>
                 <v-spacer />
@@ -75,3 +95,20 @@ withDefaults(
         </v-card>
     </v-dialog>
 </template>
+
+<style>
+/* Unscoped: the overlay content is teleported out of this component's DOM.
+   Unlayered, so it beats Vuetify's @layer rules without a specificity war. */
+.v-overlay__content.dialog-shell--sheet {
+    align-self: flex-end;
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+.v-overlay__content.dialog-shell--sheet > .v-card {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+</style>

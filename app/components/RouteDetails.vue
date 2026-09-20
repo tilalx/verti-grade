@@ -20,7 +20,7 @@
                 data-testid="route-details-sheet"
             >
                 <v-card-item class="py-2">
-                    <v-card-title class="text-h5 text-center">
+                    <v-card-title class="text-headline-small text-center">
                         {{ $t('ratings.climber_reviews') }}
                     </v-card-title>
                     <template v-slot:append>

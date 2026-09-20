@@ -200,7 +200,7 @@
                         :sort-by="tableOptions.sortBy"
                         :loading="loading"
                         :items-per-page-options="pageSizeOptions"
-                        :no-data-text="$t('table.no_data')"
+                        no-data-text="table.no_data"
                         item-value="id"
                         @update:options="loadRoutes"
                     >
@@ -884,7 +884,10 @@ useHead(() => ({
 .route-manager__comment {
     max-width: 260px;
     white-space: normal;
-    word-break: break-word;
+    /* `word-break: break-word` is a legacy alias for `overflow-wrap: anywhere`,
+       which splits inside words AND collapses the column's min-content width,
+       so the cell shrank to a few characters. */
+    overflow-wrap: break-word;
 }
 
 .route-manager__name {

@@ -14,21 +14,22 @@ withDefaults(
 </script>
 
 <template>
-    <component
-        :is="card ? 'v-card' : 'div'"
-        v-bind="card ? { rounded: 'lg', border: true, flat: true } : {}"
+    <!-- A plain div with Vuetify's utility classes: the card look here is just a
+         border, a radius and a surface background, so it needs no v-card. -->
+    <div
         class="empty-state py-12 text-center"
+        :class="card ? 'rounded-lg border bg-surface' : ''"
         data-testid="empty-state"
     >
         <v-icon :icon="icon" size="56" class="empty-state__icon mb-4" />
-        <div v-if="eyebrow" class="text-h4 font-weight-bold mb-1">
+        <div v-if="eyebrow" class="text-headline-large font-weight-bold mb-1">
             {{ eyebrow }}
         </div>
-        <div class="text-h6 text-medium-emphasis">{{ title }}</div>
-        <div v-if="hint" class="text-body-2 text-medium-emphasis mt-1">
+        <div class="text-title-large text-medium-emphasis">{{ title }}</div>
+        <div v-if="hint" class="text-body-medium text-medium-emphasis mt-1">
             {{ hint }}
         </div>
-    </component>
+    </div>
 </template>
 
 <style scoped>

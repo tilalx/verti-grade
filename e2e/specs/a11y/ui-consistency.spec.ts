@@ -65,7 +65,7 @@ test('dialogs share the same shell: role, title and escape-to-close', async ({
     await expect(page.getByTestId('user-create-cancel')).toBeVisible()
 })
 
-test('an empty result set renders the shared empty state', async ({
+test('an empty result set renders the shared empty state as a real card', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/admin/users')
@@ -73,5 +73,41 @@ test('an empty result set renders the shared empty state', async ({
         .getByTestId('filter-search')
         .locator('input')
         .fill('zzz-no-such-user-zzz')
-    await expect(page.getByTestId('empty-state')).toBeVisible()
+    const empty = page.getByTestId('empty-state')
+    await expect(empty).toBeVisible()
+
+    // Visibility alone passed while the component rendered as an unknown
+    // <v-card> element with no styling at all, so assert the box itself.
+    const box = await empty.evaluate((el) => {
+        const cs = getComputedStyle(el)
+        const icon = el.querySelector('.v-icon')!.getBoundingClientRect()
+        const self = el.getBoundingClientRect()
+        return {
+            display: cs.display,
+            radius: parseFloat(cs.borderTopLeftRadius),
+            border: parseFloat(cs.borderTopWidth),
+            iconOffset: Math.abs(
+                (icon.left + icon.right) / 2 - (self.left + self.right) / 2,
+            ),
+        }
+    })
+    expect(box.display).toBe('block')
+    expect(box.radius).toBeGreaterThan(0)
+    expect(box.border).toBeGreaterThan(0)
+    expect(box.iconOffset).toBeLessThan(2) // icon is centred
+})
+
+test('dialog confirm buttons keep their fill inside v-card-actions', async ({
+    adminPage: page,
+}) => {
+    // VCardActions provides `VBtn: { variant: 'text' }`, which silently beat the
+    // global default and flattened every dialog's primary button.
+    await gotoSettled(page, '/admin/routes')
+    await page.getByTestId('routes-create-open').click()
+
+    const submit = page.getByTestId('route-form-submit')
+    await expect(submit).toHaveClass(/v-btn--variant-flat/)
+    await expect(page.getByTestId('route-form-cancel')).toHaveClass(
+        /v-btn--variant-text/,
+    )
 })

@@ -38,7 +38,7 @@
                         >mdi-qrcode-scan</v-icon
                     >
                     <span
-                        class="text-body-2 text-center px-6"
+                        class="text-body-medium text-center px-6"
                         style="color: rgba(255, 255, 255, 0.6)"
                     >
                         {{ $t('inventory.subtitle') }}
@@ -147,7 +147,7 @@
             <div class="px-4 pt-4 pb-2">
                 <div class="d-flex align-center justify-space-between mb-2">
                     <span
-                        class="text-subtitle-2 font-weight-semibold text-medium-emphasis"
+                        class="text-title-small font-weight-semibold text-medium-emphasis"
                     >
                         {{ $t('inventory.reviewFoundTitle') }}
                     </span>
@@ -175,10 +175,14 @@
                                 >mdi-check-circle-outline</v-icon
                             >
                             <div class="flex-grow-1">
-                                <div class="text-body-2 font-weight-medium">
+                                <div
+                                    class="text-body-medium font-weight-medium"
+                                >
                                     {{ route.name }}
                                 </div>
-                                <div class="text-caption text-medium-emphasis">
+                                <div
+                                    class="text-body-small text-medium-emphasis"
+                                >
                                     {{ route.location || '—' }}
                                 </div>
                             </div>
@@ -198,7 +202,7 @@
                     <v-icon size="36" color="grey-lighten-1" class="mb-2"
                         >mdi-qrcode</v-icon
                     >
-                    <div class="text-body-2 text-medium-emphasis">
+                    <div class="text-body-medium text-medium-emphasis">
                         {{ $t('inventory.noScans') }}
                     </div>
                 </div>
@@ -227,10 +231,10 @@
             max-width="400"
             :title="$t('inventory.instructionsTitle')"
         >
-            <p class="text-body-2 text-medium-emphasis mb-3">
+            <p class="text-body-medium text-medium-emphasis mb-3">
                 {{ $t('inventory.instructionsIntro') }}
             </p>
-            <ol class="instructions-list text-body-2">
+            <ol class="instructions-list text-body-medium">
                 <li>{{ $t('inventory.instructionsStep1') }}</li>
                 <li>{{ $t('inventory.instructionsStep2') }}</li>
                 <li>{{ $t('inventory.instructionsStep3') }}</li>
@@ -252,7 +256,7 @@
         >
             <!-- Found routes -->
             <div class="mb-4">
-                <div class="text-subtitle-2 font-weight-semibold mb-2">
+                <div class="text-title-small font-weight-semibold mb-2">
                     {{ $t('inventory.reviewFoundTitle') }}
                     <v-chip
                         size="x-small"
@@ -268,10 +272,10 @@
                         v-for="route in scannedRoutes"
                         :key="`found-${route.id}`"
                     >
-                        <v-list-item-title class="text-body-2">
+                        <v-list-item-title class="text-body-medium">
                             {{ route.name || route.id }}
                         </v-list-item-title>
-                        <v-list-item-subtitle class="text-caption">
+                        <v-list-item-subtitle class="text-body-small">
                             {{ route.location || '—' }}
                         </v-list-item-subtitle>
                         <template #prepend>
@@ -282,7 +286,7 @@
                     </v-list-item>
                     <v-list-item v-if="scannedRoutes.length === 0">
                         <v-list-item-title
-                            class="text-body-2 text-medium-emphasis"
+                            class="text-body-medium text-medium-emphasis"
                         >
                             {{ $t('inventory.noScans') }}
                         </v-list-item-title>
@@ -292,7 +296,7 @@
 
             <!-- Missing routes -->
             <div>
-                <div class="text-subtitle-2 font-weight-semibold mb-1">
+                <div class="text-title-small font-weight-semibold mb-1">
                     {{ $t('inventory.reviewMissingTitle') }}
                     <v-chip
                         size="x-small"
@@ -305,7 +309,7 @@
                 </div>
                 <p
                     v-if="archivePreview.length"
-                    class="text-caption text-medium-emphasis mb-2"
+                    class="text-body-small text-medium-emphasis mb-2"
                 >
                     {{ $t('inventory.reviewMissingDescription') }}
                 </p>
@@ -314,10 +318,10 @@
                         v-for="route in archivePreview"
                         :key="`missing-${route.id}`"
                     >
-                        <v-list-item-title class="text-body-2">
+                        <v-list-item-title class="text-body-medium">
                             {{ route.name }}
                         </v-list-item-title>
-                        <v-list-item-subtitle class="text-caption">
+                        <v-list-item-subtitle class="text-body-small">
                             {{ route.location || '—' }}
                         </v-list-item-subtitle>
                         <template #prepend>
@@ -328,7 +332,7 @@
                     </v-list-item>
                     <v-list-item v-if="archivePreview.length === 0">
                         <v-list-item-title
-                            class="text-body-2 text-medium-emphasis"
+                            class="text-body-medium text-medium-emphasis"
                         >
                             {{ $t('inventory.nothingToArchive') }}
                         </v-list-item-title>

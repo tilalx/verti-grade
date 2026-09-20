@@ -1,18 +1,18 @@
 <template>
     <v-card
         variant="tonal"
-        class="comment-card"
+        class="list-card comment-card"
         :data-testid="`comment-card-${comment.id}`"
     >
         <!-- Header: [checkbox?] avatar · name + date · star rating -->
-        <div class="comment-card__header">
+        <div class="list-card__header">
             <v-checkbox
                 v-if="selectable"
                 :model-value="selected"
                 color="primary"
                 hide-details
                 density="compact"
-                class="comment-card__checkbox"
+                class="list-card__checkbox"
                 data-testid="comment-card-checkbox"
                 @update:modelValue="$emit('toggle-select')"
             />
@@ -31,13 +31,16 @@
                     :alt="comment.userName"
                     cover
                 />
-                <span v-else class="text-caption font-weight-bold text-white">
+                <span
+                    v-else
+                    class="text-body-small font-weight-bold text-white"
+                >
                     {{ initials(comment.userName) }}
                 </span>
             </v-avatar>
 
-            <div class="comment-card__title">
-                <span class="comment-card__name">{{ comment.userName }}</span>
+            <div class="list-card__title">
+                <span class="list-card__name">{{ comment.userName }}</span>
                 <span class="comment-card__date">{{ formattedDate }}</span>
             </div>
 
@@ -68,65 +71,72 @@
         <v-divider />
 
         <!-- Meta section -->
-        <div class="comment-card__meta">
+        <div class="list-card__meta">
             <!-- Comment text -->
             <div
                 v-if="comment.comment"
-                class="comment-card__meta-row comment-card__meta-row--full"
+                class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="comment-card__meta-icon"
+                <v-icon size="15" class="list-card__meta-icon"
                     >mdi-comment-text-outline</v-icon
                 >
                 <div class="comment-card__comment-wrap">
                     <span
+                        ref="commentEl"
                         class="comment-card__comment"
                         :class="{
                             'comment-card__comment--collapsed':
-                                collapsible && !expanded && isLong,
+                                collapsible && !expanded,
                         }"
                         >{{ comment.comment }}</span
                     >
-                    <v-btn
-                        v-if="collapsible && isLong"
-                        variant="text"
-                        density="compact"
-                        size="x-small"
-                        :color="expanded ? 'default' : 'primary'"
-                        class="mt-1 px-0 text-none d-block justify-start"
-                        @click="expanded = !expanded"
-                    >
-                        {{
-                            expanded
-                                ? t('comments.showLess')
-                                : t('comments.showMore')
-                        }}
-                    </v-btn>
+                    <!-- Wrapped rather than `d-block`: that forces display:block
+                         on the button and collapses Vuetify's flex height. -->
+                    <div v-if="collapsible && isLong" class="mt-1">
+                        <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
+                             leaving an x-small button 8px tall and clipping its
+                             own label. -->
+                        <v-btn
+                            variant="text"
+                            size="x-small"
+                            :color="expanded ? 'default' : 'primary'"
+                            class="px-0 text-none"
+                            data-testid="comment-card-toggle"
+                            @click="expanded = !expanded"
+                        >
+                            {{
+                                expanded
+                                    ? t('comments.showLess')
+                                    : t('comments.showMore')
+                            }}
+                        </v-btn>
+                    </div>
                 </div>
             </div>
 
             <!-- Route row (admin view) -->
             <div
                 v-if="showRoute && comment.routeName"
-                class="comment-card__meta-row comment-card__meta-row--full"
+                class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="comment-card__meta-icon"
+                <v-icon size="15" class="list-card__meta-icon"
                     >mdi-routes</v-icon
                 >
                 <NuxtLink
                     v-if="comment.routeId"
                     :to="`/route?id=${comment.routeId}`"
-                    class="comment-card__route-link text-body-2 font-weight-medium text-primary text-decoration-none"
+                    class="comment-card__route-link text-body-medium font-weight-medium text-primary text-decoration-none"
                 >
                     {{ comment.routeName }}
                 </NuxtLink>
-                <span v-else class="text-body-2 font-weight-medium">{{
+                <span v-else class="text-body-medium font-weight-medium">{{
                     comment.routeName
                 }}</span>
             </div>
 
             <!-- Pills: location · difficulty -->
-            <div class="comment-card__pills">
-                <span v-if="comment.location" class="comment-card__pill">
+            <div class="list-card__pills">
+                <span v-if="comment.location" class="list-card__pill">
                     <v-icon size="13">mdi-map-marker-outline</v-icon>
                     {{ comment.location }}
                 </span>
@@ -138,7 +148,7 @@
                     <template #activator="{ props: tooltipProps }">
                         <span
                             v-bind="tooltipProps"
-                            class="comment-card__pill comment-card__pill--primary"
+                            class="list-card__pill comment-card__pill--primary"
                         >
                             <v-icon size="13">mdi-gauge</v-icon>
                             {{ t('ratings.felt') }}
@@ -149,7 +159,7 @@
             </div>
         </div>
 
-        <v-card-actions v-if="$slots.actions" class="comment-card__actions">
+        <v-card-actions v-if="$slots.actions" class="list-card__actions">
             <v-spacer />
             <slot name="actions" />
         </v-card-actions>
@@ -197,11 +207,27 @@ const { t, locale } = useI18n()
 // ── Collapse ────────────────────────────────────────────────────────────────
 
 const expanded = ref(false)
-const LONG_THRESHOLD = 200
-const isLong = computed(
-    () =>
-        typeof props.comment.comment === 'string' &&
-        props.comment.comment.length > LONG_THRESHOLD,
+const commentEl = ref<HTMLElement | null>(null)
+const isLong = ref(false)
+
+// A character count can't predict how many lines the text wraps to, so measure
+// the clamped element instead: overflow means the clamp actually hides
+// something. One measurement is not enough — a web font swapping in re-wraps
+// the text, and a recycled card gets new text without remounting.
+function measureClamp() {
+    const el = commentEl.value
+    if (el) isLong.value = el.scrollHeight > el.clientHeight + 1
+}
+
+onMounted(async () => {
+    await nextTick()
+    measureClamp()
+    document.fonts?.ready.then(measureClamp)
+})
+
+watch(
+    () => props.comment.comment,
+    () => nextTick(measureClamp),
 )
 
 // ── Date ────────────────────────────────────────────────────────────────────
@@ -265,70 +291,11 @@ function initials(name: string): string {
 </script>
 
 <style scoped>
-.comment-card {
-    position: relative;
-    overflow: hidden;
-}
-
-.comment-card__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-}
-
-.comment-card__checkbox {
-    margin: 0;
-    padding: 0;
-    flex-shrink: 0;
-}
-
-.comment-card__title {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.comment-card__name {
-    font-weight: 600;
-    font-size: 1rem;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
+/* Structure lives in .list-card (main.css); only comment-specific bits here. */
 .comment-card__date {
     font-size: 0.75rem;
     color: rgba(var(--v-theme-on-surface), 0.55);
     line-height: 1.2;
-}
-
-/* Meta block */
-.comment-card__meta {
-    padding: 10px 16px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.comment-card__meta-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.comment-card__meta-row--full {
-    width: 100%;
-    align-items: flex-start;
-}
-
-.comment-card__meta-icon {
-    flex-shrink: 0;
-    opacity: 0.65;
-    margin-top: 3px;
 }
 
 .comment-card__comment-wrap {
@@ -336,6 +303,7 @@ function initials(name: string): string {
     min-width: 0;
 }
 
+/* Full text, wrapped — collapsed to four lines until the user expands it. */
 .comment-card__comment {
     font-size: 0.8rem;
     color: rgba(var(--v-theme-on-surface), 0.7);
@@ -355,37 +323,23 @@ function initials(name: string): string {
     text-decoration: underline !important;
 }
 
-/* Inline pill row — indent to match text column (icon 15px + gap 7px) */
-.comment-card__pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 2px;
-    padding-left: 22px;
-}
-
-.comment-card__pill :deep(.v-icon) {
-    margin-top: 1px;
-}
-
-.comment-card__pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    background: rgba(var(--v-theme-on-surface), 0.06);
-    border-radius: 6px;
-    padding: 3px 8px;
-}
-
 .comment-card__pill--primary {
     color: rgb(var(--v-theme-primary));
     background: rgba(var(--v-theme-primary), 0.08);
 }
 
-.comment-card__actions {
-    padding: 6px 10px 8px;
-    min-height: unset;
+/* Deltas from the shared shell: the taller line-height here needs one more
+   pixel of icon offset, and the pill row is indented to line up with the
+   text column (icon 15px + gap 7px). */
+.comment-card .list-card__meta-icon {
+    margin-top: 3px;
+}
+
+.comment-card .list-card__pills {
+    padding-left: 22px;
+}
+
+.comment-card .list-card__pill :deep(.v-icon) {
+    margin-top: 1px;
 }
 </style>

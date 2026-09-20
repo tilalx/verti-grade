@@ -77,7 +77,7 @@
                                 />
                                 <span
                                     v-else
-                                    class="text-caption font-weight-bold text-white"
+                                    class="text-body-small font-weight-bold text-white"
                                 >
                                     {{ initials(user.firstname, user.name) }}
                                 </span>
@@ -85,7 +85,7 @@
                         </template>
 
                         <v-card-title
-                            class="text-body-2 font-weight-semibold px-0 py-0"
+                            class="text-body-medium font-weight-semibold px-0 py-0"
                             style="line-height: 1.3"
                         >
                             {{
@@ -95,7 +95,7 @@
                             }}
                         </v-card-title>
                         <v-card-subtitle
-                            class="text-caption px-0 py-0"
+                            class="text-body-small px-0 py-0"
                             style="opacity: 0.7"
                         >
                             {{ user.username }}
@@ -118,10 +118,10 @@
                     </v-card-item>
 
                     <v-card-text class="py-2">
-                        <div class="text-caption text-disabled">
+                        <div class="text-body-small text-disabled">
                             {{ user.email }}
                         </div>
-                        <div class="text-caption text-disabled mt-1">
+                        <div class="text-body-small text-disabled mt-1">
                             {{ t('table.created_at') }}:
                             {{ formatDate(user.created) }}
                         </div>
@@ -165,7 +165,7 @@
 
         <!-- Result count + load more -->
         <div v-if="!loading && users.length" class="text-center mt-4">
-            <p class="text-caption text-medium-emphasis mb-3">
+            <p class="text-body-small text-medium-emphasis mb-3">
                 {{ t('users.showing', { n: users.length, total: totalItems }) }}
             </p>
             <v-btn
@@ -353,7 +353,7 @@ function editUser(user) {
 }
 
 function onUserUpdated() {
-    notifyError(t('notifications.success.edit'))
+    notify(t('notifications.success.edit'))
     reloadUsers()
 }
 
@@ -375,7 +375,7 @@ async function deleteUser() {
         deletingUser.value = null
     } catch (err) {
         console.error('Error deleting user:', err)
-        notify(t('users.deleteError'))
+        notifyError(t('users.deleteError'))
     } finally {
         deleting.value = false
     }

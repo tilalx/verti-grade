@@ -26,7 +26,7 @@ const emit = defineEmits<{ confirm: [] }>()
         :max-width="maxWidth"
         data-testid="confirm-dialog"
     >
-        <div class="text-body-2 text-medium-emphasis">{{ message }}</div>
+        <div class="text-body-medium text-medium-emphasis">{{ message }}</div>
         <template #actions>
             <v-btn
                 variant="text"

@@ -19,10 +19,10 @@
                     <v-icon icon="mdi-account-plus-outline" size="22" />
                 </v-avatar>
                 <div>
-                    <div class="text-h6 font-weight-bold">
+                    <div class="text-title-large font-weight-bold">
                         {{ $t('users.create') }}
                     </div>
-                    <div class="text-body-2 text-medium-emphasis">
+                    <div class="text-body-medium text-medium-emphasis">
                         {{ $t('users.createHint') }}
                     </div>
                 </div>
@@ -225,7 +225,7 @@ async function submit() {
         if (avatarFile.value) formData.append('avatar', avatarFile.value)
 
         await pb.collection('users').create(formData)
-        notifyError(t('notifications.success.userCreated'), 'success')
+        notify(t('notifications.success.userCreated'))
         emit('user-created')
         closeDialog()
     } catch (error) {
@@ -234,7 +234,7 @@ async function submit() {
             error.data?.data?.email?.message ||
             error.data?.data?.username?.message ||
             t('notifications.error.generic')
-        notify(message)
+        notifyError(message)
     } finally {
         saving.value = false
     }

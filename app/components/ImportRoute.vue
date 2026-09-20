@@ -18,7 +18,7 @@
             :title="$t('importRoutes.title')"
             data-testid="import-route-dialog"
         >
-            <p class="mb-4 text-body-2 text-medium-emphasis">
+            <p class="mb-4 text-body-medium text-medium-emphasis">
                 {{ $t('importRoutes.intro') }}
             </p>
 
@@ -46,7 +46,7 @@
                                 border
                                 flat
                             >
-                                <v-card-title class="text-subtitle-1">
+                                <v-card-title class="text-body-large">
                                     {{
                                         $t('importRoutes.ratingsFor', {
                                             name: item.name,
@@ -87,7 +87,7 @@
                             </v-card>
                             <p
                                 v-else
-                                class="text-center pa-4 text-body-2 text-medium-emphasis"
+                                class="text-center pa-4 text-body-medium text-medium-emphasis"
                             >
                                 {{ $t('importRoutes.noRatings') }}
                             </p>

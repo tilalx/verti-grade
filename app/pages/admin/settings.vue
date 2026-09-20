@@ -21,7 +21,7 @@
                         <div
                             class="d-flex align-center justify-space-between mb-3"
                         >
-                            <span class="text-subtitle-2 font-weight-semibold">
+                            <span class="text-title-small font-weight-semibold">
                                 {{ asset.label }}
                             </span>
                             <div class="d-flex align-center ga-1">
@@ -75,7 +75,7 @@
                                     >mdi-image-plus-outline</v-icon
                                 >
                                 <span
-                                    class="text-caption text-medium-emphasis"
+                                    class="text-body-small text-medium-emphasis"
                                     >{{ $t('settings.clickToUpload') }}</span
                                 >
                             </template>
@@ -104,9 +104,10 @@
                                             class="mb-1"
                                             >mdi-upload-outline</v-icon
                                         >
-                                        <span class="text-caption text-white">{{
-                                            $t('settings.replace')
-                                        }}</span>
+                                        <span
+                                            class="text-body-small text-white"
+                                            >{{ $t('settings.replace') }}</span
+                                        >
                                     </div>
                                     <div
                                         v-if="
@@ -122,9 +123,12 @@
                                             class="mb-1"
                                             >mdi-delete-outline</v-icon
                                         >
-                                        <span class="text-caption text-white">{{
-                                            $t('settings.removeImage')
-                                        }}</span>
+                                        <span
+                                            class="text-body-small text-white"
+                                            >{{
+                                                $t('settings.removeImage')
+                                            }}</span
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -151,7 +155,7 @@
         <!-- Organization -->
         <v-card border flat class="mb-6">
             <v-card-text class="pa-4">
-                <p class="text-subtitle-2 font-weight-semibold mb-4">
+                <p class="text-title-small font-weight-semibold mb-4">
                     {{ $t('settings.organization') }}
                 </p>
                 <v-row density="comfortable">
@@ -192,7 +196,7 @@
         <!-- URL Fields -->
         <v-card border flat class="mb-6">
             <v-card-text class="pa-4">
-                <p class="text-subtitle-2 font-weight-semibold mb-4">
+                <p class="text-title-small font-weight-semibold mb-4">
                     {{ $t('settings.publicUrls') }}
                 </p>
                 <v-row density="comfortable">
@@ -236,7 +240,7 @@
             <v-fade-transition>
                 <span
                     v-if="hasChanges"
-                    class="text-caption text-medium-emphasis"
+                    class="text-body-small text-medium-emphasis"
                 >
                     <v-icon size="14" class="mr-1">mdi-circle-medium</v-icon>
                     {{ $t('account.unsavedChanges') }}
@@ -281,14 +285,32 @@ const { data: settings } = useNuxtData('settings')
 // ── State ─────────────────────────────────────────────────────────────────────
 
 const original = reactive({
-    application_url: settings.value?.application_url ?? '',
-    imprint_url: settings.value?.imprint_url ?? '',
-    privacy_url: settings.value?.privacy_url ?? '',
-    organization_name: settings.value?.organization_name ?? '',
-    organization_unit_name: settings.value?.organization_unit_name ?? '',
+    application_url: '',
+    imprint_url: '',
+    privacy_url: '',
+    organization_name: '',
+    organization_unit_name: '',
 })
 
 const copySettings = reactive({ ...original })
+
+// The layout fetches 'settings' lazily, so on a client-side navigation this
+// page can set up before the record exists. Seed from it whenever it lands —
+// and again on every realtime update — leaving unsaved edits alone.
+function adoptRecord(rec) {
+    if (!rec) return
+    const dirty = hasChanges.value
+    original.application_url = rec.application_url ?? ''
+    original.imprint_url = rec.imprint_url ?? ''
+    original.privacy_url = rec.privacy_url ?? ''
+    original.organization_name = rec.organization_name ?? ''
+    original.organization_unit_name = rec.organization_unit_name ?? ''
+    if (!dirty) Object.assign(copySettings, original)
+
+    logoPreview.value = pbFileUrl(rec, rec.page_logo)
+    iconPreview.value = pbFileUrl(rec, rec.page_icon)
+    signPreview.value = pbFileUrl(rec, rec.sign_image)
+}
 
 const logoFile = ref(null)
 const iconFile = ref(null)
@@ -368,34 +390,10 @@ const assetFields = computed(() => [
 let unsubscribe = null
 
 onMounted(async () => {
-    const rec = settings.value
-    logoPreview.value = pbFileUrl(rec, rec.page_logo)
-    iconPreview.value = pbFileUrl(rec, rec.page_icon)
-    signPreview.value = pbFileUrl(rec, rec.sign_image)
-
     // subscribe() returns a Promise<unsubscribe fn> in PocketBase JS SDK v0.21+
     unsubscribe = await pb
         .collection('settings')
-        .subscribe('settings_123456', (e) => {
-            const d = e.record
-            logoPreview.value = pbFileUrl(d, d.page_logo)
-            iconPreview.value = pbFileUrl(d, d.page_icon)
-            signPreview.value = pbFileUrl(d, d.sign_image)
-
-            original.application_url = d.application_url
-            original.imprint_url = d.imprint_url
-            original.privacy_url = d.privacy_url
-            original.organization_name = d.organization_name
-            original.organization_unit_name = d.organization_unit_name
-
-            Object.assign(copySettings, {
-                application_url: d.application_url,
-                imprint_url: d.imprint_url,
-                privacy_url: d.privacy_url,
-                organization_name: d.organization_name,
-                organization_unit_name: d.organization_unit_name,
-            })
-        })
+        .subscribe('settings_123456', (e) => adoptRecord(e.record))
 })
 
 onUnmounted(() => {
@@ -471,6 +469,10 @@ const hasChanges = computed(() => {
         copySettings.organization_unit_name !== original.organization_unit_name
     )
 })
+
+// Placed after hasChanges/pbFileUrl: `immediate` runs adoptRecord during setup,
+// so everything it reads has to be declared by now.
+watch(settings, adoptRecord, { immediate: true })
 
 // ── Save ──────────────────────────────────────────────────────────────────────
 

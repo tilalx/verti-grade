@@ -82,3 +82,88 @@
     border: 1px solid rgba(var(--v-theme-on-surface), 0.07) !important;
     background: rgb(var(--v-theme-surface)) !important;
 }
+
+/* List card: the shell behind RouteCard and CommentCard. Both render the same
+   anatomy (header · divider · meta rows · pill row · actions); only the
+   contents differ, so the structure lives here and each component keeps just
+   its own deltas. */
+.list-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.list-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.list-card__checkbox {
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.list-card__title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.list-card__name {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-card__meta {
+    padding: 10px 16px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.list-card__meta-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+}
+
+.list-card__meta-row--full {
+    width: 100%;
+}
+
+.list-card__meta-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    opacity: 0.65;
+}
+
+.list-card__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.list-card__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: rgba(var(--v-theme-on-surface), 0.7);
+    background: rgba(var(--v-theme-on-surface), 0.06);
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+.list-card__actions {
+    padding: 6px 10px 8px;
+    min-height: unset;
+}

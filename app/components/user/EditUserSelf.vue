@@ -35,10 +35,14 @@
                 </div>
 
                 <div class="flex-grow-1 overflow-hidden ml-3">
-                    <div class="text-h6 font-weight-bold text-truncate">
+                    <div
+                        class="text-title-large font-weight-bold text-truncate"
+                    >
                         {{ fullName || $t('account.userProfile') }}
                     </div>
-                    <div class="text-body-2 text-medium-emphasis text-truncate">
+                    <div
+                        class="text-body-medium text-medium-emphasis text-truncate"
+                    >
                         {{ user.email }}
                     </div>
                 </div>
@@ -459,12 +463,12 @@ async function saveUser() {
         original.firstname = updated.firstname
         original.name = updated.name
 
-        notifyError(t('notifications.success.edit'), 'success')
+        notify(t('notifications.success.edit'))
         localDialog.value = false
     } catch (err) {
         const code = err?.response?.data?.oldPassword?.code
         if (code === 'validation_invalid_old_password') {
-            notify(t('account.wrongOldPassword'))
+            notifyError(t('account.wrongOldPassword'))
             activeTab.value = 'security'
         } else {
             notifyError(t('notifications.error.edit'))
