@@ -68,6 +68,30 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         timeout: 30_000,
     })
 
+    // The scan overlay is drawn in CSS pixels onto a canvas whose bitmap the
+    // library sizes from the video box. If the two boxes drift apart, the
+    // bitmap is stretched to fit and every tracking rectangle and label lands
+    // scaled and offset — which is what a viewport with no definite height did
+    // on iOS.
+    const overlay = await page.evaluate(() => {
+        const canvas = document.querySelector<HTMLCanvasElement>(
+            '#qrcode-stream-tracking-layer',
+        )
+        const video = document.querySelector<HTMLVideoElement>(
+            '.scanner-viewport video',
+        )
+        if (!canvas || !video) return null
+        const box = canvas.getBoundingClientRect()
+        return {
+            bitmap: [canvas.width, canvas.height],
+            cssBox: [Math.round(box.width), Math.round(box.height)],
+            videoBox: [video.offsetWidth, video.offsetHeight],
+        }
+    })
+    expect(overlay).not.toBeNull()
+    expect(overlay!.cssBox).toEqual(overlay!.bitmap)
+    expect(overlay!.videoBox).toEqual(overlay!.bitmap)
+
     await context.close()
     await browser.close()
 })

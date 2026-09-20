@@ -475,7 +475,9 @@
                     </template>
                 </v-list-item>
                 <v-list-item v-if="missing.length === 0">
-                    <v-list-item-title class="text-body-medium text-medium-emphasis">
+                    <v-list-item-title
+                        class="text-body-medium text-medium-emphasis"
+                    >
                         {{ $t('inventory.nothingToArchive') }}
                     </v-list-item-title>
                 </v-list-item>
@@ -907,8 +909,21 @@ const trackQrCode = (
         ctx.font = `600 ${fontSize}px sans-serif`
         const textWidth = ctx.measureText(label).width
         const padding = 6
-        const labelX = boundingBox.x + (boundingBox.width - textWidth) / 2
-        const labelY = boundingBox.y + boundingBox.height + fontSize + padding
+        // Keep the tag inside the frame. A code near an edge would otherwise
+        // centre its label half off-screen, and one near the bottom would
+        // write it below the viewport.
+        const labelX = Math.min(
+            Math.max(
+                boundingBox.x + (boundingBox.width - textWidth) / 2,
+                padding,
+            ),
+            Math.max(padding, ctx.canvas.width - textWidth - padding),
+        )
+        const below = boundingBox.y + boundingBox.height + fontSize + padding
+        const labelY =
+            below + padding / 2 > ctx.canvas.height
+                ? boundingBox.y - padding
+                : below
 
         ctx.fillStyle = color
         ctx.fillRect(
@@ -1196,16 +1211,16 @@ onBeforeUnmount(() => {
 .scanner-viewport {
     position: relative;
     width: 100%;
+    /* Definite, not a cap: the scanner's wrapper and the tracking canvas it
+       overlays are both height:100%, which is indefinite against an auto-height
+       parent. Safari then sized the canvas bitmap (taken from the video box)
+       and the canvas CSS box differently, and every tracking box and label was
+       drawn stretched and offset. Sized so the stream never pushes the
+       checklist off screen. */
+    height: 40vh;
     min-height: 200px;
-    /* Capped so the stream never pushes the checklist off screen. */
-    max-height: 40vh;
     background: #111;
     overflow: hidden;
-}
-
-.scanner-viewport :deep(video) {
-    max-height: 40vh;
-    object-fit: cover;
 }
 
 .scanner-viewport__torch {
