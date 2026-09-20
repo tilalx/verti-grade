@@ -60,7 +60,11 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     await expect(page.getByTestId('inventory-location-Hanau')).toBeVisible()
     await page.getByTestId('inventory-location-Hanau').click()
 
-    await expect(page.getByTestId('inventory-start')).toBeEnabled()
+    // Enabled only once the initial route fetch lands (`loadingRoutes`), which
+    // competes with every other worker plus this test's own second browser.
+    await expect(page.getByTestId('inventory-start')).toBeEnabled({
+        timeout: 30_000,
+    })
     await page.getByTestId('inventory-start').click()
 
     await expect(page.locator('.scanner-viewport')).toBeVisible()
