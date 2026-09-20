@@ -9,7 +9,11 @@
                     class="nav-logo"
                     :aria-label="$t('routes.home')"
                 >
-                    <NuxtImg
+                    <!-- Plain <img>: NuxtImg rewrites the src through
+                         /_ipx, which cannot read PocketBase's uploads and
+                         answers 403 in production. PocketBase already serves
+                         a sized thumbnail via ?thumb=. -->
+                    <img
                         v-if="logo_url"
                         :src="logo_url"
                         alt="Logo"

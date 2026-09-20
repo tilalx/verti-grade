@@ -55,7 +55,10 @@
                             @click="() => asset.triggerInput()"
                         >
                             <!-- Preview image when available -->
-                            <NuxtImg
+                            <!-- Plain <img>: the preview is either a
+                                 PocketBase URL or a local blob:, and /_ipx
+                                 can fetch neither. -->
+                            <img
                                 v-if="asset.preview.value"
                                 :src="asset.preview.value"
                                 :alt="asset.label"
