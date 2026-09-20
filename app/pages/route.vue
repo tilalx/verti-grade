@@ -93,12 +93,7 @@
             </div>
 
             <!-- ── Stats bar ──────────────────────────────────────────────── -->
-            <v-card
-                class="stats-card mx-4 mt-n4 rounded-xl"
-                style="position: relative; z-index: 2"
-                variant="elevated"
-                elevation="3"
-            >
+            <v-card class="stats-card mx-4 mt-n4" elevation="3">
                 <div class="d-flex align-center justify-space-around py-3">
                     <!-- Average rating -->
                     <div class="text-center">
@@ -502,7 +497,11 @@ onMounted(async () => {
     white-space: nowrap;
 }
 
+/* Overlaps the hero image (mt-n4), so it needs a stacking context and an
+   opaque background — the elevation is deliberate, not drift. */
 .stats-card {
+    position: relative;
+    z-index: 2;
     background: rgb(var(--v-theme-surface)) !important;
 }
 </style>
