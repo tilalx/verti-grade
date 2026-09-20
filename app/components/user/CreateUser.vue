@@ -225,7 +225,7 @@ async function submit() {
         if (avatarFile.value) formData.append('avatar', avatarFile.value)
 
         await pb.collection('users').create(formData)
-        notifyError(t('notifications.success.userCreated'), 'success')
+        notify(t('notifications.success.userCreated'))
         emit('user-created')
         closeDialog()
     } catch (error) {
@@ -234,7 +234,7 @@ async function submit() {
             error.data?.data?.email?.message ||
             error.data?.data?.username?.message ||
             t('notifications.error.generic')
-        notify(message)
+        notifyError(message)
     } finally {
         saving.value = false
     }

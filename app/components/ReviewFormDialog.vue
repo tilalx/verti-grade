@@ -22,126 +22,101 @@
         </v-btn>
     </template>
 
-    <v-bottom-sheet v-model="sheetOpen" inset>
-        <v-card class="py-2" data-testid="review-form-dialog">
-            <v-toolbar color="transparent" flat density="compact" class="pt-1">
-                <v-toolbar-title class="text-body-1 font-weight-semibold pl-2">
-                    {{
-                        isEditMode
-                            ? $t('comments.editReview')
-                            : $t('ratings.createReview')
-                    }}
-                </v-toolbar-title>
-                <v-btn
-                    icon
-                    variant="text"
-                    :aria-label="$t('actions.close')"
-                    @click="close"
-                >
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
-            </v-toolbar>
-
-            <v-card-text>
-                <!-- Context row: shown only in edit mode -->
-                <div
-                    v-if="isEditMode && review"
-                    class="d-flex align-center ga-3 mb-5 pa-3 rounded-lg"
-                    style="background: rgba(var(--v-theme-on-surface), 0.06)"
-                >
-                    <v-avatar size="30" :color="avatarColor(review.userName)">
-                        <span
-                            class="text-caption font-weight-bold text-white"
-                            >{{ initials(review.userName) }}</span
-                        >
-                    </v-avatar>
-                    <div>
-                        <div class="text-body-2 font-weight-medium">
-                            {{ review.userName }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis">
-                            {{ review.routeName }}
-                        </div>
-                    </div>
+    <LayoutDialogShell
+        v-model="sheetOpen"
+        max-width="600"
+        closable
+        sheet-on-mobile
+        :title="
+            isEditMode ? $t('comments.editReview') : $t('ratings.createReview')
+        "
+        data-testid="review-form-dialog"
+    >
+        <!-- Context row: shown only in edit mode -->
+        <div
+            v-if="isEditMode && review"
+            class="d-flex align-center ga-3 mb-4 pa-3 rounded-lg review-form__context"
+        >
+            <v-avatar size="30" :color="avatarColor(review.userName)">
+                <span class="text-caption font-weight-bold text-white">{{
+                    initials(review.userName)
+                }}</span>
+            </v-avatar>
+            <div>
+                <div class="text-body-2 font-weight-medium">
+                    {{ review.userName }}
                 </div>
+                <div class="text-caption text-medium-emphasis">
+                    {{ review.routeName }}
+                </div>
+            </div>
+        </div>
 
-                <v-form v-model="isFormValid">
-                    <v-row>
-                        <!-- Star rating -->
-                        <v-col cols="12">
-                            <div class="d-flex flex-column align-center">
-                                <label class="v-label mb-2">{{
-                                    $t('ratings.stars')
-                                }}</label>
-                                <v-rating
-                                    v-model="form.rating"
-                                    :rules="isEditMode ? [] : [rules.required]"
-                                    hover
-                                    active-color="yellow-darken-2"
-                                    color="grey-lighten-1"
-                                    density="compact"
-                                    size="x-large"
-                                    clearable
-                                    data-testid="review-form-rating"
-                                />
-                            </div>
-                        </v-col>
+        <v-form v-model="isFormValid">
+            <!-- Stars and difficulty share a row from sm up -->
+            <v-row density="comfortable" align="center" class="mb-1">
+                <v-col cols="12" sm="6">
+                    <!-- Inline label, field-height box: keeps the stars on the
+                         same baseline as the select next to it. -->
+                    <div class="d-flex align-center ga-3 review-form__rating">
+                        <span class="v-label">{{ $t('ratings.stars') }}</span>
+                        <v-rating
+                            v-model="form.rating"
+                            :rules="isEditMode ? [] : [rules.required]"
+                            hover
+                            active-color="yellow-darken-2"
+                            color="grey-lighten-1"
+                            density="compact"
+                            size="default"
+                            clearable
+                            data-testid="review-form-rating"
+                        />
+                    </div>
+                </v-col>
 
-                        <!-- Combined difficulty -->
-                        <v-col cols="12">
-                            <v-select
-                                v-model="form.combinedDifficulty"
-                                :label="$t('ratings.difficulty')"
-                                :items="combinedDifficulties"
-                                :rules="isEditMode ? [] : [rules.required]"
-                                clearable
-                                density="compact"
-                                data-testid="review-form-difficulty"
-                            />
-                        </v-col>
+                <v-col cols="12" sm="6">
+                    <v-select
+                        v-model="form.combinedDifficulty"
+                        :label="$t('ratings.difficulty')"
+                        :items="combinedDifficulties"
+                        :rules="isEditMode ? [] : [rules.required]"
+                        clearable
+                        hide-details="auto"
+                        data-testid="review-form-difficulty"
+                    />
+                </v-col>
+            </v-row>
 
-                        <!-- Comment -->
-                        <v-col cols="12">
-                            <v-textarea
-                                v-model="form.comment"
-                                :label="$t('ratings.comment')"
-                                :rules="
-                                    isEditMode
-                                        ? []
-                                        : [rules.requiredAndNotEmpty]
-                                "
-                                rows="4"
-                                auto-grow
-                                density="compact"
-                                :counter="isEditMode ? 1000 : undefined"
-                                data-testid="review-form-comment"
-                            />
-                        </v-col>
-                    </v-row>
-                </v-form>
-            </v-card-text>
+            <v-textarea
+                v-model="form.comment"
+                :label="$t('ratings.comment')"
+                :rules="isEditMode ? [] : [rules.requiredAndNotEmpty]"
+                rows="6"
+                auto-grow
+                :counter="isEditMode ? 1000 : undefined"
+                data-testid="review-form-comment"
+            />
+        </v-form>
 
-            <v-card-actions class="px-4 pb-4">
-                <v-btn
-                    variant="text"
-                    data-testid="review-form-cancel"
-                    @click="close"
-                    >{{ $t('actions.cancel') }}</v-btn
-                >
-                <v-spacer />
-                <v-btn
-                    :disabled="!isEditMode && !isFormValid"
-                    :loading="saving"
-                    color="primary"
-                    size="large"
-                    data-testid="review-form-submit"
-                    @click="submit"
-                >
-                    {{ isEditMode ? $t('actions.save') : $t('actions.submit') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-bottom-sheet>
+        <template #actions>
+            <v-btn
+                variant="text"
+                data-testid="review-form-cancel"
+                @click="close"
+                >{{ $t('actions.cancel') }}</v-btn
+            >
+            <v-spacer />
+            <v-btn
+                :disabled="!isEditMode && !isFormValid"
+                :loading="saving"
+                color="primary"
+                data-testid="review-form-submit"
+                @click="submit"
+            >
+                {{ isEditMode ? $t('actions.save') : $t('actions.submit') }}
+            </v-btn>
+        </template>
+    </LayoutDialogShell>
 </template>
 
 <script setup>
@@ -355,3 +330,14 @@ async function submit() {
     }
 }
 </script>
+
+<style scoped>
+.review-form__context {
+    background: rgba(var(--v-theme-on-surface), 0.06);
+}
+
+/* Matches the default-density field height next to it. */
+.review-form__rating {
+    min-height: 56px;
+}
+</style>

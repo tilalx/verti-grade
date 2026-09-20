@@ -8,7 +8,7 @@ defineOptions({ inheritAttrs: false })
 
 const open = defineModel<boolean>({ default: false })
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         title?: string
         subtitle?: string
@@ -19,15 +19,34 @@ withDefaults(
         scrollable?: boolean
         /** Drop the body padding when the slot brings its own (tabs, windows). */
         flush?: boolean
+        /** Slide up from the bottom edge on phones instead of centering. */
+        sheetOnMobile?: boolean
     }>(),
     { maxWidth: 520, scrollable: true },
+)
+
+const { smAndDown } = useDisplay()
+const asSheet = computed(() => props.sheetOnMobile && smAndDown.value)
+
+// VBottomSheet is just a VDialog wearing these classes plus a bottom
+// transition, so borrow them instead of swapping components.
+const sheetProps = computed(() =>
+    asSheet.value
+        ? {
+              class: 'v-bottom-sheet',
+              contentClass: 'v-bottom-sheet__content',
+              transition: 'bottom-sheet-transition',
+              location: 'bottom center',
+              origin: 'bottom center',
+          }
+        : { maxWidth: props.maxWidth },
 )
 </script>
 
 <template>
     <v-dialog
         v-model="open"
-        :max-width="maxWidth"
+        v-bind="sheetProps"
         :persistent="persistent"
         :scrollable="scrollable"
     >

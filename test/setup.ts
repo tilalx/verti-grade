@@ -118,6 +118,14 @@ vi.stubGlobal('useI18n', i18nGetter);
 vi.stubGlobal('useState', useStateGetter);
 vi.stubGlobal('useAsyncData', useAsyncDataGetter);
 vi.stubGlobal('useVersionCheck', useVersionCheck);
+// Vuetify's display composable is auto-imported in the app; desktop defaults
+// are enough for specs.
+vi.stubGlobal('useDisplay', () => ({
+  smAndDown: vueComputed(() => false),
+  smAndUp: vueComputed(() => true),
+  mdAndUp: vueComputed(() => true),
+  mobile: vueComputed(() => false),
+}));
 if (!('ref' in globalThis)) {
   vi.stubGlobal('ref', vueRef);
 } else {

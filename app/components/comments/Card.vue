@@ -79,28 +79,35 @@
                 >
                 <div class="comment-card__comment-wrap">
                     <span
+                        ref="commentEl"
                         class="comment-card__comment"
                         :class="{
                             'comment-card__comment--collapsed':
-                                collapsible && !expanded && isLong,
+                                collapsible && !expanded,
                         }"
                         >{{ comment.comment }}</span
                     >
-                    <v-btn
-                        v-if="collapsible && isLong"
-                        variant="text"
-                        density="compact"
-                        size="x-small"
-                        :color="expanded ? 'default' : 'primary'"
-                        class="mt-1 px-0 text-none d-block justify-start"
-                        @click="expanded = !expanded"
-                    >
-                        {{
-                            expanded
-                                ? t('comments.showLess')
-                                : t('comments.showMore')
-                        }}
-                    </v-btn>
+                    <!-- Wrapped rather than `d-block`: that forces display:block
+                         on the button and collapses Vuetify's flex height. -->
+                    <div v-if="collapsible && isLong" class="mt-1">
+                        <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
+                             leaving an x-small button 8px tall and clipping its
+                             own label. -->
+                        <v-btn
+                            variant="text"
+                            size="x-small"
+                            :color="expanded ? 'default' : 'primary'"
+                            class="px-0 text-none"
+                            data-testid="comment-card-toggle"
+                            @click="expanded = !expanded"
+                        >
+                            {{
+                                expanded
+                                    ? t('comments.showLess')
+                                    : t('comments.showMore')
+                            }}
+                        </v-btn>
+                    </div>
                 </div>
             </div>
 
@@ -197,12 +204,18 @@ const { t, locale } = useI18n()
 // ── Collapse ────────────────────────────────────────────────────────────────
 
 const expanded = ref(false)
-const LONG_THRESHOLD = 200
-const isLong = computed(
-    () =>
-        typeof props.comment.comment === 'string' &&
-        props.comment.comment.length > LONG_THRESHOLD,
-)
+const commentEl = ref<HTMLElement | null>(null)
+const isLong = ref(false)
+
+// A character count can't predict how many lines the text wraps to, so measure
+// the clamped element instead: overflow means the clamp actually hides
+// something. ponytail: measured once on mount, not on resize — re-measure with
+// a ResizeObserver if cards start resizing after load.
+onMounted(async () => {
+    await nextTick()
+    const el = commentEl.value
+    if (el) isLong.value = el.scrollHeight > el.clientHeight + 1
+})
 
 // ── Date ────────────────────────────────────────────────────────────────────
 

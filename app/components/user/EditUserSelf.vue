@@ -459,12 +459,12 @@ async function saveUser() {
         original.firstname = updated.firstname
         original.name = updated.name
 
-        notifyError(t('notifications.success.edit'), 'success')
+        notify(t('notifications.success.edit'))
         localDialog.value = false
     } catch (err) {
         const code = err?.response?.data?.oldPassword?.code
         if (code === 'validation_invalid_old_password') {
-            notify(t('account.wrongOldPassword'))
+            notifyError(t('account.wrongOldPassword'))
             activeTab.value = 'security'
         } else {
             notifyError(t('notifications.error.edit'))

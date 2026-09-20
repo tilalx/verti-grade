@@ -62,6 +62,9 @@ export default defineNuxtConfig({
       // for deliberate exceptions — anything repeated app-wide belongs here.
       defaults: {
         VBtn: { variant: 'flat', rounded: 'lg' },
+        // VCardActions provides its own `VBtn: { variant: 'text' }`, which
+        // would otherwise strip the fill off every dialog's confirm button.
+        VCardActions: { VBtn: { variant: 'flat' } },
         VCard: { rounded: 'lg' },
         VDialog: { maxWidth: 520 },
         VContainer: { fluid: true },

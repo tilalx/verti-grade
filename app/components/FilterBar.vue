@@ -80,7 +80,7 @@ function handleClear() {
         <slot name="below" />
     </v-card>
 
-    <!-- Mobile: filters in bottom sheet (same pattern as ReviewFormDialog) -->
+    <!-- Mobile: filters in bottom sheet -->
     <v-bottom-sheet v-if="!smAndUp" v-model="sheetOpen" inset>
         <v-card class="py-2" data-testid="filter-sheet">
             <v-toolbar color="transparent" flat density="compact" class="pt-1">

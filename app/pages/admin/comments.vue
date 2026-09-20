@@ -624,7 +624,7 @@ function onReviewSaved(updated) {
             expand: comments.value[idx].expand,
         })
     }
-    notifyError(t('notifications.success.edit'))
+    notify(t('notifications.success.edit'))
     scheduleStatsRefresh()
 }
 
@@ -653,7 +653,7 @@ async function confirmDelete() {
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error deleting comment:', err)
-        notify(t('notifications.error.generic'))
+        notifyError(t('notifications.error.generic'))
     } finally {
         deleting.value = false
     }
@@ -672,13 +672,13 @@ async function bulkDelete() {
         // Remove from local list — avoid full refetch
         comments.value = comments.value.filter((c) => !ids.includes(c.id))
         totalItems.value = Math.max(0, totalItems.value - ids.length)
-        notifyError(t('notifications.success.delete'))
+        notify(t('notifications.success.delete'))
         clearSelection()
         bulkDeleteDialog.value = false
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error bulk deleting:', err)
-        notify(t('notifications.error.generic'))
+        notifyError(t('notifications.error.generic'))
     } finally {
         bulkDeleting.value = false
     }

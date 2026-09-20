@@ -353,7 +353,7 @@ function editUser(user) {
 }
 
 function onUserUpdated() {
-    notifyError(t('notifications.success.edit'))
+    notify(t('notifications.success.edit'))
     reloadUsers()
 }
 
@@ -375,7 +375,7 @@ async function deleteUser() {
         deletingUser.value = null
     } catch (err) {
         console.error('Error deleting user:', err)
-        notify(t('users.deleteError'))
+        notifyError(t('users.deleteError'))
     } finally {
         deleting.value = false
     }

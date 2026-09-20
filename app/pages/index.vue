@@ -73,7 +73,7 @@
                 :page="tableOptions.page"
                 :items-per-page="tableOptions.itemsPerPage"
                 :sort-by="tableOptions.sortBy"
-                :no-data-text="$t('table.no_data')"
+                no-data-text="table.no_data"
                 item-value="id"
                 @update:options="loadRoutes"
             >

@@ -1225,7 +1225,9 @@ function formatMonthLabel(monthKey) {
     font-size: 10px;
     color: rgba(var(--v-theme-on-surface), 0.45);
     white-space: nowrap;
-    overflow: hidden;
+    /* Each label sits in one 13px grid column but needs ~17px, so it has to be
+       allowed to spill — the next label starts several columns later. */
+    overflow: visible;
 }
 
 .heatmap-grid {
