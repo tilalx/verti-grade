@@ -96,6 +96,22 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     expect(overlay!.cssBox).toEqual(overlay!.bitmap)
     expect(overlay!.videoBox).toEqual(overlay!.bitmap)
 
+    // Backgrounding ends the capture track on iOS and it cannot be revived, so
+    // the page drops the dead stream and puts the Start button back — its tap
+    // is the user gesture a fresh getUserMedia needs.
+    await page.evaluate(() => {
+        Object.defineProperty(document, 'visibilityState', {
+            configurable: true,
+            get: () => 'hidden',
+        })
+        document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    await expect(page.locator('.scanner-viewport')).toHaveCount(0)
+    await expect(page.getByTestId('inventory-start')).toBeVisible()
+    // The scan survives the interruption; only the camera goes.
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+
     await context.close()
     await browser.close()
 })

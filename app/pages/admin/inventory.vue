@@ -13,11 +13,10 @@
         <template v-if="isMobile">
             <!-- The viewport only exists while the camera does; an idle black
                  box would eat a third of the screen for nothing. -->
-            <div v-if="cameraActive" class="scanner-viewport">
+            <div v-if="cameraActive" ref="viewportRef" class="scanner-viewport">
                 <QrcodeStream
                     :formats="['qr_code']"
                     :constraints="cameraConstraints"
-                    :torch="torchOn"
                     :track="trackQrCode"
                     @detect="onDetect"
                     @camera-on="onCameraOn"
@@ -32,7 +31,7 @@
                     size="small"
                     :aria-label="$t('inventory.toggleTorch')"
                     data-testid="inventory-torch"
-                    @click="torchOn = !torchOn"
+                    @click="toggleTorch"
                 />
             </div>
 
@@ -931,6 +930,34 @@ const onDetect = (detectedCodes: { rawValue: string }[]) => {
     }
 }
 
+const viewportRef = useTemplateRef<HTMLElement>('viewportRef')
+
+/** The live camera track, reached through the element the library owns. */
+const videoTrack = (): MediaStreamTrack | null => {
+    const stream = viewportRef.value?.querySelector('video')
+        ?.srcObject as MediaStream | null
+    return stream?.getVideoTracks()[0] ?? null
+}
+
+// Not the component's `torch` prop: that sits in the same watched object as
+// the stream constraints, so flipping it tears the camera down and runs
+// getUserMedia again -- a visible re-initialisation for what the spec applies
+// to a running track.
+const toggleTorch = async () => {
+    const track = videoTrack()
+    if (!track) return
+    const next = !torchOn.value
+    try {
+        await track.applyConstraints({
+            advanced: [{ torch: next } as unknown as MediaTrackConstraintSet],
+        })
+        torchOn.value = next
+    } catch (error) {
+        console.error('Failed to toggle the torch:', error)
+        torchSupported.value = false
+    }
+}
+
 const onCameraOn = (capabilities: Partial<MediaTrackCapabilities>) => {
     scanning.value = true
     scannerError.value = ''
@@ -1142,7 +1169,19 @@ watch(isMobile, (value) => {
     if (!value) stopScanner()
 })
 
+// iOS ends the capture track when the tab is backgrounded or the screen
+// locks, and an ended track cannot be revived -- only a fresh getUserMedia
+// helps. We cannot call that on returning either: the gesture that authorised
+// the camera has long expired, so it would be rejected rather than re-prompt.
+// So tear the dead stream down and let the normal Start button come back; its
+// tap is the gesture that gets the camera again.
+const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden' && cameraActive.value)
+        stopScanner()
+}
+
 onMounted(async () => {
+    document.addEventListener('visibilitychange', onVisibilityChange)
     restoreSession()
     // Shown once, then on demand from the info button — it used to reopen on
     // every visit and swallow the first tap.
@@ -1156,6 +1195,7 @@ watch(instructionsDialog, (open) => {
 })
 
 onBeforeUnmount(() => {
+    document.removeEventListener('visibilitychange', onVisibilityChange)
     stopScanner()
     void audioContext?.close()
     audioContext = null
