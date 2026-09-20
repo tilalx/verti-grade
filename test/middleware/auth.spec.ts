@@ -55,14 +55,14 @@ describe('auth middleware', () => {
         expect(navigateToMock).not.toHaveBeenCalled()
     })
 
-    it('does not run on the server side', async () => {
+    it('guards on the server side too, so no content is flashed first', async () => {
         process.client = false
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware({ path: '/admin/routes', meta: {} }, {})
 
-        expect(navigateToMock).not.toHaveBeenCalled()
+        expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
     })
 
     // ── auth: false pages (login, password reset) ────────────────────────
@@ -90,7 +90,10 @@ describe('auth middleware', () => {
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware(
-            { path: '/auth/confirm-password-reset/abc123', meta: { auth: false } },
+            {
+                path: '/auth/confirm-password-reset/abc123',
+                meta: { auth: false },
+            },
             {},
         )
 
@@ -105,7 +108,10 @@ describe('auth middleware', () => {
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware(
-            { path: '/admin/users', meta: { requiredPermission: 'manage_users' } },
+            {
+                path: '/admin/users',
+                meta: { requiredPermission: 'manage_users' },
+            },
             {},
         )
 
@@ -120,7 +126,10 @@ describe('auth middleware', () => {
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware(
-            { path: '/admin/users', meta: { requiredPermission: 'manage_users' } },
+            {
+                path: '/admin/users',
+                meta: { requiredPermission: 'manage_users' },
+            },
             {},
         )
 
@@ -152,7 +161,10 @@ describe('auth middleware', () => {
         const { default: middleware } = await import('~/middleware/auth.js')
 
         await middleware(
-            { path: '/admin/settings', meta: { requiredPermission: 'manage_settings' } },
+            {
+                path: '/admin/settings',
+                meta: { requiredPermission: 'manage_settings' },
+            },
             {},
         )
 

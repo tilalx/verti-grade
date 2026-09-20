@@ -369,14 +369,9 @@ function mapReview(
     const user = r.expand?.user as
         { name?: string; username?: string; avatar?: string } | undefined
     const userName = user?.name || user?.username || t('comments.anonymous')
-    const userAvatar =
-        user?.avatar && user && r.expand?.user
-            ? pb.files.getURL(
-                  user as Parameters<typeof pb.files.getURL>[0],
-                  user.avatar,
-                  { thumb: '80x80' },
-              )
-            : null
+    const userAvatar = r.expand?.user
+        ? usePbFileUrl(r.expand.user, user?.avatar, { thumb: '80x80' }) || null
+        : null
 
     return {
         id: r.id,
@@ -421,13 +416,26 @@ function adjustColor(hex: string, amount: number): string {
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-onMounted(async () => {
+// Fetched during SSR so the route is in the server HTML. The handler fills the
+// refs server-side and returns them for the payload; on hydration the handler
+// is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('route-detail', async () => {
     if (!route_id.value) {
-        navigateTo('/404')
-        return
+        await navigateTo('/404')
+        return null
     }
     await Promise.all([getRouteMetadata(), getAllRouteRatings()])
-    loading.value = false
+    return { metadata: metadata.value, reviews: reviews.value }
+})
+
+if (initial.value) {
+    metadata.value = initial.value.metadata
+    reviews.value = initial.value.reviews
+}
+loading.value = false
+
+onMounted(async () => {
+    if (!route_id.value) return
 
     await subscribe('ratings', (event) => {
         if (event.record.route_id === route_id.value) {

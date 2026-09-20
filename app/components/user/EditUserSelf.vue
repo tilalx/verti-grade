@@ -286,13 +286,11 @@ const currentLocale = computed(
 
 // ── PocketBase ────────────────────────────────────────────────────────────
 const pb = usePocketbase()
-const pocketbaseAuth = JSON.parse(
-    localStorage.getItem('pocketbase_auth') ?? 'null',
-)
+const authRecord = pb.authStore.record
 
 // ── User state ────────────────────────────────────────────────────────────
 const user = reactive({
-    ...(pocketbaseAuth?.record ?? {
+    ...(authRecord ?? {
         id: '',
         firstname: '',
         name: '',
@@ -316,7 +314,7 @@ const avatarInput = ref(null)
 
 onMounted(() => {
     avatarPreview.value = user.avatar
-        ? pb.files.getURL(user, user.avatar, { thumb: '100x100' })
+        ? usePbFileUrl(user, user.avatar, { thumb: '100x100' })
         : null
 })
 
@@ -383,7 +381,7 @@ function cancelEdit() {
     user.passwordConfirm = ''
     avatarFile.value = null
     avatarPreview.value = user.avatar
-        ? pb.files.getURL(user, user.avatar, { thumb: '100x100' })
+        ? usePbFileUrl(user, user.avatar, { thumb: '100x100' })
         : null
     localDialog.value = false
 }
@@ -445,7 +443,7 @@ async function saveUser() {
         // Sync local reactive state with what PocketBase returned
         Object.assign(user, updated)
         avatarPreview.value = updated.avatar
-            ? pb.files.getURL(updated, updated.avatar, { thumb: '100x100' })
+            ? usePbFileUrl(updated, updated.avatar, { thumb: '100x100' })
             : null
 
         // Clear password fields
@@ -454,10 +452,8 @@ async function saveUser() {
         user.passwordConfirm = ''
         avatarFile.value = null
 
-        // Persist updated record to localStorage (keeps app session fresh)
-        const auth = JSON.parse(localStorage.getItem('pocketbase_auth'))
-        auth.record = updated
-        localStorage.setItem('pocketbase_auth', JSON.stringify(auth))
+        // Keep the session record fresh (re-writes the auth cookie)
+        pb.authStore.save(pb.authStore.token, updated)
 
         // Update original snapshot so hasChanges resets to false
         original.firstname = updated.firstname

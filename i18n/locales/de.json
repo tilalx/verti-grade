@@ -391,8 +391,7 @@
         "recentlyJoined": "Diese Woche beigetreten",
         "noUsers": "Keine Benutzer gefunden",
         "noUsersHint": "Suche oder Filter anpassen",
-        "showing": "{n} von {total} Benutzern",
-        "rolesLoadError": "Rollen konnten nicht geladen werden."
+        "showing": "{n} von {total} Benutzern"
     },
     "permissions": {
         "title": "Rollenberechtigungen",

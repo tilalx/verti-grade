@@ -479,11 +479,10 @@ function mapComment(c) {
             c.expand?.user?.name ||
             c.expand?.user?.username ||
             t('comments.anonymous'),
-        userAvatar: c.expand?.user?.avatar
-            ? pb.files.getURL(c.expand.user, c.expand.user.avatar, {
-                  thumb: '100x100',
-              })
-            : null,
+        userAvatar:
+            usePbFileUrl(c.expand?.user, c.expand?.user?.avatar, {
+                thumb: '100x100',
+            }) || null,
     }
 }
 
@@ -700,10 +699,27 @@ function clearSelection() {
 
 const { subscribe } = usePbSubscription()
 
-onMounted(async () => {
+// Fetched during SSR so the page is in the server HTML. The handler fills the
+// refs server-side and returns them for the payload; on hydration the handler
+// is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('admin-comments', async () => {
     // Fetch both in parallel: stats don't need to wait for the list
     await Promise.all([fetchList(), fetchStats()])
+    return {
+        comments: comments.value,
+        totalItems: totalItems.value,
+        stats: stats.value,
+    }
+})
 
+if (initial.value) {
+    comments.value = initial.value.comments
+    totalItems.value = initial.value.totalItems
+    stats.value = initial.value.stats
+}
+loading.value = false
+
+onMounted(async () => {
     await subscribe('ratings', async (e) => {
         // Handle realtime events without a full refetch
         if (e.action === 'delete') {

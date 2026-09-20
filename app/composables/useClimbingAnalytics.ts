@@ -105,6 +105,16 @@ export function useClimbingAnalytics() {
         }
     }
 
+    // Fetched during SSR so the dashboard is in the server HTML. The handler
+    // fills the ref server-side and returns it for the payload; on hydration
+    // the handler is skipped, so the ref is seeded from that payload instead.
+    const { data: initial } = useAsyncData('climbing-analytics', async () => {
+        await load()
+        return analytics.value
+    })
+
+    if (initial.value) analytics.value = initial.value
+
     const summary = computed(() => normalized.value.summary)
     const difficultyDistribution = computed(
         () => normalized.value.difficultyDistribution,
@@ -136,7 +146,7 @@ function normalizeResponse(
     response: ClimbingAnalyticsResponse,
 ): ClimbingAnalyticsResponse {
     const dedupe = <T>(items: T[]) => items.filter(Boolean)
-    const formatNumber = (value: number) => Number.isFinite(value) ? value : 0
+    const formatNumber = (value: number) => (Number.isFinite(value) ? value : 0)
 
     return {
         summary: {
@@ -146,10 +156,15 @@ function normalizeResponse(
                 formatNumber(response.summary.averageDifficulty).toFixed(2),
             ),
             totalComments: formatNumber(response.summary.totalComments),
-            averageLifespanDays: formatNumber(response.summary.averageLifespanDays ?? 0),
-            generatedAt: response.summary.generatedAt || new Date().toISOString(),
+            averageLifespanDays: formatNumber(
+                response.summary.averageLifespanDays ?? 0,
+            ),
+            generatedAt:
+                response.summary.generatedAt || new Date().toISOString(),
         },
-        difficultyDistribution: dedupe(response.difficultyDistribution ?? []).map((item) => ({
+        difficultyDistribution: dedupe(
+            response.difficultyDistribution ?? [],
+        ).map((item) => ({
             grade: item.grade,
             count: formatNumber(item.count),
         })),

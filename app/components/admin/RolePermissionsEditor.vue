@@ -131,5 +131,17 @@ async function fetchData() {
     }
 }
 
-onMounted(fetchData)
+// Visible page content, not a dialog, so it's fetched during SSR. Not awaited:
+// a top-level await here would make this an async-setup component, which
+// breaks template refs on parents that aren't wrapped in <Suspense>.
+const { data: initial } = useAsyncData('role-permissions', async () => {
+    await fetchData()
+    return { roles: roles.value, permissions: allPermissions.value }
+})
+
+if (initial.value) {
+    roles.value = initial.value.roles
+    allPermissions.value = initial.value.permissions
+    loading.value = false
+}
 </script>

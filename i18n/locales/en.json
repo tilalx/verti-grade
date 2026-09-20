@@ -391,8 +391,7 @@
         "recentlyJoined": "Joined this week",
         "noUsers": "No users found",
         "noUsersHint": "Try adjusting your search or filters",
-        "showing": "Showing {n} of {total} users",
-        "rolesLoadError": "Failed to load roles."
+        "showing": "Showing {n} of {total} users"
     },
     "permissions": {
         "title": "Role Permissions",

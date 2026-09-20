@@ -29,51 +29,52 @@
                     />
                 </router-link>
 
-                <!-- Desktop Nav Links -->
-                <ClientOnly>
-                    <nav
-                        v-if="isLoggedIn && mdAndUp"
-                        class="nav-links"
-                        :aria-label="$t('nav.mainNavigation')"
-                    >
-                        <LayoutNavLink
-                            v-for="link in desktopLinks"
-                            :key="link.to"
-                            :to="link.to"
-                            :icon="link.icon"
-                            :label="$t(link.label)"
-                        />
-                    </nav>
-                </ClientOnly>
+                <!-- Desktop Nav Links. Breakpoint via CSS, not useDisplay():
+                     the viewport is unknown server-side, so a JS breakpoint
+                     can't render here without a hydration mismatch. -->
+                <nav
+                    v-if="isLoggedIn"
+                    class="nav-links d-none d-md-flex"
+                    :aria-label="$t('nav.mainNavigation')"
+                >
+                    <LayoutNavLink
+                        v-for="link in desktopLinks"
+                        :key="link.to"
+                        :to="link.to"
+                        :icon="link.icon"
+                        :label="$t(link.label)"
+                    />
+                </nav>
 
                 <v-spacer />
 
                 <!-- Right Side -->
                 <div class="nav-actions">
-                    <ClientOnly>
-                        <UserIcon v-if="isLoggedIn && mdAndUp" />
+                    <template v-if="isLoggedIn">
+                        <div class="d-none d-md-flex">
+                            <UserIcon />
+                        </div>
                         <v-btn
-                            v-else-if="isLoggedIn"
                             icon
                             variant="text"
-                            class="nav-hamburger"
+                            class="nav-hamburger d-md-none"
                             data-testid="nav-hamburger"
                             @click="drawer = !drawer"
                             :aria-label="$t('nav.openMenu')"
                         >
                             <v-icon>mdi-menu</v-icon>
                         </v-btn>
-                        <v-btn
-                            v-else
-                            to="/auth/login"
-                            variant="tonal"
-                            prepend-icon="mdi-login"
-                            class="nav-login-btn"
-                            data-testid="nav-login"
-                        >
-                            {{ $t('routes.login') }}
-                        </v-btn>
-                    </ClientOnly>
+                    </template>
+                    <v-btn
+                        v-else
+                        to="/auth/login"
+                        variant="tonal"
+                        prepend-icon="mdi-login"
+                        class="nav-login-btn"
+                        data-testid="nav-login"
+                    >
+                        {{ $t('routes.login') }}
+                    </v-btn>
                 </div>
             </div>
         </v-app-bar>
@@ -105,10 +106,10 @@
 
             <template #append>
                 <v-divider class="mx-4 mb-3" />
+                <!-- Off-canvas, so SSR buys nothing here — and a second
+                     always-mounted UserIcon would duplicate its test ids. -->
                 <div class="drawer-footer">
-                    <ClientOnly>
-                        <UserIcon v-if="isLoggedIn && !mdAndUp" />
-                    </ClientOnly>
+                    <UserIcon v-if="isLoggedIn && !mdAndUp" />
                 </div>
             </template>
         </v-navigation-drawer>
@@ -118,7 +119,6 @@
 </template>
 
 <script setup>
-const pb = usePocketbase()
 const theme = useTheme()
 const { mdAndUp } = useDisplay()
 
@@ -195,17 +195,9 @@ watch(mdAndUp, (isDesktop) => {
     if (isDesktop) drawer.value = false
 })
 
-const logo_url = ref('')
-
-onMounted(async () => {
-    if (settings.value?.page_logo) {
-        logo_url.value = await pb.files.getURL(
-            settings.value,
-            settings.value.page_logo,
-            { thumb: '0x200' },
-        )
-    }
-})
+const logo_url = computed(() =>
+    usePbFileUrl(settings.value, settings.value?.page_logo, { thumb: '0x200' }),
+)
 
 const logoStyle = computed(() => ({
     maxWidth: '90px',

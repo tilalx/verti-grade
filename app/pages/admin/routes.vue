@@ -836,12 +836,24 @@ const queueReload = () => {
 
 const { subscribe } = usePbSubscription()
 
-onMounted(async () => {
+// Fetched during SSR so the page is in the server HTML. The handler fills the
+// refs server-side and returns them for the payload; on hydration the handler
+// is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('admin-routes', async () => {
     await loadRoutes({
         page: tableOptions.page,
         itemsPerPage: tableOptions.itemsPerPage,
         sortBy: tableOptions.sortBy,
     })
+    return { routes: routes.value, totalItems: totalItems.value }
+})
+
+if (initial.value) {
+    routes.value = initial.value.routes
+    totalItems.value = initial.value.totalItems
+}
+
+onMounted(async () => {
     await Promise.all([
         subscribe('routes', queueReload),
         subscribe('ratings', queueReload),

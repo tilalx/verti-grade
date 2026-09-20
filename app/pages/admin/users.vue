@@ -242,34 +242,19 @@ const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
 // ── Roles ─────────────────────────────────────────────────────────────────
 
-const roles = ref([])
+const { data: roles } = useRoles()
 
 const roleOptions = computed(() => [
     { text: t('filter.all'), value: null },
     ...roles.value.map((r) => ({ text: r.name, value: r.id })),
 ])
 
-async function fetchRoles() {
-    try {
-        roles.value = await pb.collection('roles').getFullList({
-            sort: 'name',
-            requestKey: 'rolesList',
-        })
-    } catch (err) {
-        if (err?.isAbort) return
-        console.error('Failed to fetch roles:', err)
-        notifyError(t('notifications.error.generic'))
-    }
-}
-
 // ── Data fetching ──────────────────────────────────────────────────────────
 
 function mapUser(u) {
     return {
         ...u,
-        avatarUrl: u.avatar
-            ? pb.files.getURL(u, u.avatar, { thumb: '100x100' })
-            : null,
+        avatarUrl: usePbFileUrl(u, u.avatar, { thumb: '100x100' }) || null,
         roleName: u.expand?.role?.name ?? null,
     }
 }
@@ -421,9 +406,21 @@ function formatDate(date) {
 
 const { subscribe } = usePbSubscription()
 
-onMounted(async () => {
-    await Promise.all([fetchList(), fetchRoles()])
+// Fetched during SSR so the page is in the server HTML. The handler fills the
+// refs server-side and returns them for the payload; on hydration the handler
+// is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('admin-users', async () => {
+    await fetchList()
+    return { users: users.value, totalItems: totalItems.value }
+})
 
+if (initial.value) {
+    users.value = initial.value.users
+    totalItems.value = initial.value.totalItems
+}
+loading.value = false
+
+onMounted(async () => {
     await subscribe('users', async (e) => {
         if (e.action === 'delete') {
             users.value = users.value.filter((u) => u.id !== e.record.id)

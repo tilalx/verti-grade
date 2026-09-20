@@ -294,9 +294,9 @@ const original = reactive({
 
 const copySettings = reactive({ ...original })
 
-// The layout fetches 'settings' lazily, so on a client-side navigation this
-// page can set up before the record exists. Seed from it whenever it lands —
-// and again on every realtime update — leaving unsaved edits alone.
+// The settings record arrives with the SSR payload, but on a client-side
+// navigation this page can still set up before it exists. Seed from it
+// whenever it lands — and on every realtime update — leaving edits alone.
 function adoptRecord(rec) {
     if (!rec) return
     const dirty = hasChanges.value
@@ -334,8 +334,7 @@ const { notify, error: notifyError } = useNotification()
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function pbFileUrl(rec, filename) {
-    if (!filename) return null
-    return pb.files.getURL(rec, filename)
+    return usePbFileUrl(rec, filename) || null
 }
 
 // ── Asset field descriptors (drives the template v-for) ───────────────────────

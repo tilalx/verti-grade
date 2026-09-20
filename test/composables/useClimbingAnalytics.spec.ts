@@ -53,10 +53,12 @@ describe('useClimbingAnalytics', () => {
         }
     })
 
-    it('starts with loading=false and no data', () => {
-        const { loading, error, hasData } = useClimbingAnalytics()
+    it('fetches on creation so the data is there for SSR', () => {
+        fetchMock.mockResolvedValue(sampleResponse)
+        const { error, hasData } = useClimbingAnalytics()
 
-        expect(loading.value).toBe(false)
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        // Synchronously, before the fetch resolves, it reads as empty.
         expect(error.value).toBe(false)
         expect(hasData.value).toBe(false)
     })
@@ -165,6 +167,7 @@ describe('useClimbingAnalytics', () => {
         await refresh()
 
         expect(hasData.value).toBe(true)
-        expect(fetchMock).toHaveBeenCalledTimes(1)
+        // Once on creation for SSR, once for the explicit refresh.
+        expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 })

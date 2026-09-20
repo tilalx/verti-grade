@@ -1180,14 +1180,28 @@ const onVisibilityChange = () => {
         stopScanner()
 }
 
-onMounted(async () => {
+// Fetched during SSR so the page is in the server HTML. The handler fills the
+// refs server-side and returns them for the payload; on hydration the handler
+// is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('inventory-routes', async () => {
+    await loadRoutes()
+    return allRoutes.value
+})
+
+if (initial.value) {
+    allRoutes.value = initial.value
+}
+
+onMounted(() => {
     document.addEventListener('visibilitychange', onVisibilityChange)
     restoreSession()
+    // The session lives in localStorage, so the SSR'd route load can't
+    // reconcile against it — that has to happen here, after the restore.
+    reconcileScannedIds()
     // Shown once, then on demand from the info button — it used to reopen on
     // every visit and swallow the first tap.
     if (isMobile.value && !hasSeenInstructions())
         instructionsDialog.value = true
-    await loadRoutes()
 })
 
 watch(instructionsDialog, (open) => {

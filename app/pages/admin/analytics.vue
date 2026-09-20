@@ -564,8 +564,6 @@ watch(error, (hasError) => {
     if (hasError) notifyError(t('analytics.error'))
 })
 
-onMounted(() => load())
-
 const showAllSetters = ref(false)
 
 // ── Heatmap tooltip (single floating instance instead of 365+ v-tooltip) ──
