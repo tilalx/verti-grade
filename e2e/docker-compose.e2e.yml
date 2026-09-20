@@ -20,6 +20,11 @@ services:
   e2e:
     image: mcr.microsoft.com/playwright:v1.63.0-noble
     working_dir: /work
+    # The browsers exhaust Docker's 64MB default /dev/shm once several contexts
+    # are open, which shows up as unexplained navigation timeouts rather than a
+    # clear error. Preferred over `ipc: host`, which would drop the container's
+    # IPC namespace isolation to achieve the same thing.
+    shm_size: 1gb
     volumes:
       # :Z relabels the bind mount for SELinux hosts (Fedora/RHEL Jenkins
       # agents); a harmless no-op everywhere else.
