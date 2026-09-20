@@ -9,6 +9,11 @@
         <LayoutFootBar :settings="settings" />
     </div>
     <GlobalSnackbar />
+    <!-- The navbar now server-renders, so it's no longer a hydration signal
+         for gotoSettled() (e2e/support/nav.ts) — this marker is. -->
+    <ClientOnly>
+        <div data-testid="page-hydrated" hidden />
+    </ClientOnly>
 </template>
 
 <script setup>
@@ -39,14 +44,16 @@ const getSettings = async () => {
     }
 }
 
-const { data: settingsData } = await useAsyncData('settings', getSettings, {
-    lazy: true,
-})
+const { data: settingsData } = await useAsyncData('settings', getSettings)
 
 const settings = ref(settingsData.value ?? {})
 watch(settingsData, (val) => {
     if (val) settings.value = val
 })
+
+// Resolved during SSR so the navbar's permission-gated links are in the
+// server HTML. Transfers via useState payload; onMounted re-verifies.
+await callOnce('user-permissions', refreshPermissions)
 
 const refreshSession = async () => {
     try {
@@ -59,16 +66,20 @@ const refreshSession = async () => {
     }
 }
 
-const setFavicon = () => {
-    if (!settings.value?.page_icon) return
-    const favUrl = pb.files.getURL(settings.value, settings.value.page_icon)
-    let link =
-        document.querySelector("link[rel~='icon']") ||
-        document.createElement('link')
-    link.rel = 'icon'
-    link.href = favUrl
-    document.head.appendChild(link)
-}
+// Rendered into the SSR'd <head>, so the custom icon is the first one the
+// browser sees instead of a post-hydration swap.
+useHead(
+    computed(() => ({
+        link: [
+            {
+                rel: 'icon',
+                href: settings.value?.page_icon
+                    ? usePbFileUrl(settings.value, settings.value.page_icon)
+                    : '/favicon.ico',
+            },
+        ],
+    })),
+)
 
 let unsubAuthChange = null
 let unsubUser = null
@@ -111,7 +122,6 @@ onMounted(async () => {
         // Skipping this for anonymous visitors left `can()`'s fail-open default
         // in effect forever, showing every admin nav link to logged-out users.
         await refreshPermissions()
-        setFavicon()
 
         // Reflect any local auth store changes immediately (login/logout on this tab)
         unsubAuthChange = pb.authStore.onChange((token, record) => {
@@ -141,7 +151,6 @@ onMounted(async () => {
             .collection('settings')
             .subscribe('settings_123456', (e) => {
                 settings.value = e.record
-                setFavicon()
             })
     } catch (error) {
         console.error('Error during initialization:', error)

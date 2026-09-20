@@ -15,6 +15,7 @@ export const test = base.extend<Fixtures>({
         const context = await browser.newContext({
             storageState: path.join(AUTH_DIR, 'admin.json'),
             baseURL,
+            ignoreHTTPSErrors: true,
         })
         const page = await context.newPage()
         await use(page)
@@ -24,6 +25,7 @@ export const test = base.extend<Fixtures>({
         const context = await browser.newContext({
             storageState: path.join(AUTH_DIR, 'routesetter.json'),
             baseURL,
+            ignoreHTTPSErrors: true,
         })
         const page = await context.newPage()
         await use(page)
@@ -33,6 +35,7 @@ export const test = base.extend<Fixtures>({
         const context = await browser.newContext({
             storageState: path.join(AUTH_DIR, 'user.json'),
             baseURL,
+            ignoreHTTPSErrors: true,
         })
         const page = await context.newPage()
         await use(page)

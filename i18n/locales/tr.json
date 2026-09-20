@@ -413,8 +413,7 @@
         "recentlyJoined": "Bu hafta katıldı",
         "noUsers": "Kullanıcı bulunamadı",
         "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
-        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor",
-        "rolesLoadError": "Roller yüklenemedi."
+        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
     },
     "settings": {
         "changed": "Değiştirildi",

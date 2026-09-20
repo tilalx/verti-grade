@@ -1,9 +1,21 @@
 services:
   app:
     image: ${E2E_IMAGE:?E2E_IMAGE must be set}
+    # WebKit refuses to store cookies for a single-label host, and `.app` is a
+    # public suffix on top of that — under the old `https://app` origin the
+    # pb_auth cookie was silently dropped and every SSR auth check redirected
+    # to login. A dotted, non-public-suffix name avoids both rules.
+    networks:
+      default:
+        aliases:
+          - vg.test
     environment:
       PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
       PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
+      SSL_DNS_NAMES: vg.test
+    volumes:
+      # Shared so the test container can install this cert as a trust anchor.
+      - e2e-ssl:/etc/nginx/ssl
     healthcheck:
       test:
         [
@@ -29,9 +41,10 @@ services:
       # :Z relabels the bind mount for SELinux hosts (Fedora/RHEL Jenkins
       # agents); a harmless no-op everywhere else.
       - ..:/work:Z
+      - e2e-ssl:/ssl:ro
     environment:
-      E2E_BASE_URL: https://app
-      E2E_PB_URL: https://app
+      E2E_BASE_URL: https://vg.test
+      E2E_PB_URL: https://vg.test
       PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
       PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
       CI: 'true'
@@ -42,4 +55,15 @@ services:
     depends_on:
       app:
         condition: service_healthy
-    command: sh -c "corepack enable && yarn install --immutable && yarn test:e2e"
+    # ignoreHTTPSErrors gets navigation through an untrusted cert, but WebKit
+    # still treats such a connection as insecure and drops Secure cookies — so
+    # the cert has to be genuinely trusted, not just waved past. WebKit on
+    # Linux validates against /etc/ssl/certs, which update-ca-certificates
+    # rebuilds.
+    command: >
+      sh -c "cp /ssl/cert.pem /usr/local/share/ca-certificates/vg-e2e.crt &&
+      update-ca-certificates &&
+      corepack enable && yarn install --immutable && yarn test:e2e"
+
+volumes:
+  e2e-ssl:

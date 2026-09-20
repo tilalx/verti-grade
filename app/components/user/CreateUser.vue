@@ -144,7 +144,7 @@ const dialog = ref(false)
 const valid = ref(false)
 const saving = ref(false)
 const form = ref(null)
-const roles = ref([])
+const { data: roles } = useRoles()
 
 const user = reactive({
     email: '',
@@ -171,19 +171,6 @@ function onAvatarPicked(e) {
 const { notify, error: notifyError } = useNotification()
 
 // ── Roles ─────────────────────────────────────────────────────────────────
-async function fetchRoles() {
-    try {
-        roles.value = await pb.collection('roles').getFullList({
-            sort: 'name',
-            requestKey: 'createUserRoles',
-        })
-    } catch (err) {
-        console.error('Failed to fetch roles:', err)
-        notifyError(t('users.rolesLoadError'))
-    }
-}
-
-onMounted(fetchRoles)
 
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]

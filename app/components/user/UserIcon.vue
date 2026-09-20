@@ -57,21 +57,11 @@ const { t } = useI18n()
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 
-const user = computed(() => {
-    try {
-        return (
-            JSON.parse(localStorage.getItem('pocketbase_auth') ?? '{}')
-                ?.record ?? null
-        )
-    } catch {
-        return null
-    }
-})
+const user = computed(() => pb.authStore.record)
 
-const image = computed(() => {
-    if (!user.value?.avatar) return null
-    return pb.files.getURL(user.value, user.value.avatar, { thumb: '100x100' })
-})
+const image = computed(() =>
+    usePbFileUrl(user.value, user.value?.avatar, { thumb: '100x100' }),
+)
 
 const displayName = computed(
     () =>

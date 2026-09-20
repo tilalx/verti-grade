@@ -151,7 +151,7 @@ const dialog = ref(false)
 const valid = ref(false)
 const saving = ref(false)
 const form = ref(null)
-const roles = ref([])
+const { data: roles } = useRoles()
 
 const editableUser = reactive({
     id: '',
@@ -179,7 +179,7 @@ function onAvatarPicked(e) {
 
 function initAvatarPreview(user) {
     if (user?.avatar) {
-        avatarPreview.value = pb.files.getURL(user, user.avatar, {
+        avatarPreview.value = usePbFileUrl(user, user.avatar, {
             thumb: '100x100',
         })
     } else if (user?.avatarUrl) {
@@ -190,21 +190,6 @@ function initAvatarPreview(user) {
 }
 
 const { error: notifyError } = useNotification()
-
-// ── Roles ─────────────────────────────────────────────────────────────────
-async function fetchRoles() {
-    try {
-        roles.value = await pb.collection('roles').getFullList({
-            sort: 'name',
-            requestKey: 'editUserRoles',
-        })
-    } catch (err) {
-        console.error('Failed to fetch roles:', err)
-        notifyError(t('users.rolesLoadError'))
-    }
-}
-
-onMounted(fetchRoles)
 
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]

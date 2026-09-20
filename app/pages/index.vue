@@ -355,14 +355,25 @@ watch(pbFilter, () => {
 
 const { subscribe } = usePbSubscription()
 
+// First page fetched during SSR so the list is in the server HTML. The handler
+// fills the refs server-side and returns them for the payload; on hydration the
+// handler is skipped, so the refs are seeded from that payload instead.
+const { data: initial } = await useAsyncData('index-routes', async () => {
+    await loadRoutes({ ...tableOptions })
+    return { routes: routes.value, totalItems: totalItems.value }
+})
+
+if (initial.value) {
+    routes.value = initial.value.routes
+    totalItems.value = initial.value.totalItems
+}
+loading.value = false
+
 onMounted(async () => {
-    await Promise.all([
-        loadRoutes({ ...tableOptions }),
-        subscribe('routes', () => {
-            tableOptions.page = 1
-            void loadRoutes({}, { append: false })
-        }),
-    ])
+    await subscribe('routes', () => {
+        tableOptions.page = 1
+        void loadRoutes({}, { append: false })
+    })
     setupScrollObserver()
 })
 

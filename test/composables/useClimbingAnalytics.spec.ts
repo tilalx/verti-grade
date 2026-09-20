@@ -53,10 +53,12 @@ describe('useClimbingAnalytics', () => {
         }
     })
 
-    it('starts with loading=false and no data', () => {
-        const { loading, error, hasData } = useClimbingAnalytics()
+    it('fetches on creation so the data is there for SSR', () => {
+        fetchMock.mockResolvedValue(sampleResponse)
+        const { error, hasData } = useClimbingAnalytics()
 
-        expect(loading.value).toBe(false)
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        // Synchronously, before the fetch resolves, it reads as empty.
         expect(error.value).toBe(false)
         expect(hasData.value).toBe(false)
     })
@@ -95,6 +97,18 @@ describe('useClimbingAnalytics', () => {
 
         expect(error.value).toBe(true)
         expect(hasData.value).toBe(false)
+    })
+
+    it('keeps the error flag in shared state so an SSR failure reaches the client', async () => {
+        fetchMock.mockRejectedValue(new Error('Network failure'))
+        const { load, error } = useClimbingAnalytics()
+
+        await load()
+
+        // A plain ref() would die with the server-side instance; living under
+        // a useState key is what carries the failure over in the payload.
+        expect(error.value).toBe(true)
+        expect(useState('climbing-analytics-error').value).toBe(true)
     })
 
     it('sets error flag when API returns an error response', async () => {
@@ -165,6 +179,7 @@ describe('useClimbingAnalytics', () => {
         await refresh()
 
         expect(hasData.value).toBe(true)
-        expect(fetchMock).toHaveBeenCalledTimes(1)
+        // Once on creation for SSR, once for the explicit refresh.
+        expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 })
