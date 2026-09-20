@@ -58,7 +58,7 @@ const sheetProps = computed(() =>
         <v-card rounded="xl" v-bind="$attrs">
             <v-card-title
                 v-if="title || $slots.title"
-                class="d-flex align-center ga-2 pa-5 pb-2 text-body-large font-weight-semibold"
+                class="dialog-shell__title d-flex align-center ga-2 pa-5 pb-2 text-body-large font-weight-semibold"
             >
                 <slot name="title">{{ title }}</slot>
                 <v-spacer />
@@ -105,6 +105,13 @@ const sheetProps = computed(() =>
     width: 100%;
     max-width: 100%;
     margin: 0;
+}
+
+/* v-card-title is nowrap + ellipsis by default, which clips a slotted header
+   that carries a second line. Let it wrap; callers that want one clipped line
+   still opt in with text-truncate. */
+.dialog-shell__title {
+    white-space: normal;
 }
 
 .v-overlay__content.dialog-shell--sheet > .v-card {
