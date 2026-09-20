@@ -12,19 +12,23 @@
             class="mb-4"
             data-testid="settings-mail-warning"
         >
-            {{ $t('settings.mailNotConfigured') }}
-            <template #append>
+            <!-- Not #append: that column keeps its width on a phone and
+                 squeezes the message down to one word per line. -->
+            <div class="d-flex flex-wrap align-center ga-2">
+                <span style="flex: 1 1 16rem">{{
+                    $t('settings.mailNotConfigured')
+                }}</span>
                 <v-btn
                     variant="text"
                     size="small"
-                    href="/_/#/settings/mail"
+                    :href="pbMailSettingsUrl"
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="settings-mail-warning-link"
                 >
                     {{ $t('settings.mailNotConfiguredAction') }}
                 </v-btn>
-            </template>
+            </div>
         </v-alert>
 
         <!-- Image Upload Cards -->
@@ -323,6 +327,11 @@ definePageMeta({
 const { data: settings } = useNuxtData('settings')
 
 const { data: mailStatus } = useMailStatus()
+// Only the production nginx maps /_/ onto PocketBase; in dev the browser sits
+// on the Nuxt origin, so the link needs PocketBase's own port. Same split as
+// usePbFileUrl().
+const pbMailSettingsUrl =
+    (import.meta.dev ? 'http://localhost:8090' : '') + '/_/#/settings/mail'
 const mailConfigured = computed(() => mailStatus.value?.configured !== false)
 
 // ── State ─────────────────────────────────────────────────────────────────────

@@ -15,8 +15,10 @@
             class="mb-4"
             data-testid="reports-mail-warning"
         >
-            {{ t('reports.mailWarning') }}
-            <template #append>
+            <div class="d-flex flex-wrap align-center ga-2">
+                <span style="flex: 1 1 16rem">{{
+                    t('reports.mailWarning')
+                }}</span>
                 <v-btn
                     variant="text"
                     size="small"
@@ -25,7 +27,7 @@
                 >
                     {{ t('reports.mailWarningAction') }}
                 </v-btn>
-            </template>
+            </div>
         </v-alert>
 
         <FilterBar
