@@ -202,13 +202,10 @@
     },
     "inventory": {
         "title": "Route Inventory Scan",
-        "subtitle": "Point your camera at each QR code to register the route.",
         "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
         "start": "Start Scanning",
         "stop": "Stop Scanning",
         "finish": "Finish Inventory",
-        "invalidCode": "Scanned code is not a recognized route.",
-        "unknownRoute": "The scanned route could not be found.",
         "noScans": "No routes scanned yet.",
         "archiveSuccess": "Inventory completed. Archived {count} routes.",
         "nothingToArchive": "All routes were scanned. Nothing to archive.",
@@ -235,14 +232,12 @@
         "locationRequired": "Choose a location to start.",
         "locationRestoreHint": "Saved progress from an earlier version — choose the gym it belongs to.",
         "changeLocation": "Change location",
-        "wrongLocation": "{name} belongs to {location} and was not counted.",
         "progress": "{found} of {total} found",
         "stillToFind": "Still to find",
         "markFound": "Mark as found",
         "markedFound": "Marked {name} as found.",
         "undo": "Undo",
         "undone": "Removed {name} from this inventory.",
-        "alreadyCounted": "{name} was already counted.",
         "addManually": "Add manually",
         "addManuallyTitle": "Mark a route as found",
         "addManuallyHint": "Use this for labels that are damaged or out of reach.",
@@ -254,7 +249,9 @@
         "resetMessage": "This clears the {count} routes counted so far. Nothing is archived.",
         "archiveSelected": "Archive {count}",
         "archiveNone": "Archive nothing",
-        "droppedForLocation": "{count} saved scans from another location were removed."
+        "droppedForLocation": "{count} saved scans from another location were removed.",
+        "tagUnknown": "Unknown",
+        "tagCounted": "Counted"
     },
     "notifications": {
         "success": {

@@ -52,8 +52,7 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     })
     await page.reload()
 
-    await page.getByTestId('inventory-location').click()
-    await page.getByRole('option', { name: 'Hanau' }).click()
+    await page.getByTestId('inventory-location-Hanau').click()
 
     await page.getByTestId('inventory-start').click()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1', {

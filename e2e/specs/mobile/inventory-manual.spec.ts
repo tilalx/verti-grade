@@ -50,11 +50,12 @@ test('marks a route found from the still-to-find list and undoes it', async ({
         0,
     )
 
-    // Undo puts it straight back into the missing list.
-    await page.getByTestId('inventory-found-toggle').click()
+    // Undo from the found tab puts it straight back into the missing list.
+    await page.getByTestId('inventory-tab-found').click()
     await page.getByTestId(`inventory-undo-${routeId}`).click()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+    await page.getByTestId('inventory-tab-missing').click()
     await expect(page.getByTestId(`inventory-missing-${routeId}`)).toBeVisible()
 })
 
@@ -98,4 +99,18 @@ test('reset clears progress only after confirmation', async ({
     await page.getByTestId('inventory-reset').click()
     await page.getByTestId('confirm-dialog-confirm').click()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+})
+
+test('reserves no camera space until scanning starts', async ({
+    adminPage: page,
+}) => {
+    await openScopedInventory(page)
+
+    // The viewport is mounted with the camera, not before it.
+    await expect(page.locator('.scanner-viewport')).toHaveCount(0)
+
+    // So the checklist starts high on the screen rather than below a black
+    // box and a title band that are doing nothing.
+    const tabs = await page.getByTestId('inventory-tab-missing').boundingBox()
+    expect(tabs!.y).toBeLessThan(300)
 })

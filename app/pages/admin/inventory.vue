@@ -11,15 +11,10 @@
 
         <!-- ── Mobile scanner UI ──────────────────────────────────────── -->
         <template v-if="isMobile">
-            <LayoutPageHeader
-                :title="$t('inventory.title')"
-                class="px-4 pt-4"
-            />
-
-            <!-- Scanner viewport -->
-            <div class="scanner-viewport">
+            <!-- The viewport only exists while the camera does; an idle black
+                 box would eat a third of the screen for nothing. -->
+            <div v-if="cameraActive" class="scanner-viewport">
                 <QrcodeStream
-                    v-if="cameraActive"
                     :formats="['qr_code']"
                     :constraints="cameraConstraints"
                     :torch="torchOn"
@@ -29,23 +24,6 @@
                     @camera-on="onCameraOn"
                     @error="onCameraError"
                 />
-                <!-- Overlay when not scanning -->
-                <div v-if="!scanning" class="scanner-viewport__placeholder">
-                    <v-icon
-                        size="48"
-                        color="white"
-                        class="mb-2"
-                        style="opacity: 0.6"
-                        >mdi-qrcode-scan</v-icon
-                    >
-                    <span
-                        class="text-body-medium text-center px-6"
-                        style="color: rgba(255, 255, 255, 0.6)"
-                    >
-                        {{ $t('inventory.subtitle') }}
-                    </span>
-                </div>
-                <!-- Torch, only where the device reports the capability -->
                 <v-btn
                     v-if="scanning && torchSupported"
                     class="scanner-viewport__torch"
@@ -59,29 +37,24 @@
                 />
             </div>
 
-            <!-- Status bar -->
-            <div class="status-bar px-4 py-3">
-                <div class="d-flex align-center justify-space-between mb-2">
-                    <div class="d-flex ga-3">
-                        <v-chip
-                            size="small"
-                            variant="tonal"
-                            color="success"
-                            prepend-icon="mdi-check-circle-outline"
-                            data-testid="inventory-found-count"
-                        >
-                            {{ foundRoutes.length }}
-                        </v-chip>
-                        <v-chip
-                            size="small"
-                            variant="tonal"
-                            color="warning"
-                            prepend-icon="mdi-help-circle-outline"
-                            data-testid="inventory-missing-count"
-                        >
-                            {{ missing.length }}
-                        </v-chip>
-                    </div>
+            <!-- ── Summary: scope, progress and utilities in two rows ──── -->
+            <div class="px-4 pt-3">
+                <div class="d-flex align-center ga-2">
+                    <h1 class="inventory-title text-truncate">
+                        {{ $t('inventory.title') }}
+                    </h1>
+
+                    <v-spacer />
+
+                    <v-btn
+                        icon="mdi-refresh"
+                        variant="text"
+                        size="small"
+                        :disabled="scannedRouteIds.length === 0 && !scanning"
+                        :aria-label="$t('inventory.reset')"
+                        data-testid="inventory-reset"
+                        @click="resetDialog = true"
+                    />
                     <v-btn
                         icon="mdi-information-outline"
                         variant="text"
@@ -90,49 +63,80 @@
                         @click="instructionsDialog = true"
                     />
                 </div>
-                <v-progress-linear
-                    :model-value="progress"
-                    color="success"
-                    height="6"
-                    rounded
-                />
-                <div
-                    class="text-body-small text-medium-emphasis mt-1"
-                    data-testid="inventory-progress"
+
+                <!-- Scope and progress share a row, wrapping only when the
+                     segmented picker and the bar cannot both fit. -->
+                <div class="d-flex flex-wrap align-center ga-3">
+                    <!-- Two sites, so segmented buttons beat a dropdown:
+                         one tap, and the active scope is readable at a glance. -->
+                    <div
+                        v-if="!locationLocked"
+                        class="d-flex ga-1"
+                        role="group"
+                        :aria-label="$t('inventory.locationLabel')"
+                        data-testid="inventory-location"
+                    >
+                        <v-btn
+                            v-for="item in locationItems"
+                            :key="item.value"
+                            size="small"
+                            rounded="lg"
+                            :variant="
+                                sessionLocation === item.value
+                                    ? 'flat'
+                                    : 'outlined'
+                            "
+                            :color="
+                                sessionLocation === item.value
+                                    ? 'primary'
+                                    : undefined
+                            "
+                            :data-testid="`inventory-location-${item.value}`"
+                            @click="sessionLocation = item.value"
+                        >
+                            {{ item.title }}
+                        </v-btn>
+                    </div>
+                    <v-chip
+                        v-else
+                        color="primary"
+                        variant="tonal"
+                        size="small"
+                        closable
+                        :close-label="$t('inventory.changeLocation')"
+                        data-testid="inventory-change-location"
+                        @click:close="resetDialog = true"
+                    >
+                        {{ sessionLocation }}
+                    </v-chip>
+
+                    <div class="progress-group d-flex align-center ga-2">
+                        <v-progress-linear
+                            :model-value="progress"
+                            color="success"
+                            height="6"
+                            rounded
+                            class="flex-grow-1"
+                        />
+                        <span
+                            class="text-body-small text-medium-emphasis flex-shrink-0"
+                            data-testid="inventory-progress"
+                        >
+                            {{ foundRoutes.length }}/{{ scoped.length }}
+                        </span>
+                    </div>
+                </div>
+
+                <p
+                    v-if="!sessionLocation"
+                    class="text-body-small text-medium-emphasis mt-2 mb-0"
                 >
                     {{
-                        $t('inventory.progress', {
-                            found: foundRoutes.length,
-                            total: scoped.length,
-                        })
+                        restoredUnscoped
+                            ? $t('inventory.locationRestoreHint')
+                            : $t('inventory.locationHint')
                     }}
-                </div>
-            </div>
-
-            <!-- Location scope: what gets counted, and what gets archived -->
-            <div class="px-4 pt-3">
-                <v-select
-                    v-model="sessionLocation"
-                    :items="locationItems"
-                    :label="$t('inventory.locationLabel')"
-                    :hint="locationHint"
-                    persistent-hint
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details="auto"
-                    :disabled="locationLocked"
-                    data-testid="inventory-location"
-                />
-                <div v-if="locationLocked" class="d-flex justify-end">
-                    <v-btn
-                        variant="text"
-                        size="small"
-                        data-testid="inventory-change-location"
-                        @click="resetDialog = true"
-                    >
-                        {{ $t('inventory.changeLocation') }}
-                    </v-btn>
-                </div>
+                </p>
             </div>
 
             <!-- Camera/permission failure is a state, not an event, so it
@@ -140,6 +144,7 @@
             <div v-if="scannerError" class="px-4 pt-3">
                 <v-alert
                     type="error"
+                    density="compact"
                     closable
                     data-testid="inventory-scanner-error"
                     @click:close="scannerError = ''"
@@ -148,13 +153,12 @@
                 </v-alert>
             </div>
 
-            <!-- Action buttons -->
+            <!-- ── Primary actions ──────────────────────────────────────── -->
             <div class="d-flex ga-2 px-4 pt-3">
                 <v-btn
                     v-if="!scanning"
                     color="primary"
-                    size="large"
-                    class="flex-grow-1"
+                    class="flex-1-1"
                     :disabled="loadingRoutes || !sessionLocation"
                     :loading="loadingRoutes"
                     prepend-icon="mdi-camera"
@@ -166,8 +170,7 @@
                 <v-btn
                     v-else
                     color="warning"
-                    size="large"
-                    class="flex-grow-1"
+                    class="flex-1-1"
                     prepend-icon="mdi-stop-circle"
                     data-testid="inventory-stop"
                     @click="stopScanner()"
@@ -175,171 +178,11 @@
                     {{ $t('inventory.stop') }}
                 </v-btn>
                 <v-btn
-                    variant="tonal"
-                    color="error"
-                    size="large"
-                    min-width="0"
-                    :disabled="scannedRouteIds.length === 0 && !scanning"
-                    :aria-label="$t('inventory.reset')"
-                    data-testid="inventory-reset"
-                    @click="resetDialog = true"
-                >
-                    <v-icon>mdi-refresh</v-icon>
-                </v-btn>
-            </div>
-
-            <!-- Active routes with no location sit outside every scoped
-                 inventory, so say so rather than letting them go unnoticed. -->
-            <div
-                v-if="unlocatedCount > 0"
-                class="px-4 pt-3 text-body-small text-medium-emphasis"
-                data-testid="inventory-unlocated-note"
-            >
-                {{ $t('inventory.unlocatedNote', { count: unlocatedCount }) }}
-            </div>
-
-            <!-- Still to find -->
-            <div class="px-4 pt-4">
-                <div class="d-flex align-center justify-space-between mb-2">
-                    <span
-                        class="text-title-small font-weight-semibold text-medium-emphasis"
-                    >
-                        {{ $t('inventory.stillToFind') }}
-                    </span>
-                    <v-btn
-                        variant="tonal"
-                        size="small"
-                        prepend-icon="mdi-plus"
-                        :disabled="missing.length === 0"
-                        data-testid="inventory-manual-open"
-                        @click="openManualDialog()"
-                    >
-                        {{ $t('inventory.addManually') }}
-                    </v-btn>
-                </div>
-
-                <v-list
-                    v-if="missing.length"
-                    density="compact"
-                    class="scope-list rounded-lg"
-                    border
-                >
-                    <v-list-item
-                        v-for="route in missing"
-                        :key="route.id"
-                        :data-testid="`inventory-missing-${route.id}`"
-                    >
-                        <template #prepend>
-                            <span class="anchor-badge">{{
-                                formatAnchorPoint(route.anchor_point)
-                            }}</span>
-                        </template>
-                        <v-list-item-title class="text-body-medium">
-                            {{ route.name }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle class="text-body-small">
-                            {{ formatDifficulty(route) || '—' }}
-                        </v-list-item-subtitle>
-                        <template #append>
-                            <v-btn
-                                icon="mdi-check"
-                                variant="text"
-                                size="small"
-                                :aria-label="$t('inventory.markFound')"
-                                :data-testid="`inventory-mark-${route.id}`"
-                                @click="markFound(route)"
-                            />
-                        </template>
-                    </v-list-item>
-                </v-list>
-
-                <LayoutEmptyState
-                    v-else
-                    :card="false"
-                    icon="mdi-check-all"
-                    :title="
-                        sessionLocation
-                            ? $t('inventory.allFound')
-                            : $t('inventory.locationRequired')
-                    "
-                />
-            </div>
-
-            <!-- Found -->
-            <div class="px-4 pt-4 pb-2">
-                <div class="d-flex align-center justify-space-between mb-2">
-                    <span
-                        class="text-title-small font-weight-semibold text-medium-emphasis"
-                    >
-                        {{ $t('inventory.reviewFoundTitle') }}
-                    </span>
-                    <v-btn
-                        variant="text"
-                        size="small"
-                        :append-icon="
-                            foundExpanded
-                                ? 'mdi-chevron-up'
-                                : 'mdi-chevron-down'
-                        "
-                        :disabled="foundRoutes.length === 0"
-                        data-testid="inventory-found-toggle"
-                        @click="foundExpanded = !foundExpanded"
-                    >
-                        {{ foundRoutes.length }}
-                    </v-btn>
-                </div>
-
-                <v-list
-                    v-if="foundRoutes.length && foundExpanded"
-                    density="compact"
-                    class="scope-list rounded-lg"
-                    border
-                >
-                    <v-list-item
-                        v-for="route in foundRoutes"
-                        :key="route.id"
-                        :data-testid="`inventory-scanned-${route.id}`"
-                    >
-                        <template #prepend>
-                            <v-icon size="16" color="success" class="mr-2"
-                                >mdi-check-circle-outline</v-icon
-                            >
-                        </template>
-                        <v-list-item-title class="text-body-medium">
-                            {{ route.name }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle class="text-body-small">
-                            {{ formatDifficulty(route) || '—' }}
-                        </v-list-item-subtitle>
-                        <template #append>
-                            <v-btn
-                                icon="mdi-undo"
-                                variant="text"
-                                size="small"
-                                :aria-label="$t('inventory.undo')"
-                                :data-testid="`inventory-undo-${route.id}`"
-                                @click="undoScan(route)"
-                            />
-                        </template>
-                    </v-list-item>
-                </v-list>
-
-                <div
-                    v-else-if="!foundRoutes.length"
-                    class="text-body-medium text-medium-emphasis"
-                >
-                    {{ $t('inventory.noScans') }}
-                </div>
-            </div>
-
-            <!-- Finish button -->
-            <div v-if="scannedRouteIds.length > 0" class="px-4 pb-6 pt-2">
-                <v-btn
+                    v-if="scannedRouteIds.length > 0"
                     color="primary"
-                    block
-                    size="large"
+                    variant="tonal"
+                    class="flex-1-1"
                     :disabled="loadingRoutes || !sessionLocation"
-                    :loading="loadingRoutes"
                     prepend-icon="mdi-check"
                     data-testid="inventory-finish-open"
                     @click="openFinishDialog()"
@@ -347,6 +190,159 @@
                     {{ $t('inventory.finish') }}
                 </v-btn>
             </div>
+
+            <div
+                v-if="unlocatedCount > 0"
+                class="px-4 pt-2 text-body-small text-medium-emphasis"
+                data-testid="inventory-unlocated-note"
+            >
+                {{ $t('inventory.unlocatedNote', { count: unlocatedCount }) }}
+            </div>
+
+            <!-- ── Missing / found, as tabs rather than stacked sections ── -->
+            <v-tabs
+                v-model="activeTab"
+                density="compact"
+                grow
+                class="mt-3"
+                color="primary"
+            >
+                <v-tab value="missing" data-testid="inventory-tab-missing">
+                    {{ $t('inventory.stillToFind') }}
+                    <v-chip
+                        size="x-small"
+                        variant="tonal"
+                        color="warning"
+                        class="ml-2"
+                        data-testid="inventory-missing-count"
+                    >
+                        {{ missing.length }}
+                    </v-chip>
+                </v-tab>
+                <v-tab value="found" data-testid="inventory-tab-found">
+                    {{ $t('inventory.reviewFoundTitle') }}
+                    <v-chip
+                        size="x-small"
+                        variant="tonal"
+                        color="success"
+                        class="ml-2"
+                        data-testid="inventory-found-count"
+                    >
+                        {{ foundRoutes.length }}
+                    </v-chip>
+                </v-tab>
+            </v-tabs>
+
+            <v-tabs-window v-model="activeTab" class="px-4 pt-3 pb-6">
+                <v-tabs-window-item value="missing">
+                    <v-list
+                        v-if="missing.length"
+                        density="compact"
+                        class="scope-list rounded-lg"
+                        border
+                    >
+                        <v-list-item
+                            v-for="route in missing"
+                            :key="route.id"
+                            :data-testid="`inventory-missing-${route.id}`"
+                        >
+                            <template #prepend>
+                                <span class="anchor-badge">{{
+                                    formatAnchorPoint(route.anchor_point)
+                                }}</span>
+                            </template>
+                            <v-list-item-title class="text-body-medium">
+                                {{ route.name }}
+                            </v-list-item-title>
+                            <template #append>
+                                <span
+                                    class="text-body-small text-medium-emphasis mr-2"
+                                >
+                                    {{ formatDifficulty(route) }}
+                                </span>
+                                <v-btn
+                                    icon="mdi-check"
+                                    variant="text"
+                                    size="small"
+                                    :aria-label="$t('inventory.markFound')"
+                                    :data-testid="`inventory-mark-${route.id}`"
+                                    @click="markFound(route)"
+                                />
+                            </template>
+                        </v-list-item>
+                    </v-list>
+
+                    <LayoutEmptyState
+                        v-else
+                        :card="false"
+                        icon="mdi-check-all"
+                        :title="
+                            sessionLocation
+                                ? $t('inventory.allFound')
+                                : $t('inventory.locationRequired')
+                        "
+                    />
+
+                    <v-btn
+                        v-if="missing.length"
+                        variant="text"
+                        size="small"
+                        block
+                        prepend-icon="mdi-plus"
+                        class="mt-2"
+                        data-testid="inventory-manual-open"
+                        @click="openManualDialog()"
+                    >
+                        {{ $t('inventory.addManually') }}
+                    </v-btn>
+                </v-tabs-window-item>
+
+                <v-tabs-window-item value="found">
+                    <v-list
+                        v-if="foundRoutes.length"
+                        density="compact"
+                        class="scope-list rounded-lg"
+                        border
+                    >
+                        <v-list-item
+                            v-for="route in foundRoutes"
+                            :key="route.id"
+                            :data-testid="`inventory-scanned-${route.id}`"
+                        >
+                            <template #prepend>
+                                <v-icon size="16" color="success" class="mr-3"
+                                    >mdi-check-circle-outline</v-icon
+                                >
+                            </template>
+                            <v-list-item-title class="text-body-medium">
+                                {{ route.name }}
+                            </v-list-item-title>
+                            <template #append>
+                                <span
+                                    class="text-body-small text-medium-emphasis mr-2"
+                                >
+                                    {{ formatDifficulty(route) }}
+                                </span>
+                                <v-btn
+                                    icon="mdi-undo"
+                                    variant="text"
+                                    size="small"
+                                    :aria-label="$t('inventory.undo')"
+                                    :data-testid="`inventory-undo-${route.id}`"
+                                    @click="undoScan(route)"
+                                />
+                            </template>
+                        </v-list-item>
+                    </v-list>
+
+                    <LayoutEmptyState
+                        v-else
+                        :card="false"
+                        icon="mdi-qrcode-scan"
+                        :title="$t('inventory.noScans')"
+                    />
+                </v-tabs-window-item>
+            </v-tabs-window>
         </template>
 
         <!-- ── Instructions dialog ────────────────────────────────────── -->
@@ -413,9 +409,11 @@
                     <v-list-item-title class="text-body-medium">
                         {{ route.name }}
                     </v-list-item-title>
-                    <v-list-item-subtitle class="text-body-small">
-                        {{ formatDifficulty(route) || '—' }}
-                    </v-list-item-subtitle>
+                    <template #append>
+                        <span class="text-body-small text-medium-emphasis">
+                            {{ formatDifficulty(route) }}
+                        </span>
+                    </template>
                 </v-list-item>
             </v-list>
             <LayoutEmptyState
@@ -434,94 +432,64 @@
             :subtitle="sessionLocation || undefined"
             data-testid="inventory-finish-dialog"
         >
-            <!-- Found routes -->
-            <div class="mb-4">
-                <div class="text-title-small font-weight-semibold mb-2">
-                    {{ $t('inventory.reviewFoundTitle') }}
-                    <v-chip
-                        size="x-small"
-                        variant="tonal"
-                        color="success"
-                        class="ml-1"
-                    >
-                        {{ foundRoutes.length }}
-                    </v-chip>
-                </div>
-                <v-list density="compact" class="review-list rounded-lg" border>
-                    <v-list-item
-                        v-for="route in foundRoutes"
-                        :key="`found-${route.id}`"
-                    >
-                        <v-list-item-title class="text-body-medium">
-                            {{ route.name || route.id }}
-                        </v-list-item-title>
-                        <template #prepend>
-                            <v-icon size="16" color="success"
-                                >mdi-check-circle-outline</v-icon
-                            >
-                        </template>
-                    </v-list-item>
-                    <v-list-item v-if="foundRoutes.length === 0">
-                        <v-list-item-title
-                            class="text-body-medium text-medium-emphasis"
-                        >
-                            {{ $t('inventory.noScans') }}
-                        </v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </div>
-
-            <!-- Missing routes — each one opts out of archiving on its own -->
-            <div>
-                <div class="text-title-small font-weight-semibold mb-1">
-                    {{ $t('inventory.reviewMissingTitle') }}
-                    <v-chip
-                        size="x-small"
-                        variant="tonal"
-                        color="error"
-                        class="ml-1"
-                    >
-                        {{ archiveIds.length }}
-                    </v-chip>
-                </div>
-                <p
-                    v-if="missing.length"
-                    class="text-body-small text-medium-emphasis mb-2"
+            <div class="text-title-small font-weight-semibold mb-1">
+                {{ $t('inventory.reviewMissingTitle') }}
+                <v-chip
+                    size="x-small"
+                    variant="tonal"
+                    color="error"
+                    class="ml-1"
                 >
-                    {{ $t('inventory.reviewMissingDescription') }}
-                </p>
-                <v-list density="compact" class="review-list rounded-lg" border>
-                    <v-list-item
-                        v-for="route in missing"
-                        :key="`missing-${route.id}`"
-                    >
-                        <template #prepend>
-                            <v-checkbox-btn
-                                :model-value="archiveSelection.has(route.id)"
-                                density="compact"
-                                :aria-label="route.name || route.id"
-                                :data-testid="`inventory-archive-toggle-${route.id}`"
-                                @update:model-value="
-                                    toggleArchive(route.id, $event)
-                                "
-                            />
-                        </template>
-                        <v-list-item-title class="text-body-medium">
-                            {{ route.name }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle class="text-body-small">
-                            {{ formatDifficulty(route) || '—' }}
-                        </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item v-if="missing.length === 0">
-                        <v-list-item-title
-                            class="text-body-medium text-medium-emphasis"
-                        >
-                            {{ $t('inventory.nothingToArchive') }}
-                        </v-list-item-title>
-                    </v-list-item>
-                </v-list>
+                    {{ archiveIds.length }}
+                </v-chip>
             </div>
+            <p
+                v-if="missing.length"
+                class="text-body-small text-medium-emphasis mb-2"
+            >
+                {{ $t('inventory.reviewMissingDescription') }}
+            </p>
+            <v-list density="compact" class="review-list rounded-lg" border>
+                <v-list-item
+                    v-for="route in missing"
+                    :key="`missing-${route.id}`"
+                >
+                    <template #prepend>
+                        <v-checkbox-btn
+                            :model-value="archiveSelection.has(route.id)"
+                            density="compact"
+                            :aria-label="route.name || route.id"
+                            :data-testid="`inventory-archive-toggle-${route.id}`"
+                            @update:model-value="
+                                toggleArchive(route.id, $event)
+                            "
+                        />
+                    </template>
+                    <v-list-item-title class="text-body-medium">
+                        {{ route.name }}
+                    </v-list-item-title>
+                    <template #append>
+                        <span class="text-body-small text-medium-emphasis">
+                            {{ formatDifficulty(route) }}
+                        </span>
+                    </template>
+                </v-list-item>
+                <v-list-item v-if="missing.length === 0">
+                    <v-list-item-title class="text-body-medium text-medium-emphasis">
+                        {{ $t('inventory.nothingToArchive') }}
+                    </v-list-item-title>
+                </v-list-item>
+            </v-list>
+
+            <p class="text-body-small text-medium-emphasis mt-3 mb-0">
+                {{
+                    $t('inventory.progress', {
+                        found: foundRoutes.length,
+                        total: scoped.length,
+                    })
+                }}
+            </p>
+
             <template #actions>
                 <v-btn
                     variant="text"
@@ -590,7 +558,7 @@ const ROUTE_FIELDS =
 const SCAN_COOLDOWN_MS = 2000
 const FREEZE_MS = 400
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const pb = usePocketbase()
 const { smAndDown } = useDisplay()
 const { locations } = useRouteFilters()
@@ -620,7 +588,7 @@ const manualDialog = ref(false)
 const manualSearch = ref('')
 const finishDialog = ref(false)
 const resetDialog = ref(false)
-const foundExpanded = ref(false)
+const activeTab = ref<'missing' | 'found'>('missing')
 const archiving = ref(false)
 const archiveSelection = ref(new Set<string>())
 
@@ -845,17 +813,77 @@ const streamPaused = computed(
 )
 
 // The track callback runs several times a second; vue-qrcode-reader's docs
-// warn against touching reactive state from it, so read a plain snapshot.
-let scopedNamesById = new Map<string, string>()
+// warn against touching reactive state from it, so everything it reads is a
+// plain snapshot kept up to date by these watchers.
+let routeInfoById = new Map<string, { name: string; location: string | null }>()
+let scannedIdSet = new Set<string>()
+let activeLocation: string | null = null
+let tagUnknown = ''
+let tagCounted = ''
+
 watch(
-    scoped,
+    allRoutes,
     (routes) => {
-        scopedNamesById = new Map(
-            routes.map((route) => [route.id, route.name || route.id]),
+        routeInfoById = new Map(
+            routes.map((route) => [
+                route.id,
+                {
+                    name: route.name || route.id,
+                    location: route.location ?? null,
+                },
+            ]),
         )
     },
     { immediate: true },
 )
+watch(
+    scannedRouteIds,
+    (ids) => {
+        scannedIdSet = new Set(ids)
+    },
+    {
+        immediate: true,
+    },
+)
+watch(
+    sessionLocation,
+    (value) => {
+        activeLocation = value
+    },
+    {
+        immediate: true,
+    },
+)
+watch(
+    locale,
+    () => {
+        tagUnknown = t('inventory.tagUnknown')
+        tagCounted = t('inventory.tagCounted')
+    },
+    { immediate: true },
+)
+
+/**
+ * What to paint on a detected code. This is the only feedback a scan needs:
+ * it lands on the code you are pointing at, instead of a banner covering the
+ * viewfinder to repeat what the overlay already says.
+ */
+const codeTag = (rawValue: string) => {
+    const id = extractRouteId(rawValue)
+    const info = id ? routeInfoById.get(id) : undefined
+
+    if (!id || !info) return { color: '#EF4444', label: tagUnknown }
+    if (info.location !== activeLocation) {
+        return {
+            color: '#EF4444',
+            label: `${info.name} · ${info.location || '—'}`,
+        }
+    }
+    if (scannedIdSet.has(id)) {
+        return { color: '#0EA5E9', label: `${tagCounted} · ${info.name}` }
+    }
+    return { color: '#1D9E75', label: info.name }
+}
 
 const trackQrCode = (
     detectedCodes: { boundingBox?: DOMRectReadOnly; rawValue: string }[],
@@ -864,9 +892,7 @@ const trackQrCode = (
     for (const code of detectedCodes) {
         const { boundingBox } = code
         if (!boundingBox) continue
-        const id = extractRouteId(code.rawValue)
-        const name = id ? scopedNamesById.get(id) : undefined
-        const color = name ? '#1D9E75' : '#EF4444'
+        const { color, label } = codeTag(code.rawValue)
 
         ctx.lineWidth = 3
         ctx.strokeStyle = color
@@ -877,8 +903,7 @@ const trackQrCode = (
             boundingBox.height,
         )
 
-        const label = name ?? t('inventory.invalidCode')
-        const fontSize = Math.max(14, boundingBox.width * 0.1)
+        const fontSize = Math.max(16, boundingBox.width * 0.1)
         ctx.font = `600 ${fontSize}px sans-serif`
         const textWidth = ctx.measureText(label).width
         const padding = 6
@@ -949,28 +974,20 @@ const recentScans = new Map<string, number>()
 const addScannedRoute = async (id: string) => {
     const route = allRoutes.value.find((entry) => entry.id === id)
 
+    // Unknown, wrong-site and already-counted codes are all labelled on the
+    // code itself by the track overlay, so they only need a sound here.
     if (!route) {
         signalRejected()
-        notifyError(t('inventory.unknownRoute'))
         return
     }
 
     if (route.location !== sessionLocation.value) {
         signalRejected()
-        notifyError(
-            t('inventory.wrongLocation', {
-                name: route.name || route.id,
-                location: route.location || '—',
-            }),
-        )
         return
     }
 
     if (scannedRouteIds.value.includes(id)) {
         signalDuplicate()
-        notifyWarning(
-            t('inventory.alreadyCounted', { name: route.name || route.id }),
-        )
         return
     }
 
@@ -1156,33 +1173,45 @@ onBeforeUnmount(() => {
     padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
+/* The heading rides in the utility row rather than in a LayoutPageHeader
+   block: this page is a tool, and a title band would cost a tenth of the
+   screen the route checklist needs. Still the page's only h1. */
+.inventory-title {
+    margin: 0;
+    min-width: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* Wraps below the location picker only when both cannot fit. */
+.progress-group {
+    flex: 1 1 140px;
+    min-width: 140px;
+}
+
 /* ── Scanner viewport ────────────────────────────────────────────────── */
+/* Only mounted while the camera runs, so it can afford to be generous
+   without costing anything when idle. */
 .scanner-viewport {
     position: relative;
     width: 100%;
-    min-height: 250px;
+    min-height: 200px;
+    /* Capped so the stream never pushes the checklist off screen. */
+    max-height: 40vh;
     background: #111;
+    overflow: hidden;
 }
 
-.scanner-viewport__placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.scanner-viewport :deep(video) {
+    max-height: 40vh;
+    object-fit: cover;
 }
 
 .scanner-viewport__torch {
     position: absolute;
     top: 12px;
     right: 12px;
-}
-
-/* ── Status bar ──────────────────────────────────────────────────────── */
-.status-bar {
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 /* ── Instructions list ───────────────────────────────────────────────── */
@@ -1195,8 +1224,9 @@ onBeforeUnmount(() => {
 }
 
 /* ── Route lists ─────────────────────────────────────────────────────── */
+/* Viewport-relative so tall phones show more rows instead of padding. */
 .scope-list {
-    max-height: 320px;
+    max-height: 46vh;
     overflow-y: auto;
 }
 
@@ -1210,10 +1240,15 @@ onBeforeUnmount(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 28px;
+    min-width: 26px;
     margin-right: 12px;
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
     color: rgba(var(--v-theme-on-surface), 0.6);
+}
+
+/* One line per route: the list is the page, so rows stay tight. */
+.scope-list :deep(.v-list-item) {
+    min-height: 40px;
 }
 </style>

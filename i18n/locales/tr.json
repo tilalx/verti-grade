@@ -202,13 +202,10 @@
     },
     "inventory": {
         "title": "Rota Envanter Taraması",
-        "subtitle": "Rotayı kaydetmek için kameranızı her QR koda doğrultun.",
         "mobileOnly": "Bu araç yalnızca mobil cihazlarda kullanılabilir. Lütfen bir telefon veya tablet kullanın.",
         "start": "Taramayı Başlat",
         "stop": "Taramayı Durdur",
         "finish": "Envanteri Bitir",
-        "invalidCode": "Taranan kod tanınan bir rota değil.",
-        "unknownRoute": "Taranan rota bulunamadı.",
         "noScans": "Henüz hiç rota taranmadı.",
         "archiveSuccess": "Envanter tamamlandı. {count} rota arşivlendi.",
         "nothingToArchive": "Tüm rotalar tarandı. Arşivlenecek bir şey yok.",
@@ -235,14 +232,12 @@
         "locationRequired": "Başlamak için bir konum seçin.",
         "locationRestoreHint": "Önceki sürümden kalan ilerleme — ait olduğu salonu seçin.",
         "changeLocation": "Konumu değiştir",
-        "wrongLocation": "{name} {location} salonuna ait, sayılmadı.",
         "progress": "{total} rotadan {found} tanesi bulundu",
         "stillToFind": "Hâlâ bulunacaklar",
         "markFound": "Bulundu olarak işaretle",
         "markedFound": "{name} bulundu olarak işaretlendi.",
         "undo": "Geri al",
         "undone": "{name} bu sayımdan çıkarıldı.",
-        "alreadyCounted": "{name} zaten sayılmıştı.",
         "addManually": "Elle ekle",
         "addManuallyTitle": "Rotayı bulundu olarak işaretle",
         "addManuallyHint": "Hasarlı veya erişilemeyen etiketler için.",
@@ -254,7 +249,9 @@
         "resetMessage": "Şu ana kadar sayılan {count} rota silinir. Hiçbir şey arşivlenmez.",
         "archiveSelected": "{count} rotayı arşivle",
         "archiveNone": "Hiçbir şeyi arşivleme",
-        "droppedForLocation": "Başka bir konuma ait {count} kayıtlı tarama kaldırıldı."
+        "droppedForLocation": "Başka bir konuma ait {count} kayıtlı tarama kaldırıldı.",
+        "tagUnknown": "Bilinmiyor",
+        "tagCounted": "Sayıldı"
     },
     "notifications": {
         "success": {

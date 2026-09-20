@@ -202,13 +202,10 @@
     },
     "inventory": {
         "title": "Routeninventur",
-        "subtitle": "Scanne nacheinander alle QR-Codes, um die Route zu erfassen.",
         "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
         "start": "Scan starten",
         "stop": "Scan stoppen",
         "finish": "Inventur abschließen",
-        "invalidCode": "Der Code konnte keiner Route zugeordnet werden.",
-        "unknownRoute": "Die Route wurde nicht gefunden.",
         "noScans": "Noch keine Routen gescannt.",
         "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
         "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
@@ -235,14 +232,12 @@
         "locationRequired": "Wähle einen Standort, um zu starten.",
         "locationRestoreHint": "Gespeicherter Fortschritt aus einer früheren Version – wähle die zugehörige Halle.",
         "changeLocation": "Standort wechseln",
-        "wrongLocation": "{name} gehört zu {location} und wurde nicht gezählt.",
         "progress": "{found} von {total} gefunden",
         "stillToFind": "Noch zu finden",
         "markFound": "Als gefunden markieren",
         "markedFound": "{name} als gefunden markiert.",
         "undo": "Rückgängig",
         "undone": "{name} aus dieser Inventur entfernt.",
-        "alreadyCounted": "{name} wurde bereits gezählt.",
         "addManually": "Manuell hinzufügen",
         "addManuallyTitle": "Route als gefunden markieren",
         "addManuallyHint": "Für beschädigte oder unerreichbare Etiketten.",
@@ -254,7 +249,9 @@
         "resetMessage": "Damit werden die bisher gezählten {count} Routen verworfen. Es wird nichts archiviert.",
         "archiveSelected": "{count} archivieren",
         "archiveNone": "Nichts archivieren",
-        "droppedForLocation": "{count} gespeicherte Scans von einem anderen Standort wurden entfernt."
+        "droppedForLocation": "{count} gespeicherte Scans von einem anderen Standort wurden entfernt.",
+        "tagUnknown": "Unbekannt",
+        "tagCounted": "Gezählt"
     },
     "notifications": {
         "success": {

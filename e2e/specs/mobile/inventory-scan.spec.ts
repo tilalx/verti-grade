@@ -114,8 +114,7 @@ test('requires a location before scanning can start', async ({
     await page.reload()
 
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
-    await page.getByTestId('inventory-location').click()
-    await page.getByRole('option', { name: 'Hanau' }).click()
+    await page.getByTestId('inventory-location-Hanau').click()
     await expect(page.getByTestId('inventory-start')).toBeEnabled()
 })
 
@@ -146,8 +145,7 @@ test('restores a legacy session and asks which location it belongs to', async ({
     await expect(page.getByTestId('inventory-missing-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
 
-    await page.getByTestId('inventory-location').click()
-    await page.getByRole('option', { name: 'Hanau' }).click()
+    await page.getByTestId('inventory-location-Hanau').click()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('2')
     // The session is upgraded to the scoped shape on the next write.
