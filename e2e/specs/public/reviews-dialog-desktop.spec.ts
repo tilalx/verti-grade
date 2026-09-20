@@ -34,8 +34,12 @@ async function openReviewsFor(
     // down rather than hoping its row landed on page one.
     await page.getByTestId('filter-search').locator('input').first().fill(route.name)
 
-    const row = page.getByTestId(`index-row-${route.id}`)
-    await row.waitFor()
+    // index-row-<id> sits on a div inside the *name* cell, not on the <tr>,
+    // so the Ratings button (a different cell) is not inside it. Walk up to
+    // the row before scoping to it.
+    const marker = page.getByTestId(`index-row-${route.id}`)
+    await marker.waitFor()
+    const row = page.locator('tr', { has: marker })
     await row.getByTestId('route-details-open').click()
 
     const dialog = page.getByTestId('route-details-sheet')
