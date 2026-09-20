@@ -6,7 +6,6 @@
             color="primary"
             size="large"
             block
-            rounded="xl"
             prepend-icon="mdi-star-plus-outline"
             data-testid="review-open-cta"
             @click="internalOpen = true"
@@ -96,7 +95,6 @@
                                 :items="combinedDifficulties"
                                 :rules="isEditMode ? [] : [rules.required]"
                                 clearable
-                                variant="outlined"
                                 density="compact"
                                 data-testid="review-form-difficulty"
                             />
@@ -112,7 +110,6 @@
                                         ? []
                                         : [rules.requiredAndNotEmpty]
                                 "
-                                variant="outlined"
                                 rows="4"
                                 auto-grow
                                 density="compact"
@@ -136,7 +133,6 @@
                     :disabled="!isEditMode && !isFormValid"
                     :loading="saving"
                     color="primary"
-                    variant="flat"
                     size="large"
                     data-testid="review-form-submit"
                     @click="submit"
@@ -149,6 +145,7 @@
 </template>
 
 <script setup>
+import { required, nonBlank } from '~/utils/validation'
 const props = defineProps({
     // Controls open state externally (edit mode)
     modelValue: {
@@ -219,9 +216,8 @@ const combinedDifficulties = computed(() => {
 })
 
 const rules = {
-    required: (v) => (v !== null && v !== '') || t('validation.required'),
-    requiredAndNotEmpty: (v) =>
-        (v && v.trim() !== '') || t('validation.required'),
+    required: required(t),
+    requiredAndNotEmpty: nonBlank(t),
 }
 
 // Pre-fill form when review prop changes (edit mode)

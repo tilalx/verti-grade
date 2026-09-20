@@ -16,3 +16,69 @@
 .fontbody {
     font-family: 'Roboto', sans-serif;
 }
+
+/* ── Shared UI primitives ───────────────────────────────────────────────────
+   Rules that were copy-pasted across several components. Global on purpose:
+   they are part of the design system, not of any one component. */
+
+/* Clickable avatar with a hover ring + camera overlay (user dialogs). */
+.avatar-wrapper {
+    position: relative;
+    cursor: pointer;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.avatar-ring {
+    border: 2.5px solid rgba(var(--v-theme-primary), 0.3);
+    transition: border-color 0.2s;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.avatar-wrapper:hover .avatar-ring {
+    border-color: rgba(var(--v-theme-primary), 0.8);
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+    opacity: 1;
+}
+
+/* Horizontal swap used when an auth page replaces one form with another. */
+.form-swap-enter-active,
+.form-swap-leave-active {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    position: absolute;
+    width: 100%;
+}
+
+.form-swap-enter-from {
+    opacity: 0;
+    transform: translateX(16px);
+}
+
+.form-swap-leave-to {
+    opacity: 0;
+    transform: translateX(-16px);
+}
+
+/* Elevated-on-hover surface card used by the analytics cards and stat tiles.
+   `!important` is kept from the original scoped rules: it beats Vuetify's own
+   layered card styles regardless of stylesheet order. */
+.surface-card {
+    border-radius: 14px !important;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.07) !important;
+    background: rgb(var(--v-theme-surface)) !important;
+}

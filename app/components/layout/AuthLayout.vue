@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <v-main>
-            <v-container fluid class="fill-height pa-0">
+            <v-container class="fill-height pa-0">
                 <v-row class="fill-height ma-0">
                     <!-- LEFT — Brand panel -->
                     <v-col
@@ -18,7 +18,7 @@
                                     class="brand-avatar"
                                 >
                                     <v-icon size="24" color="success"
-                                        >mdi-shield-lock</v-icon
+                                        >mdi-shield-lock-outline</v-icon
                                     >
                                 </v-avatar>
                                 <div>
@@ -66,7 +66,7 @@
                                     color="success-lighten-5"
                                 >
                                     <v-icon size="20" color="success"
-                                        >mdi-shield-lock</v-icon
+                                        >mdi-shield-lock-outline</v-icon
                                     >
                                 </v-avatar>
                                 <div>
@@ -130,10 +130,6 @@ const props = defineProps({
     subtitle: { type: String, default: '' },
     headingKey: { type: String, default: 'heading' },
 })
-
-const { notify } = useNotification()
-
-defineExpose({ notify })
 </script>
 
 <style scoped>

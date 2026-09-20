@@ -49,6 +49,24 @@
             "lowercase": "Küçük harf (a–z)",
             "number": "Rakam (0–9)",
             "special": "Özel karakter (!{'@'}#...)"
+        },
+        "capsLockOn": "Caps Lock açık",
+        "resetInfo": "E-posta adresine bir şifre sıfırlama bağlantısı göndereceğiz.",
+        "eyebrowWelcomeBack": "TEKRAR HOŞ GELDİN",
+        "eyebrowAccountRecovery": "HESAP KURTARMA",
+        "eyebrowAllDone": "TAMAMLANDI",
+        "eyebrowInvalidLink": "GEÇERSİZ BAĞLANTI",
+        "brandHeadline": {
+            "login": {
+                "l1": "Tırmanış",
+                "l2": "rotalarını",
+                "accent": "yönet."
+            },
+            "reset": {
+                "l1": "Hesap",
+                "l2": "şifreni",
+                "accent": "sıfırla."
+            }
         }
     },
     "routes": {
@@ -286,7 +304,8 @@
             "dashboard": "Rota Yönetimi - Verti-Grade",
             "login": "Giriş Yap - Verti-Grade",
             "resetPassword": "Parolayı Sıfırla - Verti-Grade",
-            "notFound": "Sayfa Bulunamadı - Verti-Grade"
+            "notFound": "Sayfa Bulunamadı - Verti-Grade",
+            "routeNamed": "{name} - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -385,7 +404,18 @@
         "replace": "Değiştir",
         "clickToUpload": "Yüklemek için tıklayın",
         "loadError": "Ayarlar yüklenemedi.",
-        "initError": "Ayarlar başlatılamadı."
+        "initError": "Ayarlar başlatılamadı.",
+        "organization": "Organizasyon",
+        "organizationName": "Organizasyon adı",
+        "organizationNamePlaceholder": "ör. Deutscher Alpenverein",
+        "organizationUnit": "Organizasyon birimi",
+        "organizationUnitPlaceholder": "ör. Sektion Hanau",
+        "publicUrls": "Herkese açık URL'ler",
+        "applicationUrl": "Uygulama URL'si",
+        "imprintUrl": "Künye URL'si",
+        "privacyUrl": "Gizlilik URL'si",
+        "saveSuccess": "Ayarlar başarıyla kaydedildi.",
+        "saveError": "Ayarlar kaydedilemedi. Lütfen tekrar deneyin."
     },
     "errors": {
         "notFound": {
@@ -399,5 +429,23 @@
         "qr_code": "QR kodu",
         "move_up": "Yukarı taşı",
         "move_down": "Aşağı taşı"
+    },
+    "importRoutes": {
+        "title": "İçe aktarmayı onayla",
+        "intro": "Aşağıdaki rotalar ve değerlendirmeler içe aktarılacak. Onaylamadan önce verileri gözden geçirin.",
+        "confirm": "Onayla ve içe aktar",
+        "ratingsCount": "Değerlendirmeler",
+        "ratingsFor": "{name} için değerlendirmeler",
+        "noRatings": "Bu rota için içe aktarılacak değerlendirme yok.",
+        "noComment": "Yorum yok",
+        "ratingLabel": "Değerlendirme",
+        "difficultyLabel": "Zorluk",
+        "invalidJson": "Geçersiz JSON dosyası. Lütfen dosya biçimini kontrol edin.",
+        "readFailed": "Dosya okunamadı.",
+        "success": "İçe aktarma başarıyla tamamlandı.",
+        "issues": "İçe aktarma sorunlarla tamamlandı: {details}",
+        "routesFailed": "{count} rota başarısız",
+        "commentsFailed": "{count} yorum başarısız",
+        "failed": "İçe aktarma sırasında beklenmeyen bir hata oluştu."
     }
 }

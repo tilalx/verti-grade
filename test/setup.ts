@@ -6,7 +6,11 @@ import {
   onBeforeUnmount as vueOnBeforeUnmount,
   watch as vueWatch,
 } from 'vue';
+import { config } from '@vue/test-utils';
 import { useVersionCheck } from '~/composables/useVersionCheck';
+import LayoutDialogShell from '~/components/layout/DialogShell.vue';
+import LayoutPageHeader from '~/components/layout/PageHeader.vue';
+import LayoutEmptyState from '~/components/layout/EmptyState.vue';
 
 type VitestMock = ReturnType<typeof vi.fn>;
 type RuntimeConfig = { public?: Record<string, unknown> };
@@ -154,3 +158,12 @@ beforeEach(() => {
     globalThis.$fetch.mockReset();
   }
 });
+
+// Nuxt auto-imports the shared layout primitives in the app; vitest does not.
+// Register them globally so specs can mount components that use them unchanged.
+config.global.components = {
+  ...(config.global.components ?? {}),
+  LayoutDialogShell,
+  LayoutPageHeader,
+  LayoutEmptyState,
+};

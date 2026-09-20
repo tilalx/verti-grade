@@ -1,5 +1,5 @@
 <template>
-    <v-card rounded="xl" border flat>
+    <v-card border flat>
         <v-card-item>
             <v-card-title class="text-h6 font-weight-bold">
                 {{ t('permissions.title') }}

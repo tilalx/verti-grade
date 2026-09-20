@@ -7,12 +7,13 @@
         :title="viewTitle"
         :subtitle="viewSubtitle"
         :heading-key="view"
-        ref="layout"
     >
         <template #brand-headline>
-            Manage your<br />
-            climbing<br />
-            <span class="text-success">routes.</span>
+            {{ $t('account.brandHeadline.login.l1') }}<br />
+            {{ $t('account.brandHeadline.login.l2') }}<br />
+            <span class="text-success">{{
+                $t('account.brandHeadline.login.accent')
+            }}</span>
         </template>
 
         <div v-if="!hasAnyAuth" class="text-center py-10">
@@ -45,8 +46,6 @@
                         :name="identityAutocomplete"
                         :rules="identityRules"
                         :disabled="loading"
-                        variant="outlined"
-                        density="comfortable"
                         color="success"
                         class="mb-2"
                         data-testid="login-identity"
@@ -61,7 +60,9 @@
                         :label="$t('account.password')"
                         :type="showPassword ? 'text' : 'password'"
                         :append-inner-icon="
-                            showPassword ? 'mdi-eye-off' : 'mdi-eye'
+                            showPassword
+                                ? 'mdi-eye-off-outline'
+                                : 'mdi-eye-outline'
                         "
                         prepend-inner-icon="mdi-lock-outline"
                         autocomplete="current-password"
@@ -69,8 +70,6 @@
                         data-testid="login-password"
                         :rules="passwordRules"
                         :disabled="loading"
-                        variant="outlined"
-                        density="comfortable"
                         color="success"
                         class="mb-1"
                         @click:append-inner="showPassword = !showPassword"
@@ -81,11 +80,8 @@
                     <v-alert
                         v-if="capsLockOn"
                         type="warning"
-                        variant="tonal"
-                        density="compact"
-                        rounded="lg"
                         class="mb-3"
-                        text="Caps Lock is on"
+                        :text="$t('account.capsLockOn')"
                     />
 
                     <div class="d-flex align-center justify-space-between mb-5">
@@ -115,7 +111,6 @@
                         size="large"
                         :loading="loading"
                         :disabled="loading"
-                        rounded="lg"
                         class="mb-3 font-weight-semibold"
                         data-testid="login-submit"
                     >
@@ -125,7 +120,6 @@
                     <v-btn
                         variant="text"
                         block
-                        rounded="lg"
                         class="text-none text-medium-emphasis mb-1"
                         prepend-icon="mdi-arrow-left"
                         :disabled="loading"
@@ -157,7 +151,6 @@
                                     :disabled="loading"
                                     variant="outlined"
                                     block
-                                    rounded="lg"
                                     class="text-none"
                                     @click="loginWithOAuth(p.name)"
                                 >
@@ -183,13 +176,10 @@
                 >
                     <v-alert
                         type="info"
-                        variant="tonal"
                         color="success"
-                        rounded="lg"
-                        density="compact"
                         icon="mdi-email-outline"
                         class="mb-6"
-                        text="We'll send a password reset link to your email address."
+                        :text="$t('account.resetInfo')"
                     />
 
                     <v-text-field
@@ -200,8 +190,6 @@
                         autocomplete="email"
                         :rules="emailRules"
                         :disabled="loading"
-                        variant="outlined"
-                        density="comfortable"
                         color="success"
                         class="mb-5"
                         data-testid="reset-email"
@@ -216,7 +204,6 @@
                         size="large"
                         :loading="loading"
                         :disabled="loading"
-                        rounded="lg"
                         class="mb-3 font-weight-semibold"
                         data-testid="reset-submit"
                     >
@@ -273,7 +260,7 @@ const orgName = _settings?.organization_name || ''
 const orgUnitName = _settings?.organization_unit_name || ''
 
 // ── State ──────────────────────────────────────────────────────────
-const layout = useTemplateRef('layout')
+const { notify, error: notifyError } = useNotification()
 const view = ref('login')
 const loading = ref(false)
 const loginValid = ref(false)
@@ -315,9 +302,10 @@ const identityIcon = computed(() =>
 // ── View meta ──────────────────────────────────────────────────────
 const viewEyebrow = computed(
     () =>
-        ({ login: 'WELCOME BACK', requestReset: 'ACCOUNT RECOVERY' })[
-            view.value
-        ] ?? '',
+        ({
+            login: t('account.eyebrowWelcomeBack'),
+            requestReset: t('account.eyebrowAccountRecovery'),
+        })[view.value] ?? '',
 )
 const viewTitle = computed(
     () =>
@@ -356,9 +344,9 @@ const PROVIDER_ICONS = {
     spotify: 'mdi-spotify',
     twitch: 'mdi-twitch',
     bitbucket: 'mdi-bitbucket',
-    oidc: 'mdi-lock',
-    oidc2: 'mdi-lock',
-    oidc3: 'mdi-lock',
+    oidc: 'mdi-lock-outline',
+    oidc2: 'mdi-lock-outline',
+    oidc3: 'mdi-lock-outline',
 }
 const providerIcon = (name) => PROVIDER_ICONS[name] ?? 'mdi-login'
 
@@ -400,10 +388,10 @@ async function submitLogin() {
             .authWithPassword(identity.value, password.value, {
                 autoRefreshThreshold: 0,
             })
-        layout.value.notify(t('notifications.success.login'), 'success')
+        notify(t('notifications.success.login'))
         await navigateTo('/admin/routes', { replace: true })
     } catch (err) {
-        layout.value.notify(resolveAuthError(err), 'error')
+        notifyError(resolveAuthError(err))
     } finally {
         loading.value = false
     }
@@ -414,11 +402,11 @@ async function submitReset() {
     loading.value = true
     try {
         await pb.collection('users').requestPasswordReset(resetEmail.value)
-        layout.value.notify(t('notifications.success.resetPassword'), 'success')
+        notify(t('notifications.success.resetPassword'))
         view.value = 'login'
         resetEmail.value = ''
     } catch (err) {
-        layout.value.notify(resolveAuthError(err), 'error')
+        notifyError(resolveAuthError(err))
     } finally {
         loading.value = false
     }
@@ -428,31 +416,12 @@ async function loginWithOAuth(provider) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })
-        layout.value.notify(t('notifications.success.login'), 'success')
+        notify(t('notifications.success.login'))
         await navigateTo('/admin/routes', { replace: true })
     } catch (err) {
-        layout.value.notify(resolveAuthError(err), 'error')
+        notifyError(resolveAuthError(err))
     } finally {
         loading.value = false
     }
 }
 </script>
-
-<style scoped>
-.form-swap-enter-active,
-.form-swap-leave-active {
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
-    position: absolute;
-    width: 100%;
-}
-.form-swap-enter-from {
-    opacity: 0;
-    transform: translateX(16px);
-}
-.form-swap-leave-to {
-    opacity: 0;
-    transform: translateX(-16px);
-}
-</style>

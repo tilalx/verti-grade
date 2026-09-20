@@ -1,5 +1,5 @@
 <template>
-    <v-container class="route-page pa-0" fluid>
+    <v-container class="route-page pa-0">
         <!-- ── Loading state ──────────────────────────────────────────────── -->
         <template v-if="loading">
             <v-skeleton-loader type="image" height="180" />
@@ -228,28 +228,12 @@
                 </template>
 
                 <!-- Empty state -->
-                <v-card
+                <LayoutEmptyState
                     v-else
-                    rounded="xl"
-                    flat
-                    border
-                    class="py-10 text-center"
-                >
-                    <v-icon
-                        size="64"
-                        color="grey-lighten-1"
-                        class="mb-4 empty-icon"
-                        >mdi-star-shooting-outline</v-icon
-                    >
-                    <div
-                        class="text-h6 font-weight-semibold text-medium-emphasis mb-1"
-                    >
-                        {{ t('ratings.no_reviews_yet') }}
-                    </div>
-                    <div class="text-body-2 text-disabled">
-                        {{ t('ratings.be_the_first') }}
-                    </div>
-                </v-card>
+                    icon="mdi-star-shooting-outline"
+                    :title="t('ratings.no_reviews_yet')"
+                    :hint="t('ratings.be_the_first')"
+                />
 
                 <!-- Bottom spacer for mobile -->
                 <div style="height: 24px" />
@@ -290,7 +274,7 @@ const { error: notifyError } = useNotification()
 useHead(
     computed(() => ({
         title: metadata.value?.name
-            ? `${metadata.value.name} — Verti-Grade`
+            ? t('page.title.routeNamed', { name: metadata.value.name })
             : t('page.title.route'),
     })),
 )
@@ -520,20 +504,5 @@ onMounted(async () => {
 
 .stats-card {
     background: rgb(var(--v-theme-surface)) !important;
-}
-
-/* ── Empty state icon animation ──────────────────────────────────────────── */
-.empty-icon {
-    animation: gentle-bounce 2s ease-in-out infinite;
-}
-
-@keyframes gentle-bounce {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-6px);
-    }
 }
 </style>

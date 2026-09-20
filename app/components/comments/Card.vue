@@ -127,7 +127,7 @@
             <!-- Pills: location · difficulty -->
             <div class="comment-card__pills">
                 <span v-if="comment.location" class="comment-card__pill">
-                    <v-icon size="13">mdi-map-marker</v-icon>
+                    <v-icon size="13">mdi-map-marker-outline</v-icon>
                     {{ comment.location }}
                 </span>
                 <v-tooltip

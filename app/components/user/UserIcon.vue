@@ -25,7 +25,7 @@
             </v-btn>
         </template>
 
-        <v-card rounded="xl" elevation="3" border>
+        <v-card elevation="3" border>
             <v-list density="compact" :lines="false" nav slim class="py-1">
                 <v-list-item
                     v-for="item in menuItems"

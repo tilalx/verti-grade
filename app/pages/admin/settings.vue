@@ -1,5 +1,7 @@
 <template>
-    <v-container fluid class="pa-6">
+    <v-container>
+        <LayoutPageHeader :title="$t('page.content.settings')" />
+
         <!-- Image Upload Cards -->
         <v-row class="mb-4" density="comfortable">
             <v-col
@@ -9,7 +11,6 @@
                 sm="4"
             >
                 <v-card
-                    rounded="lg"
                     border
                     flat
                     height="100%"
@@ -23,7 +24,7 @@
                             <span class="text-subtitle-2 font-weight-semibold">
                                 {{ asset.label }}
                             </span>
-                            <div class="d-flex align-center gap-1">
+                            <div class="d-flex align-center ga-1">
                                 <v-chip
                                     v-if="asset.isDirty"
                                     color="warning"
@@ -37,6 +38,7 @@
                                     icon
                                     size="x-small"
                                     variant="text"
+                                    :aria-label="$t('settings.revertChange')"
                                     :title="$t('settings.revertChange')"
                                     @click.stop="asset.onRevert()"
                                 >
@@ -48,12 +50,7 @@
                         <!-- Preview + Upload combined area -->
                         <div
                             class="asset-drop-zone d-flex flex-column align-center justify-center rounded-lg position-relative"
-                            style="
-                                height: 160px;
-                                border: 1.5px dashed rgba(255, 255, 255, 0.12);
-                                overflow: hidden;
-                                cursor: pointer;
-                            "
+                            style="height: 160px"
                             :data-testid="`settings-asset-${asset.key}`"
                             @click="() => asset.triggerInput()"
                         >
@@ -152,22 +149,22 @@
         </v-row>
 
         <!-- Organization -->
-        <v-card rounded="lg" border flat class="mb-6">
+        <v-card border flat class="mb-6">
             <v-card-text class="pa-4">
                 <p class="text-subtitle-2 font-weight-semibold mb-4">
-                    Organization
+                    {{ $t('settings.organization') }}
                 </p>
                 <v-row density="comfortable">
                     <v-col cols="12" md="6">
                         <v-text-field
                             v-model="copySettings.organization_name"
-                            label="Organization Name"
+                            :label="$t('settings.organizationName')"
                             density="compact"
-                            variant="outlined"
-                            rounded="md"
                             hide-details="auto"
                             prepend-inner-icon="mdi-domain"
-                            placeholder="e.g. Deutscher Alpenverein"
+                            :placeholder="
+                                $t('settings.organizationNamePlaceholder')
+                            "
                             :maxlength="50"
                             counter
                             data-testid="settings-org-name"
@@ -176,13 +173,13 @@
                     <v-col cols="12" md="6">
                         <v-text-field
                             v-model="copySettings.organization_unit_name"
-                            label="Organization Unit"
+                            :label="$t('settings.organizationUnit')"
                             density="compact"
-                            variant="outlined"
-                            rounded="md"
                             hide-details="auto"
                             prepend-inner-icon="mdi-office-building-outline"
-                            placeholder="e.g. Sektion Hanau"
+                            :placeholder="
+                                $t('settings.organizationUnitPlaceholder')
+                            "
                             :maxlength="50"
                             counter
                             data-testid="settings-org-unit"
@@ -193,19 +190,17 @@
         </v-card>
 
         <!-- URL Fields -->
-        <v-card rounded="lg" border flat class="mb-6">
+        <v-card border flat class="mb-6">
             <v-card-text class="pa-4">
                 <p class="text-subtitle-2 font-weight-semibold mb-4">
-                    Public URLs
+                    {{ $t('settings.publicUrls') }}
                 </p>
                 <v-row density="comfortable">
                     <v-col cols="12" md="4">
                         <v-text-field
                             v-model="copySettings.application_url"
-                            label="Application URL"
+                            :label="$t('settings.applicationUrl')"
                             density="compact"
-                            variant="outlined"
-                            rounded="md"
                             hide-details="auto"
                             prepend-inner-icon="mdi-web"
                             placeholder="https://app.example.com"
@@ -215,10 +210,8 @@
                     <v-col cols="12" md="4">
                         <v-text-field
                             v-model="copySettings.imprint_url"
-                            label="Imprint URL"
+                            :label="$t('settings.imprintUrl')"
                             density="compact"
-                            variant="outlined"
-                            rounded="md"
                             hide-details="auto"
                             prepend-inner-icon="mdi-file-document-outline"
                             placeholder="https://example.com/imprint"
@@ -227,10 +220,8 @@
                     <v-col cols="12" md="4">
                         <v-text-field
                             v-model="copySettings.privacy_url"
-                            label="Privacy URL"
+                            :label="$t('settings.privacyUrl')"
                             density="compact"
-                            variant="outlined"
-                            rounded="md"
                             hide-details="auto"
                             prepend-inner-icon="mdi-shield-outline"
                             placeholder="https://example.com/privacy"
@@ -248,7 +239,7 @@
                     class="text-caption text-medium-emphasis"
                 >
                     <v-icon size="14" class="mr-1">mdi-circle-medium</v-icon>
-                    Unsaved changes
+                    {{ $t('account.unsavedChanges') }}
                 </span>
             </v-fade-transition>
 
@@ -257,13 +248,12 @@
             <v-btn
                 v-if="hasChanges"
                 color="primary"
-                rounded="md"
                 :loading="saving"
                 prepend-icon="mdi-content-save-outline"
                 data-testid="settings-save"
                 @click="saveSettings"
             >
-                Save Changes
+                {{ $t('actions.save') }}
             </v-btn>
         </div>
     </v-container>
@@ -317,7 +307,7 @@ const iconPreview = ref(null)
 const signPreview = ref(null)
 
 const saving = ref(false)
-const { notify } = useNotification()
+const { notify, error: notifyError } = useNotification()
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -532,10 +522,10 @@ async function saveSettings() {
             organization_unit_name: updated.organization_unit_name,
         })
 
-        notify('Settings saved successfully.')
+        notify(t('settings.saveSuccess'))
     } catch (err) {
         console.error('Save failed:', err)
-        notify('Failed to save settings. Please try again.', 'error')
+        notifyError(t('settings.saveError'))
     } finally {
         saving.value = false
     }
@@ -543,10 +533,17 @@ async function saveSettings() {
 </script>
 
 <style scoped>
-.asset-drop-zone:hover .asset-hover-overlay {
-    opacity: 1 !important;
+.asset-drop-zone {
+    /* Theme tokens, not a hardcoded rgba — a white border is invisible on light. */
+    border: 1.5px dashed rgba(var(--v-border-color), 0.28);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.18s;
 }
 .asset-drop-zone:hover {
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(var(--v-border-color), 0.6);
+}
+.asset-drop-zone:hover .asset-hover-overlay {
+    opacity: 1 !important;
 }
 </style>

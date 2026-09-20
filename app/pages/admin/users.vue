@@ -1,10 +1,10 @@
 <template>
-    <v-container fluid class="users-page">
-        <!-- ── Page Header ───────────────────────────────────────────────── -->
-        <div class="d-flex align-center justify-space-between mb-4">
-            <h1 class="users-page__title">{{ t('users.title') }}</h1>
-            <UserCreateUser @user-created="reloadUsers" />
-        </div>
+    <v-container class="users-page">
+        <LayoutPageHeader :title="t('users.title')">
+            <template #actions>
+                <UserCreateUser @user-created="reloadUsers" />
+            </template>
+        </LayoutPageHeader>
 
         <!-- ── Filter bar ────────────────────────────────────────────────── -->
         <FilterBar
@@ -25,8 +25,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="users-filter-role"
                         />
                     </v-col>
@@ -39,35 +37,23 @@
             <v-col v-for="i in 6" :key="i" cols="12" sm="6" lg="4">
                 <v-skeleton-loader
                     type="list-item-avatar-two-line"
-                    rounded="xl"
+                    rounded="lg"
                 />
             </v-col>
         </v-row>
 
         <!-- ── Empty state ───────────────────────────────────────────────── -->
-        <v-card
+        <LayoutEmptyState
             v-else-if="!loading && !users.length"
-            rounded="xl"
-            border
-            flat
-            class="py-16 text-center"
-        >
-            <v-icon size="56" color="grey-lighten-2"
-                >mdi-account-off-outline</v-icon
-            >
-            <div class="text-h6 mt-4 text-medium-emphasis">
-                {{ t('users.noUsers') }}
-            </div>
-            <div class="text-body-2 text-disabled mt-1">
-                {{ t('users.noUsersHint') }}
-            </div>
-        </v-card>
+            icon="mdi-account-off-outline"
+            :title="t('users.noUsers')"
+            :hint="t('users.noUsersHint')"
+        />
 
         <!-- ── User Cards ────────────────────────────────────────────────── -->
         <v-row v-else>
             <v-col v-for="user in users" :key="user.id" cols="12" sm="6" lg="4">
                 <v-card
-                    rounded="xl"
                     border
                     flat
                     class="user-card d-flex flex-column"
@@ -147,6 +133,7 @@
                             icon
                             size="small"
                             variant="text"
+                            :aria-label="t('actions.edit')"
                             data-testid="user-card-edit"
                             @click="editUser(user)"
                         >
@@ -160,6 +147,7 @@
                             size="small"
                             variant="text"
                             :disabled="user.id === currentUserId"
+                            :aria-label="t('actions.delete')"
                             data-testid="user-card-delete"
                             @click="confirmDelete(user)"
                         >
@@ -183,7 +171,6 @@
             <v-btn
                 v-if="hasMore"
                 variant="tonal"
-                rounded="lg"
                 :loading="loadingMore"
                 data-testid="users-load-more"
                 @click="loadMore"
@@ -249,7 +236,7 @@ const editingUser = ref(null)
 const deletingUser = ref(null)
 const deleteDialog = ref(false)
 
-const { notify: showSnackbar } = useNotification()
+const { notify, error: notifyError } = useNotification()
 
 const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
@@ -270,6 +257,8 @@ async function fetchRoles() {
         })
     } catch (err) {
         if (err?.isAbort) return
+        console.error('Failed to fetch roles:', err)
+        notifyError(t('notifications.error.generic'))
     }
 }
 
@@ -327,7 +316,7 @@ async function fetchList(append = false) {
     } catch (err) {
         if (err?.isAbort) return
         console.error('Failed to fetch users:', err)
-        showSnackbar(t('notifications.error.generic'), 'error')
+        notifyError(t('notifications.error.generic'))
     } finally {
         loading.value = false
         loadingMore.value = false
@@ -364,7 +353,7 @@ function editUser(user) {
 }
 
 function onUserUpdated() {
-    showSnackbar(t('notifications.success.edit'))
+    notifyError(t('notifications.success.edit'))
     reloadUsers()
 }
 
@@ -381,12 +370,12 @@ async function deleteUser() {
         await pb.collection('users').delete(deletingUser.value.id)
         users.value = users.value.filter((u) => u.id !== deletingUser.value.id)
         totalItems.value = Math.max(0, totalItems.value - 1)
-        showSnackbar(t('users.deleteSuccess'))
+        notify(t('users.deleteSuccess'))
         deleteDialog.value = false
         deletingUser.value = null
     } catch (err) {
         console.error('Error deleting user:', err)
-        showSnackbar(t('users.deleteError'), 'error')
+        notify(t('users.deleteError'))
     } finally {
         deleting.value = false
     }
@@ -447,7 +436,9 @@ onMounted(async () => {
                     requestKey: null,
                 })
                 users.value = [mapUser(rec), ...users.value]
-            } catch {}
+            } catch (err) {
+                console.error('Realtime user create refresh failed:', err)
+            }
         } else if (e.action === 'update') {
             const idx = users.value.findIndex((u) => u.id === e.record.id)
             if (idx !== -1) {
@@ -459,7 +450,9 @@ onMounted(async () => {
                             requestKey: null,
                         })
                     users.value[idx] = mapUser(rec)
-                } catch {}
+                } catch (err) {
+                    console.error('Realtime user update refresh failed:', err)
+                }
             }
         }
     })
@@ -467,17 +460,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.users-page {
-    max-width: 100%;
-}
-
-.users-page__title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    color: rgb(var(--v-theme-on-background));
-}
-
 .user-card {
     transition:
         border-color 0.15s ease,

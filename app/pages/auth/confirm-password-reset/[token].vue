@@ -7,12 +7,13 @@
         :title="title"
         :subtitle="subtitle"
         :heading-key="step"
-        ref="layout"
     >
         <template #brand-headline>
-            Reset your<br />
-            account<br />
-            <span class="text-success">password.</span>
+            {{ $t('account.brandHeadline.reset.l1') }}<br />
+            {{ $t('account.brandHeadline.reset.l2') }}<br />
+            <span class="text-success">{{
+                $t('account.brandHeadline.reset.accent')
+            }}</span>
         </template>
 
         <div style="position: relative">
@@ -32,7 +33,6 @@
                         size="large"
                         :loading="loading"
                         :disabled="loading || !fieldsValid"
-                        rounded="lg"
                         class="mb-3 font-weight-semibold"
                         data-testid="confirm-reset-submit"
                         @click="submitReset"
@@ -43,7 +43,6 @@
                     <v-btn
                         variant="text"
                         block
-                        rounded="lg"
                         class="text-none text-medium-emphasis"
                         prepend-icon="mdi-arrow-left"
                         :disabled="loading"
@@ -74,7 +73,6 @@
                         color="success"
                         block
                         size="large"
-                        rounded="lg"
                         class="font-weight-semibold"
                         @click="navigateTo('/auth/login')"
                     >
@@ -99,7 +97,6 @@
                         color="success"
                         variant="tonal"
                         block
-                        rounded="lg"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('actions.back_to_home') }}
@@ -130,7 +127,7 @@ try {
 const orgName = _settings?.organization_name || ''
 const orgUnitName = _settings?.organization_unit_name || ''
 
-const layout = useTemplateRef('layout')
+const { error: notifyError } = useNotification()
 
 // ── Token from URL ─────────────────────────────────────────────────
 const token = computed(() => String(route.params.token ?? ''))
@@ -146,9 +143,9 @@ const confirmPassword = ref('')
 const eyebrow = computed(
     () =>
         ({
-            reset: 'ACCOUNT RECOVERY',
-            done: 'ALL DONE',
-            invalid: 'INVALID LINK',
+            reset: t('account.eyebrowAccountRecovery'),
+            done: t('account.eyebrowAllDone'),
+            invalid: t('account.eyebrowInvalidLink'),
         })[step.value] ?? '',
 )
 const title = computed(
@@ -192,7 +189,7 @@ async function submitReset() {
                 err?.data?.message ??
                 err?.message ??
                 t('notifications.error.resetPassword')
-            layout.value.notify(msg, 'error')
+            notifyError(msg)
         }
     } finally {
         loading.value = false
@@ -201,23 +198,6 @@ async function submitReset() {
 </script>
 
 <style scoped>
-.form-swap-enter-active,
-.form-swap-leave-active {
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
-    position: absolute;
-    width: 100%;
-}
-.form-swap-enter-from {
-    opacity: 0;
-    transform: translateX(16px);
-}
-.form-swap-leave-to {
-    opacity: 0;
-    transform: translateX(-16px);
-}
-
 .success-ring {
     display: inline-flex;
     align-items: center;

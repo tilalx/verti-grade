@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { required, minLength, maxLength, validEmail, passwordsMatch } from '~/utils/validation'
+import {
+    required,
+    minLength,
+    maxLength,
+    validEmail,
+    passwordsMatch,
+    nonBlank,
+} from '~/utils/validation'
 
 // Simple translation stub: just return the key so assertions are readable.
 const t = (key: string) => key
@@ -186,5 +193,21 @@ describe('passwordsMatch', () => {
         password = 'changed'
         expect(rule('initial')).toBe('validation.passwordMismatch')
         expect(rule('changed')).toBe(true)
+    })
+})
+
+describe('nonBlank', () => {
+    it('rejects an empty or whitespace-only string', () => {
+        expect(nonBlank(t)('')).toBe('validation.required')
+        expect(nonBlank(t)('   ')).toBe('validation.required')
+    })
+
+    it('accepts a string with any non-whitespace character', () => {
+        expect(nonBlank(t)(' a ')).toBe(true)
+    })
+
+    it('rejects non-string values', () => {
+        expect(nonBlank(t)(null)).toBe('validation.required')
+        expect(nonBlank(t)(undefined)).toBe('validation.required')
     })
 })

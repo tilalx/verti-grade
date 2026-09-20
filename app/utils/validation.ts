@@ -39,3 +39,9 @@ export const validEmail = (t: TranslateFn): Rule =>
  */
 export const passwordsMatch = (t: TranslateFn, getPassword: () => string): Rule =>
     (v) => v === getPassword() || t('validation.passwordMismatch')
+
+/**
+ * String value must contain at least one non-whitespace character.
+ */
+export const nonBlank = (t: TranslateFn): Rule =>
+    (v) => (typeof v === 'string' && v.trim() !== '') || t('validation.required')

@@ -1,58 +1,41 @@
 <template>
-    <v-dialog v-model="dialog" max-width="640" scrollable>
-        <template #activator="{ props: activatorProps }">
-            <slot name="activator" :props="activatorProps" />
+    <LayoutDialogShell
+        v-model="dialog"
+        max-width="640"
+        closable
+        :subtitle="
+            $t('notifications.commitList.installedCommit', [props.installedSha])
+        "
+        data-testid="commit-list-dialog"
+    >
+        <template #activator="activatorScope">
+            <slot name="activator" v-bind="activatorScope" />
         </template>
 
-        <v-card data-testid="commit-list-dialog">
-            <v-card-title class="d-flex align-center">
-                <v-icon start size="20">mdi-source-commit</v-icon>
-                {{ $t('notifications.commitList.title') }}
-                <v-spacer />
-                <v-btn
-                    icon="mdi-close"
-                    variant="text"
-                    density="comfortable"
-                    :aria-label="$t('notifications.commitList.close')"
-                    @click="dialog = false"
-                />
-            </v-card-title>
+        <template #title>
+            <v-icon size="20">mdi-source-commit</v-icon>
+            {{ $t('notifications.commitList.title') }}
+        </template>
 
-            <v-card-subtitle>
-                {{
-                    $t('notifications.commitList.installedCommit', [
-                        props.installedSha,
-                    ])
-                }}
-            </v-card-subtitle>
+        <v-alert v-if="!props.commits.length" type="info">
+            {{ $t('notifications.commitList.empty') }}
+        </v-alert>
 
-            <v-card-text>
-                <v-alert
-                    v-if="!props.commits.length"
-                    type="info"
-                    variant="tonal"
-                    dense
-                >
-                    {{ $t('notifications.commitList.empty') }}
-                </v-alert>
-
-                <div
-                    v-for="commit in props.commits"
-                    v-else
-                    :key="commit.sha"
-                    class="commit-entry"
-                >
-                    <div class="d-flex align-center flex-wrap ga-2 mb-1">
-                        <span class="commit-sha">{{ commit.sha }}</span>
-                        <span class="commit-date">
-                            {{ formatDisplayDate(commit.date, locale) }}
-                        </span>
-                    </div>
-                    <div class="commit-message">{{ commit.message }}</div>
-                </div>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+        <div
+            v-for="commit in props.commits"
+            v-else
+            :key="commit.sha"
+            class="commit-entry"
+        >
+            <div class="d-flex align-center flex-wrap ga-2 mb-1">
+                <span class="commit-sha">{{ commit.sha }}</span>
+                <span class="commit-date">
+                    {{ formatDisplayDate(commit.date, locale) }}
+                </span>
+            </div>
+            <div class="commit-message">{{ commit.message }}</div>
+        </div>
+    </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">

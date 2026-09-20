@@ -54,8 +54,6 @@
             :placeholder="$t('account.placeholders.oldPassword')"
             :type="showOld ? 'text' : 'password'"
             autocomplete="current-password"
-            variant="outlined"
-            density="comfortable"
             :rules="[rules.required]"
             prepend-inner-icon="mdi-lock-check-outline"
             :append-inner-icon="
@@ -73,8 +71,6 @@
             :placeholder="$t('account.placeholders.newPassword')"
             :type="showNew ? 'text' : 'password'"
             autocomplete="new-password"
-            variant="outlined"
-            density="comfortable"
             validate-on="blur"
             :rules="[
                 rules.required,
@@ -129,7 +125,7 @@
                         <v-icon
                             :icon="
                                 req.met
-                                    ? 'mdi-check-circle'
+                                    ? 'mdi-check-circle-outline'
                                     : 'mdi-circle-outline'
                             "
                             size="14"
@@ -150,8 +146,6 @@
             :placeholder="$t('account.placeholders.confirmPassword')"
             :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"
-            variant="outlined"
-            density="comfortable"
             validate-on="blur"
             :rules="[rules.required, rules.matchPassword]"
             prepend-inner-icon="mdi-lock-check-outline"
@@ -162,7 +156,7 @@
             <template #append-inner>
                 <v-icon
                     v-if="passwordsMatch"
-                    icon="mdi-check-circle"
+                    icon="mdi-check-circle-outline"
                     color="success"
                     size="20"
                 />

@@ -26,7 +26,7 @@ function handleClear() {
 </script>
 
 <template>
-    <v-card rounded="xl" border flat class="mb-4">
+    <v-card border flat class="mb-4">
         <v-card-text class="pa-3">
             <div class="d-flex align-center ga-2">
                 <v-text-field
@@ -36,8 +36,6 @@ function handleClear() {
                     clearable
                     hide-details
                     density="compact"
-                    variant="outlined"
-                    rounded="lg"
                     class="flex-grow-1"
                     data-testid="filter-search"
                 />
@@ -48,6 +46,7 @@ function handleClear() {
                     density="compact"
                     size="small"
                     icon
+                    :aria-label="$t('filter.title')"
                     data-testid="filter-open-sheet"
                     @click="sheetOpen = true"
                 >

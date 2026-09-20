@@ -1,175 +1,139 @@
 <template>
-    <v-dialog v-model="dialog" max-width="520" :persistent="hasChanges">
-        <v-card rounded="xl" elevation="8" data-testid="user-edit-dialog">
-            <!-- Header with avatar -->
-            <div class="dialog-header pa-6 pb-4">
-                <div class="d-flex align-center ga-3">
-                    <div class="avatar-wrapper" @click="avatarInput?.click()">
-                        <v-avatar size="64" class="avatar-ring">
-                            <v-img
-                                v-if="avatarPreview"
-                                :src="avatarPreview"
-                                :alt="$t('account.changeAvatar')"
-                                cover
-                            />
-                            <v-icon
-                                v-else
-                                icon="mdi-account"
-                                size="32"
-                                color="grey-lighten-1"
-                            />
-                        </v-avatar>
-                        <div class="avatar-overlay">
-                            <v-icon icon="mdi-camera" size="18" color="white" />
-                        </div>
-                        <v-tooltip activator="parent" location="bottom">
-                            {{ $t('account.changeAvatar') }}
-                        </v-tooltip>
-                    </div>
-                    <input
-                        type="file"
-                        ref="avatarInput"
-                        accept="image/jpeg,image/png,image/svg+xml,image/webp"
-                        style="display: none"
-                        @change="onAvatarPicked"
+    <LayoutDialogShell
+        v-model="dialog"
+        :persistent="hasChanges"
+        data-testid="user-edit-dialog"
+    >
+        <template #title>
+            <div class="avatar-wrapper" @click="avatarInput?.click()">
+                <v-avatar size="64" class="avatar-ring">
+                    <v-img
+                        v-if="avatarPreview"
+                        :src="avatarPreview"
+                        :alt="$t('account.changeAvatar')"
+                        cover
                     />
+                    <v-icon
+                        v-else
+                        icon="mdi-account-outline"
+                        size="32"
+                        color="grey-lighten-1"
+                    />
+                </v-avatar>
+                <div class="avatar-overlay">
+                    <v-icon icon="mdi-camera" size="18" color="white" />
+                </div>
+                <v-tooltip activator="parent" location="bottom">
+                    {{ $t('account.changeAvatar') }}
+                </v-tooltip>
+            </div>
+            <input
+                type="file"
+                ref="avatarInput"
+                accept="image/jpeg,image/png,image/svg+xml,image/webp"
+                style="display: none"
+                @change="onAvatarPicked"
+            />
 
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="text-h6 font-weight-bold text-truncate">
-                            {{ $t('users.edit') }}
-                        </div>
-                        <div
-                            class="text-body-2 text-medium-emphasis text-truncate"
-                        >
-                            {{ editableUser.email }}
-                        </div>
-                    </div>
+            <div class="flex-grow-1 overflow-hidden">
+                <div class="text-h6 font-weight-bold text-truncate">
+                    {{ $t('users.edit') }}
+                </div>
+                <div class="text-body-2 text-medium-emphasis text-truncate">
+                    {{ editableUser.email }}
                 </div>
             </div>
+        </template>
 
-            <v-divider />
-
-            <v-card-text class="pa-6">
-                <v-form ref="form" v-model="valid">
-                    <!-- Name fields -->
-                    <v-row density="comfortable">
-                        <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="editableUser.firstname"
-                                :rules="nameRules"
-                                :label="$t('account.firstname')"
-                                :placeholder="
-                                    $t('account.placeholders.firstname')
-                                "
-                                prepend-inner-icon="mdi-account-outline"
-                                variant="outlined"
-                                density="comfortable"
-                                rounded="lg"
-                                data-testid="user-edit-firstname"
-                            />
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-text-field
-                                v-model="editableUser.name"
-                                :rules="nameRules"
-                                :label="$t('account.lastname')"
-                                :placeholder="
-                                    $t('account.placeholders.lastname')
-                                "
-                                prepend-inner-icon="mdi-account-outline"
-                                variant="outlined"
-                                density="comfortable"
-                                rounded="lg"
-                                data-testid="user-edit-lastname"
-                            />
-                        </v-col>
-                    </v-row>
-
-                    <!-- Email (read-only) -->
+        <v-form ref="form" v-model="valid">
+            <!-- Name fields -->
+            <v-row density="comfortable">
+                <v-col cols="12" sm="6">
                     <v-text-field
-                        :model-value="editableUser.email"
-                        :label="$t('account.email')"
-                        prepend-inner-icon="mdi-email-outline"
-                        variant="outlined"
-                        density="comfortable"
-                        rounded="lg"
-                        disabled
-                        class="mb-1"
-                    >
-                        <template #append-inner>
-                            <v-tooltip
-                                :text="$t('account.emailLocked')"
-                                location="top"
-                            >
-                                <template #activator="{ props: tp }">
-                                    <v-icon
-                                        v-bind="tp"
-                                        icon="mdi-lock-outline"
-                                        size="18"
-                                    />
-                                </template>
-                            </v-tooltip>
-                        </template>
-                    </v-text-field>
-
-                    <!-- Role -->
-                    <v-select
-                        v-model="editableUser.role"
-                        :items="roles"
-                        item-title="name"
-                        item-value="id"
-                        :label="$t('users.role')"
-                        prepend-inner-icon="mdi-shield-account-outline"
-                        variant="outlined"
-                        density="comfortable"
-                        rounded="lg"
-                        clearable
-                        data-testid="user-edit-role"
+                        v-model="editableUser.firstname"
+                        :rules="nameRules"
+                        :label="$t('account.firstname')"
+                        :placeholder="$t('account.placeholders.firstname')"
+                        prepend-inner-icon="mdi-account-outline"
+                        data-testid="user-edit-firstname"
                     />
-                </v-form>
-            </v-card-text>
+                </v-col>
+                <v-col cols="12" sm="6">
+                    <v-text-field
+                        v-model="editableUser.name"
+                        :rules="nameRules"
+                        :label="$t('account.lastname')"
+                        :placeholder="$t('account.placeholders.lastname')"
+                        prepend-inner-icon="mdi-account-outline"
+                        data-testid="user-edit-lastname"
+                    />
+                </v-col>
+            </v-row>
 
-            <v-divider />
+            <!-- Email (read-only) -->
+            <v-text-field
+                :model-value="editableUser.email"
+                :label="$t('account.email')"
+                prepend-inner-icon="mdi-email-outline"
+                disabled
+                class="mb-1"
+            >
+                <template #append-inner>
+                    <v-tooltip :text="$t('account.emailLocked')" location="top">
+                        <template #activator="{ props: tp }">
+                            <v-icon
+                                v-bind="tp"
+                                icon="mdi-lock-outline"
+                                size="18"
+                            />
+                        </template>
+                    </v-tooltip>
+                </template>
+            </v-text-field>
 
-            <!-- Actions -->
-            <v-card-actions class="pa-4">
-                <v-btn
-                    variant="text"
-                    data-testid="user-edit-cancel"
-                    @click="close"
-                >
-                    {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-chip
-                    v-if="hasChanges"
-                    size="small"
-                    color="warning"
-                    variant="tonal"
-                    prepend-icon="mdi-pencil-outline"
-                    class="mr-2"
-                >
-                    {{ $t('account.unsavedChanges') }}
-                </v-chip>
-                <v-btn
-                    :disabled="!valid || !hasChanges"
-                    :loading="saving"
-                    color="primary"
-                    variant="flat"
-                    rounded="lg"
-                    prepend-icon="mdi-content-save-outline"
-                    data-testid="user-edit-submit"
-                    @click="save"
-                >
-                    {{ $t('actions.save') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+            <!-- Role -->
+            <v-select
+                v-model="editableUser.role"
+                :items="roles"
+                item-title="name"
+                item-value="id"
+                :label="$t('users.role')"
+                prepend-inner-icon="mdi-shield-account-outline"
+                clearable
+                data-testid="user-edit-role"
+            />
+        </v-form>
+        <template #actions>
+            <v-btn variant="text" data-testid="user-edit-cancel" @click="close">
+                {{ $t('actions.cancel') }}
+            </v-btn>
+            <v-spacer />
+            <v-chip
+                v-if="hasChanges"
+                size="small"
+                color="warning"
+                variant="tonal"
+                prepend-icon="mdi-pencil-outline"
+                class="mr-2"
+            >
+                {{ $t('account.unsavedChanges') }}
+            </v-chip>
+            <v-btn
+                :disabled="!valid || !hasChanges"
+                :loading="saving"
+                color="primary"
+                prepend-icon="mdi-content-save-outline"
+                data-testid="user-edit-submit"
+                @click="save"
+            >
+                {{ $t('actions.save') }}
+            </v-btn>
+        </template>
+    </LayoutDialogShell>
 </template>
 
 <script setup>
-import { required } from '~/utils/validation'
+import { required, maxLength } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -241,7 +205,7 @@ async function fetchRoles() {
 onMounted(fetchRoles)
 
 // ── Validation ────────────────────────────────────────────────────────────
-const nameRules = [required(t)]
+const nameRules = [required(t), maxLength(t, 30)]
 
 const hasChanges = computed(() => {
     if (avatarFile.value) return true
@@ -308,44 +272,4 @@ async function save() {
 }
 </script>
 
-<style scoped>
-.dialog-header {
-    background: linear-gradient(
-        135deg,
-        rgba(var(--v-theme-surface-variant), 0.5) 0%,
-        rgba(var(--v-theme-surface), 1) 100%
-    );
-}
-
-.avatar-wrapper {
-    position: relative;
-    cursor: pointer;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.avatar-ring {
-    border: 2.5px solid rgba(var(--v-theme-primary), 0.3);
-    transition: border-color 0.2s;
-}
-
-.avatar-wrapper:hover .avatar-ring {
-    border-color: rgba(var(--v-theme-primary), 0.8);
-}
-
-.avatar-overlay {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.avatar-wrapper:hover .avatar-overlay {
-    opacity: 1;
-}
-</style>
+<style scoped></style>

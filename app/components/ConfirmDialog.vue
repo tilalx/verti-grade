@@ -20,39 +20,30 @@ const emit = defineEmits<{ confirm: [] }>()
 </script>
 
 <template>
-    <v-dialog v-model="open" :max-width="maxWidth">
-        <v-card rounded="xl" data-testid="confirm-dialog">
-            <v-card-title
-                v-if="title"
-                class="pa-5 pb-2 text-body-1 font-weight-semibold"
+    <LayoutDialogShell
+        v-model="open"
+        :title="title"
+        :max-width="maxWidth"
+        data-testid="confirm-dialog"
+    >
+        <div class="text-body-2 text-medium-emphasis">{{ message }}</div>
+        <template #actions>
+            <v-btn
+                variant="text"
+                data-testid="confirm-dialog-cancel"
+                @click="open = false"
             >
-                {{ title }}
-            </v-card-title>
-            <v-card-text
-                class="text-body-2 text-medium-emphasis"
-                :class="title ? 'pa-5 pt-0' : 'pa-5'"
+                {{ $t('actions.cancel') }}
+            </v-btn>
+            <v-spacer />
+            <v-btn
+                :color="confirmColor"
+                :loading="loading"
+                data-testid="confirm-dialog-confirm"
+                @click="emit('confirm')"
             >
-                {{ message }}
-            </v-card-text>
-            <v-card-actions class="pa-4 pt-0">
-                <v-btn
-                    variant="text"
-                    data-testid="confirm-dialog-cancel"
-                    @click="open = false"
-                >
-                    {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                    :color="confirmColor"
-                    variant="flat"
-                    :loading="loading"
-                    data-testid="confirm-dialog-confirm"
-                    @click="emit('confirm')"
-                >
-                    {{ confirmText ?? $t('actions.delete') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+                {{ confirmText ?? $t('actions.delete') }}
+            </v-btn>
+        </template>
+    </LayoutDialogShell>
 </template>

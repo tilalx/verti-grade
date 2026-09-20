@@ -67,7 +67,6 @@
                             v-else
                             to="/auth/login"
                             variant="tonal"
-                            rounded="lg"
                             prepend-icon="mdi-login"
                             class="nav-login-btn"
                             data-testid="nav-login"

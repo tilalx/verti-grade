@@ -58,6 +58,23 @@ export default defineNuxtConfig({
       }
     },
     vuetifyOptions: {
+      // Single source of truth for component look. Per-instance props are only
+      // for deliberate exceptions — anything repeated app-wide belongs here.
+      defaults: {
+        VBtn: { variant: 'flat', rounded: 'lg' },
+        VCard: { rounded: 'lg' },
+        VDialog: { maxWidth: 520 },
+        VContainer: { fluid: true },
+        VAlert: { variant: 'tonal', density: 'compact', rounded: 'lg' },
+        VTextField: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VTextarea: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VSelect: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VCombobox: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VAutocomplete: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VFileInput: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+        VDataTable: { density: 'comfortable', hover: true },
+        VDataTableServer: { density: 'comfortable', hover: true },
+      },
       theme: {
         defaultTheme: 'light',
         themes: {

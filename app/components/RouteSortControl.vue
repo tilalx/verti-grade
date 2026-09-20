@@ -42,8 +42,6 @@ function toggleOrder() {
             item-value="key"
             hide-details
             density="compact"
-            variant="outlined"
-            rounded="lg"
             class="flex-grow-1"
             data-testid="sort-field"
             @update:modelValue="onKeyChange"

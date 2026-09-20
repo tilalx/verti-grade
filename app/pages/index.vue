@@ -1,5 +1,7 @@
 <template>
-    <v-container fluid>
+    <v-container>
+        <LayoutPageHeader :title="$t('page.content.index')" />
+
         <!-- Filter Bar -->
         <FilterBar
             v-model="searchRouteName"
@@ -27,8 +29,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="index-filter-difficulty"
                         />
                     </v-col>
@@ -42,8 +42,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="index-filter-type"
                         />
                     </v-col>
@@ -57,8 +55,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="index-filter-location"
                         />
                     </v-col>
@@ -77,8 +73,8 @@
                 :page="tableOptions.page"
                 :items-per-page="tableOptions.itemsPerPage"
                 :sort-by="tableOptions.sortBy"
+                :no-data-text="$t('table.no_data')"
                 item-value="id"
-                density="comfortable"
                 @update:options="loadRoutes"
             >
                 <template #item.color="{ item }">
@@ -162,15 +158,11 @@
             class="mt-4"
             :elevation="0"
         />
-        <div
+        <LayoutEmptyState
             v-if="!loading && routes.length === 0 && smAndDown"
-            class="text-center pa-8 mt-4"
-        >
-            <v-icon size="x-large" class="mb-4"
-                >mdi-magnify-remove-outline</v-icon
-            >
-            <h3 class="text-h6">{{ $t('table.no_data') }}</h3>
-        </div>
+            class="mt-4"
+            :title="$t('table.no_data')"
+        />
     </v-container>
 </template>
 

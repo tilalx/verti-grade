@@ -49,6 +49,24 @@
             "lowercase": "Строчная буква (a–z)",
             "number": "Цифра (0–9)",
             "special": "Спецсимвол (!{'@'}#...)"
+        },
+        "capsLockOn": "Включён Caps Lock",
+        "resetInfo": "Мы отправим ссылку для сброса пароля на вашу почту.",
+        "eyebrowWelcomeBack": "С ВОЗВРАЩЕНИЕМ",
+        "eyebrowAccountRecovery": "ВОССТАНОВЛЕНИЕ ДОСТУПА",
+        "eyebrowAllDone": "ГОТОВО",
+        "eyebrowInvalidLink": "НЕВЕРНАЯ ССЫЛКА",
+        "brandHeadline": {
+            "login": {
+                "l1": "Управляйте",
+                "l2": "своими",
+                "accent": "маршрутами."
+            },
+            "reset": {
+                "l1": "Сбросьте",
+                "l2": "пароль",
+                "accent": "аккаунта."
+            }
         }
     },
     "routes": {
@@ -286,7 +304,8 @@
             "dashboard": "Управление маршрутами - Verti-Grade",
             "login": "Вход - Verti-Grade",
             "resetPassword": "Сброс пароля - Verti-Grade",
-            "notFound": "Страница не найдена - Verti-Grade"
+            "notFound": "Страница не найдена - Verti-Grade",
+            "routeNamed": "{name} - Verti-Grade"
         },
         "content": {
             "settings": "Настройки",
@@ -385,7 +404,18 @@
         "replace": "Заменить",
         "clickToUpload": "Нажмите, чтобы загрузить",
         "loadError": "Не удалось загрузить настройки.",
-        "initError": "Не удалось инициализировать настройки."
+        "initError": "Не удалось инициализировать настройки.",
+        "organization": "Организация",
+        "organizationName": "Название организации",
+        "organizationNamePlaceholder": "например, Deutscher Alpenverein",
+        "organizationUnit": "Подразделение",
+        "organizationUnitPlaceholder": "например, Sektion Hanau",
+        "publicUrls": "Публичные ссылки",
+        "applicationUrl": "URL приложения",
+        "imprintUrl": "URL выходных данных",
+        "privacyUrl": "URL политики конфиденциальности",
+        "saveSuccess": "Настройки успешно сохранены.",
+        "saveError": "Не удалось сохранить настройки. Попробуйте ещё раз."
     },
     "errors": {
         "notFound": {
@@ -399,5 +429,23 @@
         "qr_code": "QR-код",
         "move_up": "Вверх",
         "move_down": "Вниз"
+    },
+    "importRoutes": {
+        "title": "Подтвердить импорт",
+        "intro": "Следующие маршруты и оценки будут импортированы. Проверьте данные перед подтверждением.",
+        "confirm": "Подтвердить и импортировать",
+        "ratingsCount": "Оценки",
+        "ratingsFor": "Оценки для {name}",
+        "noRatings": "Для этого маршрута нет оценок для импорта.",
+        "noComment": "Без комментария",
+        "ratingLabel": "Оценка",
+        "difficultyLabel": "Сложность",
+        "invalidJson": "Некорректный JSON-файл. Проверьте формат файла.",
+        "readFailed": "Не удалось прочитать файл.",
+        "success": "Импорт успешно завершён.",
+        "issues": "Импорт завершён с ошибками: {details}",
+        "routesFailed": "Маршрутов с ошибкой: {count}",
+        "commentsFailed": "Комментариев с ошибкой: {count}",
+        "failed": "Во время импорта произошла непредвиденная ошибка."
     }
 }

@@ -1,41 +1,29 @@
 <template>
-    <v-container fluid class="analytics-page py-6">
-        <!-- ── Header ─────────────────────────────────────────────────── -->
-        <v-row class="mb-6">
-            <v-col
-                cols="12"
-                class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4"
-            >
-                <div>
-                    <h1 class="page-title mb-1">
-                        {{ t('analytics.title') }}
-                    </h1>
-                    <p class="page-subtitle mb-0">
-                        {{ t('analytics.subtitle') }}
-                    </p>
+    <v-container class="analytics-page">
+        <LayoutPageHeader
+            :title="t('analytics.title')"
+            :subtitle="t('analytics.subtitle')"
+            class="mb-6"
+        >
+            <template #actions>
+                <div v-if="summary.generatedAt" class="generated-at">
+                    {{
+                        t('analytics.generatedAt', {
+                            value: formatDate(summary.generatedAt),
+                        })
+                    }}
                 </div>
-                <div class="d-flex align-center ga-3">
-                    <div v-if="summary.generatedAt" class="generated-at">
-                        {{
-                            t('analytics.generatedAt', {
-                                value: formatDate(summary.generatedAt),
-                            })
-                        }}
-                    </div>
-                    <v-btn
-                        color="primary"
-                        variant="tonal"
-                        rounded="lg"
-                        :loading="loading"
-                        data-testid="analytics-refresh"
-                        @click="refresh"
-                    >
-                        <v-icon start size="18">mdi-refresh</v-icon>
-                        {{ t('analytics.refresh') }}
-                    </v-btn>
-                </div>
-            </v-col>
-        </v-row>
+                <v-btn
+                    color="primary"
+                    prepend-icon="mdi-refresh"
+                    :loading="loading"
+                    data-testid="analytics-refresh"
+                    @click="refresh"
+                >
+                    {{ t('analytics.refresh') }}
+                </v-btn>
+            </template>
+        </LayoutPageHeader>
 
         <!-- ── Summary cards ──────────────────────────────────────────── -->
         <v-row class="mb-6" density="comfortable">
@@ -69,7 +57,7 @@
         <v-row class="mb-6" density="comfortable">
             <!-- Latest comments -->
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -94,12 +82,12 @@
                             ]"
                             class="px-4 py-2"
                         />
-                        <div
+                        <LayoutEmptyState
                             v-else-if="!hasLatestComments"
-                            class="empty-list-msg"
-                        >
-                            {{ t('analytics.emptyComments') }}
-                        </div>
+                            icon="mdi-comment-off-outline"
+                            :card="false"
+                            :title="t('analytics.emptyComments')"
+                        />
                         <v-list v-else lines="two" class="py-1">
                             <v-list-item
                                 v-for="comment in latestComments"
@@ -126,7 +114,7 @@
                                 </v-list-item-subtitle>
                                 <template #append>
                                     <div
-                                        class="d-flex flex-column align-end gap-1"
+                                        class="d-flex flex-column align-end ga-1"
                                     >
                                         <div
                                             v-if="comment.rating !== null"
@@ -152,7 +140,7 @@
 
             <!-- Latest routes -->
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -177,12 +165,12 @@
                             ]"
                             class="px-4 py-2"
                         />
-                        <div
+                        <LayoutEmptyState
                             v-else-if="!hasLatestRoutes"
-                            class="empty-list-msg"
-                        >
-                            {{ t('analytics.emptyRoutes') }}
-                        </div>
+                            icon="mdi-routes"
+                            :card="false"
+                            :title="t('analytics.emptyRoutes')"
+                        />
                         <v-list v-else lines="two" class="py-1">
                             <v-list-item
                                 v-for="route in latestRoutes"
@@ -227,7 +215,7 @@
                                             class="route-chip chip-setter"
                                         >
                                             <v-icon size="10"
-                                                >mdi-account-hard-hat</v-icon
+                                                >mdi-account-hard-hat-outline</v-icon
                                             >
                                             {{ formatCreators(route.creators) }}
                                         </span>
@@ -248,7 +236,7 @@
         <!-- ── Charts row 1: difficulty + route timeline ──────────────── -->
         <v-row class="mb-6" density="comfortable">
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -280,7 +268,7 @@
             </v-col>
 
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -315,7 +303,7 @@
         <!-- ── Activity heatmap ───────────────────────────────────────── -->
         <v-row v-if="!error" class="mb-6" density="comfortable">
             <v-col cols="12" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -465,14 +453,14 @@
         <!-- ── Charts row 2: setters + comment timeline ───────────────── -->
         <v-row density="comfortable">
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
                             style="background: #faeeda"
                         >
                             <v-icon size="16" color="#854F0B"
-                                >mdi-account-hard-hat</v-icon
+                                >mdi-account-hard-hat-outline</v-icon
                             >
                         </div>
                         <span class="card-header-title">{{
@@ -507,7 +495,7 @@
             </v-col>
 
             <v-col cols="12" md="6" class="d-flex">
-                <v-card class="analytics-card w-100" elevation="0">
+                <v-card class="analytics-card surface-card w-100" elevation="0">
                     <v-card-title class="card-header">
                         <div
                             class="card-header-icon"
@@ -646,7 +634,7 @@ const summaryCards = computed(() => [
         key: 'totalComments',
         title: t('analytics.cards.totalComments'),
         value: summary.value.totalComments,
-        icon: 'mdi-comment-text-multiple',
+        icon: 'mdi-comment-text-multiple-outline',
         accentColor: '#7F77DD',
         iconBg: '#EEEDFE',
         iconFg: '#534AB7',
@@ -1174,19 +1162,6 @@ function formatMonthLabel(monthKey) {
     background: rgb(var(--v-theme-background));
 }
 
-/* ── Header ──────────────────────────────────────────────────────────── */
-.page-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    color: rgb(var(--v-theme-on-background));
-}
-
-.page-subtitle {
-    font-size: 0.85rem;
-    color: rgba(var(--v-theme-on-background), 0.5);
-}
-
 .generated-at {
     font-size: 0.75rem;
     color: rgba(var(--v-theme-on-background), 0.4);
@@ -1387,9 +1362,6 @@ function formatMonthLabel(monthKey) {
 
 /* ── Shared card shell ───────────────────────────────────────────────── */
 .analytics-card {
-    border-radius: 14px !important;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.07) !important;
-    background: rgb(var(--v-theme-surface)) !important;
     transition: box-shadow 0.18s ease;
 }
 
@@ -1527,13 +1499,6 @@ function formatMonthLabel(monthKey) {
     white-space: nowrap;
 }
 
-.empty-list-msg {
-    padding: 24px 16px;
-    font-size: 0.85rem;
-    color: rgba(var(--v-theme-on-surface), 0.4);
-    text-align: center;
-}
-
 /* ── Misc ────────────────────────────────────────────────────────────── */
 .chart-skeleton {
     height: 300px;
@@ -1547,9 +1512,6 @@ function formatMonthLabel(monthKey) {
 @media (max-width: 600px) {
     .analytics-page {
         padding-inline: 12px;
-    }
-    .page-title {
-        font-size: 1.35rem;
     }
 }
 </style>
