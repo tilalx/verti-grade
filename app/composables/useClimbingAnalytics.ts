@@ -74,7 +74,9 @@ const defaultResult: ClimbingAnalyticsResponse = {
 export function useClimbingAnalytics() {
     const analytics = ref<ClimbingAnalyticsResponse | null>(null)
     const loading = ref(false)
-    const error = ref(false)
+    // Shared state, not a plain ref: the fetch runs during SSR, so a failure
+    // only reaches the client through the payload.
+    const error = useState('climbing-analytics-error', () => false)
 
     const normalized = computed(() => analytics.value ?? defaultResult)
     const hasData = computed(() => normalized.value.summary.totalRoutes > 0)

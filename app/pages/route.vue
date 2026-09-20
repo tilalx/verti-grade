@@ -329,10 +329,7 @@ const avgPerceivedDifficulty = computed(() => {
 // ── Data fetching ──────────────────────────────────────────────────────────
 
 const getRouteMetadata = async (): Promise<void> => {
-    if (!route_id.value) {
-        navigateTo('/404')
-        return
-    }
+    if (!route_id.value) return
     try {
         const record = await pb
             .collection('routes')
@@ -342,7 +339,7 @@ const getRouteMetadata = async (): Promise<void> => {
             creator: normalizeCreators(record.creator),
         }
     } catch {
-        navigateTo('/404')
+        metadata.value = null
     }
 }
 
@@ -420,10 +417,7 @@ function adjustColor(hex: string, amount: number): string {
 // refs server-side and returns them for the payload; on hydration the handler
 // is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('route-detail', async () => {
-    if (!route_id.value) {
-        await navigateTo('/404')
-        return null
-    }
+    if (!route_id.value) return null
     await Promise.all([getRouteMetadata(), getAllRouteRatings()])
     return { metadata: metadata.value, reviews: reviews.value }
 })
@@ -432,6 +426,11 @@ if (initial.value) {
     metadata.value = initial.value.metadata
     reviews.value = initial.value.reviews
 }
+
+// navigateTo() inside the handler is swallowed — the redirect only becomes a
+// real 302 (SSR) or router push (client nav) from the setup body.
+if (!metadata.value) await navigateTo('/404')
+
 loading.value = false
 
 onMounted(async () => {

@@ -8,11 +8,20 @@ import type { Page } from '@playwright/test'
  * longer a hydration signal either (it server-renders now), so both layouts
  * carry a client-only 'page-hydrated' marker to wait on.
  */
-export async function gotoSettled(page: Page, path: string) {
+export async function gotoSettled(
+    page: Page,
+    path: string,
+    expectPath?: string | RegExp,
+) {
     await page.goto(path)
     await page
         .locator('[data-testid="page-hydrated"]')
         .waitFor({ state: 'attached' })
+    // Both layouts carry the hydration marker, so a server-side auth redirect
+    // to /auth/login settles just as happily as the real page. Callers that
+    // must be on the page they asked for say so, and get an honest failure
+    // instead of a puzzling missing-element one further down.
+    if (expectPath) await page.waitForURL(expectPath)
 }
 
 export async function assertSettledUrl(page: Page, path: string | RegExp) {

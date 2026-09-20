@@ -99,6 +99,18 @@ describe('useClimbingAnalytics', () => {
         expect(hasData.value).toBe(false)
     })
 
+    it('keeps the error flag in shared state so an SSR failure reaches the client', async () => {
+        fetchMock.mockRejectedValue(new Error('Network failure'))
+        const { load, error } = useClimbingAnalytics()
+
+        await load()
+
+        // A plain ref() would die with the server-side instance; living under
+        // a useState key is what carries the failure over in the payload.
+        expect(error.value).toBe(true)
+        expect(useState('climbing-analytics-error').value).toBe(true)
+    })
+
     it('sets error flag when API returns an error response', async () => {
         fetchMock.mockRejectedValue({ data: { message: 'Unauthorized' } })
         const { load, error } = useClimbingAnalytics()

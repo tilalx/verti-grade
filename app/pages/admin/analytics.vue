@@ -560,9 +560,13 @@ const {
 
 const { error: notifyError } = useNotification()
 
-watch(error, (hasError) => {
-    if (hasError) notifyError(t('analytics.error'))
-})
+watch(
+    error,
+    (hasError) => {
+        if (hasError) notifyError(t('analytics.error'))
+    },
+    { immediate: true },
+)
 
 const showAllSetters = ref(false)
 

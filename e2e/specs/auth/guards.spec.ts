@@ -53,9 +53,9 @@ test.describe('routesetter guard', () => {
     test('the users API refuses a create from a routesetter session', async ({
         setterPage: page,
     }) => {
-        // storageState's localStorage only applies once a page has loaded
-        // the matching origin, so navigate before reading the auth token.
-        await gotoSettled(page, '/admin/routes')
+        // authHeader() reads the pb_auth cookie off the document, so a page
+        // on the app origin has to be loaded before the token is readable.
+        await gotoSettled(page, '/admin/routes', '**/admin/routes')
         const res = await page.request.post('/api/collections/users/records', {
             headers: await authHeader(page),
             data: {
@@ -68,7 +68,7 @@ test.describe('routesetter guard', () => {
     })
 
     test('can reach /admin/routes', async ({ setterPage: page }) => {
-        await gotoSettled(page, '/admin/routes')
+        await gotoSettled(page, '/admin/routes', '**/admin/routes')
         await expect(page.getByTestId('routes-create-open')).toBeVisible()
     })
 })

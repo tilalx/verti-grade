@@ -3,7 +3,7 @@
         v-model="visible"
         :color="color"
         location="top"
-        timeout="4000"
+        timeout="6000"
         rounded="lg"
         data-testid="global-snackbar"
     >

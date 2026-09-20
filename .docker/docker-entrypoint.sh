@@ -13,16 +13,28 @@ cat /etc/hosts.bak > /etc/hosts
 # Mount real certs at /etc/nginx/ssl/cert.pem and /etc/nginx/ssl/key.pem to override.
 SSL_CERT=/etc/nginx/ssl/cert.pem
 SSL_KEY=/etc/nginx/ssl/key.pem
+# SSL_DNS_NAMES adds comma-separated hostnames to the SAN, for callers that
+# reach the container under a name of their own (the e2e harness does).
 if [ ! -f "$SSL_CERT" ] || [ ! -f "$SSL_KEY" ]; then
     echo "[nginx] no TLS certificate found — generating self-signed certificate..."
     mkdir -p /etc/nginx/ssl
+    SAN="DNS:localhost,IP:127.0.0.1"
+    if [ -n "$SSL_DNS_NAMES" ]; then
+        IFS=',' read -ra EXTRA_NAMES <<< "$SSL_DNS_NAMES"
+        for name in "${EXTRA_NAMES[@]}"; do
+            SAN="$SAN,DNS:$name"
+        done
+    fi
+    # CA:TRUE so the cert can be installed as a trust anchor; it signs only
+    # itself, and nothing trusts it unless someone explicitly adds it.
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
         -keyout "$SSL_KEY" \
         -out "$SSL_CERT" \
         -subj "/CN=verti-grade/O=Verti-Grade/C=DE" \
-        -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" \
+        -addext "subjectAltName=$SAN" \
+        -addext "basicConstraints=critical,CA:TRUE" \
         2>/dev/null
-    echo "[nginx] self-signed certificate generated (valid 10 years)"
+    echo "[nginx] self-signed certificate generated (valid 10 years, SAN: $SAN)"
 fi
 
 echo ""
