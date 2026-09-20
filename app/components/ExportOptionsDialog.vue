@@ -129,7 +129,7 @@ const confirm = () => {
         data-testid="export-options-dialog"
     >
         <div class="d-flex align-center justify-space-between mb-1">
-            <span class="text-body-2 text-medium-emphasis">
+            <span class="text-body-medium text-medium-emphasis">
                 {{ $t('export.columns') }}
             </span>
             <v-btn

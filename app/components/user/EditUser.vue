@@ -36,10 +36,12 @@
             />
 
             <div class="flex-grow-1 overflow-hidden">
-                <div class="text-h6 font-weight-bold text-truncate">
+                <div class="text-title-large font-weight-bold text-truncate">
                     {{ $t('users.edit') }}
                 </div>
-                <div class="text-body-2 text-medium-emphasis text-truncate">
+                <div
+                    class="text-body-medium text-medium-emphasis text-truncate"
+                >
                     {{ editableUser.email }}
                 </div>
             </div>

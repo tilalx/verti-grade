@@ -19,10 +19,10 @@
                     <v-icon icon="mdi-account-plus-outline" size="22" />
                 </v-avatar>
                 <div>
-                    <div class="text-h6 font-weight-bold">
+                    <div class="text-title-large font-weight-bold">
                         {{ $t('users.create') }}
                     </div>
-                    <div class="text-body-2 text-medium-emphasis">
+                    <div class="text-body-medium text-medium-emphasis">
                         {{ $t('users.createHint') }}
                     </div>
                 </div>

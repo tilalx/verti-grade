@@ -1,7 +1,7 @@
 <template>
     <v-card border flat>
         <v-card-item>
-            <v-card-title class="text-h6 font-weight-bold">
+            <v-card-title class="text-title-large font-weight-bold">
                 {{ t('permissions.title') }}
             </v-card-title>
         </v-card-item>

@@ -91,11 +91,11 @@
         <Transition name="pcf-slide-down">
             <div v-if="password" class="mt-n2 mb-3 px-1">
                 <div class="d-flex align-center justify-space-between mb-1">
-                    <span class="text-caption text-medium-emphasis">
+                    <span class="text-body-small text-medium-emphasis">
                         {{ $t('account.passwordStrength') }}
                     </span>
                     <span
-                        class="text-caption font-weight-bold"
+                        class="text-body-small font-weight-bold"
                         :class="`text-${strengthColor}`"
                     >
                         {{ $t(`account.strength.${strengthLabel}`) }}
@@ -131,7 +131,7 @@
                             size="14"
                             class="mr-1 flex-shrink-0"
                         />
-                        <span class="text-caption">
+                        <span class="text-body-small">
                             {{ $t(`account.requirements.${req.key}`) }}
                         </span>
                     </div>

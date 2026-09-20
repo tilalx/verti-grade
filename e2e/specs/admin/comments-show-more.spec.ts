@@ -22,7 +22,13 @@ test('show more expands a clipped comment', async ({
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
 
     await gotoSettled(page, '/admin/comments')
-    const card = page.locator('[data-testid^="comment-card-"]').first()
+    // Pin to the card we just edited: the list is sorted by creation date, so
+    // "first" is only incidentally the one carrying our text.
+    const card = page
+        .locator('[data-testid^="comment-card-"]')
+        .filter({ hasText: testPrefix })
+        .first()
+    await expect(card).toBeVisible()
     const text = card.locator('.comment-card__comment')
     const toggle = card.getByTestId('comment-card-toggle')
 
@@ -60,7 +66,10 @@ test('short comments have no show more button', async ({
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
 
     await gotoSettled(page, '/admin/comments')
-    const card = page.locator('[data-testid^="comment-card-"]').first()
+    const card = page
+        .locator('[data-testid^="comment-card-"]')
+        .filter({ hasText: testPrefix })
+        .first()
     await expect(card).toContainText('kurz')
     await expect(card.getByTestId('comment-card-toggle')).toHaveCount(0)
 })

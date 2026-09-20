@@ -84,7 +84,9 @@ function handleClear() {
     <v-bottom-sheet v-if="!smAndUp" v-model="sheetOpen" inset>
         <v-card class="py-2" data-testid="filter-sheet">
             <v-toolbar color="transparent" flat density="compact" class="pt-1">
-                <v-toolbar-title class="text-body-1 font-weight-semibold pl-2">
+                <v-toolbar-title
+                    class="text-body-large font-weight-semibold pl-2"
+                >
                     {{ $t('filter.title') }}
                 </v-toolbar-title>
                 <template #append>

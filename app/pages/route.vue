@@ -53,7 +53,7 @@
                     <div class="d-flex align-end justify-space-between ga-3">
                         <div>
                             <h1
-                                class="text-h5 font-weight-bold text-white mb-1"
+                                class="text-headline-small font-weight-bold text-white mb-1"
                                 style="
                                     line-height: 1.2;
                                     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -71,7 +71,7 @@
                                     >mdi-account-hard-hat-outline</v-icon
                                 >
                                 <span
-                                    class="text-body-2"
+                                    class="text-body-medium"
                                     style="color: rgba(255, 255, 255, 0.8)"
                                     >{{ metadata.creator.join(', ') }}</span
                                 >
@@ -102,12 +102,12 @@
                                 >mdi-star</v-icon
                             >
                             <span
-                                class="text-h6 font-weight-bold"
+                                class="text-title-large font-weight-bold"
                                 data-testid="route-avg-rating"
                                 >{{ avgRating }}</span
                             >
                         </div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-body-small text-medium-emphasis">
                             {{ t('ratings.score') }}
                         </div>
                     </div>
@@ -116,10 +116,10 @@
 
                     <!-- Review count -->
                     <div class="text-center">
-                        <span class="text-h6 font-weight-bold">{{
+                        <span class="text-title-large font-weight-bold">{{
                             reviews.length
                         }}</span>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-body-small text-medium-emphasis">
                             {{ t('ratings.climber_reviews') }}
                         </div>
                     </div>
@@ -132,11 +132,11 @@
                             <v-icon size="18" color="primary"
                                 >mdi-trending-up</v-icon
                             >
-                            <span class="text-h6 font-weight-bold">{{
+                            <span class="text-title-large font-weight-bold">{{
                                 avgPerceivedDifficulty || '—'
                             }}</span>
                         </div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-body-small text-medium-emphasis">
                             {{ t('ratings.difficulty') }}
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                         <v-icon size="16" color="medium-emphasis"
                             >mdi-calendar-outline</v-icon
                         >
-                        <span class="text-body-2 text-medium-emphasis">{{
+                        <span class="text-body-medium text-medium-emphasis">{{
                             formattedScrewDate
                         }}</span>
                     </div>
@@ -167,7 +167,7 @@
                         <v-icon size="16" color="medium-emphasis"
                             >mdi-pound</v-icon
                         >
-                        <span class="text-body-2 text-medium-emphasis"
+                        <span class="text-body-medium text-medium-emphasis"
                             >{{ t('climbing.anchor_point') }}:
                             {{ metadata.anchor_point }}</span
                         >
@@ -180,7 +180,7 @@
                             >mdi-information-outline</v-icon
                         >
                         <span
-                            class="text-body-2 text-medium-emphasis font-italic"
+                            class="text-body-medium text-medium-emphasis font-italic"
                             >{{ metadata.comment }}</span
                         >
                     </div>
@@ -198,7 +198,7 @@
 
                 <!-- ── Reviews section ────────────────────────────────────── -->
                 <div class="d-flex align-center justify-space-between mb-3">
-                    <span class="text-subtitle-1 font-weight-bold">
+                    <span class="text-body-large font-weight-bold">
                         {{ t('ratings.climber_reviews') }}
                     </span>
                     <v-chip

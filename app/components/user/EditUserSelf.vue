@@ -35,10 +35,14 @@
                 </div>
 
                 <div class="flex-grow-1 overflow-hidden ml-3">
-                    <div class="text-h6 font-weight-bold text-truncate">
+                    <div
+                        class="text-title-large font-weight-bold text-truncate"
+                    >
                         {{ fullName || $t('account.userProfile') }}
                     </div>
-                    <div class="text-body-2 text-medium-emphasis text-truncate">
+                    <div
+                        class="text-body-medium text-medium-emphasis text-truncate"
+                    >
                         {{ user.email }}
                     </div>
                 </div>

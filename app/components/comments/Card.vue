@@ -31,7 +31,10 @@
                     :alt="comment.userName"
                     cover
                 />
-                <span v-else class="text-caption font-weight-bold text-white">
+                <span
+                    v-else
+                    class="text-body-small font-weight-bold text-white"
+                >
                     {{ initials(comment.userName) }}
                 </span>
             </v-avatar>
@@ -122,11 +125,11 @@
                 <NuxtLink
                     v-if="comment.routeId"
                     :to="`/route?id=${comment.routeId}`"
-                    class="comment-card__route-link text-body-2 font-weight-medium text-primary text-decoration-none"
+                    class="comment-card__route-link text-body-medium font-weight-medium text-primary text-decoration-none"
                 >
                     {{ comment.routeName }}
                 </NuxtLink>
-                <span v-else class="text-body-2 font-weight-medium">{{
+                <span v-else class="text-body-medium font-weight-medium">{{
                     comment.routeName
                 }}</span>
             </div>
@@ -209,13 +212,23 @@ const isLong = ref(false)
 
 // A character count can't predict how many lines the text wraps to, so measure
 // the clamped element instead: overflow means the clamp actually hides
-// something. ponytail: measured once on mount, not on resize — re-measure with
-// a ResizeObserver if cards start resizing after load.
-onMounted(async () => {
-    await nextTick()
+// something. One measurement is not enough — a web font swapping in re-wraps
+// the text, and a recycled card gets new text without remounting.
+function measureClamp() {
     const el = commentEl.value
     if (el) isLong.value = el.scrollHeight > el.clientHeight + 1
+}
+
+onMounted(async () => {
+    await nextTick()
+    measureClamp()
+    document.fonts?.ready.then(measureClamp)
 })
+
+watch(
+    () => props.comment.comment,
+    () => nextTick(measureClamp),
+)
 
 // ── Date ────────────────────────────────────────────────────────────────────
 

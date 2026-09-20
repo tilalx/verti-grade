@@ -20,10 +20,11 @@ test('shows an error and keeps the form open when save fails', async ({
 }) => {
     await gotoSettled(page, '/admin/settings')
 
-    const original = await page
-        .getByTestId('settings-org-name')
-        .locator('input')
-        .inputValue()
+    // The record is fetched lazily by the layout, so the field is briefly
+    // empty — snapshotting too early compares against the wrong baseline.
+    const orgName = page.getByTestId('settings-org-name').locator('input')
+    await expect(orgName).not.toHaveValue('')
+    const original = await orgName.inputValue()
 
     await page.route('**/api/collections/settings/records/**', (route) =>
         route.abort('failed'),

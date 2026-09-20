@@ -18,7 +18,7 @@
             >
                 <v-avatar size="36" :color="image ? undefined : 'primary'">
                     <v-img v-if="image" :src="image" :alt="displayName" cover />
-                    <span v-else class="text-subtitle-2 font-weight-bold">{{
+                    <span v-else class="text-title-small font-weight-bold">{{
                         initials
                     }}</span>
                 </v-avatar>

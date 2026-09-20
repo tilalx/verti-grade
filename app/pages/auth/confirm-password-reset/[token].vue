@@ -65,7 +65,7 @@
                         >
                     </div>
 
-                    <p class="text-body-2 text-medium-emphasis mb-8">
+                    <p class="text-body-medium text-medium-emphasis mb-8">
                         {{ $t('notifications.success.resetPassword') }}
                     </p>
 
@@ -90,7 +90,7 @@
                     <v-icon size="48" color="error" class="mb-4"
                         >mdi-link-off</v-icon
                     >
-                    <p class="text-body-2 text-medium-emphasis mb-8">
+                    <p class="text-body-medium text-medium-emphasis mb-8">
                         {{ $t('notifications.error.resetPassword') }}
                     </p>
                     <v-btn

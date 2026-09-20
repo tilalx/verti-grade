@@ -20,7 +20,7 @@
             <v-icon size="48" color="warning" class="mb-3"
                 >mdi-alert-circle-outline</v-icon
             >
-            <p class="text-body-2 text-medium-emphasis">
+            <p class="text-body-medium text-medium-emphasis">
                 {{ $t('notifications.error.no_auth_methods_available') }}
             </p>
         </div>
@@ -133,7 +133,7 @@
                         <div class="d-flex align-center ga-3 my-4">
                             <v-divider />
                             <span
-                                class="text-caption text-medium-emphasis text-no-wrap"
+                                class="text-body-small text-medium-emphasis text-no-wrap"
                             >
                                 {{ $t('account.or_login_with') }}
                             </span>
