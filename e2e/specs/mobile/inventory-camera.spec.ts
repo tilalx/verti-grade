@@ -12,9 +12,12 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         baseURL,
         ignoreHTTPSErrors: true,
     })
+    // The inventory is scoped to one site, so scan a route known to be there.
     const res = await routeRes.get(
         '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
+            encodeURIComponent(
+                'name ~ "e2e-route-" && archived = false && location = "Hanau"',
+            ) +
             '&perPage=1',
     )
     const body = await res.json()
@@ -41,9 +44,17 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     const page = await context.newPage()
 
     await gotoSettled(page, '/admin/inventory')
-    // The instructions dialog auto-opens on every mount when on mobile
-    // (app/pages/admin/inventory.vue onMounted) and otherwise blocks clicks.
-    await page.keyboard.press('Escape')
+    // The instructions dialog is shown once per device; skip it so the first
+    // tap lands on the button rather than dismissing the dialog.
+    await page.evaluate(() => {
+        localStorage.setItem('inventory-instructions-seen', '1')
+        localStorage.removeItem('inventory-scanned-route-ids')
+    })
+    await page.reload()
+
+    await page.getByTestId('inventory-location').click()
+    await page.getByRole('option', { name: 'Hanau' }).click()
+
     await page.getByTestId('inventory-start').click()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1', {
         timeout: 15_000,

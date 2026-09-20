@@ -207,14 +207,9 @@
         "start": "Почати сканування",
         "stop": "Зупинити сканування",
         "finish": "Завершити інвентаризацію",
-        "scannedCount": "Відскановано: {count}",
-        "pendingCount": "Залишилось: {count}",
-        "lastScanned": "Останнє сканування",
         "invalidCode": "Код не розпізнано як маршрут.",
         "unknownRoute": "Маршрут не знайдено.",
         "noScans": "Маршрути ще не сканувались.",
-        "dialogTitle": "Архівувати відсутні маршрути?",
-        "dialogDescription": "Наступні маршрути не були відскановані та будуть архівовані:",
         "archiveSuccess": "Інвентаризацію завершено. Архівовано маршрутів: {count}.",
         "nothingToArchive": "Всі маршрути відскановано. Нічого архівувати.",
         "archiveError": "Помилка архівування відсутніх маршрутів.",
@@ -234,7 +229,32 @@
         "reviewTitle": "Перегляд результатів",
         "reviewFoundTitle": "Проскановані маршрути",
         "reviewMissingTitle": "Маршрути не знайдено",
-        "reviewMissingDescription": "Ці маршрути не були відскановані й будуть автоматично заархівовані."
+        "reviewMissingDescription": "Ці маршрути не знайдено. Непозначені залишаються активними.",
+        "locationLabel": "Локація",
+        "locationHint": "Враховуються та архівуються лише маршрути цієї локації.",
+        "locationRequired": "Оберіть локацію, щоб почати.",
+        "locationRestoreHint": "Збережений прогрес із попередньої версії — оберіть відповідний зал.",
+        "changeLocation": "Змінити локацію",
+        "wrongLocation": "{name} належить до {location} і не був зарахований.",
+        "progress": "Знайдено {found} із {total}",
+        "stillToFind": "Ще знайти",
+        "markFound": "Позначити як знайдений",
+        "markedFound": "{name} позначено як знайдений.",
+        "undo": "Скасувати",
+        "undone": "{name} вилучено з цієї інвентаризації.",
+        "alreadyCounted": "{name} уже зараховано.",
+        "addManually": "Додати вручну",
+        "addManuallyTitle": "Позначити маршрут як знайдений",
+        "addManuallyHint": "Для пошкоджених або недосяжних табличок.",
+        "searchRoutes": "Пошук маршрутів",
+        "allFound": "Усі маршрути цієї локації знайдено.",
+        "unlocatedNote": "{count} активних маршрутів без локації не входять до цієї інвентаризації.",
+        "toggleTorch": "Увімкнути ліхтарик",
+        "resetTitle": "Скинути інвентаризацію?",
+        "resetMessage": "Буде видалено {count} зарахованих маршрутів. Нічого не архівується.",
+        "archiveSelected": "Архівувати {count}",
+        "archiveNone": "Нічого не архівувати",
+        "droppedForLocation": "{count} збережених сканувань з іншої локації вилучено."
     },
     "notifications": {
         "success": {
@@ -305,7 +325,8 @@
             "login": "Вхід - Verti-Grade",
             "resetPassword": "Скидання пароля - Verti-Grade",
             "notFound": "Сторінку не знайдено - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade"
+            "routeNamed": "{name} - Verti-Grade",
+            "inventory": "Інвентаризація маршрутів - Verti-Grade"
         },
         "content": {
             "settings": "Налаштування",
@@ -313,7 +334,8 @@
             "index": "Маршрути для скелелазіння",
             "comments": "Коментарі",
             "users": "Управління користувачами",
-            "dashboard": "Управління маршрутами"
+            "dashboard": "Управління маршрутами",
+            "inventory": "Інвентаризація маршрутів"
         }
     },
     "validation": {

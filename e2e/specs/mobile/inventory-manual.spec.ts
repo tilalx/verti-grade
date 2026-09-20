@@ -1,0 +1,101 @@
+import type { Page } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
+import { gotoSettled } from '../../support/nav'
+
+/**
+ * The parts of a stock-take that happen without the camera: marking a route
+ * found when its label is damaged, and undoing a scan that was wrong.
+ */
+
+async function openScopedInventory(page: Page) {
+    await gotoSettled(page, '/admin/inventory')
+    await page.evaluate(() => {
+        localStorage.setItem('inventory-instructions-seen', '1')
+        localStorage.setItem(
+            'inventory-scanned-route-ids',
+            JSON.stringify({ v: 2, location: 'Hanau', ids: [] }),
+        )
+    })
+    await page.reload()
+    await page
+        .locator('[data-testid="inventory-progress"]')
+        .waitFor({ state: 'visible' })
+}
+
+async function firstMissingRouteId(page: Page) {
+    const res = await page.request.get(
+        '/api/collections/routes/records?' +
+            new URLSearchParams({
+                filter: 'name ~ "e2e-route-" && archived = false && location = "Hanau"',
+                perPage: '1',
+                sort: 'anchor_point,name',
+            }),
+    )
+    return (await res.json()).items[0].id as string
+}
+
+test('marks a route found from the still-to-find list and undoes it', async ({
+    adminPage: page,
+}) => {
+    await openScopedInventory(page)
+    const routeId = await firstMissingRouteId(page)
+
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toBeVisible()
+
+    await page.getByTestId(`inventory-mark-${routeId}`).click()
+
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toHaveCount(
+        0,
+    )
+
+    // Undo puts it straight back into the missing list.
+    await page.getByTestId('inventory-found-toggle').click()
+    await page.getByTestId(`inventory-undo-${routeId}`).click()
+
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toBeVisible()
+})
+
+test('marks a route found through the manual search dialog', async ({
+    adminPage: page,
+}) => {
+    await openScopedInventory(page)
+    const routeId = await firstMissingRouteId(page)
+    const routeName = await page
+        .getByTestId(`inventory-missing-${routeId}`)
+        .locator('.v-list-item-title')
+        .innerText()
+
+    await page.getByTestId('inventory-manual-open').click()
+    const dialog = page.getByTestId('inventory-manual-dialog')
+    await expect(dialog).toBeVisible()
+
+    await page
+        .getByTestId('inventory-manual-search')
+        .locator('input')
+        .fill(routeName)
+    await page.getByTestId(`inventory-manual-item-${routeId}`).click()
+
+    await expect(dialog).toBeHidden()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+})
+
+test('reset clears progress only after confirmation', async ({
+    adminPage: page,
+}) => {
+    await openScopedInventory(page)
+    const routeId = await firstMissingRouteId(page)
+    await page.getByTestId(`inventory-mark-${routeId}`).click()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+
+    await page.getByTestId('inventory-reset').click()
+    await expect(page.getByTestId('confirm-dialog')).toBeVisible()
+    await page.getByTestId('confirm-dialog-cancel').click()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+
+    await page.getByTestId('inventory-reset').click()
+    await page.getByTestId('confirm-dialog-confirm').click()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+})

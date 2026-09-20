@@ -207,14 +207,9 @@
         "start": "Начать сканирование",
         "stop": "Остановить сканирование",
         "finish": "Завершить инвентаризацию",
-        "scannedCount": "Отсканировано: {count}",
-        "pendingCount": "Осталось: {count}",
-        "lastScanned": "Последнее сканирование",
         "invalidCode": "Код не распознан как маршрут.",
         "unknownRoute": "Маршрут не найден.",
         "noScans": "Маршруты ещё не сканировались.",
-        "dialogTitle": "Архивировать отсутствующие маршруты?",
-        "dialogDescription": "Следующие маршруты не были отсканированы и будут архивированы:",
         "archiveSuccess": "Инвентаризация завершена. Архивировано маршрутов: {count}.",
         "nothingToArchive": "Все маршруты отсканированы. Нечего архивировать.",
         "archiveError": "Ошибка архивирования отсутствующих маршрутов.",
@@ -234,7 +229,32 @@
         "reviewTitle": "Проверка результатов",
         "reviewFoundTitle": "Найденные маршруты",
         "reviewMissingTitle": "Маршруты не найдены",
-        "reviewMissingDescription": "Эти маршруты не были отсканированы и будут автоматически архивированы."
+        "reviewMissingDescription": "Эти маршруты не найдены. Не отмеченные остаются активными.",
+        "locationLabel": "Локация",
+        "locationHint": "Учитываются и архивируются только маршруты этой локации.",
+        "locationRequired": "Выберите локацию, чтобы начать.",
+        "locationRestoreHint": "Сохранённый прогресс из прежней версии — выберите соответствующий зал.",
+        "changeLocation": "Сменить локацию",
+        "wrongLocation": "{name} относится к {location} и не был учтён.",
+        "progress": "Найдено {found} из {total}",
+        "stillToFind": "Осталось найти",
+        "markFound": "Отметить как найденный",
+        "markedFound": "{name} отмечен как найденный.",
+        "undo": "Отменить",
+        "undone": "{name} удалён из этой инвентаризации.",
+        "alreadyCounted": "{name} уже учтён.",
+        "addManually": "Добавить вручную",
+        "addManuallyTitle": "Отметить маршрут как найденный",
+        "addManuallyHint": "Для повреждённых или недоступных табличек.",
+        "searchRoutes": "Поиск маршрутов",
+        "allFound": "Все маршруты этой локации найдены.",
+        "unlocatedNote": "{count} активных маршрутов без локации не входят в эту инвентаризацию.",
+        "toggleTorch": "Включить фонарик",
+        "resetTitle": "Сбросить инвентаризацию?",
+        "resetMessage": "Будут удалены {count} учтённых маршрутов. Ничего не архивируется.",
+        "archiveSelected": "Архивировать {count}",
+        "archiveNone": "Ничего не архивировать",
+        "droppedForLocation": "{count} сохранённых сканов из другой локации удалены."
     },
     "notifications": {
         "success": {
@@ -305,7 +325,8 @@
             "login": "Вход - Verti-Grade",
             "resetPassword": "Сброс пароля - Verti-Grade",
             "notFound": "Страница не найдена - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade"
+            "routeNamed": "{name} - Verti-Grade",
+            "inventory": "Инвентаризация маршрутов - Verti-Grade"
         },
         "content": {
             "settings": "Настройки",
@@ -313,7 +334,8 @@
             "index": "Маршруты для скалолазания",
             "comments": "Комментарии",
             "users": "Управление пользователями",
-            "dashboard": "Управление маршрутами"
+            "dashboard": "Управление маршрутами",
+            "inventory": "Инвентаризация маршрутов"
         }
     },
     "validation": {

@@ -207,14 +207,9 @@
         "start": "Taramayı Başlat",
         "stop": "Taramayı Durdur",
         "finish": "Envanteri Bitir",
-        "scannedCount": "Taranan rotalar: {count}",
-        "pendingCount": "Bulunacak rotalar: {count}",
-        "lastScanned": "Son taranan",
         "invalidCode": "Taranan kod tanınan bir rota değil.",
         "unknownRoute": "Taranan rota bulunamadı.",
         "noScans": "Henüz hiç rota taranmadı.",
-        "dialogTitle": "Eksik rotalar arşivlensin mi?",
-        "dialogDescription": "Aşağıdaki rotalar taranmadı ve arşivlenecek:",
         "archiveSuccess": "Envanter tamamlandı. {count} rota arşivlendi.",
         "nothingToArchive": "Tüm rotalar tarandı. Arşivlenecek bir şey yok.",
         "archiveError": "Eksik rotalar arşivlenemedi.",
@@ -234,7 +229,32 @@
         "reviewTitle": "Taramayı gözden geçirin",
         "reviewFoundTitle": "Taranan rotalar",
         "reviewMissingTitle": "Tarama sırasında bulunmayanlar",
-        "reviewMissingDescription": "Bu rotalar taranmadı ve otomatik olarak arşivlenecek."
+        "reviewMissingDescription": "Bu rotalar bulunamadı. İşaretlenmeyenler aktif kalır.",
+        "locationLabel": "Salon",
+        "locationHint": "Yalnızca bu konumdaki rotalar sayılır ve arşivlenir.",
+        "locationRequired": "Başlamak için bir konum seçin.",
+        "locationRestoreHint": "Önceki sürümden kalan ilerleme — ait olduğu salonu seçin.",
+        "changeLocation": "Konumu değiştir",
+        "wrongLocation": "{name} {location} salonuna ait, sayılmadı.",
+        "progress": "{total} rotadan {found} tanesi bulundu",
+        "stillToFind": "Hâlâ bulunacaklar",
+        "markFound": "Bulundu olarak işaretle",
+        "markedFound": "{name} bulundu olarak işaretlendi.",
+        "undo": "Geri al",
+        "undone": "{name} bu sayımdan çıkarıldı.",
+        "alreadyCounted": "{name} zaten sayılmıştı.",
+        "addManually": "Elle ekle",
+        "addManuallyTitle": "Rotayı bulundu olarak işaretle",
+        "addManuallyHint": "Hasarlı veya erişilemeyen etiketler için.",
+        "searchRoutes": "Rota ara",
+        "allFound": "Bu konumdaki tüm rotalar bulundu.",
+        "unlocatedNote": "{count} aktif rotanın konumu yok ve bu sayıma dahil değil.",
+        "toggleTorch": "Feneri aç/kapat",
+        "resetTitle": "Sayım sıfırlansın mı?",
+        "resetMessage": "Şu ana kadar sayılan {count} rota silinir. Hiçbir şey arşivlenmez.",
+        "archiveSelected": "{count} rotayı arşivle",
+        "archiveNone": "Hiçbir şeyi arşivleme",
+        "droppedForLocation": "Başka bir konuma ait {count} kayıtlı tarama kaldırıldı."
     },
     "notifications": {
         "success": {
@@ -305,7 +325,8 @@
             "login": "Giriş Yap - Verti-Grade",
             "resetPassword": "Parolayı Sıfırla - Verti-Grade",
             "notFound": "Sayfa Bulunamadı - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade"
+            "routeNamed": "{name} - Verti-Grade",
+            "inventory": "Rota Sayımı - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -313,7 +334,8 @@
             "index": "Tırmanış Rotaları",
             "comments": "Yorumlar",
             "users": "Kullanıcı Yönetimi",
-            "dashboard": "Rota Yönetimi"
+            "dashboard": "Rota Yönetimi",
+            "inventory": "Rota Sayımı"
         }
     },
     "validation": {
