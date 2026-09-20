@@ -34,6 +34,27 @@
                 >
                     {{ $t('legal.imprint') }}
                 </v-btn>
+
+                <span
+                    v-if="
+                        (settings.privacy_url || settings.imprint_url) &&
+                        settings.contact_email
+                    "
+                    class="link-sep"
+                    >·</span
+                >
+
+                <!-- DSA Art. 11/12: a single point of contact, publicly reachable. -->
+                <v-btn
+                    v-if="settings.contact_email"
+                    :href="`mailto:${settings.contact_email}`"
+                    variant="plain"
+                    density="compact"
+                    class="footer-link-btn"
+                    data-testid="footer-contact"
+                >
+                    {{ $t('settings.contactEmail') }}
+                </v-btn>
             </div>
 
             <!-- Center: status pills -->

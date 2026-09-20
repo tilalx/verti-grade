@@ -30,6 +30,9 @@ declare global {
     t: (key: string) => string;
     locale: { value: string };
   };
+  var useNuxtApp: () => {
+    $i18n: { t: (key: string) => string };
+  };
   var useAsyncData: <T>(
     key: string,
     handler: () => Promise<T>,
@@ -69,6 +72,10 @@ const i18nGetter = () => ({
   t: (key: string) => key,
   locale: vueRef('en'),
 });
+
+// The app-level i18n composer, used where useI18n() can't run (after an await,
+// or in route middleware).
+const nuxtAppGetter = () => ({ $i18n: { t: (key: string) => key } });
 
 // Minimal useAsyncData stub: runs the handler immediately and exposes the
 // same refs the real composable returns. Specs drive it via the $fetch mock
@@ -115,6 +122,7 @@ const useStateGetter = <T>(key: string, init?: () => T) => {
 vi.stubGlobal('useRuntimeConfig', runtimeConfigGetter);
 vi.stubGlobal('usePocketbase', pocketbaseGetter);
 vi.stubGlobal('useI18n', i18nGetter);
+vi.stubGlobal('useNuxtApp', nuxtAppGetter);
 vi.stubGlobal('useState', useStateGetter);
 vi.stubGlobal('useAsyncData', useAsyncDataGetter);
 vi.stubGlobal('useVersionCheck', useVersionCheck);

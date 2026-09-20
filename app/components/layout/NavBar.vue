@@ -39,6 +39,7 @@
                 <nav
                     v-if="isLoggedIn"
                     class="nav-links d-none d-md-flex"
+                    data-testid="nav-desktop-links"
                     :aria-label="$t('nav.mainNavigation')"
                 >
                     <LayoutNavLink
@@ -174,6 +175,12 @@ const navLinks = [
         permission: 'manage_users',
     },
     {
+        to: '/admin/reports',
+        icon: 'mdi-flag-outline',
+        label: 'routes.reports',
+        permission: 'manage_reports',
+    },
+    {
         to: '/admin/inventory',
         icon: 'mdi-package-variant-closed',
         label: 'routes.inventory',
@@ -242,8 +249,12 @@ const drawer = ref(false)
     margin-right: 8px;
 }
 
+/* No `display` here: scoped styles are unlayered, and Vuetify 4 ships its
+   helpers inside @layer vuetify-utilities.helpers — an unlayered rule beats a
+   layered one at any specificity, so `display: flex` here silently defeated
+   the `d-none` half of `d-none d-md-flex` and forced the desktop nav onto
+   mobile (pushing the hamburger off-screen). Let the utilities own display. */
 .nav-links {
-    display: flex;
     align-items: center;
     gap: 2px;
 }

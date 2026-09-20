@@ -87,6 +87,44 @@ export interface SettingsRecord extends BaseRecord {
     application_url?: string | null
     organization_name?: string | null
     organization_unit_name?: string | null
+    contact_email?: string | null
+}
+
+export type ReportContentType = 'rating' | 'route'
+export type ReportReason =
+    | 'hate_speech'
+    | 'harassment'
+    | 'violence_threat'
+    | 'sexual_content'
+    | 'personal_data'
+    | 'ip_infringement'
+    | 'spam_fraud'
+    | 'other'
+export type ReportStatus = 'open' | 'actioned' | 'rejected'
+export type ReportDecision = 'content_removed' | 'content_kept'
+
+/**
+ * A DSA Art. 16 notice. content_id is a plain id, not a relation: the report
+ * has to outlive the content it reports, because it is the record proving the
+ * operator acted on the notice.
+ */
+export interface ReportRecord extends BaseRecord {
+    content_type: ReportContentType
+    content_id: RecordId
+    content_url: string
+    content_snapshot?: string | null
+    reason: ReportReason
+    explanation: string
+    notifier_name: string
+    notifier_email: string
+    good_faith: boolean
+    status: ReportStatus
+    decision?: ReportDecision | '' | null
+    decision_reason?: string | null
+    decided_at?: string | null
+    decided_by?: RecordId | null
+    receipt_sent?: boolean
+    notified_at?: string | null
 }
 
 export interface RouteScoreRecord extends RouteRecord {
@@ -103,6 +141,7 @@ export type PocketBaseRecord =
     | RoleRecord
     | UserRecord
     | SettingsRecord
+    | ReportRecord
     | RouteScoreRecord
 
 export interface ListResult<T> {

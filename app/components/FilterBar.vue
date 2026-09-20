@@ -40,10 +40,11 @@ function handleClear() {
                     data-testid="filter-search"
                 />
                 <!-- Mobile: open bottom sheet -->
+                <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
+                     shrinking a small button until it clips its own icon. -->
                 <v-btn
                     v-if="!smAndUp"
                     variant="tonal"
-                    density="compact"
                     size="small"
                     icon
                     :aria-label="$t('filter.title')"
@@ -62,7 +63,6 @@ function handleClear() {
                 <v-btn
                     v-if="smAndUp && activeFilterCount > 0"
                     variant="text"
-                    density="compact"
                     size="small"
                     prepend-icon="mdi-close"
                     data-testid="filter-clear"

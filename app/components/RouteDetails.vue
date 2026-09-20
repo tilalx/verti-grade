@@ -1,108 +1,79 @@
 <template>
     <div class="view-ratings-wrapper">
-        <!-- The button that opens the ratings sheet -->
+        <!-- The button that opens the reviews dialog -->
         <v-btn
-            @click="openSheet"
             color="primary"
             data-testid="route-details-open"
+            @click="openSheet"
         >
             {{ $t('ratings.ratings') }}
         </v-btn>
 
-        <!-- 
-            The v-bottom-sheet provides a native mobile experience by sliding up from the bottom.
-            On desktop, it behaves like a standard centered dialog.
-        -->
-        <v-bottom-sheet v-model="isSheetOpen" inset>
-            <v-card
-                class="d-flex flex-column"
-                style="max-height: 90vh"
-                data-testid="route-details-sheet"
-            >
-                <v-card-item class="py-2">
-                    <v-card-title class="text-headline-small text-center">
-                        {{ $t('ratings.climber_reviews') }}
-                    </v-card-title>
-                    <template v-slot:append>
+        <!-- Centered dialog on desktop, bottom sheet on mobile. v-bottom-sheet
+             stayed bottom-anchored at every width, which left a cramped strip
+             on a 1440px table; the shared shell owns that breakpoint switch. -->
+        <LayoutDialogShell
+            v-model="isSheetOpen"
+            max-width="600"
+            closable
+            sheet-on-mobile
+            :title="$t('ratings.climber_reviews')"
+            data-testid="route-details-sheet"
+        >
+            <v-progress-linear v-if="isLoading" indeterminate color="primary" />
+
+            <div v-if="!isLoading && reviews.length">
+                <CommentsCard
+                    v-for="review in reviews"
+                    :key="review.id"
+                    :comment="review"
+                    date-format="relative"
+                    class="mb-3"
+                >
+                    <template #actions>
+                        <!-- DSA Art. 16(1): the reporting path has to be on
+                             every item wherever it is publicly displayed, not
+                             only on the route page. -->
                         <v-btn
-                            icon
+                            icon="mdi-flag-outline"
                             variant="text"
-                            :aria-label="$t('actions.close')"
-                            @click="isSheetOpen = false"
-                        >
-                            <v-icon>mdi-close</v-icon>
-                        </v-btn>
+                            size="small"
+                            :aria-label="$t('reports.reportAction')"
+                            :title="$t('reports.reportAction')"
+                            data-testid="comment-card-report"
+                            @click="openReport(review.id)"
+                        />
                     </template>
-                </v-card-item>
+                </CommentsCard>
+            </div>
 
-                <v-progress-linear
-                    v-if="isLoading"
-                    indeterminate
-                    color="primary"
-                ></v-progress-linear>
+            <LayoutEmptyState
+                v-if="!isLoading && !reviews.length"
+                icon="mdi-star-shooting-outline"
+                :card="false"
+                :title="$t('ratings.no_reviews_yet')"
+                :hint="$t('ratings.be_the_first')"
+            />
+        </LayoutDialogShell>
 
-                <v-card-text class="flex-grow-1" style="overflow-y: auto">
-                    <!-- List of Review Cards -->
-                    <div v-if="!isLoading && ratings.length > 0">
-                        <v-card
-                            v-for="(review, index) in ratings"
-                            :key="index"
-                            class="mb-4"
-                            variant="tonal"
-                        >
-                            <v-list-item class="py-2">
-                                <!-- Placeholder for user avatar -->
-                                <template v-slot:prepend>
-                                    <v-avatar color="grey-lighten-2">
-                                        <v-icon>mdi-account-outline</v-icon>
-                                    </v-avatar>
-                                </template>
-
-                                <v-list-item-title class="font-weight-bold">
-                                    {{ review.difficulty }}
-                                </v-list-item-title>
-
-                                <v-rating
-                                    :model-value="review.rating"
-                                    readonly
-                                    color="yellow-darken-2"
-                                    density="compact"
-                                    size="small"
-                                    class="mt-1"
-                                ></v-rating>
-                            </v-list-item>
-
-                            <v-card-text v-if="review.comment" class="pt-0">
-                                {{ review.comment }}
-                            </v-card-text>
-                        </v-card>
-                    </div>
-
-                    <!-- Empty State for No Reviews -->
-                    <LayoutEmptyState
-                        v-if="!isLoading && ratings.length === 0"
-                        icon="mdi-star-shooting-outline"
-                        :card="false"
-                        :title="$t('ratings.no_reviews_yet')"
-                        :hint="$t('ratings.be_the_first')"
-                    />
-                </v-card-text>
-            </v-card>
-        </v-bottom-sheet>
+        <ReportsFormDialog
+            v-if="reportTarget"
+            v-model="reportDialog"
+            content-type="rating"
+            :content-id="reportTarget"
+            :content-url="reportUrl"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
 import type { RatingRecord } from '~/types/models'
+import type { CommentCardItem } from '~/components/comments/Card.vue'
+import { formatDifficulty } from '~/utils/formatting'
+import { reportContentUrl } from '~/utils/reports'
 
 const { t } = useI18n()
-
-interface RatingDisplay {
-    rating: number | null | undefined
-    difficulty: string
-    comment: string | null
-}
 
 const props = defineProps<{
     route_id: string
@@ -112,10 +83,23 @@ const pb = usePocketbase() as PocketBase
 const { subscribe, unsubscribeFrom } = usePbSubscription()
 const { error: notifyError } = useNotification()
 
-// Component State
 const isSheetOpen = ref(false)
 const isLoading = ref(false)
-const ratings = ref<RatingDisplay[]>([])
+const reviews = ref<CommentCardItem[]>([])
+
+// One report dialog for the whole list, retargeted per card.
+const reportDialog = ref(false)
+const reportTarget = ref<string | null>(null)
+const reportUrl = computed(() =>
+    reportTarget.value
+        ? reportContentUrl('rating', reportTarget.value, props.route_id)
+        : '',
+)
+
+function openReport(id: string) {
+    reportTarget.value = id
+    reportDialog.value = true
+}
 
 const openSheet = async () => {
     isSheetOpen.value = true
@@ -137,16 +121,13 @@ const fetchClimbingRatings = async () => {
         const data = await pb.collection('ratings').getFullList<RatingRecord>({
             filter: `route_id = "${props.route_id}"`,
             sort: '-created',
+            expand: 'user',
         })
 
-        ratings.value = data.map((rating) => ({
-            rating: typeof rating.rating === 'number' ? rating.rating : null,
-            difficulty: buildDifficultyLabel(rating),
-            comment: rating.comment ?? null,
-        }))
+        reviews.value = data.map(mapReview)
     } catch (error) {
         console.error('Error fetching ratings:', error)
-        ratings.value = []
+        reviews.value = []
         notifyError(t('ratings.loadError'))
     } finally {
         isLoading.value = false
@@ -157,19 +138,23 @@ watch(isSheetOpen, (isOpen) => {
     if (!isOpen) void unsubscribeFrom('ratings')
 })
 
-function buildDifficultyLabel(rating: RatingRecord): string {
-    const base = rating.difficulty ?? ''
-    const sign =
-        rating.difficulty_sign === true
-            ? '+'
-            : rating.difficulty_sign === false
-              ? '-'
-              : typeof rating.difficulty_sign === 'string'
-                ? rating.difficulty_sign
-                : ''
+function mapReview(
+    r: RatingRecord & { expand?: Record<string, unknown> },
+): CommentCardItem {
+    const user = r.expand?.user as
+        { name?: string; username?: string; avatar?: string } | undefined
 
-    return `${base}${sign}`.trim()
+    return {
+        id: r.id,
+        rating: typeof r.rating === 'number' ? r.rating : null,
+        difficultyLabel: formatDifficulty(r),
+        comment: r.comment ?? null,
+        created: r.created ?? '',
+        userName: user?.name || user?.username || t('comments.anonymous'),
+        userAvatar: r.expand?.user
+            ? usePbFileUrl(r.expand.user, user?.avatar, { thumb: '80x80' }) ||
+              null
+            : null,
+    }
 }
 </script>
-
-<style scoped></style>

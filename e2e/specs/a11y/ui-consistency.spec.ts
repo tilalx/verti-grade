@@ -13,6 +13,7 @@ const PAGES = [
     '/admin/analytics',
     '/admin/settings',
     '/admin/inventory',
+    '/admin/reports',
 ]
 
 for (const path of PAGES) {
@@ -29,7 +30,12 @@ for (const path of PAGES) {
 test('every icon-only button exposes an accessible name', async ({
     adminPage: page,
 }) => {
-    for (const path of ['/admin/routes', '/admin/users', '/admin/comments']) {
+    for (const path of [
+        '/admin/routes',
+        '/admin/users',
+        '/admin/comments',
+        '/admin/reports',
+    ]) {
         await gotoSettled(page, path)
         const unnamed = await page
             .locator('button.v-btn--icon:visible')
