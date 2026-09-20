@@ -1,207 +1,185 @@
 <template>
-    <v-dialog v-model="dialogOpen" max-width="560" scrollable>
-        <v-card data-testid="route-form-dialog">
-            <v-card-title class="pa-4 pb-3">
-                <span class="text-h6">{{
-                    isEditMode ? $t('actions.edit') : $t('climbing.create')
-                }}</span>
-            </v-card-title>
-            <v-divider />
-            <v-card-text class="pa-4">
-                <v-form ref="formRef" @submit.prevent="submit">
-                    <!-- Name -->
+    <LayoutDialogShell
+        v-model="dialogOpen"
+        max-width="560"
+        :title="isEditMode ? $t('actions.edit') : $t('climbing.create')"
+        :persistent="hasChanges"
+        data-testid="route-form-dialog"
+    >
+        <v-form ref="formRef" @submit.prevent="submit">
+            <!-- Name -->
+            <v-text-field
+                v-model="form.name"
+                :label="$t('routes.name')"
+                :rules="nameRules"
+                maxlength="30"
+                counter
+                class="mb-1"
+                data-testid="route-form-name"
+            />
+
+            <!-- Difficulty and Type -->
+            <v-row density="comfortable" class="mb-1">
+                <v-col cols="6">
+                    <v-select
+                        v-model="form.combinedDifficulty"
+                        :label="$t('climbing.difficulty')"
+                        :items="combinedDifficulties"
+                        :rules="[requiredRule]"
+                        data-testid="route-form-difficulty"
+                    />
+                </v-col>
+                <v-col cols="6">
+                    <v-select
+                        v-model="form.type"
+                        :label="$t('climbing.type')"
+                        :items="typeItems"
+                        item-title="title"
+                        item-value="value"
+                        :rules="[requiredRule]"
+                        data-testid="route-form-type"
+                    />
+                </v-col>
+            </v-row>
+
+            <!-- Anchor Point and Location -->
+            <v-row density="comfortable" class="mb-1">
+                <v-col cols="6">
                     <v-text-field
-                        v-model="form.name"
-                        :label="$t('routes.name')"
-                        :rules="nameRules"
-                        maxlength="30"
-                        counter
-                        required
-                        density="comfortable"
-                        class="mb-1"
-                        data-testid="route-form-name"
+                        v-model.number="form.anchor_point"
+                        :label="$t('climbing.anchor_point')"
+                        :rules="anchorPointRules"
+                        type="number"
+                        :min="isBoulderRoute ? 0 : 1"
+                        max="100"
+                        step="1"
+                        data-testid="route-form-anchor-point"
                     />
-
-                    <!-- Difficulty and Type -->
-                    <v-row density="comfortable" class="mb-1">
-                        <v-col cols="6">
-                            <v-select
-                                v-model="form.combinedDifficulty"
-                                :label="$t('climbing.difficulty')"
-                                :items="combinedDifficulties"
-                                :rules="[requiredRule]"
-                                required
-                                density="comfortable"
-                                data-testid="route-form-difficulty"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <v-select
-                                v-model="form.type"
-                                :label="$t('climbing.type')"
-                                :items="typeItems"
-                                item-title="title"
-                                item-value="value"
-                                :rules="[requiredRule]"
-                                required
-                                density="comfortable"
-                                data-testid="route-form-type"
-                            />
-                        </v-col>
-                    </v-row>
-
-                    <!-- Anchor Point and Location -->
-                    <v-row density="comfortable" class="mb-1">
-                        <v-col cols="6">
-                            <v-text-field
-                                v-model.number="form.anchor_point"
-                                :label="$t('climbing.anchor_point')"
-                                :rules="anchorPointRules"
-                                type="number"
-                                :min="isBoulderRoute ? 0 : 1"
-                                max="100"
-                                step="1"
-                                required
-                                density="comfortable"
-                                data-testid="route-form-anchor-point"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <v-select
-                                v-model="form.location"
-                                :label="$t('climbing.location')"
-                                :items="locations"
-                                :rules="[requiredRule]"
-                                required
-                                density="comfortable"
-                                data-testid="route-form-location"
-                            />
-                        </v-col>
-                    </v-row>
-
-                    <!-- Route Setter -->
-                    <v-combobox
-                        v-model="form.creator"
-                        :label="$t('routes.route_setter')"
-                        :items="setterItems"
-                        :rules="[creatorRule]"
-                        multiple
-                        chips
-                        closable-chips
-                        required
-                        density="comfortable"
-                        class="mb-1"
-                        data-testid="route-form-creator"
+                </v-col>
+                <v-col cols="6">
+                    <v-select
+                        v-model="form.location"
+                        :label="$t('climbing.location')"
+                        :items="locations"
+                        :rules="[requiredRule]"
+                        data-testid="route-form-location"
                     />
+                </v-col>
+            </v-row>
 
-                    <!-- Screwed at and Archived -->
-                    <v-row density="comfortable" class="mb-1">
-                        <v-col cols="6">
-                            <v-text-field
-                                v-model="form.screw_date"
-                                :label="$t('routes.screwed_at')"
-                                type="date"
-                                :rules="[requiredRule]"
-                                required
-                                density="comfortable"
-                                data-testid="route-form-screw-date"
-                            />
-                        </v-col>
-                        <v-col
-                            v-if="isEditMode"
-                            cols="6"
-                            style="
-                                align-self: stretch;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            "
-                        >
-                            <v-switch
-                                v-model="form.archived"
-                                :label="$t('climbing.archived')"
-                                color="primary"
-                                density="compact"
-                                hide-details
-                                data-testid="route-form-archived"
-                            />
-                        </v-col>
-                    </v-row>
+            <!-- Route Setter -->
+            <v-combobox
+                v-model="form.creator"
+                :label="$t('routes.route_setter')"
+                :items="setterItems"
+                :rules="[creatorRule]"
+                multiple
+                chips
+                closable-chips
+                class="mb-1"
+                data-testid="route-form-creator"
+            />
 
-                    <!-- Comment -->
-                    <v-textarea
-                        v-model="form.comment"
-                        :label="$t('climbing.comment')"
-                        rows="2"
-                        auto-grow
-                        counter="255"
-                        density="comfortable"
-                        class="mb-2"
-                        data-testid="route-form-comment"
+            <!-- Screwed at and Archived -->
+            <v-row density="comfortable" class="mb-1">
+                <v-col cols="6">
+                    <v-text-field
+                        v-model="form.screw_date"
+                        :label="$t('routes.screwed_at')"
+                        type="date"
+                        :rules="[requiredRule]"
+                        data-testid="route-form-screw-date"
                     />
-
-                    <!-- Color picker -->
-                    <div class="color-picker-section">
-                        <v-color-picker
-                            v-model="form.color"
-                            hide-inputs
-                            :modes="['hex']"
-                            width="100%"
-                            elevation="0"
-                        />
-
-                        <!-- Palette: similar colors when picker changed, default otherwise -->
-                        <div class="d-flex flex-wrap ga-1 mt-2 mb-1">
-                            <button
-                                v-for="c in activePalette"
-                                :key="c"
-                                type="button"
-                                class="color-dot"
-                                :style="{
-                                    backgroundColor: c,
-                                    boxShadow:
-                                        form.color?.toUpperCase() ===
-                                        c.toUpperCase()
-                                            ? '0 0 0 2px white, 0 0 0 4px ' + c
-                                            : 'none',
-                                }"
-                                @click="form.color = c"
-                            />
-                        </div>
-                    </div>
-                </v-form>
-            </v-card-text>
-            <v-divider />
-            <v-card-actions class="pa-3">
-                <v-btn
+                </v-col>
+                <v-col
                     v-if="isEditMode"
-                    color="error"
-                    variant="text"
-                    prepend-icon="mdi-delete-outline"
-                    data-testid="route-form-delete"
-                    @click="deleteDialog = true"
+                    cols="6"
+                    style="
+                        align-self: stretch;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
                 >
-                    {{ $t('actions.delete') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                    variant="text"
-                    data-testid="route-form-cancel"
-                    @click="close"
-                    >{{ $t('actions.cancel') }}</v-btn
-                >
-                <v-btn
-                    color="primary"
-                    variant="tonal"
-                    :loading="saving"
-                    data-testid="route-form-submit"
-                    @click="submit"
-                >
-                    {{ isEditMode ? $t('actions.save') : $t('actions.create') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+                    <v-switch
+                        v-model="form.archived"
+                        :label="$t('climbing.archived')"
+                        color="primary"
+                        density="compact"
+                        hide-details
+                        data-testid="route-form-archived"
+                    />
+                </v-col>
+            </v-row>
+
+            <!-- Comment -->
+            <v-textarea
+                v-model="form.comment"
+                :label="$t('climbing.comment')"
+                rows="2"
+                auto-grow
+                counter="255"
+                class="mb-2"
+                data-testid="route-form-comment"
+            />
+
+            <!-- Color picker -->
+            <div class="color-picker-section">
+                <v-color-picker
+                    v-model="form.color"
+                    hide-inputs
+                    :modes="['hex']"
+                    width="100%"
+                    elevation="0"
+                />
+
+                <!-- Palette: similar colors when picker changed, default otherwise -->
+                <div class="d-flex flex-wrap ga-1 mt-2 mb-1">
+                    <button
+                        v-for="c in activePalette"
+                        :key="c"
+                        type="button"
+                        class="color-dot"
+                        :style="{
+                            backgroundColor: c,
+                            boxShadow:
+                                form.color?.toUpperCase() === c.toUpperCase()
+                                    ? '0 0 0 2px white, 0 0 0 4px ' + c
+                                    : 'none',
+                        }"
+                        @click="form.color = c"
+                    />
+                </div>
+            </div>
+        </v-form>
+        <template #actions>
+            <v-btn
+                v-if="isEditMode"
+                color="error"
+                variant="text"
+                prepend-icon="mdi-delete-outline"
+                data-testid="route-form-delete"
+                @click="deleteDialog = true"
+            >
+                {{ $t('actions.delete') }}
+            </v-btn>
+            <v-spacer />
+            <v-btn
+                variant="text"
+                data-testid="route-form-cancel"
+                @click="close"
+                >{{ $t('actions.cancel') }}</v-btn
+            >
+            <v-btn
+                color="primary"
+                :loading="saving"
+                data-testid="route-form-submit"
+                @click="submit"
+            >
+                {{ isEditMode ? $t('actions.save') : $t('actions.create') }}
+            </v-btn>
+        </template>
+    </LayoutDialogShell>
 
     <ConfirmDialog
         v-model="deleteDialog"
@@ -216,7 +194,7 @@
 import type PocketBase from 'pocketbase'
 import type { RouteRecord } from '~/types/models'
 import { normalizeCreators, formatDateToYYYYMMDD } from '~/utils/formatting'
-import { required } from '~/utils/validation'
+import { required, maxLength } from '~/utils/validation'
 
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
@@ -325,6 +303,13 @@ const form = reactive({
     archived: false,
 })
 
+// Snapshot taken once the dialog is populated; drives the persistent flag so
+// an outside click can't silently discard a half-filled form.
+const openSnapshot = ref('')
+const hasChanges = computed(
+    () => dialogOpen.value && JSON.stringify(form) !== openSnapshot.value,
+)
+
 const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
 
@@ -342,10 +327,7 @@ const typeItems = computed(() => [
 
 const requiredRule = required(t)
 
-const nameRules = [
-    (v: string) => !!v || t('validation.required'),
-    (v: string) => v.length <= 30 || t('validation.maxLength', { n: 30 }),
-]
+const nameRules = [required(t), maxLength(t, 30)]
 
 const isAnchorPointValid = (value: number | null) => {
     if (value === null || value === undefined || String(value) === '')
@@ -453,6 +435,7 @@ async function open(route?: RouteRecord) {
     buildDefaultPalette()
     await nextTick()
     colorModified.value = false
+    openSnapshot.value = JSON.stringify(form)
 }
 
 function close() {
@@ -507,8 +490,10 @@ async function submit() {
             await pb.collection('routes').create(payload)
         }
 
+        // Carry the id on edits so the parent can tell "created" from "saved".
+        const savedId = isEditMode.value ? editRouteId.value : undefined
         close()
-        emit('saved', payload)
+        emit('saved', savedId ? { ...payload, id: savedId } : payload)
     } catch (error) {
         console.error('Failed to save route:', error)
         notifyError(t('notifications.error.generic'))

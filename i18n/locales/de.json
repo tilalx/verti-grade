@@ -49,6 +49,24 @@
             "lowercase": "Kleinbuchstabe (a–z)",
             "number": "Zahl (0–9)",
             "special": "Sonderzeichen (!{'@'}#...)"
+        },
+        "capsLockOn": "Feststelltaste ist aktiv",
+        "resetInfo": "Wir senden dir einen Link zum Zurücksetzen des Passworts per E-Mail.",
+        "eyebrowWelcomeBack": "WILLKOMMEN ZURÜCK",
+        "eyebrowAccountRecovery": "KONTO-WIEDERHERSTELLUNG",
+        "eyebrowAllDone": "FERTIG",
+        "eyebrowInvalidLink": "UNGÜLTIGER LINK",
+        "brandHeadline": {
+            "login": {
+                "l1": "Verwalte deine",
+                "l2": "Kletter-",
+                "accent": "routen."
+            },
+            "reset": {
+                "l1": "Setze dein",
+                "l2": "Konto-",
+                "accent": "passwort zurück."
+            }
         }
     },
     "routes": {
@@ -286,7 +304,8 @@
             "dashboard": "Routenverwaltung - Verti-Grade",
             "login": "Anmelden - Verti-Grade",
             "resetPassword": "Passwort zurücksetzen - Verti-Grade",
-            "notFound": "Seite nicht gefunden - Verti-Grade"
+            "notFound": "Seite nicht gefunden - Verti-Grade",
+            "routeNamed": "{name} - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -385,7 +404,18 @@
         "replace": "Ersetzen",
         "clickToUpload": "Zum Hochladen klicken",
         "loadError": "Einstellungen konnten nicht geladen werden.",
-        "initError": "Einstellungen konnten nicht initialisiert werden."
+        "initError": "Einstellungen konnten nicht initialisiert werden.",
+        "organization": "Organisation",
+        "organizationName": "Name der Organisation",
+        "organizationNamePlaceholder": "z. B. Deutscher Alpenverein",
+        "organizationUnit": "Organisationseinheit",
+        "organizationUnitPlaceholder": "z. B. Sektion Hanau",
+        "publicUrls": "Öffentliche URLs",
+        "applicationUrl": "Anwendungs-URL",
+        "imprintUrl": "Impressum-URL",
+        "privacyUrl": "Datenschutz-URL",
+        "saveSuccess": "Einstellungen erfolgreich gespeichert.",
+        "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen."
     },
     "errors": {
         "notFound": {
@@ -399,5 +429,23 @@
         "qr_code": "QR-Code",
         "move_up": "Nach oben",
         "move_down": "Nach unten"
+    },
+    "importRoutes": {
+        "title": "Import bestätigen",
+        "intro": "Die folgenden Routen und Bewertungen werden importiert. Bitte prüfe die Daten vor dem Bestätigen.",
+        "confirm": "Bestätigen & importieren",
+        "ratingsCount": "Bewertungen",
+        "ratingsFor": "Bewertungen für {name}",
+        "noRatings": "Keine Bewertungen für diese Route zu importieren.",
+        "noComment": "Kein Kommentar",
+        "ratingLabel": "Bewertung",
+        "difficultyLabel": "Schwierigkeit",
+        "invalidJson": "Ungültige JSON-Datei. Bitte prüfe das Dateiformat.",
+        "readFailed": "Datei konnte nicht gelesen werden.",
+        "success": "Import erfolgreich abgeschlossen.",
+        "issues": "Import mit Problemen beendet: {details}",
+        "routesFailed": "{count} Route(n) fehlgeschlagen",
+        "commentsFailed": "{count} Kommentar(e) fehlgeschlagen",
+        "failed": "Beim Import ist ein unerwarteter Fehler aufgetreten."
     }
 }

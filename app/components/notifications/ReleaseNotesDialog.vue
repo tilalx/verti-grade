@@ -1,80 +1,71 @@
 <template>
-    <v-dialog v-model="dialog" max-width="640" scrollable>
-        <template #activator="{ props: activatorProps }">
-            <slot name="activator" :props="activatorProps" />
+    <LayoutDialogShell
+        v-model="dialog"
+        max-width="640"
+        closable
+        :subtitle="
+            $t('notifications.releaseNotes.installedVersion', [
+                installedVersion,
+            ])
+        "
+        data-testid="release-notes-dialog"
+    >
+        <template #activator="activatorScope">
+            <slot name="activator" v-bind="activatorScope" />
         </template>
 
-        <v-card data-testid="release-notes-dialog">
-            <v-card-title class="d-flex align-center">
-                <v-icon start size="20">mdi-tag-outline</v-icon>
-                {{ $t('notifications.releaseNotes.title') }}
-                <v-spacer />
-                <v-btn
-                    icon="mdi-close"
-                    variant="text"
-                    density="comfortable"
-                    :aria-label="$t('notifications.releaseNotes.close')"
-                    @click="dialog = false"
-                />
-            </v-card-title>
+        <template #title>
+            <v-icon size="20">mdi-tag-outline</v-icon>
+            {{ $t('notifications.releaseNotes.title') }}
+        </template>
 
-            <v-card-subtitle>
-                {{
-                    $t('notifications.releaseNotes.installedVersion', [
-                        installedVersion,
-                    ])
-                }}
-            </v-card-subtitle>
+        <div
+            v-if="loading"
+            class="d-flex justify-center py-8"
+            data-testid="release-notes-loading"
+        >
+            <v-progress-circular
+                indeterminate
+                size="24"
+                width="2"
+                color="primary"
+            />
+        </div>
 
-            <v-card-text>
-                <div
-                    v-if="loading"
-                    class="d-flex justify-center py-8"
-                    data-testid="release-notes-loading"
-                >
-                    <v-progress-circular indeterminate />
-                </div>
+        <v-alert
+            v-else-if="error"
+            type="error"
+            data-testid="release-notes-error"
+        >
+            {{ $t('notifications.releaseNotes.error') }}
+        </v-alert>
 
-                <v-alert
-                    v-else-if="error"
-                    type="error"
+        <v-alert
+            v-else-if="!notes"
+            type="info"
+            data-testid="release-notes-empty"
+        >
+            {{ $t('notifications.releaseNotes.notFound') }}
+        </v-alert>
+
+        <div v-else class="release-entry">
+            <div class="d-flex align-center flex-wrap ga-2 mb-1">
+                <span class="release-version">{{ tag }}</span>
+                <v-chip
+                    v-if="installed"
+                    size="x-small"
+                    color="success"
                     variant="tonal"
-                    dense
-                    data-testid="release-notes-error"
                 >
-                    {{ $t('notifications.releaseNotes.error') }}
-                </v-alert>
-
-                <v-alert
-                    v-else-if="!notes"
-                    type="info"
-                    variant="tonal"
-                    dense
-                    data-testid="release-notes-empty"
-                >
-                    {{ $t('notifications.releaseNotes.notFound') }}
-                </v-alert>
-
-                <div v-else class="release-entry">
-                    <div class="d-flex align-center flex-wrap ga-2 mb-1">
-                        <span class="release-version">{{ tag }}</span>
-                        <v-chip
-                            v-if="installed"
-                            size="x-small"
-                            color="success"
-                            variant="tonal"
-                        >
-                            {{ $t('notifications.releaseNotes.installed') }}
-                        </v-chip>
-                        <span class="release-date">
-                            {{ formatDisplayDate(publishedAt, locale) }}
-                        </span>
-                    </div>
-                    <div class="release-body">{{ changelog }}</div>
-                </div>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+                    {{ $t('notifications.releaseNotes.installed') }}
+                </v-chip>
+                <span class="release-date">
+                    {{ formatDisplayDate(publishedAt, locale) }}
+                </span>
+            </div>
+            <div class="release-body">{{ changelog }}</div>
+        </div>
+    </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">

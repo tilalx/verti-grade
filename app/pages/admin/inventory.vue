@@ -1,23 +1,21 @@
 <template>
-    <v-container fluid class="inventory-page pa-0">
+    <v-container class="inventory-page pa-0">
         <!-- ── Desktop: not supported ─────────────────────────────────── -->
-        <v-card
-            v-if="!isMobile"
-            flat
-            class="pa-8 text-center ma-4"
-            rounded="xl"
-            border
-        >
-            <v-icon size="64" color="grey-lighten-1" class="mb-4"
-                >mdi-cellphone</v-icon
-            >
-            <div class="text-h6 text-medium-emphasis mb-1">
-                {{ $t('inventory.mobileOnly') }}
-            </div>
-        </v-card>
+        <div v-if="!isMobile" class="pa-4">
+            <LayoutPageHeader :title="$t('inventory.title')" />
+            <LayoutEmptyState
+                icon="mdi-cellphone"
+                :title="$t('inventory.mobileOnly')"
+            />
+        </div>
 
         <!-- ── Mobile scanner UI ──────────────────────────────────────── -->
         <template v-if="isMobile">
+            <LayoutPageHeader
+                :title="$t('inventory.title')"
+                class="px-4 pt-4"
+            />
+
             <!-- Scanner viewport -->
             <div class="scanner-viewport">
                 <QrcodeStream
@@ -72,13 +70,12 @@
                         </v-chip>
                     </div>
                     <v-btn
-                        icon
+                        icon="mdi-information-outline"
                         variant="text"
                         size="small"
+                        :aria-label="$t('inventory.showInstructions')"
                         @click="instructionsDialog = true"
-                    >
-                        <v-icon>mdi-information-outline</v-icon>
-                    </v-btn>
+                    />
                 </div>
             </div>
 
@@ -90,8 +87,6 @@
                 <v-alert
                     v-if="successMessage"
                     type="success"
-                    variant="tonal"
-                    density="compact"
                     closable
                     class="mb-2"
                     @click:close="successMessage = ''"
@@ -101,8 +96,6 @@
                 <v-alert
                     v-if="!scanning && scannerError"
                     type="error"
-                    variant="tonal"
-                    density="compact"
                     closable
                     class="mb-2"
                     @click:close="scannerError = ''"
@@ -116,11 +109,10 @@
                 <v-btn
                     v-if="!scanning"
                     color="primary"
-                    variant="flat"
-                    rounded="lg"
                     size="large"
                     class="flex-grow-1"
                     :disabled="loadingRoutes"
+                    :loading="loadingRoutes"
                     prepend-icon="mdi-camera"
                     data-testid="inventory-start"
                     @click="startScanner()"
@@ -130,8 +122,6 @@
                 <v-btn
                     v-else
                     color="warning"
-                    variant="flat"
-                    rounded="lg"
                     size="large"
                     class="flex-grow-1"
                     prepend-icon="mdi-stop-circle"
@@ -143,7 +133,6 @@
                 <v-btn
                     variant="tonal"
                     color="error"
-                    rounded="lg"
                     size="large"
                     min-width="0"
                     :disabled="scannedRouteIds.length === 0 && !scanning"
@@ -176,7 +165,6 @@
                     <v-card
                         v-for="route in scannedRoutes"
                         :key="route.id"
-                        rounded="lg"
                         border
                         flat
                         class="mb-2"
@@ -184,7 +172,7 @@
                     >
                         <div class="d-flex align-center pa-3">
                             <v-icon size="18" color="success" class="mr-3"
-                                >mdi-check-circle</v-icon
+                                >mdi-check-circle-outline</v-icon
                             >
                             <div class="flex-grow-1">
                                 <div class="text-body-2 font-weight-medium">
@@ -219,12 +207,11 @@
             <!-- Finish button -->
             <div v-if="scannedRouteIds.length > 0" class="px-4 pb-6 pt-2">
                 <v-btn
-                    color="success"
-                    variant="flat"
+                    color="primary"
                     block
-                    rounded="xl"
                     size="large"
                     :disabled="loadingRoutes"
+                    :loading="loadingRoutes"
                     prepend-icon="mdi-check"
                     data-testid="inventory-finish-open"
                     @click="openFinishDialog()"
@@ -235,162 +222,138 @@
         </template>
 
         <!-- ── Instructions dialog ────────────────────────────────────── -->
-        <v-dialog v-model="instructionsDialog" max-width="400">
-            <v-card rounded="xl">
-                <v-card-title
-                    class="text-body-1 font-weight-semibold pa-5 pb-2"
-                >
-                    {{ $t('inventory.instructionsTitle') }}
-                </v-card-title>
-                <v-card-text class="pa-5 pt-2">
-                    <p class="text-body-2 text-medium-emphasis mb-3">
-                        {{ $t('inventory.instructionsIntro') }}
-                    </p>
-                    <ol class="instructions-list text-body-2">
-                        <li>{{ $t('inventory.instructionsStep1') }}</li>
-                        <li>{{ $t('inventory.instructionsStep2') }}</li>
-                        <li>{{ $t('inventory.instructionsStep3') }}</li>
-                    </ol>
-                </v-card-text>
-                <v-card-actions class="pa-5 pt-0">
-                    <v-spacer />
-                    <v-btn
-                        color="primary"
-                        variant="flat"
-                        rounded="lg"
-                        @click="instructionsDialog = false"
-                    >
-                        {{ $t('inventory.instructionsClose') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <LayoutDialogShell
+            v-model="instructionsDialog"
+            max-width="400"
+            :title="$t('inventory.instructionsTitle')"
+        >
+            <p class="text-body-2 text-medium-emphasis mb-3">
+                {{ $t('inventory.instructionsIntro') }}
+            </p>
+            <ol class="instructions-list text-body-2">
+                <li>{{ $t('inventory.instructionsStep1') }}</li>
+                <li>{{ $t('inventory.instructionsStep2') }}</li>
+                <li>{{ $t('inventory.instructionsStep3') }}</li>
+            </ol>
+            <template #actions>
+                <v-spacer />
+                <v-btn color="primary" @click="instructionsDialog = false">
+                    {{ $t('inventory.instructionsClose') }}
+                </v-btn>
+            </template>
+        </LayoutDialogShell>
 
         <!-- ── Finish review dialog ───────────────────────────────────── -->
-        <v-dialog v-model="finishDialog" max-width="480">
-            <v-card rounded="xl" data-testid="inventory-finish-dialog">
-                <v-card-title
-                    class="text-body-1 font-weight-semibold pa-5 pb-2"
-                >
-                    {{ $t('inventory.reviewTitle') }}
-                </v-card-title>
-                <v-card-text class="pa-5 pt-2">
-                    <!-- Found routes -->
-                    <div class="mb-4">
-                        <div class="text-subtitle-2 font-weight-semibold mb-2">
-                            {{ $t('inventory.reviewFoundTitle') }}
-                            <v-chip
-                                size="x-small"
-                                variant="tonal"
-                                color="success"
-                                class="ml-1"
+        <LayoutDialogShell
+            v-model="finishDialog"
+            max-width="480"
+            :title="$t('inventory.reviewTitle')"
+            data-testid="inventory-finish-dialog"
+        >
+            <!-- Found routes -->
+            <div class="mb-4">
+                <div class="text-subtitle-2 font-weight-semibold mb-2">
+                    {{ $t('inventory.reviewFoundTitle') }}
+                    <v-chip
+                        size="x-small"
+                        variant="tonal"
+                        color="success"
+                        class="ml-1"
+                    >
+                        {{ scannedRoutes.length }}
+                    </v-chip>
+                </div>
+                <v-list density="compact" class="review-list rounded-lg" border>
+                    <v-list-item
+                        v-for="route in scannedRoutes"
+                        :key="`found-${route.id}`"
+                    >
+                        <v-list-item-title class="text-body-2">
+                            {{ route.name || route.id }}
+                        </v-list-item-title>
+                        <v-list-item-subtitle class="text-caption">
+                            {{ route.location || '—' }}
+                        </v-list-item-subtitle>
+                        <template #prepend>
+                            <v-icon size="16" color="success"
+                                >mdi-check-circle-outline</v-icon
                             >
-                                {{ scannedRoutes.length }}
-                            </v-chip>
-                        </div>
-                        <v-list
-                            density="compact"
-                            class="review-list rounded-lg"
-                            border
+                        </template>
+                    </v-list-item>
+                    <v-list-item v-if="scannedRoutes.length === 0">
+                        <v-list-item-title
+                            class="text-body-2 text-medium-emphasis"
                         >
-                            <v-list-item
-                                v-for="route in scannedRoutes"
-                                :key="`found-${route.id}`"
-                            >
-                                <v-list-item-title class="text-body-2">
-                                    {{ route.name || route.id }}
-                                </v-list-item-title>
-                                <v-list-item-subtitle class="text-caption">
-                                    {{ route.location || '—' }}
-                                </v-list-item-subtitle>
-                                <template #prepend>
-                                    <v-icon size="16" color="success"
-                                        >mdi-check-circle</v-icon
-                                    >
-                                </template>
-                            </v-list-item>
-                            <v-list-item v-if="scannedRoutes.length === 0">
-                                <v-list-item-title
-                                    class="text-body-2 text-medium-emphasis"
-                                >
-                                    {{ $t('inventory.noScans') }}
-                                </v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </div>
+                            {{ $t('inventory.noScans') }}
+                        </v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </div>
 
-                    <!-- Missing routes -->
-                    <div>
-                        <div class="text-subtitle-2 font-weight-semibold mb-1">
-                            {{ $t('inventory.reviewMissingTitle') }}
-                            <v-chip
-                                size="x-small"
-                                variant="tonal"
-                                color="error"
-                                class="ml-1"
-                            >
-                                {{ archivePreview.length }}
-                            </v-chip>
-                        </div>
-                        <p
-                            v-if="archivePreview.length"
-                            class="text-caption text-medium-emphasis mb-2"
-                        >
-                            {{ $t('inventory.reviewMissingDescription') }}
-                        </p>
-                        <v-list
-                            density="compact"
-                            class="review-list rounded-lg"
-                            border
-                        >
-                            <v-list-item
-                                v-for="route in archivePreview"
-                                :key="`missing-${route.id}`"
-                            >
-                                <v-list-item-title class="text-body-2">
-                                    {{ route.name }}
-                                </v-list-item-title>
-                                <v-list-item-subtitle class="text-caption">
-                                    {{ route.location || '—' }}
-                                </v-list-item-subtitle>
-                                <template #prepend>
-                                    <v-icon size="16" color="error"
-                                        >mdi-alert-circle</v-icon
-                                    >
-                                </template>
-                            </v-list-item>
-                            <v-list-item v-if="archivePreview.length === 0">
-                                <v-list-item-title
-                                    class="text-body-2 text-medium-emphasis"
-                                >
-                                    {{ $t('inventory.nothingToArchive') }}
-                                </v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </div>
-                </v-card-text>
-                <v-card-actions class="pa-5 pt-0">
-                    <v-btn
-                        variant="text"
-                        data-testid="inventory-finish-cancel"
-                        @click="finishDialog = false"
+            <!-- Missing routes -->
+            <div>
+                <div class="text-subtitle-2 font-weight-semibold mb-1">
+                    {{ $t('inventory.reviewMissingTitle') }}
+                    <v-chip
+                        size="x-small"
+                        variant="tonal"
+                        color="error"
+                        class="ml-1"
                     >
-                        {{ $t('actions.cancel') }}
-                    </v-btn>
-                    <v-spacer />
-                    <v-btn
-                        color="primary"
-                        variant="flat"
-                        rounded="lg"
-                        prepend-icon="mdi-check"
-                        data-testid="inventory-finish-confirm"
-                        @click="confirmFinish"
+                        {{ archivePreview.length }}
+                    </v-chip>
+                </div>
+                <p
+                    v-if="archivePreview.length"
+                    class="text-caption text-medium-emphasis mb-2"
+                >
+                    {{ $t('inventory.reviewMissingDescription') }}
+                </p>
+                <v-list density="compact" class="review-list rounded-lg" border>
+                    <v-list-item
+                        v-for="route in archivePreview"
+                        :key="`missing-${route.id}`"
                     >
-                        {{ $t('actions.save') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                        <v-list-item-title class="text-body-2">
+                            {{ route.name }}
+                        </v-list-item-title>
+                        <v-list-item-subtitle class="text-caption">
+                            {{ route.location || '—' }}
+                        </v-list-item-subtitle>
+                        <template #prepend>
+                            <v-icon size="16" color="error"
+                                >mdi-alert-circle-outline</v-icon
+                            >
+                        </template>
+                    </v-list-item>
+                    <v-list-item v-if="archivePreview.length === 0">
+                        <v-list-item-title
+                            class="text-body-2 text-medium-emphasis"
+                        >
+                            {{ $t('inventory.nothingToArchive') }}
+                        </v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </div>
+            <template #actions>
+                <v-btn
+                    variant="text"
+                    data-testid="inventory-finish-cancel"
+                    @click="finishDialog = false"
+                >
+                    {{ $t('actions.cancel') }}
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                    color="warning"
+                    prepend-icon="mdi-archive-outline"
+                    data-testid="inventory-finish-confirm"
+                    @click="confirmFinish"
+                >
+                    {{ $t('inventory.finish') }}
+                </v-btn>
+            </template>
+        </LayoutDialogShell>
     </v-container>
 </template>
 
@@ -407,7 +370,7 @@ definePageMeta({
 const { t } = useI18n()
 const pb = usePocketbase()
 const { smAndDown } = useDisplay()
-const { warning: notifyStorageWarning } = useNotification()
+const { warning: notifyWarning } = useNotification()
 let storageWarningShown = false
 
 const isMobile = computed(() => smAndDown.value)
@@ -469,7 +432,7 @@ const loadStoredScannedIds = () => {
 const warnStorageUnavailable = () => {
     if (storageWarningShown) return
     storageWarningShown = true
-    notifyStorageWarning(t('inventory.storageWarning'))
+    notifyWarning(t('inventory.storageWarning'))
 }
 
 const persistScannedIds = (ids) => {

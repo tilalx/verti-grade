@@ -1,15 +1,11 @@
 <template>
-    <v-container fluid class="comments-page">
-        <!-- ── Page Header + inline stats ────────────────────────────────── -->
-        <div class="d-flex align-center justify-space-between mb-4">
-            <h1 class="comments-page__title">{{ t('routes.comments') }}</h1>
-        </div>
+    <v-container class="comments-page">
+        <LayoutPageHeader :title="t('routes.comments')" />
 
         <!-- Stats: horizontal scroll on mobile, row on desktop -->
         <div class="stats-scroll mb-3">
             <div class="stats-scroll__inner">
                 <v-card
-                    rounded="lg"
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
@@ -23,7 +19,6 @@
                     </div>
                 </v-card>
                 <v-card
-                    rounded="lg"
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
@@ -42,7 +37,6 @@
                     </div>
                 </v-card>
                 <v-card
-                    rounded="lg"
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
@@ -56,7 +50,6 @@
                     </div>
                 </v-card>
                 <v-card
-                    rounded="lg"
                     border
                     flat
                     class="stat-chip pa-2 px-3 text-center"
@@ -91,8 +84,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="comments-filter-location"
                         />
                     </v-col>
@@ -106,8 +97,6 @@
                             clearable
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             data-testid="comments-filter-difficulty"
                         />
                     </v-col>
@@ -119,8 +108,6 @@
                             item-value="value"
                             hide-details
                             density="compact"
-                            variant="outlined"
-                            rounded="lg"
                             prepend-inner-icon="mdi-sort"
                             data-testid="comments-sort"
                         />
@@ -191,7 +178,7 @@
                         class="bulk-bar px-4 py-2 d-flex align-center ga-2 flex-wrap"
                     >
                         <v-icon size="18" color="primary"
-                            >mdi-check-circle</v-icon
+                            >mdi-check-circle-outline</v-icon
                         >
                         <span class="text-body-2 font-weight-medium">
                             {{ t('comments.selected', { n: selectedCount }) }}
@@ -209,7 +196,7 @@
                             size="small"
                             color="error"
                             variant="tonal"
-                            prepend-icon="mdi-delete"
+                            prepend-icon="mdi-delete-outline"
                             data-testid="comments-bulk-delete"
                             @click="bulkDeleteDialog = true"
                         >
@@ -227,28 +214,17 @@
         <!-- ── Loading skeletons ───────────────────────────────────────────── -->
         <v-row v-if="loading && !comments.length">
             <v-col v-for="i in 6" :key="i" cols="12" sm="6" lg="4">
-                <v-skeleton-loader type="card-avatar" rounded="xl" />
+                <v-skeleton-loader type="card-avatar" rounded="lg" />
             </v-col>
         </v-row>
 
         <!-- ── Empty state ─────────────────────────────────────────────────── -->
-        <v-card
+        <LayoutEmptyState
             v-else-if="!loading && !comments.length"
-            rounded="xl"
-            border
-            flat
-            class="py-16 text-center"
-        >
-            <v-icon size="56" color="grey-lighten-2"
-                >mdi-comment-off-outline</v-icon
-            >
-            <div class="text-h6 mt-4 text-medium-emphasis">
-                {{ t('comments.noComments') }}
-            </div>
-            <div class="text-body-2 text-disabled mt-1">
-                {{ t('comments.noCommentsHint') }}
-            </div>
-        </v-card>
+            icon="mdi-comment-off-outline"
+            :title="t('comments.noComments')"
+            :hint="t('comments.noCommentsHint')"
+        />
 
         <!-- ── Comment Cards ───────────────────────────────────────────────── -->
         <v-row v-else>
@@ -272,6 +248,7 @@
                                 icon
                                 size="small"
                                 variant="text"
+                                :aria-label="t('actions.edit')"
                                 data-testid="comment-card-edit"
                                 @click="openEdit(comment)"
                             >
@@ -281,15 +258,14 @@
                                 }}</v-tooltip>
                             </v-btn>
                             <v-btn
-                                icon
+                                icon="mdi-delete-outline"
                                 color="error"
                                 size="small"
                                 variant="text"
+                                :aria-label="t('actions.delete')"
                                 data-testid="comment-card-delete"
                                 @click="openDelete(comment)"
-                            >
-                                <v-icon size="18">mdi-delete</v-icon>
-                            </v-btn>
+                            />
                         </template>
                     </CommentsCard>
                 </VirtualWindow>
@@ -311,6 +287,8 @@
                     v-if="loadingMore"
                     indeterminate
                     size="24"
+                    width="2"
+                    color="primary"
                 />
             </div>
         </div>
@@ -396,7 +374,7 @@ const editingReview = ref(null)
 // Bulk delete dialog
 const bulkDeleteDialog = ref(false)
 
-const { notify: showSnackbar } = useNotification()
+const { notify, error: notifyError } = useNotification()
 
 const activeFilterCount = computed(
     () =>
@@ -565,7 +543,7 @@ const fetchList = async (append = false) => {
     } catch (err) {
         if (err?.isAbort) return
         console.error('Failed to fetch comments:', err)
-        showSnackbar(t('notifications.error.generic'), 'error')
+        notifyError(t('notifications.error.generic'))
     } finally {
         loading.value = false
         loadingMore.value = false
@@ -646,7 +624,7 @@ function onReviewSaved(updated) {
             expand: comments.value[idx].expand,
         })
     }
-    showSnackbar(t('notifications.success.edit'))
+    notifyError(t('notifications.success.edit'))
     scheduleStatsRefresh()
 }
 
@@ -671,11 +649,11 @@ async function confirmDelete() {
         totalItems.value = Math.max(0, totalItems.value - 1)
         deleteDialog.value = false
         deleteTarget.value = null
-        showSnackbar(t('notifications.success.delete'))
+        notify(t('notifications.success.delete'))
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error deleting comment:', err)
-        showSnackbar(t('notifications.error.generic'), 'error')
+        notify(t('notifications.error.generic'))
     } finally {
         deleting.value = false
     }
@@ -694,13 +672,13 @@ async function bulkDelete() {
         // Remove from local list — avoid full refetch
         comments.value = comments.value.filter((c) => !ids.includes(c.id))
         totalItems.value = Math.max(0, totalItems.value - ids.length)
-        showSnackbar(t('notifications.success.delete'))
+        notifyError(t('notifications.success.delete'))
         clearSelection()
         bulkDeleteDialog.value = false
         scheduleStatsRefresh()
     } catch (err) {
         console.error('Error bulk deleting:', err)
-        showSnackbar(t('notifications.error.generic'), 'error')
+        notify(t('notifications.error.generic'))
     } finally {
         bulkDeleting.value = false
     }
@@ -775,17 +753,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.comments-page {
-    max-width: 100%;
-}
-
-.comments-page__title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    color: rgb(var(--v-theme-on-background));
-}
-
 /* ── Stats horizontal scroll ─────────────────────────────────────────── */
 .stats-scroll {
     overflow-x: auto;
@@ -823,6 +790,7 @@ onBeforeUnmount(() => {
 .bulk-bar {
     border-top: 1px solid rgba(var(--v-border-color), 0.12);
     background: rgba(var(--v-theme-primary), 0.05);
-    border-radius: 0 0 24px 24px;
+    /* Matches the lg radius of the FilterBar card it sits inside. */
+    border-radius: 0 0 8px 8px;
 }
 </style>

@@ -1,18 +1,11 @@
 <template>
-    <v-container fluid>
-        <v-row justify="center" align="center" class="text-center">
-            <v-col cols="12">
-                <v-card class="pa-4">
-                    <v-card-title class="display-1">404</v-card-title>
-                    <v-card-subtitle class="headline">{{
-                        $t('errors.notFound.title')
-                    }}</v-card-subtitle>
-                    <v-card-text class="subheading-1">{{
-                        $t('errors.notFound.subtitle')
-                    }}</v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
+    <v-container>
+        <LayoutEmptyState
+            icon="mdi-map-marker-question-outline"
+            eyebrow="404"
+            :title="$t('errors.notFound.title')"
+            :hint="$t('errors.notFound.subtitle')"
+        />
     </v-container>
 </template>
 

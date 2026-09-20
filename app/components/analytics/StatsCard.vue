@@ -1,5 +1,5 @@
 <template>
-    <v-card class="stats-card" elevation="0">
+    <v-card class="stats-card surface-card" elevation="0">
         <div
             class="accent-bar"
             :style="{ background: resolvedAccentColor }"
@@ -130,9 +130,6 @@ const normalizedSparkline = computed(() => {
 <style scoped>
 .stats-card {
     height: 100%;
-    border-radius: 14px !important;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.07) !important;
-    background: rgb(var(--v-theme-surface)) !important;
     position: relative;
     overflow: hidden;
     transition:

@@ -1,42 +1,31 @@
 <template>
-    <v-container fluid class="route-manager">
-        <v-row class="mb-4">
-            <v-col
-                cols="12"
-                class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4"
-            >
-                <h1 class="route-manager__page-title">
-                    {{ $t('routes.dashboard') }}
-                </h1>
-                <div class="d-flex align-center ga-2">
-                    <v-btn
-                        color="primary"
-                        variant="tonal"
-                        rounded="lg"
-                        prepend-icon="mdi-routes"
-                        data-testid="routes-create-open"
-                        @click="routeFormRef.open()"
-                    >
-                        {{ $t('climbing.create') }}
-                    </v-btn>
-                    <v-btn
-                        color="primary"
-                        variant="tonal"
-                        rounded="lg"
-                        prepend-icon="mdi-file-import-outline"
-                        data-testid="routes-import-open"
-                        @click="importRouteRef.open()"
-                    >
-                        {{ $t('actions.import') }}
-                    </v-btn>
-                </div>
-            </v-col>
-        </v-row>
+    <v-container class="route-manager">
+        <LayoutPageHeader :title="$t('routes.dashboard')">
+            <template #actions>
+                <v-btn
+                    color="primary"
+                    prepend-icon="mdi-routes"
+                    data-testid="routes-create-open"
+                    @click="routeFormRef.open()"
+                >
+                    {{ $t('climbing.create') }}
+                </v-btn>
+                <v-btn
+                    color="primary"
+                    variant="tonal"
+                    prepend-icon="mdi-file-import-outline"
+                    data-testid="routes-import-open"
+                    @click="importRouteRef.open()"
+                >
+                    {{ $t('actions.import') }}
+                </v-btn>
+            </template>
+        </LayoutPageHeader>
 
         <RouteFormDialog
             ref="routeFormRef"
-            @saved="reloadRoutes"
-            @deleted="reloadRoutes"
+            @saved="onRouteSaved"
+            @deleted="onRouteDeleted"
         />
         <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
 
@@ -68,8 +57,6 @@
                                     clearable
                                     hide-details
                                     density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
                                     data-testid="routes-filter-difficulty"
                                 />
                             </v-col>
@@ -83,8 +70,6 @@
                                     clearable
                                     hide-details
                                     density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
                                     data-testid="routes-filter-type"
                                 />
                             </v-col>
@@ -98,8 +83,6 @@
                                     clearable
                                     hide-details
                                     density="compact"
-                                    variant="outlined"
-                                    rounded="lg"
                                     data-testid="routes-filter-location"
                                 />
                             </v-col>
@@ -200,7 +183,7 @@
                                 variant="tonal"
                                 data-testid="routes-archive-selected"
                             >
-                                <v-icon start>mdi-archive</v-icon>
+                                <v-icon start>mdi-archive-outline</v-icon>
                                 {{ $t('actions.archive') }}
                             </v-btn>
                         </div>
@@ -217,8 +200,8 @@
                         :sort-by="tableOptions.sortBy"
                         :loading="loading"
                         :items-per-page-options="pageSizeOptions"
+                        :no-data-text="$t('table.no_data')"
                         item-value="id"
-                        density="comfortable"
                         @update:options="loadRoutes"
                     >
                         <template #item.selected="{ item }">
@@ -288,14 +271,14 @@
                         <template #item.actions="{ item }">
                             <div class="route-manager__row-actions">
                                 <v-btn
-                                    icon
+                                    icon="mdi-pencil-outline"
+                                    variant="text"
                                     size="small"
                                     class="mr-1"
+                                    :aria-label="$t('actions.edit')"
                                     data-testid="routes-row-edit"
                                     @click="routeFormRef.open(item)"
-                                >
-                                    <v-icon>mdi-pencil</v-icon>
-                                </v-btn>
+                                />
                                 <RouteDetails :route_id="item.id" />
                             </div>
                         </template>
@@ -309,17 +292,11 @@
                         class="mt-4"
                         :elevation="0"
                     />
-                    <div
+                    <LayoutEmptyState
                         v-else-if="!loading && routes.length === 0"
-                        class="route-manager__mobile-empty"
-                    >
-                        <v-icon size="x-large" class="mb-2"
-                            >mdi-magnify-remove-outline</v-icon
-                        >
-                        <p class="text-body-1 mb-0">
-                            {{ $t('table.no_data') }}
-                        </p>
-                    </div>
+                        class="mt-4"
+                        :title="$t('table.no_data')"
+                    />
                     <v-row v-else class="mt-2">
                         <v-col
                             v-for="route in routes"
@@ -337,12 +314,12 @@
                                 <template #actions>
                                     <RouteDetails :route_id="route.id" />
                                     <v-btn
-                                        icon
+                                        icon="mdi-pencil-outline"
+                                        variant="text"
                                         size="small"
+                                        :aria-label="$t('actions.edit')"
                                         @click="routeFormRef.open(route)"
-                                    >
-                                        <v-icon>mdi-pencil</v-icon>
-                                    </v-btn>
+                                    />
                                 </template>
                             </RouteCard>
                         </v-col>
@@ -362,7 +339,6 @@
                             :items="pageSizeOptions"
                             density="compact"
                             hide-details
-                            variant="outlined"
                             class="route-manager__page-size"
                             data-testid="routes-mobile-page-size"
                             @update:modelValue="onMobileItemsPerPageChange"
@@ -682,6 +658,24 @@ const loadRoutes = async (options = {}) => {
     }
 }
 
+// The dialog only emits; without these the user gets no confirmation that a
+// route was actually created, edited or deleted.
+const onRouteSaved = async (payload) => {
+    notify(
+        t(
+            payload?.id
+                ? 'notifications.success.edit'
+                : 'notifications.success.create',
+        ),
+    )
+    await reloadRoutes()
+}
+
+const onRouteDeleted = async () => {
+    notify(t('notifications.success.delete'))
+    await reloadRoutes()
+}
+
 const reloadRoutes = async () => {
     invalidateAllRouteIdsCache()
     await loadRoutes({
@@ -875,13 +869,6 @@ useHead(() => ({
     padding-bottom: 64px;
 }
 
-.route-manager__page-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    color: rgb(var(--v-theme-on-background));
-}
-
 .route-manager__actions {
     display: flex;
     flex-wrap: wrap;
@@ -927,12 +914,6 @@ useHead(() => ({
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.route-manager__mobile-empty {
-    text-align: center;
-    padding: 32px 16px;
-    color: rgba(var(--v-theme-on-surface), 0.7);
 }
 
 .route-manager__mobile-pagination {

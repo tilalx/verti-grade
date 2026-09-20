@@ -54,7 +54,7 @@
                                 <!-- Placeholder for user avatar -->
                                 <template v-slot:prepend>
                                     <v-avatar color="grey-lighten-2">
-                                        <v-icon>mdi-account</v-icon>
+                                        <v-icon>mdi-account-outline</v-icon>
                                     </v-avatar>
                                 </template>
 
@@ -79,20 +79,13 @@
                     </div>
 
                     <!-- Empty State for No Reviews -->
-                    <div
+                    <LayoutEmptyState
                         v-if="!isLoading && ratings.length === 0"
-                        class="text-center pa-8"
-                    >
-                        <v-icon size="x-large" class="mb-4"
-                            >mdi-comment-search-outline</v-icon
-                        >
-                        <h3 class="text-h6 mb-2">
-                            {{ $t('ratings.no_reviews_yet') }}
-                        </h3>
-                        <p class="text-body-1">
-                            {{ $t('ratings.be_the_first') }}
-                        </p>
-                    </div>
+                        icon="mdi-star-shooting-outline"
+                        :card="false"
+                        :title="$t('ratings.no_reviews_yet')"
+                        :hint="$t('ratings.be_the_first')"
+                    />
                 </v-card-text>
             </v-card>
         </v-bottom-sheet>

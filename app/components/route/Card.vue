@@ -75,7 +75,7 @@
                 class="route-card__meta-row route-card__meta-row--full"
             >
                 <v-icon size="15" class="route-card__meta-icon"
-                    >mdi-account-hard-hat</v-icon
+                    >mdi-account-hard-hat-outline</v-icon
                 >
                 <div class="d-flex flex-wrap" style="gap: 4px 4px">
                     <v-chip
@@ -94,11 +94,11 @@
                     {{ $t('climbing.anchor_point') }} {{ anchorPoint }}
                 </span>
                 <span v-if="screwDate" class="route-card__pill">
-                    <v-icon size="13">mdi-calendar-month</v-icon>
+                    <v-icon size="13">mdi-calendar-month-outline</v-icon>
                     {{ screwDate }}
                 </span>
                 <span v-if="route.location" class="route-card__pill">
-                    <v-icon size="13">mdi-map-marker</v-icon>
+                    <v-icon size="13">mdi-map-marker-outline</v-icon>
                     {{ route.location }}
                 </span>
                 <span v-if="route.type" class="route-card__pill">

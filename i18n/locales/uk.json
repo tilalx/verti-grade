@@ -49,6 +49,24 @@
             "lowercase": "Мала літера (a–z)",
             "number": "Цифра (0–9)",
             "special": "Спецсимвол (!{'@'}#...)"
+        },
+        "capsLockOn": "Увімкнено Caps Lock",
+        "resetInfo": "Ми надішлемо посилання для скидання пароля на вашу пошту.",
+        "eyebrowWelcomeBack": "З ПОВЕРНЕННЯМ",
+        "eyebrowAccountRecovery": "ВІДНОВЛЕННЯ ДОСТУПУ",
+        "eyebrowAllDone": "ГОТОВО",
+        "eyebrowInvalidLink": "НЕДІЙСНЕ ПОСИЛАННЯ",
+        "brandHeadline": {
+            "login": {
+                "l1": "Керуйте",
+                "l2": "своїми",
+                "accent": "маршрутами."
+            },
+            "reset": {
+                "l1": "Скиньте",
+                "l2": "пароль",
+                "accent": "облікового запису."
+            }
         }
     },
     "routes": {
@@ -286,7 +304,8 @@
             "dashboard": "Управління маршрутами - Verti-Grade",
             "login": "Вхід - Verti-Grade",
             "resetPassword": "Скидання пароля - Verti-Grade",
-            "notFound": "Сторінку не знайдено - Verti-Grade"
+            "notFound": "Сторінку не знайдено - Verti-Grade",
+            "routeNamed": "{name} - Verti-Grade"
         },
         "content": {
             "settings": "Налаштування",
@@ -385,7 +404,18 @@
         "replace": "Замінити",
         "clickToUpload": "Натисніть, щоб завантажити",
         "loadError": "Не вдалося завантажити налаштування.",
-        "initError": "Не вдалося ініціалізувати налаштування."
+        "initError": "Не вдалося ініціалізувати налаштування.",
+        "organization": "Організація",
+        "organizationName": "Назва організації",
+        "organizationNamePlaceholder": "напр. Deutscher Alpenverein",
+        "organizationUnit": "Підрозділ",
+        "organizationUnitPlaceholder": "напр. Sektion Hanau",
+        "publicUrls": "Публічні посилання",
+        "applicationUrl": "URL застосунку",
+        "imprintUrl": "URL вихідних даних",
+        "privacyUrl": "URL політики конфіденційності",
+        "saveSuccess": "Налаштування успішно збережено.",
+        "saveError": "Не вдалося зберегти налаштування. Спробуйте ще раз."
     },
     "errors": {
         "notFound": {
@@ -399,5 +429,23 @@
         "qr_code": "QR-код",
         "move_up": "Вгору",
         "move_down": "Вниз"
+    },
+    "importRoutes": {
+        "title": "Підтвердити імпорт",
+        "intro": "Наведені маршрути та оцінки буде імпортовано. Перевірте дані перед підтвердженням.",
+        "confirm": "Підтвердити та імпортувати",
+        "ratingsCount": "Оцінки",
+        "ratingsFor": "Оцінки для {name}",
+        "noRatings": "Для цього маршруту немає оцінок для імпорту.",
+        "noComment": "Без коментаря",
+        "ratingLabel": "Оцінка",
+        "difficultyLabel": "Складність",
+        "invalidJson": "Некоректний файл JSON. Перевірте формат файлу.",
+        "readFailed": "Не вдалося прочитати файл.",
+        "success": "Імпорт успішно завершено.",
+        "issues": "Імпорт завершено з помилками: {details}",
+        "routesFailed": "Маршрутів з помилкою: {count}",
+        "commentsFailed": "Коментарів з помилкою: {count}",
+        "failed": "Під час імпорту сталася неочікувана помилка."
     }
 }

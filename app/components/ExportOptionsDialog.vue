@@ -123,87 +123,83 @@ const confirm = () => {
 </script>
 
 <template>
-    <v-dialog v-model="open" max-width="520">
-        <v-card rounded="xl" data-testid="export-options-dialog">
-            <v-card-title class="pa-5 pb-2 text-body-1 font-weight-semibold">
-                {{ $t('export.title') }}
-            </v-card-title>
-            <v-card-text class="pa-5 pt-0">
-                <div class="d-flex align-center justify-space-between mb-1">
-                    <span class="text-body-2 text-medium-emphasis">
-                        {{ $t('export.columns') }}
-                    </span>
-                    <v-btn
-                        variant="text"
-                        size="small"
-                        data-testid="export-toggle-all"
-                        @click="toggleAll"
-                    >
-                        {{
-                            allSelected
-                                ? $t('actions.deselect_all')
-                                : $t('actions.select_all')
-                        }}
-                    </v-btn>
-                </div>
-                <div
-                    v-for="(column, index) in orderedColumns"
-                    :key="column.key"
-                    class="export-column d-flex align-center"
-                    draggable="true"
-                    :data-testid="`export-column-${column.key}`"
-                    @dragstart="dragKey = column.key"
-                    @dragover.prevent
-                    @drop.prevent="onDrop(column.key)"
-                >
-                    <v-icon class="export-column__handle" size="small">
-                        mdi-drag-horizontal-variant
-                    </v-icon>
-                    <v-checkbox
-                        v-model="selected"
-                        :value="column.key"
-                        :label="$t(column.labelKey)"
-                        density="compact"
-                        hide-details
-                    />
-                    <v-spacer />
-                    <v-btn
-                        icon="mdi-chevron-up"
-                        variant="text"
-                        size="small"
-                        :disabled="index === 0"
-                        :aria-label="$t('export.move_up')"
-                        :data-testid="`export-move-up-${column.key}`"
-                        @click="move(column.key, -1)"
-                    />
-                    <v-btn
-                        icon="mdi-chevron-down"
-                        variant="text"
-                        size="small"
-                        :disabled="index === orderedColumns.length - 1"
-                        :aria-label="$t('export.move_down')"
-                        :data-testid="`export-move-down-${column.key}`"
-                        @click="move(column.key, 1)"
-                    />
-                </div>
-            </v-card-text>
-            <v-card-actions class="pa-4 pt-0">
-                <v-btn variant="text" @click="open = false">
-                    {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                    color="success"
-                    variant="flat"
-                    :disabled="!selected.length"
-                    data-testid="export-confirm"
-                    @click="confirm"
-                >
-                    {{ $t('actions.export') }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <LayoutDialogShell
+        v-model="open"
+        :title="$t('export.title')"
+        data-testid="export-options-dialog"
+    >
+        <div class="d-flex align-center justify-space-between mb-1">
+            <span class="text-body-2 text-medium-emphasis">
+                {{ $t('export.columns') }}
+            </span>
+            <v-btn
+                variant="text"
+                size="small"
+                data-testid="export-toggle-all"
+                @click="toggleAll"
+            >
+                {{
+                    allSelected
+                        ? $t('actions.deselect_all')
+                        : $t('actions.select_all')
+                }}
+            </v-btn>
+        </div>
+        <div
+            v-for="(column, index) in orderedColumns"
+            :key="column.key"
+            class="export-column d-flex align-center"
+            draggable="true"
+            :data-testid="`export-column-${column.key}`"
+            @dragstart="dragKey = column.key"
+            @dragover.prevent
+            @drop.prevent="onDrop(column.key)"
+        >
+            <v-icon class="export-column__handle" size="small">
+                mdi-drag-horizontal-variant
+            </v-icon>
+            <v-checkbox
+                v-model="selected"
+                :value="column.key"
+                :label="$t(column.labelKey)"
+                density="compact"
+                hide-details
+            />
+            <v-spacer />
+            <v-btn
+                icon="mdi-chevron-up"
+                variant="text"
+                size="small"
+                :disabled="index === 0"
+                :aria-label="$t('export.move_up')"
+                :data-testid="`export-move-up-${column.key}`"
+                @click="move(column.key, -1)"
+            />
+            <v-btn
+                icon="mdi-chevron-down"
+                variant="text"
+                size="small"
+                :disabled="index === orderedColumns.length - 1"
+                :aria-label="$t('export.move_down')"
+                :data-testid="`export-move-down-${column.key}`"
+                @click="move(column.key, 1)"
+            />
+        </div>
+        <template #actions>
+            <v-btn variant="text" @click="open = false">
+                {{ $t('actions.cancel') }}
+            </v-btn>
+            <v-spacer />
+            <v-btn
+                color="primary"
+                :disabled="!selected.length"
+                data-testid="export-confirm"
+                @click="confirm"
+            >
+                {{ $t('actions.export') }}
+            </v-btn>
+        </template>
+    </LayoutDialogShell>
 </template>
 
 <style scoped>

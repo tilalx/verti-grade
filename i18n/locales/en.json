@@ -49,6 +49,24 @@
             "lowercase": "Lowercase letter (a–z)",
             "number": "Number (0–9)",
             "special": "Special character (!{'@'}#...)"
+        },
+        "capsLockOn": "Caps Lock is on",
+        "resetInfo": "We'll send a password reset link to your email address.",
+        "eyebrowWelcomeBack": "WELCOME BACK",
+        "eyebrowAccountRecovery": "ACCOUNT RECOVERY",
+        "eyebrowAllDone": "ALL DONE",
+        "eyebrowInvalidLink": "INVALID LINK",
+        "brandHeadline": {
+            "login": {
+                "l1": "Manage your",
+                "l2": "climbing",
+                "accent": "routes."
+            },
+            "reset": {
+                "l1": "Reset your",
+                "l2": "account",
+                "accent": "password."
+            }
         }
     },
     "routes": {
@@ -286,7 +304,8 @@
             "dashboard": "Route Management - Verti-Grade",
             "login": "Sign In - Verti-Grade",
             "resetPassword": "Reset Password - Verti-Grade",
-            "notFound": "Page Not Found - Verti-Grade"
+            "notFound": "Page Not Found - Verti-Grade",
+            "routeNamed": "{name} - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -385,7 +404,18 @@
         "replace": "Replace",
         "clickToUpload": "Click to upload",
         "loadError": "Failed to load settings.",
-        "initError": "Failed to initialize settings."
+        "initError": "Failed to initialize settings.",
+        "organization": "Organization",
+        "organizationName": "Organization name",
+        "organizationNamePlaceholder": "e.g. Deutscher Alpenverein",
+        "organizationUnit": "Organization unit",
+        "organizationUnitPlaceholder": "e.g. Sektion Hanau",
+        "publicUrls": "Public URLs",
+        "applicationUrl": "Application URL",
+        "imprintUrl": "Imprint URL",
+        "privacyUrl": "Privacy URL",
+        "saveSuccess": "Settings saved successfully.",
+        "saveError": "Failed to save settings. Please try again."
     },
     "errors": {
         "notFound": {
@@ -399,5 +429,23 @@
         "qr_code": "QR code",
         "move_up": "Move up",
         "move_down": "Move down"
+    },
+    "importRoutes": {
+        "title": "Confirm import",
+        "intro": "The following routes and ratings will be imported. Please review the data before confirming.",
+        "confirm": "Confirm & Import",
+        "ratingsCount": "Ratings",
+        "ratingsFor": "Ratings for {name}",
+        "noRatings": "No ratings to import for this route.",
+        "noComment": "No comment",
+        "ratingLabel": "Rating",
+        "difficultyLabel": "Difficulty",
+        "invalidJson": "Invalid JSON file. Please check the file format.",
+        "readFailed": "Failed to read the file.",
+        "success": "Import completed successfully.",
+        "issues": "Import finished with issues: {details}",
+        "routesFailed": "{count} route(s) failed",
+        "commentsFailed": "{count} comment(s) failed",
+        "failed": "An unexpected error occurred during import."
     }
 }

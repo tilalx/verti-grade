@@ -2,105 +2,121 @@
     <div>
         <!-- Hidden file input -->
         <input
-            type="file"
             ref="fileInput"
+            type="file"
             style="display: none"
+            accept="application/json"
             data-testid="import-route-file-input"
             @change="handleFileChange"
-            accept="application/json"
         />
 
         <!-- Import Preview Dialog -->
-        <v-dialog v-model="showPreviewDialog" persistent max-width="900px">
-            <v-card data-testid="import-route-dialog">
-                <v-card-title>
-                    <span class="text-h5">Confirm Import</span>
-                </v-card-title>
-                <v-card-text>
-                    <p class="mb-4">
-                        The following routes and ratings will be imported.
-                        Please review the data before confirming.
-                    </p>
+        <LayoutDialogShell
+            v-model="showPreviewDialog"
+            max-width="900"
+            persistent
+            :title="$t('importRoutes.title')"
+            data-testid="import-route-dialog"
+        >
+            <p class="mb-4 text-body-2 text-medium-emphasis">
+                {{ $t('importRoutes.intro') }}
+            </p>
 
-                    <v-data-table
-                        :headers="previewHeaders"
-                        :items="routesToImport"
-                        item-value="name"
-                        v-model:expanded="expanded"
-                        show-expand
-                        class="elevation-1"
-                    >
-                        <template v-slot:item.color="{ item }">
-                            <v-avatar :color="item.color" size="24" />
-                        </template>
+            <v-data-table
+                v-model:expanded="expanded"
+                :headers="previewHeaders"
+                :items="routesToImport"
+                item-value="name"
+                show-expand
+            >
+                <template #item.color="{ item }">
+                    <v-avatar :color="item.color" size="24" />
+                </template>
 
-                        <template v-slot:item.ratings="{ item }">
-                            {{ item.ratings?.length || 0 }}
-                        </template>
+                <template #item.ratings="{ item }">
+                    {{ item.ratings?.length || 0 }}
+                </template>
 
-                        <template v-slot:expanded-row="{ columns, item }">
-                            <tr>
-                                <td :colspan="columns.length">
-                                    <v-card
-                                        v-if="item.ratings?.length"
-                                        class="my-4"
-                                        elevation="2"
+                <template #expanded-row="{ columns, item }">
+                    <tr>
+                        <td :colspan="columns.length">
+                            <v-card
+                                v-if="item.ratings?.length"
+                                class="my-4"
+                                border
+                                flat
+                            >
+                                <v-card-title class="text-subtitle-1">
+                                    {{
+                                        $t('importRoutes.ratingsFor', {
+                                            name: item.name,
+                                        })
+                                    }}
+                                </v-card-title>
+                                <v-list density="compact">
+                                    <v-list-item
+                                        v-for="(rating, i) in item.ratings"
+                                        :key="i"
                                     >
-                                        <v-card-title class="text-subtitle-1"
-                                            >Ratings for
-                                            {{ item.name }}</v-card-title
-                                        >
-                                        <v-list density="compact">
-                                            <v-list-item
-                                                v-for="(
-                                                    rating, i
-                                                ) in item.ratings"
-                                                :key="i"
+                                        <v-list-item-title>
+                                            <strong
+                                                >{{
+                                                    $t(
+                                                        'importRoutes.ratingLabel',
+                                                    )
+                                                }}:</strong
                                             >
-                                                <v-list-item-title
-                                                    ><strong>Rating:</strong>
-                                                    {{ rating.rating }}/5,
-                                                    <strong>Difficulty:</strong>
-                                                    {{
-                                                        rating.difficulty
-                                                    }}</v-list-item-title
-                                                >
-                                                <v-list-item-subtitle>{{
-                                                    rating.comment ||
-                                                    'No comment'
-                                                }}</v-list-item-subtitle>
-                                            </v-list-item>
-                                        </v-list>
-                                    </v-card>
-                                    <p v-else class="text-center pa-4">
-                                        No ratings to import for this route.
-                                    </p>
-                                </td>
-                            </tr>
-                        </template>
-                    </v-data-table>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text
-                        data-testid="import-route-cancel"
-                        @click="cancelImport"
-                        >Cancel</v-btn
-                    >
-                    <v-btn
-                        color="primary"
-                        data-testid="import-route-confirm"
-                        @click="confirmImport"
-                        :loading="loading"
-                        >Confirm & Import</v-btn
-                    >
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                                            {{ rating.rating }}/5,
+                                            <strong
+                                                >{{
+                                                    $t(
+                                                        'importRoutes.difficultyLabel',
+                                                    )
+                                                }}:</strong
+                                            >
+                                            {{ rating.difficulty }}
+                                        </v-list-item-title>
+                                        <v-list-item-subtitle>
+                                            {{
+                                                rating.comment ||
+                                                $t('importRoutes.noComment')
+                                            }}
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </v-list>
+                            </v-card>
+                            <p
+                                v-else
+                                class="text-center pa-4 text-body-2 text-medium-emphasis"
+                            >
+                                {{ $t('importRoutes.noRatings') }}
+                            </p>
+                        </td>
+                    </tr>
+                </template>
+            </v-data-table>
+
+            <template #actions>
+                <v-btn
+                    variant="text"
+                    data-testid="import-route-cancel"
+                    @click="cancelImport"
+                >
+                    {{ $t('actions.cancel') }}
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                    color="primary"
+                    :loading="loading"
+                    data-testid="import-route-confirm"
+                    @click="confirmImport"
+                >
+                    {{ $t('importRoutes.confirm') }}
+                </v-btn>
+            </template>
+        </LayoutDialogShell>
     </div>
 </template>
-
 <script setup>
 const pb = usePocketbase()
 const emit = defineEmits(['closed'])
@@ -112,16 +128,17 @@ const loading = ref(false)
 const routesToImport = ref([])
 const expanded = ref([])
 
-const { notify: showSnackbar } = useNotification()
+const { t } = useI18n()
+const { notify, error: notifyError } = useNotification()
 
-const previewHeaders = [
-    { title: 'Color', value: 'color', sortable: false },
-    { title: 'Name', value: 'name' },
-    { title: 'Difficulty', value: 'difficulty' },
-    { title: 'Anchor Point', value: 'anchor_point' },
-    { title: 'Location', value: 'location' },
-    { title: 'Ratings', value: 'ratings' },
-]
+const previewHeaders = computed(() => [
+    { title: t('climbing.color'), value: 'color', sortable: false },
+    { title: t('routes.name'), value: 'name' },
+    { title: t('climbing.difficulty'), value: 'difficulty' },
+    { title: t('climbing.anchor_point'), value: 'anchor_point' },
+    { title: t('climbing.location'), value: 'location' },
+    { title: t('importRoutes.ratingsCount'), value: 'ratings' },
+])
 
 const open = () => {
     fileInput.value.click()
@@ -147,14 +164,11 @@ const handleFileChange = async (event) => {
             showPreviewDialog.value = true
         } catch (error) {
             console.error('Error parsing JSON file:', error)
-            showSnackbar(
-                'Invalid JSON file. Please check the file format.',
-                'error',
-            )
+            notifyError(t('importRoutes.invalidJson'))
         }
     }
     reader.onerror = () => {
-        showSnackbar('Failed to read the file.', 'error')
+        notifyError(t('importRoutes.readFailed'))
     }
     reader.readAsText(file)
 
@@ -215,26 +229,33 @@ const confirmImport = async () => {
         }
 
         if (routeErrors.length === 0 && ratingErrors.length === 0) {
-            showSnackbar('Import completed successfully!', 'success')
+            notify(t('importRoutes.success'))
         } else {
             const summaryParts = []
             if (routeErrors.length > 0) {
-                summaryParts.push(`${routeErrors.length} route(s) failed`)
+                summaryParts.push(
+                    t('importRoutes.routesFailed', {
+                        count: routeErrors.length,
+                    }),
+                )
             }
             if (ratingErrors.length > 0) {
-                summaryParts.push(`${ratingErrors.length} comment(s) failed`)
+                summaryParts.push(
+                    t('importRoutes.commentsFailed', {
+                        count: ratingErrors.length,
+                    }),
+                )
             }
-            const details = summaryParts.join(', ')
-            showSnackbar(`Import finished with issues: ${details}`, 'warning')
+            notify(
+                t('importRoutes.issues', { details: summaryParts.join(', ') }),
+                'warning',
+            )
         }
 
         emit('closed')
     } catch (error) {
         console.error('Error during import:', error)
-        showSnackbar(
-            error.message || 'An unexpected error occurred during import.',
-            'error',
-        )
+        notifyError(error.message || t('importRoutes.failed'))
     } finally {
         loading.value = false
         cancelImport()

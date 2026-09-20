@@ -2,8 +2,6 @@
     <v-alert
         v-if="updateAvailable && !dismissed"
         type="info"
-        variant="tonal"
-        density="compact"
         border="start"
         closable
         rounded="0"
