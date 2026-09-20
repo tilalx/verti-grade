@@ -1,41 +1,180 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
+import { authHeader, gotoSettled } from '../../support/nav'
 
-async function firstTwoSeededRouteIds(page: import('@playwright/test').Page) {
+/**
+ * The inventory is scoped to one gym location. These tests pin that down:
+ * finishing a stock-take at Hanau must never touch a Gelnhausen route, and an
+ * unchecked route must survive the archive step.
+ */
+
+async function activeRoutesAt(page: Page, location: string) {
     const res = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=2',
+        '/api/collections/routes/records?' +
+            new URLSearchParams({
+                filter: `name ~ "e2e-route-" && archived = false && location = "${location}"`,
+                perPage: '200',
+                sort: 'name',
+            }),
     )
-    const body = await res.json()
-    return body.items.map((r: { id: string }) => r.id) as string[]
+    return (await res.json()).items as { id: string; name: string }[]
 }
 
-test('drives the scan/finish/archive flow via seeded localStorage, no camera', async ({
+async function isArchived(page: Page, id: string) {
+    const res = await page.request.get(`/api/collections/routes/records/${id}`)
+    return (await res.json()).archived === true
+}
+
+/** Seeds a v2 session and reloads so the page picks it up. */
+async function seedSession(page: Page, location: string, ids: string[]) {
+    await page.evaluate(
+        ({ location: loc, ids: scanned }) => {
+            localStorage.setItem(
+                'inventory-scanned-route-ids',
+                JSON.stringify({ v: 2, location: loc, ids: scanned }),
+            )
+            localStorage.setItem('inventory-instructions-seen', '1')
+        },
+        { location, ids },
+    )
+    await page.reload()
+    await page
+        .locator('[data-testid="inventory-progress"]')
+        .waitFor({ state: 'visible' })
+}
+
+test('archives only the checked routes at the scanned location', async ({
     adminPage: page,
 }) => {
-    const ids = await firstTwoSeededRouteIds(page)
-
     await gotoSettled(page, '/admin/inventory')
-    await page.evaluate((scannedIds) => {
-        localStorage.setItem(
-            'inventory-scanned-route-ids',
-            JSON.stringify(scannedIds),
-        )
-    }, ids)
-    await page.reload()
-    await page.waitForLoadState('networkidle')
-    // The instructions dialog auto-opens on every mount when on mobile
-    // (app/pages/admin/inventory.vue onMounted) and otherwise blocks clicks.
-    await page.keyboard.press('Escape')
 
-    await expect(page.getByTestId('inventory-found-count')).toHaveText(
-        String(ids.length),
+    const hanau = await activeRoutesAt(page, 'Hanau')
+    const gelnhausen = await activeRoutesAt(page, 'Gelnhausen')
+    expect(hanau.length).toBeGreaterThan(2)
+    expect(gelnhausen.length).toBeGreaterThan(0)
+
+    // Everything at Hanau counted except the last two.
+    const missing = hanau.slice(-2)
+    const scanned = hanau.slice(0, -2)
+    await seedSession(
+        page,
+        'Hanau',
+        scanned.map((route) => route.id),
     )
 
-    await page.getByTestId('inventory-finish-open').click()
-    await expect(page.getByTestId('inventory-finish-dialog')).toBeVisible()
-    await page.getByTestId('inventory-finish-confirm').click()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText(
+        String(scanned.length),
+    )
+    // Membership, not an exact count: the page counts every active route at
+    // the location, and sibling specs create their own routes at Hanau while
+    // this one runs. What matters is that both uncounted seed routes are
+    // listed as still to find.
+    for (const route of missing) {
+        await expect(
+            page.getByTestId(`inventory-missing-${route.id}`),
+        ).toBeVisible()
+    }
 
-    await expect(page.getByTestId('inventory-finish-dialog')).toBeHidden()
+    const [toArchive, toKeep] = missing
+
+    await page.getByTestId('inventory-finish-open').click()
+    const dialog = page.getByTestId('inventory-finish-dialog')
+    await expect(dialog).toBeVisible()
+
+    // The review must not reach across sites.
+    for (const route of gelnhausen) {
+        await expect(
+            page.getByTestId(`inventory-archive-toggle-${route.id}`),
+        ).toHaveCount(0)
+    }
+
+    // Everything missing here is staged for archiving by default, foreign
+    // routes at this location included. Opt every one of them out so the
+    // archive is exactly the route this test owns — otherwise confirming
+    // would archive records a parallel spec is still asserting on.
+    for (const toggle of await page
+        .locator('[data-testid^="inventory-archive-toggle-"]')
+        .all()) {
+        const id = (await toggle.getAttribute('data-testid'))!.slice(
+            'inventory-archive-toggle-'.length,
+        )
+        if (id !== toArchive.id) await toggle.click()
+    }
+    await expect(page.getByTestId('inventory-finish-confirm')).toHaveText(
+        /Archive\s+1\b/,
+    )
+
+    await page.getByTestId('inventory-finish-confirm').click()
+    await expect(dialog).toBeHidden()
+
+    expect(await isArchived(page, toArchive.id)).toBe(true)
+    expect(await isArchived(page, toKeep.id)).toBe(false)
+
+    // The other site is untouched — this is the regression that matters.
+    expect((await activeRoutesAt(page, 'Gelnhausen')).length).toBe(
+        gelnhausen.length,
+    )
+
+    // Leave the seed as we found it.
+    await page.request.patch(
+        `/api/collections/routes/records/${toArchive.id}`,
+        { data: { archived: false }, headers: await authHeader(page) },
+    )
+})
+
+test('requires a location before scanning can start', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/inventory')
+    await page.evaluate(() => {
+        localStorage.removeItem('inventory-scanned-route-ids')
+        localStorage.setItem('inventory-instructions-seen', '1')
+    })
+    await page.reload()
+
+    await expect(page.getByTestId('inventory-start')).toBeDisabled()
+    await page.getByTestId('inventory-location-Hanau').click()
+    await expect(page.getByTestId('inventory-start')).toBeEnabled()
+})
+
+test('restores a legacy session and asks which location it belongs to', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/inventory')
+
+    const hanau = await activeRoutesAt(page, 'Hanau')
+    // The pre-scoping storage shape: a bare array of ids.
+    await page.evaluate(
+        (ids) => {
+            localStorage.setItem(
+                'inventory-scanned-route-ids',
+                JSON.stringify(ids),
+            )
+            localStorage.setItem('inventory-instructions-seen', '1')
+        },
+        [hanau[0].id, hanau[1].id],
+    )
+    await page.reload()
+    await page
+        .locator('[data-testid="inventory-progress"]')
+        .waitFor({ state: 'visible' })
+
+    // Unscoped: nothing is counted and nothing can be archived yet.
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
+    await expect(page.getByTestId('inventory-missing-count')).toHaveText('0')
+    await expect(page.getByTestId('inventory-start')).toBeDisabled()
+
+    await page.getByTestId('inventory-location-Hanau').click()
+
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('2')
+    // The session is upgraded to the scoped shape on the next write.
+    await expect
+        .poll(async () =>
+            page.evaluate(() =>
+                JSON.parse(
+                    localStorage.getItem('inventory-scanned-route-ids') || '{}',
+                ),
+            ),
+        )
+        .toMatchObject({ v: 2, location: 'Hanau' })
 })

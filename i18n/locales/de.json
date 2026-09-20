@@ -202,19 +202,11 @@
     },
     "inventory": {
         "title": "Routeninventur",
-        "subtitle": "Scanne nacheinander alle QR-Codes, um die Route zu erfassen.",
         "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
         "start": "Scan starten",
         "stop": "Scan stoppen",
         "finish": "Inventur abschließen",
-        "scannedCount": "Gescannt: {count}",
-        "pendingCount": "Noch offen: {count}",
-        "lastScanned": "Zuletzt gescannt",
-        "invalidCode": "Der Code konnte keiner Route zugeordnet werden.",
-        "unknownRoute": "Die Route wurde nicht gefunden.",
         "noScans": "Noch keine Routen gescannt.",
-        "dialogTitle": "Fehlende Routen archivieren?",
-        "dialogDescription": "Die folgenden Routen wurden nicht gescannt und werden archiviert:",
         "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
         "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
         "archiveError": "Fehler beim Archivieren der fehlenden Routen.",
@@ -234,7 +226,32 @@
         "reviewTitle": "Inventur überprüfen",
         "reviewFoundTitle": "Gescannt",
         "reviewMissingTitle": "Nicht gescannt",
-        "reviewMissingDescription": "Diese Routen wurden nicht gescannt und werden automatisch archiviert."
+        "reviewMissingDescription": "Diese Routen wurden nicht gefunden. Nicht angehakte Routen bleiben aktiv.",
+        "locationLabel": "Halle",
+        "locationHint": "Nur Routen an diesem Standort werden gezählt und archiviert.",
+        "locationRequired": "Wähle einen Standort, um zu starten.",
+        "locationRestoreHint": "Gespeicherter Fortschritt aus einer früheren Version – wähle die zugehörige Halle.",
+        "changeLocation": "Standort wechseln",
+        "progress": "{found} von {total} gefunden",
+        "stillToFind": "Noch zu finden",
+        "markFound": "Als gefunden markieren",
+        "markedFound": "{name} als gefunden markiert.",
+        "undo": "Rückgängig",
+        "undone": "{name} aus dieser Inventur entfernt.",
+        "addManually": "Manuell hinzufügen",
+        "addManuallyTitle": "Route als gefunden markieren",
+        "addManuallyHint": "Für beschädigte oder unerreichbare Etiketten.",
+        "searchRoutes": "Routen suchen",
+        "allFound": "Alle Routen an diesem Standort wurden gefunden.",
+        "unlocatedNote": "{count} aktive Routen haben keinen Standort und gehören nicht zu dieser Inventur.",
+        "toggleTorch": "Taschenlampe umschalten",
+        "resetTitle": "Inventur zurücksetzen?",
+        "resetMessage": "Damit werden die bisher gezählten {count} Routen verworfen. Es wird nichts archiviert.",
+        "archiveSelected": "{count} archivieren",
+        "archiveNone": "Nichts archivieren",
+        "droppedForLocation": "{count} gespeicherte Scans von einem anderen Standort wurden entfernt.",
+        "tagUnknown": "Unbekannt",
+        "tagCounted": "Gezählt"
     },
     "notifications": {
         "success": {
@@ -305,7 +322,8 @@
             "login": "Anmelden - Verti-Grade",
             "resetPassword": "Passwort zurücksetzen - Verti-Grade",
             "notFound": "Seite nicht gefunden - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade"
+            "routeNamed": "{name} - Verti-Grade",
+            "inventory": "Routen-Inventur - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -313,7 +331,8 @@
             "index": "Kletterrouten",
             "comments": "Kommentare",
             "users": "Benutzerverwaltung",
-            "dashboard": "Routenverwaltung"
+            "dashboard": "Routenverwaltung",
+            "inventory": "Routen-Inventur"
         }
     },
     "validation": {

@@ -1,112 +1,240 @@
 /**
- * Tests for pure utility logic from app/pages/admin/inventory.vue.
+ * Tests for app/utils/inventory.ts.
  *
- * loadStoredScannedIds and persistScannedIds interact with localStorage.
- * The logic is inlined here because these functions are defined inside a
- * Vue SFC <script setup> block and cannot be imported directly.
+ * These import the real implementation. The previous version of this spec
+ * inlined its own copies of the storage helpers against a key the app never
+ * wrote ('verti-grade:scanned-route-ids'), so it passed regardless of the
+ * page's behaviour.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-
-const STORAGE_KEY = 'verti-grade:scanned-route-ids'
-
-// ---------------------------------------------------------------------------
-// Helpers that mirror the inventory page implementation
-// ---------------------------------------------------------------------------
-
-function loadStoredScannedIds(): string[] {
-    if (!process.client) return []
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-        if (!raw) return []
-        const parsed = JSON.parse(raw)
-        if (!Array.isArray(parsed)) return []
-        return parsed.filter((value) => typeof value === 'string' && value.length > 0)
-    } catch {
-        return []
-    }
-}
-
-function persistScannedIds(ids: string[]): void {
-    if (!process.client) return
-    try {
-        if (Array.isArray(ids) && ids.length > 0) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(ids))
-        } else {
-            localStorage.removeItem(STORAGE_KEY)
-        }
-    } catch {
-        // swallow
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Setup
-// ---------------------------------------------------------------------------
+import { describe, it, expect, beforeEach } from 'vitest'
+import {
+    INVENTORY_STORAGE_KEY,
+    clearSession,
+    countUnlocated,
+    extractRouteId,
+    loadSession,
+    missingRoutes,
+    persistSession,
+    scopedRoutes,
+    sortByAnchor,
+    type InventoryRoute,
+} from '~/utils/inventory'
 
 beforeEach(() => {
-    process.client = true
     localStorage.clear()
 })
 
-// ---------------------------------------------------------------------------
-// loadStoredScannedIds
-// ---------------------------------------------------------------------------
+const route = (
+    id: string,
+    overrides: Partial<InventoryRoute> = {},
+): InventoryRoute => ({ id, name: id, location: 'Hanau', ...overrides })
 
-describe('loadStoredScannedIds', () => {
-    it('returns [] when nothing is stored', () => {
-        expect(loadStoredScannedIds()).toEqual([])
+describe('loadSession', () => {
+    it('returns an empty session when nothing is stored', () => {
+        expect(loadSession()).toEqual({ location: null, ids: [] })
     })
 
-    it('returns the stored string ids', () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(['abc', 'def']))
-        expect(loadStoredScannedIds()).toEqual(['abc', 'def'])
+    it('reads the v2 record', () => {
+        localStorage.setItem(
+            INVENTORY_STORAGE_KEY,
+            JSON.stringify({ v: 2, location: 'Hanau', ids: ['abc', 'def'] }),
+        )
+        expect(loadSession()).toEqual({
+            location: 'Hanau',
+            ids: ['abc', 'def'],
+        })
     })
 
-    it('filters out non-string values', () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(['abc', 42, null, 'def']))
-        expect(loadStoredScannedIds()).toEqual(['abc', 'def'])
+    it('migrates a legacy v1 array to an unscoped session', () => {
+        localStorage.setItem(
+            INVENTORY_STORAGE_KEY,
+            JSON.stringify(['abc', 'def']),
+        )
+        expect(loadSession()).toEqual({ location: null, ids: ['abc', 'def'] })
     })
 
-    it('filters out empty strings', () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(['abc', '', 'def']))
-        expect(loadStoredScannedIds()).toEqual(['abc', 'def'])
+    it('drops non-string and empty ids', () => {
+        localStorage.setItem(
+            INVENTORY_STORAGE_KEY,
+            JSON.stringify({
+                v: 2,
+                location: 'Hanau',
+                ids: ['abc', 42, null, '', 'def'],
+            }),
+        )
+        expect(loadSession().ids).toEqual(['abc', 'def'])
     })
 
-    it('returns [] when stored value is not a JSON array', () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ foo: 'bar' }))
-        expect(loadStoredScannedIds()).toEqual([])
+    it('treats a blank stored location as unscoped', () => {
+        localStorage.setItem(
+            INVENTORY_STORAGE_KEY,
+            JSON.stringify({ v: 2, location: '', ids: ['abc'] }),
+        )
+        expect(loadSession().location).toBeNull()
     })
 
-    it('returns [] when stored value is invalid JSON', () => {
-        localStorage.setItem(STORAGE_KEY, 'not-valid-json')
-        expect(loadStoredScannedIds()).toEqual([])
+    it('returns an empty session for invalid JSON', () => {
+        localStorage.setItem(INVENTORY_STORAGE_KEY, 'not-valid-json')
+        expect(loadSession()).toEqual({ location: null, ids: [] })
     })
 
-    it('returns [] on the server (process.client = false)', () => {
-        process.client = false
-        expect(loadStoredScannedIds()).toEqual([])
+    it('returns an empty session for an unexpected shape', () => {
+        localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(42))
+        expect(loadSession()).toEqual({ location: null, ids: [] })
     })
 })
 
-// ---------------------------------------------------------------------------
-// persistScannedIds
-// ---------------------------------------------------------------------------
-
-describe('persistScannedIds', () => {
-    it('writes the ids to localStorage', () => {
-        persistScannedIds(['abc', 'def'])
-        expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual(['abc', 'def'])
+describe('persistSession', () => {
+    it('round-trips through loadSession', () => {
+        persistSession({ location: 'Gelnhausen', ids: ['abc'] })
+        expect(loadSession()).toEqual({ location: 'Gelnhausen', ids: ['abc'] })
     })
 
-    it('removes the key for an empty array', () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(['abc']))
-        persistScannedIds([])
-        expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    it('always writes the v2 shape', () => {
+        persistSession({ location: 'Hanau', ids: ['abc'] })
+        expect(
+            JSON.parse(localStorage.getItem(INVENTORY_STORAGE_KEY)!),
+        ).toEqual({
+            v: 2,
+            location: 'Hanau',
+            ids: ['abc'],
+        })
     })
 
-    it('does nothing when process.client is false', () => {
-        process.client = false
-        persistScannedIds(['abc'])
-        expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    it('upgrades a legacy session once a location is chosen', () => {
+        localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(['abc']))
+        const restored = loadSession()
+        persistSession({ ...restored, location: 'Hanau' })
+        expect(loadSession()).toEqual({ location: 'Hanau', ids: ['abc'] })
+    })
+
+    it('removes the key for a fully empty session', () => {
+        persistSession({ location: 'Hanau', ids: ['abc'] })
+        persistSession({ location: null, ids: [] })
+        expect(localStorage.getItem(INVENTORY_STORAGE_KEY)).toBeNull()
+    })
+
+    it('keeps a chosen location with no scans yet', () => {
+        persistSession({ location: 'Hanau', ids: [] })
+        expect(loadSession()).toEqual({ location: 'Hanau', ids: [] })
+    })
+})
+
+describe('clearSession', () => {
+    it('removes the stored session', () => {
+        persistSession({ location: 'Hanau', ids: ['abc'] })
+        clearSession()
+        expect(localStorage.getItem(INVENTORY_STORAGE_KEY)).toBeNull()
+    })
+})
+
+describe('scopedRoutes', () => {
+    const routes = [
+        route('a'),
+        route('b', { location: 'Gelnhausen' }),
+        route('c', { archived: true }),
+        route('d', { location: null }),
+    ]
+
+    it('keeps only active routes at the given location', () => {
+        expect(scopedRoutes(routes, 'Hanau').map((r) => r.id)).toEqual(['a'])
+    })
+
+    it('returns nothing without a location, so nothing can be archived', () => {
+        expect(scopedRoutes(routes, null)).toEqual([])
+    })
+})
+
+describe('missingRoutes', () => {
+    const routes = [
+        route('a', { anchor_point: 2 }),
+        route('b', { anchor_point: 1 }),
+        route('other', { location: 'Gelnhausen', anchor_point: 1 }),
+    ]
+
+    it('excludes scanned routes', () => {
+        expect(missingRoutes(routes, ['b'], 'Hanau').map((r) => r.id)).toEqual([
+            'a',
+        ])
+    })
+
+    it('never reaches across locations', () => {
+        expect(missingRoutes(routes, [], 'Hanau').map((r) => r.id)).toEqual([
+            'b',
+            'a',
+        ])
+    })
+
+    it('is empty for an unscoped session', () => {
+        expect(missingRoutes(routes, [], null)).toEqual([])
+    })
+})
+
+describe('sortByAnchor', () => {
+    it('orders by anchor point, unnumbered last, then by name', () => {
+        const sorted = sortByAnchor([
+            route('z', { anchor_point: null, name: 'z' }),
+            route('b', { anchor_point: 5, name: 'b' }),
+            route('a', { anchor_point: null, name: 'a' }),
+            route('c', { anchor_point: 1, name: 'c' }),
+        ])
+        expect(sorted.map((r) => r.id)).toEqual(['c', 'b', 'a', 'z'])
+    })
+
+    it('does not mutate its input', () => {
+        const input = [
+            route('b', { anchor_point: 2 }),
+            route('a', { anchor_point: 1 }),
+        ]
+        sortByAnchor(input)
+        expect(input.map((r) => r.id)).toEqual(['b', 'a'])
+    })
+})
+
+describe('countUnlocated', () => {
+    it('counts active routes with no location', () => {
+        expect(
+            countUnlocated([
+                route('a'),
+                route('b', { location: null }),
+                route('c', { location: '' }),
+                route('d', { location: null, archived: true }),
+            ]),
+        ).toBe(2)
+    })
+})
+
+describe('extractRouteId', () => {
+    it('reads the id from a printed label URL', () => {
+        expect(
+            extractRouteId('https://verti.example/route?id=abc123def4567'),
+        ).toBe('abc123def4567')
+    })
+
+    it('reads the id from a relative URL', () => {
+        expect(extractRouteId('/route?id=abc123def4567')).toBe('abc123def4567')
+    })
+
+    it('accepts a bare PocketBase id', () => {
+        expect(extractRouteId('abc123def456789')).toBe('abc123def456789')
+    })
+
+    it('trims surrounding whitespace', () => {
+        expect(extractRouteId('  abc123def456789  ')).toBe('abc123def456789')
+    })
+
+    it('rejects an unrelated URL with no id', () => {
+        expect(extractRouteId('https://verti.example/route')).toBeNull()
+    })
+
+    it('rejects a short or non-id string', () => {
+        expect(extractRouteId('hello')).toBeNull()
+        expect(extractRouteId('not an id!')).toBeNull()
+    })
+
+    it('rejects empty input', () => {
+        expect(extractRouteId('')).toBeNull()
+        expect(extractRouteId(null)).toBeNull()
+        expect(extractRouteId(undefined)).toBeNull()
     })
 })

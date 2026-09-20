@@ -202,19 +202,11 @@
     },
     "inventory": {
         "title": "Route Inventory Scan",
-        "subtitle": "Point your camera at each QR code to register the route.",
         "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
         "start": "Start Scanning",
         "stop": "Stop Scanning",
         "finish": "Finish Inventory",
-        "scannedCount": "Scanned routes: {count}",
-        "pendingCount": "Routes still to find: {count}",
-        "lastScanned": "Last scanned",
-        "invalidCode": "Scanned code is not a recognized route.",
-        "unknownRoute": "The scanned route could not be found.",
         "noScans": "No routes scanned yet.",
-        "dialogTitle": "Archive missing routes?",
-        "dialogDescription": "The following routes were not scanned and will be archived:",
         "archiveSuccess": "Inventory completed. Archived {count} routes.",
         "nothingToArchive": "All routes were scanned. Nothing to archive.",
         "archiveError": "Failed to archive the missing routes.",
@@ -234,7 +226,32 @@
         "reviewTitle": "Review scanned routes",
         "reviewFoundTitle": "Scanned routes",
         "reviewMissingTitle": "Routes not scanned",
-        "reviewMissingDescription": "These routes were not scanned and will be archived automatically."
+        "reviewMissingDescription": "These routes were not found. Unchecked routes stay active.",
+        "locationLabel": "Gym location",
+        "locationHint": "Only routes at this location are counted and archived.",
+        "locationRequired": "Choose a location to start.",
+        "locationRestoreHint": "Saved progress from an earlier version — choose the gym it belongs to.",
+        "changeLocation": "Change location",
+        "progress": "{found} of {total} found",
+        "stillToFind": "Still to find",
+        "markFound": "Mark as found",
+        "markedFound": "Marked {name} as found.",
+        "undo": "Undo",
+        "undone": "Removed {name} from this inventory.",
+        "addManually": "Add manually",
+        "addManuallyTitle": "Mark a route as found",
+        "addManuallyHint": "Use this for labels that are damaged or out of reach.",
+        "searchRoutes": "Search routes",
+        "allFound": "Every route at this location has been found.",
+        "unlocatedNote": "{count} active routes have no location and are not part of this inventory.",
+        "toggleTorch": "Toggle flashlight",
+        "resetTitle": "Reset inventory?",
+        "resetMessage": "This clears the {count} routes counted so far. Nothing is archived.",
+        "archiveSelected": "Archive {count}",
+        "archiveNone": "Archive nothing",
+        "droppedForLocation": "{count} saved scans from another location were removed.",
+        "tagUnknown": "Unknown",
+        "tagCounted": "Counted"
     },
     "notifications": {
         "success": {
@@ -305,7 +322,8 @@
             "login": "Sign In - Verti-Grade",
             "resetPassword": "Reset Password - Verti-Grade",
             "notFound": "Page Not Found - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade"
+            "routeNamed": "{name} - Verti-Grade",
+            "inventory": "Route Inventory - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -313,7 +331,8 @@
             "index": "Climbing Routes",
             "comments": "Comments",
             "users": "User Management",
-            "dashboard": "Route Management"
+            "dashboard": "Route Management",
+            "inventory": "Route Inventory"
         }
     },
     "validation": {
