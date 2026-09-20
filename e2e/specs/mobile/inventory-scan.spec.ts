@@ -65,7 +65,17 @@ test('archives only the checked routes at the scanned location', async ({
     await expect(page.getByTestId('inventory-found-count')).toHaveText(
         String(scanned.length),
     )
-    await expect(page.getByTestId('inventory-missing-count')).toHaveText('2')
+    // Membership, not an exact count: the page counts every active route at
+    // the location, and sibling specs create their own routes at Hanau while
+    // this one runs. What matters is that both uncounted seed routes are
+    // listed as still to find.
+    for (const route of missing) {
+        await expect(
+            page.getByTestId(`inventory-missing-${route.id}`),
+        ).toBeVisible()
+    }
+
+    const [toArchive, toKeep] = missing
 
     await page.getByTestId('inventory-finish-open').click()
     const dialog = page.getByTestId('inventory-finish-dialog')
@@ -78,9 +88,18 @@ test('archives only the checked routes at the scanned location', async ({
         ).toHaveCount(0)
     }
 
-    // Opt the second one out; only the first should be archived.
-    const [toArchive, toKeep] = missing
-    await page.getByTestId(`inventory-archive-toggle-${toKeep.id}`).click()
+    // Everything missing here is staged for archiving by default, foreign
+    // routes at this location included. Opt every one of them out so the
+    // archive is exactly the route this test owns — otherwise confirming
+    // would archive records a parallel spec is still asserting on.
+    for (const toggle of await page
+        .locator('[data-testid^="inventory-archive-toggle-"]')
+        .all()) {
+        const id = (await toggle.getAttribute('data-testid'))!.slice(
+            'inventory-archive-toggle-'.length,
+        )
+        if (id !== toArchive.id) await toggle.click()
+    }
     await expect(page.getByTestId('inventory-finish-confirm')).toHaveText(
         /Archive\s+1\b/,
     )
