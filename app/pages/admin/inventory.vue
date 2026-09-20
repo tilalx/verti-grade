@@ -18,7 +18,6 @@
                     :formats="['qr_code']"
                     :constraints="cameraConstraints"
                     :torch="torchOn"
-                    :paused="streamPaused"
                     :track="trackQrCode"
                     @detect="onDetect"
                     @camera-on="onCameraOn"
@@ -558,7 +557,6 @@ definePageMeta({
 const ROUTE_FIELDS =
     'id,name,location,difficulty,difficulty_sign,anchor_point,archived'
 const SCAN_COOLDOWN_MS = 2000
-const FREEZE_MS = 400
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
@@ -580,7 +578,6 @@ const restoredUnscoped = ref(false)
 
 const scanning = ref(false)
 const cameraActive = ref(false)
-const paused = ref(false)
 const torchOn = ref(false)
 const torchSupported = ref(false)
 const scannerError = ref('')
@@ -735,7 +732,6 @@ watch(sessionLocation, () => reconcileScannedIds())
 // ── Scan feedback ───────────────────────────────────────────────────────
 // Sound and vibration let you keep walking instead of watching the screen.
 let audioContext: AudioContext | null = null
-let freezeTimer: ReturnType<typeof setTimeout> | null = null
 
 const ensureAudio = () => {
     if (!import.meta.client) return
@@ -780,26 +776,14 @@ const vibrate = (pattern: number | number[]) => {
     }
 }
 
-const freezeFrame = () => {
-    if (!cameraActive.value) return
-    paused.value = true
-    if (freezeTimer) clearTimeout(freezeTimer)
-    freezeTimer = setTimeout(() => {
-        paused.value = false
-        freezeTimer = null
-    }, FREEZE_MS)
-}
-
 const signalAccepted = () => {
     vibrate(60)
     beep(880)
-    freezeFrame()
 }
 
 const signalDuplicate = () => {
     vibrate(30)
     beep(520)
-    freezeFrame()
 }
 
 const signalRejected = () => {
@@ -808,10 +792,13 @@ const signalRejected = () => {
 }
 
 // ── Camera ──────────────────────────────────────────────────────────────
-// Dialogs pause the stream rather than unmounting it, so cancelling out of
-// the review does not pay for a full camera re-initialisation.
-const streamPaused = computed(
-    () => paused.value || finishDialog.value || manualDialog.value,
+// Never hand the stream a pause. The library implements it by stopping the
+// track and re-running getUserMedia to resume, so a freeze on every scan cost
+// a full camera re-initialisation -- seconds on iOS, with the viewport showing
+// its backdrop until the first frame arrived. Detections are ignored while a
+// dialog is open instead, which is all the pause was really protecting.
+const acceptingScans = computed(
+    () => !finishDialog.value && !manualDialog.value,
 )
 
 // The track callback runs several times a second; vue-qrcode-reader's docs
@@ -938,7 +925,7 @@ const trackQrCode = (
 }
 
 const onDetect = (detectedCodes: { rawValue: string }[]) => {
-    if (!Array.isArray(detectedCodes)) return
+    if (!Array.isArray(detectedCodes) || !acceptingScans.value) return
     for (const code of detectedCodes) {
         if (code.rawValue) void handleScanResult(code.rawValue)
     }
@@ -967,20 +954,14 @@ const startScanner = () => {
     // This tap is the user gesture the AudioContext needs.
     ensureAudio()
     scannerError.value = ''
-    paused.value = false
     cameraActive.value = true
 }
 
 const stopScanner = () => {
     cameraActive.value = false
     scanning.value = false
-    paused.value = false
     torchOn.value = false
     torchSupported.value = false
-    if (freezeTimer) {
-        clearTimeout(freezeTimer)
-        freezeTimer = null
-    }
 }
 
 // ── Scanning ────────────────────────────────────────────────────────────
@@ -1221,6 +1202,18 @@ onBeforeUnmount(() => {
     min-height: 200px;
     background: #111;
     overflow: hidden;
+}
+
+/* Explicit, not inherited from the library's inline style: a video element
+   defaults to object-fit: contain, so a portrait camera stream in this
+   landscape box gets pillarboxed with the backdrop showing either side. The
+   tracking layer is deliberately excluded -- its bitmap already matches its
+   box, and fitting it would move the overlay off the picture. */
+.scanner-viewport :deep(video),
+.scanner-viewport :deep(#qrcode-stream-pause-frame) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .scanner-viewport__torch {
