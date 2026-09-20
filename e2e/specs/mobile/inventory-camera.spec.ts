@@ -7,7 +7,10 @@ import { gotoSettled } from '../../support/nav'
 const AUTH_FILE = path.join(__dirname, '..', '..', '.auth', 'admin.json')
 
 test('detects a route QR code via a fake video device', async ({ baseURL }) => {
-    test.setTimeout(60_000)
+    // This test carries its own browser (the fake-device flags are
+    // browser-level) plus camera start-up and QR decoding, all while the other
+    // workers are busy — 60s was not enough headroom on a loaded agent.
+    test.setTimeout(120_000)
     const routeRes = await request.newContext({
         baseURL,
         ignoreHTTPSErrors: true,
@@ -52,11 +55,17 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     })
     await page.reload()
 
+    // Assert before each click, so a page that never got this far fails here
+    // with the step that stalled rather than as a bare test timeout.
+    await expect(page.getByTestId('inventory-location-Hanau')).toBeVisible()
     await page.getByTestId('inventory-location-Hanau').click()
 
+    await expect(page.getByTestId('inventory-start')).toBeEnabled()
     await page.getByTestId('inventory-start').click()
+
+    await expect(page.locator('.scanner-viewport')).toBeVisible()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1', {
-        timeout: 15_000,
+        timeout: 30_000,
     })
 
     await context.close()

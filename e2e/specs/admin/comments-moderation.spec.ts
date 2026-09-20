@@ -1,40 +1,61 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
+import { createComment, deleteComment } from '../../support/comments'
+
+/**
+ * Every test here owns the comment it acts on. Reaching for `.first()` in the
+ * shared seeded list raced the other tests in this file — they run in parallel
+ * and delete or edit that same card.
+ */
 
 test('shows seeded review stats and deletes a comment', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/comments')
     await expect(page.getByTestId('comments-stat-total')).toBeVisible()
 
-    const firstCard = page.locator('[data-testid^="comment-card-"]').first()
-    await expect(firstCard).toBeVisible()
-    await firstCard.getByTestId('comment-card-delete').click()
-    await page.getByTestId('confirm-dialog-confirm').click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
-})
-
-test('cancelling delete keeps the comment', async ({ adminPage: page }) => {
+    const id = await createComment(page, `${testPrefix}-to-delete`)
     await gotoSettled(page, '/admin/comments')
 
-    const firstCard = page.locator('[data-testid^="comment-card-"]').first()
-    await expect(firstCard).toBeVisible()
-    const testId = await firstCard.getAttribute('data-testid')
+    const card = page.getByTestId(`comment-card-${id}`)
+    await expect(card).toBeVisible()
+    await card.getByTestId('comment-card-delete').click()
+    await page.getByTestId('confirm-dialog-confirm').click()
 
-    await firstCard.getByTestId('comment-card-delete').click()
+    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(card).toHaveCount(0)
+})
+
+test('cancelling delete keeps the comment', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    await gotoSettled(page, '/admin/comments')
+    const id = await createComment(page, `${testPrefix}-survives-cancel`)
+    await gotoSettled(page, '/admin/comments')
+
+    const card = page.getByTestId(`comment-card-${id}`)
+    await expect(card).toBeVisible()
+
+    await card.getByTestId('comment-card-delete').click()
     await expect(page.getByTestId('confirm-dialog')).toBeVisible()
     await page.getByTestId('confirm-dialog-cancel').click()
     await expect(page.getByTestId('confirm-dialog')).toBeHidden()
 
-    await expect(page.getByTestId(testId!)).toBeVisible()
+    await expect(card).toBeVisible()
+
+    await deleteComment(page, id)
 })
 
 test('edits a comment', async ({ adminPage: page, testPrefix }) => {
     await gotoSettled(page, '/admin/comments')
+    const id = await createComment(page, `${testPrefix}-before-edit`)
+    await gotoSettled(page, '/admin/comments')
 
-    const firstCard = page.locator('[data-testid^="comment-card-"]').first()
-    await expect(firstCard).toBeVisible()
-    await firstCard.getByTestId('comment-card-edit').click()
+    const card = page.getByTestId(`comment-card-${id}`)
+    await expect(card).toBeVisible()
+    await card.getByTestId('comment-card-edit').click()
 
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
     const newComment = `${testPrefix}-edited-comment`
@@ -46,7 +67,9 @@ test('edits a comment', async ({ adminPage: page, testPrefix }) => {
 
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
-    await expect(firstCard).toContainText(newComment)
+    await expect(card).toContainText(newComment)
+
+    await deleteComment(page, id)
 })
 
 test('filters comments by star rating', async ({ adminPage: page }) => {
@@ -59,14 +82,14 @@ test('filters comments by star rating', async ({ adminPage: page }) => {
 
 test('shows an error and keeps the comment when delete fails', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/comments')
+    const id = await createComment(page, `${testPrefix}-delete-fails`)
+    await gotoSettled(page, '/admin/comments')
 
-    // .last() to avoid racing other tests' .first(); '.comment-card', not
-    // the testid prefix, which also matches the card's own child buttons.
-    const card = page.locator('.comment-card').last()
+    const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
-    const testId = await card.getAttribute('data-testid')
 
     await page.route('**/api/collections/ratings/records/**', (route) =>
         route.abort('failed'),
@@ -76,7 +99,11 @@ test('shows an error and keeps the comment when delete fails', async ({
     await page.getByTestId('confirm-dialog-confirm').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
-    await expect(page.getByTestId(testId!)).toBeVisible()
+    await expect(card).toBeVisible()
+
+    // Lift the abort before cleaning up, or the cleanup delete fails too.
+    await page.unroute('**/api/collections/ratings/records/**')
+    await deleteComment(page, id)
 })
 
 test('a user without manage_comments is redirected away from /admin/comments', async ({
