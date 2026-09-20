@@ -85,7 +85,8 @@
             "route": "Route",
             "boulder": "Boulder"
         },
-        "name": "Name"
+        "name": "Name",
+        "reports": "Meldungen"
     },
     "dashboard": {
         "online": "{0} Online"
@@ -323,7 +324,8 @@
             "resetPassword": "Passwort zurücksetzen - Verti-Grade",
             "notFound": "Seite nicht gefunden - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Routen-Inventur - Verti-Grade"
+            "inventory": "Routen-Inventur - Verti-Grade",
+            "reports": "Inhaltsmeldungen - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -332,7 +334,8 @@
             "comments": "Kommentare",
             "users": "Benutzerverwaltung",
             "dashboard": "Routenverwaltung",
-            "inventory": "Routen-Inventur"
+            "inventory": "Routen-Inventur",
+            "reports": "Inhaltsmeldungen"
         }
     },
     "validation": {
@@ -403,7 +406,8 @@
             "manage_comments": "Kommentare verwalten",
             "manage_users": "Benutzer verwalten",
             "manage_settings": "Einstellungen verwalten",
-            "run_inventory": "Inventur durchführen"
+            "run_inventory": "Inventur durchführen",
+            "manage_reports": "Meldungen verwalten"
         },
         "updated": "Berechtigungen aktualisiert.",
         "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
@@ -433,7 +437,11 @@
         "imprintUrl": "Impressum-URL",
         "privacyUrl": "Datenschutz-URL",
         "saveSuccess": "Einstellungen erfolgreich gespeichert.",
-        "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen."
+        "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.",
+        "contactEmail": "Kontakt-E-Mail",
+        "contactEmailHint": "Wird als Kontaktstelle veröffentlicht und über neue Inhaltsmeldungen benachrichtigt.",
+        "mailNotConfigured": "E-Mail ist nicht konfiguriert, daher können Passwort-Zurücksetzungen und Meldungsbenachrichtigungen nicht zugestellt werden. SMTP wird in PocketBase konfiguriert, nicht hier.",
+        "mailNotConfiguredAction": "PocketBase-E-Mail-Einstellungen öffnen"
     },
     "errors": {
         "notFound": {
@@ -465,5 +473,57 @@
         "routesFailed": "{count} Route(n) fehlgeschlagen",
         "commentsFailed": "{count} Kommentar(e) fehlgeschlagen",
         "failed": "Beim Import ist ein unerwarteter Fehler aufgetreten."
+    },
+    "reports": {
+        "title": "Inhaltsmeldungen",
+        "subtitle": "Meldungen nach Artikel 16 des Gesetzes über digitale Dienste.",
+        "reportAction": "Diesen Kommentar melden",
+        "dialogTitle": "Inhalt melden",
+        "dialogIntro": "Teilen Sie uns mit, was an diesem Inhalt nicht in Ordnung ist. Jede Meldung wird von einer Person geprüft.",
+        "reason": "Grund",
+        "reasons": {
+            "hate_speech": "Hassrede",
+            "harassment": "Belästigung oder Mobbing",
+            "violence_threat": "Gewaltandrohung",
+            "sexual_content": "Sexuelle Inhalte",
+            "personal_data": "Personenbezogene Daten",
+            "ip_infringement": "Verletzung geistigen Eigentums",
+            "spam_fraud": "Spam oder Betrug",
+            "other": "Etwas anderes"
+        },
+        "explanation": "Begründung",
+        "explanationHint": "Erläutern Sie, warum dieser Inhalt rechtswidrig ist oder gegen die Regeln verstößt.",
+        "notifierName": "Ihr Name",
+        "notifierEmail": "Ihre E-Mail-Adresse",
+        "contactNote": "Wir verwenden Ihre E-Mail-Adresse ausschließlich für die Eingangsbestätigung und die Mitteilung der Entscheidung.",
+        "goodFaith": "Ich erkläre nach Treu und Glauben, dass die Angaben in dieser Meldung richtig und vollständig sind.",
+        "submit": "Meldung absenden",
+        "submitted": "Meldung übermittelt. Wir haben Ihnen eine Bestätigung per E-Mail gesendet.",
+        "reportedContent": "Gemeldeter Inhalt",
+        "snapshot": "Inhalt zum Zeitpunkt der Meldung",
+        "contentUnavailable": "Inhalt nicht mehr verfügbar",
+        "notifier": "Gemeldet von",
+        "viewContent": "Inhalt ansehen",
+        "filterStatus": "Status",
+        "status": {
+            "open": "Offen",
+            "actioned": "Bearbeitet",
+            "rejected": "Abgelehnt"
+        },
+        "decision": {
+            "content_removed": "Inhalt entfernt",
+            "content_kept": "Inhalt beibehalten"
+        },
+        "decideTitle": "Entscheidung festhalten",
+        "decisionReason": "Begründung der Entscheidung",
+        "decisionReasonHint": "Wird als interner Nachweis der Entscheidungsgründe gespeichert.",
+        "removeContent": "Inhalt entfernen",
+        "keepContent": "Inhalt behalten",
+        "decided": "Entscheidung gespeichert. Die meldende Person wurde benachrichtigt.",
+        "receiptPending": "Bestätigung nicht zugestellt",
+        "empty": "Keine Meldungen",
+        "emptyHint": "Gemeldete Inhalte erscheinen hier zur Prüfung.",
+        "mailWarning": "E-Mail ist nicht konfiguriert, daher erhalten meldende Personen weder die Eingangsbestätigung noch die Entscheidungsmitteilung nach Artikel 16.",
+        "mailWarningAction": "Einstellungen öffnen"
     }
 }

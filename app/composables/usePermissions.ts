@@ -30,9 +30,12 @@ export function usePermissions() {
             console.error('Failed to fetch permissions:', err)
             permissions.value = []
             roleName.value = ''
-            const { t } = useI18n()
+            // useI18n() throws here: this runs after an await, so the
+            // synchronous setup context it requires is already gone. The
+            // app-level composer works anywhere, including route middleware.
+            const { $i18n } = useNuxtApp()
             const { error: notifyError } = useNotification()
-            notifyError(t('permissions.loadError'))
+            notifyError($i18n.t('permissions.loadError'))
         } finally {
             loading.value = false
             loaded.value = true

@@ -82,6 +82,7 @@ ENV APP_VERSION=${APP_VERSION}
 # Copy artifacts only
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
 COPY ./pocketbase/pb_migrations /pb/pb_migrations
+COPY ./pocketbase/pb_hooks /pb/pb_hooks
 COPY --from=ui-build /app/.output /app/ui
 
 # Entrypoint + nginx config

@@ -85,7 +85,8 @@
             "route": "Rota",
             "boulder": "Boulder"
         },
-        "name": "İsim"
+        "name": "İsim",
+        "reports": "Bildirimler"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -323,7 +324,8 @@
             "resetPassword": "Parolayı Sıfırla - Verti-Grade",
             "notFound": "Sayfa Bulunamadı - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Rota Sayımı - Verti-Grade"
+            "inventory": "Rota Sayımı - Verti-Grade",
+            "reports": "İçerik Bildirimleri - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -332,7 +334,8 @@
             "comments": "Yorumlar",
             "users": "Kullanıcı Yönetimi",
             "dashboard": "Rota Yönetimi",
-            "inventory": "Rota Sayımı"
+            "inventory": "Rota Sayımı",
+            "reports": "İçerik Bildirimleri"
         }
     },
     "validation": {
@@ -385,7 +388,8 @@
             "manage_comments": "Yorumları Yönet",
             "manage_users": "Kullanıcıları Yönet",
             "manage_settings": "Ayarları Yönet",
-            "run_inventory": "Envanter Taraması"
+            "run_inventory": "Envanter Taraması",
+            "manage_reports": "Bildirimleri Yönet"
         },
         "updated": "Yetkiler güncellendi.",
         "updateError": "Yetkiler güncellenemedi.",
@@ -433,7 +437,11 @@
         "imprintUrl": "Künye URL'si",
         "privacyUrl": "Gizlilik URL'si",
         "saveSuccess": "Ayarlar başarıyla kaydedildi.",
-        "saveError": "Ayarlar kaydedilemedi. Lütfen tekrar deneyin."
+        "saveError": "Ayarlar kaydedilemedi. Lütfen tekrar deneyin.",
+        "contactEmail": "İletişim e-postası",
+        "contactEmailHint": "İletişim adresiniz olarak yayımlanır ve yeni içerik bildirimlerinde bilgilendirilir.",
+        "mailNotConfigured": "E-posta yapılandırılmadı, bu nedenle parola sıfırlama ve içerik bildirimi bildirimleri iletilemiyor. SMTP burada değil, PocketBase üzerinde yapılandırılır.",
+        "mailNotConfiguredAction": "PocketBase e-posta ayarlarını aç"
     },
     "errors": {
         "notFound": {
@@ -465,5 +473,57 @@
         "routesFailed": "{count} rota başarısız",
         "commentsFailed": "{count} yorum başarısız",
         "failed": "İçe aktarma sırasında beklenmeyen bir hata oluştu."
+    },
+    "reports": {
+        "title": "İçerik Bildirimleri",
+        "subtitle": "Dijital Hizmetler Yasası'nın 16. maddesi uyarınca yapılan bildirimler.",
+        "reportAction": "Bu yorumu bildir",
+        "dialogTitle": "İçeriği bildir",
+        "dialogIntro": "Bu içerikte neyin yanlış olduğunu bize anlatın. Her bildirim bir kişi tarafından incelenir.",
+        "reason": "Neden",
+        "reasons": {
+            "hate_speech": "Nefret söylemi",
+            "harassment": "Taciz veya zorbalık",
+            "violence_threat": "Şiddet tehdidi",
+            "sexual_content": "Cinsel içerik",
+            "personal_data": "Kişisel veriler",
+            "ip_infringement": "Fikri mülkiyet ihlali",
+            "spam_fraud": "Spam veya dolandırıcılık",
+            "other": "Diğer"
+        },
+        "explanation": "Açıklama",
+        "explanationHint": "Bu içeriğin neden hukuka aykırı olduğunu veya kuralları ihlal ettiğini açıklayın.",
+        "notifierName": "Adınız",
+        "notifierEmail": "E-posta adresiniz",
+        "contactNote": "E-posta adresinizi yalnızca alındı onayı ve karar bildirimi için kullanırız.",
+        "goodFaith": "Bu bildirimdeki bilgilerin doğru ve eksiksiz olduğunu iyi niyetle beyan ederim.",
+        "submit": "Bildirimi gönder",
+        "submitted": "Bildirim gönderildi. E-posta adresinize bir onay ilettik.",
+        "reportedContent": "Bildirilen içerik",
+        "snapshot": "Bildirim anındaki içerik",
+        "contentUnavailable": "İçerik artık mevcut değil",
+        "notifier": "Bildiren",
+        "viewContent": "İçeriği görüntüle",
+        "filterStatus": "Durum",
+        "status": {
+            "open": "Açık",
+            "actioned": "İşlem yapıldı",
+            "rejected": "Reddedildi"
+        },
+        "decision": {
+            "content_removed": "İçerik kaldırıldı",
+            "content_kept": "İçerik korundu"
+        },
+        "decideTitle": "Kararınızı kaydedin",
+        "decisionReason": "Karar gerekçesi",
+        "decisionReasonHint": "Kararın gerekçesine ilişkin dahili kayıt olarak saklanır.",
+        "removeContent": "İçeriği kaldır",
+        "keepContent": "İçeriği koru",
+        "decided": "Karar kaydedildi. Bildirimi yapan kişi bilgilendirildi.",
+        "receiptPending": "Onay iletilmedi",
+        "empty": "Bildirim yok",
+        "emptyHint": "Bildirilen içerikler incelenmek üzere burada görünecek.",
+        "mailWarning": "E-posta yapılandırılmadığı için bildirimde bulunanlar 16. maddenin gerektirdiği onay ve karar bildirimlerini alamıyor.",
+        "mailWarningAction": "Ayarları aç"
     }
 }

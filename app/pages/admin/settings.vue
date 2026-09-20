@@ -2,6 +2,35 @@
     <v-container>
         <LayoutPageHeader :title="$t('page.content.settings')" />
 
+        <!-- SMTP lives in PocketBase, not here. This only reports the flag so
+             an admin isn't left wondering why no mail ever arrives. -->
+        <v-alert
+            v-if="!mailConfigured"
+            type="info"
+            variant="tonal"
+            icon="mdi-email-off-outline"
+            class="mb-4"
+            data-testid="settings-mail-warning"
+        >
+            <!-- Not #append: that column keeps its width on a phone and
+                 squeezes the message down to one word per line. -->
+            <div class="d-flex flex-wrap align-center ga-2">
+                <span style="flex: 1 1 16rem">{{
+                    $t('settings.mailNotConfigured')
+                }}</span>
+                <v-btn
+                    variant="text"
+                    size="small"
+                    :href="pbMailSettingsUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="settings-mail-warning-link"
+                >
+                    {{ $t('settings.mailNotConfiguredAction') }}
+                </v-btn>
+            </div>
+        </v-alert>
+
         <!-- Image Upload Cards -->
         <v-row class="mb-4" density="comfortable">
             <v-col
@@ -192,6 +221,18 @@
                             data-testid="settings-org-unit"
                         />
                     </v-col>
+                    <v-col cols="12" md="6">
+                        <v-text-field
+                            v-model="copySettings.contact_email"
+                            type="email"
+                            :label="$t('settings.contactEmail')"
+                            :hint="$t('settings.contactEmailHint')"
+                            persistent-hint
+                            density="compact"
+                            prepend-inner-icon="mdi-email-outline"
+                            data-testid="settings-contact-email"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card>
@@ -285,6 +326,14 @@ definePageMeta({
 
 const { data: settings } = useNuxtData('settings')
 
+const { data: mailStatus } = useMailStatus()
+// Only the production nginx maps /_/ onto PocketBase; in dev the browser sits
+// on the Nuxt origin, so the link needs PocketBase's own port. Same split as
+// usePbFileUrl().
+const pbMailSettingsUrl =
+    (import.meta.dev ? 'http://localhost:8090' : '') + '/_/#/settings/mail'
+const mailConfigured = computed(() => mailStatus.value?.configured !== false)
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 const original = reactive({
@@ -293,6 +342,7 @@ const original = reactive({
     privacy_url: '',
     organization_name: '',
     organization_unit_name: '',
+    contact_email: '',
 })
 
 const copySettings = reactive({ ...original })
@@ -308,6 +358,7 @@ function adoptRecord(rec) {
     original.privacy_url = rec.privacy_url ?? ''
     original.organization_name = rec.organization_name ?? ''
     original.organization_unit_name = rec.organization_unit_name ?? ''
+    original.contact_email = rec.contact_email ?? ''
     if (!dirty) Object.assign(copySettings, original)
 
     logoPreview.value = pbFileUrl(rec, rec.page_logo)
@@ -468,7 +519,9 @@ const hasChanges = computed(() => {
         copySettings.imprint_url !== original.imprint_url ||
         copySettings.privacy_url !== original.privacy_url ||
         copySettings.organization_name !== original.organization_name ||
-        copySettings.organization_unit_name !== original.organization_unit_name
+        copySettings.organization_unit_name !==
+            original.organization_unit_name ||
+        copySettings.contact_email !== original.contact_email
     )
 })
 
@@ -490,6 +543,7 @@ async function saveSettings() {
             privacy_url: copySettings.privacy_url,
             organization_name: copySettings.organization_name,
             organization_unit_name: copySettings.organization_unit_name,
+            contact_email: copySettings.contact_email,
         }
         if (logoFile.value) payload.page_logo = logoFile.value
         else if (logoClear.value) payload.page_logo = null
@@ -517,6 +571,7 @@ async function saveSettings() {
         original.privacy_url = updated.privacy_url
         original.organization_name = updated.organization_name
         original.organization_unit_name = updated.organization_unit_name
+        original.contact_email = updated.contact_email ?? ''
 
         Object.assign(copySettings, {
             application_url: updated.application_url,
@@ -524,6 +579,7 @@ async function saveSettings() {
             privacy_url: updated.privacy_url,
             organization_name: updated.organization_name,
             organization_unit_name: updated.organization_unit_name,
+            contact_email: updated.contact_email ?? '',
         })
 
         notify(t('settings.saveSuccess'))

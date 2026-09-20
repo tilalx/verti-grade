@@ -85,7 +85,8 @@
             "route": "Route",
             "boulder": "Boulder"
         },
-        "name": "Name"
+        "name": "Name",
+        "reports": "Reports"
     },
     "dashboard": {
         "online": "{0} Online"
@@ -323,7 +324,8 @@
             "resetPassword": "Reset Password - Verti-Grade",
             "notFound": "Page Not Found - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Route Inventory - Verti-Grade"
+            "inventory": "Route Inventory - Verti-Grade",
+            "reports": "Content Reports - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -332,7 +334,8 @@
             "comments": "Comments",
             "users": "User Management",
             "dashboard": "Route Management",
-            "inventory": "Route Inventory"
+            "inventory": "Route Inventory",
+            "reports": "Content Reports"
         }
     },
     "validation": {
@@ -403,7 +406,8 @@
             "manage_comments": "Manage Comments",
             "manage_users": "Manage Users",
             "manage_settings": "Manage Settings",
-            "run_inventory": "Run Inventory"
+            "run_inventory": "Run Inventory",
+            "manage_reports": "Manage Reports"
         },
         "updated": "Permissions updated.",
         "updateError": "Failed to update permissions.",
@@ -433,7 +437,11 @@
         "imprintUrl": "Imprint URL",
         "privacyUrl": "Privacy URL",
         "saveSuccess": "Settings saved successfully.",
-        "saveError": "Failed to save settings. Please try again."
+        "saveError": "Failed to save settings. Please try again.",
+        "contactEmail": "Contact email",
+        "contactEmailHint": "Published as your point of contact and notified about new content reports.",
+        "mailNotConfigured": "Email is not configured, so password resets and content report notices cannot be delivered. SMTP is configured in PocketBase, not here.",
+        "mailNotConfiguredAction": "Open PocketBase mail settings"
     },
     "errors": {
         "notFound": {
@@ -465,5 +473,57 @@
         "routesFailed": "{count} route(s) failed",
         "commentsFailed": "{count} comment(s) failed",
         "failed": "An unexpected error occurred during import."
+    },
+    "reports": {
+        "title": "Content Reports",
+        "subtitle": "Notices submitted under Article 16 of the Digital Services Act.",
+        "reportAction": "Report this comment",
+        "dialogTitle": "Report content",
+        "dialogIntro": "Tell us what is wrong with this content. A person reviews every report.",
+        "reason": "Reason",
+        "reasons": {
+            "hate_speech": "Hate speech",
+            "harassment": "Harassment or bullying",
+            "violence_threat": "Threat of violence",
+            "sexual_content": "Sexual content",
+            "personal_data": "Personal data",
+            "ip_infringement": "Intellectual property infringement",
+            "spam_fraud": "Spam or fraud",
+            "other": "Something else"
+        },
+        "explanation": "Explanation",
+        "explanationHint": "Explain why you think this content is unlawful or breaks the rules.",
+        "notifierName": "Your name",
+        "notifierEmail": "Your email",
+        "contactNote": "We use your email only to confirm receipt and to tell you the decision.",
+        "goodFaith": "I declare in good faith that the information in this report is accurate and complete.",
+        "submit": "Submit report",
+        "submitted": "Report submitted. We have sent a confirmation to your email.",
+        "reportedContent": "Reported content",
+        "snapshot": "Content when reported",
+        "contentUnavailable": "Content no longer available",
+        "notifier": "Reported by",
+        "viewContent": "View content",
+        "filterStatus": "Status",
+        "status": {
+            "open": "Open",
+            "actioned": "Actioned",
+            "rejected": "Rejected"
+        },
+        "decision": {
+            "content_removed": "Content removed",
+            "content_kept": "Content kept"
+        },
+        "decideTitle": "Record your decision",
+        "decisionReason": "Reason for the decision",
+        "decisionReasonHint": "Kept as the internal record of why this decision was made.",
+        "removeContent": "Remove content",
+        "keepContent": "Keep content",
+        "decided": "Decision recorded. The reporter has been notified.",
+        "receiptPending": "Receipt not delivered",
+        "empty": "No reports",
+        "emptyHint": "Reported content will appear here for review.",
+        "mailWarning": "Email is not configured, so reporters are not receiving the confirmations and decision notices required by Article 16.",
+        "mailWarningAction": "Open settings"
     }
 }

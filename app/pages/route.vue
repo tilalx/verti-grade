@@ -219,8 +219,30 @@
                         :comment="review"
                         date-format="relative"
                         class="mb-3"
-                    />
+                    >
+                        <template #actions>
+                            <!-- DSA Art. 16(1): a reporting path on every
+                                 individual item, reachable without an account. -->
+                            <v-btn
+                                icon="mdi-flag-outline"
+                                variant="text"
+                                size="small"
+                                :aria-label="t('reports.reportAction')"
+                                :title="t('reports.reportAction')"
+                                data-testid="comment-card-report"
+                                @click="openReport(review.id)"
+                            />
+                        </template>
+                    </CommentsCard>
                 </template>
+
+                <ReportsFormDialog
+                    v-if="reportTarget"
+                    v-model="reportDialog"
+                    content-type="rating"
+                    :content-id="reportTarget"
+                    :content-url="reportUrl"
+                />
 
                 <!-- Empty state -->
                 <LayoutEmptyState
@@ -241,6 +263,7 @@
 import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import { formatDifficulty, normalizeCreators } from '~/utils/formatting'
+import { reportContentUrl } from '~/utils/reports'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -261,6 +284,21 @@ interface ReviewDisplay {
 }
 
 const reviews = ref<ReviewDisplay[]>([])
+
+// One dialog for the whole list, retargeted per card.
+const reportDialog = ref(false)
+const reportTarget = ref<string | null>(null)
+const reportUrl = computed(() =>
+    reportTarget.value
+        ? reportContentUrl('rating', reportTarget.value, route_id.value)
+        : '',
+)
+
+function openReport(id: string) {
+    reportTarget.value = id
+    reportDialog.value = true
+}
+
 const { subscribe } = usePbSubscription()
 const { error: notifyError } = useNotification()
 
