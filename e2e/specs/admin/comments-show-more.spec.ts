@@ -14,9 +14,9 @@ test('show more expands a clipped comment', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, `${testPrefix} ${LONG_COMMENT}`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
@@ -44,9 +44,9 @@ test('short comments have no show more button', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, `${testPrefix} kurz`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toContainText('kurz')

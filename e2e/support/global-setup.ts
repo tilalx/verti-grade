@@ -31,7 +31,7 @@ async function saveStorageState(
     await page.getByTestId('login-identity').locator('input').fill(email)
     await page.getByTestId('login-password').locator('input').fill(password)
     await page.getByTestId('login-submit').click()
-    // Every role lands somewhere different post-login (admin -> /admin/routes,
+    // Every role lands somewhere different post-login (admin -> /manage/routes,
     // a plain "user" role has no admin permissions and bounces to /), so the
     // only role-independent success signal is "left the login page".
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))

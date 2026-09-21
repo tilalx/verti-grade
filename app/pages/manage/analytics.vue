@@ -538,7 +538,6 @@ useHead(() => ({
 }))
 
 definePageMeta({
-    authRequired: true,
     middleware: ['auth'],
     requiredPermission: 'view_analytics',
 })

@@ -15,7 +15,7 @@ test.describe('login', () => {
             .locator('input')
             .fill('E2ePassw0rd!')
         await page.getByTestId('login-submit').click()
-        await page.waitForURL('**/admin/routes')
+        await page.waitForURL('**/manage/routes')
         await expect(page.getByTestId('routes-create-open')).toBeVisible()
     })
 

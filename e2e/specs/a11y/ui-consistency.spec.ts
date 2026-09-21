@@ -7,14 +7,14 @@ import { gotoSettled } from '../../support/nav'
 
 const PAGES = [
     '/',
-    '/admin/routes',
+    '/manage/routes',
     '/admin/users',
-    '/admin/comments',
-    '/admin/analytics',
+    '/manage/comments',
+    '/manage/analytics',
     '/admin/settings',
-    '/admin/inventory',
-    '/admin/reports',
-    '/admin/activity',
+    '/manage/inventory',
+    '/manage/reports',
+    '/account/activity',
 ]
 
 for (const path of PAGES) {
@@ -32,11 +32,11 @@ test('every icon-only button exposes an accessible name', async ({
     adminPage: page,
 }) => {
     for (const path of [
-        '/admin/routes',
+        '/manage/routes',
         '/admin/users',
-        '/admin/comments',
-        '/admin/reports',
-        '/admin/activity',
+        '/manage/comments',
+        '/manage/reports',
+        '/account/activity',
     ]) {
         await gotoSettled(page, path)
         const unnamed = await page
@@ -57,7 +57,7 @@ test('every icon-only button exposes an accessible name', async ({
 test('dialogs share the same shell: role, title and escape-to-close', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     await page.getByTestId('routes-create-open').click()
     const dialog = page.getByRole('dialog')
@@ -110,7 +110,7 @@ test('dialog confirm buttons keep their fill inside v-card-actions', async ({
 }) => {
     // VCardActions provides `VBtn: { variant: 'text' }`, which silently beat the
     // global default and flattened every dialog's primary button.
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('routes-create-open').click()
 
     const submit = page.getByTestId('route-form-submit')

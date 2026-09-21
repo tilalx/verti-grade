@@ -1,7 +1,7 @@
 /**
  * Pure logic for the route inventory (stock-take) flow.
  *
- * Lives outside `app/pages/admin/inventory.vue` so it can be imported and
+ * Lives outside `app/pages/manage/inventory.vue` so it can be imported and
  * tested directly — the previous spec re-implemented these helpers inline and
  * therefore passed no matter what the page did.
  */

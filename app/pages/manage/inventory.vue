@@ -549,7 +549,6 @@ import type { RouteRecord } from '~/types/models'
 
 definePageMeta({
     middleware: 'auth',
-    authRequired: true,
     requiredPermission: 'run_inventory',
 })
 

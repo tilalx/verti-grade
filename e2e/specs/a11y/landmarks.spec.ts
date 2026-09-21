@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('nav has a labelled main-navigation landmark', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     // The page legitimately has several labelled nav landmarks (desktop
     // links, the off-canvas mobile drawer, Vuetify's pagination control) —
     // assert the visible main-navigation one specifically.
@@ -16,7 +16,7 @@ test('nav has a labelled main-navigation landmark', async ({
 test('dialogs expose a role and are keyboard-dismissible', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByRole('dialog')).toBeVisible()
     await page.keyboard.press('Escape')
@@ -26,7 +26,7 @@ test('dialogs expose a role and are keyboard-dismissible', async ({
 test('icon-only close buttons have an accessible name', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('route-details-open').first().click()
     await expect(page.getByRole('button', { name: /close/i })).toBeVisible()
 })
@@ -34,7 +34,7 @@ test('icon-only close buttons have an accessible name', async ({
 test('a blocked-submit validation error is exposed to assistive tech', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('routes-create-open').click()
     await page.getByTestId('route-form-submit').click()
 

@@ -379,7 +379,9 @@
         "openMenu": "Menü öffnen",
         "skipToContent": "Zum Inhalt springen",
         "mainNavigation": "Hauptnavigation",
-        "userMenu": "Benutzermenü"
+        "userMenu": "Benutzermenü",
+        "manage": "Verwalten",
+        "admin": "Administration"
     },
     "users": {
         "create": "Benutzer erstellen",

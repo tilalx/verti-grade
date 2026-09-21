@@ -373,7 +373,6 @@ import {
 import { toPbSort } from '~/utils/sorting'
 
 definePageMeta({
-    authRequired: true,
     middleware: ['auth'],
     requiredPermission: 'manage_routes',
 })

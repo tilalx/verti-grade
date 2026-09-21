@@ -27,9 +27,12 @@
 
         <v-card elevation="3" border>
             <v-list density="compact" :lines="false" nav slim class="py-1">
+                <!-- `to` where there is one, so the entry is a real
+                     anchor: middle-clickable, and announced as a link. -->
                 <v-list-item
                     v-for="item in menuItems"
                     :key="item.key"
+                    :to="item.to"
                     :prepend-icon="item.icon"
                     :title="item.title"
                     :base-color="item.color"
@@ -95,6 +98,17 @@ const menuItems = computed(() => [
         icon: 'mdi-account-edit-outline',
         action: () => {
             dialogOpen.value = true
+            menuOpen.value = false
+        },
+    },
+    {
+        // Personal, permission-free page — lives with the account rather
+        // than in a management nav group.
+        key: 'activity',
+        title: t('routes.activity'),
+        icon: 'mdi-clipboard-text-clock-outline',
+        to: '/account/activity',
+        action: () => {
             menuOpen.value = false
         },
     },

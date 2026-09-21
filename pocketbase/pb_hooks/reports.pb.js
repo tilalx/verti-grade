@@ -77,7 +77,7 @@ onRecordAfterCreateSuccess((e) => {
              ${summary}
              <p><strong>Reported by:</strong> ${utils.escapeHtml(e.record.get('notifier_name'))}
              (${utils.escapeHtml(e.record.get('notifier_email'))})</p>
-             <p><a href="${utils.escapeHtml(utils.appUrl(e.app))}/admin/reports">Open the moderation queue</a></p>`,
+             <p><a href="${utils.escapeHtml(utils.appUrl(e.app))}/manage/reports">Open the moderation queue</a></p>`,
         )
 
         if (receiptSent) {

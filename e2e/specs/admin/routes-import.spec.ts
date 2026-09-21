@@ -27,7 +27,7 @@ test('imports routes from a JSON file', async ({ adminPage: page }) => {
         ]),
     )
 
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByTestId('routes-import-open').click()
     const chooser = await fileChooserPromise
@@ -63,7 +63,7 @@ test('reports import issues when route creation fails server-side', async ({
         ]),
     )
 
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.route('**/api/collections/routes/records', (route) =>
         route.fulfill({ status: 500, body: 'boom' }),
     )
@@ -84,7 +84,7 @@ test('rejects a malformed JSON file', async ({ adminPage: page }) => {
     const file = path.join(os.tmpdir(), `e2e-import-bad-${Date.now()}.json`)
     fs.writeFileSync(file, '{ not valid json ]')
 
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByTestId('routes-import-open').click()
     const chooser = await fileChooserPromise

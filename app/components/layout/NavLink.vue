@@ -1,23 +1,76 @@
 <template>
-    <router-link :to="to" custom v-slot="{ isActive, navigate }">
+    <!-- Leaf link -->
+    <router-link
+        v-if="!children"
+        :to="to"
+        custom
+        v-slot="{ isActive, navigate }"
+    >
         <button
             @click="navigate"
             :class="['nav-link', { 'nav-link--active': isActive }]"
-            :data-testid="`nav-link-${to.replace(/^\//, '').replaceAll('/', '-') || 'home'}`"
+            :data-testid="`nav-link-${navTestId(to)}`"
         >
             <v-icon :icon="icon" size="16" class="nav-link-icon" />
-            <span class="nav-link-label">{{ label }}</span>
+            <span class="nav-link-label">{{ $t(label) }}</span>
             <span v-if="isActive" class="nav-link-pip" />
         </button>
     </router-link>
+
+    <!-- Group: one button, its pages in a menu. The row keeps a fixed width
+         however many pages a group grows to — that is the point of grouping. -->
+    <v-menu v-else location="bottom start" offset="4">
+        <template #activator="{ props: menuProps }">
+            <button
+                v-bind="menuProps"
+                :class="['nav-link', { 'nav-link--active': groupActive }]"
+                :data-testid="`nav-group-${groupKey}`"
+            >
+                <v-icon :icon="icon" size="16" class="nav-link-icon" />
+                <span class="nav-link-label">{{ $t(label) }}</span>
+                <v-icon
+                    icon="mdi-chevron-down"
+                    size="14"
+                    class="nav-link-chevron"
+                />
+                <span v-if="groupActive" class="nav-link-pip" />
+            </button>
+        </template>
+
+        <v-card elevation="3" border>
+            <v-list density="compact" nav slim min-width="210" class="py-1">
+                <v-list-item
+                    v-for="child in children"
+                    :key="child.to"
+                    :to="child.to"
+                    :prepend-icon="child.icon"
+                    :title="$t(child.label)"
+                    rounded="lg"
+                    density="compact"
+                    :data-testid="`nav-link-${navTestId(child.to)}`"
+                />
+            </v-list>
+        </v-card>
+    </v-menu>
 </template>
 
 <script setup>
-defineProps({
-    to: { type: String, required: true },
+const props = defineProps({
+    to: { type: String, default: '' },
     icon: { type: String, required: true },
+    // i18n key, not display text.
     label: { type: String, required: true },
+    // Present => render as a dropdown group. Each child is
+    // { to, icon, label }; labels are i18n keys, as on this component.
+    children: { type: Array, default: null },
+    groupKey: { type: String, default: '' },
 })
+
+const route = useRoute()
+
+const groupActive = computed(
+    () => props.children?.some((child) => route.path === child.to) ?? false,
+)
 </script>
 
 <style scoped>
@@ -64,6 +117,11 @@ defineProps({
 
 .nav-link--active .nav-link-icon {
     opacity: 1;
+}
+
+.nav-link-chevron {
+    opacity: 0.5;
+    margin-left: -2px;
 }
 
 /* Small active dot under label */

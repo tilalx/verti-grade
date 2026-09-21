@@ -1,5 +1,5 @@
 /**
- * Unit tests for the pure logic extracted from app/pages/admin/comments.vue.
+ * Unit tests for the pure logic extracted from app/pages/manage/comments.vue.
  *
  * Functions are defined inside <script setup> and cannot be imported, so the
  * identical logic is inlined here and verified independently.

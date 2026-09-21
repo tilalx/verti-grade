@@ -12,11 +12,11 @@ test('shows seeded review stats and deletes a comment', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     await expect(page.getByTestId('comments-stat-total')).toBeVisible()
 
     const id = await createComment(page, `${testPrefix}-to-delete`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
@@ -31,9 +31,9 @@ test('cancelling delete keeps the comment', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, `${testPrefix}-survives-cancel`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
@@ -49,9 +49,9 @@ test('cancelling delete keeps the comment', async ({
 })
 
 test('edits a comment', async ({ adminPage: page, testPrefix }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, `${testPrefix}-before-edit`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
@@ -73,7 +73,7 @@ test('edits a comment', async ({ adminPage: page, testPrefix }) => {
 })
 
 test('filters comments by star rating', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     await page.getByTestId('comments-filter-rating-5').click()
     await expect(page.getByTestId('comments-filter-rating-5')).toHaveClass(
         /v-chip--selected/,
@@ -84,9 +84,9 @@ test('shows an error and keeps the comment when delete fails', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, `${testPrefix}-delete-fails`)
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
@@ -106,11 +106,11 @@ test('shows an error and keeps the comment when delete fails', async ({
     await deleteComment(page, id)
 })
 
-test('a user without manage_comments is redirected away from /admin/comments', async ({
+test('a user without manage_comments is redirected away from /manage/comments', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/admin/comments')
-    await page.waitForURL((url) => !url.pathname.endsWith('/admin/comments'))
+    await gotoSettled(page, '/manage/comments')
+    await page.waitForURL((url) => !url.pathname.endsWith('/manage/comments'))
 
     const headers = await authHeader(page)
     const res = await page.request.delete(

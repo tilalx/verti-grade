@@ -32,7 +32,7 @@ describe('auth middleware', () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
-        await middleware({ path: '/admin/routes', meta: {} }, {})
+        await middleware({ path: '/manage/routes', meta: {} }, {})
 
         expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
     })
@@ -41,7 +41,7 @@ describe('auth middleware', () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
-        await middleware({ path: '/admin/routes', meta: {} }, {})
+        await middleware({ path: '/manage/routes', meta: {} }, {})
 
         expect(navigateToMock).not.toHaveBeenCalled()
     })
@@ -60,7 +60,7 @@ describe('auth middleware', () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
-        await middleware({ path: '/admin/routes', meta: {} }, {})
+        await middleware({ path: '/manage/routes', meta: {} }, {})
 
         expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
     })
@@ -82,7 +82,7 @@ describe('auth middleware', () => {
 
         await middleware({ path: '/auth/login', meta: { auth: false } }, {})
 
-        expect(navigateToMock).toHaveBeenCalledWith('/admin/routes')
+        expect(navigateToMock).toHaveBeenCalledWith('/manage/routes')
     })
 
     it('allows unauthenticated access to password reset with auth: false', async () => {
@@ -142,7 +142,7 @@ describe('auth middleware', () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
         const { default: middleware } = await import('~/middleware/auth.js')
 
-        await middleware({ path: '/admin/routes', meta: {} }, {})
+        await middleware({ path: '/manage/routes', meta: {} }, {})
 
         expect(canMock).not.toHaveBeenCalled()
         expect(ensureLoadedMock).not.toHaveBeenCalled()
@@ -175,12 +175,12 @@ describe('auth middleware', () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
 
         const pages = [
-            { path: '/admin/routes', permission: 'manage_routes' },
-            { path: '/admin/analytics', permission: 'view_analytics' },
-            { path: '/admin/comments', permission: 'manage_comments' },
+            { path: '/manage/routes', permission: 'manage_routes' },
+            { path: '/manage/analytics', permission: 'view_analytics' },
+            { path: '/manage/comments', permission: 'manage_comments' },
             { path: '/admin/users', permission: 'manage_users' },
             { path: '/admin/settings', permission: 'manage_settings' },
-            { path: '/admin/inventory', permission: 'run_inventory' },
+            { path: '/manage/inventory', permission: 'run_inventory' },
         ]
 
         for (const { path, permission } of pages) {

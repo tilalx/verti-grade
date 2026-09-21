@@ -2,7 +2,7 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
 test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     const name = `e2e-crud-${Date.now()}`
 
@@ -53,7 +53,7 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
 test('blocks route creation when required fields are empty', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()

@@ -1,5 +1,5 @@
 /**
- * Tests for filtering logic mirrored from app/pages/admin/comments.vue and
+ * Tests for filtering logic mirrored from app/pages/manage/comments.vue and
  * the pbFilter builder from app/pages/index.vue.
  *
  * Since these functions close over reactive refs inside Vue SFCs they cannot
@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest'
 
 // ---------------------------------------------------------------------------
-// filteredComments – logic from app/pages/admin/comments.vue
+// filteredComments – logic from app/pages/manage/comments.vue
 // ---------------------------------------------------------------------------
 
 interface Comment {
@@ -92,7 +92,7 @@ describe('filteredComments', () => {
 })
 
 // ---------------------------------------------------------------------------
-// formatDate – logic from app/pages/admin/comments.vue
+// formatDate – logic from app/pages/manage/comments.vue
 // ---------------------------------------------------------------------------
 
 function formatDate(date: string | null | undefined): string | null {

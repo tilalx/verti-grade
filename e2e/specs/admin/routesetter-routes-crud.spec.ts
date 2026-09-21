@@ -4,7 +4,7 @@ import { gotoSettled, authHeader } from '../../support/nav'
 test('routesetter can create and delete a route (manage_routes permission)', async ({
     setterPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     const name = `e2e-setter-${Date.now()}`
 
@@ -45,11 +45,11 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
     await expect(page.getByTestId('routes-table')).not.toContainText(name)
 })
 
-test('a user without manage_routes cannot reach or write to /admin/routes', async ({
+test('a user without manage_routes cannot reach or write to /manage/routes', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
-    await page.waitForURL((url) => !url.pathname.endsWith('/admin/routes'))
+    await gotoSettled(page, '/manage/routes')
+    await page.waitForURL((url) => !url.pathname.endsWith('/manage/routes'))
 
     const headers = await authHeader(page)
     const res = await page.request.post('/api/collections/routes/records', {

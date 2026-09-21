@@ -24,10 +24,10 @@ test('server-renders a route detail page', async ({ page, request }) => {
 
 test.describe('admin pages', () => {
     for (const path of [
-        '/admin/routes',
-        '/admin/comments',
+        '/manage/routes',
+        '/manage/comments',
         '/admin/users',
-        '/admin/analytics',
+        '/manage/analytics',
     ]) {
         test(`server-renders ${path}`, async ({ adminPage: page }) => {
             const response = await page.goto(path)
@@ -47,7 +47,7 @@ test.describe('admin pages', () => {
 test('never ships internal-host file urls in the server html', async ({
     adminPage: page,
 }) => {
-    for (const path of ['/admin/users', '/admin/comments', '/admin/settings']) {
+    for (const path of ['/admin/users', '/manage/comments', '/admin/settings']) {
         const response = await page.goto(path)
         expect((await response?.text()) ?? '').not.toContain('localhost:8080')
     }
@@ -56,7 +56,7 @@ test('never ships internal-host file urls in the server html', async ({
 test('redirects a guarded page on the server, without rendering it', async ({
     page,
 }) => {
-    const response = await page.goto('/admin/routes')
+    const response = await page.goto('/manage/routes')
     expect(page.url()).toContain('/auth/login')
     expect((await response?.text()) ?? '').not.toContain(
         'data-testid="routes-table"',
