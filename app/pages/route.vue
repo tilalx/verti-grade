@@ -17,243 +17,293 @@
         </template>
 
         <template v-else-if="metadata">
-            <!-- ── Hero header ────────────────────────────────────────────── -->
-            <div class="route-hero" :style="heroStyle">
-                <div class="route-hero__overlay" />
-                <div class="route-hero__content">
-                    <!-- Type + location -->
-                    <div class="d-flex align-center ga-2 mb-2">
-                        <v-chip
-                            v-if="metadata.type"
-                            size="small"
-                            variant="flat"
-                            color="rgba(255,255,255,0.2)"
-                            class="text-white"
-                            :prepend-icon="
-                                metadata.type === 'Boulder'
-                                    ? 'mdi-image-filter-hdr'
-                                    : 'mdi-routes'
-                            "
-                        >
-                            {{ metadata.type }}
-                        </v-chip>
-                        <v-chip
-                            v-if="metadata.location"
-                            size="small"
-                            variant="flat"
-                            color="rgba(255,255,255,0.2)"
-                            class="text-white"
-                            prepend-icon="mdi-map-marker-outline"
-                        >
-                            {{ metadata.location }}
-                        </v-chip>
+            <div class="route-layout">
+                <div class="route-layout__main">
+                    <!-- ── Hero header ────────────────────────────────────────────── -->
+                    <div
+                        class="route-hero"
+                        data-testid="route-hero"
+                        :style="heroStyle"
+                    >
+                        <div class="route-hero__overlay" />
+                        <div class="route-hero__content">
+                            <!-- Type + location -->
+                            <div class="d-flex align-center ga-2 mb-2">
+                                <v-chip
+                                    v-if="metadata.type"
+                                    size="small"
+                                    variant="flat"
+                                    color="rgba(255,255,255,0.2)"
+                                    class="text-white"
+                                    :prepend-icon="
+                                        metadata.type === 'Boulder'
+                                            ? 'mdi-image-filter-hdr'
+                                            : 'mdi-routes'
+                                    "
+                                >
+                                    {{ metadata.type }}
+                                </v-chip>
+                                <v-chip
+                                    v-if="metadata.location"
+                                    size="small"
+                                    variant="flat"
+                                    color="rgba(255,255,255,0.2)"
+                                    class="text-white"
+                                    prepend-icon="mdi-map-marker-outline"
+                                >
+                                    {{ metadata.location }}
+                                </v-chip>
+                            </div>
+
+                            <!-- Name + difficulty badge inline -->
+                            <div
+                                class="d-flex align-end justify-space-between ga-3"
+                            >
+                                <div>
+                                    <h1
+                                        class="text-headline-small font-weight-bold text-white mb-1"
+                                        style="
+                                            line-height: 1.2;
+                                            text-shadow: 0 1px 3px
+                                                rgba(0, 0, 0, 0.3);
+                                        "
+                                        data-testid="route-page-name"
+                                    >
+                                        {{ metadata.name }}
+                                    </h1>
+
+                                    <div
+                                        v-if="metadata.creator?.length"
+                                        class="d-flex align-center ga-1 mt-1"
+                                    >
+                                        <v-icon
+                                            size="14"
+                                            color="rgba(255,255,255,0.7)"
+                                            >mdi-account-hard-hat-outline</v-icon
+                                        >
+                                        <span
+                                            class="text-body-medium"
+                                            style="
+                                                color: rgba(255, 255, 255, 0.8);
+                                            "
+                                            >{{
+                                                metadata.creator.join(', ')
+                                            }}</span
+                                        >
+                                    </div>
+                                </div>
+
+                                <div
+                                    v-if="difficulty"
+                                    class="route-hero__difficulty-badge"
+                                    :style="difficultyBadgeStyle"
+                                >
+                                    <span
+                                        class="route-hero__difficulty-text font-weight-black"
+                                        >{{ difficulty }}</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Name + difficulty badge inline -->
-                    <div class="d-flex align-end justify-space-between ga-3">
-                        <div>
-                            <h1
-                                class="text-headline-small font-weight-bold text-white mb-1"
-                                style="
-                                    line-height: 1.2;
-                                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-                                "
-                                data-testid="route-page-name"
-                            >
-                                {{ metadata.name }}
-                            </h1>
+                    <!-- ── Stats bar ──────────────────────────────────────────────── -->
+                    <v-card class="stats-card mx-4 mt-n4" elevation="3">
+                        <div
+                            class="d-flex align-center justify-space-around py-3"
+                        >
+                            <!-- Average rating -->
+                            <div class="text-center">
+                                <div
+                                    class="d-flex align-center justify-center ga-1"
+                                >
+                                    <v-icon color="yellow-darken-2" size="22"
+                                        >mdi-star</v-icon
+                                    >
+                                    <span
+                                        class="text-title-large font-weight-bold"
+                                        data-testid="route-avg-rating"
+                                        >{{ avgRating }}</span
+                                    >
+                                </div>
+                                <div
+                                    class="text-body-small text-medium-emphasis"
+                                >
+                                    {{ t('ratings.score') }}
+                                </div>
+                            </div>
 
+                            <v-divider vertical class="my-1" />
+
+                            <!-- Review count -->
+                            <div class="text-center">
+                                <span
+                                    class="text-title-large font-weight-bold"
+                                    >{{ reviews.length }}</span
+                                >
+                                <div
+                                    class="text-body-small text-medium-emphasis"
+                                >
+                                    {{ t('ratings.climber_reviews') }}
+                                </div>
+                            </div>
+
+                            <v-divider vertical class="my-1" />
+
+                            <!-- Perceived difficulty -->
+                            <div class="text-center">
+                                <div
+                                    class="d-flex align-center justify-center ga-1"
+                                >
+                                    <v-icon size="18" color="primary"
+                                        >mdi-trending-up</v-icon
+                                    >
+                                    <span
+                                        class="text-title-large font-weight-bold"
+                                        >{{
+                                            avgPerceivedDifficulty || '—'
+                                        }}</span
+                                    >
+                                </div>
+                                <div
+                                    class="text-body-small text-medium-emphasis"
+                                >
+                                    {{ t('ratings.difficulty') }}
+                                </div>
+                            </div>
+                        </div>
+                    </v-card>
+
+                    <!-- ── Route details ──────────────────────────────────────────── -->
+                    <div
+                        class="route-details px-4 pt-4"
+                        data-testid="route-details"
+                    >
+                        <!-- Date + comment -->
+                        <div
+                            v-if="formattedScrewDate || metadata.comment"
+                            class="mb-4"
+                        >
                             <div
-                                v-if="metadata.creator?.length"
-                                class="d-flex align-center ga-1 mt-1"
+                                v-if="formattedScrewDate"
+                                class="d-flex align-center ga-2 mb-2"
                             >
-                                <v-icon size="14" color="rgba(255,255,255,0.7)"
-                                    >mdi-account-hard-hat-outline</v-icon
+                                <v-icon size="16" color="medium-emphasis"
+                                    >mdi-calendar-outline</v-icon
                                 >
                                 <span
-                                    class="text-body-medium"
-                                    style="color: rgba(255, 255, 255, 0.8)"
-                                    >{{ metadata.creator.join(', ') }}</span
+                                    class="text-body-medium text-medium-emphasis"
+                                    >{{ formattedScrewDate }}</span
+                                >
+                            </div>
+                            <div
+                                v-if="
+                                    metadata.anchor_point &&
+                                    metadata.type !== 'Boulder'
+                                "
+                                class="d-flex align-center ga-2 mb-2"
+                            >
+                                <v-icon size="16" color="medium-emphasis"
+                                    >mdi-pound</v-icon
+                                >
+                                <span
+                                    class="text-body-medium text-medium-emphasis"
+                                    >{{ t('climbing.anchor_point') }}:
+                                    {{ metadata.anchor_point }}</span
+                                >
+                            </div>
+                            <div
+                                v-if="metadata.comment"
+                                class="d-flex align-start ga-2"
+                            >
+                                <v-icon
+                                    size="16"
+                                    color="medium-emphasis"
+                                    class="mt-1"
+                                    >mdi-information-outline</v-icon
+                                >
+                                <span
+                                    class="text-body-medium text-medium-emphasis font-italic"
+                                    >{{ metadata.comment }}</span
                                 >
                             </div>
                         </div>
 
-                        <div
-                            v-if="difficulty"
-                            class="route-hero__difficulty-badge"
-                            :style="difficultyBadgeStyle"
-                        >
-                            <span
-                                class="route-hero__difficulty-text font-weight-black"
-                                >{{ difficulty }}</span
-                            >
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── Stats bar ──────────────────────────────────────────────── -->
-            <v-card class="stats-card mx-4 mt-n4" elevation="3">
-                <div class="d-flex align-center justify-space-around py-3">
-                    <!-- Average rating -->
-                    <div class="text-center">
-                        <div class="d-flex align-center justify-center ga-1">
-                            <v-icon color="yellow-darken-2" size="22"
-                                >mdi-star</v-icon
-                            >
-                            <span
-                                class="text-title-large font-weight-bold"
-                                data-testid="route-avg-rating"
-                                >{{ avgRating }}</span
-                            >
-                        </div>
-                        <div class="text-body-small text-medium-emphasis">
-                            {{ t('ratings.score') }}
-                        </div>
-                    </div>
-
-                    <v-divider vertical class="my-1" />
-
-                    <!-- Review count -->
-                    <div class="text-center">
-                        <span class="text-title-large font-weight-bold">{{
-                            reviews.length
-                        }}</span>
-                        <div class="text-body-small text-medium-emphasis">
-                            {{ t('ratings.climber_reviews') }}
-                        </div>
-                    </div>
-
-                    <v-divider vertical class="my-1" />
-
-                    <!-- Perceived difficulty -->
-                    <div class="text-center">
-                        <div class="d-flex align-center justify-center ga-1">
-                            <v-icon size="18" color="primary"
-                                >mdi-trending-up</v-icon
-                            >
-                            <span class="text-title-large font-weight-bold">{{
-                                avgPerceivedDifficulty || '—'
-                            }}</span>
-                        </div>
-                        <div class="text-body-small text-medium-emphasis">
-                            {{ t('ratings.difficulty') }}
-                        </div>
-                    </div>
-                </div>
-            </v-card>
-
-            <!-- ── Route details ──────────────────────────────────────────── -->
-            <div class="px-4 pt-4">
-                <!-- Date + comment -->
-                <div v-if="formattedScrewDate || metadata.comment" class="mb-4">
-                    <div
-                        v-if="formattedScrewDate"
-                        class="d-flex align-center ga-2 mb-2"
-                    >
-                        <v-icon size="16" color="medium-emphasis"
-                            >mdi-calendar-outline</v-icon
-                        >
-                        <span class="text-body-medium text-medium-emphasis">{{
-                            formattedScrewDate
-                        }}</span>
-                    </div>
-                    <div
-                        v-if="
-                            metadata.anchor_point && metadata.type !== 'Boulder'
-                        "
-                        class="d-flex align-center ga-2 mb-2"
-                    >
-                        <v-icon size="16" color="medium-emphasis"
-                            >mdi-pound</v-icon
-                        >
-                        <span class="text-body-medium text-medium-emphasis"
-                            >{{ t('climbing.anchor_point') }}:
-                            {{ metadata.anchor_point }}</span
-                        >
-                    </div>
-                    <div
-                        v-if="metadata.comment"
-                        class="d-flex align-start ga-2"
-                    >
-                        <v-icon size="16" color="medium-emphasis" class="mt-1"
-                            >mdi-information-outline</v-icon
-                        >
-                        <span
-                            class="text-body-medium text-medium-emphasis font-italic"
-                            >{{ metadata.comment }}</span
-                        >
-                    </div>
-                </div>
-
-                <!-- ── Rate CTA ───────────────────────────────────────────── -->
-                <div class="mb-6">
-                    <ReviewFormDialog
-                        v-if="route_id"
-                        :route-id="route_id"
-                        call-to-action
-                        @saved="onReviewSaved"
-                    />
-                </div>
-
-                <!-- ── Reviews section ────────────────────────────────────── -->
-                <div class="d-flex align-center justify-space-between mb-3">
-                    <span class="text-body-large font-weight-bold">
-                        {{ t('ratings.climber_reviews') }}
-                    </span>
-                    <v-chip
-                        v-if="reviews.length"
-                        size="small"
-                        variant="tonal"
-                        color="primary"
-                    >
-                        {{ reviews.length }}
-                    </v-chip>
-                </div>
-
-                <!-- Review list -->
-                <template v-if="reviews.length">
-                    <CommentsCard
-                        v-for="review in reviews"
-                        :key="review.id"
-                        :comment="review"
-                        date-format="relative"
-                        class="mb-3"
-                    >
-                        <template #actions>
-                            <!-- DSA Art. 16(1): a reporting path on every
-                                 individual item, reachable without an account. -->
-                            <v-btn
-                                icon="mdi-flag-outline"
-                                variant="text"
-                                size="small"
-                                :aria-label="t('reports.reportAction')"
-                                :title="t('reports.reportAction')"
-                                data-testid="comment-card-report"
-                                @click="openReport(review.id)"
+                        <!-- ── Rate CTA ───────────────────────────────────────────── -->
+                        <div class="mb-6">
+                            <ReviewFormDialog
+                                v-if="route_id"
+                                :route-id="route_id"
+                                call-to-action
+                                @saved="onReviewSaved"
                             />
-                        </template>
-                    </CommentsCard>
-                </template>
+                        </div>
+                    </div>
+                </div>
 
-                <ReportsFormDialog
-                    v-if="reportTarget"
-                    v-model="reportDialog"
-                    content-type="rating"
-                    :content-id="reportTarget"
-                    :content-url="reportUrl"
-                />
+                <!-- ── Reviews section ────────────────────────────────────────── -->
+                <div
+                    class="route-layout__reviews px-4 pt-4"
+                    data-testid="route-reviews"
+                >
+                    <div class="d-flex align-center justify-space-between mb-3">
+                        <span class="text-body-large font-weight-bold">
+                            {{ t('ratings.climber_reviews') }}
+                        </span>
+                        <v-chip
+                            v-if="reviews.length"
+                            size="small"
+                            variant="tonal"
+                            color="primary"
+                        >
+                            {{ reviews.length }}
+                        </v-chip>
+                    </div>
 
-                <!-- Empty state -->
-                <LayoutEmptyState
-                    v-else
-                    icon="mdi-star-shooting-outline"
-                    :title="t('ratings.no_reviews_yet')"
-                    :hint="t('ratings.be_the_first')"
-                />
+                    <!-- Review list -->
+                    <div v-if="reviews.length" class="route-reviews-list">
+                        <CommentsCard
+                            v-for="review in reviews"
+                            :key="review.id"
+                            :comment="review"
+                            date-format="relative"
+                            class="mb-3"
+                        >
+                            <template #actions>
+                                <!-- DSA Art. 16(1): a reporting path on every
+                                 individual item, reachable without an account. -->
+                                <v-btn
+                                    icon="mdi-flag-outline"
+                                    variant="text"
+                                    size="small"
+                                    :aria-label="t('reports.reportAction')"
+                                    :title="t('reports.reportAction')"
+                                    data-testid="comment-card-report"
+                                    @click="openReport(review.id)"
+                                />
+                            </template>
+                        </CommentsCard>
+                    </div>
 
-                <!-- Bottom spacer for mobile -->
-                <div style="height: 24px" />
+                    <!-- Empty state -->
+                    <LayoutEmptyState
+                        v-else
+                        icon="mdi-star-shooting-outline"
+                        :title="t('ratings.no_reviews_yet')"
+                        :hint="t('ratings.be_the_first')"
+                    />
+
+                    <ReportsFormDialog
+                        v-if="reportTarget"
+                        v-model="reportDialog"
+                        content-type="rating"
+                        :content-id="reportTarget"
+                        :content-url="reportUrl"
+                    />
+
+                    <!-- Bottom spacer for mobile -->
+                    <div style="height: 24px" />
+                </div>
             </div>
         </template>
     </v-container>
@@ -500,10 +550,94 @@ onMounted(async () => {
     overflow: hidden;
 }
 
-/* Round hero corners on desktop */
+/* Round hero corners on tablet */
 @media (min-width: 600px) {
     .route-hero {
         border-radius: 0 0 16px 16px;
+    }
+}
+
+/* Desktop: hero banner carries name, grade and stats; details sit left of
+   the reviews below it. The main column is unwrapped with display:contents
+   so the hero can span the full width. */
+@media (min-width: 960px) {
+    .route-page {
+        max-width: 1400px;
+        padding: 24px 24px 0;
+    }
+
+    .route-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+        grid-template-areas:
+            'hero hero'
+            'details reviews'
+            '. reviews';
+        grid-template-rows: auto auto 1fr;
+        column-gap: 32px;
+        align-items: start;
+    }
+
+    .route-layout__main {
+        display: contents;
+    }
+
+    .route-hero {
+        grid-area: hero;
+        min-height: 220px;
+        border-radius: 16px;
+        padding: 28px 32px;
+        justify-content: center;
+    }
+
+    .route-hero__content h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Name and grade stay together instead of drifting to opposite edges */
+    .route-hero__content > .d-flex.align-end {
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 20px;
+    }
+
+    .route-hero__difficulty-badge {
+        min-width: 72px;
+        height: 72px;
+        border-radius: 20px;
+    }
+
+    .route-hero__difficulty-text {
+        font-size: 1.75rem;
+    }
+
+    /* Stats sit inside the hero on the right, not overlapping its bottom edge */
+    .stats-card {
+        grid-area: hero;
+        align-self: center;
+        justify-self: end;
+        min-width: 320px;
+        margin: 0 32px 0 0;
+    }
+
+    .route-details {
+        grid-area: details;
+        padding-top: 24px !important;
+    }
+
+    .route-layout__reviews {
+        grid-area: reviews;
+        padding-top: 24px;
+    }
+}
+
+/* Wide desktop: reviews read as a two-column board instead of one long list */
+@media (min-width: 1400px) {
+    .route-reviews-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        column-gap: 16px;
+        align-items: start;
     }
 }
 

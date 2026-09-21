@@ -96,6 +96,16 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     expect(overlay!.cssBox).toEqual(overlay!.bitmap)
     expect(overlay!.videoBox).toEqual(overlay!.bitmap)
 
+    // Bottom-right: at the top it sat under the thumb reaching for a wall
+    // label, and over the part of the frame the code is usually centred in.
+    const torch = page.getByTestId('inventory-torch')
+    if (await torch.isVisible()) {
+        const button = (await torch.boundingBox())!
+        const frame = (await page.locator('.scanner-viewport').boundingBox())!
+        expect(button.y).toBeGreaterThan(frame.y + frame.height / 2)
+        expect(button.x).toBeGreaterThan(frame.x + frame.width / 2)
+    }
+
     // Backgrounding ends the capture track on iOS and it cannot be revived, so
     // the page drops the dead stream and puts the Start button back — its tap
     // is the user gesture a fresh getUserMedia needs.

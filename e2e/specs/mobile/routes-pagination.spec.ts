@@ -32,7 +32,9 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
     // Search is debounced (300ms) before it re-fetches; wait for the filter
     // to actually take effect (all 12 own routes, default page size) before
     // changing the page size, or that change races the still-unfiltered list.
-    await expect(page.locator('.route-card[data-testid^="route-card-"]')).toHaveCount(12)
+    await expect(
+        page.locator('.route-card[data-testid^="route-card-"]'),
+    ).toHaveCount(12)
     await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
 
     await page.getByTestId('routes-mobile-page-size').click()
@@ -41,5 +43,63 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
     )
     await page.getByRole('option', { name: '10', exact: true }).click()
     await routesResponse
-    await expect(page.locator('.route-card[data-testid^="route-card-"]')).toHaveCount(10)
+    await expect(
+        page.locator('.route-card[data-testid^="route-card-"]'),
+    ).toHaveCount(10)
+
+    // The number strip is a window around the current page, so the count of
+    // buttons follows the width rather than the number of pages.
+    await expect(page.getByTestId('routes-mobile-goto-1')).toHaveAttribute(
+        'aria-current',
+        'page',
+    )
+    await expect(page.getByTestId('routes-mobile-prev')).toBeDisabled()
+
+    await page.getByTestId('routes-mobile-next').click()
+    await expect(page.getByTestId('routes-mobile-goto-2')).toHaveAttribute(
+        'aria-current',
+        'page',
+    )
+    await expect(
+        page.locator('.route-card[data-testid^="route-card-"]'),
+    ).toHaveCount(2)
+    await expect(page.getByTestId('routes-mobile-next')).toBeDisabled()
+
+    // A number jumps straight there, which is the point of having them back.
+    await page.getByTestId('routes-mobile-goto-1').click()
+    await expect(page.getByTestId('routes-mobile-goto-1')).toHaveAttribute(
+        'aria-current',
+        'page',
+    )
+    await expect(
+        page.locator('.route-card[data-testid^="route-card-"]'),
+    ).toHaveCount(10)
+})
+
+test('the pager stays under the thumb while stepping', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/manage/routes')
+    await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
+
+    // Pages hold cards of differing heights, so a pager that simply followed
+    // the last card landed somewhere new on every tap and the next button
+    // slid out from under the finger mid-click.
+    const next = page.getByTestId('routes-mobile-next')
+    await next.click()
+    await expect(page.getByTestId('routes-mobile-goto-2')).toHaveAttribute(
+        'aria-current',
+        'page',
+    )
+    const afterFirst = (await next.boundingBox())!
+
+    await next.click()
+    await expect(page.getByTestId('routes-mobile-goto-3')).toHaveAttribute(
+        'aria-current',
+        'page',
+    )
+    const afterSecond = (await next.boundingBox())!
+
+    expect(afterSecond.y).toBeCloseTo(afterFirst.y, 0)
+    expect(afterSecond.x).toBeCloseTo(afterFirst.x, 0)
 })

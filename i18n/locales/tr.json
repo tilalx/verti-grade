@@ -180,7 +180,12 @@
         "created_at": "Oluşturulma Tarihi",
         "sort_by": "Sıralama ölçütü",
         "sort_asc": "Artan",
-        "sort_desc": "Azalan"
+        "sort_desc": "Azalan",
+        "previous_page": "Önceki sayfa",
+        "next_page": "Sonraki sayfa",
+        "page_of": "Sayfa {page} / {total}",
+        "rows_per_page": "Sayfa başına satır",
+        "pagination": "Sayfalama"
     },
     "actions": {
         "search": "Ara",
@@ -204,7 +209,6 @@
     },
     "inventory": {
         "title": "Rota Envanter Taraması",
-        "mobileOnly": "Bu araç yalnızca mobil cihazlarda kullanılabilir. Lütfen bir telefon veya tablet kullanın.",
         "start": "Taramayı Başlat",
         "stop": "Taramayı Durdur",
         "finish": "Envanteri Bitir",

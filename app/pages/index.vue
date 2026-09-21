@@ -12,7 +12,7 @@
             <template #filters>
                 <v-row density="comfortable">
                     <!-- Sorting for the mobile card list (desktop sorts via table headers) -->
-                    <v-col v-if="smAndDown" cols="12" sm="4">
+                    <v-col v-if="!isWideLayout" cols="12" sm="4">
                         <RouteSortControl
                             :model-value="tableOptions.sortBy"
                             :items="sortItemsMobile"
@@ -63,7 +63,7 @@
         </FilterBar>
 
         <!-- DESKTOP VIEW: Data Table -->
-        <div v-if="mdAndUp" data-testid="index-table">
+        <div v-if="isWideLayout" data-testid="index-table">
             <v-data-table-server
                 class="mt-4"
                 :headers="headersDesktop"
@@ -128,7 +128,7 @@
         </div>
 
         <!-- MOBILE VIEW: Card List -->
-        <div v-if="smAndDown">
+        <div v-if="!isWideLayout">
             <v-row class="mt-2">
                 <v-col v-for="route in routes" :key="route.id" cols="12">
                     <RouteCard :route="route">
@@ -153,13 +153,13 @@
 
         <!-- Empty State / Skeleton Loader on Mobile -->
         <v-skeleton-loader
-            v-if="loading && routes.length === 0 && smAndDown"
+            v-if="loading && routes.length === 0 && !isWideLayout"
             type="card"
             class="mt-4"
             :elevation="0"
         />
         <LayoutEmptyState
-            v-if="!loading && routes.length === 0 && smAndDown"
+            v-if="!loading && routes.length === 0 && !isWideLayout"
             class="mt-4"
             :title="$t('table.no_data')"
         />
@@ -179,7 +179,12 @@ import { toPbSort, type SortOption } from '~/utils/sorting'
 
 const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
-const { smAndDown, mdAndUp } = useDisplay()
+const { lgAndUp } = useDisplay()
+
+// Vuetify 4's thresholds are md 840 / lg 1145. At mdAndUp the nine-column
+// table was handed to 840px windows, where it overflowed its wrapper and had
+// to be scrolled sideways; the card list covers everything below lg.
+const isWideLayout = computed(() => lgAndUp.value)
 const { error: notifyError } = useNotification()
 
 const {
@@ -409,5 +414,26 @@ function formatDate(date: string | null | undefined) {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+    /* Without this a wrapped stack fills the row edge to edge and the row
+       dividers sit flush against the chips, reading as a line through them. */
+    padding-block: 6px;
+}
+
+/* Just above the card list's cutoff the nine columns need more than the
+   window. Same treatment as the route manager: tighter cells, one step
+   smaller type, and a comment column that may shrink. */
+@media (max-width: 1279.98px) {
+    :deep(.v-data-table__td),
+    :deep(.v-data-table__th) {
+        padding-inline: 6px;
+    }
+
+    :deep(table) {
+        font-size: 13px;
+    }
+
+    .route-comment {
+        min-width: 0;
+    }
 }
 </style>

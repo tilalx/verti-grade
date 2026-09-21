@@ -25,8 +25,11 @@ const props = withDefaults(
     { maxWidth: 520, scrollable: true },
 )
 
-const { smAndDown } = useDisplay()
-const asSheet = computed(() => props.sheetOnMobile && smAndDown.value)
+// Phones only, the same 600px cut FilterBar uses for its own bottom sheet.
+// Not smAndDown: Vuetify 4's thresholds put that at 840px, so small tablets
+// and landscape phones started getting a sheet docked to the bottom edge.
+const { smAndUp } = useDisplay()
+const asSheet = computed(() => props.sheetOnMobile && !smAndUp.value)
 
 // A VDialog docked to the bottom edge. Vuetify's own `v-bottom-sheet` classes
 // are not reusable here: their CSS ships in the VBottomSheet chunk, so it is
@@ -105,6 +108,12 @@ const sheetProps = computed(() =>
     width: 100%;
     max-width: 100%;
     margin: 0;
+    /* Vuetify positions the content with an inline `left` that centres it on
+       the page box. While an overlay holds the scroll lock that box is the
+       scrollbar's width narrower than the viewport this sheet spans, so the
+       centring pushed it half a scrollbar off to the left. A full-bleed sheet
+       belongs on the edge; !important because that `left` is inline. */
+    left: 0 !important;
 }
 
 /* v-card-title is nowrap + ellipsis by default, which clips a slotted header

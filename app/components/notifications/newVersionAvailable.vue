@@ -6,7 +6,7 @@
         closable
         rounded="0"
         data-testid="update-banner"
-        :close-label="$t('notifications.updateBanner.dismiss')"
+        close-label="notifications.updateBanner.dismiss"
         @click:close="dismiss"
     >
         <div class="d-flex align-center flex-wrap ga-2">

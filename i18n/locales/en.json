@@ -180,7 +180,12 @@
         "created_at": "Created at",
         "sort_by": "Sort by",
         "sort_asc": "Ascending",
-        "sort_desc": "Descending"
+        "sort_desc": "Descending",
+        "previous_page": "Previous page",
+        "next_page": "Next page",
+        "page_of": "Page {page} of {total}",
+        "rows_per_page": "Rows per page",
+        "pagination": "Pagination"
     },
     "actions": {
         "search": "Search",
@@ -204,7 +209,6 @@
     },
     "inventory": {
         "title": "Route Inventory Scan",
-        "mobileOnly": "This tool is only available on mobile devices. Please use a phone or tablet.",
         "start": "Start Scanning",
         "stop": "Stop Scanning",
         "finish": "Finish Inventory",

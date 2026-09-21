@@ -33,6 +33,11 @@ test('an anonymous visitor can submit a review', async ({ page }) => {
     await page.getByTestId('review-form-submit').click()
 
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
+
+    // The empty state is an either/or with the list: its v-else used to be
+    // bound to the report dialog, so it rendered next to real reviews.
+    await expect(page.getByTestId('comment-card-report').first()).toBeVisible()
+    await expect(page.getByTestId('empty-state')).toBeHidden()
 })
 
 test('keeps the dialog open when the review submit fails', async ({ page }) => {
