@@ -86,7 +86,8 @@
             "boulder": "Boulder"
         },
         "name": "Name",
-        "reports": "Reports"
+        "reports": "Reports",
+        "activity": "Activity"
     },
     "dashboard": {
         "online": "{0} Online"
@@ -325,7 +326,8 @@
             "notFound": "Page Not Found - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Route Inventory - Verti-Grade",
-            "reports": "Content Reports - Verti-Grade"
+            "reports": "Content Reports - Verti-Grade",
+            "activity": "Activity Log"
         },
         "content": {
             "settings": "Settings",
@@ -335,7 +337,8 @@
             "users": "User Management",
             "dashboard": "Route Management",
             "inventory": "Route Inventory",
-            "reports": "Content Reports"
+            "reports": "Content Reports",
+            "activity": "Review recorded account and content activity."
         }
     },
     "validation": {
@@ -407,7 +410,8 @@
             "manage_users": "Manage Users",
             "manage_settings": "Manage Settings",
             "run_inventory": "Run Inventory",
-            "manage_reports": "Manage Reports"
+            "manage_reports": "Manage Reports",
+            "view_audit_log": "View Audit Log"
         },
         "updated": "Permissions updated.",
         "updateError": "Failed to update permissions.",
@@ -440,6 +444,8 @@
         "saveError": "Failed to save settings. Please try again.",
         "contactEmail": "Contact email",
         "contactEmailHint": "Published as your point of contact and notified about new content reports.",
+        "auditRetention": "Audit log retention (days)",
+        "auditRetentionHint": "Entries older than this are deleted automatically. Default 90 days.",
         "mailNotConfigured": "Email is not configured, so password resets and content report notices cannot be delivered. SMTP is configured in PocketBase, not here.",
         "mailNotConfiguredAction": "Open PocketBase mail settings"
     },
@@ -525,5 +531,56 @@
         "emptyHint": "Reported content will appear here for review.",
         "mailWarning": "Email is not configured, so reporters are not receiving the confirmations and decision notices required by Article 16.",
         "mailWarningAction": "Open settings"
+    },
+    "audit": {
+        "title": "Audit Log",
+        "subtitle": "Every recorded action across the site.",
+        "titleOwn": "Your Activity",
+        "subtitleOwn": "Everything recorded about your account.",
+        "searchLabel": "Search activity",
+        "filterAction": "Action",
+        "filterCollection": "Area",
+        "filterPeriod": "Period",
+        "empty": "Nothing recorded yet",
+        "emptyHint": "Actions appear here as they happen.",
+        "anonymous": "Anonymous",
+        "superuser": "Administrator (PocketBase)",
+        "retentionNote": "Entries are deleted automatically after {days} days.",
+        "period": {
+            "24h": "Last 24 hours",
+            "7d": "Last 7 days",
+            "30d": "Last 30 days",
+            "all": "All time"
+        },
+        "action": {
+            "create": "Created",
+            "update": "Updated",
+            "delete": "Deleted",
+            "login": "Signed in",
+            "login_failed": "Sign-in failed",
+            "password_reset_request": "Password reset requested",
+            "password_reset": "Password reset",
+            "email_change_request": "Email change requested",
+            "email_change": "Email changed"
+        },
+        "collection": {
+            "routes": "Routes",
+            "ratings": "Reviews",
+            "users": "Users",
+            "roles": "Roles",
+            "permissions": "Permissions",
+            "settings": "Settings",
+            "reports": "Reports"
+        },
+        "target": {
+            "routes": "Route",
+            "ratings": "Review",
+            "users": "User",
+            "roles": "Role",
+            "permissions": "Permission",
+            "settings": "Settings",
+            "reports": "Report"
+        },
+        "changedLabel": "Changed"
     }
 }

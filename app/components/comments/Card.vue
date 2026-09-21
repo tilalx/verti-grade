@@ -167,6 +167,7 @@
 </template>
 
 <script setup lang="ts">
+import { timeAgo as sharedTimeAgo } from '~/utils/formatting'
 export interface CommentCardItem {
     id: string
     userName: string
@@ -244,19 +245,7 @@ const formattedDate = computed(() => {
 })
 
 function timeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const mins = Math.floor(diff / 60_000)
-    const hours = Math.floor(diff / 3_600_000)
-    const days = Math.floor(diff / 86_400_000)
-    if (mins < 1) return t('time.justNow')
-    if (mins < 60) return t('time.minutesAgo', { n: mins })
-    if (hours < 24) return t('time.hoursAgo', { n: hours })
-    if (days < 30) return t('time.daysAgo', { n: days })
-    return new Date(dateStr).toLocaleDateString(locale.value, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    })
+    return sharedTimeAgo(dateStr, t, locale.value)
 }
 
 // ── Avatar ──────────────────────────────────────────────────────────────────

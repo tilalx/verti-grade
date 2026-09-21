@@ -86,7 +86,8 @@
             "boulder": "Boulder"
         },
         "name": "İsim",
-        "reports": "Bildirimler"
+        "reports": "Bildirimler",
+        "activity": "Etkinlik"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -325,7 +326,8 @@
             "notFound": "Sayfa Bulunamadı - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Rota Sayımı - Verti-Grade",
-            "reports": "İçerik Bildirimleri - Verti-Grade"
+            "reports": "İçerik Bildirimleri - Verti-Grade",
+            "activity": "Etkinlik Günlüğü"
         },
         "content": {
             "settings": "Ayarlar",
@@ -335,7 +337,8 @@
             "users": "Kullanıcı Yönetimi",
             "dashboard": "Rota Yönetimi",
             "inventory": "Rota Sayımı",
-            "reports": "İçerik Bildirimleri"
+            "reports": "İçerik Bildirimleri",
+            "activity": "Kaydedilen hesap ve içerik etkinliklerini görüntüleyin."
         }
     },
     "validation": {
@@ -389,7 +392,8 @@
             "manage_users": "Kullanıcıları Yönet",
             "manage_settings": "Ayarları Yönet",
             "run_inventory": "Envanter Taraması",
-            "manage_reports": "Bildirimleri Yönet"
+            "manage_reports": "Bildirimleri Yönet",
+            "view_audit_log": "Denetim Günlüğünü Görüntüle"
         },
         "updated": "Yetkiler güncellendi.",
         "updateError": "Yetkiler güncellenemedi.",
@@ -440,6 +444,8 @@
         "saveError": "Ayarlar kaydedilemedi. Lütfen tekrar deneyin.",
         "contactEmail": "İletişim e-postası",
         "contactEmailHint": "İletişim adresiniz olarak yayımlanır ve yeni içerik bildirimlerinde bilgilendirilir.",
+        "auditRetention": "Denetim günlüğü saklama süresi (gün)",
+        "auditRetentionHint": "Daha eski kayıtlar otomatik olarak silinir. Varsayılan 90 gün.",
         "mailNotConfigured": "E-posta yapılandırılmadı, bu nedenle parola sıfırlama ve içerik bildirimi bildirimleri iletilemiyor. SMTP burada değil, PocketBase üzerinde yapılandırılır.",
         "mailNotConfiguredAction": "PocketBase e-posta ayarlarını aç"
     },
@@ -525,5 +531,56 @@
         "emptyHint": "Bildirilen içerikler incelenmek üzere burada görünecek.",
         "mailWarning": "E-posta yapılandırılmadığı için bildirimde bulunanlar 16. maddenin gerektirdiği onay ve karar bildirimlerini alamıyor.",
         "mailWarningAction": "Ayarları aç"
+    },
+    "audit": {
+        "title": "Denetim Günlüğü",
+        "subtitle": "Sitedeki tüm kayıtlı işlemler.",
+        "titleOwn": "Etkinliğiniz",
+        "subtitleOwn": "Hesabınızla ilgili kaydedilen her şey.",
+        "searchLabel": "Etkinlikte ara",
+        "filterAction": "İşlem",
+        "filterCollection": "Alan",
+        "filterPeriod": "Dönem",
+        "empty": "Henüz kayıt yok",
+        "emptyHint": "İşlemler gerçekleştikçe burada görünür.",
+        "anonymous": "Anonim",
+        "superuser": "Yönetici (PocketBase)",
+        "retentionNote": "Kayıtlar {days} gün sonra otomatik olarak silinir.",
+        "period": {
+            "24h": "Son 24 saat",
+            "7d": "Son 7 gün",
+            "30d": "Son 30 gün",
+            "all": "Tüm zamanlar"
+        },
+        "action": {
+            "create": "Oluşturuldu",
+            "update": "Güncellendi",
+            "delete": "Silindi",
+            "login": "Giriş yapıldı",
+            "login_failed": "Giriş başarısız",
+            "password_reset_request": "Parola sıfırlama istendi",
+            "password_reset": "Parola sıfırlandı",
+            "email_change_request": "E-posta değişikliği istendi",
+            "email_change": "E-posta değiştirildi"
+        },
+        "collection": {
+            "routes": "Rotalar",
+            "ratings": "Değerlendirmeler",
+            "users": "Kullanıcılar",
+            "roles": "Roller",
+            "permissions": "İzinler",
+            "settings": "Ayarlar",
+            "reports": "Bildirimler"
+        },
+        "target": {
+            "routes": "Rota",
+            "ratings": "Değerlendirme",
+            "users": "Kullanıcı",
+            "roles": "Rol",
+            "permissions": "İzin",
+            "settings": "Ayarlar",
+            "reports": "Bildirim"
+        },
+        "changedLabel": "Değişen"
     }
 }

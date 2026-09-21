@@ -35,10 +35,15 @@
 
                 <!-- Desktop Nav Links. Breakpoint via CSS, not useDisplay():
                      the viewport is unknown server-side, so a JS breakpoint
-                     can't render here without a hydration mismatch. -->
+                     can't render here without a hydration mismatch.
+
+                     lg, not md: the full link row plus the logo and the user
+                     menu needs ~1040px, so between 960 and 1280 it used to
+                     overflow -- the user menu got pushed off the right edge
+                     while the viewport was still too wide for the drawer. -->
                 <nav
                     v-if="isLoggedIn"
-                    class="nav-links d-none d-md-flex"
+                    class="nav-links d-none d-lg-flex"
                     data-testid="nav-desktop-links"
                     :aria-label="$t('nav.mainNavigation')"
                 >
@@ -56,13 +61,13 @@
                 <!-- Right Side -->
                 <div class="nav-actions">
                     <template v-if="isLoggedIn">
-                        <div class="d-none d-md-flex">
+                        <div class="d-none d-lg-flex">
                             <UserIcon />
                         </div>
                         <v-btn
                             icon
                             variant="text"
-                            class="nav-hamburger d-md-none"
+                            class="nav-hamburger d-lg-none"
                             data-testid="nav-hamburger"
                             @click="drawer = !drawer"
                             :aria-label="$t('nav.openMenu')"
@@ -114,7 +119,7 @@
                 <!-- Off-canvas, so SSR buys nothing here — and a second
                      always-mounted UserIcon would duplicate its test ids. -->
                 <div class="drawer-footer">
-                    <UserIcon v-if="isLoggedIn && !mdAndUp" />
+                    <UserIcon v-if="isLoggedIn && !lgAndUp" />
                 </div>
             </template>
         </v-navigation-drawer>
@@ -125,7 +130,9 @@
 
 <script setup>
 const theme = useTheme()
-const { mdAndUp } = useDisplay()
+// Must track the CSS breakpoint above (d-lg-flex / d-lg-none): if these
+// disagree, the drawer opens between 960 and 1280 with no user menu in it.
+const { lgAndUp } = useDisplay()
 
 const props = defineProps({
     loggedIn: {
@@ -169,16 +176,24 @@ const navLinks = [
         permission: 'manage_comments',
     },
     {
-        to: '/admin/users',
-        icon: 'mdi-account-group-outline',
-        label: 'routes.users',
-        permission: 'manage_users',
-    },
-    {
         to: '/admin/reports',
         icon: 'mdi-flag-outline',
         label: 'routes.reports',
         permission: 'manage_reports',
+    },
+    {
+        // No permission key: everyone sees their own activity here, and a
+        // view_audit_log holder sees everyone's. The collection's list rule
+        // decides which, so the link does not need to.
+        to: '/admin/activity',
+        icon: 'mdi-clipboard-text-clock-outline',
+        label: 'routes.activity',
+    },
+    {
+        to: '/admin/users',
+        icon: 'mdi-account-group-outline',
+        label: 'routes.users',
+        permission: 'manage_users',
     },
     {
         to: '/admin/inventory',
@@ -202,7 +217,7 @@ const desktopLinks = computed(() =>
     visibleNavLinks.value.filter((l) => !l.mobileOnly),
 )
 
-watch(mdAndUp, (isDesktop) => {
+watch(lgAndUp, (isDesktop) => {
     if (isDesktop) drawer.value = false
 })
 
@@ -252,7 +267,7 @@ const drawer = ref(false)
 /* No `display` here: scoped styles are unlayered, and Vuetify 4 ships its
    helpers inside @layer vuetify-utilities.helpers — an unlayered rule beats a
    layered one at any specificity, so `display: flex` here silently defeated
-   the `d-none` half of `d-none d-md-flex` and forced the desktop nav onto
+   the `d-none` half of `d-none d-lg-flex` and forced the desktop nav onto
    mobile (pushing the hamburger off-screen). Let the utilities own display. */
 .nav-links {
     align-items: center;

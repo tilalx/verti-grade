@@ -233,6 +233,20 @@
                             data-testid="settings-contact-email"
                         />
                     </v-col>
+                    <v-col cols="12" md="6">
+                        <v-text-field
+                            v-model.number="copySettings.audit_retention_days"
+                            type="number"
+                            :min="1"
+                            :max="3650"
+                            :label="$t('settings.auditRetention')"
+                            :hint="$t('settings.auditRetentionHint')"
+                            persistent-hint
+                            density="compact"
+                            prepend-inner-icon="mdi-clipboard-text-clock-outline"
+                            data-testid="settings-audit-retention"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card>
@@ -343,6 +357,7 @@ const original = reactive({
     organization_name: '',
     organization_unit_name: '',
     contact_email: '',
+    audit_retention_days: 90,
 })
 
 const copySettings = reactive({ ...original })
@@ -359,6 +374,7 @@ function adoptRecord(rec) {
     original.organization_name = rec.organization_name ?? ''
     original.organization_unit_name = rec.organization_unit_name ?? ''
     original.contact_email = rec.contact_email ?? ''
+    original.audit_retention_days = rec.audit_retention_days ?? 90
     if (!dirty) Object.assign(copySettings, original)
 
     logoPreview.value = pbFileUrl(rec, rec.page_logo)
@@ -521,7 +537,8 @@ const hasChanges = computed(() => {
         copySettings.organization_name !== original.organization_name ||
         copySettings.organization_unit_name !==
             original.organization_unit_name ||
-        copySettings.contact_email !== original.contact_email
+        copySettings.contact_email !== original.contact_email ||
+        copySettings.audit_retention_days !== original.audit_retention_days
     )
 })
 
@@ -544,6 +561,11 @@ async function saveSettings() {
             organization_name: copySettings.organization_name,
             organization_unit_name: copySettings.organization_unit_name,
             contact_email: copySettings.contact_email,
+            // Clearing the field yields '' (or NaN via .number), which a
+            // min:1 number field rejects. Send null instead and let the
+            // retention hook fall back to its own default.
+            audit_retention_days:
+                Number(copySettings.audit_retention_days) || null,
         }
         if (logoFile.value) payload.page_logo = logoFile.value
         else if (logoClear.value) payload.page_logo = null
@@ -572,6 +594,7 @@ async function saveSettings() {
         original.organization_name = updated.organization_name
         original.organization_unit_name = updated.organization_unit_name
         original.contact_email = updated.contact_email ?? ''
+        original.audit_retention_days = updated.audit_retention_days ?? 90
 
         Object.assign(copySettings, {
             application_url: updated.application_url,
@@ -580,6 +603,7 @@ async function saveSettings() {
             organization_name: updated.organization_name,
             organization_unit_name: updated.organization_unit_name,
             contact_email: updated.contact_email ?? '',
+            audit_retention_days: updated.audit_retention_days ?? 90,
         })
 
         notify(t('settings.saveSuccess'))

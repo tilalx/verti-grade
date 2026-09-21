@@ -86,7 +86,8 @@
             "boulder": "Boulder"
         },
         "name": "Name",
-        "reports": "Meldungen"
+        "reports": "Meldungen",
+        "activity": "Aktivität"
     },
     "dashboard": {
         "online": "{0} Online"
@@ -325,7 +326,8 @@
             "notFound": "Seite nicht gefunden - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Routen-Inventur - Verti-Grade",
-            "reports": "Inhaltsmeldungen - Verti-Grade"
+            "reports": "Inhaltsmeldungen - Verti-Grade",
+            "activity": "Aktivitätsprotokoll"
         },
         "content": {
             "settings": "Einstellungen",
@@ -335,7 +337,8 @@
             "users": "Benutzerverwaltung",
             "dashboard": "Routenverwaltung",
             "inventory": "Routen-Inventur",
-            "reports": "Inhaltsmeldungen"
+            "reports": "Inhaltsmeldungen",
+            "activity": "Aufgezeichnete Konto- und Inhaltsaktivitäten einsehen."
         }
     },
     "validation": {
@@ -407,7 +410,8 @@
             "manage_users": "Benutzer verwalten",
             "manage_settings": "Einstellungen verwalten",
             "run_inventory": "Inventur durchführen",
-            "manage_reports": "Meldungen verwalten"
+            "manage_reports": "Meldungen verwalten",
+            "view_audit_log": "Audit-Protokoll ansehen"
         },
         "updated": "Berechtigungen aktualisiert.",
         "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
@@ -440,6 +444,8 @@
         "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.",
         "contactEmail": "Kontakt-E-Mail",
         "contactEmailHint": "Wird als Kontaktstelle veröffentlicht und über neue Inhaltsmeldungen benachrichtigt.",
+        "auditRetention": "Aufbewahrung des Audit-Protokolls (Tage)",
+        "auditRetentionHint": "Ältere Einträge werden automatisch gelöscht. Standard: 90 Tage.",
         "mailNotConfigured": "E-Mail ist nicht konfiguriert, daher können Passwort-Zurücksetzungen und Meldungsbenachrichtigungen nicht zugestellt werden. SMTP wird in PocketBase konfiguriert, nicht hier.",
         "mailNotConfiguredAction": "PocketBase-E-Mail-Einstellungen öffnen"
     },
@@ -525,5 +531,56 @@
         "emptyHint": "Gemeldete Inhalte erscheinen hier zur Prüfung.",
         "mailWarning": "E-Mail ist nicht konfiguriert, daher erhalten meldende Personen weder die Eingangsbestätigung noch die Entscheidungsmitteilung nach Artikel 16.",
         "mailWarningAction": "Einstellungen öffnen"
+    },
+    "audit": {
+        "title": "Audit-Protokoll",
+        "subtitle": "Alle aufgezeichneten Aktionen auf der Seite.",
+        "titleOwn": "Deine Aktivität",
+        "subtitleOwn": "Alles, was zu deinem Konto aufgezeichnet wurde.",
+        "searchLabel": "Aktivität durchsuchen",
+        "filterAction": "Aktion",
+        "filterCollection": "Bereich",
+        "filterPeriod": "Zeitraum",
+        "empty": "Noch nichts aufgezeichnet",
+        "emptyHint": "Aktionen erscheinen hier, sobald sie passieren.",
+        "anonymous": "Anonym",
+        "superuser": "Administrator (PocketBase)",
+        "retentionNote": "Einträge werden nach {days} Tagen automatisch gelöscht.",
+        "period": {
+            "24h": "Letzte 24 Stunden",
+            "7d": "Letzte 7 Tage",
+            "30d": "Letzte 30 Tage",
+            "all": "Gesamter Zeitraum"
+        },
+        "action": {
+            "create": "Erstellt",
+            "update": "Geändert",
+            "delete": "Gelöscht",
+            "login": "Angemeldet",
+            "login_failed": "Anmeldung fehlgeschlagen",
+            "password_reset_request": "Passwort-Zurücksetzung angefordert",
+            "password_reset": "Passwort zurückgesetzt",
+            "email_change_request": "E-Mail-Änderung angefordert",
+            "email_change": "E-Mail geändert"
+        },
+        "collection": {
+            "routes": "Routen",
+            "ratings": "Bewertungen",
+            "users": "Benutzer",
+            "roles": "Rollen",
+            "permissions": "Berechtigungen",
+            "settings": "Einstellungen",
+            "reports": "Meldungen"
+        },
+        "target": {
+            "routes": "Route",
+            "ratings": "Bewertung",
+            "users": "Benutzer",
+            "roles": "Rolle",
+            "permissions": "Berechtigung",
+            "settings": "Einstellungen",
+            "reports": "Meldung"
+        },
+        "changedLabel": "Geändert"
     }
 }
