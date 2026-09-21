@@ -561,7 +561,11 @@ async function saveSettings() {
             organization_name: copySettings.organization_name,
             organization_unit_name: copySettings.organization_unit_name,
             contact_email: copySettings.contact_email,
-            audit_retention_days: copySettings.audit_retention_days,
+            // Clearing the field yields '' (or NaN via .number), which a
+            // min:1 number field rejects. Send null instead and let the
+            // retention hook fall back to its own default.
+            audit_retention_days:
+                Number(copySettings.audit_retention_days) || null,
         }
         if (logoFile.value) payload.page_logo = logoFile.value
         else if (logoClear.value) payload.page_logo = null
