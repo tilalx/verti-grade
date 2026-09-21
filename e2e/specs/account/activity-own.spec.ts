@@ -38,7 +38,7 @@ test('a user sees their own entries and nobody else’s', async ({
 test('the activity page is reachable without any admin permission', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/activity', /\/activity/)
+    await gotoSettled(page, '/admin/activity', /\/admin\/activity/)
 
     await expect(page.getByTestId('audit-retention-note')).toBeVisible()
     await expect(page.getByTestId('audit-filter-action')).toBeVisible()
@@ -48,14 +48,16 @@ test('the activity link is in the navigation for a plain user', async ({
     userPage: page,
 }) => {
     await gotoSettled(page, '/', /\//)
-    await expect(page.locator('a[href="/activity"]').first()).toHaveCount(1)
+    expect(
+        await page.locator('a[href="/admin/activity"]').count(),
+    ).toBeGreaterThan(0)
 })
 
 test('an admin sees entries from other actors too', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/activity', /\/activity/)
+    await gotoSettled(page, '/admin/activity', /\/admin\/activity/)
 
     const headers = await authHeader(page)
     const res = await page.request.post('/api/collections/routes/records', {

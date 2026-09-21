@@ -229,6 +229,10 @@ useHead({
     meta: [{ name: 'description', content: t('page.content.activity') }],
 })
 
+// Deliberately no requiredPermission, unlike every other page under admin/:
+// a signed-in user without view_audit_log still reaches this and sees their
+// own entries (GDPR Art. 15). The collection's list rule is what scopes the
+// result, so the route guard does not need to.
 definePageMeta({
     authRequired: true,
     middleware: ['auth'],

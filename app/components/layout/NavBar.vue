@@ -176,12 +176,6 @@ const navLinks = [
         permission: 'manage_comments',
     },
     {
-        to: '/admin/users',
-        icon: 'mdi-account-group-outline',
-        label: 'routes.users',
-        permission: 'manage_users',
-    },
-    {
         to: '/admin/reports',
         icon: 'mdi-flag-outline',
         label: 'routes.reports',
@@ -191,9 +185,15 @@ const navLinks = [
         // No permission key: everyone sees their own activity here, and a
         // view_audit_log holder sees everyone's. The collection's list rule
         // decides which, so the link does not need to.
-        to: '/activity',
+        to: '/admin/activity',
         icon: 'mdi-clipboard-text-clock-outline',
         label: 'routes.activity',
+    },
+    {
+        to: '/admin/users',
+        icon: 'mdi-account-group-outline',
+        label: 'routes.users',
+        permission: 'manage_users',
     },
     {
         to: '/admin/inventory',
