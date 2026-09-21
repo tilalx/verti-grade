@@ -71,7 +71,7 @@
                 v-for="entry in entries"
                 :key="entry.id"
                 :entry="entry"
-                class="mb-3"
+                class="mb-2"
             />
 
             <div v-if="hasMore" class="text-center mt-4">

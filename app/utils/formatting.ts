@@ -29,6 +29,34 @@ export function formatDisplayDate(
     return parsed.toLocaleDateString(locale || undefined)
 }
 
+/**
+ * "12 min ago" for anything recent, an absolute date once that stops being
+ * useful. Takes `t`/`locale` as arguments, the same way the validation rule
+ * factories do, so it stays a pure function outside a component.
+ */
+export function timeAgo(
+    dateStr: string | null | undefined,
+    t: (key: string, named?: Record<string, unknown>) => string,
+    locale: string,
+): string {
+    if (!dateStr) return ''
+    const parsed = new Date(String(dateStr).replace(' ', 'T'))
+    if (Number.isNaN(parsed.getTime())) return ''
+    const diff = Date.now() - parsed.getTime()
+    const mins = Math.floor(diff / 60_000)
+    const hours = Math.floor(diff / 3_600_000)
+    const days = Math.floor(diff / 86_400_000)
+    if (mins < 1) return t('time.justNow')
+    if (mins < 60) return t('time.minutesAgo', { n: mins })
+    if (hours < 24) return t('time.hoursAgo', { n: hours })
+    if (days < 30) return t('time.daysAgo', { n: days })
+    return parsed.toLocaleDateString(locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    })
+}
+
 export interface DifficultySource {
     difficulty?: number | string | null
     difficulty_sign?: boolean | string | null
@@ -37,7 +65,9 @@ export interface DifficultySource {
 /**
  * Formats a route's difficulty into a display string like "7+", "5-", or "6".
  */
-export function formatDifficulty(route: DifficultySource | null | undefined): string {
+export function formatDifficulty(
+    route: DifficultySource | null | undefined,
+): string {
     const base = route?.difficulty ?? ''
     const sign =
         route?.difficulty_sign === true
@@ -66,9 +96,13 @@ export function formatAnchorPoint(value: unknown): unknown {
 /**
  * Formats a route's aggregate score as "X.XX/5" or '—' when absent.
  */
-export function formatScore(route: { score?: unknown } | null | undefined): string {
+export function formatScore(
+    route: { score?: unknown } | null | undefined,
+): string {
     const score =
-        typeof route?.score === 'number' && Number.isFinite(route.score) ? route.score : null
+        typeof route?.score === 'number' && Number.isFinite(route.score)
+            ? route.score
+            : null
     return score !== null ? `${score.toFixed(2)}/5` : '—'
 }
 

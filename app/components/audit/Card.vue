@@ -1,89 +1,77 @@
 <template>
     <v-card
         variant="tonal"
-        class="list-card"
+        class="list-card audit-card"
         :data-testid="`audit-card-${entry.id}`"
     >
-        <div class="list-card__header">
+        <div class="audit-card__body">
             <v-icon
                 size="20"
-                class="flex-shrink-0"
+                class="audit-card__icon"
                 :color="actionColor(entry.action)"
                 >{{ actionIcon(entry.action) }}</v-icon
             >
 
-            <div class="list-card__title">
-                <div class="d-flex align-center ga-2 flex-wrap">
+            <div class="audit-card__text">
+                <!-- What happened, first and in the strongest type. The actor
+                     and the address are context, not the headline. -->
+                <div class="audit-card__summary">
                     <span
-                        class="text-body-medium font-weight-medium"
-                        data-testid="audit-card-actor"
-                    >
-                        {{ actorName }}
-                    </span>
-                    <v-chip
-                        size="x-small"
-                        :color="actionColor(entry.action)"
-                        variant="tonal"
+                        class="font-weight-medium"
+                        :class="`text-${actionColor(entry.action)}`"
                         data-testid="audit-card-action"
                     >
                         {{ t(`audit.action.${entry.action}`) }}
-                    </v-chip>
-                </div>
-                <div class="text-body-small text-medium-emphasis">
-                    {{ formatDate(entry.created) }}
-                </div>
-            </div>
-        </div>
-
-        <div class="list-card__meta">
-            <div
-                v-if="entry.collection_name"
-                class="list-card__meta-row list-card__meta-row--full"
-            >
-                <v-icon size="16" class="list-card__meta-icon"
-                    >mdi-database-outline</v-icon
-                >
-                <span class="text-body-small">
-                    {{ collectionLabel }}
-                    <NuxtLink
-                        v-if="targetUrl"
-                        :to="targetUrl"
-                        class="audit-card__target"
-                        data-testid="audit-card-target"
-                        >{{ entry.record_id }}</NuxtLink
-                    >
-                    <span
-                        v-else-if="entry.record_id"
-                        class="text-medium-emphasis"
-                    >
-                        {{ entry.record_id }}
                     </span>
-                </span>
+                    <template v-if="targetLabel">
+                        <span class="audit-card__dot">·</span>
+                        <span
+                            class="font-weight-medium"
+                            data-testid="audit-card-target"
+                            >{{ targetLabel }}</span
+                        >
+                    </template>
+                </div>
+
+                <div class="audit-card__meta text-body-small">
+                    <span data-testid="audit-card-actor">{{ actorName }}</span>
+                    <template v-if="entry.record_id">
+                        <span class="audit-card__dot">·</span>
+                        <NuxtLink
+                            v-if="targetUrl"
+                            :to="targetUrl"
+                            class="audit-card__link"
+                            data-testid="audit-card-record"
+                            >{{ entry.record_id }}</NuxtLink
+                        >
+                        <span v-else>{{ entry.record_id }}</span>
+                    </template>
+                    <template v-if="ip">
+                        <span class="audit-card__dot">·</span>
+                        <span>{{ ip }}</span>
+                    </template>
+                </div>
+
+                <!-- Field names only. The log never stores what a value
+                     changed to, so there is nothing else to show here. -->
+                <div
+                    v-if="changedFields.length"
+                    class="audit-card__meta text-body-small"
+                >
+                    <span>{{ t('audit.changedLabel') }}:</span>
+                    <span data-testid="audit-card-fields">{{
+                        changedFields.join(', ')
+                    }}</span>
+                </div>
             </div>
 
-            <div
-                v-if="entry.ip"
-                class="list-card__meta-row list-card__meta-row--full"
+            <time
+                class="audit-card__time text-body-small"
+                :datetime="entry.created ?? undefined"
+                :title="absoluteTime"
+                data-testid="audit-card-time"
+                >{{ relativeTime }}</time
             >
-                <v-icon size="16" class="list-card__meta-icon"
-                    >mdi-ip-network-outline</v-icon
-                >
-                <span class="text-body-small text-medium-emphasis">{{
-                    entry.ip
-                }}</span>
-            </div>
-
-            <!-- Field names only. The log never stores what a value changed to. -->
-            <div v-if="changedFields.length" class="list-card__pills">
-                <span
-                    v-for="field in changedFields"
-                    :key="field"
-                    class="list-card__pill"
-                    data-testid="audit-card-field"
-                >
-                    {{ field }}
-                </span>
-            </div>
         </div>
     </v-card>
 </template>
@@ -93,8 +81,11 @@ import {
     actionColor,
     actionIcon,
     auditTargetUrl,
+    compressIp,
+    isRecordAction,
     isSuperuserEntry,
 } from '~/utils/audit'
+import { timeAgo } from '~/utils/formatting'
 import type { AuditLogRecord } from '~/types/models'
 
 const props = defineProps<{ entry: AuditLogRecord }>()
@@ -106,10 +97,12 @@ const actorName = computed(() => {
     return props.entry.actor_label || t('audit.anonymous')
 })
 
-const collectionLabel = computed(() => {
+// Only the record actions need naming what they acted on; "Signed in · User"
+// reads worse than "Signed in".
+const targetLabel = computed(() => {
     const name = props.entry.collection_name
-    if (!name) return ''
-    return te(`audit.collection.${name}`) ? t(`audit.collection.${name}`) : name
+    if (!name || !isRecordAction(props.entry.action)) return ''
+    return te(`audit.target.${name}`) ? t(`audit.target.${name}`) : name
 })
 
 const targetUrl = computed(() =>
@@ -117,17 +110,69 @@ const targetUrl = computed(() =>
 )
 
 const changedFields = computed(() => props.entry.changed_fields ?? [])
+const ip = computed(() => compressIp(props.entry.ip))
 
-// PocketBase stores `2026-09-21 06:25:33.187Z`; the space needs to become a T
+const relativeTime = computed(() =>
+    timeAgo(props.entry.created, t, locale.value),
+)
+
+// PocketBase stores `2026-09-21 06:25:33.187Z`; the space has to become a T
 // before Date will parse it the same way in every browser.
-function formatDate(value?: string | null) {
-    if (!value) return ''
-    return new Date(value.replace(' ', 'T')).toLocaleString(locale.value)
-}
+const absoluteTime = computed(() => {
+    if (!props.entry.created) return ''
+    return new Date(props.entry.created.replace(' ', 'T')).toLocaleString(
+        locale.value,
+    )
+})
 </script>
 
 <style scoped>
-.audit-card__target {
+.audit-card__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+}
+
+.audit-card__icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.audit-card__text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.audit-card__summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.audit-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.audit-card__dot {
+    opacity: 0.45;
+}
+
+.audit-card__link {
     color: inherit;
+}
+
+.audit-card__time {
+    flex-shrink: 0;
+    white-space: nowrap;
+    color: rgba(var(--v-theme-on-surface), 0.6);
 }
 </style>

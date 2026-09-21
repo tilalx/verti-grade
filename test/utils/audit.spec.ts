@@ -3,6 +3,8 @@ import {
     AUDIT_ACTIONS,
     actionColor,
     actionIcon,
+    compressIp,
+    isRecordAction,
     auditTargetUrl,
     buildAuditFilter,
     isSuperuserEntry,
@@ -109,6 +111,40 @@ describe('actionIcon', () => {
         for (const action of AUDIT_ACTIONS) {
             expect(actionIcon(action)).toMatch(/^mdi-/)
         }
+    })
+})
+
+describe('compressIp', () => {
+    it('collapses the longest run of zero groups', () => {
+        expect(compressIp('0000:0000:0000:0000:0000:0000:0000:0001')).toBe(
+            '::1',
+        )
+        expect(compressIp('2001:0db8:0000:0000:0000:ff00:0042:8329')).toBe(
+            '2001:db8::ff00:42:8329',
+        )
+    })
+
+    it('leaves IPv4 and already-short values alone', () => {
+        expect(compressIp('192.168.1.10')).toBe('192.168.1.10')
+        expect(compressIp('::1')).toBe('::1')
+        expect(compressIp('')).toBe('')
+        expect(compressIp(null)).toBe('')
+    })
+
+    // A single zero group is not worth a `::`, which may appear only once.
+    it('does not collapse a lone zero group', () => {
+        expect(compressIp('2001:0db8:0001:0000:0002:0003:0004:0005')).toBe(
+            '2001:db8:1:0:2:3:4:5',
+        )
+    })
+})
+
+describe('isRecordAction', () => {
+    it('separates record actions from auth events', () => {
+        expect(isRecordAction('create')).toBe(true)
+        expect(isRecordAction('delete')).toBe(true)
+        expect(isRecordAction('login')).toBe(false)
+        expect(isRecordAction('password_reset')).toBe(false)
     })
 })
 

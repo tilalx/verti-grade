@@ -571,6 +571,16 @@
             "permissions": "Дозволи",
             "settings": "Налаштування",
             "reports": "Скарги"
-        }
+        },
+        "target": {
+            "routes": "Маршрут",
+            "ratings": "Відгук",
+            "users": "Користувач",
+            "roles": "Роль",
+            "permissions": "Дозвіл",
+            "settings": "Налаштування",
+            "reports": "Скарга"
+        },
+        "changedLabel": "Змінено"
     }
 }

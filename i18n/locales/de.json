@@ -571,6 +571,16 @@
             "permissions": "Berechtigungen",
             "settings": "Einstellungen",
             "reports": "Meldungen"
-        }
+        },
+        "target": {
+            "routes": "Route",
+            "ratings": "Bewertung",
+            "users": "Benutzer",
+            "roles": "Rolle",
+            "permissions": "Berechtigung",
+            "settings": "Einstellungen",
+            "reports": "Meldung"
+        },
+        "changedLabel": "Geändert"
     }
 }

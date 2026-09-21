@@ -571,6 +571,16 @@
             "permissions": "Права",
             "settings": "Настройки",
             "reports": "Жалобы"
-        }
+        },
+        "target": {
+            "routes": "Маршрут",
+            "ratings": "Отзыв",
+            "users": "Пользователь",
+            "roles": "Роль",
+            "permissions": "Право",
+            "settings": "Настройки",
+            "reports": "Жалоба"
+        },
+        "changedLabel": "Изменено"
     }
 }

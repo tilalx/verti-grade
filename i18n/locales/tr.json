@@ -571,6 +571,16 @@
             "permissions": "İzinler",
             "settings": "Ayarlar",
             "reports": "Bildirimler"
-        }
+        },
+        "target": {
+            "routes": "Rota",
+            "ratings": "Değerlendirme",
+            "users": "Kullanıcı",
+            "roles": "Rol",
+            "permissions": "İzin",
+            "settings": "Ayarlar",
+            "reports": "Bildirim"
+        },
+        "changedLabel": "Değişen"
     }
 }

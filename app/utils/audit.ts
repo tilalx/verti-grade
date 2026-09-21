@@ -39,6 +39,43 @@ const PERIOD_HOURS: Record<Exclude<AuditPeriod, 'all'>, number> = {
     '30d': 24 * 30,
 }
 
+/** create/update/delete name a record; the auth actions speak for themselves. */
+export function isRecordAction(action: AuditAction | string): boolean {
+    return action === 'create' || action === 'update' || action === 'delete'
+}
+
+/**
+ * `0000:0000:0000:0000:0000:0000:0000:0001` is 39 characters saying `::1`.
+ * The IP is the least important thing on a row; it should not be the widest.
+ */
+export function compressIp(ip?: string | null): string {
+    if (!ip) return ''
+    const groups = ip.split(':')
+    if (groups.length !== 8) return ip
+    const trimmed = groups.map((g) => g.replace(/^0+(?=.)/, ''))
+
+    let bestStart = -1
+    let bestLen = 0
+    let runStart = -1
+    let runLen = 0
+    trimmed.forEach((g, i) => {
+        if (g !== '0') {
+            runStart = -1
+            runLen = 0
+            return
+        }
+        if (runStart < 0) runStart = i
+        runLen += 1
+        if (runLen > bestLen) {
+            bestLen = runLen
+            bestStart = runStart
+        }
+    })
+
+    if (bestLen < 2) return trimmed.join(':')
+    return `${trimmed.slice(0, bestStart).join(':')}::${trimmed.slice(bestStart + bestLen).join(':')}`
+}
+
 export function actionIcon(action: AuditAction | string): string {
     if (action === 'create') return 'mdi-plus-circle-outline'
     if (action === 'update') return 'mdi-pencil-outline'
