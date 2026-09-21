@@ -14,6 +14,7 @@ const PAGES = [
     '/admin/settings',
     '/admin/inventory',
     '/admin/reports',
+    '/activity',
 ]
 
 for (const path of PAGES) {
@@ -35,6 +36,7 @@ test('every icon-only button exposes an accessible name', async ({
         '/admin/users',
         '/admin/comments',
         '/admin/reports',
+        '/activity',
     ]) {
         await gotoSettled(page, path)
         const unnamed = await page

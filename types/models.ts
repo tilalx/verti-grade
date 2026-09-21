@@ -88,6 +88,7 @@ export interface SettingsRecord extends BaseRecord {
     organization_name?: string | null
     organization_unit_name?: string | null
     contact_email?: string | null
+    audit_retention_days?: number | null
 }
 
 export type ReportContentType = 'rating' | 'route'
@@ -127,6 +128,39 @@ export interface ReportRecord extends BaseRecord {
     notified_at?: string | null
 }
 
+export type AuditAction =
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'login'
+    | 'login_failed'
+    | 'password_reset_request'
+    | 'password_reset'
+    | 'email_change_request'
+    | 'email_change'
+
+/**
+ * One user action, written server-side by the hooks in pb_hooks/audit.pb.js.
+ *
+ * changed_fields holds field NAMES and never values: a value-carrying log
+ * would be a second copy of every collection, with its own retention clock
+ * and its own erasure problem.
+ *
+ * actor is empty for anonymous visitors and for PocketBase superusers, whose
+ * ids belong to a different collection than the relation targets -- read
+ * actor_label for those. It cascades, so deleting a user takes their entries
+ * with them.
+ */
+export interface AuditLogRecord extends BaseRecord {
+    actor?: RecordId | null
+    actor_label?: string | null
+    action: AuditAction
+    collection_name?: string | null
+    record_id?: string | null
+    changed_fields?: string[] | null
+    ip?: string | null
+}
+
 export interface RouteScoreRecord extends RouteRecord {
     average_rating?: number | null
     ratings_count?: number
@@ -142,6 +176,7 @@ export type PocketBaseRecord =
     | UserRecord
     | SettingsRecord
     | ReportRecord
+    | AuditLogRecord
     | RouteScoreRecord
 
 export interface ListResult<T> {
