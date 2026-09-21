@@ -9,7 +9,7 @@ test('selects filtered routes and archives them', async ({
     // Navigate first: storageState's localStorage is only applied once the
     // page has loaded the matching origin, so the auth token isn't readable
     // (or attachable to page.request calls) before that first navigation.
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
 
     // Create two routes scoped to this test via the API so "select all"
@@ -48,7 +48,7 @@ test('selects filtered routes and archives them', async ({
 test('hides the archive action when nothing is selected', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await expect(page.getByTestId('routes-archive-selected')).toHaveCount(0)
 })
 
@@ -56,7 +56,7 @@ test('shows an error and keeps routes when archiving fails', async ({
     adminPage: page,
 }) => {
     const prefix = `e2e-archive-fail-${Date.now()}`
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
 
     for (let i = 0; i < 2; i++) {

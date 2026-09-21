@@ -15,7 +15,7 @@ vi.mock('h3', async () => {
             }
             return event.body
         },
-        getRequestURL: () => new URL('https://request.example/admin/routes'),
+        getRequestURL: () => new URL('https://request.example/manage/routes'),
     }
 })
 

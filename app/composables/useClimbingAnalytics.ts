@@ -90,7 +90,7 @@ export function useClimbingAnalytics() {
 
         try {
             const response = await requestFetch<ClimbingAnalyticsResponse>(
-                '/api/admin/analytics',
+                '/api/manage/analytics',
                 {
                     headers: pb.authStore.token
                         ? { Authorization: pb.authStore.token }

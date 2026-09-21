@@ -14,7 +14,7 @@ test('server-renders the favicon, logo and logged-out navbar', async ({
 })
 
 test('server-renders the logged-in navbar', async ({ adminPage: page }) => {
-    const response = await page.goto('/admin/routes')
+    const response = await page.goto('/manage/routes')
     const html = (await response?.text()) ?? ''
 
     expect(html).toContain('data-testid="user-menu-activator"')

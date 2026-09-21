@@ -2,12 +2,12 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 
 const ADMIN_PATHS = [
-    '/admin/routes',
-    '/admin/analytics',
-    '/admin/comments',
+    '/manage/routes',
+    '/manage/analytics',
+    '/manage/comments',
     '/admin/users',
     '/admin/settings',
-    '/admin/inventory',
+    '/manage/inventory',
 ]
 
 test.describe('unauthenticated guard', () => {
@@ -55,7 +55,7 @@ test.describe('routesetter guard', () => {
     }) => {
         // authHeader() reads the pb_auth cookie off the document, so a page
         // on the app origin has to be loaded before the token is readable.
-        await gotoSettled(page, '/admin/routes', '**/admin/routes')
+        await gotoSettled(page, '/manage/routes', '**/manage/routes')
         const res = await page.request.post('/api/collections/users/records', {
             headers: await authHeader(page),
             data: {
@@ -67,8 +67,8 @@ test.describe('routesetter guard', () => {
         expect(res.status()).toBeGreaterThanOrEqual(400)
     })
 
-    test('can reach /admin/routes', async ({ setterPage: page }) => {
-        await gotoSettled(page, '/admin/routes', '**/admin/routes')
+    test('can reach /manage/routes', async ({ setterPage: page }) => {
+        await gotoSettled(page, '/manage/routes', '**/manage/routes')
         await expect(page.getByTestId('routes-create-open')).toBeVisible()
     })
 })

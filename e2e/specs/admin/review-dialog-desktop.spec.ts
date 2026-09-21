@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('edit review dialog puts stars and difficulty on one row', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/comments')
+    await gotoSettled(page, '/manage/comments')
 
     const firstCard = page.locator('[data-testid^="comment-card-"]').first()
     await expect(firstCard).toBeVisible()

@@ -379,7 +379,9 @@
         "openMenu": "Open menu",
         "skipToContent": "Skip to content",
         "mainNavigation": "Main navigation",
-        "userMenu": "User menu"
+        "userMenu": "User menu",
+        "manage": "Manage",
+        "admin": "Admin"
     },
     "users": {
         "create": "Create User",

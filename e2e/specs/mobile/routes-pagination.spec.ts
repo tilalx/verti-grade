@@ -10,7 +10,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
     // realtime reloads then still return the same (unaffected) count.
     const prefix = `e2e-pg-${Date.now()}`
 
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
     for (let i = 0; i < 12; i++) {
         await page.request.post('/api/collections/routes/records', {

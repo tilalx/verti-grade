@@ -8,7 +8,7 @@ import { gotoSettled } from '../../support/nav'
  */
 
 async function openScopedInventory(page: Page) {
-    await gotoSettled(page, '/admin/inventory')
+    await gotoSettled(page, '/manage/inventory')
     await page.evaluate(() => {
         localStorage.setItem('inventory-instructions-seen', '1')
         localStorage.setItem(

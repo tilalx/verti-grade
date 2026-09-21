@@ -2,7 +2,7 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
 test('renders analytics stats and charts', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/analytics')
+    await gotoSettled(page, '/manage/analytics')
 
     const firstStat = page.locator('[data-testid^="analytics-stat-"]').first()
     await expect(firstStat).toBeVisible()
@@ -21,7 +21,7 @@ test('renders analytics stats and charts', async ({ adminPage: page }) => {
 })
 
 test('refresh button reloads analytics data', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/analytics')
+    await gotoSettled(page, '/manage/analytics')
     await page.getByTestId('analytics-refresh').click()
     await expect(page.getByTestId('analytics-refresh')).toBeEnabled()
 })
@@ -32,8 +32,8 @@ test('shows an error notification when the analytics fetch fails', async ({
     // The initial fetch is served in-process by Nitro during SSR and never
     // crosses the network, so page.route() can't reach it. Refresh re-runs the
     // same loader from the browser, which is the path a mock can intercept.
-    await gotoSettled(page, '/admin/analytics')
-    await page.route('**/api/admin/analytics*', (route) =>
+    await gotoSettled(page, '/manage/analytics')
+    await page.route('**/api/manage/analytics*', (route) =>
         route.fulfill({ status: 500, body: 'boom' }),
     )
     await page.getByTestId('analytics-refresh').click()

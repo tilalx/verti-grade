@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('combines filter, sort, and pagination on the admin routes table', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     // Filter down to the seeded set so paging/sorting has a known scope.
     await page.getByTestId('filter-search').locator('input').fill('e2e-route-')

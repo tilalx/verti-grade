@@ -46,7 +46,7 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     })
     const page = await context.newPage()
 
-    await gotoSettled(page, '/admin/inventory')
+    await gotoSettled(page, '/manage/inventory')
     // The instructions dialog is shown once per device; skip it so the first
     // tap lands on the button rather than dismissing the dialog.
     await page.evaluate(() => {

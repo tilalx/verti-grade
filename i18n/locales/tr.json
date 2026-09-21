@@ -379,7 +379,9 @@
         "openMenu": "Menüyü aç",
         "skipToContent": "İçeriğe geç",
         "mainNavigation": "Ana gezinme",
-        "userMenu": "Kullanıcı menüsü"
+        "userMenu": "Kullanıcı menüsü",
+        "manage": "Yönetim",
+        "admin": "Yönetici"
     },
     "permissions": {
         "title": "Rol Yetkileri",

@@ -37,10 +37,9 @@
                      the viewport is unknown server-side, so a JS breakpoint
                      can't render here without a hydration mismatch.
 
-                     lg, not md: the full link row plus the logo and the user
-                     menu needs ~1040px, so between 960 and 1280 it used to
-                     overflow -- the user menu got pushed off the right edge
-                     while the viewport was still too wide for the drawer. -->
+                     Grouped, not flat: the row is four items wide whatever
+                     gets added under Manage or Admin, so it cannot grow back
+                     into the logo and user menu the way the flat list did. -->
                 <nav
                     v-if="isLoggedIn"
                     class="nav-links d-none d-lg-flex"
@@ -48,11 +47,13 @@
                     :aria-label="$t('nav.mainNavigation')"
                 >
                     <LayoutNavLink
-                        v-for="link in desktopLinks"
-                        :key="link.to"
-                        :to="link.to"
-                        :icon="link.icon"
-                        :label="$t(link.label)"
+                        v-for="item in visibleNav"
+                        :key="item.key"
+                        :to="item.to"
+                        :icon="item.icon"
+                        :label="item.label"
+                        :group-key="item.children ? item.key : ''"
+                        :children="item.children"
                     />
                 </nav>
 
@@ -100,18 +101,25 @@
             :aria-label="$t('nav.mainNavigation')"
         >
             <v-list nav density="compact" class="drawer-list">
-                <v-list-item
-                    v-for="link in visibleNavLinks"
-                    :key="link.to"
-                    :to="link.to"
-                    :prepend-icon="link.icon"
-                    :title="$t(link.label)"
-                    rounded="lg"
-                    class="drawer-item"
-                    active-class="drawer-item--active"
-                    :data-testid="`nav-drawer-link-${link.to.replace(/^\//, '').replaceAll('/', '-') || 'home'}`"
-                    @click="drawer = false"
-                />
+                <template v-for="item in visibleNav" :key="item.key">
+                    <!-- Groups keep their heading here instead of collapsing:
+                         a drawer has the vertical room a link row does not. -->
+                    <v-list-subheader v-if="item.children" class="drawer-group">
+                        {{ $t(item.label) }}
+                    </v-list-subheader>
+                    <v-list-item
+                        v-for="link in item.children ?? [item]"
+                        :key="link.to"
+                        :to="link.to"
+                        :prepend-icon="link.icon"
+                        :title="$t(link.label)"
+                        rounded="lg"
+                        class="drawer-item"
+                        active-class="drawer-item--active"
+                        :data-testid="`nav-drawer-link-${navTestId(link.to)}`"
+                        @click="drawer = false"
+                    />
+                </template>
             </v-list>
 
             <template #append>
@@ -150,71 +158,90 @@ const { loggedIn, settings } = toRefs(props)
 
 const { can } = usePermissions()
 
-const navLinks = [
+// Audience-shaped, mirroring the URL prefixes: a flat top level for the
+// public page and the daily route work, then one group per permission
+// neighbourhood. A new page joins a group instead of widening the row.
+const navItems = [
     {
+        key: 'home',
         to: '/',
         icon: 'mdi-home-outline',
         label: 'routes.home',
-        permission: null,
     },
     {
-        to: '/admin/routes',
+        key: 'routes',
+        to: '/manage/routes',
         icon: 'mdi-map-marker-path',
         label: 'routes.dashboard',
         permission: 'manage_routes',
     },
     {
-        to: '/admin/analytics',
-        icon: 'mdi-chart-line',
-        label: 'routes.analytics',
-        permission: 'view_analytics',
+        key: 'manage',
+        icon: 'mdi-tune-variant',
+        label: 'nav.manage',
+        children: [
+            {
+                to: '/manage/comments',
+                icon: 'mdi-comment-outline',
+                label: 'routes.comments',
+                permission: 'manage_comments',
+            },
+            {
+                to: '/manage/reports',
+                icon: 'mdi-flag-outline',
+                label: 'routes.reports',
+                permission: 'manage_reports',
+            },
+            {
+                to: '/manage/analytics',
+                icon: 'mdi-chart-line',
+                label: 'routes.analytics',
+                permission: 'view_analytics',
+            },
+            {
+                to: '/manage/inventory',
+                icon: 'mdi-package-variant-closed',
+                label: 'routes.inventory',
+                permission: 'run_inventory',
+            },
+        ],
     },
     {
-        to: '/admin/comments',
-        icon: 'mdi-comment-outline',
-        label: 'routes.comments',
-        permission: 'manage_comments',
-    },
-    {
-        to: '/admin/reports',
-        icon: 'mdi-flag-outline',
-        label: 'routes.reports',
-        permission: 'manage_reports',
-    },
-    {
-        // No permission key: everyone sees their own activity here, and a
-        // view_audit_log holder sees everyone's. The collection's list rule
-        // decides which, so the link does not need to.
-        to: '/admin/activity',
-        icon: 'mdi-clipboard-text-clock-outline',
-        label: 'routes.activity',
-    },
-    {
-        to: '/admin/users',
-        icon: 'mdi-account-group-outline',
-        label: 'routes.users',
-        permission: 'manage_users',
-    },
-    {
-        to: '/admin/inventory',
-        icon: 'mdi-package-variant-closed',
-        label: 'routes.inventory',
-        permission: 'run_inventory',
-        mobileOnly: true,
-    },
-    {
-        to: '/admin/settings',
-        icon: 'mdi-cog-outline',
-        label: 'routes.settings',
-        permission: 'manage_settings',
+        key: 'admin',
+        icon: 'mdi-shield-account-outline',
+        label: 'nav.admin',
+        children: [
+            {
+                to: '/admin/users',
+                icon: 'mdi-account-group-outline',
+                label: 'routes.users',
+                permission: 'manage_users',
+            },
+            {
+                to: '/admin/settings',
+                icon: 'mdi-cog-outline',
+                label: 'routes.settings',
+                permission: 'manage_settings',
+            },
+        ],
     },
 ]
 
-const visibleNavLinks = computed(() =>
-    navLinks.filter((l) => !l.permission || can(l.permission)),
-)
-const desktopLinks = computed(() =>
-    visibleNavLinks.value.filter((l) => !l.mobileOnly),
+// Your own activity is not in here on purpose: it needs no permission, so it
+// belongs with the account in the user menu, not in a management group.
+const allowed = (entry) => !entry.permission || can(entry.permission)
+
+const visibleNav = computed(() =>
+    navItems
+        .map((item) =>
+            item.children
+                ? { ...item, children: item.children.filter(allowed) }
+                : item,
+        )
+        // An empty group would render as a dead button / bare subheader.
+        .filter((item) =>
+            item.children ? item.children.length > 0 : allowed(item),
+        ),
 )
 
 watch(lgAndUp, (isDesktop) => {

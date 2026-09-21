@@ -379,7 +379,9 @@
         "openMenu": "Відкрити меню",
         "skipToContent": "Перейти до вмісту",
         "mainNavigation": "Основна навігація",
-        "userMenu": "Меню користувача"
+        "userMenu": "Меню користувача",
+        "manage": "Керування",
+        "admin": "Адміністрування"
     },
     "permissions": {
         "title": "Права ролей",

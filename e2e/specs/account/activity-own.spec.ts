@@ -38,26 +38,30 @@ test('a user sees their own entries and nobody else’s', async ({
 test('the activity page is reachable without any admin permission', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/admin/activity', /\/admin\/activity/)
+    await gotoSettled(page, '/account/activity', /\/account\/activity/)
 
     await expect(page.getByTestId('audit-retention-note')).toBeVisible()
     await expect(page.getByTestId('audit-filter-action')).toBeVisible()
 })
 
-test('the activity link is in the navigation for a plain user', async ({
+test('a plain user reaches their activity from the user menu', async ({
     userPage: page,
 }) => {
     await gotoSettled(page, '/', /\//)
-    expect(
-        await page.locator('a[href="/admin/activity"]').count(),
-    ).toBeGreaterThan(0)
+
+    // Not a nav link: the page needs no permission, so it sits with the
+    // account rather than in a management group.
+    await page.getByTestId('user-menu-activator').click()
+    const entry = page.getByTestId('user-menu-activity')
+    await expect(entry).toBeVisible()
+    await expect(entry).toHaveAttribute('href', '/account/activity')
 })
 
 test('an admin sees entries from other actors too', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/activity', /\/admin\/activity/)
+    await gotoSettled(page, '/account/activity', /\/account\/activity/)
 
     const headers = await authHeader(page)
     const res = await page.request.post('/api/collections/routes/records', {

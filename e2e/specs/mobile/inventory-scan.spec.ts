@@ -46,7 +46,7 @@ async function seedSession(page: Page, location: string, ids: string[]) {
 test('archives only the checked routes at the scanned location', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/inventory')
+    await gotoSettled(page, '/manage/inventory')
 
     const hanau = await activeRoutesAt(page, 'Hanau')
     const gelnhausen = await activeRoutesAt(page, 'Gelnhausen')
@@ -125,7 +125,7 @@ test('archives only the checked routes at the scanned location', async ({
 test('requires a location before scanning can start', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/inventory')
+    await gotoSettled(page, '/manage/inventory')
     await page.evaluate(() => {
         localStorage.removeItem('inventory-scanned-route-ids')
         localStorage.setItem('inventory-instructions-seen', '1')
@@ -140,7 +140,7 @@ test('requires a location before scanning can start', async ({
 test('restores a legacy session and asks which location it belongs to', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/inventory')
+    await gotoSettled(page, '/manage/inventory')
 
     const hanau = await activeRoutesAt(page, 'Hanau')
     // The pre-scoping storage shape: a bare array of ids.

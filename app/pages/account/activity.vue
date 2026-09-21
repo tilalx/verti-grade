@@ -234,7 +234,6 @@ useHead({
 // own entries (GDPR Art. 15). The collection's list rule is what scopes the
 // result, so the route guard does not need to.
 definePageMeta({
-    authRequired: true,
     middleware: ['auth'],
 })
 

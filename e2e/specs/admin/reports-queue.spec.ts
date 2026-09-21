@@ -14,14 +14,14 @@ test('a report appears in the queue with its notice details', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/reports', /\/admin\/reports/)
+    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
     const commentId = await createComment(page, `${testPrefix}-reported`)
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-explanation`,
     })
 
-    await gotoSettled(page, '/admin/reports')
+    await gotoSettled(page, '/manage/reports')
 
     const card = page.getByTestId(`report-card-${reportId}`)
     await expect(card).toBeVisible()
@@ -38,14 +38,14 @@ test('removing content deletes the comment and records the decision', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/reports', /\/admin\/reports/)
+    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
     const commentId = await createComment(page, `${testPrefix}-remove-me`)
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-remove`,
     })
 
-    await gotoSettled(page, '/admin/reports')
+    await gotoSettled(page, '/manage/reports')
 
     const card = page.getByTestId(`report-card-${reportId}`)
     await card.getByTestId('report-card-remove').click()
@@ -76,14 +76,14 @@ test('keeping content records a rejection and leaves the comment in place', asyn
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/reports', /\/admin\/reports/)
+    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
     const commentId = await createComment(page, `${testPrefix}-keep-me`)
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-keep`,
     })
 
-    await gotoSettled(page, '/admin/reports')
+    await gotoSettled(page, '/manage/reports')
 
     const card = page.getByTestId(`report-card-${reportId}`)
     await card.getByTestId('report-card-keep').click()
@@ -115,7 +115,7 @@ test('keeping content records a rejection and leaves the comment in place', asyn
 test('the queue warns when email is not configured', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/reports', /\/admin\/reports/)
+    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
 
     const warning = page.getByTestId('reports-mail-warning')
     await expect(warning).toBeVisible()
@@ -127,8 +127,8 @@ test('the queue warns when email is not configured', async ({
 test('a user without manage_reports cannot reach the queue or its records', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/admin/reports')
-    await page.waitForURL((url) => !url.pathname.endsWith('/admin/reports'))
+    await gotoSettled(page, '/manage/reports')
+    await page.waitForURL((url) => !url.pathname.endsWith('/manage/reports'))
 
     // The route guard is a UI affordance; the collection rule is the real gate.
     const headers = await authHeader(page)

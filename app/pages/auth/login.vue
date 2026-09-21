@@ -241,7 +241,7 @@ useHead({
 if (pb.authStore.isValid) {
     try {
         await pb.collection('users').authRefresh()
-        await navigateTo('/admin/routes', { replace: true })
+        await navigateTo('/manage/routes', { replace: true })
     } catch {
         pb.authStore.clear()
     }
@@ -389,7 +389,7 @@ async function submitLogin() {
                 autoRefreshThreshold: 0,
             })
         notify(t('notifications.success.login'))
-        await navigateTo('/admin/routes', { replace: true })
+        await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))
     } finally {
@@ -417,7 +417,7 @@ async function loginWithOAuth(provider) {
     try {
         await pb.collection('users').authWithOAuth2({ provider })
         notify(t('notifications.success.login'))
-        await navigateTo('/admin/routes', { replace: true })
+        await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))
     } finally {

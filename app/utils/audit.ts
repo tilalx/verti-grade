@@ -158,8 +158,8 @@ export function auditTargetUrl(
     if (!collectionName || !recordId) return null
     if (collectionName === 'routes') return `/route?id=${recordId}`
     if (collectionName === 'users') return '/admin/users'
-    if (collectionName === 'ratings') return '/admin/comments'
-    if (collectionName === 'reports') return '/admin/reports'
+    if (collectionName === 'ratings') return '/manage/comments'
+    if (collectionName === 'reports') return '/manage/reports'
     return null
 }
 

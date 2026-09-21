@@ -21,6 +21,22 @@ export default defineNuxtConfig({
     }
   },
   ssr: true,
+  // Pages moved from the /admin/* catch-all to audience prefixes. Kept so
+  // staff bookmarks and any link already sent out still land.
+  routeRules: {
+    '/admin/routes': { redirect: { to: '/manage/routes', statusCode: 301 } },
+    '/admin/inventory': {
+      redirect: { to: '/manage/inventory', statusCode: 301 },
+    },
+    '/admin/comments': { redirect: { to: '/manage/comments', statusCode: 301 } },
+    '/admin/reports': { redirect: { to: '/manage/reports', statusCode: 301 } },
+    '/admin/analytics': {
+      redirect: { to: '/manage/analytics', statusCode: 301 },
+    },
+    '/admin/activity': {
+      redirect: { to: '/account/activity', statusCode: 301 },
+    },
+  },
   app: {
     // Paints the browser canvas per OS preference before any CSS loads —
     // without it a dark-mode first paint is white.

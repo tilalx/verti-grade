@@ -19,7 +19,7 @@ test('a create, an update and a delete each leave an entry', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
     const commentId = await createComment(page, `${testPrefix}-audited`)
     const created = await waitForAuditRow(
@@ -51,7 +51,7 @@ test('an update records the changed field names and none of the values', async (
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
     const commentId = await createComment(page, `${testPrefix}-before`)
     const secret = `${testPrefix}-SECRET-VALUE`
@@ -81,7 +81,7 @@ test('a failed sign-in is recorded without the attempted password', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
     const identity = `ghost-${testPrefix}@example.test`
     const badPassword = `wrong-${testPrefix}`
@@ -103,7 +103,7 @@ test('nobody can forge or erase an entry through the API', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
     const headers = await authHeader(page)
 
     const forged = await page.request.post(
@@ -131,7 +131,7 @@ test('a bulk archive leaves one entry per route', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
     const headers = await authHeader(page)
 
     const ids: string[] = []
@@ -183,7 +183,7 @@ test('a bulk archive leaves one entry per route', async ({
 test('an anonymous caller cannot read the audit log', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes', /\/admin\/routes/)
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
     // Regression for the list rule: without its `@request.auth.id != ""`
     // guard, `actor = @request.auth.id` matches every anonymous entry and the

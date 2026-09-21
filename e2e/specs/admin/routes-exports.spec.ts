@@ -3,7 +3,7 @@ import { gotoSettled } from '../../support/nav'
 
 test.describe('exports', () => {
     test('exports selected routes as PDF', async ({ adminPage: page }) => {
-        await gotoSettled(page, '/admin/routes')
+        await gotoSettled(page, '/manage/routes')
         await page.getByTestId('routes-select-all').click()
         const downloadPromise = page.waitForEvent('download')
         await page.getByTestId('routes-export-pdf').click()
@@ -16,7 +16,7 @@ test.describe('exports', () => {
     })
 
     test('exports selected routes as XLSX', async ({ adminPage: page }) => {
-        await gotoSettled(page, '/admin/routes')
+        await gotoSettled(page, '/manage/routes')
         await page.getByTestId('routes-select-all').click()
         await page.getByTestId('routes-export-xlsx').click()
         const downloadPromise = page.waitForEvent('download')
@@ -34,7 +34,7 @@ test.describe('exports', () => {
     test('exports selected routes as JSON with real route content', async ({
         adminPage: page,
     }) => {
-        await gotoSettled(page, '/admin/routes')
+        await gotoSettled(page, '/manage/routes')
         await page.getByTestId('routes-select-all').click()
         const downloadPromise = page.waitForEvent('download')
         await page.getByTestId('routes-export-json').click()
@@ -63,7 +63,7 @@ test.describe('exports', () => {
     test('exports only the selected columns, with QR images', async ({
         adminPage: page,
     }) => {
-        await gotoSettled(page, '/admin/routes')
+        await gotoSettled(page, '/manage/routes')
         await page.getByTestId('routes-select-all').click()
         await page.getByTestId('routes-export-xlsx').click()
 

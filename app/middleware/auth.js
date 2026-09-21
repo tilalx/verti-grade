@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Pages that opt out of auth (login, password reset)
     if (to.meta.auth === false) {
         if (isValidSession) {
-            return navigateTo('/admin/routes')
+            return navigateTo('/manage/routes')
         }
         return
     }

@@ -4,11 +4,11 @@ import { gotoSettled } from '../../support/nav'
 test('opens the mobile nav drawer and navigates', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('nav-hamburger').click()
     await expect(page.getByTestId('nav-drawer')).toBeVisible()
-    await page.getByTestId('nav-drawer-link-admin-comments').click()
-    await page.waitForURL('**/admin/comments')
+    await page.getByTestId('nav-drawer-link-manage-comments').click()
+    await page.waitForURL('**/manage/comments')
 })
 
 // Regression: scoped `.nav-links { display: flex }` is unlayered, so it beat
@@ -19,7 +19,7 @@ test('opens the mobile nav drawer and navigates', async ({
 test('the desktop nav is hidden on mobile and the hamburger is reachable', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     await expect(page.getByTestId('nav-desktop-links')).toBeHidden()
 
@@ -37,7 +37,7 @@ test('the desktop nav is hidden on mobile and the hamburger is reachable', async
 test('the mobile filter button is big enough to show its icon', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/routes')
+    await gotoSettled(page, '/manage/routes')
 
     const filterButton = page.getByTestId('filter-open-sheet')
     await expect(filterButton).toBeVisible()

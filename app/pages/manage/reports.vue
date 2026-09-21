@@ -220,7 +220,6 @@ useHead({
 })
 
 definePageMeta({
-    authRequired: true,
     middleware: ['auth'],
     requiredPermission: 'manage_reports',
 })
