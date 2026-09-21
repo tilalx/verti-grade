@@ -2,6 +2,7 @@
     <LayoutDialogShell
         v-model="dialogOpen"
         max-width="560"
+        sheet-on-mobile
         :title="isEditMode ? $t('actions.edit') : $t('climbing.create')"
         :persistent="hasChanges"
         data-testid="route-form-dialog"

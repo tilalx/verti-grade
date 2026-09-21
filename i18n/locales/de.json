@@ -180,7 +180,12 @@
         "created_at": "Erstellt am",
         "sort_by": "Sortieren nach",
         "sort_asc": "Aufsteigend",
-        "sort_desc": "Absteigend"
+        "sort_desc": "Absteigend",
+        "previous_page": "Vorherige Seite",
+        "next_page": "Nächste Seite",
+        "page_of": "Seite {page} von {total}",
+        "rows_per_page": "Zeilen pro Seite",
+        "pagination": "Seitennavigation"
     },
     "actions": {
         "search": "Suchen",
@@ -204,7 +209,6 @@
     },
     "inventory": {
         "title": "Routeninventur",
-        "mobileOnly": "Dieses Werkzeug ist nur auf mobilen Geräten verfügbar. Bitte verwende ein Smartphone oder Tablet.",
         "start": "Scan starten",
         "stop": "Scan stoppen",
         "finish": "Inventur abschließen",

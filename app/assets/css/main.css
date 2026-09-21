@@ -167,3 +167,35 @@
     padding: 6px 10px 8px;
     min-height: unset;
 }
+
+/* Inventory checklist: shared by the page's manual-add dialog and the
+   InventoryRouteList component, which cannot see the page's scoped styles. */
+.scope-list {
+    /* Viewport-relative so tall screens show more rows instead of padding. */
+    max-height: 46vh;
+    overflow-y: auto;
+}
+
+/* One line per route: the list is the page, so rows stay tight. */
+.scope-list .v-list-item {
+    min-height: 40px;
+}
+
+/* Anchor point doubles as the walking order, so it leads each row. */
+.anchor-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    margin-right: 12px;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+}
+
+/* Matches the inventory page's desktop breakpoint (Vuetify 4 lg). */
+@media (min-width: 1145px) {
+    .scope-list {
+        max-height: calc(100vh - 320px);
+    }
+}
