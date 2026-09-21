@@ -1,6 +1,14 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
+// Shown once per device and it swallows the first click, so every inventory
+// spec marks it seen — before the page's own script runs, not after.
+test.beforeEach(async ({ adminPage: page }) => {
+    await page.addInitScript(() =>
+        localStorage.setItem('inventory-instructions-seen', '1'),
+    )
+})
+
 test('shows controls beside both checklists, without tabs', async ({
     adminPage: page,
 }) => {

@@ -26,7 +26,7 @@ test('docks to the bottom edge on a phone', async ({ page }) => {
     await openReview(page)
 
     const gap = await page
-        .locator('.v-overlay__content')
+        .getByTestId('review-form-dialog')
         .evaluate((el) => innerHeight - el.getBoundingClientRect().bottom)
     expect(gap).toBeLessThanOrEqual(1)
 })
@@ -35,7 +35,9 @@ test('centres as a dialog above phone width', async ({ page }) => {
     await page.setViewportSize({ width: 700, height: 850 })
     await openReview(page)
 
-    const box = (await page.locator('.v-overlay__content').boundingBox())!
+    const box = (await page
+        .getByTestId('review-form-dialog')
+        .boundingBox())!
     expect(box.width).toBeLessThan(700)
     const offCentre = Math.abs(box.x + box.width / 2 - 700 / 2)
     expect(offCentre).toBeLessThanOrEqual(2)
