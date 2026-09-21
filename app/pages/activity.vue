@@ -67,78 +67,12 @@
                 :hint="t('audit.emptyHint')"
             />
 
-            <v-card v-else-if="entries.length" variant="outlined">
-                <v-list density="comfortable" class="py-0">
-                    <template v-for="(entry, i) in entries" :key="entry.id">
-                        <v-divider v-if="i > 0" />
-                        <v-list-item
-                            class="py-3"
-                            :data-testid="`audit-row-${entry.id}`"
-                        >
-                            <template #prepend>
-                                <v-chip
-                                    :color="actionColor(entry.action)"
-                                    size="small"
-                                    variant="tonal"
-                                    class="mr-3 audit-action-chip"
-                                    data-testid="audit-row-action"
-                                >
-                                    {{ t(`audit.action.${entry.action}`) }}
-                                </v-chip>
-                            </template>
-
-                            <v-list-item-title
-                                class="text-body-medium"
-                                data-testid="audit-row-actor"
-                            >
-                                {{ actorName(entry) }}
-                            </v-list-item-title>
-
-                            <v-list-item-subtitle
-                                class="d-flex flex-wrap align-center ga-1 mt-1"
-                            >
-                                <span v-if="entry.collection_name">
-                                    {{ collectionName(entry.collection_name) }}
-                                </span>
-                                <NuxtLink
-                                    v-if="targetUrl(entry)"
-                                    :to="targetUrl(entry) ?? undefined"
-                                    class="audit-target"
-                                    data-testid="audit-row-target"
-                                >
-                                    {{ entry.record_id }}
-                                </NuxtLink>
-                                <code v-else-if="entry.record_id">{{
-                                    entry.record_id
-                                }}</code>
-                                <v-chip
-                                    v-for="field in entry.changed_fields ?? []"
-                                    :key="field"
-                                    size="x-small"
-                                    variant="outlined"
-                                    data-testid="audit-row-field"
-                                >
-                                    {{ field }}
-                                </v-chip>
-                            </v-list-item-subtitle>
-
-                            <template #append>
-                                <div class="text-right">
-                                    <div class="text-caption">
-                                        {{ formatTime(entry.created) }}
-                                    </div>
-                                    <div
-                                        v-if="entry.ip"
-                                        class="text-caption text-medium-emphasis"
-                                    >
-                                        {{ entry.ip }}
-                                    </div>
-                                </div>
-                            </template>
-                        </v-list-item>
-                    </template>
-                </v-list>
-            </v-card>
+            <AuditCard
+                v-for="entry in entries"
+                :key="entry.id"
+                :entry="entry"
+                class="mb-3"
+            />
 
             <div v-if="hasMore" class="text-center mt-4">
                 <v-btn
@@ -169,14 +103,11 @@ import {
     AUDIT_ACTIONS,
     AUDIT_PERIODS,
     AUDITED_COLLECTIONS,
-    actionColor,
-    auditTargetUrl,
     buildAuditFilter,
-    isSuperuserEntry,
     type AuditPeriod,
 } from '~/utils/audit'
 
-const { t, te } = useI18n()
+const { t } = useI18n()
 const pb = usePocketbase()
 const { can } = usePermissions()
 
@@ -226,27 +157,6 @@ const periodItems = computed(() =>
     })),
 )
 
-function collectionName(name: string) {
-    return te(`audit.collection.${name}`) ? t(`audit.collection.${name}`) : name
-}
-
-function actorName(entry: AuditLogRecord) {
-    if (isSuperuserEntry(entry)) return t('audit.superuser')
-    return entry.actor_label || t('audit.anonymous')
-}
-
-// formatDisplayDate drops the time, and for an audit entry the time is half
-// the information.
-function formatTime(value?: string | null) {
-    if (!value) return ''
-    const parsed = new Date(value)
-    return Number.isNaN(parsed.getTime()) ? '' : parsed.toLocaleString()
-}
-
-function targetUrl(entry: AuditLogRecord) {
-    return auditTargetUrl(entry.collection_name, entry.record_id)
-}
-
 async function fetchList(target = 1) {
     const result = (await pb
         .collection('audit_logs')
@@ -282,6 +192,37 @@ loading.value = false
 // than fetching the singleton a second time.
 const { data: settings } = useNuxtData('settings')
 const retentionDays = computed(() => settings.value?.audit_retention_days ?? 90)
+
+// The log is append-only, so realtime is just a prepend -- but only when the
+// new entry still matches the active filters, and only on the first page, or
+// a row would appear above a window the user has scrolled past.
+const { subscribe } = usePbSubscription()
+
+onMounted(async () => {
+    await subscribe('audit_logs', (e) => {
+        if (e.action !== 'create' || !e.record) return
+        if (page.value !== 1) return
+        if (!matchesFilters(e.record)) return
+        if (entries.value.some((entry) => entry.id === e.record.id)) return
+        entries.value = [e.record as AuditLogRecord, ...entries.value]
+        totalItems.value += 1
+    })
+})
+
+function matchesFilters(record: AuditLogRecord) {
+    if (actionFilter.value && record.action !== actionFilter.value) return false
+    if (
+        collectionFilter.value &&
+        record.collection_name !== collectionFilter.value
+    ) {
+        return false
+    }
+    const term = search.value.trim().toLowerCase()
+    if (!term) return true
+    return [record.actor_label, record.record_id, record.collection_name].some(
+        (value) => (value ?? '').toLowerCase().includes(term),
+    )
+}
 
 useHead({
     title: t('page.title.activity'),

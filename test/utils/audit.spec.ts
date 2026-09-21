@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
     AUDIT_ACTIONS,
     actionColor,
+    actionIcon,
     auditTargetUrl,
     buildAuditFilter,
     isSuperuserEntry,
@@ -99,6 +100,14 @@ describe('actionColor', () => {
     it('returns a colour for every action in the list', () => {
         for (const action of AUDIT_ACTIONS) {
             expect(actionColor(action)).toBeTruthy()
+        }
+    })
+})
+
+describe('actionIcon', () => {
+    it('returns an icon for every action in the list', () => {
+        for (const action of AUDIT_ACTIONS) {
+            expect(actionIcon(action)).toMatch(/^mdi-/)
         }
     })
 })

@@ -39,6 +39,18 @@ const PERIOD_HOURS: Record<Exclude<AuditPeriod, 'all'>, number> = {
     '30d': 24 * 30,
 }
 
+export function actionIcon(action: AuditAction | string): string {
+    if (action === 'create') return 'mdi-plus-circle-outline'
+    if (action === 'update') return 'mdi-pencil-outline'
+    if (action === 'delete') return 'mdi-trash-can-outline'
+    if (action === 'login') return 'mdi-login'
+    if (action === 'login_failed') return 'mdi-account-alert-outline'
+    if (action === 'password_reset' || action === 'password_reset_request') {
+        return 'mdi-lock-reset'
+    }
+    return 'mdi-email-sync-outline'
+}
+
 export function actionColor(action: AuditAction | string): string {
     if (action === 'create') return 'success'
     if (action === 'update') return 'info'
