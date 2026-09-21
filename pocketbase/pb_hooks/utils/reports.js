@@ -32,6 +32,20 @@ function reasonLabel(reason) {
     return REASON_LABELS[reason] || reason || 'Other'
 }
 
+/**
+ * True when a date field carries no value.
+ *
+ * PocketBase hands back a DateTime OBJECT for an unset date, and an object is
+ * truthy in JS -- so `if (record.get('notified_at'))` reads as "already
+ * notified" on a report nobody has ever notified. That is what silently
+ * suppressed every Art. 16(5) decision notice.
+ */
+function isBlankDate(value) {
+    if (!value) return true
+    if (typeof value.isZero === 'function') return value.isZero()
+    return String(value) === ''
+}
+
 function mailEnabled(app) {
     return !!app.settings().smtp.enabled
 }
@@ -54,27 +68,16 @@ function contactEmail(app) {
 
 // Every user whose role grants manage_reports, plus the configured public
 // contact address. Deduplicated, blanks dropped.
+//
+// The lookup itself lives in utils/notifications.js so the mail path and the
+// in-app queue cannot disagree about who the moderators are.
 function alertRecipients(app) {
+    const notifications = require(`${__hooks}/utils/notifications.js`)
     const addresses = []
 
-    try {
-        const users = app.findRecordsByFilter(
-            'users',
-            'role.permissions.name ?= "manage_reports"',
-            '',
-            200,
-            0,
-        )
-        for (const user of users) {
-            const address = user.get('email')
-            if (address) addresses.push(address)
-        }
-    } catch (err) {
-        app.logger().error(
-            'reports: failed to resolve manage_reports users',
-            'error',
-            String(err),
-        )
+    for (const user of notifications.usersByPermission(app, 'manage_reports')) {
+        const address = user.get('email')
+        if (address) addresses.push(address)
     }
 
     const contact = contactEmail(app)
@@ -132,6 +135,7 @@ function redressHtml(app) {
 }
 
 module.exports = {
+    isBlankDate,
     escapeHtml,
     reasonLabel,
     mailEnabled,

@@ -62,6 +62,9 @@
                 <!-- Right Side -->
                 <div class="nav-actions">
                     <template v-if="isLoggedIn">
+                        <!-- Outside the d-lg-flex wrapper: moderation work
+                             should reach a phone too. -->
+                        <NotificationsBell />
                         <div class="d-none d-lg-flex">
                             <UserIcon />
                         </div>

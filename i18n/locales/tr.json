@@ -67,7 +67,23 @@
                 "l2": "şifreni",
                 "accent": "sıfırla."
             }
-        }
+        },
+        "eyebrowVerifyEmail": "E-POSTA DOĞRULAMA",
+        "eyebrowEmailChange": "E-POSTA DEĞİŞİKLİĞİ",
+        "verifyEmail": "E-posta adresinizi doğrulayın",
+        "verifyEmailHint": "E-posta adresi doğrulanıyor…",
+        "emailChange": "Yeni e-posta adresinizi onaylayın",
+        "emailChangeHint": "Değişikliği onaylamak için şifrenizi girin.",
+        "passwordSet": "Şifre güncellendi",
+        "emailVerified": "E-posta doğrulandı",
+        "emailChanged": "E-posta güncellendi",
+        "linkInvalid": "Bağlantı artık geçerli değil",
+        "emailChangeConfirmHint": "Yeni adrese bir onay bağlantısı gönderilir. Bağlantıyı açana kadar mevcut adresiniz etkin kalır.",
+        "emailChangeSent": "Onay bağlantısı yeni adrese gönderildi. Bağlantıyı açana kadar mevcut adresiniz etkin kalır.",
+        "emailChangeFailed": "Onay bağlantısı gönderilemedi. E-posta adresiniz değişmedi.",
+        "deleteAccount": "Hesabı sil",
+        "deleteAccountHint": "Hesabınızı kalıcı olarak siler ve oturumunuzu kapatır. Oluşturduğunuz rotalar ve puanlar kalır.",
+        "deleteAccountConfirm": "Bu işlem hesabınızı kalıcı olarak siler ve oturumunuzu kapatır. Geri alınamaz."
     },
     "routes": {
         "home": "Ana Sayfa",
@@ -265,9 +281,12 @@
             "create": "Başarıyla oluşturuldu",
             "edit": "Başarıyla kaydedildi",
             "delete": "Başarıyla silindi",
-            "login": "Giriş başarılı. Rota yönetimine yönlendiriliyorsunuz...",
             "health": "Durum: İyi",
-            "userCreated": "Kullanıcı başarıyla oluşturuldu."
+            "userCreated": "Kullanıcı başarıyla oluşturuldu.",
+            "verifyEmail": "E-posta adresiniz doğrulandı. Şimdi giriş yapabilirsiniz.",
+            "emailChange": "E-posta adresiniz değiştirildi. Lütfen tekrar giriş yapın.",
+            "userInvited": "Kullanıcı oluşturuldu. Bir davet e-postası gönderildi.",
+            "passwordChanged": "Şifreniz belirlendi. Şimdi giriş yapabilirsiniz."
         },
         "error": {
             "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
@@ -280,7 +299,11 @@
             "email_not_verified": "E-posta adresiniz henüz doğrulanmamış.",
             "too_many_attempts": "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
             "unknown": "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.",
-            "generic": "Beklenmeyen bir hata oluştu."
+            "generic": "Beklenmeyen bir hata oluştu.",
+            "verifyEmail": "Bu doğrulama bağlantısı geçersiz veya süresi dolmuş.",
+            "emailChange": "Bu e-posta değiştirme bağlantısı geçersiz veya süresi dolmuş.",
+            "userInviteMail": "Kullanıcı oluşturuldu ancak davet e-postası gönderilemedi.",
+            "resetLinkInvalid": "Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş. Giriş sayfasından yenisini talep edin."
         },
         "deleteItem": "Bu öğeyi silmek istediğinize emin misiniz?",
         "deleteMoreItems": "Seçili öğeleri silmek istediğinize emin misiniz?",
@@ -306,6 +329,17 @@
             "installedCommit": "Yüklü commit: {0}",
             "empty": "Yeni commit bulunamadı.",
             "close": "Commit listesini kapat"
+        },
+        "center": {
+            "title": "Bildirimler",
+            "markAllRead": "Tümünü okundu işaretle",
+            "dismiss": "Kapat",
+            "empty": "Şu an yeni bir şey yok.",
+            "types": {
+                "report_filed": "Yeni içerik bildirimi: “{snippet}”",
+                "report_decided_removed": "Bir bildirim karara bağlandı — içerik kaldırıldı",
+                "report_decided_kept": "Bir bildirim karara bağlandı — içerik yayında kaldı"
+            }
         }
     },
     "filter": {
@@ -331,7 +365,9 @@
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Rota Sayımı - Verti-Grade",
             "reports": "İçerik Bildirimleri - Verti-Grade",
-            "activity": "Etkinlik Günlüğü"
+            "activity": "Etkinlik Günlüğü",
+            "verifyEmail": "E-posta Doğrulama - Verti-Grade",
+            "emailChange": "E-posta Değiştirme - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -427,7 +463,8 @@
         "recentlyJoined": "Bu hafta katıldı",
         "noUsers": "Kullanıcı bulunamadı",
         "noUsersHint": "Arama veya filtreleri düzenlemeyi deneyin",
-        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor"
+        "showing": "{total} kullanıcıdan {n} tanesi gösteriliyor",
+        "inviteMailNotConfigured": "E-posta yapılandırılmadığı için davet gönderilemez. Yeni kullanıcı giriş yapamayacak."
     },
     "settings": {
         "changed": "Değiştirildi",

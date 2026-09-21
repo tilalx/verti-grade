@@ -110,18 +110,23 @@ test('keeping content records a rejection and leaves the comment in place', asyn
     await deleteComment(page, commentId)
 })
 
-// The e2e stack ships no mail server, so this is the state a fresh install is
-// in — and the operator has to be told the Art. 16 notices aren't going out.
-test('the queue warns when email is not configured', async ({
+/**
+ * The stack now runs a real SMTP catcher (e2e/docker-compose.e2e.yml), so the
+ * warning must be ABSENT — and that is the assertion worth having.
+ *
+ * This test used to assert the warning was present, and passed only because
+ * the harness had no mail server at all: `useMailStatus` resolves during SSR,
+ * so a page.route() stub cannot reach it and the "configured: false" branch
+ * can only be produced by a stack without SMTP. Exercising the warning itself
+ * needs a second, mail-less stack; asserting its absence is what this one can
+ * honestly prove.
+ */
+test('the queue shows no mail warning once SMTP is configured', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
 
-    const warning = page.getByTestId('reports-mail-warning')
-    await expect(warning).toBeVisible()
-    await expect(
-        page.getByTestId('reports-mail-warning-link'),
-    ).toHaveAttribute('href', /\/admin\/settings/)
+    await expect(page.getByTestId('reports-mail-warning')).toBeHidden()
 })
 
 test('a user without manage_reports cannot reach the queue or its records', async ({

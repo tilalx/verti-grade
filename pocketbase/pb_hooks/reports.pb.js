@@ -42,6 +42,35 @@ onRecordCreateRequest((e) => {
 onRecordAfterCreateSuccess((e) => {
     const utils = require(`${__hooks}/utils/reports.js`)
 
+    // Before the mail block, which returns early when SMTP is off -- and with
+    // mail off this queue is the only thing that says a report came in.
+    try {
+        const notifications = require(`${__hooks}/utils/notifications.js`)
+        const snippet = String(e.record.get('content_snapshot') || '').slice(
+            0,
+            140,
+        )
+
+        notifications.push(e.app, {
+            users: notifications.usersByPermission(e.app, 'manage_reports'),
+            type: 'report_filed',
+            params: { snippet: snippet },
+            // The queue, not the reported comment: that is where the decide
+            // buttons are, and the card links on to the content itself.
+            url: '/manage/reports',
+        })
+    } catch (err) {
+        e.app
+            .logger()
+            .error(
+                'reports: failed to queue report_filed notification',
+                'report',
+                e.record.id,
+                'error',
+                String(err),
+            )
+    }
+
     try {
         if (!utils.mailEnabled(e.app)) {
             e.app
@@ -106,10 +135,71 @@ onRecordAfterCreateSuccess((e) => {
 onRecordAfterUpdateSuccess((e) => {
     const utils = require(`${__hooks}/utils/reports.js`)
 
+    // Queued before the mail block on purpose: that block returns early when
+    // SMTP is off, and a silent queue is exactly what this is here to prevent.
+    //
+    // Two guards, because neither alone is enough:
+    //
+    //  - status having just left "open" stops a later edit of an already
+    //    decided report from re-queueing.
+    //  - a blank notified_at stops the double-fire: the mail block below
+    //    re-saves the record to stamp notified_at, which re-enters this hook,
+    //    and original() on that second pass still reports the pre-decision
+    //    status. With mail off there is no re-save and no second pass, so this
+    //    guard costs nothing there.
+    try {
+        const notifications = require(`${__hooks}/utils/notifications.js`)
+        const status = String(e.record.get('status') || '')
+        const wasOpen =
+            String(e.record.original().get('status') || '') === 'open'
+        const freshDecision = utils.isBlankDate(e.record.get('notified_at'))
+
+        if (wasOpen && status && status !== 'open' && freshDecision) {
+            // RecordEvent carries no auth, but the moderation UI stamps
+            // decided_by (app/pages/manage/reports.vue), so the moderator who
+            // decided is skipped rather than told what they just did.
+            //
+            // A relation reads back as an array in some PocketBase paths even
+            // at maxSelect 1, and a bare String() on the wrong shape silently
+            // matches nobody -- which is how the decider ended up notified.
+            const decidedBy = e.record.get('decided_by')
+            const decider = Array.isArray(decidedBy)
+                ? String(decidedBy[0] || '')
+                : String(decidedBy || '')
+            const recipients = notifications
+                .usersByPermission(e.app, 'manage_reports')
+                .filter((user) => user.id !== decider)
+
+            notifications.push(e.app, {
+                users: recipients,
+                type:
+                    e.record.get('decision') === 'content_removed'
+                        ? 'report_decided_removed'
+                        : 'report_decided_kept',
+                params: {},
+                url: '/manage/reports',
+            })
+        }
+    } catch (err) {
+        e.app
+            .logger()
+            .error(
+                'reports: failed to queue report_decided notification',
+                'report',
+                e.record.id,
+                'error',
+                String(err),
+            )
+    }
+
     try {
         const status = e.record.get('status')
-        // notified_at guards the re-save below from looping.
-        if (status === 'open' || e.record.get('notified_at')) {
+        // notified_at guards the re-save below from looping -- via isBlankDate,
+        // because an unset date is a truthy object, not an empty string.
+        if (
+            status === 'open' ||
+            !utils.isBlankDate(e.record.get('notified_at'))
+        ) {
             e.next()
             return
         }

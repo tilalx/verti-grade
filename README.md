@@ -81,7 +81,26 @@ Regular user accounts must be created via the PocketBase admin panel:
 
 After that the user can log in at `https://localhost/auth/login`.
 
-### 4. Configure Application Settings
+### 4. Configure Email
+
+Without SMTP the app sends no mail at all — a user created in the UI never gets
+their invitation and cannot sign in, and the DSA Art. 16 notices are not
+delivered. Set these in `docker-compose.yml` (they are read at every boot, so
+no visit to the PocketBase panel is needed):
+
+| Variable | Purpose |
+|----------|---------|
+| `PB_SMTP_HOST` / `PB_SMTP_PORT` | Mail server. Setting the host enables SMTP. |
+| `PB_SMTP_USERNAME` / `PB_SMTP_PASSWORD` | Credentials, if the server needs them. |
+| `PB_SMTP_TLS` | `false` for STARTTLS; anything else enforces TLS. |
+| `PB_APP_URL` | Origin used for links in mail. |
+| `PB_APP_NAME` | Name used in subject lines and signatures. |
+| `PB_SENDER_ADDRESS` / `PB_SENDER_NAME` | From address and display name. |
+
+Leave `PB_SMTP_HOST` unset to keep whatever is configured in the PocketBase
+panel instead.
+
+### 5. Configure Application Settings
 
 Go to **Admin → Settings** in the Verti-Grade UI to configure:
 
@@ -89,7 +108,7 @@ Go to **Admin → Settings** in the Verti-Grade UI to configure:
 - Privacy policy / imprint URL
 - Sign image for route cards
 
-### 5. Start Adding Routes
+### 6. Start Adding Routes
 
 Once logged in as a regular user, use the dashboard to add and manage climbing routes.
 
