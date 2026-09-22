@@ -9376,10 +9376,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:^2.1.0":
-  version: 2.2.0
-  resolution: "pako@npm:2.2.0"
-  checksum: 10c0/e5d31de1940fdd13cc4014296b0026112483d0834bce4856ca29c8af8438d030c6416986a0f6df7d5372cae18d6dd6c57f48b24a49d6c207c0a4cc66af15c07d
+"pako@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "pako@npm:3.0.2"
+  checksum: 10c0/6de8283193fff07382134f1cdcd387b3bc43f2b4d1a04ed086f98183fe0b4fb7a282cd4b58397593794bba2c9d42fd008285344ba086c1f8fde49cd436587d3d
   languageName: node
   linkType: hard
 
@@ -12256,7 +12256,7 @@ __metadata:
     husky: "npm:^9.1.7"
     lint-staged: "npm:^17.5.1"
     nuxt: "npm:^4.5.2"
-    pako: "npm:^2.1.0"
+    pako: "npm:^3.0.2"
     pdfkit: "npm:0.20.2"
     pocketbase: "npm:^0.28.1"
     prettier: "npm:3.9.8"
