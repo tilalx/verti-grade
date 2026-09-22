@@ -120,13 +120,13 @@
                             >
                                 <v-icon start>
                                     {{
-                                        areAllSelected()
+                                        areAllSelected
                                             ? 'mdi-checkbox-marked-outline'
                                             : 'mdi-checkbox-blank-outline'
                                     }}
                                 </v-icon>
                                 {{
-                                    areAllSelected()
+                                    areAllSelected
                                         ? $t('actions.deselect_all')
                                         : $t('actions.select_all')
                                 }}
@@ -206,7 +206,7 @@
                     >
                         <template #item.selected="{ item }">
                             <v-checkbox
-                                :model-value="item.selected"
+                                :model-value="selectedRouteIds.has(item.id)"
                                 color="primary"
                                 hide-details
                                 density="compact"
@@ -306,7 +306,7 @@
                             <RouteCard
                                 :route="route"
                                 selectable
-                                :model-value="route.selected"
+                                :model-value="selectedRouteIds.has(route.id)"
                                 @update:model-value="
                                     updateRouteSelection(route, $event)
                                 "
@@ -497,7 +497,7 @@ const createAllRouteIdsCache = () => ({
     ids: [],
 })
 
-const allRouteIdsCache = ref(createAllRouteIdsCache())
+const allRouteIdsCache = shallowRef(createAllRouteIdsCache())
 
 const pageSizeOptions = [10, 25, 50, 100]
 
@@ -588,15 +588,9 @@ const pageItems = computed(() => {
     return items
 })
 
-const areAllSelected = () =>
-    totalItems.value > 0 && selectedCount.value >= totalItems.value
-
-const applySelectionToRoutes = () => {
-    routes.value = routes.value.map((route) => ({
-        ...route,
-        selected: selectedRouteIds.value.has(route.id),
-    }))
-}
+const areAllSelected = computed(
+    () => totalItems.value > 0 && selectedCount.value >= totalItems.value,
+)
 
 const updateRouteSelection = (route, isSelected) => {
     const next = new Set(selectedRouteIds.value)
@@ -606,11 +600,10 @@ const updateRouteSelection = (route, isSelected) => {
         next.delete(route.id)
     }
     selectedRouteIds.value = next
-    applySelectionToRoutes()
 }
 
 const selectAll = async () => {
-    if (areAllSelected()) {
+    if (areAllSelected.value) {
         clearSelection()
         return
     }
@@ -618,7 +611,6 @@ const selectAll = async () => {
     try {
         const ids = await loadAllRouteIds()
         selectedRouteIds.value = new Set(ids)
-        applySelectionToRoutes()
     } catch (error) {
         console.error('Failed to select all routes:', error)
         notifyError(t('routes.selectAllError'))
@@ -627,7 +619,6 @@ const selectAll = async () => {
 
 const clearSelection = () => {
     selectedRouteIds.value = new Set()
-    applySelectionToRoutes()
 }
 
 const removeSelectedIds = (ids) => {
@@ -638,7 +629,6 @@ const removeSelectedIds = (ids) => {
     const next = new Set(selectedRouteIds.value)
     ids.forEach((id) => next.delete(id))
     selectedRouteIds.value = next
-    applySelectionToRoutes()
 }
 
 const toPbSortRoutes = (sortByArr) =>
@@ -754,7 +744,6 @@ const loadRoutes = async (options = {}) => {
                 creator: normalizeCreators(route.creator),
                 score: hasRatings ? route.average_rating : null,
                 has_ratings: hasRatings,
-                selected: selectedRouteIds.value.has(route.id),
             }
         })
 

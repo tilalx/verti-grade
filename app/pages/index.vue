@@ -224,15 +224,13 @@ const tableOptions = reactive<TableOptions>({
 })
 
 const loading = ref(true)
-const routes = ref<RouteListItem[]>([])
+const routes = shallowRef<RouteListItem[]>([])
 const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 
-const headersDesktop: Array<{
-    title: string
-    key: string
-    sortable?: boolean
-}> = [
+const headersDesktop = computed<
+    Array<{ title: string; key: string; sortable?: boolean }>
+>(() => [
     { title: t('climbing.color'), key: 'color', sortable: false },
     { title: t('climbing.routename'), key: 'name' },
     { title: t('climbing.difficulty'), key: 'difficulty' },
@@ -242,7 +240,7 @@ const headersDesktop: Array<{
     { title: t('ratings.score'), key: 'score' },
     { title: t('table.created_at'), key: 'screw_date' },
     { title: t('table.actions'), key: 'actions', sortable: false },
-]
+])
 
 const pbFilter = computed(() => {
     const base = baseFilter.value
