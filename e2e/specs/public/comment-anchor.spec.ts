@@ -6,13 +6,6 @@ import {
     firstRouteId,
 } from '../../support/comments'
 
-/**
- * A report addresses a comment as `/route?id=<route>#comment-<rating>`
- * (app/utils/reports.ts). That link is emailed to moderators and rendered on
- * the moderation queue card, so the anchor has to actually resolve — it used
- * to match no element at all.
- */
-
 test('scrolls to and highlights the comment a report links to', async ({
     adminPage: page,
     testPrefix,
@@ -26,7 +19,6 @@ test('scrolls to and highlights the comment a report links to', async ({
     const card = page.locator(`#comment-${commentId}`)
     await expect(card).toBeVisible()
     await expect(card).toHaveClass(/comment-card--target/)
-    // scrollIntoView ran: the card sits inside the viewport, not below it.
     await expect(card).toBeInViewport()
 
     await deleteComment(page, commentId)

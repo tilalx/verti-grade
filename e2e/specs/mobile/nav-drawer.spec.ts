@@ -11,11 +11,6 @@ test('opens the mobile nav drawer and navigates', async ({
     await page.waitForURL('**/manage/comments')
 })
 
-// Regression: scoped `.nav-links { display: flex }` is unlayered, so it beat
-// Vuetify 4's layered `.d-none` and forced the desktop nav onto mobile, which
-// overflowed the bar and pushed the hamburger off-screen. Clicking the
-// hamburger still "worked" in Playwright, so only a visibility assertion
-// catches it.
 test('the desktop nav is hidden on mobile and the hamburger is reachable', async ({
     adminPage: page,
 }) => {
@@ -26,14 +21,11 @@ test('the desktop nav is hidden on mobile and the hamburger is reachable', async
     const hamburger = page.getByTestId('nav-hamburger')
     await expect(hamburger).toBeVisible()
 
-    // Inside the viewport, not pushed past its right edge.
     const box = (await hamburger.boundingBox())!
     const viewport = page.viewportSize()!
     expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
 })
 
-// Regression: density="compact" on a size="small" v-btn subtracts 12px in
-// Vuetify 4, shrinking the button until it clips its own icon.
 test('the mobile filter button is big enough to show its icon', async ({
     adminPage: page,
 }) => {

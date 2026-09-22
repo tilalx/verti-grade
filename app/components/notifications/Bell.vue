@@ -18,9 +18,6 @@
                 :aria-label="$t('notifications.center.title')"
                 data-testid="notification-bell"
             >
-                <!-- The testid sits on the badge CONTENT, not on v-badge:
-                     v-badge's own wrapper renders regardless of model-value,
-                     so a testid there reads as "badge visible" at zero. -->
                 <v-badge
                     :model-value="unreadCount > 0"
                     color="error"
@@ -132,11 +129,6 @@ const { items, unreadCount, refresh, markRead, markAllRead, dismiss } =
 const open = ref(false)
 const isLoggedIn = ref(false)
 
-/**
- * The wording is never stored -- only `type` and its interpolation `params` --
- * so a notification reads in the recipient's locale. An unknown type falls
- * back to its own key rather than rendering blank.
- */
 function label(item) {
     return t(`notifications.center.types.${item.type}`, item.params ?? {})
 }
@@ -154,15 +146,11 @@ onMounted(async () => {
     if (!isLoggedIn.value) return
 
     await refresh()
-    // Own rows only -- the collection rules scope the feed to this user.
     await subscribe('notifications', () => void refresh())
 })
 </script>
 
 <style scoped>
-/* Matches .nav-hamburger, the other icon-only action in the bar: same muted
-   weight and scale, so the bell doesn't read as heavier than the nav links
-   beside it. Full strength once there is something worth looking at. */
 .nav-bell {
     opacity: 0.8;
 }
@@ -176,8 +164,6 @@ onMounted(async () => {
     background: rgba(var(--v-theme-primary), 0.06);
 }
 
-/* v-list-item-title clamps to a single line, which truncated every message
-   mid-sentence. Wrap to three lines instead, then ellipsise. */
 .notification-item__title {
     white-space: normal;
     overflow-wrap: anywhere;

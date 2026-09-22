@@ -1,7 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // Add permissions multi-relation field to roles collection
         const rolesCol = app.findCollectionByNameOrId('roles_collection_id')
 
         rolesCol.fields.addAt(
@@ -21,12 +20,10 @@ migrate(
             }),
         )
 
-        // Allow admins to update roles (for permission editing)
         rolesCol.updateRule = '@request.auth.role.name = "admin"'
 
         app.save(rolesCol)
 
-        // Seed the routesetter role
         const routesetterRole = new Record(rolesCol)
         routesetterRole.set('name', 'routesetter')
         routesetterRole.set(
@@ -35,7 +32,6 @@ migrate(
         )
         app.save(routesetterRole)
 
-        // Look up all permission records by name
         const permissionsCol =
             app.findCollectionByNameOrId('permissions_col_id')
         const allPerms = app.findAllRecords(permissionsCol)
@@ -47,7 +43,6 @@ migrate(
 
         const allPermIds = Object.values(permIdByName)
 
-        // Define default permission assignments
         const rolePermissions = {
             admin: allPermIds,
             routesetter: [
@@ -59,7 +54,6 @@ migrate(
             user: [],
         }
 
-        // Assign permissions to each role
         const allRoles = app.findAllRecords(rolesCol)
         for (const role of allRoles) {
             const roleName = role.get('name')
@@ -73,7 +67,6 @@ migrate(
     (app) => {
         const rolesCol = app.findCollectionByNameOrId('roles_collection_id')
 
-        // Remove routesetter role
         try {
             const routesetter = app.findFirstRecordByFilter(
                 rolesCol,
@@ -82,14 +75,12 @@ migrate(
             if (routesetter) app.delete(routesetter)
         } catch {}
 
-        // Clear permissions from existing roles
         const allRoles = app.findAllRecords(rolesCol)
         for (const role of allRoles) {
             role.set('permissions', [])
             app.save(role)
         }
 
-        // Remove the permissions field
         rolesCol.fields.removeById('relation_role_perms')
         rolesCol.updateRule = null
 

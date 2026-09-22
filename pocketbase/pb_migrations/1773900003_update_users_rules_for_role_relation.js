@@ -3,7 +3,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('_pb_users_auth_')
 
-        // Update rules to use the role relation (expand role.name)
         collection.listRule =
             'id = @request.auth.id || @request.auth.role.name = "admin"'
         collection.viewRule =
@@ -18,7 +17,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('_pb_users_auth_')
 
-        // Revert to the string-based rules
         collection.listRule =
             'id = @request.auth.id || @request.auth.role = "admin"'
         collection.viewRule =

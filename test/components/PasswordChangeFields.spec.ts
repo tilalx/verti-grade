@@ -2,13 +2,9 @@ import { computed, watch } from 'vue'
 import { mount } from '@vue/test-utils'
 import PasswordChangeFields from '~/components/user/PasswordChangeFields.vue'
 
-// PasswordChangeFields uses computed/watch/ref as Nuxt auto-import globals.
-// ref is already stubbed in test/setup.ts; computed and watch are not.
 vi.stubGlobal('computed', computed)
 vi.stubGlobal('watch', watch)
 
-// A password that satisfies all 6 requirements:
-//   length≥8, length≤72, uppercase, lowercase, digit, special char
 const STRONG_PASSWORD = 'SecurePass1!'
 
 const simpleStub = { template: '<div />' }
@@ -116,7 +112,6 @@ describe('PasswordChangeFields – validity emit', () => {
             passwordConfirm: STRONG_PASSWORD,
         })
 
-        // Currently valid — now break the confirm
         await wrapper.setProps({ passwordConfirm: 'wrongpassword' })
 
         const emits = wrapper.emitted('validity')!

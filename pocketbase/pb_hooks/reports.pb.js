@@ -1,12 +1,5 @@
 /// <reference path="../pb_data/types.d.ts" />
 
-// DSA Art. 16 notice-and-action hooks.
-//
-// The reports collection is publicly writable (Art. 16(1) requires accepting a
-// notice from *any* individual or entity, including anonymous ones), so every
-// field that records what the operator decided is stamped server-side here and
-// can never be set by the submitter.
-
 onRecordCreateRequest((e) => {
     e.record.set('status', 'open')
     e.record.set('decision', '')
@@ -16,7 +9,6 @@ onRecordCreateRequest((e) => {
     e.record.set('receipt_sent', false)
     e.record.set('notified_at', '')
 
-    // Snapshot the reported content so the audit trail survives its deletion.
     let snapshot = ''
     try {
         const id = e.record.get('content_id')
@@ -29,7 +21,6 @@ onRecordCreateRequest((e) => {
             snapshot = e.app.findRecordById('ratings', id).get('comment') || ''
         }
     } catch (err) {
-        // A notice about already-deleted content is still a valid notice.
         snapshot = ''
     }
     e.record.set('content_snapshot', String(snapshot).slice(0, 5000))
@@ -37,13 +28,9 @@ onRecordCreateRequest((e) => {
     e.next()
 }, 'reports')
 
-// Art. 16(4): confirm receipt to the notifier without undue delay, and alert
-// everyone who can act on it.
 onRecordAfterCreateSuccess((e) => {
     const utils = require(`${__hooks}/utils/reports.js`)
 
-    // Before the mail block, which returns early when SMTP is off -- and with
-    // mail off this queue is the only thing that says a report came in.
     try {
         const notifications = require(`${__hooks}/utils/notifications.js`)
         const snippet = String(e.record.get('content_snapshot') || '').slice(
@@ -55,8 +42,6 @@ onRecordAfterCreateSuccess((e) => {
             users: notifications.usersByPermission(e.app, 'manage_reports'),
             type: 'report_filed',
             params: { snippet: snippet },
-            // The queue, not the reported comment: that is where the decide
-            // buttons are, and the card links on to the content itself.
             url: '/manage/reports',
         })
     } catch (err) {
@@ -114,8 +99,6 @@ onRecordAfterCreateSuccess((e) => {
             e.app.save(e.record)
         }
     } catch (err) {
-        // Never fail the notice because mail is down. receipt_sent stays false,
-        // which is what the admin queue surfaces as an undelivered receipt.
         e.app
             .logger()
             .error(
@@ -130,23 +113,9 @@ onRecordAfterCreateSuccess((e) => {
     e.next()
 }, 'reports')
 
-// Art. 16(5): once a human has decided, tell the notifier what was decided and
-// how to challenge it.
 onRecordAfterUpdateSuccess((e) => {
     const utils = require(`${__hooks}/utils/reports.js`)
 
-    // Queued before the mail block on purpose: that block returns early when
-    // SMTP is off, and a silent queue is exactly what this is here to prevent.
-    //
-    // Two guards, because neither alone is enough:
-    //
-    //  - status having just left "open" stops a later edit of an already
-    //    decided report from re-queueing.
-    //  - a blank notified_at stops the double-fire: the mail block below
-    //    re-saves the record to stamp notified_at, which re-enters this hook,
-    //    and original() on that second pass still reports the pre-decision
-    //    status. With mail off there is no re-save and no second pass, so this
-    //    guard costs nothing there.
     try {
         const notifications = require(`${__hooks}/utils/notifications.js`)
         const status = String(e.record.get('status') || '')
@@ -155,13 +124,6 @@ onRecordAfterUpdateSuccess((e) => {
         const freshDecision = utils.isBlankDate(e.record.get('notified_at'))
 
         if (wasOpen && status && status !== 'open' && freshDecision) {
-            // RecordEvent carries no auth, but the moderation UI stamps
-            // decided_by (app/pages/manage/reports.vue), so the moderator who
-            // decided is skipped rather than told what they just did.
-            //
-            // A relation reads back as an array in some PocketBase paths even
-            // at maxSelect 1, and a bare String() on the wrong shape silently
-            // matches nobody -- which is how the decider ended up notified.
             const decidedBy = e.record.get('decided_by')
             const decider = Array.isArray(decidedBy)
                 ? String(decidedBy[0] || '')
@@ -194,8 +156,6 @@ onRecordAfterUpdateSuccess((e) => {
 
     try {
         const status = e.record.get('status')
-        // notified_at guards the re-save below from looping -- via isBlankDate,
-        // because an unset date is a truthy object, not an empty string.
         if (
             status === 'open' ||
             !utils.isBlankDate(e.record.get('notified_at'))
@@ -250,8 +210,6 @@ onRecordAfterUpdateSuccess((e) => {
     e.next()
 }, 'reports')
 
-// Lets the admin UI warn that Art. 16(4)/(5) notices are not being delivered.
-// Returns a single boolean and no credential of any kind.
 routerAdd(
     'GET',
     '/api/mail-status',

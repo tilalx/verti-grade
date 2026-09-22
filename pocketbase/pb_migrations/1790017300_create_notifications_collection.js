@@ -1,20 +1,7 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // A generic in-app queue, fanned out one row per recipient by
-        // pb_hooks/utils/notifications.js.
-        //
-        // `type` is free text rather than a select on purpose: adding a new
-        // kind of notification should cost an i18n key, not a migration. The
-        // wording lives in the client (notifications.center.types.<type>) and
-        // the interpolation values in `params`, so the queue stays localised
-        // across all five locales without the hooks knowing about i18n.
-        //
-        // `user` cascades: deleting a user is meant to erase that user, so
-        // their queue goes with them -- same reasoning as audit_logs.actor.
         const collection = new Collection({
-            // Only hooks write here. An API-createable notification is a
-            // forgeable one, so there is no create rule at all.
             createRule: null,
             deleteRule: 'user = @request.auth.id',
             fields: [
@@ -108,14 +95,10 @@ migrate(
                 'CREATE INDEX `idx_notifications_user_read` ON `notifications` (`user`, `read`)',
                 'CREATE INDEX `idx_notifications_user_created` ON `notifications` (`user`, `created`)',
             ],
-            // The `@request.auth.id != ""` guard is load-bearing: without it an
-            // unauthenticated caller matches `user = ""` and reads rows whose
-            // relation is empty.
             listRule: '@request.auth.id != "" && user = @request.auth.id',
             name: 'notifications',
             system: false,
             type: 'base',
-            // Owner-only, so the only thing worth changing here is `read`.
             updateRule: '@request.auth.id != "" && user = @request.auth.id',
             viewRule: '@request.auth.id != "" && user = @request.auth.id',
         })

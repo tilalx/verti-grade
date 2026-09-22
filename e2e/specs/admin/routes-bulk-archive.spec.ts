@@ -6,14 +6,9 @@ test('selects filtered routes and archives them', async ({
 }) => {
     const prefix = `e2e-archive-${Date.now()}`
 
-    // Navigate first: storageState's localStorage is only applied once the
-    // page has loaded the matching origin, so the auth token isn't readable
-    // (or attachable to page.request calls) before that first navigation.
     await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
 
-    // Create two routes scoped to this test via the API so "select all"
-    // only ever touches records this test owns, not the shared seed set.
     for (let i = 0; i < 2; i++) {
         await page.request.post('/api/collections/routes/records', {
             headers,

@@ -1,14 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // DSA Art. 16 notice-and-action records.
-        //
-        // content_id is deliberately plain text and NOT a relation: a relation
-        // to ratings would cascade-delete the report the moment the reported
-        // comment is removed, erasing the very record that proves the operator
-        // acted on the notice. A text pointer plus content_snapshot keeps the
-        // audit trail intact after takedown, and lets one collection serve more
-        // than one content type.
         const collection = new Collection({
             createRule: '',
             deleteRule:

@@ -172,7 +172,6 @@ const handleFileChange = async (event) => {
     }
     reader.readAsText(file)
 
-    // Reset file input to allow selecting the same file again
     event.target.value = ''
 }
 

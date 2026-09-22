@@ -203,9 +203,6 @@ async function submitReset() {
     border-radius: 50%;
     border: 2px solid rgba(var(--v-theme-success), 0.3);
     background: rgba(var(--v-theme-success), 0.08);
-    /* Vuetify 4 spacing utilities live in a CSS layer, so this unlayered
-       scoped rule wins over an mb-* class on the same element -- the gap has
-       to be declared here or the ring sits flush against the button. */
     margin: 0 auto 24px;
 }
 </style>

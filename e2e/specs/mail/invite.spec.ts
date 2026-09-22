@@ -2,15 +2,6 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 import { waitForMail, linkPath, mailbox } from '../../support/mail'
 
-/**
- * Creating a user used to produce a dead account: a random throwaway password
- * nobody knew, `verified` unset, and the users collection authRule is
- * `verified=true` — so the only way to finish the job was the PocketBase
- * superuser panel. The create flow now sends a password-reset mail, and
- * confirming it sets both the password AND verified, which is what makes the
- * account usable.
- */
-
 const NEW_PASSWORD = 'E2eInvited!123'
 
 test('an invited user can set a password from the mail and sign in', async ({
@@ -32,14 +23,12 @@ test('an invited user can set a password from the mail and sign in', async ({
     await expect(page.getByTestId('user-create-dialog')).toBeHidden()
 
     const mail = await waitForMail(page, email, { subject: /password/i })
-    // Not the superuser panel: /_/#/auth/... is what this used to link to.
     expect(mail.HTML).not.toContain('/_/#/')
     const path = linkPath(
         mail,
         /https?:\/\/[^"'\s]*\/auth\/confirm-password-reset\/[^"'\s]+/,
     )
 
-    // A fresh context: the invited user is not the admin who created them.
     const context = await browser.newContext({
         baseURL: process.env.E2E_BASE_URL || 'https://vg.test',
         ignoreHTTPSErrors: true,
@@ -58,8 +47,6 @@ test('an invited user can set a password from the mail and sign in', async ({
     await invited.getByTestId('confirm-reset-submit').click()
     await expect(invited.getByTestId('reset-done')).toBeVisible()
 
-    // The real assertion: the account works. Confirming the reset also set
-    // verified=true, without which authRule rejects the login outright.
     await gotoSettled(invited, '/auth/login')
     await invited.getByTestId('login-identity').locator('input').fill(email)
     await invited
@@ -71,7 +58,6 @@ test('an invited user can set a password from the mail and sign in', async ({
 
     await context.close()
 
-    // Clean up the invited account.
     const headers = await authHeader(page)
     const found = await page.request.get(
         '/api/collections/users/records?filter=' +

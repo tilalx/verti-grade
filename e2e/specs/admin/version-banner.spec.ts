@@ -33,8 +33,16 @@ const COMMIT_PAYLOAD = {
     },
     latest: { tag: 'v1.9.0', notes: 'notes', publishedAt: null },
     commits: [
-        { sha: 'bbbbbbb', message: 'second commit', date: '2026-01-02T00:00:00Z' },
-        { sha: 'aaaaaaa', message: 'first commit', date: '2026-01-01T00:00:00Z' },
+        {
+            sha: 'bbbbbbb',
+            message: 'second commit',
+            date: '2026-01-02T00:00:00Z',
+        },
+        {
+            sha: 'aaaaaaa',
+            message: 'first commit',
+            date: '2026-01-01T00:00:00Z',
+        },
     ],
     mode: 'commit',
     updateAvailable: true,
@@ -42,7 +50,13 @@ const COMMIT_PAYLOAD = {
 }
 
 const UP_TO_DATE = {
-    installed: { raw: '1.9.0', base: '1.9.0', ahead: 0, sha: null, notes: 'notes' },
+    installed: {
+        raw: '1.9.0',
+        base: '1.9.0',
+        ahead: 0,
+        sha: null,
+        notes: 'notes',
+    },
     latest: { tag: 'v1.9.0', notes: 'notes', publishedAt: null },
     commits: [],
     mode: 'none',
@@ -50,12 +64,6 @@ const UP_TO_DATE = {
     error: null,
 }
 
-/**
- * The real endpoint reaches GitHub and is cached for an hour, so every case
- * here stubs it. The composable fetches client-side (server: false) precisely
- * so this interception works — an SSR-resolved payload would be inlined into
- * the HTML instead.
- */
 async function stubVersion(page: Page, payload: unknown) {
     await page.route('**/api/version', (route) =>
         route.fulfill({ json: payload }),
@@ -77,7 +85,6 @@ test('announces a new release and opens its notes', async ({
     const dialog = page.getByTestId('release-notes-dialog')
     await expect(dialog).toBeVisible()
     await expect(dialog).toContainText('v1.10.0')
-    // Markdown is flattened to plain text, never rendered as HTML.
     await expect(dialog).toContainText('What changed')
     await expect(dialog).toContainText('• Bold fix')
     await expect(dialog).not.toContainText('**')
@@ -89,7 +96,6 @@ test('announces new commits and lists them', async ({ adminPage: page }) => {
 
     const banner = page.getByTestId('update-banner')
     await expect(banner).toBeVisible()
-    // Pluralised: two commits, so the plural form must be chosen.
     await expect(banner).toContainText('2 new commits')
 
     await page.getByTestId('update-banner-commits').click()
@@ -99,8 +105,6 @@ test('announces new commits and lists them', async ({ adminPage: page }) => {
     await expect(dialog).toContainText('bbbbbbb')
     await expect(dialog).toContainText('second commit')
 
-    // The installed commit comes from the deployed APP_VERSION, not from the
-    // stubbed payload — so assert it against what the app actually reports.
     const deployed = (
         await page.getByTestId('footer-version').innerText()
     ).trim()
@@ -131,11 +135,10 @@ test('a dismissal survives a reload but a newer release reappears', async ({
 
     await gotoSettled(page, '/')
     await expect(page.getByTestId('update-banner')).toBeHidden()
-    expect(await page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY)).toBe(
-        'v1.10.0',
-    )
+    expect(
+        await page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY),
+    ).toBe('v1.10.0')
 
-    // A different release is a different announcement, so it shows again.
     await stubVersion(page, {
         ...RELEASE_PAYLOAD,
         latest: { ...RELEASE_PAYLOAD.latest, tag: 'v1.11.0' },
@@ -150,11 +153,8 @@ test('the footer pill shows the installed release notes to a logged-out visitor'
     await stubVersion(page, UP_TO_DATE)
     await gotoSettled(page, '/')
 
-    // No banner when logged out, but the version pill still works.
     await expect(page.getByTestId('update-banner')).toBeHidden()
 
-    // The pill label is the deployed APP_VERSION, not the stubbed payload,
-    // so target it by testid rather than by text.
     await page.getByTestId('footer-version').click()
 
     const dialog = page.getByTestId('release-notes-dialog')

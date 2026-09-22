@@ -1,11 +1,5 @@
 import type { AuditAction, AuditLogRecord, RecordId } from '~/types/models'
 
-/**
- * The actions offered in the filter select, in the order they are shown.
- * Must stay in lockstep with the values the PocketBase select field accepts
- * (pb_migrations/1789940001_create_audit_logs_collection.js) and with the
- * `audit.action.*` i18n keys.
- */
 export const AUDIT_ACTIONS: AuditAction[] = [
     'create',
     'update',
@@ -18,7 +12,6 @@ export const AUDIT_ACTIONS: AuditAction[] = [
     'email_change',
 ]
 
-/** Collections the hooks actually write entries for, for the filter select. */
 export const AUDITED_COLLECTIONS: string[] = [
     'routes',
     'ratings',
@@ -39,15 +32,10 @@ const PERIOD_HOURS: Record<Exclude<AuditPeriod, 'all'>, number> = {
     '30d': 24 * 30,
 }
 
-/** create/update/delete name a record; the auth actions speak for themselves. */
 export function isRecordAction(action: AuditAction | string): boolean {
     return action === 'create' || action === 'update' || action === 'delete'
 }
 
-/**
- * `0000:0000:0000:0000:0000:0000:0000:0001` is 39 characters saying `::1`.
- * The IP is the least important thing on a row; it should not be the widest.
- */
 export function compressIp(ip?: string | null): string {
     if (!ip) return ''
     const groups = ip.split(':')
@@ -97,10 +85,6 @@ export function actionColor(action: AuditAction | string): string {
     return 'medium-emphasis'
 }
 
-/**
- * PocketBase stores dates as `YYYY-MM-DD HH:MM:SS.sssZ`, and its filter
- * comparison is lexicographic against that exact shape.
- */
 export function pbDateString(date: Date): string {
     return date.toISOString().replace('T', ' ')
 }
@@ -147,10 +131,6 @@ export function buildAuditFilter(options: {
     return parts.join(' && ')
 }
 
-/**
- * Where the affected record lives, when it still has a page of its own.
- * Entries outlive what they describe, so this is best-effort by design.
- */
 export function auditTargetUrl(
     collectionName?: string | null,
     recordId?: string | null,
@@ -163,7 +143,6 @@ export function auditTargetUrl(
     return null
 }
 
-/** True when the entry was written for a PocketBase superuser. */
 export function isSuperuserEntry(entry: Pick<AuditLogRecord, 'actor_label'>) {
     return (entry.actor_label ?? '').startsWith('superuser')
 }

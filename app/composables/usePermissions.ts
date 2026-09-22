@@ -5,14 +5,6 @@ export function usePermissions() {
     const loading = ref(false)
     const loaded = useState<boolean>('user-permissions-loaded', () => false)
 
-    /**
-     * The request carries a fixed `requestKey`, so the PocketBase SDK aborts an
-     * in-flight fetch as soon as a newer one starts -- which is exactly what
-     * happens when a role update arrives over realtime while a refresh is
-     * already running. That abort is a normal outcome, not a failure: the newer
-     * request is about to deliver the answer, so the superseded one must leave
-     * state alone instead of clearing permissions and alarming the user.
-     */
     function isAutoCancelled(err: any) {
         return !!err?.isAbort || err?.status === 0
     }
@@ -44,15 +36,10 @@ export function usePermissions() {
             console.error('Failed to fetch permissions:', err)
             permissions.value = []
             roleName.value = ''
-            // useI18n() throws here: this runs after an await, so the
-            // synchronous setup context it requires is already gone. The
-            // app-level composer works anywhere, including route middleware.
             const { $i18n } = useNuxtApp()
             const { error: notifyError } = useNotification()
             notifyError($i18n.t('permissions.loadError'))
         } finally {
-            // The newer request owns both flags -- flipping them here would
-            // report "loaded" with the permissions momentarily emptied.
             if (!superseded) {
                 loading.value = false
                 loaded.value = true
@@ -66,10 +53,7 @@ export function usePermissions() {
     }
 
     function can(featureName: string): boolean {
-        // Before permissions are loaded, allow navigation
-        // (PocketBase rules enforce server-side anyway)
         if (!loaded.value) return true
-        // Admin safety net: always has all permissions
         if (roleName.value === 'admin') return true
         return permissions.value.includes(featureName)
     }

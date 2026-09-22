@@ -68,8 +68,6 @@ describe('toHex6', () => {
     })
 
     it('drops the alpha channel the color picker can append', () => {
-        // The roles.color field only accepts ^#[0-9a-fA-F]{6}$, so an 8-digit
-        // value coming out of v-color-picker would be rejected server-side.
         expect(toHex6('#7C4DFFFF')).toBe('#7C4DFF')
         expect(toHex6('#7c4dff80')).toBe('#7C4DFF')
     })
@@ -85,9 +83,6 @@ describe('toHex6', () => {
 })
 
 describe('readableTextOn', () => {
-    // A role color is admin-chosen, so the label must stay legible whatever
-    // hue lands in the field — this is what replaced painting the text in the
-    // color itself, which left #7C4DFF unreadable on a dark surface.
     it('puts white on dark backgrounds', () => {
         expect(readableTextOn('#7C4DFF')).toBe('#FFFFFF')
         expect(readableTextOn('#000000')).toBe('#FFFFFF')

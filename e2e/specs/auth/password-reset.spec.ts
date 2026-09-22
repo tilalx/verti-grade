@@ -18,7 +18,6 @@ test('blocks a reset request with an invalid email', async ({ page }) => {
     await page.getByTestId('reset-email').locator('input').fill('not-an-email')
     await page.getByTestId('reset-submit').click()
 
-    // Client-side validation blocks it — still on the reset form, no snackbar.
     await expect(page.getByTestId('reset-form')).toBeVisible()
     await expect(page.getByTestId('global-snackbar')).toBeHidden()
 })
@@ -45,8 +44,6 @@ test('shows the invalid-link state for a bogus reset token', async ({
     page,
 }) => {
     await gotoSettled(page, '/auth/confirm-password-reset/not-a-real-token')
-    // Token is syntactically present, so the page renders the reset form;
-    // submitting against PocketBase resolves to the invalid-token step.
     await page
         .getByTestId('password-new')
         .locator('input')

@@ -29,9 +29,6 @@ test('refresh button reloads analytics data', async ({ adminPage: page }) => {
 test('shows an error notification when the analytics fetch fails', async ({
     adminPage: page,
 }) => {
-    // The initial fetch is served in-process by Nitro during SSR and never
-    // crosses the network, so page.route() can't reach it. Refresh re-runs the
-    // same loader from the browser, which is the path a mock can intercept.
     await gotoSettled(page, '/manage/analytics')
     await page.route('**/api/manage/analytics*', (route) =>
         route.fulfill({ status: 500, body: 'boom' }),

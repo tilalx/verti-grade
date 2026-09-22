@@ -1,11 +1,3 @@
-/**
- * Pure logic for the route inventory (stock-take) flow.
- *
- * Lives outside `app/pages/manage/inventory.vue` so it can be imported and
- * tested directly — the previous spec re-implemented these helpers inline and
- * therefore passed no matter what the page did.
- */
-
 export interface InventoryRoute {
     id: string
     name?: string | null
@@ -15,7 +7,6 @@ export interface InventoryRoute {
 }
 
 export interface InventorySession {
-    /** Gym site the stock-take is scoped to. `null` for a restored v1 session. */
     location: string | null
     ids: string[]
 }
@@ -36,18 +27,6 @@ function validIds(value: unknown): string[] {
     )
 }
 
-/**
- * Reads the stored session.
- *
- * Understands both shapes: the v1 array of ids (`["a","b"]`) written by
- * earlier builds, and the v2 record that also carries the location. A v1
- * session migrates to `location: null`, which the page resolves by asking for
- * a location before the inventory can be finished.
- *
- * Unusable content (corrupt JSON, wrong type) yields an empty session.
- * Throws only when localStorage itself is unavailable, so the caller can warn
- * that progress will not survive a reload.
- */
 export function loadSession(): InventorySession {
     if (typeof localStorage === 'undefined') return emptySession()
 
@@ -61,7 +40,6 @@ export function loadSession(): InventorySession {
         return emptySession()
     }
 
-    // v1: a bare array of ids, written before the inventory was site-scoped.
     if (Array.isArray(parsed)) {
         return { location: null, ids: validIds(parsed) }
     }
@@ -78,7 +56,6 @@ export function loadSession(): InventorySession {
     }
 }
 
-/** Writes the session in the v2 shape, clearing the key when it is empty. */
 export function persistSession(session: InventorySession): void {
     if (typeof localStorage === 'undefined') return
 
@@ -113,18 +90,9 @@ export function hasSeenInstructions(): boolean {
 export function markInstructionsSeen(): void {
     try {
         localStorage?.setItem(INVENTORY_INSTRUCTIONS_KEY, '1')
-    } catch {
-        // Remembering this is a convenience, never worth surfacing.
-    }
+    } catch {}
 }
 
-/**
- * Active routes belonging to the inventoried site.
- *
- * Without a location this is empty on purpose: every downstream consumer —
- * including the archive step — derives from it, so an unscoped session can
- * never archive routes at the other gym.
- */
 export function scopedRoutes<T extends InventoryRoute>(
     routes: T[],
     location: string | null,
@@ -135,7 +103,6 @@ export function scopedRoutes<T extends InventoryRoute>(
     )
 }
 
-/** Scoped routes that have not been scanned yet, in wall order. */
 export function missingRoutes<T extends InventoryRoute>(
     routes: T[],
     scannedIds: string[],
@@ -149,10 +116,6 @@ export function missingRoutes<T extends InventoryRoute>(
     )
 }
 
-/**
- * Orders routes the way you walk the wall: by anchor point, unnumbered ones
- * last, then by name.
- */
 export function sortByAnchor<T extends InventoryRoute>(routes: T[]): T[] {
     return [...routes].sort((a, b) => {
         const anchorA =
@@ -169,22 +132,11 @@ export function sortByAnchor<T extends InventoryRoute>(routes: T[]): T[] {
     })
 }
 
-/**
- * Active routes with no location. They are outside every scoped inventory, so
- * the page reports them rather than letting them go quietly unaccounted for.
- */
 export function countUnlocated(routes: InventoryRoute[]): number {
     return routes.filter((route) => route.archived !== true && !route.location)
         .length
 }
 
-/**
- * Pulls a route id out of a scanned QR payload.
- *
- * Printed labels encode `<appUrl>/route?id=<id>` (see server/api/ui/pdf.js);
- * the bare-id form is accepted as well because PocketBase ids are 15 chars of
- * `[a-z0-9]` and some tooling encodes just that.
- */
 export function extractRouteId(value: unknown): string | null {
     if (!value) return null
 
@@ -193,9 +145,7 @@ export function extractRouteId(value: unknown): string | null {
     try {
         const id = new URL(trimmed).searchParams.get('id')
         if (id) return id
-    } catch {
-        // Not an absolute URL — fall through to the relative form.
-    }
+    } catch {}
 
     const queryStart = trimmed.indexOf('?')
     if (queryStart !== -1) {

@@ -1,8 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-// Vuetify 4's lg threshold (1145px) is where the card list hands over to the
-// table, and just above it is the tightest the nine columns ever get.
 test.use({ viewport: { width: 1160, height: 900 } })
 
 test('the route table fits without sideways scrolling', async ({ page }) => {
@@ -21,8 +19,6 @@ test('stacked setter chips keep clear of the row dividers', async ({
     await gotoSettled(page, '/')
     await expect(page.getByTestId('index-table')).toBeVisible()
 
-    // A wrapped chip stack used to fill its row edge to edge, so the dividers
-    // sat flush against the chips and read as a line drawn through them.
     const gaps = await page.locator('tbody tr').evaluateAll((rows) => {
         const row = rows.find(
             (tr) => tr.querySelectorAll('.creator-chips .v-chip').length > 1,

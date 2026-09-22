@@ -7,15 +7,11 @@ import { gotoSettled } from '../../support/nav'
 const AUTH_FILE = path.join(__dirname, '..', '..', '.auth', 'admin.json')
 
 test('detects a route QR code via a fake video device', async ({ baseURL }) => {
-    // This test carries its own browser (the fake-device flags are
-    // browser-level) plus camera start-up and QR decoding, all while the other
-    // workers are busy — 60s was not enough headroom on a loaded agent.
     test.setTimeout(120_000)
     const routeRes = await request.newContext({
         baseURL,
         ignoreHTTPSErrors: true,
     })
-    // The inventory is scoped to one site, so scan a route known to be there.
     const res = await routeRes.get(
         '/api/collections/routes/records?filter=' +
             encodeURIComponent(
@@ -47,21 +43,15 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     const page = await context.newPage()
 
     await gotoSettled(page, '/manage/inventory')
-    // The instructions dialog is shown once per device; skip it so the first
-    // tap lands on the button rather than dismissing the dialog.
     await page.evaluate(() => {
         localStorage.setItem('inventory-instructions-seen', '1')
         localStorage.removeItem('inventory-scanned-route-ids')
     })
     await page.reload()
 
-    // Assert before each click, so a page that never got this far fails here
-    // with the step that stalled rather than as a bare test timeout.
     await expect(page.getByTestId('inventory-location-Hanau')).toBeVisible()
     await page.getByTestId('inventory-location-Hanau').click()
 
-    // Enabled only once the initial route fetch lands (`loadingRoutes`), which
-    // competes with every other worker plus this test's own second browser.
     await expect(page.getByTestId('inventory-start')).toBeEnabled({
         timeout: 30_000,
     })
@@ -72,11 +62,6 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         timeout: 30_000,
     })
 
-    // The scan overlay is drawn in CSS pixels onto a canvas whose bitmap the
-    // library sizes from the video box. If the two boxes drift apart, the
-    // bitmap is stretched to fit and every tracking rectangle and label lands
-    // scaled and offset — which is what a viewport with no definite height did
-    // on iOS.
     const overlay = await page.evaluate(() => {
         const canvas = document.querySelector<HTMLCanvasElement>(
             '#qrcode-stream-tracking-layer',
@@ -96,8 +81,6 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     expect(overlay!.cssBox).toEqual(overlay!.bitmap)
     expect(overlay!.videoBox).toEqual(overlay!.bitmap)
 
-    // Bottom-right: at the top it sat under the thumb reaching for a wall
-    // label, and over the part of the frame the code is usually centred in.
     const torch = page.getByTestId('inventory-torch')
     if (await torch.isVisible()) {
         const button = (await torch.boundingBox())!
@@ -106,9 +89,6 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         expect(button.x).toBeGreaterThan(frame.x + frame.width / 2)
     }
 
-    // Backgrounding ends the capture track on iOS and it cannot be revived, so
-    // the page drops the dead stream and puts the Start button back — its tap
-    // is the user gesture a fresh getUserMedia needs.
     await page.evaluate(() => {
         Object.defineProperty(document, 'visibilityState', {
             configurable: true,
@@ -119,7 +99,6 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
 
     await expect(page.locator('.scanner-viewport')).toHaveCount(0)
     await expect(page.getByTestId('inventory-start')).toBeVisible()
-    // The scan survives the interruption; only the camera goes.
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
 
     await context.close()

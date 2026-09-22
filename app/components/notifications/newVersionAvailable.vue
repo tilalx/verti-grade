@@ -89,10 +89,7 @@ const dismissedId = ref('')
 onMounted(() => {
     try {
         dismissedId.value = localStorage.getItem(DISMISS_KEY) ?? ''
-    } catch {
-        // Private mode or blocked storage: the banner just stays dismissable
-        // for this page view only.
-    }
+    } catch {}
 })
 
 const dismissed = computed(
@@ -103,8 +100,6 @@ const dismiss = () => {
     dismissedId.value = updateId.value
     try {
         localStorage.setItem(DISMISS_KEY, updateId.value)
-    } catch {
-        // See above.
-    }
+    } catch {}
 }
 </script>

@@ -1,8 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // Single-row aggregate view so the admin comments page can fetch its
-        // header stats in one tiny request instead of the full collection.
         const collection = new Collection({
             createRule: null,
             deleteRule: null,

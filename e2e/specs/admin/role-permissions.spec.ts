@@ -14,7 +14,6 @@ test('toggles a permission for the routesetter role', async ({
     await checkbox.click()
     await expect(page.getByTestId('role-permissions-table')).toBeVisible()
 
-    // Toggle back to leave state clean for other tests/workers.
     await checkbox.click()
     await expect(checkbox.locator('input')).toHaveJSProperty(
         'checked',
@@ -28,9 +27,6 @@ test('shows an error and does not persist the change when the update fails', asy
     await gotoSettled(page, '/admin/users')
     await expect(page.getByTestId('role-permissions-table')).toBeVisible()
 
-    // A different permission than the toggle test above uses, so the two
-    // tests (which can run concurrently in different workers) don't race
-    // on the same checkbox.
     const checkbox = page.getByTestId(
         'role-permissions-routesetter-manage_settings',
     )

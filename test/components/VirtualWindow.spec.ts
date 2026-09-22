@@ -34,7 +34,6 @@ class MockIntersectionObserver {
     }
 }
 
-// Each VirtualWindow creates two observers: [near = mount band, far = unmount band]
 function observers() {
     const [near, far] = MockIntersectionObserver.instances
     return { near, far }
@@ -52,8 +51,6 @@ function createWrapper(props: Record<string, unknown> = {}) {
 describe('VirtualWindow', () => {
     beforeEach(() => {
         MockIntersectionObserver.instances = []
-        // Note: no unstubAllGlobals in cleanup — it would also remove the
-        // auto-import stubs (ref, onMounted, …) from test/setup.ts
         vi.stubGlobal('IntersectionObserver', MockIntersectionObserver)
     })
 
@@ -80,7 +77,6 @@ describe('VirtualWindow', () => {
 
         near.trigger(true)
         await nextTick()
-        // Leaves the mount band but is still inside the unmount band
         near.trigger(false)
         await nextTick()
 

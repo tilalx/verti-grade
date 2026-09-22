@@ -1,9 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-// sheet-on-mobile means phones. It used to ride on smAndDown, which Vuetify 4
-// moved from 960px to 840px, so the cut no longer matched the app's other
-// phone switch (FilterBar, 600px) and small tablets got a docked sheet.
 async function firstSeededRouteId(page: import('@playwright/test').Page) {
     const res = await page.request.get(
         '/api/collections/routes/records?filter=' +
@@ -35,9 +32,7 @@ test('centres as a dialog above phone width', async ({ page }) => {
     await page.setViewportSize({ width: 700, height: 850 })
     await openReview(page)
 
-    const box = (await page
-        .getByTestId('review-form-dialog')
-        .boundingBox())!
+    const box = (await page.getByTestId('review-form-dialog').boundingBox())!
     expect(box.width).toBeLessThan(700)
     const offCentre = Math.abs(box.x + box.width / 2 - 700 / 2)
     expect(offCentre).toBeLessThanOrEqual(2)

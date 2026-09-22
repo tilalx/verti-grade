@@ -1,5 +1,4 @@
 <template>
-    <!-- Trigger button: only when parent does NOT control open state via v-model -->
     <template v-if="modelValue === undefined">
         <v-btn
             v-if="callToAction"
@@ -56,8 +55,6 @@
             <!-- Stars and difficulty share a row from sm up -->
             <v-row density="comfortable" align="center" class="mb-1">
                 <v-col cols="12" sm="6">
-                    <!-- Inline label, field-height box: keeps the stars on the
-                         same baseline as the select next to it. -->
                     <div class="d-flex align-center ga-3 review-form__rating">
                         <span class="v-label">{{ $t('ratings.stars') }}</span>
                         <v-rating
@@ -123,17 +120,14 @@
 <script setup>
 import { required, nonBlank } from '~/utils/validation'
 const props = defineProps({
-    // Controls open state externally (edit mode)
     modelValue: {
         type: Boolean,
         default: undefined,
     },
-    // route_id is required when creating
     routeId: {
         type: String,
         default: null,
     },
-    // Passing a review switches to edit mode
     review: {
         type: Object,
         default: null,
@@ -154,7 +148,6 @@ const { capHeaders } = useCapToken()
 const isEditMode = computed(() => !!props.review)
 
 // ── Open state ─────────────────────────────────────────────────────────────
-// Internal open for create mode; external v-model for edit mode.
 
 const internalOpen = ref(false)
 
@@ -197,7 +190,6 @@ const rules = {
     requiredAndNotEmpty: nonBlank(t),
 }
 
-// Pre-fill form when review prop changes (edit mode)
 watch(
     () => props.review,
     (review) => {
@@ -213,10 +205,6 @@ watch(
     { immediate: true },
 )
 
-// Re-sync the form every time the sheet opens, so a cancelled edit never
-// survives into the next time the same record is reopened (props.review's
-// object reference doesn't change on reopen, so the watch above alone
-// wouldn't refire).
 watch(sheetOpen, (open) => {
     if (open) {
         if (props.review) {
@@ -313,9 +301,6 @@ async function submit() {
                 })
             emit('saved', updated)
         } else {
-            // Anonymous create: PocketBase requires a solved captcha token
-            // when one is configured (pb_hooks/cap.pb.js). Signed-in staff
-            // are exempt, and capHeaders() is a no-op when it is switched off.
             await pb.collection('ratings').create(
                 {
                     route_id: props.routeId,
@@ -344,7 +329,6 @@ async function submit() {
     background: rgba(var(--v-theme-on-surface), 0.06);
 }
 
-/* Matches the default-density field height next to it. */
 .review-form__rating {
     min-height: 56px;
 }

@@ -1,5 +1,3 @@
-// Russian and Ukrainian need three plural forms; vue-i18n's default rule only
-// handles the two-form (English) shape.
 function slavicPluralRule(choice: number, choicesLength: number): number {
     if (choicesLength < 3) return choice === 1 ? 0 : 1
 

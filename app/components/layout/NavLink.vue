@@ -17,8 +17,6 @@
         </button>
     </router-link>
 
-    <!-- Group: one button, its pages in a menu. The row keeps a fixed width
-         however many pages a group grows to — that is the point of grouping. -->
     <v-menu v-else location="bottom start" offset="4">
         <template #activator="{ props: menuProps }">
             <button
@@ -58,10 +56,7 @@
 const props = defineProps({
     to: { type: String, default: '' },
     icon: { type: String, required: true },
-    // i18n key, not display text.
     label: { type: String, required: true },
-    // Present => render as a dropdown group. Each child is
-    // { to, icon, label }; labels are i18n keys, as on this component.
     children: { type: Array, default: null },
     groupKey: { type: String, default: '' },
 })

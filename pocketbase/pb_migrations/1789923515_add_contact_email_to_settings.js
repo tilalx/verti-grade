@@ -1,12 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // DSA Art. 11/12 public point of contact, and the second recipient of
-        // the new-report alert alongside every manage_reports holder.
-        //
-        // The settings collection is publicly readable (listRule: ''), which is
-        // correct for a published contact address -- and exactly why no SMTP
-        // credential may ever be stored here. SMTP is configured in PocketBase.
         const collection = app.findCollectionByNameOrId('68oae2zwn6jtsd4')
 
         collection.fields.addAt(

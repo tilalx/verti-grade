@@ -13,13 +13,6 @@ export interface AuditRow {
     created: string
 }
 
-/**
- * Reads the audit log as whoever `page` is signed in as.
- *
- * Ownership rule, same as createComment/createReport: with `fullyParallel`
- * sibling tests are writing to this table constantly, so never assert on
- * `.first()` — always filter by the record id the calling test just touched.
- */
 export async function fetchAuditRows(
     page: Page,
     filter: string,
@@ -32,7 +25,6 @@ export async function fetchAuditRows(
     return (body.items ?? []) as AuditRow[]
 }
 
-/** Reads the audit log with no credentials at all. */
 export async function fetchAuditRowsAnonymously(page: Page) {
     const res = await page.request.get(
         '/api/collections/audit_logs/records?perPage=200',
@@ -40,7 +32,6 @@ export async function fetchAuditRowsAnonymously(page: Page) {
     return await res.json()
 }
 
-/** Polls until an entry for `recordId` shows up, since the hook writes after the response. */
 export async function waitForAuditRow(
     page: Page,
     filter: string,

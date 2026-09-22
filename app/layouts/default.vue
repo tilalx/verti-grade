@@ -9,8 +9,6 @@
         <LayoutFootBar :settings="settings" />
     </div>
     <GlobalSnackbar />
-    <!-- The navbar now server-renders, so it's no longer a hydration signal
-         for gotoSettled() (e2e/support/nav.ts) — this marker is. -->
     <ClientOnly>
         <div data-testid="page-hydrated" hidden />
     </ClientOnly>
@@ -51,8 +49,6 @@ watch(settingsData, (val) => {
     if (val) settings.value = val
 })
 
-// Resolved during SSR so the navbar's permission-gated links are in the
-// server HTML. Transfers via useState payload; onMounted re-verifies.
 await callOnce('user-permissions', refreshPermissions)
 
 const refreshSession = async () => {
@@ -66,8 +62,6 @@ const refreshSession = async () => {
     }
 }
 
-// Rendered into the SSR'd <head>, so the custom icon is the first one the
-// browser sees instead of a post-hydration swap.
 useHead(
     computed(() => ({
         link: [
@@ -90,10 +84,6 @@ async function subscribeToRole(roleId) {
     unsubRole?.()?.catch?.(() => {})
     if (!roleId) return
     unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
-        // Roles can be deleted from the admin UI now. The delete path reassigns
-        // holders first, and that user update already triggers a refresh via the
-        // users subscription — this is the backstop for a role removed any
-        // other way, which would otherwise leave stale permissions until reload.
         if (e.action === 'update' || e.action === 'delete') refreshPermissions()
     })
 }
@@ -107,7 +97,6 @@ async function subscribeToUser(userId) {
             const oldRole = pb.authStore.record?.role
             pb.authStore.save(pb.authStore.token, e.record)
             isLoggedIn.value = true
-            // If the user's role changed, refresh permissions and resubscribe
             if (e.record.role !== oldRole) {
                 refreshPermissions()
                 subscribeToRole(e.record.role)
@@ -121,13 +110,8 @@ onMounted(async () => {
         if (pb.authStore.isValid) {
             await refreshSession()
         }
-        // Always resolve permissions, even when logged out — refreshPermissions()
-        // handles the anonymous case itself (empty permissions, loaded=true).
-        // Skipping this for anonymous visitors left `can()`'s fail-open default
-        // in effect forever, showing every admin nav link to logged-out users.
         await refreshPermissions()
 
-        // Reflect any local auth store changes immediately (login/logout on this tab)
         unsubAuthChange = pb.authStore.onChange((token, record) => {
             isLoggedIn.value = !!token
             if (token && record?.id) {
@@ -140,17 +124,14 @@ onMounted(async () => {
             }
         })
 
-        // Subscribe to current user record for cross-device auth sync
         if (pb.authStore.isValid && pb.authStore.record?.id) {
             await subscribeToUser(pb.authStore.record.id)
         }
 
-        // Subscribe to role changes for realtime permission updates
         if (pb.authStore.isValid && pb.authStore.record?.role) {
             await subscribeToRole(pb.authStore.record.role)
         }
 
-        // Realtime settings sync across devices
         unsubSettings = await pb
             .collection('settings')
             .subscribe('settings_123456', (e) => {
@@ -199,14 +180,6 @@ onBeforeUnmount(() => {
     top: 0;
 }
 
-/*
- * Vuetify's v-main padding-top (offsetting the fixed app-bar) is computed
- * client-side by its layout system once the app-bar registers its height,
- * so server-rendered HTML has no top padding — content briefly renders
- * behind the navbar until hydration applies the inline style. This fallback
- * matches NavBar.vue's hardcoded app-bar height so first paint is correct;
- * Vuetify's own inline style takes over (and matches) once hydrated.
- */
 #main-content {
     padding-top: 64px;
 }

@@ -1,11 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * The email-change mail used to link into the PocketBase superuser panel
- * (/_/#/auth/confirm-email-change/...). It now lands here.
- */
-
 test('blocks submit until the password is filled in', async ({ page }) => {
     await gotoSettled(page, '/auth/confirm-email-change/looks-like-a-token')
     await expect(page.getByTestId('email-change-form')).toBeVisible()

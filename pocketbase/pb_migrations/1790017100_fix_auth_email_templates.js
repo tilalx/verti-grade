@@ -1,9 +1,5 @@
 /// <reference path="../pb_data/types.d.ts" />
 
-// The verification and email-change templates still pointed at the PocketBase
-// superuser panel (/_/#/auth/...), so a regular user clicking either link
-// landed in an admin UI they cannot use. 1773763351 already did this for the
-// password reset template; these two were missed.
 const APP_VERIFY = '{APP_URL}/auth/confirm-verification/{TOKEN}'
 const PB_VERIFY = '{APP_URL}/_/#/auth/confirm-verification/{TOKEN}'
 const APP_EMAIL_CHANGE = '{APP_URL}/auth/confirm-email-change/{TOKEN}'

@@ -84,8 +84,6 @@ const props = defineProps<{
 const { locale } = useI18n()
 const dialog = ref(false)
 
-// Release bodies are GitHub markdown; render as readable plain text
-// instead of pulling in a markdown library (avoids v-html/XSS).
 const changelog = computed(() =>
     (props.notes ?? '')
         .replace(/\r\n/g, '\n')

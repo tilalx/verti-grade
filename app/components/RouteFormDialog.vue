@@ -134,7 +134,6 @@
                     elevation="0"
                 />
 
-                <!-- Palette: similar colors when picker changed, default otherwise -->
                 <div class="d-flex flex-wrap ga-1 mt-2 mb-1">
                     <button
                         v-for="c in activePalette"
@@ -304,8 +303,6 @@ const form = reactive({
     archived: false,
 })
 
-// Snapshot taken once the dialog is populated; drives the persistent flag so
-// an outside click can't silently discard a half-filled form.
 const openSnapshot = ref('')
 const hasChanges = computed(
     () => dialogOpen.value && JSON.stringify(form) !== openSnapshot.value,
@@ -491,7 +488,6 @@ async function submit() {
             await pb.collection('routes').create(payload)
         }
 
-        // Carry the id on edits so the parent can tell "created" from "saved".
         const savedId = isEditMode.value ? editRouteId.value : undefined
         close()
         emit('saved', savedId ? { ...payload, id: savedId } : payload)

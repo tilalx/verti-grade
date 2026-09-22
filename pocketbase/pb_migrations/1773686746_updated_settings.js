@@ -3,7 +3,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('68oae2zwn6jtsd4')
 
-        // add field
         collection.fields.addAt(
             7,
             new Field({
@@ -22,7 +21,6 @@ migrate(
             }),
         )
 
-        // add field
         collection.fields.addAt(
             8,
             new Field({
@@ -46,10 +44,8 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('68oae2zwn6jtsd4')
 
-        // remove field
         collection.fields.removeById('text1730822299')
 
-        // remove field
         collection.fields.removeById('text3939648858')
 
         return app.save(collection)

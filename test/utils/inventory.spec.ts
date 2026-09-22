@@ -1,11 +1,3 @@
-/**
- * Tests for app/utils/inventory.ts.
- *
- * These import the real implementation. The previous version of this spec
- * inlined its own copies of the storage helpers against a key the app never
- * wrote ('verti-grade:scanned-route-ids'), so it passed regardless of the
- * page's behaviour.
- */
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
     INVENTORY_STORAGE_KEY,

@@ -34,9 +34,6 @@
                 {{ t('permissions.roleColor') }}
             </div>
 
-            <!-- Swatches first: they are the whole answer for almost every
-                 role, and they are the only colors guaranteed to stay legible
-                 as a chip in both themes. -->
             <div class="d-flex flex-wrap ga-2 align-center">
                 <button
                     v-for="c in ROLE_COLORS"
@@ -120,8 +117,6 @@
 import { required, maxLength } from '~/utils/validation'
 import { toHex6, isProtectedRole, readableTextOn } from '~/utils/roles'
 
-// A dozen mid-tone hues: dark enough to read on a light chip, light enough to
-// read on a dark one, which a free-form picker cannot promise.
 const ROLE_COLORS = [
     '#EF5350',
     '#EC407A',
@@ -138,10 +133,6 @@ const ROLE_COLORS = [
 ]
 
 const props = defineProps({
-    /**
-     * The role being edited, a blank object for a new one, or `null` to close.
-     * Mirrors the prop-watch convention in `user/EditUser.vue`.
-     */
     role: { type: Object, default: null },
 })
 
@@ -163,11 +154,6 @@ const original = reactive({ name: '', description: '', color: '' })
 
 const isEdit = computed(() => !!props.role?.id)
 
-/**
- * Renaming the admin role would silently disarm two guards at once: the
- * client-side safety net in `usePermissions.can()` and the `name != "admin"`
- * clause in `roles.deleteRule`. Its color and description stay editable.
- */
 const nameLocked = computed(
     () => isEdit.value && isProtectedRole({ name: props.role.name }),
 )
@@ -192,8 +178,6 @@ function pickSwatch(hex) {
 }
 
 function toggleCustom() {
-    // v-color-picker has no concept of "no color" — handed an empty string it
-    // has nothing to parse, so open it on a real value it can edit.
     if (!customOpen.value && !draft.color) draft.color = ROLE_COLORS[0]
     customOpen.value = !customOpen.value
 }
@@ -212,7 +196,6 @@ watch(
         })
         Object.assign(original, { ...draft })
         nameError.value = ''
-        // Reopen on the swatch row unless the existing color is off-palette.
         customOpen.value =
             !!draft.color && !ROLE_COLORS.some((c) => isSelected(c))
         dialog.value = true
@@ -220,8 +203,6 @@ watch(
     { immediate: true },
 )
 
-// Closing by backdrop/escape has to reach the parent too, or its `role` ref
-// stays set and the dialog can never be reopened for the same record.
 watch(dialog, (open) => {
     if (!open) emit('close')
 })
@@ -234,8 +215,6 @@ async function save() {
     const { valid: formValid } = await form.value.validate()
     if (!formValid) return
 
-    // `idx_roles_name` is unique; the picker sends whatever was typed and the
-    // collision comes back as a 400 on the `name` field.
     const payload = {
         name: nameLocked.value ? props.role.name : draft.name.trim(),
         description: draft.description.trim(),

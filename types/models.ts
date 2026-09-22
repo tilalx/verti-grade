@@ -1,10 +1,3 @@
-/*
- * Central TypeScript models for the Verti-Grade domain.
- * These types mirror the PocketBase collections we consume in the
- * application so that both client and server code share a single source
- * of truth for record shapes.
- */
-
 export type RecordId = string
 
 export interface BaseRecord {
@@ -64,7 +57,6 @@ export interface PermissionRecord extends BaseRecord {
 export interface RoleRecord extends BaseRecord {
     name: string
     description?: string | null
-    /** Chip color as `#RRGGBB`; unset falls back to the default chip surface. */
     color?: string | null
     permissions?: RecordId[] | null
 }
@@ -106,11 +98,6 @@ export type ReportReason =
 export type ReportStatus = 'open' | 'actioned' | 'rejected'
 export type ReportDecision = 'content_removed' | 'content_kept'
 
-/**
- * A DSA Art. 16 notice. content_id is a plain id, not a relation: the report
- * has to outlive the content it reports, because it is the record proving the
- * operator acted on the notice.
- */
 export interface ReportRecord extends BaseRecord {
     content_type: ReportContentType
     content_id: RecordId
@@ -141,18 +128,6 @@ export type AuditAction =
     | 'email_change_request'
     | 'email_change'
 
-/**
- * One user action, written server-side by the hooks in pb_hooks/audit.pb.js.
- *
- * changed_fields holds field NAMES and never values: a value-carrying log
- * would be a second copy of every collection, with its own retention clock
- * and its own erasure problem.
- *
- * actor is empty for anonymous visitors and for PocketBase superusers, whose
- * ids belong to a different collection than the relation targets -- read
- * actor_label for those. It cascades, so deleting a user takes their entries
- * with them.
- */
 export interface AuditLogRecord extends BaseRecord {
     actor?: RecordId | null
     actor_label?: string | null
@@ -163,14 +138,6 @@ export interface AuditLogRecord extends BaseRecord {
     ip?: string | null
 }
 
-/**
- * One queued in-app notification, addressed to a single user.
- *
- * `type` is free text rather than a union so a new event kind costs an i18n
- * key (notifications.center.types.<type>) and nothing else -- the wording is
- * never stored, only the type and its interpolation `params`, so the queue
- * reads in whichever locale the recipient uses.
- */
 export interface NotificationRecord extends BaseRecord {
     user: RecordId
     type: string

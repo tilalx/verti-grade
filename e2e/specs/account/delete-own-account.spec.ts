@@ -3,12 +3,6 @@ import { gotoSettled } from '../../support/nav'
 import PocketBase from 'pocketbase'
 import { authAsSuperuser, getRoleIds } from '../../support/seed'
 
-/**
- * 1774100001 blocked self-deletion outright; 1790017200 allows it so the
- * account owner can close their own account. Uses a throwaway account — the
- * shared fixtures are reused by every other spec.
- */
-
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 const PASSWORD = 'E2ePassw0rd!'
 
@@ -49,10 +43,8 @@ test('lets a user delete their own account', async ({ page, testPrefix }) => {
     await expect(page.getByTestId('confirm-dialog')).toBeVisible()
     await page.getByTestId('confirm-dialog-confirm').click()
 
-    // Signed out and bounced back to login.
     await page.waitForURL(/\/auth\/login/)
 
-    // And genuinely gone from PocketBase, not just logged out client-side.
     await expect(
         pb.collection('users').getOne(id, { requestKey: null }),
     ).rejects.toThrow()

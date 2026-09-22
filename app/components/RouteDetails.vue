@@ -1,6 +1,5 @@
 <template>
     <div class="view-ratings-wrapper">
-        <!-- The button that opens the reviews dialog -->
         <v-btn
             color="primary"
             data-testid="route-details-open"
@@ -9,9 +8,6 @@
             {{ $t('ratings.ratings') }}
         </v-btn>
 
-        <!-- Centered dialog on desktop, bottom sheet on mobile. v-bottom-sheet
-             stayed bottom-anchored at every width, which left a cramped strip
-             on a 1440px table; the shared shell owns that breakpoint switch. -->
         <LayoutDialogShell
             v-model="isSheetOpen"
             max-width="600"
@@ -31,9 +27,6 @@
                     class="mb-3"
                 >
                     <template #actions>
-                        <!-- DSA Art. 16(1): the reporting path has to be on
-                             every item wherever it is publicly displayed, not
-                             only on the route page. -->
                         <v-btn
                             icon="mdi-flag-outline"
                             variant="text"
@@ -87,7 +80,6 @@ const isSheetOpen = ref(false)
 const isLoading = ref(false)
 const reviews = ref<CommentCardItem[]>([])
 
-// One report dialog for the whole list, retargeted per card.
 const reportDialog = ref(false)
 const reportTarget = ref<string | null>(null)
 const reportUrl = computed(() =>

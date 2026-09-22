@@ -1,20 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // Append-only record of what users do, fed by the hooks in
-        // pb_hooks/audit.pb.js.
-        //
-        // record_id is plain text, not a relation, for the same reason as
-        // reports.content_id: the log has to outlive whatever it describes,
-        // and a delete entry is worthless if deleting the record erases it.
-        //
-        // actor, by contrast, IS a cascading relation. Deleting a user is
-        // meant to erase that user, so their entries go with them (GDPR
-        // Art. 17). The admin's own "deleted user X" entry survives, so the
-        // fact of the deletion stays on record.
-        //
-        // There is no `updated` autodate and no update rule: entries are
-        // never edited, only written and eventually pruned.
         const collection = new Collection({
             createRule: null,
             deleteRule: null,
@@ -151,9 +137,6 @@ migrate(
                 'CREATE INDEX `idx_audit_logs_collection_name` ON `audit_logs` (`collection_name`)',
                 'CREATE INDEX `idx_audit_logs_actor_created` ON `audit_logs` (`actor`, `created`)',
             ],
-            // The `@request.auth.id != ""` guard is load-bearing: without it an
-            // unauthenticated caller matches `actor = ""` and reads every
-            // anonymous entry.
             listRule:
                 '@request.auth.id != "" && (@request.auth.role.permissions.name ?= "view_audit_log" || actor = @request.auth.id)',
             name: 'audit_logs',

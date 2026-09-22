@@ -183,11 +183,6 @@ const subtitle = computed(
 )
 
 // ── Submit ─────────────────────────────────────────────────────────
-// PocketBase keys several distinct failures on `token` —
-// validation_invalid_token_payload for a malformed one, validation_invalid_token
-// for an expired one, plus collection/email mismatches. All of them mean the
-// same thing to the user: this link is dead. A wrong password is keyed on
-// `password` instead, and stays an inline error rather than killing the form.
 function isTokenError(err) {
     return !!err?.data?.data?.token
 }
@@ -201,8 +196,6 @@ async function submitChange() {
         await pb
             .collection('users')
             .confirmEmailChange(token.value, password.value)
-        // PocketBase clears the auth store on success -- the old token is tied
-        // to the old address, so the user has to sign in again either way.
         pb.authStore.clear()
         step.value = 'done'
     } catch (err) {
@@ -231,9 +224,6 @@ async function submitChange() {
     border-radius: 50%;
     border: 2px solid rgba(var(--v-theme-success), 0.3);
     background: rgba(var(--v-theme-success), 0.08);
-    /* Vuetify 4 spacing utilities live in a CSS layer, so this unlayered
-       scoped rule wins over an mb-* class on the same element -- the gap has
-       to be declared here or the ring sits flush against the button. */
     margin: 0 auto 24px;
 }
 </style>

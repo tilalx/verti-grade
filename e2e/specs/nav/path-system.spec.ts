@@ -1,17 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * Paths are grouped by audience, and the nav mirrors that grouping:
- *   /manage/*  day-to-day gym work, one permission each
- *   /admin/*   users and settings
- *   /account/* your own, no permission
- *
- * The point of the grouping is that the desktop link row stays a fixed
- * width as pages get added — it used to grow until it pushed the user menu
- * off the right edge.
- */
-
 const TOP_LEVEL = ['nav-link-home', 'nav-link-manage-routes']
 const GROUPS = ['nav-group-manage', 'nav-group-admin']
 
@@ -26,12 +15,10 @@ test('the desktop link row is the four grouped items, not one per page', async (
     for (const id of [...TOP_LEVEL, ...GROUPS]) {
         await expect(row.getByTestId(id)).toBeVisible()
     }
-    // An admin can reach all eight pages, but only these four are in the row.
     await expect(row.locator('button')).toHaveCount(
         TOP_LEVEL.length + GROUPS.length,
     )
 
-    // The whole row fits left of the user menu.
     const rowBox = (await row.boundingBox())!
     const menuBox = (await page
         .getByTestId('user-menu-activator')
@@ -71,13 +58,10 @@ test('a group with no permitted page is left out entirely', async ({
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    // A route setter manages no users and no settings, so the Admin group
-    // would otherwise render as a button opening an empty menu.
     await expect(page.getByTestId('nav-group-admin')).toHaveCount(0)
     await expect(page.getByTestId('nav-link-manage-routes')).toBeVisible()
 })
 
-// The old flat paths went out on staff bookmarks, so they still have to land.
 const MOVED = [
     ['/admin/routes', '/manage/routes'],
     ['/admin/comments', '/manage/comments'],

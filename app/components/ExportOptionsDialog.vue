@@ -9,8 +9,6 @@ const { t } = useI18n()
 
 const STORAGE_KEY = 'verti-grade.export-columns'
 
-// Default order mirrors the route table; the QR code stays off by default
-// because it makes every row tall.
 const EXPORT_COLUMNS = [
     { key: 'color', labelKey: 'climbing.color' },
     { key: 'name', labelKey: 'climbing.routename' },
@@ -46,7 +44,6 @@ function sanitizeOrder(keys: unknown): string[] | null {
         return null
     }
     const known = keys.filter((key) => DEFAULT_ORDER.includes(key))
-    // Keys added since the selection was stored are appended in default order.
     const missing = DEFAULT_ORDER.filter((key) => !known.includes(key))
     return known.length ? [...known, ...missing] : null
 }
@@ -68,9 +65,7 @@ function readStored(): { order: string[]; selected: string[] } {
                     : [...DEFAULT_SELECTED],
             }
         }
-    } catch {
-        // no usable selection stored — fall back to the defaults
-    }
+    } catch {}
     return { order: [...DEFAULT_ORDER], selected: [...DEFAULT_SELECTED] }
 }
 
@@ -102,9 +97,7 @@ const confirm = () => {
             STORAGE_KEY,
             JSON.stringify({ order: order.value, selected: selected.value }),
         )
-    } catch {
-        // persisting the selection is best-effort
-    }
+    } catch {}
 
     emit('confirm', {
         columns,

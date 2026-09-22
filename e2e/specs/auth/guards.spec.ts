@@ -31,9 +31,6 @@ test.describe('anonymous guard', () => {
 })
 
 test.describe('routesetter guard', () => {
-    // manage_users / manage_settings are admin-only permissions; the
-    // routesetter role has manage_routes, view_analytics, manage_comments,
-    // run_inventory but not those two.
     test('is redirected away from /admin/users', async ({
         setterPage: page,
     }) => {
@@ -53,8 +50,6 @@ test.describe('routesetter guard', () => {
     test('the users API refuses a create from a routesetter session', async ({
         setterPage: page,
     }) => {
-        // authHeader() reads the pb_auth cookie off the document, so a page
-        // on the app origin has to be loaded before the token is readable.
         await gotoSettled(page, '/manage/routes', '**/manage/routes')
         const res = await page.request.post('/api/collections/users/records', {
             headers: await authHeader(page),

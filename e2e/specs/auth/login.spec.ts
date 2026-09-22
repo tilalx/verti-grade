@@ -18,8 +18,6 @@ test.describe('login', () => {
         await page.waitForURL('**/manage/routes')
         await expect(page.getByTestId('routes-create-open')).toBeVisible()
 
-        // The redirect is the confirmation -- no success toast rides along
-        // into the dashboard.
         await expect(page.getByTestId('global-snackbar')).toBeHidden()
     })
 
@@ -42,9 +40,6 @@ test.describe('login', () => {
         page,
     }) => {
         await gotoSettled(page, '/auth/login')
-        // Regex, not a glob: the SDK may append query params, and a glob that
-        // stops at the path silently matches nothing -- which let this test
-        // pass on the success toast instead of on the error it claims to check.
         let aborted = 0
         await page.route(
             /\/api\/collections\/users\/auth-with-password/,

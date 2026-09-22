@@ -28,8 +28,6 @@
                 </div>
             </template>
 
-            <!-- The invite mail is what makes the account usable. Without
-                 SMTP the new user gets a random password they can never learn. -->
             <v-alert
                 v-if="!mailConfigured"
                 type="warning"
@@ -208,15 +206,10 @@ async function submit() {
 
     saving.value = true
     try {
-        // Generate username from firstname + lastname
         const username = ((user.firstname || '') + (user.name || ''))
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
 
-        // Throwaway password: the invite mail below is how the user sets a
-        // real one. PocketBase also flips verified=true on reset confirm, and
-        // the users collection authRule is verified=true -- so without that
-        // mail the account cannot log in at all.
         const randomPassword = crypto.randomUUID()
 
         const formData = new FormData()
@@ -232,8 +225,6 @@ async function submit() {
 
         await pb.collection('users').create(formData)
 
-        // Separate try: the record exists either way, so a mail failure must
-        // not read as "user not created".
         try {
             await pb.collection('users').requestPasswordReset(user.email)
             notify(t('notifications.success.userInvited'))

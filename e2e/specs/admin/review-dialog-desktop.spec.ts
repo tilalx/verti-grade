@@ -19,16 +19,12 @@ test('edit review dialog puts stars and difficulty on one row', async ({
         .getByTestId('review-form-difficulty')
         .boundingBox()
 
-    // Side by side, not stacked: difficulty starts right of the stars and
-    // overlaps their vertical band.
     expect(difficulty!.x).toBeGreaterThan(rating!.x + rating!.width)
     expect(difficulty!.y).toBeLessThan(rating!.y + rating!.height)
 
-    // ...and on the same middle line, not floating above or below it.
     const center = (b: { y: number; height: number }) => b.y + b.height / 2
     expect(Math.abs(center(rating!) - center(difficulty!))).toBeLessThan(8)
 
-    // Centered dialog, not a bottom sheet pinned to the viewport floor.
     const box = (await dialog.boundingBox())!
     const viewport = page.viewportSize()!
     expect(viewport.height - (box.y + box.height)).toBeGreaterThan(24)

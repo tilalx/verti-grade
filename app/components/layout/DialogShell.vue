@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * The one dialog shell. Owns max-width, radius, header/close affordance and
- * the padding rhythm so individual dialogs only supply body + actions.
- * Attributes (notably `data-testid`) fall through to the inner v-card.
- */
 defineOptions({ inheritAttrs: false })
 
 const open = defineModel<boolean>({ default: false })
@@ -14,27 +9,17 @@ const props = withDefaults(
         subtitle?: string
         maxWidth?: string | number
         persistent?: boolean
-        /** Show the header close button. */
         closable?: boolean
         scrollable?: boolean
-        /** Drop the body padding when the slot brings its own (tabs, windows). */
         flush?: boolean
-        /** Slide up from the bottom edge on phones instead of centering. */
         sheetOnMobile?: boolean
     }>(),
     { maxWidth: 520, scrollable: true },
 )
 
-// Phones only, the same 600px cut FilterBar uses for its own bottom sheet.
-// Not smAndDown: Vuetify 4's thresholds put that at 840px, so small tablets
-// and landscape phones started getting a sheet docked to the bottom edge.
 const { smAndUp } = useDisplay()
 const asSheet = computed(() => props.sheetOnMobile && !smAndUp.value)
 
-// A VDialog docked to the bottom edge. Vuetify's own `v-bottom-sheet` classes
-// are not reusable here: their CSS ships in the VBottomSheet chunk, so it is
-// absent on any page that renders no real bottom sheet. The styles below are
-// ours; `dialog-bottom-transition` lives in Vuetify's always-loaded core.
 const sheetProps = computed(() =>
     asSheet.value
         ? {
@@ -100,25 +85,15 @@ const sheetProps = computed(() =>
 </template>
 
 <style>
-/* Unscoped: the overlay content is teleported out of this component's DOM.
-   Unlayered, so it beats Vuetify's @layer rules without a specificity war. */
 .v-overlay__content.dialog-shell--sheet {
     align-self: flex-end;
     flex: 0 1 auto;
     width: 100%;
     max-width: 100%;
     margin: 0;
-    /* Vuetify positions the content with an inline `left` that centres it on
-       the page box. While an overlay holds the scroll lock that box is the
-       scrollbar's width narrower than the viewport this sheet spans, so the
-       centring pushed it half a scrollbar off to the left. A full-bleed sheet
-       belongs on the edge; !important because that `left` is inline. */
     left: 0 !important;
 }
 
-/* v-card-title is nowrap + ellipsis by default, which clips a slotted header
-   that carries a second line. Let it wrap; callers that want one clipped line
-   still opt in with text-truncate. */
 .dialog-shell__title {
     white-space: normal;
 }

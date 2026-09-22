@@ -1,8 +1,4 @@
 <template>
-    <!-- A section of the page, not a card of its own. The user list above is a
-         bare grid of bordered cards under the page header; wrapping this in an
-         outer card would nest cards inside cards and read as a widget dropped
-         onto the page instead of part of it. -->
     <section class="role-section">
         <LayoutSectionHeader
             :title="t('permissions.title')"
@@ -34,9 +30,6 @@
             :title="t('permissions.noRoles')"
         />
 
-        <!-- One card per role at every breakpoint, laid out on the same grid as
-             the user cards. The matrix this replaced was nine fixed-width
-             columns wide, so it overflowed the page long before phone width. -->
         <v-row v-else data-testid="role-permissions-table">
             <v-col v-for="role in roles" :key="role.id" cols="12" md="6" lg="4">
                 <v-card
@@ -46,9 +39,6 @@
                     class="role-card d-flex flex-column"
                     :data-testid="`role-permissions-row-${role.name}`"
                 >
-                    <!-- Deliberately the same anatomy as a user card: avatar,
-                         title, subtitle, chip in the append slot, actions along
-                         the bottom. -->
                     <v-card-item class="pb-1 pt-3">
                         <template #prepend>
                             <v-avatar
@@ -137,8 +127,6 @@
                                 t('permissions.editRole')
                             }}</v-tooltip>
                         </v-btn>
-                        <!-- The admin role is the permission safety net; the
-                             server refuses to delete it too (roles.deleteRule). -->
                         <v-btn
                             v-if="!isProtectedRole(role)"
                             icon
@@ -166,8 +154,6 @@
             @close="editingRole = null"
         />
 
-        <!-- Not ConfirmDialog: deleting a role that people hold needs to ask
-             where they go, and that dialog is confirm-only. -->
         <LayoutDialogShell
             v-model="deleteDialog"
             :title="t('permissions.deleteRole')"
@@ -247,7 +233,6 @@ import {
 const { t } = useI18n()
 const pb = usePocketbase()
 
-/** Matches settings.batch.maxRequests on the server. */
 const REASSIGN_BATCH_SIZE = 200
 
 const loading = ref(true)
@@ -290,10 +275,6 @@ async function togglePermission(role, perm) {
         currentPerms.splice(idx, 1)
     }
 
-    // Apply optimistically so the checkbox (bound to role.permissions via
-    // hasPermission) always reflects the click immediately, then roll back
-    // on failure — otherwise a rejected update leaves the prop unchanged
-    // and Vuetify's checkbox never resyncs to the (correct) prior state.
     role.permissions = currentPerms
     saving.value = true
     try {
@@ -333,11 +314,6 @@ async function onRoleSaved(kind) {
     await refreshRoles()
 }
 
-/**
- * The editor keeps its own copy of the role list, but every role picker in the
- * app reads the shared `useRoles()` payload — so a create or delete has to
- * invalidate that too or the users filter keeps offering a role that is gone.
- */
 async function refreshRoles() {
     await Promise.all([fetchData({ silent: true }), refreshNuxtData('roles')])
 }
@@ -362,8 +338,6 @@ async function confirmDelete(role) {
         if (err?.isAbort) return
         console.error('Failed to count role holders:', err)
         notifyError(t('permissions.loadError'))
-        // Unknown count: close rather than offer a delete that might strip
-        // every holder of their role without moving them anywhere.
         deleteDialog.value = false
     } finally {
         countingHolders.value = false
@@ -376,20 +350,12 @@ async function deleteRole() {
 
     deleting.value = true
     try {
-        // Move the holders first: PocketBase does not cascade here, so a role
-        // deleted out from under them would leave those accounts with no role
-        // and therefore no permissions at all.
         if (holderCount.value > 0) {
             const holders = await pb.collection('users').getFullList({
                 filter: pb.filter('role = {:id}', { id: role.id }),
                 fields: 'id',
                 requestKey: 'roleHolders',
             })
-            // PocketBase caps a batch at 200 requests (settings.batch
-            // .maxRequests, set in 1783803501), and a popular role can hold
-            // more members than that. Chunked, and safe to retry: a failure
-            // part-way leaves the role in place with the moved users already
-            // moved, so running the delete again finishes the job.
             for (let i = 0; i < holders.length; i += REASSIGN_BATCH_SIZE) {
                 const batch = pb.createBatch()
                 for (const u of holders.slice(i, i + REASSIGN_BATCH_SIZE)) {
@@ -417,8 +383,6 @@ async function deleteRole() {
 // ── Data ───────────────────────────────────────────────────────────────────
 
 async function fetchData({ silent = false } = {}) {
-    // A refresh after a create or delete keeps the grid on screen: flipping
-    // `loading` would swap the whole card back to a spinner for one round trip.
     if (!silent) loading.value = true
     try {
         const [rolesData, permsData] = await Promise.all([
@@ -442,9 +406,6 @@ async function fetchData({ silent = false } = {}) {
     }
 }
 
-// Visible page content, not a dialog, so it's fetched during SSR. Not awaited:
-// a top-level await here would make this an async-setup component, which
-// breaks template refs on parents that aren't wrapped in <Suspense>.
 const { data: initial } = useAsyncData('role-permissions', async () => {
     await fetchData()
     return { roles: roles.value, permissions: allPermissions.value }

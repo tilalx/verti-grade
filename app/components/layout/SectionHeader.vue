@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * A second-level heading for a section within a page, sized and spaced to rhyme
- * with `LayoutPageHeader` rather than compete with it. Same anatomy — title,
- * optional subtitle, actions pinned right, stacking on a phone — so a page made
- * of several sections reads as one system instead of a stack of widgets.
- */
 defineProps<{
     title: string
     subtitle?: string

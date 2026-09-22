@@ -13,8 +13,6 @@
             >
 
             <div class="audit-card__text">
-                <!-- What happened, first and in the strongest type. The actor
-                     and the address are context, not the headline. -->
                 <div class="audit-card__summary">
                     <span
                         class="font-weight-medium"
@@ -52,8 +50,6 @@
                     </template>
                 </div>
 
-                <!-- Field names only. The log never stores what a value
-                     changed to, so there is nothing else to show here. -->
                 <div
                     v-if="changedFields.length"
                     class="audit-card__meta text-body-small"
@@ -97,8 +93,6 @@ const actorName = computed(() => {
     return props.entry.actor_label || t('audit.anonymous')
 })
 
-// Only the record actions need naming what they acted on; "Signed in · User"
-// reads worse than "Signed in".
 const targetLabel = computed(() => {
     const name = props.entry.collection_name
     if (!name || !isRecordAction(props.entry.action)) return ''
@@ -116,8 +110,6 @@ const relativeTime = computed(() =>
     timeAgo(props.entry.created, t, locale.value),
 )
 
-// PocketBase stores `2026-09-21 06:25:33.187Z`; the space has to become a T
-// before Date will parse it the same way in every browser.
 const absoluteTime = computed(() => {
     if (!props.entry.created) return ''
     return new Date(props.entry.created.replace(' ', 'T')).toLocaleString(

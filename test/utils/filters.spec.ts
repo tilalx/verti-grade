@@ -1,16 +1,4 @@
-/**
- * Tests for filtering logic mirrored from app/pages/manage/comments.vue and
- * the pbFilter builder from app/pages/index.vue.
- *
- * Since these functions close over reactive refs inside Vue SFCs they cannot
- * be imported directly.  The tests inline the same pure logic so that it is
- * verified independently from the component.
- */
 import { describe, it, expect } from 'vitest'
-
-// ---------------------------------------------------------------------------
-// filteredComments – logic from app/pages/manage/comments.vue
-// ---------------------------------------------------------------------------
 
 interface Comment {
     difficulty: number | null
@@ -27,8 +15,10 @@ function filteredComments(
     search: string,
 ): Comment[] {
     return comments.filter((comment) => {
-        const difficultyMatch = !selectedDifficulty || comment.difficulty === selectedDifficulty
-        const locationMatch = !selectedLocation || comment.location === selectedLocation
+        const difficultyMatch =
+            !selectedDifficulty || comment.difficulty === selectedDifficulty
+        const locationMatch =
+            !selectedLocation || comment.location === selectedLocation
         const term = search?.toLowerCase() ?? ''
         const searchMatch =
             !term ||
@@ -40,9 +30,27 @@ function filteredComments(
 }
 
 const sampleComments: Comment[] = [
-    { difficulty: 5, location: 'Hanau', routeName: 'Blue Wave', comment: 'Great route!', userName: 'Alice' },
-    { difficulty: 7, location: 'Gelnhausen', routeName: 'Red Wall', comment: 'Very hard', userName: 'Bob' },
-    { difficulty: 5, location: 'Gelnhausen', routeName: 'Green Path', comment: 'Fun climb', userName: 'Carol' },
+    {
+        difficulty: 5,
+        location: 'Hanau',
+        routeName: 'Blue Wave',
+        comment: 'Great route!',
+        userName: 'Alice',
+    },
+    {
+        difficulty: 7,
+        location: 'Gelnhausen',
+        routeName: 'Red Wall',
+        comment: 'Very hard',
+        userName: 'Bob',
+    },
+    {
+        difficulty: 5,
+        location: 'Gelnhausen',
+        routeName: 'Green Path',
+        comment: 'Fun climb',
+        userName: 'Carol',
+    },
 ]
 
 describe('filteredComments', () => {
@@ -87,13 +95,11 @@ describe('filteredComments', () => {
     })
 
     it('returns empty array when nothing matches', () => {
-        expect(filteredComments(sampleComments, null, null, 'xyz-no-match')).toHaveLength(0)
+        expect(
+            filteredComments(sampleComments, null, null, 'xyz-no-match'),
+        ).toHaveLength(0)
     })
 })
-
-// ---------------------------------------------------------------------------
-// formatDate – logic from app/pages/manage/comments.vue
-// ---------------------------------------------------------------------------
 
 function formatDate(date: string | null | undefined): string | null {
     if (!date) return null
@@ -124,10 +130,6 @@ describe('formatDate (comments page)', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// pbFilter builder – logic from app/pages/index.vue
-// ---------------------------------------------------------------------------
-
 function buildPbFilter(opts: {
     selectedDifficulty: string
     selectedLocation: string
@@ -139,8 +141,7 @@ function buildPbFilter(opts: {
         parts.push(`difficulty = ${Number(opts.selectedDifficulty)}`)
     if (opts.selectedLocation)
         parts.push(`location = "${opts.selectedLocation}"`)
-    if (opts.selectedType)
-        parts.push(`type = "${opts.selectedType}"`)
+    if (opts.selectedType) parts.push(`type = "${opts.selectedType}"`)
     if (opts.searchRouteName.trim()) {
         const term = opts.searchRouteName.replace(/"/g, '\\"')
         parts.push(`name ~ "${term}"`)
@@ -149,30 +150,45 @@ function buildPbFilter(opts: {
 }
 
 describe('pbFilter builder', () => {
-    const empty = { selectedDifficulty: '', selectedLocation: '', selectedType: '', searchRouteName: '' }
+    const empty = {
+        selectedDifficulty: '',
+        selectedLocation: '',
+        selectedType: '',
+        searchRouteName: '',
+    }
 
     it('starts with archived = false when all filters are empty', () => {
         expect(buildPbFilter(empty)).toBe('archived = false')
     })
 
     it('appends a numeric difficulty filter', () => {
-        expect(buildPbFilter({ ...empty, selectedDifficulty: '7' })).toContain('difficulty = 7')
+        expect(buildPbFilter({ ...empty, selectedDifficulty: '7' })).toContain(
+            'difficulty = 7',
+        )
     })
 
     it('appends a quoted location filter', () => {
-        expect(buildPbFilter({ ...empty, selectedLocation: 'Hanau' })).toContain('location = "Hanau"')
+        expect(
+            buildPbFilter({ ...empty, selectedLocation: 'Hanau' }),
+        ).toContain('location = "Hanau"')
     })
 
     it('appends a quoted type filter', () => {
-        expect(buildPbFilter({ ...empty, selectedType: 'Boulder' })).toContain('type = "Boulder"')
+        expect(buildPbFilter({ ...empty, selectedType: 'Boulder' })).toContain(
+            'type = "Boulder"',
+        )
     })
 
     it('appends a name ~ search filter', () => {
-        expect(buildPbFilter({ ...empty, searchRouteName: 'wall' })).toContain('name ~ "wall"')
+        expect(buildPbFilter({ ...empty, searchRouteName: 'wall' })).toContain(
+            'name ~ "wall"',
+        )
     })
 
     it('escapes double-quotes in the search term', () => {
-        expect(buildPbFilter({ ...empty, searchRouteName: 'say "hi"' })).toContain('name ~ "say \\"hi\\""')
+        expect(
+            buildPbFilter({ ...empty, searchRouteName: 'say "hi"' }),
+        ).toContain('name ~ "say \\"hi\\""')
     })
 
     it('ignores a whitespace-only search term', () => {
@@ -187,6 +203,8 @@ describe('pbFilter builder', () => {
             selectedType: '',
             searchRouteName: '',
         })
-        expect(filter).toBe('archived = false && difficulty = 5 && location = "Hanau"')
+        expect(filter).toBe(
+            'archived = false && difficulty = 5 && location = "Hanau"',
+        )
     })
 })

@@ -2,12 +2,6 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 import { createComment, deleteComment } from '../../support/comments'
 
-/**
- * Every test here owns the comment it acts on. Reaching for `.first()` in the
- * shared seeded list raced the other tests in this file — they run in parallel
- * and delete or edit that same card.
- */
-
 test('shows seeded review stats and deletes a comment', async ({
     adminPage: page,
     testPrefix,
@@ -101,7 +95,6 @@ test('shows an error and keeps the comment when delete fails', async ({
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
     await expect(card).toBeVisible()
 
-    // Lift the abort before cleaning up, or the cleanup delete fails too.
     await page.unroute('**/api/collections/ratings/records/**')
     await deleteComment(page, id)
 })

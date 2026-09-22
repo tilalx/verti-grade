@@ -39,7 +39,6 @@
                 >
                     <template #filters>
                         <v-row density="comfortable" align="center">
-                            <!-- Sorting for the mobile card list (desktop sorts via table headers) -->
                             <v-col v-if="isMobile" cols="12" sm="6">
                                 <RouteSortControl
                                     :model-value="tableOptions.sortBy"
@@ -325,10 +324,6 @@
                         </v-col>
                     </v-row>
 
-                    <!-- Numbered pages need one 40px button each, which a
-                         375px phone cannot spare: they overflowed the page
-                         into a sideways scroll. Step buttons and a counter
-                         cost the same at any page count. -->
                     <nav
                         class="route-manager__mobile-pagination"
                         :aria-label="$t('table.pagination')"
@@ -448,10 +443,6 @@ const { t, locale } = useI18n()
 const { mdAndDown, width: displayWidth } = useDisplay()
 const { notify, error: notifyError } = useNotification()
 
-// Vuetify 4's thresholds are md 840 / lg 1145, so smAndDown handed the table
-// to 840px windows, where its eleven columns overflowed the wrapper and the
-// selection checkbox was clipped out of reach. The card list owns everything
-// below lg; the table starts where it fits.
 const isMobile = computed(() => mdAndDown.value)
 
 const {
@@ -546,9 +537,6 @@ const pageLength = computed(() =>
     Math.max(1, Math.ceil(totalItems.value / tableOptions.itemsPerPage)),
 )
 
-// One 40px button per page is what overflowed a 375px phone, so the strip is
-// a window: as many numbers as the row can hold beside the arrows and the
-// page-size select, centred on the page you are on.
 const PAGE_BUTTON = 36
 const pageWindowSize = computed(() => {
     const spare = displayWidth.value - 32 - 96 - 16 - 2 * PAGE_BUTTON
@@ -557,11 +545,6 @@ const pageWindowSize = computed(() => {
 
 const ELLIPSIS = '...'
 
-/**
- * The strip always ends in the first and last page, so a window that has
- * slid into the middle still says how much is on either side of it — three
- * bare numbers read like a three page list. Gaps collapse to an ellipsis.
- */
 const pageItems = computed(() => {
     const total = pageLength.value
     const current = tableOptions.page
@@ -570,8 +553,6 @@ const pageItems = computed(() => {
         return Array.from({ length: total }, (_, index) => index + 1)
     }
 
-    // The ellipses are narrower than a button but not free, so the window
-    // gives up one number to pay for them.
     const budget = Math.max(3, pageWindowSize.value - 1)
     const inner = Math.max(1, budget - 2)
     const start = Math.max(
@@ -758,8 +739,6 @@ const loadRoutes = async (options = {}) => {
     }
 }
 
-// The dialog only emits; without these the user gets no confirmation that a
-// route was actually created, edited or deleted.
 const onRouteSaved = async (payload) => {
     notify(
         t(
@@ -896,9 +875,6 @@ const onMobilePageChange = async (value) => {
 
     await loadRoutes({ page: value })
 
-    // The new page is a different height, so without this the reader is left
-    // wherever the previous page happened to end — mid-list, or scrolled past
-    // the cards entirely.
     const list = mobileListRef.value?.$el ?? mobileListRef.value
     list?.scrollIntoView({ block: 'start' })
 }
@@ -944,9 +920,6 @@ const queueReload = () => {
 
 const { subscribe } = usePbSubscription()
 
-// Fetched during SSR so the page is in the server HTML. The handler fills the
-// refs server-side and returns them for the payload; on hydration the handler
-// is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('admin-routes', async () => {
     await loadRoutes({
         page: tableOptions.page,
@@ -1004,9 +977,6 @@ useHead(() => ({
 .route-manager__comment {
     max-width: 260px;
     white-space: normal;
-    /* `word-break: break-word` is a legacy alias for `overflow-wrap: anywhere`,
-       which splits inside words AND collapses the column's min-content width,
-       so the cell shrank to a few characters. */
     overflow-wrap: break-word;
 }
 
@@ -1025,8 +995,6 @@ useHead(() => ({
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    /* Without this a wrapped stack fills the row edge to edge and the row
-       dividers sit flush against the chips, reading as a line through them. */
     padding-block: 6px;
 }
 
@@ -1046,36 +1014,26 @@ useHead(() => ({
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    /* Grouped rather than pushed to opposite ends: on a wide phone or a
-       tablet, space-between stranded the two controls a screen apart. */
     justify-content: center;
     align-items: center;
-    /* Pages differ in height, so a pager that sits after the last card lands
-       somewhere new on every tap. Sticking it to the bottom edge keeps it
-       under the thumb for as long as you keep stepping. */
     position: sticky;
     bottom: 0;
     z-index: 2;
     padding-block: 8px;
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-    /* Opaque with a hairline: cards scroll underneath it. */
     background: rgb(var(--v-theme-background));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .route-manager__page-size {
-    /* Only ever holds a two or three digit count. */
     max-width: 96px;
 }
 
-/* Arrows hug the number strip; the page size travels with them. */
 .route-manager__pager {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    /* Tight enough that first + current + last + both ellipses still share a
-       row with the page size on a 375px phone. */
     gap: 2px;
 }
 
@@ -1091,22 +1049,12 @@ useHead(() => ({
     color: rgba(var(--v-theme-on-surface), 0.5);
 }
 
-/* Between the card list's cutoff (lg, 1145px) and a wide desktop the eleven
-   columns need more than the window, and the table wrapper scrolled sideways.
-   Vuetify's 16px cell padding is 352px of table across eleven columns; cutting
-   it to 6px and dropping the cell type a step buys back the ~130px the
-   narrowest window in that range was missing, so every column stays on screen with nothing
-   hidden, clipped or truncated. */
 @media (max-width: 1279.98px) {
     .route-manager__table :deep(.v-data-table__td),
     .route-manager__table :deep(.v-data-table__th) {
         padding-inline: 6px;
     }
 
-    /* The `width: 56` header hint is advisory in an auto-layout table, so the
-       selection column got starved down to its padding and the checkbox
-       spilled out of the cell — half of it clipped by the scrolling wrapper
-       and impossible to hit. A real width keeps the hit target inside. */
     .route-manager__table :deep(.v-data-table__th:first-child),
     .route-manager__table :deep(.v-data-table__td:first-child) {
         width: 44px;

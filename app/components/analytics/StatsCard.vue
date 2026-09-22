@@ -80,27 +80,22 @@ const props = defineProps({
         type: Function,
         default: (value) => `${value}`,
     },
-    /** Net change vs previous period (positive = up, negative = down) */
     delta: {
         type: Number,
         default: null,
     },
-    /** Up to ~6 values for the mini sparkline, raw counts */
     sparkline: {
         type: Array,
         default: () => [],
     },
-    /** Accent color for the top bar and sparkline */
     accentColor: {
         type: String,
         default: '#378ADD',
     },
-    /** Icon badge background tint. Auto-derived from accentColor if omitted. */
     iconBg: {
         type: String,
         default: undefined,
     },
-    /** Icon foreground color. Defaults to accentColor. */
     iconFg: {
         type: String,
         default: undefined,
@@ -111,7 +106,6 @@ const resolvedAccentColor = computed(() => props.accentColor)
 
 const resolvedIconBg = computed(() => {
     if (props.iconBg) return props.iconBg
-    // derive a pale tint from the accent hex at ~12% opacity
     return props.accentColor + '1F'
 })
 

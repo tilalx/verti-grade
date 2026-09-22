@@ -2,8 +2,6 @@
     <v-container>
         <LayoutPageHeader :title="$t('page.content.settings')" />
 
-        <!-- SMTP lives in PocketBase, not here. This only reports the flag so
-             an admin isn't left wondering why no mail ever arrives. -->
         <v-alert
             v-if="!mailConfigured"
             type="info"
@@ -12,8 +10,6 @@
             class="mb-4"
             data-testid="settings-mail-warning"
         >
-            <!-- Not #append: that column keeps its width on a phone and
-                 squeezes the message down to one word per line. -->
             <div class="d-flex flex-wrap align-center ga-2">
                 <span style="flex: 1 1 16rem">{{
                     $t('settings.mailNotConfigured')
@@ -84,9 +80,6 @@
                             @click="() => asset.triggerInput()"
                         >
                             <!-- Preview image when available -->
-                            <!-- Plain <img>: the preview is either a
-                                 PocketBase URL or a local blob:, and /_ipx
-                                 can fetch neither. -->
                             <img
                                 v-if="asset.preview.value"
                                 :src="asset.preview.value"
@@ -166,7 +159,6 @@
                             </div>
                         </div>
 
-                        <!-- Hidden real file input, triggered by clicking the drop zone -->
                         <v-file-input
                             :ref="
                                 (el) => {
@@ -340,9 +332,6 @@ definePageMeta({
 const { data: settings } = useNuxtData('settings')
 
 const { data: mailStatus } = useMailStatus()
-// Only the production nginx maps /_/ onto PocketBase; in dev the browser sits
-// on the Nuxt origin, so the link needs PocketBase's own port. Same split as
-// usePbFileUrl().
 const pbMailSettingsUrl =
     (import.meta.dev ? 'http://localhost:8090' : '') + '/_/#/settings/mail'
 const mailConfigured = computed(() => mailStatus.value?.configured !== false)
@@ -361,9 +350,6 @@ const original = reactive({
 
 const copySettings = reactive({ ...original })
 
-// The settings record arrives with the SSR payload, but on a client-side
-// navigation this page can still set up before it exists. Seed from it
-// whenever it lands — and on every realtime update — leaving edits alone.
 function adoptRecord(rec) {
     if (!rec) return
     const dirty = hasChanges.value
@@ -458,7 +444,6 @@ const assetFields = computed(() => [
 let unsubscribe = null
 
 onMounted(async () => {
-    // subscribe() returns a Promise<unsubscribe fn> in PocketBase JS SDK v0.21+
     unsubscribe = await pb
         .collection('settings')
         .subscribe('settings_123456', (e) => adoptRecord(e.record))
@@ -541,8 +526,6 @@ const hasChanges = computed(() => {
     )
 })
 
-// Placed after hasChanges/pbFileUrl: `immediate` runs adoptRecord during setup,
-// so everything it reads has to be declared by now.
 watch(settings, adoptRecord, { immediate: true })
 
 // ── Save ──────────────────────────────────────────────────────────────────────
@@ -552,7 +535,6 @@ async function saveSettings() {
     saving.value = true
 
     try {
-        // PB SDK v0.21+ converts plain objects with File values to multipart automatically
         const payload = {
             application_url: copySettings.application_url,
             imprint_url: copySettings.imprint_url,
@@ -560,9 +542,6 @@ async function saveSettings() {
             organization_name: copySettings.organization_name,
             organization_unit_name: copySettings.organization_unit_name,
             contact_email: copySettings.contact_email,
-            // Clearing the field yields '' (or NaN via .number), which a
-            // min:1 number field rejects. Send null instead and let the
-            // retention hook fall back to its own default.
             audit_retention_days:
                 Number(copySettings.audit_retention_days) || null,
         }
@@ -577,16 +556,13 @@ async function saveSettings() {
             .collection('settings')
             .update(settings.value.id, payload)
 
-        // Sync previews to canonical PB-hosted URLs
         logoPreview.value = pbFileUrl(updated, updated.page_logo)
         iconPreview.value = pbFileUrl(updated, updated.page_icon)
         signPreview.value = pbFileUrl(updated, updated.sign_image)
 
-        // Clear staged file refs and clear flags
         logoFile.value = iconFile.value = signFile.value = null
         logoClear.value = iconClear.value = signClear.value = false
 
-        // Advance the original snapshot so hasChanges resets
         original.application_url = updated.application_url
         original.imprint_url = updated.imprint_url
         original.privacy_url = updated.privacy_url
@@ -617,7 +593,6 @@ async function saveSettings() {
 
 <style scoped>
 .asset-drop-zone {
-    /* Theme tokens, not a hardcoded rgba — a white border is invisible on light. */
     border: 1.5px dashed rgba(var(--v-border-color), 0.28);
     overflow: hidden;
     cursor: pointer;

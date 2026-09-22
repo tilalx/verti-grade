@@ -665,8 +665,6 @@ const hasLatestComments = computed(() => latestComments.value.length > 0)
 const hasLatestRoutes = computed(() => latestRoutes.value.length > 0)
 
 // ── Theme-aware chart colors ──────────────────────────────────────────────
-// ECharts cannot read CSS variables, so we resolve them once from the DOM
-// and reuse the result across all chart options.
 
 function getCSSColor(variable) {
     if (typeof window === 'undefined') return '#888'
@@ -676,10 +674,8 @@ function getCSSColor(variable) {
 }
 
 const chartColors = computed(() => {
-    // Depend on theme so charts recompute on theme switch
     const isDark = useTheme().global.current.value.dark
 
-    // Vuetify exposes RGB channels as CSS vars, e.g. --v-theme-on-surface = "0 0 0"
     const onSurface =
         getCSSColor('--v-theme-on-surface') ||
         (isDark ? '236 236 236' : '18 18 18')
@@ -775,13 +771,12 @@ function makeBarSeries(name, data, color, emphasisColor) {
 
 // ── Activity heatmap ──────────────────────────────────────────────────────
 
-// Locale-aware short names for Mon / Wed / Fri
 const heatmapDayLabels = computed(() => {
     const fmt = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
     return {
-        mon: fmt.format(new Date(2024, 0, 1)), // known Monday
-        wed: fmt.format(new Date(2024, 0, 3)), // known Wednesday
-        fri: fmt.format(new Date(2024, 0, 5)), // known Friday
+        mon: fmt.format(new Date(2024, 0, 1)),
+        wed: fmt.format(new Date(2024, 0, 3)),
+        fri: fmt.format(new Date(2024, 0, 5)),
     }
 })
 
@@ -799,13 +794,11 @@ const availableYears = computed(() => {
 const heatmapCells = computed(() => {
     const year = selectedYear.value
 
-    // Grid starts on the Monday on or before Jan 1 (week starts Monday)
     const jan1 = new Date(year, 0, 1)
     const startDate = new Date(jan1)
-    const jan1Dow = startDate.getDay() // 0=Sun … 6=Sat
+    const jan1Dow = startDate.getDay()
     startDate.setDate(startDate.getDate() - (jan1Dow === 0 ? 6 : jan1Dow - 1))
 
-    // Grid ends on the Sunday on or after Dec 31
     const dec31 = new Date(year, 11, 31)
     const endDate = new Date(dec31)
     const dec31Dow = endDate.getDay()
@@ -826,8 +819,6 @@ const heatmapCells = computed(() => {
         dateStyle: 'medium',
     })
     while (cursor <= endDate) {
-        // Use local date components — toISOString() returns UTC and causes
-        // off-by-one errors for users in timezones ahead of UTC (e.g. UTC+1/+2).
         const mm = String(cursor.getMonth() + 1).padStart(2, '0')
         const dd = String(cursor.getDate()).padStart(2, '0')
         const iso = `${cursor.getFullYear()}-${mm}-${dd}`
@@ -865,8 +856,6 @@ const heatmapMonthLabels = computed(() => {
         if (!cell.inYear) continue
         const month = cell.date.slice(0, 7)
         if (month !== prevMonth) {
-            // Place label at the first full column (Sunday) within this month,
-            // not at the day itself (which may be mid-column / mid-week).
             const nextSundayIdx = i % 7 === 0 ? i : i + (7 - (i % 7))
             const weekCol = Math.floor(nextSundayIdx / 7) + 1
             if (weekCol <= 54) {
@@ -1193,7 +1182,7 @@ function formatMonthLabel(monthKey) {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding-top: 18px; /* align with grid rows below month labels */
+    padding-top: 18px;
     flex-shrink: 0;
 }
 
@@ -1226,8 +1215,6 @@ function formatMonthLabel(monthKey) {
     font-size: 10px;
     color: rgba(var(--v-theme-on-surface), 0.45);
     white-space: nowrap;
-    /* Each label sits in one 13px grid column but needs ~17px, so it has to be
-       allowed to spill — the next label starts several columns later. */
     overflow: visible;
 }
 
@@ -1334,25 +1321,21 @@ function formatMonthLabel(monthKey) {
         aspect-ratio: 54 / 7;
     }
 
-    /* Only scale grid cells — legend cells keep their explicit 13px size */
     .heatmap-grid .heatmap-cell {
         width: auto;
         height: auto;
     }
 
-    /* Align day-of-week labels with scaled grid rows */
     .heatmap-day-labels {
         padding-top: 0;
         align-self: stretch;
     }
 
-    /* First span = spacer matching the month-labels row height */
     .heatmap-day-labels > span:first-child {
         flex-shrink: 0;
-        height: 16px; /* matches .heatmap-month-labels height */
+        height: 16px;
     }
 
-    /* Remaining 7 spans stretch evenly to match grid rows */
     .heatmap-day-labels > span:not(:first-child) {
         flex: 1;
         height: auto;

@@ -1,10 +1,6 @@
 services:
   app:
     image: ${E2E_IMAGE:?E2E_IMAGE must be set}
-    # WebKit refuses to store cookies for a single-label host, and `.app` is a
-    # public suffix on top of that — under the old `https://app` origin the
-    # pb_auth cookie was silently dropped and every SSR auth check redirected
-    # to login. A dotted, non-public-suffix name avoids both rules.
     networks:
       default:
         aliases:
@@ -13,24 +9,17 @@ services:
       PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
       PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
       SSL_DNS_NAMES: vg.test
-      # Without these PocketBase sends no mail at all, so every mail path --
-      # the invite, the verification and email-change links, and both DSA
-      # Art. 16 notices -- was untestable. pb_hooks/smtp.pb.js reads them.
       PB_SMTP_HOST: mailpit
       PB_SMTP_PORT: 1025
       PB_SMTP_TLS: "false"
-      # Templates interpolate {APP_URL}; at its default the links would point
-      # at localhost:8090 and the tests could not follow them.
       PB_APP_URL: https://vg.test
       PB_SENDER_ADDRESS: no-reply@verti-grade.test
       PB_SENDER_NAME: Verti-Grade E2E
-      # {APP_NAME} rides in every subject and signature; the default is "Acme".
       PB_APP_NAME: Verti-Grade
     depends_on:
       mailpit:
         condition: service_started
     volumes:
-      # Shared so the test container can install this cert as a trust anchor.
       - e2e-ssl:/etc/nginx/ssl
     healthcheck:
       test:
@@ -52,22 +41,14 @@ services:
         aliases:
           - mailpit
     environment:
-      # A catcher, not a relay: accept whatever the app sends, no credentials
-      # and no TLS to arrange.
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
   e2e:
     image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
     working_dir: /work
-    # The browsers exhaust Docker's 64MB default /dev/shm once several contexts
-    # are open, which shows up as unexplained navigation timeouts rather than a
-    # clear error. Preferred over `ipc: host`, which would drop the container's
-    # IPC namespace isolation to achieve the same thing.
     shm_size: 1gb
     volumes:
-      # :Z relabels the bind mount for SELinux hosts (Fedora/RHEL Jenkins
-      # agents); a harmless no-op everywhere else.
       - ..:/work:Z
       - e2e-ssl:/ssl:ro
     environment:
@@ -77,20 +58,12 @@ services:
       PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL:-e2e-super@verti-grade.test}
       PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD:-e2e-superuser-pw-123}
       CI: 'true'
-      # global-setup.ts talks to the app over plain Node fetch (via the
-      # pocketbase SDK), which doesn't share Playwright's ignoreHTTPSErrors —
-      # the container generates its own self-signed cert, so this is safe.
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
     depends_on:
       app:
         condition: service_healthy
       mailpit:
         condition: service_started
-    # ignoreHTTPSErrors gets navigation through an untrusted cert, but WebKit
-    # still treats such a connection as insecure and drops Secure cookies — so
-    # the cert has to be genuinely trusted, not just waved past. WebKit on
-    # Linux validates against /etc/ssl/certs, which update-ca-certificates
-    # rebuilds.
     command: >
       sh -c "cp /ssl/cert.pem /usr/local/share/ca-certificates/vg-e2e.crt &&
       update-ca-certificates &&

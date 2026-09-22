@@ -9,7 +9,6 @@ migrate(
         permission.set('label', 'Manage Reports')
         app.save(permission)
 
-        // Admin only: acting on a legal notice is not a routesetter duty.
         const rolesCol = app.findCollectionByNameOrId('roles_collection_id')
         const adminRole = app.findFirstRecordByData(rolesCol, 'name', 'admin')
         const permIds = adminRole.get('permissions') || []

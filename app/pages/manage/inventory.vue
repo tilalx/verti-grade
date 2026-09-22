@@ -1,13 +1,10 @@
 <template>
     <v-container class="inventory-page pa-0">
-        <!-- ── Scanner and checklist ──────────────────────────────────── -->
         <div class="inventory-layout">
             <div
                 class="inventory-layout__controls"
                 data-testid="inventory-controls"
             >
-                <!-- The viewport only exists while the camera does; an idle black
-                 box would eat a third of the screen for nothing. -->
                 <div
                     v-if="cameraActive"
                     ref="viewportRef"
@@ -36,7 +33,6 @@
                     />
                 </div>
 
-                <!-- ── Summary: scope, progress and utilities in two rows ──── -->
                 <div class="px-4 pt-3">
                     <div class="d-flex align-center ga-2">
                         <h1 class="inventory-title text-truncate">
@@ -65,11 +61,7 @@
                         />
                     </div>
 
-                    <!-- Scope and progress share a row, wrapping only when the
-                     segmented picker and the bar cannot both fit. -->
                     <div class="d-flex flex-wrap align-center ga-3">
-                        <!-- Two sites, so segmented buttons beat a dropdown:
-                         one tap, and the active scope is readable at a glance. -->
                         <div
                             v-if="!locationLocked"
                             class="d-flex ga-1"
@@ -140,8 +132,6 @@
                     </p>
                 </div>
 
-                <!-- Camera/permission failure is a state, not an event, so it
-                 stays inline next to the retry button. -->
                 <div v-if="scannerError" class="px-4 pt-3">
                     <v-alert
                         type="error"
@@ -154,7 +144,6 @@
                     </v-alert>
                 </div>
 
-                <!-- ── Primary actions ──────────────────────────────────────── -->
                 <div class="d-flex ga-2 px-4 pt-3">
                     <v-btn
                         v-if="!scanning"
@@ -204,7 +193,6 @@
             </div>
 
             <div class="inventory-layout__lists" data-testid="inventory-lists">
-                <!-- ── Narrow screens: one list at a time, as tabs ──────────── -->
                 <v-tabs
                     v-if="!isWideLayout"
                     v-model="activeTab"
@@ -278,7 +266,6 @@
                     </v-tabs-window-item>
                 </v-tabs-window>
 
-                <!-- ── Desktop: both checklists at once, no tab switching ───── -->
                 <div v-else class="inventory-columns px-4 pt-1 pb-6">
                     <section
                         class="inventory-column inventory-column--missing"
@@ -346,7 +333,6 @@
             </div>
         </div>
 
-        <!-- ── Instructions dialog ────────────────────────────────────── -->
         <LayoutDialogShell
             v-model="instructionsDialog"
             max-width="400"
@@ -369,7 +355,6 @@
             </template>
         </LayoutDialogShell>
 
-        <!-- ── Manual add dialog ──────────────────────────────────────── -->
         <LayoutDialogShell
             v-model="manualDialog"
             max-width="480"
@@ -424,7 +409,6 @@
             />
         </LayoutDialogShell>
 
-        <!-- ── Finish review dialog ───────────────────────────────────── -->
         <LayoutDialogShell
             v-model="finishDialog"
             max-width="480"
@@ -520,7 +504,6 @@
             </template>
         </LayoutDialogShell>
 
-        <!-- ── Reset confirmation ─────────────────────────────────────── -->
         <ConfirmDialog
             v-model="resetDialog"
             :title="$t('inventory.resetTitle')"
@@ -535,11 +518,6 @@
 
 <script setup lang="ts">
 import { QrcodeStream, setZXingModuleOverrides } from 'vue-qrcode-reader'
-// The scanner's 932 KB decoder is fetched from jsDelivr by default, which a
-// gym's wifi may block and a basement may not reach at all -- and the scan is
-// the one thing a route setter needs working while standing at the wall.
-// Vite emits the copy from node_modules as a hashed asset of this app, so the
-// binary always matches the installed zxing-wasm.
 import zxingReaderWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
 
 import { formatAnchorPoint, formatDifficulty } from '~/utils/formatting'
@@ -557,7 +535,6 @@ import {
 } from '~/utils/inventory'
 import type { RouteRecord } from '~/types/models'
 
-// Module-level config, so it must run before <QrcodeStream> mounts.
 setZXingModuleOverrides({ locateFile: () => zxingReaderWasmUrl })
 
 definePageMeta({
@@ -579,8 +556,6 @@ const {
     warning: notifyWarning,
 } = useNotification()
 
-// Matches the 1280px media query below. A tablet has no room for the
-// side-by-side board, so it keeps the tabbed single-column layout.
 const isWideLayout = computed(() => lgAndUp.value)
 
 const allRoutes = ref<RouteRecord[]>([])
@@ -604,8 +579,6 @@ const activeTab = ref<'missing' | 'found'>('missing')
 const archiving = ref(false)
 const archiveSelection = ref(new Set<string>())
 
-// Higher than the browser default: route labels are small and often scanned
-// from a step back, where the default stream resolution loses the modules.
 const cameraConstraints = {
     facingMode: 'environment',
     width: { ideal: 1920 },
@@ -618,8 +591,6 @@ const locationItems = computed(() =>
         .map((entry) => ({ title: entry.text, value: entry.value })),
 )
 
-// A started inventory is pinned to its location; changing it means resetting,
-// so the archive step can never span two sites.
 const locationLocked = computed(
     () => scannedRouteIds.value.length > 0 && !!sessionLocation.value,
 )
@@ -717,11 +688,6 @@ watch(
     { flush: 'post' },
 )
 
-/**
- * Drops stored ids that no longer belong in this session: deleted routes go
- * quietly, routes at another location are reported because the user needs to
- * know their earlier scans are not being counted here.
- */
 const reconcileScannedIds = () => {
     if (!allRoutes.value.length) return
 
@@ -748,8 +714,6 @@ const reconcileScannedIds = () => {
 
 watch(sessionLocation, () => reconcileScannedIds())
 
-// ── Scan feedback ───────────────────────────────────────────────────────
-// Sound and vibration let you keep walking instead of watching the screen.
 let audioContext: AudioContext | null = null
 
 const ensureAudio = () => {
@@ -781,18 +745,13 @@ const beep = (frequency: number, duration = 0.12) => {
         gain.connect(audioContext.destination)
         oscillator.start(now)
         oscillator.stop(now + duration)
-    } catch {
-        // Audio is a nicety; never let it break a scan.
-    }
+    } catch {}
 }
 
 const vibrate = (pattern: number | number[]) => {
-    // Absent on iOS Safari.
     try {
         navigator.vibrate?.(pattern)
-    } catch {
-        // ignore
-    }
+    } catch {}
 }
 
 const signalAccepted = () => {
@@ -810,19 +769,10 @@ const signalRejected = () => {
     beep(220, 0.2)
 }
 
-// ── Camera ──────────────────────────────────────────────────────────────
-// Never hand the stream a pause. The library implements it by stopping the
-// track and re-running getUserMedia to resume, so a freeze on every scan cost
-// a full camera re-initialisation -- seconds on iOS, with the viewport showing
-// its backdrop until the first frame arrived. Detections are ignored while a
-// dialog is open instead, which is all the pause was really protecting.
 const acceptingScans = computed(
     () => !finishDialog.value && !manualDialog.value,
 )
 
-// The track callback runs several times a second; vue-qrcode-reader's docs
-// warn against touching reactive state from it, so everything it reads is a
-// plain snapshot kept up to date by these watchers.
 let routeInfoById = new Map<string, { name: string; location: string | null }>()
 let scannedIdSet = new Set<string>()
 let activeLocation: string | null = null
@@ -871,11 +821,6 @@ watch(
     { immediate: true },
 )
 
-/**
- * What to paint on a detected code. This is the only feedback a scan needs:
- * it lands on the code you are pointing at, instead of a banner covering the
- * viewfinder to repeat what the overlay already says.
- */
 const codeTag = (rawValue: string) => {
     const id = extractRouteId(rawValue)
     const info = id ? routeInfoById.get(id) : undefined
@@ -915,9 +860,6 @@ const trackQrCode = (
         ctx.font = `600 ${fontSize}px sans-serif`
         const textWidth = ctx.measureText(label).width
         const padding = 6
-        // Keep the tag inside the frame. A code near an edge would otherwise
-        // centre its label half off-screen, and one near the bottom would
-        // write it below the viewport.
         const labelX = Math.min(
             Math.max(
                 boundingBox.x + (boundingBox.width - textWidth) / 2,
@@ -952,17 +894,12 @@ const onDetect = (detectedCodes: { rawValue: string }[]) => {
 
 const viewportRef = useTemplateRef<HTMLElement>('viewportRef')
 
-/** The live camera track, reached through the element the library owns. */
 const videoTrack = (): MediaStreamTrack | null => {
     const stream = viewportRef.value?.querySelector('video')
         ?.srcObject as MediaStream | null
     return stream?.getVideoTracks()[0] ?? null
 }
 
-// Not the component's `torch` prop: that sits in the same watched object as
-// the stream constraints, so flipping it tears the camera down and runs
-// getUserMedia again -- a visible re-initialisation for what the spec applies
-// to a running track.
 const toggleTorch = async () => {
     const track = videoTrack()
     if (!track) return
@@ -998,7 +935,6 @@ const onCameraError = (error: { name?: string; message?: string }) => {
 
 const startScanner = () => {
     if (!import.meta.client || !sessionLocation.value) return
-    // This tap is the user gesture the AudioContext needs.
     ensureAudio()
     scannerError.value = ''
     cameraActive.value = true
@@ -1011,14 +947,11 @@ const stopScanner = () => {
     torchSupported.value = false
 }
 
-// ── Scanning ────────────────────────────────────────────────────────────
 const recentScans = new Map<string, number>()
 
 const addScannedRoute = async (id: string) => {
     const route = allRoutes.value.find((entry) => entry.id === id)
 
-    // Unknown, wrong-site and already-counted codes are all labelled on the
-    // code itself by the track overlay, so they only need a sound here.
     if (!route) {
         signalRejected()
         return
@@ -1034,7 +967,6 @@ const addScannedRoute = async (id: string) => {
         return
     }
 
-    // A sign that is still on the wall means the route is active again.
     if (route.archived) {
         try {
             await pb.collection('routes').update(id, { archived: false })
@@ -1059,15 +991,12 @@ const addScannedRoute = async (id: string) => {
 const handleScanResult = async (text: string) => {
     const id = extractRouteId(text)
 
-    // Cooldown keyed on the payload, so a code simply held in frame is not
-    // re-processed — and an unreadable one does not buzz on every frame.
     const key = id ?? `raw:${text}`
     const now = Date.now()
     if (now - (recentScans.get(key) ?? 0) < SCAN_COOLDOWN_MS) return
     recentScans.set(key, now)
 
     if (!id) {
-        // The track overlay already outlines it in red and names it.
         signalRejected()
         return
     }
@@ -1096,7 +1025,6 @@ const undoScan = (route: RouteRecord) => {
     notifySuccess(t('inventory.undone', { name: route.name || route.id }))
 }
 
-// ── Routes ──────────────────────────────────────────────────────────────
 const loadRoutes = async () => {
     loadingRoutes.value = true
     try {
@@ -1117,15 +1045,12 @@ const loadRoutes = async () => {
     }
 }
 
-// ── Dialogs ─────────────────────────────────────────────────────────────
 const openManualDialog = () => {
     manualSearch.value = ''
     manualDialog.value = true
 }
 
 const openFinishDialog = () => {
-    // Everything is staged for archiving by default; unchecking opts a route
-    // out, for a label that could not be reached rather than one that is gone.
     archiveSelection.value = new Set(missing.value.map((route) => route.id))
     finishDialog.value = true
 }
@@ -1184,21 +1109,11 @@ const confirmFinish = async () => {
     }
 }
 
-// ── Lifecycle ───────────────────────────────────────────────────────────
-// iOS ends the capture track when the tab is backgrounded or the screen
-// locks, and an ended track cannot be revived -- only a fresh getUserMedia
-// helps. We cannot call that on returning either: the gesture that authorised
-// the camera has long expired, so it would be rejected rather than re-prompt.
-// So tear the dead stream down and let the normal Start button come back; its
-// tap is the gesture that gets the camera again.
 const onVisibilityChange = () => {
     if (document.visibilityState === 'hidden' && cameraActive.value)
         stopScanner()
 }
 
-// Fetched during SSR so the page is in the server HTML. The handler fills the
-// refs server-side and returns them for the payload; on hydration the handler
-// is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('inventory-routes', async () => {
     await loadRoutes()
     return allRoutes.value
@@ -1211,11 +1126,7 @@ if (initial.value) {
 onMounted(() => {
     document.addEventListener('visibilitychange', onVisibilityChange)
     restoreSession()
-    // The session lives in localStorage, so the SSR'd route load can't
-    // reconcile against it — that has to happen here, after the restore.
     reconcileScannedIds()
-    // Shown once, then on demand from the info button — it used to reopen on
-    // every visit and swallow the first tap.
     if (!hasSeenInstructions()) instructionsDialog.value = true
 })
 
@@ -1238,9 +1149,6 @@ onBeforeUnmount(() => {
     padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* The heading rides in the utility row rather than in a LayoutPageHeader
-   block: this page is a tool, and a title band would cost a tenth of the
-   screen the route checklist needs. Still the page's only h1. */
 .inventory-title {
     margin: 0;
     min-width: 0;
@@ -1249,35 +1157,20 @@ onBeforeUnmount(() => {
     line-height: 1.5;
 }
 
-/* Wraps below the location picker only when both cannot fit. */
 .progress-group {
     flex: 1 1 140px;
     min-width: 140px;
 }
 
-/* ── Scanner viewport ────────────────────────────────────────────────── */
-/* Only mounted while the camera runs, so it can afford to be generous
-   without costing anything when idle. */
 .scanner-viewport {
     position: relative;
     width: 100%;
-    /* Definite, not a cap: the scanner's wrapper and the tracking canvas it
-       overlays are both height:100%, which is indefinite against an auto-height
-       parent. Safari then sized the canvas bitmap (taken from the video box)
-       and the canvas CSS box differently, and every tracking box and label was
-       drawn stretched and offset. Sized so the stream never pushes the
-       checklist off screen. */
     height: 40vh;
     min-height: 200px;
     background: #111;
     overflow: hidden;
 }
 
-/* Explicit, not inherited from the library's inline style: a video element
-   defaults to object-fit: contain, so a portrait camera stream in this
-   landscape box gets pillarboxed with the backdrop showing either side. The
-   tracking layer is deliberately excluded -- its bitmap already matches its
-   box, and fitting it would move the overlay off the picture. */
 .scanner-viewport :deep(video),
 .scanner-viewport :deep(#qrcode-stream-pause-frame) {
     width: 100%;
@@ -1291,7 +1184,6 @@ onBeforeUnmount(() => {
     right: 12px;
 }
 
-/* ── Instructions list ───────────────────────────────────────────────── */
 .instructions-list {
     margin: 0;
     padding-left: 20px;
@@ -1300,34 +1192,23 @@ onBeforeUnmount(() => {
     gap: 6px;
 }
 
-/* ── Route lists ─────────────────────────────────────────────────────── */
-/* .scope-list and .anchor-badge live in main.css: InventoryRouteList renders
-   them too, and scoped styles do not reach into a child component. */
 .review-list {
     max-height: 200px;
     overflow-y: auto;
 }
 
-/* Tablet: 40vh of a tall screen is a slab of black above the checklist. */
 @media (min-width: 600px) {
     .scanner-viewport {
         height: 320px;
     }
 }
 
-/* Desktop: scanner and session controls on the left, both checklists beside
-   them, so nothing needs a tab switch on a screen with room for all of it. */
 @media (min-width: 1145px) {
     .inventory-page {
         max-width: 1400px;
-        /* The inner blocks keep their own px-4, so this only adds the gutter
-           the page needs when the window is narrower than the max width. */
         padding: 16px 16px 24px;
     }
 
-    /* Scanner in the middle, the list it empties on the left, the list it
-       fills on the right — a scan visibly moves a route from one to the
-       other. The wrappers collapse so all three are siblings in this grid. */
     .inventory-layout {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 360px) minmax(0, 1fr);
@@ -1355,26 +1236,19 @@ onBeforeUnmount(() => {
         grid-row: 1;
     }
 
-    /* Big enough to head the page, small enough to sit on one line next to
-       the reset and help buttons instead of ellipsing its own name away. */
     .inventory-title {
         font-size: 1.125rem;
         white-space: normal;
     }
 
-    /* Own row: sharing one with the site picker left it a stub. */
     .progress-group {
         flex-basis: 100%;
     }
 
-    /* A cap, not a height: a long checklist uses the whole window, an empty
-       column stays the size of its message instead of a tall void. */
     .inventory-column :deep(.scope-list) {
         max-height: calc(100vh - 220px);
     }
 
-    /* A webcam sits at arm's length, so the frame needs less of the window
-       than a phone held up to a wall label. */
     .scanner-viewport {
         height: 260px;
         border-radius: 12px;

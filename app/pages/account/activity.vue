@@ -85,8 +85,6 @@
                 </v-btn>
             </div>
 
-            <!-- Art. 13(2)(a): the retention period is something you have to
-                 tell people, so tell them here rather than only in a policy. -->
             <p
                 class="text-caption text-medium-emphasis text-center mt-6"
                 data-testid="audit-retention-note"
@@ -126,9 +124,6 @@ const actionFilter = ref<AuditAction | null>(null)
 const collectionFilter = ref<string | null>(null)
 const periodFilter = ref<AuditPeriod>('30d')
 
-// One page for two audiences. The collection's list rule already decides what
-// comes back -- everything for a view_audit_log holder, your own entries for
-// everyone else -- so the page only has to say which of the two it is showing.
 const seesEverything = computed(() => can('view_audit_log'))
 
 const activeFilterCount = computed(
@@ -188,14 +183,9 @@ if (initial.value) {
 }
 loading.value = false
 
-// The layout already loaded settings under this key; read the cache rather
-// than fetching the singleton a second time.
 const { data: settings } = useNuxtData('settings')
 const retentionDays = computed(() => settings.value?.audit_retention_days ?? 90)
 
-// The log is append-only, so realtime is just a prepend -- but only when the
-// new entry still matches the active filters, and only on the first page, or
-// a row would appear above a window the user has scrolled past.
 const { subscribe } = usePbSubscription()
 
 onMounted(async () => {
@@ -229,10 +219,6 @@ useHead({
     meta: [{ name: 'description', content: t('page.content.activity') }],
 })
 
-// Deliberately no requiredPermission, unlike every other page under admin/:
-// a signed-in user without view_audit_log still reaches this and sees their
-// own entries (GDPR Art. 15). The collection's list rule is what scopes the
-// result, so the route guard does not need to.
 definePageMeta({
     middleware: ['auth'],
 })

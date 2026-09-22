@@ -1,16 +1,9 @@
-/**
- * Unit tests for the pure logic extracted from app/pages/manage/comments.vue.
- *
- * Functions are defined inside <script setup> and cannot be imported, so the
- * identical logic is inlined here and verified independently.
- */
 import { describe, it, expect } from 'vitest'
 
-// ---------------------------------------------------------------------------
-// toCombined – converts separate difficulty + sign fields to a display string
-// ---------------------------------------------------------------------------
-
-function toCombined(difficulty: number | null | undefined, sign: boolean | null | undefined): string | null {
+function toCombined(
+    difficulty: number | null | undefined,
+    sign: boolean | null | undefined,
+): string | null {
     if (difficulty === null || difficulty === undefined) return null
     const suffix = sign === true ? ' +' : sign === false ? ' -' : ''
     return `${difficulty}${suffix}`
@@ -47,64 +40,94 @@ describe('toCombined', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// fromCombined – parses a combined difficulty string back to separate fields
-// ---------------------------------------------------------------------------
-
-function fromCombined(combined: string | null | undefined): { difficulty: number | null; difficulty_sign: boolean | null } {
+function fromCombined(combined: string | null | undefined): {
+    difficulty: number | null
+    difficulty_sign: boolean | null
+} {
     if (!combined) return { difficulty: null, difficulty_sign: null }
     const num = parseInt(combined, 10)
     const trimmed = combined.trim()
-    const sign = trimmed.endsWith('+') ? true : trimmed.endsWith('-') ? false : null
+    const sign = trimmed.endsWith('+')
+        ? true
+        : trimmed.endsWith('-')
+          ? false
+          : null
     return { difficulty: Number.isNaN(num) ? null : num, difficulty_sign: sign }
 }
 
 describe('fromCombined', () => {
     it('parses "7 +" → difficulty=7, sign=true', () => {
-        expect(fromCombined('7 +')).toEqual({ difficulty: 7, difficulty_sign: true })
+        expect(fromCombined('7 +')).toEqual({
+            difficulty: 7,
+            difficulty_sign: true,
+        })
     })
 
     it('parses "7 -" → difficulty=7, sign=false', () => {
-        expect(fromCombined('7 -')).toEqual({ difficulty: 7, difficulty_sign: false })
+        expect(fromCombined('7 -')).toEqual({
+            difficulty: 7,
+            difficulty_sign: false,
+        })
     })
 
     it('parses "7" → difficulty=7, sign=null', () => {
-        expect(fromCombined('7')).toEqual({ difficulty: 7, difficulty_sign: null })
+        expect(fromCombined('7')).toEqual({
+            difficulty: 7,
+            difficulty_sign: null,
+        })
     })
 
     it('parses "10 +" correctly', () => {
-        expect(fromCombined('10 +')).toEqual({ difficulty: 10, difficulty_sign: true })
+        expect(fromCombined('10 +')).toEqual({
+            difficulty: 10,
+            difficulty_sign: true,
+        })
     })
 
     it('returns nulls for null input', () => {
-        expect(fromCombined(null)).toEqual({ difficulty: null, difficulty_sign: null })
+        expect(fromCombined(null)).toEqual({
+            difficulty: null,
+            difficulty_sign: null,
+        })
     })
 
     it('returns nulls for undefined input', () => {
-        expect(fromCombined(undefined)).toEqual({ difficulty: null, difficulty_sign: null })
+        expect(fromCombined(undefined)).toEqual({
+            difficulty: null,
+            difficulty_sign: null,
+        })
     })
 
     it('returns nulls for empty string', () => {
-        expect(fromCombined('')).toEqual({ difficulty: null, difficulty_sign: null })
+        expect(fromCombined('')).toEqual({
+            difficulty: null,
+            difficulty_sign: null,
+        })
     })
 
     it('round-trips with toCombined', () => {
         const cases: Array<[number, boolean | null]> = [
-            [5, true], [5, false], [5, null],
-            [1, true], [10, false], [3, null],
+            [5, true],
+            [5, false],
+            [5, null],
+            [1, true],
+            [10, false],
+            [3, null],
         ]
         for (const [d, s] of cases) {
             const combined = toCombined(d, s)!
-            expect(fromCombined(combined)).toEqual({ difficulty: d, difficulty_sign: s })
+            expect(fromCombined(combined)).toEqual({
+                difficulty: d,
+                difficulty_sign: s,
+            })
         }
     })
 })
 
-// ---------------------------------------------------------------------------
-// stats computed – total, avgRating, thisWeek, lowRated
-// ---------------------------------------------------------------------------
-
-interface Comment { rating: number | null; created: string }
+interface Comment {
+    rating: number | null
+    created: string
+}
 
 function computeStats(comments: Comment[]) {
     const total = comments.length
@@ -114,15 +137,23 @@ function computeStats(comments: Comment[]) {
     const avgRating = (sum / total).toFixed(1)
 
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-    const thisWeek = comments.filter((c) => new Date(c.created).getTime() > weekAgo).length
-    const lowRated = comments.filter((c) => c.rating !== null && c.rating <= 2).length
+    const thisWeek = comments.filter(
+        (c) => new Date(c.created).getTime() > weekAgo,
+    ).length
+    const lowRated = comments.filter(
+        (c) => c.rating !== null && c.rating <= 2,
+    ).length
 
     return { avgRating, thisWeek, lowRated }
 }
 
 describe('computeStats', () => {
     it('returns zeroed defaults for an empty list', () => {
-        expect(computeStats([])).toEqual({ avgRating: '—', thisWeek: 0, lowRated: 0 })
+        expect(computeStats([])).toEqual({
+            avgRating: '—',
+            thisWeek: 0,
+            lowRated: 0,
+        })
     })
 
     it('computes the correct average rating', () => {
@@ -143,7 +174,9 @@ describe('computeStats', () => {
     })
 
     it('counts comments from the past 7 days as thisWeek', () => {
-        const recentDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        const recentDate = new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000,
+        ).toISOString()
         const oldDate = '2020-01-01'
         const comments = [
             { rating: 5, created: recentDate },
@@ -173,14 +206,9 @@ describe('computeStats', () => {
             { rating: null, created: '2020-01-01' },
             { rating: 4, created: '2020-01-01' },
         ]
-        // sum = 0 + 4 = 4, total = 2, avg = 2.0
         expect(computeStats(comments).avgRating).toBe('2.0')
     })
 })
-
-// ---------------------------------------------------------------------------
-// filteredAndSorted – all filter + sort logic from the page computed
-// ---------------------------------------------------------------------------
 
 interface FullComment {
     id: string
@@ -199,7 +227,7 @@ function filteredAndSorted(
         search: string
         selectedLocation: string | null
         selectedDifficulty: number | null
-        selectedRating: number          // 0 = all
+        selectedRating: number // 0 = all
         dateFilter: '' | 'week' | 'month'
         sortOrder: 'newest' | 'oldest' | 'highest' | 'lowest'
     },
@@ -210,11 +238,25 @@ function filteredAndSorted(
     const monthMs = 30 * 24 * 60 * 60 * 1000
 
     let result = comments.filter((c) => {
-        if (opts.selectedDifficulty !== null && c.difficulty !== opts.selectedDifficulty) return false
-        if (opts.selectedLocation && c.location !== opts.selectedLocation) return false
-        if (opts.selectedRating !== 0 && c.rating !== opts.selectedRating) return false
-        if (opts.dateFilter === 'week' && nowMs - new Date(c.created).getTime() > weekMs) return false
-        if (opts.dateFilter === 'month' && nowMs - new Date(c.created).getTime() > monthMs) return false
+        if (
+            opts.selectedDifficulty !== null &&
+            c.difficulty !== opts.selectedDifficulty
+        )
+            return false
+        if (opts.selectedLocation && c.location !== opts.selectedLocation)
+            return false
+        if (opts.selectedRating !== 0 && c.rating !== opts.selectedRating)
+            return false
+        if (
+            opts.dateFilter === 'week' &&
+            nowMs - new Date(c.created).getTime() > weekMs
+        )
+            return false
+        if (
+            opts.dateFilter === 'month' &&
+            nowMs - new Date(c.created).getTime() > monthMs
+        )
+            return false
         if (term) {
             const hit =
                 c.routeName?.toLowerCase().includes(term) ||
@@ -226,8 +268,10 @@ function filteredAndSorted(
     })
 
     if (opts.sortOrder === 'oldest') result = [...result].reverse()
-    else if (opts.sortOrder === 'highest') result = [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-    else if (opts.sortOrder === 'lowest') result = [...result].sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0))
+    else if (opts.sortOrder === 'highest')
+        result = [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    else if (opts.sortOrder === 'lowest')
+        result = [...result].sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0))
 
     return result
 }
@@ -242,9 +286,36 @@ const baseOpts = {
 }
 
 const sampleComments: FullComment[] = [
-    { id: '1', rating: 5, difficulty: 7, location: 'Hanau',      created: '2024-01-01', routeName: 'Blue Wall',  comment: 'Amazing!',   userName: 'Alice'   },
-    { id: '2', rating: 2, difficulty: 5, location: 'Gelnhausen', created: '2024-01-02', routeName: 'Red Slab',  comment: 'Too hard',   userName: 'Bob'     },
-    { id: '3', rating: 4, difficulty: 7, location: 'Hanau',      created: '2024-01-03', routeName: 'Green Overhang', comment: 'Fun route', userName: 'Carol' },
+    {
+        id: '1',
+        rating: 5,
+        difficulty: 7,
+        location: 'Hanau',
+        created: '2024-01-01',
+        routeName: 'Blue Wall',
+        comment: 'Amazing!',
+        userName: 'Alice',
+    },
+    {
+        id: '2',
+        rating: 2,
+        difficulty: 5,
+        location: 'Gelnhausen',
+        created: '2024-01-02',
+        routeName: 'Red Slab',
+        comment: 'Too hard',
+        userName: 'Bob',
+    },
+    {
+        id: '3',
+        rating: 4,
+        difficulty: 7,
+        location: 'Hanau',
+        created: '2024-01-03',
+        routeName: 'Green Overhang',
+        comment: 'Fun route',
+        userName: 'Carol',
+    },
 ]
 
 describe('filteredAndSorted', () => {
@@ -253,80 +324,135 @@ describe('filteredAndSorted', () => {
     })
 
     it('filters by location', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, selectedLocation: 'Hanau' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            selectedLocation: 'Hanau',
+        })
         expect(result).toHaveLength(2)
         expect(result.every((c) => c.location === 'Hanau')).toBe(true)
     })
 
     it('filters by difficulty', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, selectedDifficulty: 7 })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            selectedDifficulty: 7,
+        })
         expect(result).toHaveLength(2)
         expect(result.every((c) => c.difficulty === 7)).toBe(true)
     })
 
     it('filters by exact star rating', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, selectedRating: 5 })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            selectedRating: 5,
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('1')
     })
 
     it('rating=0 means no rating filter', () => {
-        expect(filteredAndSorted(sampleComments, { ...baseOpts, selectedRating: 0 })).toHaveLength(3)
+        expect(
+            filteredAndSorted(sampleComments, {
+                ...baseOpts,
+                selectedRating: 0,
+            }),
+        ).toHaveLength(3)
     })
 
     it('searches by routeName (case-insensitive)', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, search: 'blue' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            search: 'blue',
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('1')
     })
 
     it('searches by comment text', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, search: 'too hard' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            search: 'too hard',
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('2')
     })
 
     it('searches by userName', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, search: 'carol' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            search: 'carol',
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('3')
     })
 
     it('returns empty when search matches nothing', () => {
-        expect(filteredAndSorted(sampleComments, { ...baseOpts, search: 'xyz-no-match' })).toHaveLength(0)
+        expect(
+            filteredAndSorted(sampleComments, {
+                ...baseOpts,
+                search: 'xyz-no-match',
+            }),
+        ).toHaveLength(0)
     })
 
     it('dateFilter "week" excludes old entries', () => {
-        const recentDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        const recentDate = new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000,
+        ).toISOString()
         const withRecent = [
             ...sampleComments,
-            { id: '4', rating: 3, difficulty: 6, location: 'Hanau', created: recentDate, routeName: 'New Route', comment: 'Fresh!', userName: 'Dave' },
+            {
+                id: '4',
+                rating: 3,
+                difficulty: 6,
+                location: 'Hanau',
+                created: recentDate,
+                routeName: 'New Route',
+                comment: 'Fresh!',
+                userName: 'Dave',
+            },
         ]
-        const result = filteredAndSorted(withRecent, { ...baseOpts, dateFilter: 'week' })
+        const result = filteredAndSorted(withRecent, {
+            ...baseOpts,
+            dateFilter: 'week',
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('4')
     })
 
     it('sort "oldest" reverses the newest-first order', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, sortOrder: 'oldest' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            sortOrder: 'oldest',
+        })
         expect(result[0].id).toBe('3')
         expect(result[2].id).toBe('1')
     })
 
     it('sort "highest" puts the 5-star review first', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, sortOrder: 'highest' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            sortOrder: 'highest',
+        })
         expect(result[0].rating).toBe(5)
         expect(result[result.length - 1].rating).toBe(2)
     })
 
     it('sort "lowest" puts the 2-star review first', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, sortOrder: 'lowest' })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            sortOrder: 'lowest',
+        })
         expect(result[0].rating).toBe(2)
         expect(result[result.length - 1].rating).toBe(5)
     })
 
     it('combines location + rating filters', () => {
-        const result = filteredAndSorted(sampleComments, { ...baseOpts, selectedLocation: 'Hanau', selectedRating: 5 })
+        const result = filteredAndSorted(sampleComments, {
+            ...baseOpts,
+            selectedLocation: 'Hanau',
+            selectedRating: 5,
+        })
         expect(result).toHaveLength(1)
         expect(result[0].id).toBe('1')
     })
@@ -337,10 +463,6 @@ describe('filteredAndSorted', () => {
         expect(sampleComments).toEqual(original)
     })
 })
-
-// ---------------------------------------------------------------------------
-// initials – first letter of each word (up to 2 words)
-// ---------------------------------------------------------------------------
 
 function initials(name: string | null | undefined): string {
     if (!name) return '?'
@@ -381,13 +503,17 @@ describe('initials', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// avatarColor – deterministic color from name
-// ---------------------------------------------------------------------------
-
 const AVATAR_COLORS = [
-    'primary', 'secondary', 'success', 'info', 'deep-purple',
-    'teal', 'indigo', 'pink', 'cyan', 'orange',
+    'primary',
+    'secondary',
+    'success',
+    'info',
+    'deep-purple',
+    'teal',
+    'indigo',
+    'pink',
+    'cyan',
+    'orange',
 ]
 
 function avatarColor(name: string | null | undefined): string {
@@ -416,14 +542,23 @@ describe('avatarColor', () => {
     })
 
     it('gives different colors to different names (at least sometimes)', () => {
-        const colors = new Set(['Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank', 'Grace', 'Henry', 'Iris', 'Jack'].map(avatarColor))
+        const colors = new Set(
+            [
+                'Alice',
+                'Bob',
+                'Carol',
+                'Dave',
+                'Eve',
+                'Frank',
+                'Grace',
+                'Henry',
+                'Iris',
+                'Jack',
+            ].map(avatarColor),
+        )
         expect(colors.size).toBeGreaterThan(1)
     })
 })
-
-// ---------------------------------------------------------------------------
-// isLong – whether a comment exceeds the collapse threshold
-// ---------------------------------------------------------------------------
 
 const LONG_THRESHOLD = 200
 
@@ -457,15 +592,18 @@ describe('isLong', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// getComments error handling – abort errors are silently swallowed
-// ---------------------------------------------------------------------------
-
 describe('getComments abort handling', () => {
     it('treats isAbort=true as a non-error (no snackbar shown)', () => {
-        // This mirrors the guard in getComments: if (err?.isAbort) return
-        const abortError = { isAbort: true, status: 0, message: 'The request was aborted' }
-        const realError = { isAbort: false, status: 500, message: 'Server error' }
+        const abortError = {
+            isAbort: true,
+            status: 0,
+            message: 'The request was aborted',
+        }
+        const realError = {
+            isAbort: false,
+            status: 500,
+            message: 'Server error',
+        }
 
         const shouldIgnore = (err: unknown) => !!(err as any)?.isAbort
 

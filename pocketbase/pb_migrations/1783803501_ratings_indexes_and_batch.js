@@ -1,8 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate(
     (app) => {
-        // Indexes for the ratings collection: the admin comments page sorts
-        // and filters on created/rating and joins routes via route_id.
         const ratings = app.findCollectionByNameOrId('ratings')
         const wanted = [
             'CREATE INDEX `idx_ratings_created` ON `ratings` (`created`)',
@@ -16,7 +14,6 @@ migrate(
         ratings.indexes = existing
         app.save(ratings)
 
-        // Enable the batch API so bulk deletes are a single request.
         const settings = app.settings()
         settings.batch.enabled = true
         settings.batch.maxRequests = 200

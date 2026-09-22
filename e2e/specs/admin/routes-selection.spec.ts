@@ -1,9 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 
-// Row checkboxes and the select-all toggle read straight off the selected-id
-// Set instead of a `selected` flag copied onto every route object, so this
-// guards that the rows still reflect selection after that indirection went.
 test('row checkboxes and select-all reflect the selected route ids', async ({
     adminPage: page,
 }) => {
@@ -40,15 +37,12 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
     await boxes.first().click()
     await expect(boxes.first()).toBeChecked()
     await expect(boxes.nth(1)).not.toBeChecked()
-    // One of two selected is not all of them, so the bulk action stays hidden
-    // behind a partial selection rather than flipping to deselect.
     await expect(page.getByTestId('routes-archive-selected')).toBeVisible()
 
     await page.getByTestId('routes-select-all').click()
     await expect(boxes.first()).toBeChecked()
     await expect(boxes.nth(1)).toBeChecked()
 
-    // Second press means "all are selected" and clears rather than re-selects.
     await page.getByTestId('routes-select-all').click()
     await expect(boxes.first()).not.toBeChecked()
     await expect(boxes.nth(1)).not.toBeChecked()

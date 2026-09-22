@@ -3,7 +3,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('_pb_users_auth_')
 
-        // update collection data
         unmarshal(
             {
                 resetPasswordTemplate: {
@@ -18,7 +17,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('_pb_users_auth_')
 
-        // update collection data
         unmarshal(
             {
                 resetPasswordTemplate: {

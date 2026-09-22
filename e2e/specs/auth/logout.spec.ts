@@ -3,10 +3,6 @@ import { gotoSettled } from '../../support/nav'
 
 test('logs out and redirects to login', async ({ adminPage: page }) => {
     await gotoSettled(page, '/manage/routes', '**/manage/routes')
-    // The app-bar UserIcon is server-rendered on both breakpoints and hidden
-    // by CSS below md, so it's always in the DOM — visibility, not presence,
-    // says which one to use. On mobile the drawer must be opened first to
-    // reach its off-canvas copy.
     const bannerActivator = page
         .getByRole('banner')
         .getByTestId('user-menu-activator')

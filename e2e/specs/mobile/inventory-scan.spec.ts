@@ -2,12 +2,6 @@ import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
 
-/**
- * The inventory is scoped to one gym location. These tests pin that down:
- * finishing a stock-take at Hanau must never touch a Gelnhausen route, and an
- * unchecked route must survive the archive step.
- */
-
 async function activeRoutesAt(page: Page, location: string) {
     const res = await page.request.get(
         '/api/collections/routes/records?' +
@@ -25,7 +19,6 @@ async function isArchived(page: Page, id: string) {
     return (await res.json()).archived === true
 }
 
-/** Seeds a v2 session and reloads so the page picks it up. */
 async function seedSession(page: Page, location: string, ids: string[]) {
     await page.evaluate(
         ({ location: loc, ids: scanned }) => {
@@ -53,7 +46,6 @@ test('archives only the checked routes at the scanned location', async ({
     expect(hanau.length).toBeGreaterThan(2)
     expect(gelnhausen.length).toBeGreaterThan(0)
 
-    // Everything at Hanau counted except the last two.
     const missing = hanau.slice(-2)
     const scanned = hanau.slice(0, -2)
     await seedSession(
@@ -65,10 +57,6 @@ test('archives only the checked routes at the scanned location', async ({
     await expect(page.getByTestId('inventory-found-count')).toHaveText(
         String(scanned.length),
     )
-    // Membership, not an exact count: the page counts every active route at
-    // the location, and sibling specs create their own routes at Hanau while
-    // this one runs. What matters is that both uncounted seed routes are
-    // listed as still to find.
     for (const route of missing) {
         await expect(
             page.getByTestId(`inventory-missing-${route.id}`),
@@ -81,17 +69,12 @@ test('archives only the checked routes at the scanned location', async ({
     const dialog = page.getByTestId('inventory-finish-dialog')
     await expect(dialog).toBeVisible()
 
-    // The review must not reach across sites.
     for (const route of gelnhausen) {
         await expect(
             page.getByTestId(`inventory-archive-toggle-${route.id}`),
         ).toHaveCount(0)
     }
 
-    // Everything missing here is staged for archiving by default, foreign
-    // routes at this location included. Opt every one of them out so the
-    // archive is exactly the route this test owns — otherwise confirming
-    // would archive records a parallel spec is still asserting on.
     for (const toggle of await page
         .locator('[data-testid^="inventory-archive-toggle-"]')
         .all()) {
@@ -110,12 +93,10 @@ test('archives only the checked routes at the scanned location', async ({
     expect(await isArchived(page, toArchive.id)).toBe(true)
     expect(await isArchived(page, toKeep.id)).toBe(false)
 
-    // The other site is untouched — this is the regression that matters.
     expect((await activeRoutesAt(page, 'Gelnhausen')).length).toBe(
         gelnhausen.length,
     )
 
-    // Leave the seed as we found it.
     await page.request.patch(
         `/api/collections/routes/records/${toArchive.id}`,
         { data: { archived: false }, headers: await authHeader(page) },
@@ -143,7 +124,6 @@ test('restores a legacy session and asks which location it belongs to', async ({
     await gotoSettled(page, '/manage/inventory')
 
     const hanau = await activeRoutesAt(page, 'Hanau')
-    // The pre-scoping storage shape: a bare array of ids.
     await page.evaluate(
         (ids) => {
             localStorage.setItem(
@@ -159,7 +139,6 @@ test('restores a legacy session and asks which location it belongs to', async ({
         .locator('[data-testid="inventory-progress"]')
         .waitFor({ state: 'visible' })
 
-    // Unscoped: nothing is counted and nothing can be archived yet.
     await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-missing-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
@@ -167,7 +146,6 @@ test('restores a legacy session and asks which location it belongs to', async ({
     await page.getByTestId('inventory-location-Hanau').click()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('2')
-    // The session is upgraded to the scoped shape on the next write.
     await expect
         .poll(async () =>
             page.evaluate(() =>

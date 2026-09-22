@@ -5,9 +5,6 @@ test('nav has a labelled main-navigation landmark', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes')
-    // The page legitimately has several labelled nav landmarks (desktop
-    // links, the off-canvas mobile drawer, Vuetify's pagination control) —
-    // assert the visible main-navigation one specifically.
     await expect(
         page.getByRole('navigation', { name: 'Main navigation' }).first(),
     ).toBeVisible()
@@ -38,8 +35,6 @@ test('a blocked-submit validation error is exposed to assistive tech', async ({
     await page.getByTestId('routes-create-open').click()
     await page.getByTestId('route-form-submit').click()
 
-    // Vuetify surfaces field errors via role="alert" on the messages slot —
-    // a red border alone would fail a screen-reader user silently.
     await expect(
         page.getByTestId('route-form-name').getByRole('alert').first(),
     ).toBeVisible()

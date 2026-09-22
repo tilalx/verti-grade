@@ -11,7 +11,6 @@
         >
             <template #filters>
                 <v-row density="comfortable">
-                    <!-- Sorting for the mobile card list (desktop sorts via table headers) -->
                     <v-col v-if="!isWideLayout" cols="12" sm="4">
                         <RouteSortControl
                             :model-value="tableOptions.sortBy"
@@ -181,9 +180,6 @@ const { t } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { lgAndUp } = useDisplay()
 
-// Vuetify 4's thresholds are md 840 / lg 1145. At mdAndUp the nine-column
-// table was handed to 840px windows, where it overflowed its wrapper and had
-// to be scrolled sideways; the card list covers everything below lg.
 const isWideLayout = computed(() => lgAndUp.value)
 const { error: notifyError } = useNotification()
 
@@ -358,9 +354,6 @@ watch(pbFilter, () => {
 
 const { subscribe } = usePbSubscription()
 
-// First page fetched during SSR so the list is in the server HTML. The handler
-// fills the refs server-side and returns them for the payload; on hydration the
-// handler is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('index-routes', async () => {
     await loadRoutes({ ...tableOptions })
     return { routes: routes.value, totalItems: totalItems.value }
@@ -412,14 +405,9 @@ function formatDate(date: string | null | undefined) {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    /* Without this a wrapped stack fills the row edge to edge and the row
-       dividers sit flush against the chips, reading as a line through them. */
     padding-block: 6px;
 }
 
-/* Just above the card list's cutoff the nine columns need more than the
-   window. Same treatment as the route manager: tighter cells, one step
-   smaller type, and a comment column that may shrink. */
 @media (max-width: 1279.98px) {
     :deep(.v-data-table__td),
     :deep(.v-data-table__th) {

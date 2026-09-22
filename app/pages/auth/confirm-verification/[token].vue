@@ -136,16 +136,12 @@ const subtitle = computed(
 )
 
 // ── Confirm ────────────────────────────────────────────────────────
-// No form to fill in: the token is the whole request, so it runs on mount.
-// Client-only -- SSR would burn the single-use token on a prefetch.
 onMounted(async () => {
     if (!token.value) return
     try {
         await pb.collection('users').confirmVerification(token.value)
         step.value = 'done'
     } catch {
-        // Any failure here is a dead link as far as the user is concerned:
-        // expired, already consumed, or malformed.
         step.value = 'invalid'
     }
 })
@@ -161,9 +157,6 @@ onMounted(async () => {
     border-radius: 50%;
     border: 2px solid rgba(var(--v-theme-success), 0.3);
     background: rgba(var(--v-theme-success), 0.08);
-    /* Vuetify 4 spacing utilities live in a CSS layer, so this unlayered
-       scoped rule wins over an mb-* class on the same element -- the gap has
-       to be declared here or the ring sits flush against the button. */
     margin: 0 auto 24px;
 }
 </style>

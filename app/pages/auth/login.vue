@@ -386,20 +386,11 @@ async function submitLogin() {
     if (!(await validate(loginForm))) return
     loading.value = true
     try {
-        // No autoRefreshThreshold: the SDK only honours it on _superusers, so
-        // on this collection it was never an option -- just an unknown key the
-        // SDK forwarded as a ?autoRefreshThreshold=0 query param.
-        // A sign-in is the one anonymous action that is worth guessing at, so
-        // PocketBase wants a solved captcha here too when one is configured.
-        // The superuser panel at /_/ is deliberately not gated -- it cannot
-        // attach a token -- and relies on the rate limit instead.
         await pb
             .collection('users')
             .authWithPassword(identity.value, password.value, {
                 headers: await capHeaders('login'),
             })
-        // No success toast: the redirect is the confirmation, and a snackbar
-        // riding along into the next page just gets in the way.
         await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))
@@ -429,8 +420,6 @@ async function loginWithOAuth(provider) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })
-        // No success toast: the redirect is the confirmation, and a snackbar
-        // riding along into the next page just gets in the way.
         await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))

@@ -2,11 +2,6 @@ import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * The parts of a stock-take that happen without the camera: marking a route
- * found when its label is damaged, and undoing a scan that was wrong.
- */
-
 async function openScopedInventory(page: Page) {
     await gotoSettled(page, '/manage/inventory')
     await page.evaluate(() => {
@@ -50,7 +45,6 @@ test('marks a route found from the still-to-find list and undoes it', async ({
         0,
     )
 
-    // Undo from the found tab puts it straight back into the missing list.
     await page.getByTestId('inventory-tab-found').click()
     await page.getByTestId(`inventory-undo-${routeId}`).click()
 
@@ -106,11 +100,8 @@ test('reserves no camera space until scanning starts', async ({
 }) => {
     await openScopedInventory(page)
 
-    // The viewport is mounted with the camera, not before it.
     await expect(page.locator('.scanner-viewport')).toHaveCount(0)
 
-    // So the checklist starts high on the screen rather than below a black
-    // box and a title band that are doing nothing.
     const tabs = await page.getByTestId('inventory-tab-missing').boundingBox()
     expect(tabs!.y).toBeLessThan(300)
 })

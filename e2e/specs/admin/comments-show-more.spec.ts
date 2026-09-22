@@ -4,12 +4,6 @@ import { createComment, deleteComment } from '../../support/comments'
 
 const LONG_COMMENT = 'Sehr schoene Route, wirklich lang. '.repeat(20)
 
-/**
- * The clamp is about comment length, so each test creates a comment of the
- * length it needs. Editing whichever card came first in the shared list raced
- * the moderation specs, which delete and edit that same card.
- */
-
 test('show more expands a clipped comment', async ({
     adminPage: page,
     testPrefix,

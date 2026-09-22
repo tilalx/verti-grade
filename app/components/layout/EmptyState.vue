@@ -2,11 +2,9 @@
 withDefaults(
     defineProps<{
         icon?: string
-        /** Small label above the title (e.g. an HTTP status code). */
         eyebrow?: string
         title: string
         hint?: string
-        /** Bordered card (list/table placeholders) vs bare text (inside cards). */
         card?: boolean
     }>(),
     { icon: 'mdi-magnify-remove-outline', card: true },
@@ -14,8 +12,6 @@ withDefaults(
 </script>
 
 <template>
-    <!-- A plain div with Vuetify's utility classes: the card look here is just a
-         border, a radius and a surface background, so it needs no v-card. -->
     <div
         class="empty-state py-12 text-center"
         :class="card ? 'rounded-lg border bg-surface' : ''"

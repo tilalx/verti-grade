@@ -25,7 +25,6 @@ interface VersionPayload {
     error: 'rate_limited' | 'unavailable' | null
 }
 
-// GitHub rejects requests without a User-Agent, and node's fetch sends none.
 const GITHUB_HEADERS = {
     Accept: 'application/vnd.github+json',
     'User-Agent': 'verti-grade',
@@ -46,7 +45,6 @@ export default defineCachedEventHandler(
                 })
             } catch (error) {
                 const status = (error as { status?: number })?.status
-                // A 404 is an expected answer (no such tag), not a failure.
                 if (status !== 404)
                     failure = status === 403 ? 'rate_limited' : 'unavailable'
                 return null
@@ -56,8 +54,6 @@ export default defineCachedEventHandler(
         const latestRelease = await get<GithubRelease>('releases/latest')
         const latestTag = latestRelease?.tag_name ?? null
 
-        // git describe's own "-7-" count is only a hint; the compare API is
-        // authoritative, so ask it whenever we know which commit is deployed.
         const comparison = installed.sha
             ? await get<{ ahead_by?: number; commits?: GithubCommit[] }>(
                   `compare/${installed.sha}...${github.branch}`,
@@ -71,8 +67,6 @@ export default defineCachedEventHandler(
             aheadBy,
         )
 
-        // The footer pill shows the installed release's notes whether or not an
-        // update exists, so resolve them even when we are up to date.
         let installedRelease: GithubRelease | null = null
         if (installed.base) {
             installedRelease =
@@ -110,8 +104,5 @@ export default defineCachedEventHandler(
             error: failure,
         }
     },
-    // One hour matches GitHub's own unauthenticated rate-limit window, so a
-    // 403 is cached as a deliberate backoff rather than retried per page load
-    // (retrying is what exhausts the 60/hr budget in the first place).
     { maxAge: 3600, name: 'version', getKey: () => 'current' },
 )

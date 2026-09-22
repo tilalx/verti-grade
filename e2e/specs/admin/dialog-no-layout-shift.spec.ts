@@ -1,10 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-// A full-bleed sheet is as wide as the viewport, but Vuetify positions overlay
-// content with an inline `left` that centres it on the page box — and while an
-// overlay holds the scroll lock that box is a scrollbar narrower. The sheet
-// landed half a scrollbar to the left, dragging the eye with it.
 test('the route form sheet sits flush and shifts nothing behind it', async ({
     adminPage: page,
 }) => {
@@ -30,12 +26,10 @@ test('the route form sheet sits flush and shifts nothing behind it', async ({
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
     const during = await anchors()
 
-    // Nothing behind the sheet may move.
     expect(during.burger.x).toBeCloseTo(before.burger.x, 0)
     expect(during.search.x).toBeCloseTo(before.search.x, 0)
     expect(during.search.width).toBeCloseTo(before.search.width, 0)
 
-    // And the sheet itself spans the viewport exactly.
     const sheet = (await page.locator('.dialog-shell--sheet').boundingBox())!
     expect(sheet.x).toBe(0)
     expect(sheet.width).toBe(393)

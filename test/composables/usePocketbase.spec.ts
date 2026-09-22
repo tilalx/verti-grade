@@ -10,8 +10,6 @@ const PocketBaseMock = vi.fn(function (url: string, authStore: unknown) {
     return instance
 })
 
-// Methods, not class fields: fields are own properties assigned in the base
-// constructor, which would shadow CookieAuthStore's own save()/clear().
 class BaseAuthStoreMock {
     loadFromCookie = vi.fn()
     exportToCookie = vi.fn(() => 'pb_auth=serialized')

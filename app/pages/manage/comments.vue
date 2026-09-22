@@ -2,7 +2,6 @@
     <v-container class="comments-page">
         <LayoutPageHeader :title="t('routes.comments')" />
 
-        <!-- Stats: horizontal scroll on mobile, row on desktop -->
         <div class="stats-scroll mb-3">
             <div class="stats-scroll__inner">
                 <v-card
@@ -115,7 +114,6 @@
                     </v-col>
                 </v-row>
 
-                <!-- Rating chips + date toggle -->
                 <v-row density="comfortable" align="center" class="mt-2">
                     <v-col cols="12" sm="auto">
                         <v-chip-group
@@ -172,7 +170,6 @@
             </template>
 
             <template #below>
-                <!-- Bulk-action bar, slides in when items are selected -->
                 <v-slide-y-transition>
                     <div
                         v-if="selectedCount > 0"
@@ -343,35 +340,27 @@ const loading = ref(true)
 const loadingMore = ref(false)
 const bulkDeleting = ref(false)
 
-// Display list (current page accumulation)
 const comments = ref([])
-// Header stats, aggregated server-side by the ratingsStats view
 const stats = ref({ totalReviews: 0, avgRating: '—', thisWeek: 0, lowRated: 0 })
 
-// Pagination
 const page = ref(1)
 const PER_PAGE = 48
 const totalItems = ref(0)
 const hasMore = computed(() => comments.value.length < totalItems.value)
 
-// Filters
 const search = ref('')
 const selectedLocation = ref(null)
 const selectedDifficulty = ref(null)
-const selectedRating = ref(0) // 0 = sentinel for "all ratings"
+const selectedRating = ref(0)
 const dateFilter = ref('')
 const sortOrder = ref('newest')
 
-// Selection: reactive object { [id]: true } — Vue tracks per-key access,
-// so toggling one ID only re-renders that one card instead of all of them.
 const selectedMap = reactive({})
 const selectedCount = computed(() => Object.keys(selectedMap).length)
 
-// Edit dialog — review object passed to ReviewFormDialog
 const editDialog = ref(false)
 const editingReview = ref(null)
 
-// Bulk delete dialog
 const bulkDeleteDialog = ref(false)
 
 const { notify, error: notifyError } = useNotification()
@@ -454,7 +443,6 @@ function buildSort() {
 
 // ── Data fetching ──────────────────────────────────────────────────────────
 
-// Trim expanded records to what mapComment actually reads
 const LIST_FIELDS = [
     '*',
     'expand.route_id.id',
@@ -485,8 +473,6 @@ function mapComment(c) {
     }
 }
 
-// Single-row aggregate from the ratingsStats view — one tiny request instead
-// of downloading the whole collection to count client-side.
 const fetchStats = async () => {
     try {
         const result = await pb.collection('ratingsStats').getList(1, 1, {
@@ -497,7 +483,6 @@ const fetchStats = async () => {
         if (!rec) return
         stats.value = {
             totalReviews: Number(rec.totalReviews) || 0,
-            // View aggregates come back as JSON values; AVG is null when empty
             avgRating:
                 rec.avgRating != null ? Number(rec.avgRating).toFixed(1) : '—',
             thisWeek: Number(rec.thisWeek) || 0,
@@ -508,15 +493,12 @@ const fetchStats = async () => {
     }
 }
 
-// Coalesce stats refreshes: bulk operations and realtime bursts trigger one
-// trailing refresh instead of one request per event.
 let statsDebounce = null
 function scheduleStatsRefresh() {
     clearTimeout(statsDebounce)
     statsDebounce = setTimeout(() => fetchStats(), 500)
 }
 
-// Paginated list with server-side filtering and sorting
 const fetchList = async (append = false) => {
     if (append) {
         loadingMore.value = true
@@ -552,8 +534,6 @@ const fetchList = async (append = false) => {
 async function loadMore() {
     page.value++
     await fetchList(true)
-    // Re-arm the sentinel: observe() fires immediately, so if it is still in
-    // range another page loads until the viewport is filled
     await nextTick()
     if (sentinelRef.value && scrollObserver) {
         scrollObserver.unobserve(sentinelRef.value)
@@ -571,8 +551,6 @@ function maybeLoadMore() {
     loadMore()
 }
 
-// The sentinel unmounts whenever the list re-renders empty (filter changes),
-// so (re)observe the element itself instead of setting up once on mount
 watch(sentinelRef, (el) => {
     scrollObserver?.disconnect()
     if (!el || typeof IntersectionObserver === 'undefined') return
@@ -589,14 +567,12 @@ watch(sentinelRef, (el) => {
 
 // ── Watchers ───────────────────────────────────────────────────────────────
 
-// Debounce search: 300ms after last keystroke
 let searchDebounce = null
 watch(search, () => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => fetchList(), 300)
 })
 
-// Filters that should refetch immediately (no debounce)
 watch(
     [
         selectedLocation,
@@ -664,11 +640,9 @@ async function bulkDelete() {
     bulkDeleting.value = true
     try {
         const ids = Object.keys(selectedMap)
-        // Single batch request instead of one DELETE per record
         const batch = pb.createBatch()
         ids.forEach((id) => batch.collection('ratings').delete(id))
         await batch.send()
-        // Remove from local list — avoid full refetch
         comments.value = comments.value.filter((c) => !ids.includes(c.id))
         totalItems.value = Math.max(0, totalItems.value - ids.length)
         notify(t('notifications.success.delete'))
@@ -698,11 +672,7 @@ function clearSelection() {
 
 const { subscribe } = usePbSubscription()
 
-// Fetched during SSR so the page is in the server HTML. The handler fills the
-// refs server-side and returns them for the payload; on hydration the handler
-// is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('admin-comments', async () => {
-    // Fetch both in parallel: stats don't need to wait for the list
     await Promise.all([fetchList(), fetchStats()])
     return {
         comments: comments.value,
@@ -720,14 +690,12 @@ loading.value = false
 
 onMounted(async () => {
     await subscribe('ratings', async (e) => {
-        // Handle realtime events without a full refetch
         if (e.action === 'delete') {
             comments.value = comments.value.filter((c) => c.id !== e.record.id)
             totalItems.value = Math.max(0, totalItems.value - 1)
             scheduleStatsRefresh()
         } else if (e.action === 'create') {
             totalItems.value++
-            // Prepend to list only when showing newest-first on the first "page"
             if (sortOrder.value === 'newest' && !hasMore.value) {
                 try {
                     const rec = await pb
@@ -769,7 +737,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* ── Stats horizontal scroll ─────────────────────────────────────────── */
 .stats-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -797,16 +764,13 @@ onBeforeUnmount(() => {
     }
 }
 
-/* Observable target even when the loader is hidden */
 .load-sentinel {
     min-height: 32px;
 }
 
-/* Bulk action bar that slides in at the bottom of the filter card */
 .bulk-bar {
     border-top: 1px solid rgba(var(--v-border-color), 0.12);
     background: rgba(var(--v-theme-primary), 0.05);
-    /* Matches the lg radius of the FilterBar card it sits inside. */
     border-radius: 0 0 8px 8px;
 }
 </style>

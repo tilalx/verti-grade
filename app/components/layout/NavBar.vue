@@ -9,10 +9,6 @@
                     class="nav-logo"
                     :aria-label="$t('routes.home')"
                 >
-                    <!-- Plain <img>: NuxtImg rewrites the src through
-                         /_ipx, which cannot read PocketBase's uploads and
-                         answers 403 in production. PocketBase already serves
-                         a sized thumbnail via ?thumb=. -->
                     <img
                         v-if="logo_url"
                         :src="logo_url"
@@ -33,13 +29,6 @@
                     />
                 </router-link>
 
-                <!-- Desktop Nav Links. Breakpoint via CSS, not useDisplay():
-                     the viewport is unknown server-side, so a JS breakpoint
-                     can't render here without a hydration mismatch.
-
-                     Grouped, not flat: the row is four items wide whatever
-                     gets added under Manage or Admin, so it cannot grow back
-                     into the logo and user menu the way the flat list did. -->
                 <nav
                     v-if="isLoggedIn"
                     class="nav-links d-none d-lg-flex"
@@ -62,8 +51,6 @@
                 <!-- Right Side -->
                 <div class="nav-actions">
                     <template v-if="isLoggedIn">
-                        <!-- Outside the d-lg-flex wrapper: moderation work
-                             should reach a phone too. -->
                         <NotificationsBell />
                         <div class="d-none d-lg-flex">
                             <UserIcon />
@@ -105,8 +92,6 @@
         >
             <v-list nav density="compact" class="drawer-list">
                 <template v-for="item in visibleNav" :key="item.key">
-                    <!-- Groups keep their heading here instead of collapsing:
-                         a drawer has the vertical room a link row does not. -->
                     <v-list-subheader v-if="item.children" class="drawer-group">
                         {{ $t(item.label) }}
                     </v-list-subheader>
@@ -127,8 +112,6 @@
 
             <template #append>
                 <v-divider class="mx-4 mb-3" />
-                <!-- Off-canvas, so SSR buys nothing here — and a second
-                     always-mounted UserIcon would duplicate its test ids. -->
                 <div class="drawer-footer">
                     <UserIcon v-if="isLoggedIn && !lgAndUp" />
                 </div>
@@ -141,8 +124,6 @@
 
 <script setup>
 const theme = useTheme()
-// Must track the CSS breakpoint above (d-lg-flex / d-lg-none): if these
-// disagree, the drawer opens between 960 and 1280 with no user menu in it.
 const { lgAndUp } = useDisplay()
 
 const props = defineProps({
@@ -161,9 +142,6 @@ const { loggedIn, settings } = toRefs(props)
 
 const { can } = usePermissions()
 
-// Audience-shaped, mirroring the URL prefixes: a flat top level for the
-// public page and the daily route work, then one group per permission
-// neighbourhood. A new page joins a group instead of widening the row.
 const navItems = [
     {
         key: 'home',
@@ -230,8 +208,6 @@ const navItems = [
     },
 ]
 
-// Your own activity is not in here on purpose: it needs no permission, so it
-// belongs with the account in the user menu, not in a management group.
 const allowed = (entry) => !entry.permission || can(entry.permission)
 
 const visibleNav = computed(() =>
@@ -241,7 +217,6 @@ const visibleNav = computed(() =>
                 ? { ...item, children: item.children.filter(allowed) }
                 : item,
         )
-        // An empty group would render as a dead button / bare subheader.
         .filter((item) =>
             item.children ? item.children.length > 0 : allowed(item),
         ),
@@ -294,11 +269,6 @@ const drawer = ref(false)
     margin-right: 8px;
 }
 
-/* No `display` here: scoped styles are unlayered, and Vuetify 4 ships its
-   helpers inside @layer vuetify-utilities.helpers — an unlayered rule beats a
-   layered one at any specificity, so `display: flex` here silently defeated
-   the `d-none` half of `d-none d-lg-flex` and forced the desktop nav onto
-   mobile (pushing the hamburger off-screen). Let the utilities own display. */
 .nav-links {
     align-items: center;
     gap: 2px;

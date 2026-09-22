@@ -31,22 +31,11 @@ async function saveStorageState(
     await page.getByTestId('login-identity').locator('input').fill(email)
     await page.getByTestId('login-password').locator('input').fill(password)
     await page.getByTestId('login-submit').click()
-    // Every role lands somewhere different post-login (admin -> /manage/routes,
-    // a plain "user" role has no admin permissions and bounces to /), so the
-    // only role-independent success signal is "left the login page".
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
     await context.storageState({ path: file })
     await browser.close()
 }
 
-/**
- * The production limits (1790200001_enable_rate_limits.js) are sized per client
- * IP for a gym full of separate phones. The whole suite runs from one address
- * and, across the four projects that match **\/auth\/**, sends far more sign-ins
- * and password-reset mails than any single person ever would -- so leaving them
- * on would fail the run on its own traffic. Turned off for the test stack only;
- * the rules themselves are verified against the migration, not through the UI.
- */
 async function relaxRateLimits(pb: PocketBase) {
     await pb.settings.update({ rateLimits: { enabled: false } })
 }

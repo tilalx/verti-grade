@@ -5,8 +5,6 @@
             :subtitle="t('reports.subtitle')"
         />
 
-        <!-- Art. 16(4)/(5) notices are mail. If mail is off, say so loudly:
-             an unreachable reporter is a compliance failure, not a nicety. -->
         <v-alert
             v-if="!mailConfigured"
             type="warning"
@@ -73,8 +71,6 @@
                 @decide="openDecision"
             />
 
-            <!-- Deliberately a button, not an observer: this list is short and
-                 a sentinel would be the most fragile part of the page. -->
             <div v-if="hasMore" class="text-center mt-4">
                 <v-btn
                     variant="tonal"
@@ -270,9 +266,6 @@ function openDecision(report: ReportRecord, decision: ReportDecision) {
     decisionDialog.value = true
 }
 
-// Art. 16(6): a human decides, and the reasoning is recorded. Removing the
-// content and recording the decision are two steps -- if the delete fails we
-// must not claim the content was removed.
 async function confirmDecision() {
     const report = pendingReport.value
     const decision = pendingDecision.value
@@ -286,7 +279,6 @@ async function confirmDecision() {
             try {
                 await pb.collection(collection).delete(report.content_id)
             } catch (err) {
-                // 404 means someone already removed it; anything else is real.
                 if ((err as { status?: number })?.status !== 404) throw err
             }
         }

@@ -1,13 +1,5 @@
 /// <reference path="../pb_data/types.d.ts" />
 
-// Spent Cap captcha tokens.
-//
-// One row per redeemed challenge. Nothing reads this table: its entire job is
-// the unique index, which turns "insert the jti" into an atomic claim and so
-// makes a solved token worth exactly one write (pb_hooks/cap.pb.js).
-//
-// No rules are opened. Only hooks touch it, and they run as the app rather than
-// as the request, so every API path to it stays closed.
 migrate(
     (app) => {
         const collection = new Collection({

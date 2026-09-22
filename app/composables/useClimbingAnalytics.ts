@@ -74,8 +74,6 @@ const defaultResult: ClimbingAnalyticsResponse = {
 export function useClimbingAnalytics() {
     const analytics = ref<ClimbingAnalyticsResponse | null>(null)
     const loading = ref(false)
-    // Shared state, not a plain ref: the fetch runs during SSR, so a failure
-    // only reaches the client through the payload.
     const error = useState('climbing-analytics-error', () => false)
 
     const normalized = computed(() => analytics.value ?? defaultResult)
@@ -107,9 +105,6 @@ export function useClimbingAnalytics() {
         }
     }
 
-    // Fetched during SSR so the dashboard is in the server HTML. The handler
-    // fills the ref server-side and returns it for the payload; on hydration
-    // the handler is skipped, so the ref is seeded from that payload instead.
     const { data: initial } = useAsyncData('climbing-analytics', async () => {
         await load()
         return analytics.value

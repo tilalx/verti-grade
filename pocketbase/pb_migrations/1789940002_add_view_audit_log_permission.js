@@ -9,9 +9,6 @@ migrate(
         permission.set('label', 'View Audit Log')
         app.save(permission)
 
-        // Admin only. Without this permission a user still reads their own
-        // entries -- the collection rule grants that to everyone -- so this
-        // grants the one thing it cannot: seeing what other people did.
         const rolesCol = app.findCollectionByNameOrId('roles_collection_id')
         const adminRole = app.findFirstRecordByData(rolesCol, 'name', 'admin')
         const permIds = adminRole.get('permissions') || []

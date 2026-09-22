@@ -44,7 +44,6 @@
                     >·</span
                 >
 
-                <!-- DSA Art. 11/12: a single point of contact, publicly reachable. -->
                 <v-btn
                     v-if="settings.contact_email"
                     :href="`mailto:${settings.contact_email}`"

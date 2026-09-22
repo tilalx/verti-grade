@@ -1,52 +1,5 @@
 <template>
-    <!--
-    ┌─────────────────────────────────────────────────────────────────────┐
-    │  PasswordChangeFields.vue                                           │
-    │                                                                     │
-    │  Pure UI + validation block. No PocketBase, no API calls.          │
-    │  The parent owns the string values; this component only renders     │
-    │  the fields, computes strength/validity, and emits upward.         │
-    │                                                                     │
-    │  Props                                                              │
-    │  ─────                                                              │
-    │  requireOldPassword  Boolean (default true)                        │
-    │    true  → shows "Current password" field (account-change flow)    │
-    │    false → hides it entirely (reset / first-login flow)            │
-    │                                                                     │
-    │  oldPassword        String  – v-model:old-password                 │
-    │  password           String  – v-model:password                     │
-    │  passwordConfirm    String  – v-model:password-confirm             │
-    │                                                                     │
-    │  Emits                                                              │
-    │  ─────                                                              │
-    │  update:oldPassword      String                                     │
-    │  update:password         String                                     │
-    │  update:passwordConfirm  String                                     │
-    │  validity                Boolean – fires immediately + on change   │
-    │                                                                     │
-    │  Usage – change flow (account dialog, security tab)                │
-    │  ──────────────────────────────────────────────────────────────────│
-    │  <PasswordChangeFields                                              │
-    │      v-model:old-password="user.oldPassword"                       │
-    │      v-model:password="user.password"                              │
-    │      v-model:password-confirm="user.passwordConfirm"               │
-    │      :require-old-password="true"                                  │
-    │      @validity="securityFieldsValid = $event"                      │
-    │  />                                                                 │
-    │                                                                     │
-    │  Usage – reset flow (standalone reset dialog / page)               │
-    │  ──────────────────────────────────────────────────────────────────│
-    │  <PasswordChangeFields                                              │
-    │      v-model:password="form.password"                              │
-    │      v-model:password-confirm="form.passwordConfirm"               │
-    │      :require-old-password="false"                                 │
-    │      @validity="canSubmit = $event"                                │
-    │  />                                                                 │
-    └─────────────────────────────────────────────────────────────────────┘
-    -->
-
     <div class="pcf-root">
-        <!-- ── Current password (change flow only) ──────────────────── -->
         <v-text-field
             v-if="requireOldPassword"
             :model-value="oldPassword"
@@ -64,7 +17,6 @@
             @click:append-inner="showOld = !showOld"
         />
 
-        <!-- ── New password ──────────────────────────────────────────── -->
         <v-text-field
             :model-value="password"
             :label="$t('account.password')"
@@ -87,7 +39,6 @@
             @click:append-inner="showNew = !showNew"
         />
 
-        <!-- ── Strength bar + checklist ──────────────────────────────── -->
         <Transition name="pcf-slide-down">
             <div v-if="password" class="mt-n2 mb-3 px-1">
                 <div class="d-flex align-center justify-space-between mb-1">
@@ -139,7 +90,6 @@
             </div>
         </Transition>
 
-        <!-- ── Confirm password ──────────────────────────────────────── -->
         <v-text-field
             :model-value="passwordConfirm"
             :label="$t('account.newPassword')"
@@ -152,7 +102,6 @@
             data-testid="password-confirm"
             @update:model-value="emit('update:passwordConfirm', $event)"
         >
-            <!-- Eye icon swaps to check-circle once passwords match (no remount) -->
             <template #append-inner>
                 <v-icon
                     v-if="passwordsMatch"
@@ -180,15 +129,7 @@ import {
     maxLength,
     passwordsMatch as makePasswordsMatchRule,
 } from '~/utils/validation'
-// ── Props ─────────────────────────────────────────────────────────────────
 const props = defineProps({
-    /**
-     * true  → "Current password" field is shown and required.
-     *          Use in the account-settings / change-password flow.
-     * false → field is hidden entirely.
-     *          Use for password-reset / first-login where the token already
-     *          authenticated the user.
-     */
     requireOldPassword: { type: Boolean, default: true },
 
     oldPassword: { type: String, default: '' },
@@ -196,15 +137,10 @@ const props = defineProps({
     passwordConfirm: { type: String, default: '' },
 })
 
-// ── Emits ─────────────────────────────────────────────────────────────────
 const emit = defineEmits([
     'update:oldPassword',
     'update:password',
     'update:passwordConfirm',
-    /**
-     * Fires immediately on mount and whenever computed validity flips.
-     * Payload: Boolean — true when all visible fields satisfy their rules.
-     */
     'validity',
 ])
 
@@ -252,7 +188,6 @@ const passwordsMatch = computed(
     () => !!(props.passwordConfirm && props.password === props.passwordConfirm),
 )
 
-// ── Validation rules (referenced directly by v-text-field :rules) ─────────
 const rules = {
     required: required(t),
     minLength: minLength(t, 8),
@@ -261,9 +196,6 @@ const rules = {
     strength: () => strengthScore.value >= 3 || t('validation.passwordTooWeak'),
 }
 
-// ── Computed overall validity ─────────────────────────────────────────────
-// Mirrors the field rules exactly so the parent can gate save/submit
-// without needing a full form.validate() round-trip first.
 const isValid = computed(() => {
     const baseOk =
         props.password.length >= 8 &&
@@ -274,13 +206,10 @@ const isValid = computed(() => {
     return props.requireOldPassword ? baseOk && !!props.oldPassword : baseOk
 })
 
-// Emit immediately on mount so parent's initial button state is correct,
-// then whenever validity flips.
 watch(isValid, (val) => emit('validity', val), { immediate: true })
 </script>
 
 <style scoped>
-/* ── Strength bar ──────────────────────────────────────────────────── */
 .pcf-strength-track {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -295,7 +224,6 @@ watch(isValid, (val) => emit('validity', val), { immediate: true })
     background-color: rgba(var(--v-theme-on-surface), 0.12);
 }
 
-/* ── Requirements checklist ───────────────────────────────────────── */
 .pcf-requirements-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -313,7 +241,6 @@ watch(isValid, (val) => emit('validity', val), { immediate: true })
     color: rgba(var(--v-theme-on-surface), 0.45);
 }
 
-/* ── Slide-down transition for strength block ─────────────────────── */
 .pcf-slide-down-enter-active,
 .pcf-slide-down-leave-active {
     transition:

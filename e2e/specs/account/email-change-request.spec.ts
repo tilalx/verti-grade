@@ -1,12 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * The address is never written directly — PocketBase mails a confirmation link
- * to the NEW inbox and only swaps it when that link is opened, so the old
- * address has to stay live on the record until then.
- */
-
 async function openProfileDialog(page) {
     await gotoSettled(page, '/')
     await page.getByTestId('user-menu-activator').click()
@@ -35,7 +29,6 @@ test('requests an email change instead of writing the address', async ({
     await page.getByTestId('profile-save').click()
 
     const patchReq = await patch
-    // The PATCH carries the profile fields only — never the new address.
     expect(await patchReq.postData()).not.toContain(newEmail)
 
     const req = await changeRequest
@@ -67,6 +60,5 @@ test('blocks saving a malformed email address', async ({ userPage: page }) => {
         .fill('not-an-email')
     await page.getByTestId('profile-save').click()
 
-    // Client-side validation keeps the dialog open, nothing is submitted.
     await expect(page.getByTestId('profile-email')).toBeVisible()
 })

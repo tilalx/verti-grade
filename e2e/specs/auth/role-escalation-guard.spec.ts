@@ -2,22 +2,6 @@ import { test, expect } from '@playwright/test'
 import PocketBase from 'pocketbase'
 import { authAsSuperuser, ensureUser, getRoleIds } from '../../support/seed'
 
-/**
- * users.updateRule lets a member write their own record, and PocketBase rules
- * gate records rather than fields -- so the `role` relation was writable by its
- * owner and every signed-in account could hand itself the admin role.
- * pb_hooks/users.pb.js is what closes that, and this is its regression test.
- *
- * PocketBase already refuses `verified` and `email` from a non-superuser on its
- * own; a custom relation like `role` gets no such treatment, which is the whole
- * reason the hook has to exist.
- *
- * Driven through the SDK rather than the UI on purpose: no page offers this, so
- * the only way to make the attempt is the one an attacker would use. Accounts
- * are created per test -- the seeded fixtures are shared by four parallel
- * projects, and a spec that moved one between roles would race with itself.
- */
-
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
 async function superuser() {

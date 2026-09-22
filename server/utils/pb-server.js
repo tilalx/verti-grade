@@ -6,16 +6,6 @@ export function createPocketBase() {
     return new PocketBase(url)
 }
 
-/**
- * Build a PocketBase client authenticated as the requesting user.
- *
- * The user's auth token is forwarded from the `Authorization` header so that
- * every PocketBase request is evaluated against that user's collection rules,
- * instead of running as an anonymous client that could expose records the
- * caller is not allowed to read.
- *
- * Throws a 401 error when no valid token is present.
- */
 export function getAuthenticatedPb(event) {
     const header = getHeader(event, 'authorization') || ''
     const token = header.replace(/^Bearer\s+/i, '').trim()

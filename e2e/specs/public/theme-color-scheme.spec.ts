@@ -11,9 +11,6 @@ test.describe('dark OS preference', () => {
         await expect(page.locator(appRoot)).toHaveClass(/v-theme--dark/)
     })
 
-    // The color-scheme cookie is seeded with the default theme on the very
-    // first request, before any client hint exists — it must not outrank the
-    // browser's actual preference afterwards.
     test('ignores a stale light color-scheme cookie', async ({
         page,
         baseURL,

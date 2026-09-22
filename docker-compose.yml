@@ -1,38 +1,28 @@
 services:
-  verti-grade:
-    container_name: verti-grade
-    image: tilalx/verti-grade:rolling
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      # Default superuser created/updated on every boot (idempotent).
-      # Change these before first launch, or remove after initial setup.
-      PB_SUPERUSER_EMAIL: admin@example.com
-      PB_SUPERUSER_PASSWORD: changeme123
-      # Mail. Without SMTP the app sends nothing: no invite for a newly created
-      # user (who then cannot sign in at all), and no DSA Art. 16 notices.
-      # Uncomment and fill in to configure it without the PocketBase panel.
-      #PB_SMTP_HOST: smtp.example.com
-      #PB_SMTP_PORT: 587
-      #PB_SMTP_USERNAME: apikey
-      #PB_SMTP_PASSWORD: change-me
-      #PB_SMTP_TLS: "true"
-      # Interpolated into every mail: the link target, the subject line and the
-      # sender identity. Defaults are localhost:8090 / "Acme" / support@example.com.
-      #PB_APP_URL: https://climbing.example.com
-      #PB_APP_NAME: Verti-Grade
-      #PB_SENDER_ADDRESS: no-reply@example.com
-      #PB_SENDER_NAME: Verti-Grade
-      # Proof-of-work captcha (Cap). Unset = off, and every form keeps working.
-      # Set it to a long random string to require a solved challenge on the
-      # anonymous actions: rating and report creation, sign-in, and the public
-      # password-reset form. Turning it on also raises the rate limits that the
-      # captcha now backs. Use the same value if you ever run more than one
-      # replica -- both halves sign and verify with it.
-      #CAP_SECRET: change-me-to-a-long-random-string
-    volumes:
-      - ./pb_data:/pb/pb_data
-#     Mount custom TLS certificates to replace the auto-generated self-signed ones:
+    verti-grade:
+        container_name: verti-grade
+        image: tilalx/verti-grade:rolling
+        ports:
+            - '80:80'
+            - '443:443'
+        environment:
+            # Change before first launch, or remove after initial setup.
+            PB_SUPERUSER_EMAIL: admin@example.com
+            PB_SUPERUSER_PASSWORD: changeme123
+            # Mail (SMTP). Uncomment and fill in to enable.
+            #PB_SMTP_HOST: smtp.example.com
+            #PB_SMTP_PORT: 587
+            #PB_SMTP_USERNAME: apikey
+            #PB_SMTP_PASSWORD: change-me
+            #PB_SMTP_TLS: "true"
+            #PB_APP_URL: https://climbing.example.com
+            #PB_APP_NAME: Verti-Grade
+            #PB_SENDER_ADDRESS: no-reply@example.com
+            #PB_SENDER_NAME: Verti-Grade
+            # Proof-of-work captcha (Cap). Unset = off.
+            #CAP_SECRET: change-me-to-a-long-random-string
+        volumes:
+            - ./pb_data:/pb/pb_data
+            # Custom TLS certificates, replacing the auto-generated self-signed ones:
 #      - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
 #      - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro

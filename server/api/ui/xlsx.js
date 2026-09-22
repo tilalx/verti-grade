@@ -71,7 +71,6 @@ export default eventHandler(async (event) => {
             key: column.key,
         }))
 
-        // Widths grow with the widest rendered value in each column.
         const widths = columns.map((column) => column.header.length)
 
         for (const climbingRoute of climbingRoutes) {
@@ -95,7 +94,6 @@ export default eventHandler(async (event) => {
                 if (numFmt) {
                     cell.numFmt = numFmt
                 }
-                // Two extra characters cover the sign a number format appends.
                 widths[index] = Math.max(
                     widths[index],
                     String(cell.value ?? '').length + (numFmt ? 2 : 0),
@@ -114,8 +112,6 @@ export default eventHandler(async (event) => {
             }
 
             if (qrIndex !== -1) {
-                // Same payload as the PDF export — the inventory scanner parses
-                // the `id` query parameter back out of it.
                 const buffer = await QRCode.toBuffer(
                     `${applicationUrl}/route?id=${climbingRoute.id}`,
                     {
@@ -143,7 +139,6 @@ export default eventHandler(async (event) => {
                       )
         })
 
-        // Header dropdowns: sort and filter the sheet straight out of Excel.
         worksheet.autoFilter = {
             from: { row: 1, col: 1 },
             to: { row: climbingRoutes.length + 1, col: columns.length },

@@ -1,11 +1,3 @@
-/**
- * Pure formatting utilities shared across pages and components.
- */
-
-/**
- * Converts a date string or null to a `YYYY-MM-DD` string suitable for
- * HTML date inputs.  Returns `''` for invalid or absent values.
- */
 export function formatDateToYYYYMMDD(date: string | null | undefined): string {
     if (!date) return ''
     const parsed = new Date(date)
@@ -15,10 +7,6 @@ export function formatDateToYYYYMMDD(date: string | null | undefined): string {
     return `${parsed.getFullYear()}-${month}-${day}`
 }
 
-/**
- * Formats a date string for display in the given locale.  Returns `''` for
- * invalid or absent values.
- */
 export function formatDisplayDate(
     date: string | null | undefined,
     locale?: string,
@@ -29,11 +17,6 @@ export function formatDisplayDate(
     return parsed.toLocaleDateString(locale || undefined)
 }
 
-/**
- * "12 min ago" for anything recent, an absolute date once that stops being
- * useful. Takes `t`/`locale` as arguments, the same way the validation rule
- * factories do, so it stays a pure function outside a component.
- */
 export function timeAgo(
     dateStr: string | null | undefined,
     t: (key: string, named?: Record<string, unknown>) => string,
@@ -62,9 +45,6 @@ export interface DifficultySource {
     difficulty_sign?: boolean | string | null
 }
 
-/**
- * Formats a route's difficulty into a display string like "7+", "5-", or "6".
- */
 export function formatDifficulty(
     route: DifficultySource | null | undefined,
 ): string {
@@ -80,9 +60,6 @@ export function formatDifficulty(
     return `${base}${sign}`.trim()
 }
 
-/**
- * Formats an anchor-point value. Returns '—' for nullish/empty, '-' for 0, otherwise the raw value.
- */
 export function formatAnchorPoint(value: unknown): unknown {
     if (value === null || value === undefined || value === '') {
         return '—'
@@ -93,9 +70,6 @@ export function formatAnchorPoint(value: unknown): unknown {
     return value
 }
 
-/**
- * Formats a route's aggregate score as "X.XX/5" or '—' when absent.
- */
 export function formatScore(
     route: { score?: unknown } | null | undefined,
 ): string {
@@ -106,9 +80,6 @@ export function formatScore(
     return score !== null ? `${score.toFixed(2)}/5` : '—'
 }
 
-/**
- * Normalises a raw creator value (either a CSV string or an array) into a trimmed string[].
- */
 export function normalizeCreators(raw: unknown): string[] {
     if (Array.isArray(raw)) {
         return raw

@@ -274,8 +274,6 @@
                             }"
                         >
                             <template #actions>
-                                <!-- DSA Art. 16(1): a reporting path on every
-                                 individual item, reachable without an account. -->
                                 <v-btn
                                     icon="mdi-flag-outline"
                                     variant="text"
@@ -325,13 +323,6 @@ const nuxtRoute = useRoute()
 
 const route_id = ref<string | null>((nuxtRoute.query.id as string) || null)
 
-// A report addresses a comment as `/route?id=<route>#comment-<rating>`
-// (utils/reports.ts).
-//
-// Read from window on mount rather than from useRoute().hash: a fragment is
-// never sent to the server, so it is empty for the whole SSR render and the
-// highlight silently never applied. Client-only is also honest -- the server
-// genuinely cannot know which comment was linked.
 const targetCommentId = ref('')
 const loading = ref(true)
 const metadata = ref<RouteListItem | null>(null)
@@ -348,7 +339,6 @@ interface ReviewDisplay {
 
 const reviews = ref<ReviewDisplay[]>([])
 
-// One dialog for the whole list, retargeted per card.
 const reportDialog = ref(false)
 const reportTarget = ref<string | null>(null)
 const reportUrl = computed(() =>
@@ -495,12 +485,10 @@ function isLightColor(hex: string): boolean {
     const r = (num >> 16) & 0xff
     const g = (num >> 8) & 0xff
     const b = num & 0xff
-    // Perceived luminance formula
     return r * 0.299 + g * 0.587 + b * 0.114 > 160
 }
 
 function adjustColor(hex: string, amount: number): string {
-    // Darken/lighten a hex color
     let color = hex.replace('#', '')
     if (color.length === 3) {
         color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
@@ -514,9 +502,6 @@ function adjustColor(hex: string, amount: number): string {
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-// Fetched during SSR so the route is in the server HTML. The handler fills the
-// refs server-side and returns them for the payload; on hydration the handler
-// is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('route-detail', async () => {
     if (!route_id.value) return null
     await Promise.all([getRouteMetadata(), getAllRouteRatings()])
@@ -528,8 +513,6 @@ if (initial.value) {
     reviews.value = initial.value.reviews
 }
 
-// navigateTo() inside the handler is swallowed — the redirect only becomes a
-// real 302 (SSR) or router push (client nav) from the setup body.
 if (!metadata.value) await navigateTo('/404')
 
 loading.value = false
@@ -538,8 +521,6 @@ onMounted(async () => {
     const hash = window.location.hash
     if (hash.startsWith('#comment-')) {
         targetCommentId.value = hash.slice('#comment-'.length)
-        // Reviews are server-rendered, so the element is already in the DOM;
-        // nextTick is for the class that was just flipped on.
         await nextTick()
         document
             .getElementById(`comment-${targetCommentId.value}`)
@@ -557,8 +538,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* The reported comment, arrived at from a report link. Outline rather than a
-   background so the card's own tonal surface still reads in both themes. */
 .comment-card--target {
     outline: 2px solid rgb(var(--v-theme-success));
     outline-offset: 2px;
@@ -605,9 +584,6 @@ onMounted(async () => {
     }
 }
 
-/* Desktop: hero banner carries name, grade and stats; details sit left of
-   the reviews below it. The main column is unwrapped with display:contents
-   so the hero can span the full width. */
 @media (min-width: 960px) {
     .route-page {
         max-width: 1400px;
@@ -642,7 +618,6 @@ onMounted(async () => {
         font-size: 2.5rem;
     }
 
-    /* Name and grade stay together instead of drifting to opposite edges */
     .route-hero__content > .d-flex.align-end {
         justify-content: flex-start !important;
         align-items: center !important;
@@ -659,7 +634,6 @@ onMounted(async () => {
         font-size: 1.75rem;
     }
 
-    /* Stats sit inside the hero on the right, not overlapping its bottom edge */
     .stats-card {
         grid-area: hero;
         align-self: center;
@@ -679,7 +653,6 @@ onMounted(async () => {
     }
 }
 
-/* Wide desktop: reviews read as a two-column board instead of one long list */
 @media (min-width: 1400px) {
     .route-reviews-list {
         display: grid;
@@ -724,8 +697,6 @@ onMounted(async () => {
     white-space: nowrap;
 }
 
-/* Overlaps the hero image (mt-n4), so it needs a stacking context and an
-   opaque background — the elevation is deliberate, not drift. */
 .stats-card {
     position: relative;
     z-index: 2;

@@ -7,14 +7,6 @@ import {
     waitForAuditRow,
 } from '../../support/audit'
 
-/**
- * The audit log.
- *
- * Entries are written by PocketBase hooks after the request returns, so reads
- * poll. Every test filters by a record id it created itself — `fullyParallel`
- * means sibling tests are appending to this table the whole time.
- */
-
 test('a create, an update and a delete each leave an entry', async ({
     adminPage: page,
     testPrefix,
@@ -37,8 +29,6 @@ test('a create, an update and a delete each leave an entry', async ({
     )
     expect(deleted).toHaveLength(1)
 
-    // The entry outlives the record it describes — that is the whole point of
-    // record_id being plain text rather than a relation.
     const gone = await page.request.get(
         `/api/collections/ratings/records/${commentId}`,
     )
@@ -71,7 +61,6 @@ test('an update records the changed field names and none of the values', async (
     expect(rows).toHaveLength(1)
     expect(rows[0].changed_fields).toContain('comment')
 
-    // The minimisation guarantee: field names are stored, values never are.
     expect(JSON.stringify(rows[0])).not.toContain(secret)
 
     await deleteComment(page, commentId)
@@ -149,9 +138,6 @@ test('a bulk archive leaves one entry per route', async ({
         ids.push((await res.json()).id as string)
     }
 
-    // The batch API, as the bulk-archive button uses it. If batch sub-requests
-    // bypassed the record hooks, every bulk operation would be an audit blind
-    // spot — this is the test that says they do not.
     const batch = await page.request.post('/api/batch', {
         headers,
         data: {
@@ -185,9 +171,6 @@ test('an anonymous caller cannot read the audit log', async ({
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    // Regression for the list rule: without its `@request.auth.id != ""`
-    // guard, `actor = @request.auth.id` matches every anonymous entry and the
-    // whole anonymous slice — IP addresses included — becomes world-readable.
     const body = await fetchAuditRowsAnonymously(page)
     expect(body.totalItems ?? 0).toBe(0)
 })

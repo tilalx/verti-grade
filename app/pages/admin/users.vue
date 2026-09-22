@@ -102,11 +102,6 @@
                         </v-card-subtitle>
 
                         <template #append>
-                            <!-- Flat, not tonal: a tonal chip paints the
-                                 label in the role color, and an admin-chosen
-                                 mid-tone hue is unreadable as text on a dark
-                                 surface. Color goes behind, foreground is
-                                 contrast-checked. -->
                             <v-chip
                                 v-if="user.roleName"
                                 size="small"
@@ -285,7 +280,6 @@ function buildFilter() {
     if (selectedRole.value) {
         parts.push(`role = "${selectedRole.value}"`)
     }
-    // Note: role is a relation ID, filter works directly with the ID
     return parts.join(' && ')
 }
 
@@ -418,9 +412,6 @@ function formatDate(date) {
 
 const { subscribe } = usePbSubscription()
 
-// Fetched during SSR so the page is in the server HTML. The handler fills the
-// refs server-side and returns them for the payload; on hydration the handler
-// is skipped, so the refs are seeded from that payload instead.
 const { data: initial } = await useAsyncData('admin-users', async () => {
     await fetchList()
     return { users: users.value, totalItems: totalItems.value }

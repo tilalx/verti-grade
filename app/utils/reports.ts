@@ -5,11 +5,6 @@ import type {
     RecordId,
 } from '~/types/models'
 
-/**
- * The reason list offered in the report dialog, in the order it is shown.
- * Kept next to the URL helper so the select and the i18n keys cannot drift
- * apart from the values the PocketBase select field accepts.
- */
 export const REPORT_REASONS: ReportReason[] = [
     'hate_speech',
     'harassment',
@@ -21,11 +16,6 @@ export const REPORT_REASONS: ReportReason[] = [
     'other',
 ]
 
-/**
- * DSA Art. 16(2)(b) requires the notice to carry the exact electronic location
- * of the reported content. A comment has no page of its own, so it is
- * addressed as an anchor on the route page that renders it.
- */
 export function reportContentUrl(
     type: ReportContentType,
     id: RecordId,

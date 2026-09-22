@@ -58,7 +58,6 @@ describe('useClimbingAnalytics', () => {
         const { error, hasData } = useClimbingAnalytics()
 
         expect(fetchMock).toHaveBeenCalledTimes(1)
-        // Synchronously, before the fetch resolves, it reads as empty.
         expect(error.value).toBe(false)
         expect(hasData.value).toBe(false)
     })
@@ -78,8 +77,13 @@ describe('useClimbingAnalytics', () => {
 
     it('exposes all data fields after a successful load', async () => {
         fetchMock.mockResolvedValue(sampleResponse)
-        const { load, difficultyDistribution, routeSetters, latestRoutes, latestComments } =
-            useClimbingAnalytics()
+        const {
+            load,
+            difficultyDistribution,
+            routeSetters,
+            latestRoutes,
+            latestComments,
+        } = useClimbingAnalytics()
 
         await load()
 
@@ -105,8 +109,6 @@ describe('useClimbingAnalytics', () => {
 
         await load()
 
-        // A plain ref() would die with the server-side instance; living under
-        // a useState key is what carries the failure over in the payload.
         expect(error.value).toBe(true)
         expect(useState('climbing-analytics-error').value).toBe(true)
     })
@@ -147,7 +149,11 @@ describe('useClimbingAnalytics', () => {
     it('filters out falsy items from array fields', async () => {
         fetchMock.mockResolvedValue({
             ...sampleResponse,
-            routeSetters: [{ setter: 'Alice', count: 3 }, null, { setter: 'Bob', count: 1 }],
+            routeSetters: [
+                { setter: 'Alice', count: 3 },
+                null,
+                { setter: 'Bob', count: 1 },
+            ],
         })
         const { load, routeSetters } = useClimbingAnalytics()
 
@@ -160,7 +166,12 @@ describe('useClimbingAnalytics', () => {
         fetchMock.mockResolvedValue({
             ...sampleResponse,
             latestRoutes: [
-                { id: 'r2', name: 'Sparse Route', difficulty: '4', creators: null },
+                {
+                    id: 'r2',
+                    name: 'Sparse Route',
+                    difficulty: '4',
+                    creators: null,
+                },
             ],
         })
         const { load, latestRoutes } = useClimbingAnalytics()
@@ -179,7 +190,6 @@ describe('useClimbingAnalytics', () => {
         await refresh()
 
         expect(hasData.value).toBe(true)
-        // Once on creation for SSR, once for the explicit refresh.
         expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 })

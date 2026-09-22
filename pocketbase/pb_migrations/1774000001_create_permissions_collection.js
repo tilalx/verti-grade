@@ -82,11 +82,9 @@ migrate(
 
         app.save(collection)
 
-        // Re-fetch the collection so Record gets proper context
         const savedCollection =
             app.findCollectionByNameOrId('permissions_col_id')
 
-        // Seed the 8 features
         const features = [
             { name: 'manage_routes', label: 'Manage Routes' },
             { name: 'view_analytics', label: 'View Analytics' },

@@ -2,7 +2,6 @@ import { defineConfig, PluginOption } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import path from 'node:path'
 
-// Nuxt's build-time flags, which plain vitest doesn't define.
 const importMetaFlags: Record<string, string> = {
     'import.meta.dev': '(process.env.NODE_ENV !== "production")',
     'import.meta.server': '(process.server === true)',

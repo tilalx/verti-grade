@@ -1,13 +1,7 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * specs/public/** only runs under desktop-en, so the bottom-sheet variant of
- * the report dialog needs its own file here — same split as review-sheet.
- */
 test('report form opens as a bottom sheet on mobile', async ({ page }) => {
-    // Derive the route from a comment that exists, rather than assuming the
-    // first seeded route happens to have one.
     const res = await page.request.get(
         '/api/collections/ratings/records?filter=' +
             encodeURIComponent(
@@ -24,8 +18,6 @@ test('report form opens as a bottom sheet on mobile', async ({ page }) => {
     await expect(dialog).toBeVisible()
 
     const viewport = page.viewportSize()!
-    // Flush with the bottom edge and full width. Polled on absolute distance:
-    // the sheet slides up, so the first visible frame is still below the fold.
     await expect
         .poll(async () => {
             const box = (await dialog.boundingBox())!

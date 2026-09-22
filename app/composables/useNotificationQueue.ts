@@ -1,15 +1,5 @@
 import type { NotificationRecord } from '~/types/models'
 
-/**
- * The in-app notification queue backing the navbar bell.
- *
- * Deliberately NOT useNotification() -- that one is the transient snackbar.
- * This is the persistent, per-user queue written server-side by
- * pb_hooks/utils/notifications.js, one row per recipient.
- *
- * State is shared through useState so the bell and any other consumer see the
- * same list and the same unread count.
- */
 export function useNotificationQueue() {
     const pb = usePocketbase()
     const items = useState<NotificationRecord[]>('notification-queue', () => [])
@@ -19,7 +9,6 @@ export function useNotificationQueue() {
         () => items.value.filter((item) => !item.read).length,
     )
 
-    /** A superseded request, not a failure -- see usePermissions(). */
     function isAutoCancelled(err: any) {
         return !!err?.isAbort || err?.status === 0
     }
@@ -50,7 +39,6 @@ export function useNotificationQueue() {
         const item = items.value.find((entry) => entry.id === id)
         if (!item || item.read) return
 
-        // Optimistic: the badge should drop the moment it is clicked.
         item.read = true
         try {
             await pb.collection('notifications').update(id, { read: true })
@@ -66,8 +54,6 @@ export function useNotificationQueue() {
 
         unread.forEach((item) => (item.read = true))
         try {
-            // Batch API is enabled (migration 1783803501), so this is one
-            // request regardless of how many rows are unread.
             const batch = pb.createBatch()
             for (const item of unread) {
                 batch

@@ -34,8 +34,6 @@ test('an anonymous visitor can submit a review', async ({ page }) => {
 
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
 
-    // The empty state is an either/or with the list: its v-else used to be
-    // bound to the report dialog, so it rendered next to real reviews.
     await expect(page.getByTestId('comment-card-report').first()).toBeVisible()
     await expect(page.getByTestId('empty-state')).toBeHidden()
 })
@@ -76,7 +74,6 @@ test('blocks submit when no rating is selected', async ({ page }) => {
     await page.getByTestId('review-open-cta').click()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 
-    // Empty form — submit stays disabled, never clickable.
     await expect(page.getByTestId('review-form-submit')).toBeDisabled()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 })

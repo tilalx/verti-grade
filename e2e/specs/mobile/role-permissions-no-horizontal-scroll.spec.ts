@@ -1,10 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-// The role permission editor used to be a v-table with one fixed-width column
-// per permission — nine of them. That is wider than any phone, so it pushed the
-// whole document into a sideways scroll, and a page that scrolls sideways
-// slides under every dialog that locks the scroll. It is a card grid now.
 test('the role permission editor never scrolls sideways on a small phone', async ({
     adminPage: page,
 }) => {
@@ -41,7 +37,6 @@ test('every role card and its permission toggles stay reachable on a phone', asy
         expect(box.x + box.width).toBeLessThanOrEqual(375)
     }
 
-    // A checkbox clipped out of the viewport cannot be tapped at all.
     const toggle = page.getByTestId('role-permissions-user-view_analytics')
     await toggle.scrollIntoViewIfNeeded()
     const toggleBox = (await toggle.boundingBox())!
@@ -57,7 +52,6 @@ test('the role create dialog opens as a bottom sheet on a phone', async ({
     await page.getByTestId('role-create-open').click()
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
 
-    // sheet-on-mobile docks it to the bottom edge, full-bleed.
     const sheet = page.locator('.v-overlay__content.dialog-shell--sheet')
     await expect(sheet).toBeVisible()
     const box = (await sheet.boundingBox())!

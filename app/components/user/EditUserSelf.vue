@@ -103,10 +103,6 @@
                 <v-tab value="security" data-testid="profile-tab-security">
                     <v-icon start icon="mdi-shield-lock-outline" size="18" />
                     {{ $t('account.tabs.security') }}
-                    <!--
-                            Dot badge: user started typing a password on the security tab
-                            but navigated away and the fields are not yet valid.
-                        -->
                     <v-badge
                         v-if="showSecurityWarning"
                         color="warning"
@@ -187,15 +183,6 @@
             <!-- ── Security tab ───────────────────────────────── -->
             <v-window-item value="security">
                 <v-card-text class="pa-6">
-                    <!--
-                            PasswordChangeFields owns all password state and
-                            validation. We just bind the three string refs and
-                            listen to @validity to know whether the block is
-                            complete and valid before attempting to save.
-
-                            :require-old-password="true" → current-password
-                            field is shown and required (change flow).
-                        -->
                     <UserPasswordChangeFields
                         v-model:old-password="user.oldPassword"
                         v-model:password="user.password"
@@ -204,7 +191,6 @@
                         @validity="passwordFieldsValid = $event"
                     />
 
-                    <!-- Hint shown when the user hasn't started yet -->
                     <v-alert
                         v-if="!passwordChangeRequested"
                         type="info"
@@ -310,7 +296,6 @@ const user = reactive({
         email: '',
         avatar: null,
     }),
-    // Password fields — owned here, bound into PasswordChangeFields via v-model
     oldPassword: '',
     password: '',
     passwordConfirm: '',
@@ -348,18 +333,10 @@ function onAvatarNative(e) {
 const activeTab = ref('profile')
 
 // ── Password section state ────────────────────────────────────────────────
-/**
- * True once the user has typed anything into any of the three password fields.
- * Used to show the "hint" alert and the security-tab warning badge.
- */
 const passwordChangeRequested = computed(
     () => !!(user.oldPassword || user.password || user.passwordConfirm),
 )
 
-/**
- * Kept in sync by PasswordChangeFields via @validity.
- * True when all three fields satisfy their validation rules.
- */
 const passwordFieldsValid = ref(false)
 
 const showSecurityWarning = computed(
@@ -369,7 +346,6 @@ const showSecurityWarning = computed(
         !passwordFieldsValid.value,
 )
 
-// ── Profile-only validation rule (only "required" needed here) ────────────
 const rules = {
     required: required(t),
     email: validEmail(t),
@@ -390,11 +366,6 @@ const normalizedEmail = (value) =>
         .trim()
         .toLowerCase()
 
-/**
- * The address is not written directly: PocketBase sends a confirmation link to
- * the NEW inbox and only swaps it once that link is opened, so the old address
- * stays live until then.
- */
 const emailChangeRequested = computed(
     () =>
         !!normalizedEmail(user.email) &&
@@ -422,11 +393,6 @@ function cancelEdit() {
     localDialog.value = false
 }
 
-/**
- * Save is only enabled when:
- *  - there are actual changes, AND
- *  - if the password section was touched, those fields are fully valid
- */
 const canSave = computed(() => {
     if (!hasChanges.value) return false
     if (passwordChangeRequested.value && !passwordFieldsValid.value)
@@ -440,16 +406,12 @@ const { notify, error: notifyError } = useNotification()
 const saving = ref(false)
 
 async function saveUser() {
-    // Validate profile fields (name, firstname)
     const profileResult = await profileForm.value?.validate()
     if (!profileResult?.valid) {
         activeTab.value = 'profile'
         return
     }
 
-    // If password change was requested, guard against invalid state
-    // (canSave already prevents the button being clickable, but this is
-    // a safety net e.g. if called programmatically)
     if (passwordChangeRequested.value && !passwordFieldsValid.value) {
         activeTab.value = 'security'
         return
@@ -457,9 +419,6 @@ async function saveUser() {
 
     saving.value = true
 
-    // Captured before the update: Object.assign() below resets user.email to
-    // whatever PocketBase still has (the old address), which is correct --
-    // the swap only happens once the new inbox confirms.
     const requestedEmail = user.email.trim()
     const wantsEmailChange = emailChangeRequested.value
 
@@ -468,8 +427,6 @@ async function saveUser() {
     formData.append('name', user.name)
 
     if (passwordChangeRequested.value) {
-        // oldPassword, password, passwordConfirm are owned by `user` reactive
-        // and were kept in sync by PasswordChangeFields via v-model
         formData.append('oldPassword', user.oldPassword)
         formData.append('password', user.password)
         formData.append('passwordConfirm', user.passwordConfirm)
@@ -482,22 +439,18 @@ async function saveUser() {
     try {
         const updated = await pb.collection('users').update(user.id, formData)
 
-        // Sync local reactive state with what PocketBase returned
         Object.assign(user, updated)
         avatarPreview.value = updated.avatar
             ? usePbFileUrl(updated, updated.avatar, { thumb: '100x100' })
             : null
 
-        // Clear password fields
         user.oldPassword = ''
         user.password = ''
         user.passwordConfirm = ''
         avatarFile.value = null
 
-        // Keep the session record fresh (re-writes the auth cookie)
         pb.authStore.save(pb.authStore.token, updated)
 
-        // Update original snapshot so hasChanges resets to false
         original.firstname = updated.firstname
         original.name = updated.name
         original.email = updated.email ?? original.email
@@ -536,8 +489,6 @@ async function deleteAccount() {
     deleting.value = true
     try {
         await pb.collection('users').delete(user.id)
-        // Clear before navigating: the token still looks valid to the auth
-        // middleware, which would bounce the user straight back in.
         pb.authStore.clear()
         deleteDialog.value = false
         localDialog.value = false

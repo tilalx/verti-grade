@@ -1,10 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-// The shared layout primitives (LayoutPageHeader, LayoutDialogShell,
-// LayoutEmptyState) only pay off if every screen actually routes through
-// them. These assertions are what "unified" means in practice.
-
 const PAGES = [
     '/',
     '/manage/routes',
@@ -22,7 +18,6 @@ for (const path of PAGES) {
         adminPage: page,
     }) => {
         await gotoSettled(page, path)
-        // Dialogs are closed on load, so every h1 in the DOM is page chrome.
         await expect(page.locator('h1')).toHaveCount(1)
         await expect(page.locator('h1')).not.toBeEmpty()
     })
@@ -62,7 +57,6 @@ test('dialogs share the same shell: role, title and escape-to-close', async ({
     await page.getByTestId('routes-create-open').click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible()
-    // DialogShell always renders the title row through v-card-title.
     await expect(dialog.locator('.v-card-title')).not.toBeEmpty()
     await page.keyboard.press('Escape')
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
@@ -84,8 +78,6 @@ test('an empty result set renders the shared empty state as a real card', async 
     const empty = page.getByTestId('empty-state')
     await expect(empty).toBeVisible()
 
-    // Visibility alone passed while the component rendered as an unknown
-    // <v-card> element with no styling at all, so assert the box itself.
     const box = await empty.evaluate((el) => {
         const cs = getComputedStyle(el)
         const icon = el.querySelector('.v-icon')!.getBoundingClientRect()
@@ -108,8 +100,6 @@ test('an empty result set renders the shared empty state as a real card', async 
 test('dialog confirm buttons keep their fill inside v-card-actions', async ({
     adminPage: page,
 }) => {
-    // VCardActions provides `VBtn: { variant: 'text' }`, which silently beat the
-    // global default and flattened every dialog's primary button.
     await gotoSettled(page, '/manage/routes')
     await page.getByTestId('routes-create-open').click()
 

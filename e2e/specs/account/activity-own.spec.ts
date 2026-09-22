@@ -2,19 +2,12 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 import { fetchAuditRows } from '../../support/audit'
 
-/**
- * GDPR Art. 15: a user can see what has been recorded about them, without
- * asking anyone. The page carries no permission gate — the collection's list
- * rule is what decides whether you get everyone's entries or only your own.
- */
-
 test('a user sees their own entries and nobody else’s', async ({
     userPage: page,
     testPrefix,
 }) => {
     await gotoSettled(page, '/', /\//)
 
-    // Give this user an entry of their own to find.
     const headers = await authHeader(page)
     const me = await page.request.post('/api/collections/users/auth-refresh', {
         headers,
@@ -29,7 +22,6 @@ test('a user sees their own entries and nobody else’s', async ({
 
     const rows = await fetchAuditRows(page, '')
     expect(rows.length).toBeGreaterThan(0)
-    // The list rule, not the client, is what enforces this.
     for (const row of rows) {
         expect(row.actor).toBe(myId)
     }
@@ -49,8 +41,6 @@ test('a plain user reaches their activity from the user menu', async ({
 }) => {
     await gotoSettled(page, '/', /\//)
 
-    // Not a nav link: the page needs no permission, so it sits with the
-    // account rather than in a management group.
     await page.getByTestId('user-menu-activator').click()
     const entry = page.getByTestId('user-menu-activity')
     await expect(entry).toBeVisible()
@@ -79,7 +69,6 @@ test('an admin sees entries from other actors too', async ({
     const rows = await fetchAuditRows(page, `record_id = "${routeId}"`)
     expect(rows.length).toBeGreaterThan(0)
 
-    // An admin's view is not filtered to their own actor id.
     const all = await fetchAuditRows(page, '')
     const actors = new Set(all.map((r) => r.actor))
     expect(actors.size).toBeGreaterThan(0)

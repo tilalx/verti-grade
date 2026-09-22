@@ -1,15 +1,5 @@
 /// <reference path="../../pb_data/types.d.ts" />
 
-/**
- * In-app notification queue.
- *
- * Rows are fanned out one per recipient, so "unread" is a plain boolean on the
- * row and the collection rules are ownership checks. The wording is NOT stored:
- * `type` plus `params` is rendered client-side through i18n, so a notification
- * reads in whatever locale the recipient uses.
- */
-
-/** Every user whose role grants `permission`. */
 function usersByPermission(app, permission) {
     try {
         return app.findRecordsByFilter(
@@ -31,10 +21,6 @@ function usersByPermission(app, permission) {
     }
 }
 
-/**
- * Queue one notification per user. Never throws: a queue write must not take
- * down the hook it rides along with.
- */
 function push(app, { users, type, params, url }) {
     if (!users || !users.length) return 0
 

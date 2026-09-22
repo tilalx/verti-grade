@@ -1,11 +1,5 @@
 /// <reference path="../../pb_data/types.d.ts" />
 
-// Shared helpers for the DSA Art. 16 report hooks.
-//
-// PocketBase runs every hook handler in a pooled goja runtime that cannot see
-// the enclosing file scope, so handlers must require() this module from inside
-// the handler body rather than closing over top-level helpers.
-
 const REASON_LABELS = {
     hate_speech: 'Hate speech',
     harassment: 'Harassment',
@@ -17,8 +11,6 @@ const REASON_LABELS = {
     other: 'Other',
 }
 
-// Report text is attacker-controlled and anonymous. It is rendered into an HTML
-// mail that lands in a moderator's inbox, so it must be escaped, not trusted.
 function escapeHtml(value) {
     return String(value == null ? '' : value)
         .replaceAll('&', '&amp;')
@@ -32,14 +24,6 @@ function reasonLabel(reason) {
     return REASON_LABELS[reason] || reason || 'Other'
 }
 
-/**
- * True when a date field carries no value.
- *
- * PocketBase hands back a DateTime OBJECT for an unset date, and an object is
- * truthy in JS -- so `if (record.get('notified_at'))` reads as "already
- * notified" on a report nobody has ever notified. That is what silently
- * suppressed every Art. 16(5) decision notice.
- */
 function isBlankDate(value) {
     if (!value) return true
     if (typeof value.isZero === 'function') return value.isZero()
@@ -66,11 +50,6 @@ function contactEmail(app) {
     }
 }
 
-// Every user whose role grants manage_reports, plus the configured public
-// contact address. Deduplicated, blanks dropped.
-//
-// The lookup itself lives in utils/notifications.js so the mail path and the
-// in-app queue cannot disagree about who the moderators are.
 function alertRecipients(app) {
     const notifications = require(`${__hooks}/utils/notifications.js`)
     const addresses = []
@@ -117,7 +96,6 @@ function reportSummaryHtml(app, record) {
     `
 }
 
-// Art. 16(5): the decision notice must tell the notifier how to challenge it.
 function redressHtml(app) {
     const contact = contactEmail(app)
     const contactLine = contact

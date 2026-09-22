@@ -4,7 +4,6 @@ import type { SortOption } from '~/utils/sorting'
 export interface SortItem {
     title: string
     key: string
-    /** Direction used when the field is first selected. Defaults to 'asc'. */
     defaultOrder?: 'asc' | 'desc'
 }
 

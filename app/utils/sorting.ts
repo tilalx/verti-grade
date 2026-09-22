@@ -3,11 +3,6 @@ export interface SortOption {
     order?: 'asc' | 'desc' | string
 }
 
-/**
- * Converts a VDataTable sortBy array to a PocketBase sort string.
- * Falls back to `defaultSort` when the array is empty or absent.
- * `keyMap` translates table column keys to PocketBase field names.
- */
 export function toPbSort(
     sortByArr: SortOption[],
     defaultSort = '-created',

@@ -74,8 +74,6 @@
                 >
             </p>
 
-            <!-- Art. 16(2)(d): the notice is only valid with this declaration,
-                 so it is a validated field, not a courtesy checkbox. -->
             <v-checkbox
                 v-model="form.goodFaith"
                 :label="$t('reports.goodFaith')"
@@ -177,14 +175,11 @@ function resetForm() {
     form.reason = null
     form.explanation = ''
     form.goodFaith = false
-    // Prefill identity for signed-in reporters; Art. 16(2) needs it either way.
     const account = pb.authStore.record
     form.notifierName = (account?.name as string) || ''
     form.notifierEmail = (account?.email as string) || ''
 }
 
-// props.contentId doesn't change identity when the same card is reopened, so
-// the reset hangs off the open state rather than the props.
 watch(sheetOpen, (open) => {
     if (open) resetForm()
 })
@@ -196,8 +191,6 @@ function close() {
 async function submit() {
     saving.value = true
     try {
-        // status/decision/receipt fields are stamped by the PocketBase create
-        // hook and deliberately not sent from here.
         await pb.collection('reports').create(
             {
                 content_type: props.contentType,

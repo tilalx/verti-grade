@@ -16,9 +16,6 @@ test('review form opens as a bottom sheet on mobile', async ({ page }) => {
     await expect(dialog).toBeVisible()
 
     const viewport = page.viewportSize()!
-    // Flush with the bottom edge and the full width of the screen. Polled on
-    // the absolute distance: the sheet slides up, so the first frame after it
-    // turns visible still sits below the fold.
     await expect
         .poll(async () => {
             const box = (await dialog.boundingBox())!

@@ -172,7 +172,6 @@ const score = computed(() => formatScore(props.route))
 </script>
 
 <style scoped>
-/* Structure lives in .list-card (main.css); only route-specific bits here. */
 .route-card__difficulty {
     margin-left: auto;
     font-size: 1.4rem;
@@ -192,7 +191,6 @@ const score = computed(() => formatScore(props.route))
     gap: 4px;
 }
 
-/* Clamped to two lines — the list view shows a preview, not the full text. */
 .route-card__comment {
     font-size: 0.8rem;
     color: rgba(var(--v-theme-on-surface), 0.7);

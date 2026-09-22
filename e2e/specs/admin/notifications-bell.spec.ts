@@ -3,27 +3,6 @@ import { gotoSettled, authHeader } from '../../support/nav'
 import { createComment, deleteComment } from '../../support/comments'
 import { createReport, deleteReport } from '../../support/reports'
 
-/**
- * The in-app queue behind the navbar bell.
- *
- * Reports used to announce themselves only by email, so with SMTP unconfigured
- * the moderation queue filled in silence. The hook now also writes one
- * notification row per manage_reports holder (the admin role holds it).
- *
- * Every test owns its own rows: `fullyParallel` means siblings are filing
- * reports at the same moment, so assert on this test's notification, never on
- * the badge total.
- */
-
-/**
- * Waits for a notification whose params carry `marker`.
- *
- * The moderator inbox is SHARED: every manage_reports holder gets a row for
- * every report, so siblings running in parallel add rows to the same queue.
- * Asserting on the badge or on "the first row" therefore races. Polling the
- * API for this test's own row is the only deterministic signal.
- */
-/** Drops one notification, so a test cleans up only what it created. */
 async function dropNotification(page, id: string) {
     await page.request.delete(`/api/collections/notifications/records/${id}`, {
         headers: await authHeader(page),
@@ -62,8 +41,6 @@ test('a filed report raises a notification linking to the queue', async ({
         explanation: `${testPrefix}-bell`,
     })
 
-    // The snippet is the server-stamped snapshot, not anything the reporter
-    // sent -- and it is what identifies this test's own row in a shared queue.
     const queued = await waitForNotification(page, `${testPrefix}-belled`)
 
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
@@ -97,11 +74,8 @@ test('opening a notification marks it read and clears the badge', async ({
     await page.getByTestId('notification-bell').click()
     await page.getByTestId(`notification-item-${queued.id}`).click()
 
-    // The queue, not the reported comment -- that is where it can be acted on.
     await page.waitForURL(/\/manage\/reports/)
 
-    // Asserted on this row, not on the badge: a sibling's report can land in
-    // the same shared inbox at any moment and keep the badge lit.
     const headers = await authHeader(page)
     const after = await page.request.get(
         `/api/collections/notifications/records/${queued.id}`,
@@ -135,8 +109,6 @@ test('dismissing a notification removes it from the list', async ({
     await expect(row).toBeVisible()
     await row.getByTestId('notification-dismiss').click()
 
-    // Gone from the list, and gone from the server -- and the bell stays,
-    // since it is a permanent affordance now.
     await expect(row).toBeHidden()
     await expect(page.getByTestId('notification-bell')).toBeVisible()
 
@@ -156,10 +128,6 @@ test('deciding a report notifies the other moderators exactly once', async ({
     setterPage: other,
     testPrefix,
 }) => {
-    // The admin decides; the routesetter has no manage_reports, so the
-    // assertion is on the admin's own queue staying free of duplicates. The
-    // mail block re-saves the report to stamp notified_at, which re-enters the
-    // update hook -- that second pass used to queue a second notification.
     await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
 
     const commentId = await createComment(page, `${testPrefix}-once`)
@@ -188,9 +156,6 @@ test('deciding a report notifies the other moderators exactly once', async ({
         .map((i: any) => i.type)
         .filter((t: string) => t.startsWith('report_decided'))
 
-    // Two separate properties, asserted separately so a failure says which
-    // one broke: the hook fires once (not once per internal re-save), and the
-    // moderator who decided is not told what they just did.
     expect(decided.length).toBeLessThanOrEqual(1)
     expect(decided).toEqual([])
 

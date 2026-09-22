@@ -3,7 +3,6 @@ migrate(
     (app) => {
         const collection = app.findCollectionByNameOrId('_pb_users_auth_')
 
-        // Add role relation field
         collection.fields.addAt(
             collection.fields.length,
             new Field({

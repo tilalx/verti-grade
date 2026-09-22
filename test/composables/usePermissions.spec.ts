@@ -18,7 +18,6 @@ vi.stubGlobal('useI18n', () => ({ t: (key: string) => key }))
 const notifyErrorMock = vi.fn()
 vi.stubGlobal('useNotification', () => ({ error: notifyErrorMock }))
 
-// PocketBase mock
 let pbMock: any
 
 vi.stubGlobal('usePocketbase', () => pbMock)
@@ -26,11 +25,9 @@ vi.stubGlobal('usePocketbase', () => pbMock)
 describe('usePermissions', () => {
     beforeEach(() => {
         vi.resetModules()
-        // Clear useState cache
         for (const key of Object.keys(useStateMocks)) {
             delete useStateMocks[key]
         }
-        // Default PB mock: valid session with a role
         pbMock = {
             authStore: {
                 isValid: true,
@@ -95,7 +92,6 @@ describe('usePermissions', () => {
         const { can, refreshPermissions } = await loadComposable()
         await refreshPermissions()
 
-        // Admin can do everything, even features not explicitly in the expand
         expect(can('manage_routes')).toBe(true)
         expect(can('manage_users')).toBe(true)
         expect(can('manage_settings')).toBe(true)
@@ -166,8 +162,6 @@ describe('usePermissions', () => {
     })
 
     it('keeps permissions and stays quiet when a refresh is auto-cancelled', async () => {
-        // A role update over realtime starts a second refresh, which aborts the
-        // first -- the superseded one must not report a failure.
         const autoCancel = Object.assign(new Error('autocancelled'), {
             isAbort: true,
             status: 0,
@@ -242,7 +236,6 @@ describe('usePermissions', () => {
         await ensureLoaded()
         await ensureLoaded()
 
-        // getOne should only be called once despite multiple ensureLoaded calls
         expect(getOneMock).toHaveBeenCalledTimes(1)
         expect(can('manage_routes')).toBe(true)
     })
@@ -250,7 +243,6 @@ describe('usePermissions', () => {
     // ── Permission refresh updates results ───────────────────────────────
 
     it('refreshPermissions updates can() results when role changes', async () => {
-        // First: routesetter with manage_routes
         const getOneMock = vi
             .fn()
             .mockResolvedValueOnce({
@@ -277,7 +269,6 @@ describe('usePermissions', () => {
         expect(can('manage_routes')).toBe(true)
         expect(can('manage_users')).toBe(false)
 
-        // Second: downgraded to user with no permissions
         await refreshPermissions()
         expect(roleName.value).toBe('user')
         expect(can('manage_routes')).toBe(false)

@@ -1,13 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-/**
- * A created user gets a throwaway password and is unverified, and the users
- * collection authRule is `verified=true` — so without the invite mail the
- * account cannot log in at all. Confirming the reset link sets both the
- * password and verified=true, which is what makes the account usable.
- */
-
 async function fillCreateForm(page, email: string, lastname: string) {
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
@@ -55,8 +48,6 @@ test('keeps the created user when the invite mail fails', async ({
     await fillCreateForm(page, email, `InviteFail${suffix}`)
     await page.getByTestId('user-create-submit').click()
 
-    // The record exists either way, so the dialog closes and the failure is
-    // reported as a mail problem — not as "user not created".
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
     await expect(page.getByTestId('user-create-dialog')).toBeHidden()
 
@@ -66,13 +57,6 @@ test('keeps the created user when the invite mail fails', async ({
     ).toBeVisible()
 })
 
-/**
- * `useMailStatus` resolves during SSR, so a page.route() stub never reaches it
- * — this test passed only while the harness had no SMTP at all and the real
- * answer happened to be "not configured". With a mail catcher in the stack the
- * honest assertion is the inverse: no warning when mail genuinely works. The
- * warning branch needs a mail-less stack to exercise.
- */
 test('shows no mail warning in the create dialog once SMTP is configured', async ({
     adminPage: page,
 }) => {

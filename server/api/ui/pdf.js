@@ -25,8 +25,6 @@ export default eventHandler(async (event) => {
             .collection('settings')
             .getOne('settings_123456')
 
-        // The sign image is optional — if none is configured (or it fails to
-        // load), the PDF is still generated without the logo.
         let logo = null
         if (settings.sign_image) {
             const logoUrl = pb.files.getURL(settings, settings.sign_image)
@@ -39,16 +37,10 @@ export default eventHandler(async (event) => {
         const QR_SIZE = 110 // Rendered size of the QR code in PDF points (square)
         const QR_PX = 330 // Pixel size of the generated QR image (3× for sharpness)
 
-        // Color circle — centered on the QR code.
-        // Error correction H (30%) supports up to ~15pt radius safely at QR_SIZE=110.
         const CIRCLE_RADIUS = 12 // Radius of the route color circle
         const CIRCLE_BORDER = 1.5 // Dark outline for light-color visibility
         // ──────────────────────────────────────────────────────────────────
 
-        // Fetched in bulk before a single byte is written, like the JSON and
-        // XLSX handlers: one round trip per 25 ids instead of per id, and a
-        // route deleted between selection and export simply drops out of the
-        // sheet instead of throwing halfway through the response body.
         const records = await fetchRecordsByIds(pb, {
             collection: 'routes',
             ids,
@@ -67,7 +59,6 @@ export default eventHandler(async (event) => {
         for (const climbingRoute of routes) {
             const id = climbingRoute.id
 
-            // Every 8 entries, add a new page
             if (entryCount % 8 === 0 && entryCount > 0) {
                 doc.addPage()
             }
@@ -75,7 +66,6 @@ export default eventHandler(async (event) => {
             const x = entryCount % 2 === 0 ? 20 : 315
             const y = (Math.floor(entryCount / 2) % 4) * 193 + 30
 
-            // Draw a border around the entry
             doc.rect(x - 10, y - 10, 280, 170).stroke()
 
             doc.fillColor('black')
@@ -141,7 +131,6 @@ export default eventHandler(async (event) => {
                     })
             }
 
-            // Creator names — shrink font if the list is long
             const creators = climbingRoute.creator || []
             if (Array.isArray(creators) && creators.length > 0) {
                 const creatorText = creators.join(' / ')
@@ -163,7 +152,6 @@ export default eventHandler(async (event) => {
                 )
             }
 
-            // Screw date
             const date = new Date(climbingRoute.screw_date)
             const screw_date = date.toLocaleDateString('DE-de')
             doc.fontSize(8).text(
@@ -174,8 +162,6 @@ export default eventHandler(async (event) => {
             )
 
             // ── QR code ────────────────────────────────────────────────────
-            // width/height (not fit:[]) guarantees exact QR_SIZE × QR_SIZE
-            // so the circle center calculation is always precise.
             const qrX = x + 159
             const qrY = y - 9
 
@@ -198,15 +184,11 @@ export default eventHandler(async (event) => {
             const cx = qrX + QR_SIZE / 2
             const cy = qrY + QR_SIZE / 2
 
-            // White clearing disc
             doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER + 1).fill(
                 '#FFFFFF',
             )
-            // Dark outline ring
             doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER).fill('#333333')
-            // Thin white gap
             doc.circle(cx, cy, CIRCLE_RADIUS + 0.5).fill('#FFFFFF')
-            // Route color fill
             doc.circle(cx, cy, CIRCLE_RADIUS).fill(climbingRoute.color)
             // ──────────────────────────────────────────────────────────────
 
@@ -224,9 +206,6 @@ export default eventHandler(async (event) => {
         doc.end()
     } catch (error) {
         console.error(error)
-        // Once the PDF stream has started the status line is already on the
-        // wire: throwing here would leave the client waiting on a body that
-        // never ends, so close the response instead.
         if (res.headersSent) {
             res.end()
             return

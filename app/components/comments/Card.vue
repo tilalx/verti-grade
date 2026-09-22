@@ -45,7 +45,6 @@
                 <span class="comment-card__date">{{ formattedDate }}</span>
             </div>
 
-            <!-- Static star row: far cheaper than a readonly v-rating -->
             <div
                 v-if="comment.rating != null"
                 class="flex-shrink-0 comment-card__rating"
@@ -91,12 +90,7 @@
                         }"
                         >{{ comment.comment }}</span
                     >
-                    <!-- Wrapped rather than `d-block`: that forces display:block
-                         on the button and collapses Vuetify's flex height. -->
                     <div v-if="collapsible && isLong" class="mt-1">
-                        <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
-                             leaving an x-small button 8px tall and clipping its
-                             own label. -->
                         <v-btn
                             variant="text"
                             size="x-small"
@@ -212,10 +206,6 @@ const expanded = ref(false)
 const commentEl = ref<HTMLElement | null>(null)
 const isLong = ref(false)
 
-// A character count can't predict how many lines the text wraps to, so measure
-// the clamped element instead: overflow means the clamp actually hides
-// something. One measurement is not enough — a web font swapping in re-wraps
-// the text, and a recycled card gets new text without remounting.
 function measureClamp() {
     const el = commentEl.value
     if (el) isLong.value = el.scrollHeight > el.clientHeight + 1
@@ -281,7 +271,6 @@ function initials(name: string): string {
 </script>
 
 <style scoped>
-/* Structure lives in .list-card (main.css); only comment-specific bits here. */
 .comment-card__date {
     font-size: 0.75rem;
     color: rgba(var(--v-theme-on-surface), 0.55);
@@ -293,7 +282,6 @@ function initials(name: string): string {
     min-width: 0;
 }
 
-/* Full text, wrapped — collapsed to four lines until the user expands it. */
 .comment-card__comment {
     font-size: 0.8rem;
     color: rgba(var(--v-theme-on-surface), 0.7);
@@ -318,9 +306,6 @@ function initials(name: string): string {
     background: rgba(var(--v-theme-primary), 0.08);
 }
 
-/* Deltas from the shared shell: the taller line-height here needs one more
-   pixel of icon offset, and the pill row is indented to line up with the
-   text column (icon 15px + gap 7px). */
 .comment-card .list-card__meta-icon {
     margin-top: 3px;
 }
