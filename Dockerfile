@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go build -trimpath -ldflags="-s -w" -o /out/pocketbase
 
 # --------------> Build nuxt app (Node)
-FROM node:26.8.2-trixie@sha256:fb192b8ad31841aadc4bb79c44ae0f59d193a798ffbc9fdce37ba6ecb20c2236 AS ui-deps
+FROM node:26.9.0-trixie@sha256:fa271c47a5d81dc321f4a45be01362f5b3de7559edc7e76b8c4089be1e50d866 AS ui-deps
 WORKDIR /app
 
 # Toolchain for native deps (sharp, parcel/watcher, esbuild)
@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     yarn install --immutable --inline-builds \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
-FROM node:26.8.2-trixie@sha256:fb192b8ad31841aadc4bb79c44ae0f59d193a798ffbc9fdce37ba6ecb20c2236 AS ui-build
+FROM node:26.9.0-trixie@sha256:fa271c47a5d81dc321f4a45be01362f5b3de7559edc7e76b8c4089be1e50d866 AS ui-build
 WORKDIR /app
 ENV NODE_ENV=production NITRO_PRESET=node-server
 ARG APP_VERSION
@@ -69,7 +69,7 @@ RUN --mount=type=cache,target=/root/.cache yarn build \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
 # --------------> Runtime (final stage)
-FROM node:26.8.2-trixie-slim@sha256:f7bb8247fdb16250dbec7fd0e24f091c6f5f0a29d256f3aef5816a7a369166b2
+FROM node:26.9.0-trixie-slim@sha256:3a771f83944bb763050c23c0225c260638c4b7899e7a72485ef75e5e570499e5
 # Install nginx (cacheable layer)
 RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl openssl \
  && rm -rf /var/lib/apt/lists/*
