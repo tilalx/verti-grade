@@ -102,15 +102,25 @@
                         </v-card-subtitle>
 
                         <template #append>
+                            <!-- Flat, not tonal: a tonal chip paints the
+                                 label in the role color, and an admin-chosen
+                                 mid-tone hue is unreadable as text on a dark
+                                 surface. Color goes behind, foreground is
+                                 contrast-checked. -->
                             <v-chip
                                 v-if="user.roleName"
                                 size="small"
-                                :color="
-                                    user.roleName === 'admin'
-                                        ? 'primary'
-                                        : 'default'
+                                :color="user.roleColor || undefined"
+                                :variant="user.roleColor ? 'flat' : 'tonal'"
+                                :style="
+                                    user.roleColor
+                                        ? {
+                                              color: readableTextOn(
+                                                  user.roleColor,
+                                              ),
+                                          }
+                                        : undefined
                                 "
-                                variant="tonal"
                             >
                                 {{ user.roleName }}
                             </v-chip>
@@ -195,14 +205,16 @@
             @confirm="deleteUser"
         />
 
-        <!-- ── Role Permissions Editor ────────────────────────────────────── -->
-        <div class="mt-8">
-            <AdminRolePermissionsEditor />
-        </div>
+        <!-- ── Role Permissions ──────────────────────────────────────────── -->
+        <v-divider class="my-8" />
+
+        <AdminRolePermissionsEditor />
     </v-container>
 </template>
 
 <script setup>
+import { readableTextOn } from '~/utils/roles'
+
 const { t } = useI18n()
 const pb = usePocketbase()
 
@@ -255,6 +267,7 @@ function mapUser(u) {
         ...u,
         avatarUrl: usePbFileUrl(u, u.avatar, { thumb: '100x100' }) || null,
         roleName: u.expand?.role?.name ?? null,
+        roleColor: u.expand?.role?.color ?? null,
     }
 }
 
