@@ -64,6 +64,8 @@ export interface PermissionRecord extends BaseRecord {
 export interface RoleRecord extends BaseRecord {
     name: string
     description?: string | null
+    /** Chip color as `#RRGGBB`; unset falls back to the default chip surface. */
+    color?: string | null
     permissions?: RecordId[] | null
 }
 

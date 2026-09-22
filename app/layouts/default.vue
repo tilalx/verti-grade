@@ -90,7 +90,11 @@ async function subscribeToRole(roleId) {
     unsubRole?.()?.catch?.(() => {})
     if (!roleId) return
     unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
-        if (e.action === 'update') refreshPermissions()
+        // Roles can be deleted from the admin UI now. The delete path reassigns
+        // holders first, and that user update already triggers a refresh via the
+        // users subscription — this is the backstop for a role removed any
+        // other way, which would otherwise leave stale permissions until reload.
+        if (e.action === 'update' || e.action === 'delete') refreshPermissions()
     })
 }
 
