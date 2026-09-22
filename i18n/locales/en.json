@@ -391,6 +391,9 @@
         "passwordTooWeak": "Password must be at least \"Good\" strength.",
         "email": "Please enter a valid email address."
     },
+    "captcha": {
+        "verifying": "Verifying… {progress}%"
+    },
     "comments": {
         "subtitle": "Moderate and manage climber reviews",
         "totalReviews": "Total reviews",

@@ -113,6 +113,7 @@
                 data-testid="review-form-submit"
                 @click="submit"
             >
+                <template #loader><CaptchaLoader /></template>
                 {{ isEditMode ? $t('actions.save') : $t('actions.submit') }}
             </v-btn>
         </template>
@@ -148,6 +149,7 @@ const emit = defineEmits(['update:modelValue', 'saved'])
 const pb = usePocketbase()
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
+const { capHeaders } = useCapToken()
 
 const isEditMode = computed(() => !!props.review)
 
@@ -311,13 +313,19 @@ async function submit() {
                 })
             emit('saved', updated)
         } else {
-            await pb.collection('ratings').create({
-                route_id: props.routeId,
-                rating: form.rating,
-                difficulty,
-                difficulty_sign,
-                comment: form.comment?.trim(),
-            })
+            // Anonymous create: PocketBase requires a solved captcha token
+            // when one is configured (pb_hooks/cap.pb.js). Signed-in staff
+            // are exempt, and capHeaders() is a no-op when it is switched off.
+            await pb.collection('ratings').create(
+                {
+                    route_id: props.routeId,
+                    rating: form.rating,
+                    difficulty,
+                    difficulty_sign,
+                    comment: form.comment?.trim(),
+                },
+                { headers: await capHeaders('rating') },
+            )
             emit('saved', null)
         }
 

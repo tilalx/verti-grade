@@ -391,6 +391,9 @@
         "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
         "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
     },
+    "captcha": {
+        "verifying": "Überprüfung… {progress}%"
+    },
     "comments": {
         "subtitle": "Kletterer-Bewertungen moderieren und verwalten",
         "totalReviews": "Bewertungen gesamt",

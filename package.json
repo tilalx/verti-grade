@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "build": "nuxt build",
-        "dev": "concurrently \"nuxt dev\" \"npm run start:db\"",
+        "dev": "CAP_SECRET=${CAP_SECRET:-dev-only-cap-secret-not-for-production} concurrently \"nuxt dev\" \"npm run start:db\"",
         "start:db": "cd pocketbase && ./pocketbase serve --http=0.0.0.0:8090",
         "generate": "nuxt generate",
         "preview": "nuxt preview",
@@ -19,6 +19,7 @@
         "e2e:down": "./e2e/scripts/app-down.sh"
     },
     "devDependencies": {
+        "@cap.js/wasm": "0.0.7",
         "@cj-tech-master/excelts": "10.2.0",
         "@mdi/font": "7.4.47",
         "@nuxt/image": "2.1.0",
@@ -28,11 +29,14 @@
         "@types/qrcode": "1.5.6",
         "@vitejs/plugin-vue": "6.0.9",
         "@vue/test-utils": "2.5.0",
+        "cap-widget": "^0.1.57",
+        "capjs-core": "^0.1.2",
         "concurrently": "10.0.5",
         "echarts": "6.1.0",
         "h3": "1.15.11",
         "happy-dom": "20.14.5",
         "nuxt": "^4.5.2",
+        "pako": "^2.1.0",
         "pdfkit": "0.20.2",
         "pocketbase": "^0.28.1",
         "prettier": "3.9.8",

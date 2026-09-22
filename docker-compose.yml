@@ -24,6 +24,13 @@ services:
       #PB_APP_NAME: Verti-Grade
       #PB_SENDER_ADDRESS: no-reply@example.com
       #PB_SENDER_NAME: Verti-Grade
+      # Proof-of-work captcha (Cap). Unset = off, and every form keeps working.
+      # Set it to a long random string to require a solved challenge on the
+      # anonymous actions: rating and report creation, sign-in, and the public
+      # password-reset form. Turning it on also raises the rate limits that the
+      # captcha now backs. Use the same value if you ever run more than one
+      # replica -- both halves sign and verify with it.
+      #CAP_SECRET: change-me-to-a-long-random-string
     volumes:
       - ./pb_data:/pb/pb_data
 #     Mount custom TLS certificates to replace the auto-generated self-signed ones:
