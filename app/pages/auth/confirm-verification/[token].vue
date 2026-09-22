@@ -9,47 +9,28 @@
         :heading-key="step"
     >
         <template #brand-headline>
-            {{ $t('account.brandHeadline.reset.l1') }}<br />
-            {{ $t('account.brandHeadline.reset.l2') }}<br />
+            {{ $t('account.brandHeadline.login.l1') }}<br />
+            {{ $t('account.brandHeadline.login.l2') }}<br />
             <span class="text-success">{{
-                $t('account.brandHeadline.reset.accent')
+                $t('account.brandHeadline.login.accent')
             }}</span>
         </template>
 
         <div style="position: relative">
             <Transition name="form-swap" mode="out-in">
-                <!-- ─── STEP 1 · New password ─── -->
-                <div v-if="step === 'reset'" key="reset">
-                    <UserPasswordChangeFields
-                        v-model:password="newPassword"
-                        v-model:password-confirm="confirmPassword"
-                        :require-old-password="false"
-                        @validity="fieldsValid = $event"
-                    />
-
-                    <v-btn
+                <!-- ─── STEP 1 · Working ─── -->
+                <div
+                    v-if="step === 'verifying'"
+                    key="verifying"
+                    class="text-center py-6"
+                    data-testid="verify-pending"
+                >
+                    <v-progress-circular
+                        indeterminate
                         color="success"
-                        block
-                        size="large"
-                        :loading="loading"
-                        :disabled="loading || !fieldsValid"
-                        class="mb-3 font-weight-semibold"
-                        data-testid="confirm-reset-submit"
-                        @click="submitReset"
-                    >
-                        {{ $t('actions.save') }}
-                    </v-btn>
-
-                    <v-btn
-                        variant="text"
-                        block
-                        class="text-none text-medium-emphasis"
-                        prepend-icon="mdi-arrow-left"
-                        :disabled="loading"
-                        @click="navigateTo('/auth/login')"
-                    >
-                        {{ $t('actions.back_to_home') }}
-                    </v-btn>
+                        size="48"
+                        class="mb-6"
+                    />
                 </div>
 
                 <!-- ─── STEP 2 · Success ─── -->
@@ -57,7 +38,7 @@
                     v-else-if="step === 'done'"
                     key="done"
                     class="text-center py-6"
-                    data-testid="reset-done"
+                    data-testid="verify-done"
                 >
                     <div class="success-ring">
                         <v-icon size="40" color="success"
@@ -70,7 +51,7 @@
                         block
                         size="large"
                         class="font-weight-semibold"
-                        data-testid="reset-goto-login"
+                        data-testid="verify-goto-login"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('account.login') }}
@@ -82,7 +63,7 @@
                     v-else-if="step === 'invalid'"
                     key="invalid"
                     class="text-center py-6"
-                    data-testid="reset-invalid"
+                    data-testid="verify-invalid"
                 >
                     <v-icon size="48" color="error" class="mb-4"
                         >mdi-link-off</v-icon
@@ -92,7 +73,7 @@
                         variant="tonal"
                         block
                         class="mt-4"
-                        data-testid="reset-back"
+                        data-testid="verify-back"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('actions.back_to_home') }}
@@ -104,7 +85,7 @@
 </template>
 
 <script setup>
-defineOptions({ name: 'ResetPasswordPage' })
+defineOptions({ name: 'ConfirmVerificationPage' })
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -113,7 +94,7 @@ const route = useRoute()
 definePageMeta({ layout: 'blank', auth: false })
 
 useHead({
-    title: t('page.title.resetPassword'),
+    title: t('page.title.verifyEmail'),
 })
 
 let _settings = null
@@ -123,23 +104,16 @@ try {
 const orgName = _settings?.organization_name || ''
 const orgUnitName = _settings?.organization_unit_name || ''
 
-const { error: notifyError } = useNotification()
-
 // ── Token from URL ─────────────────────────────────────────────────
 const token = computed(() => String(route.params.token ?? ''))
-const step = ref(token.value ? 'reset' : 'invalid')
-
-// ── State ──────────────────────────────────────────────────────────
-const loading = ref(false)
-const fieldsValid = ref(false)
-const newPassword = ref('')
-const confirmPassword = ref('')
+const step = ref(token.value ? 'verifying' : 'invalid')
+const loading = computed(() => step.value === 'verifying')
 
 // ── Heading meta ───────────────────────────────────────────────────
 const eyebrow = computed(
     () =>
         ({
-            reset: t('account.eyebrowAccountRecovery'),
+            verifying: t('account.eyebrowVerifyEmail'),
             done: t('account.eyebrowAllDone'),
             invalid: t('account.eyebrowInvalidLink'),
         })[step.value] ?? '',
@@ -147,50 +121,34 @@ const eyebrow = computed(
 const title = computed(
     () =>
         ({
-            reset: t('account.reset_password'),
-            done: t('account.passwordSet'),
+            verifying: t('account.verifyEmail'),
+            done: t('account.emailVerified'),
             invalid: t('account.linkInvalid'),
         })[step.value] ?? '',
 )
 const subtitle = computed(
     () =>
         ({
-            reset: t('account.reset_hint'),
-            done: t('notifications.success.passwordChanged'),
-            invalid: t('notifications.error.resetLinkInvalid'),
+            verifying: t('account.verifyEmailHint'),
+            done: t('notifications.success.verifyEmail'),
+            invalid: t('notifications.error.verifyEmail'),
         })[step.value] ?? '',
 )
 
-// ── Submit ─────────────────────────────────────────────────────────
-function isTokenError(err) {
-    return err?.data?.data?.token?.code === 'validation_invalid_token'
-}
-
-async function submitReset() {
-    loading.value = true
+// ── Confirm ────────────────────────────────────────────────────────
+// No form to fill in: the token is the whole request, so it runs on mount.
+// Client-only -- SSR would burn the single-use token on a prefetch.
+onMounted(async () => {
+    if (!token.value) return
     try {
-        await pb
-            .collection('users')
-            .confirmPasswordReset(
-                token.value,
-                newPassword.value,
-                confirmPassword.value,
-            )
+        await pb.collection('users').confirmVerification(token.value)
         step.value = 'done'
-    } catch (err) {
-        if (isTokenError(err)) {
-            step.value = 'invalid'
-        } else {
-            const msg =
-                err?.data?.message ??
-                err?.message ??
-                t('notifications.error.resetPassword')
-            notifyError(msg)
-        }
-    } finally {
-        loading.value = false
+    } catch {
+        // Any failure here is a dead link as far as the user is concerned:
+        // expired, already consumed, or malformed.
+        step.value = 'invalid'
     }
-}
+})
 </script>
 
 <style scoped>

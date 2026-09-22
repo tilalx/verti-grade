@@ -67,7 +67,23 @@
                 "l2": "Konto-",
                 "accent": "passwort zurück."
             }
-        }
+        },
+        "eyebrowVerifyEmail": "E-MAIL-BESTÄTIGUNG",
+        "eyebrowEmailChange": "E-MAIL-ÄNDERUNG",
+        "verifyEmail": "E-Mail-Adresse bestätigen",
+        "verifyEmailHint": "E-Mail-Adresse wird bestätigt…",
+        "emailChange": "Neue E-Mail-Adresse bestätigen",
+        "emailChangeHint": "Gib dein Passwort ein, um die Änderung zu bestätigen.",
+        "passwordSet": "Passwort aktualisiert",
+        "emailVerified": "E-Mail bestätigt",
+        "emailChanged": "E-Mail aktualisiert",
+        "linkInvalid": "Link nicht mehr gültig",
+        "emailChangeConfirmHint": "An die neue Adresse wird ein Bestätigungslink gesendet. Deine aktuelle Adresse bleibt aktiv, bis du ihn öffnest.",
+        "emailChangeSent": "Bestätigungslink an die neue Adresse gesendet. Deine aktuelle Adresse bleibt aktiv, bis du ihn öffnest.",
+        "emailChangeFailed": "Der Bestätigungslink konnte nicht gesendet werden. Deine E-Mail-Adresse wurde nicht geändert.",
+        "deleteAccount": "Konto löschen",
+        "deleteAccountHint": "Löscht dein Konto endgültig und meldet dich ab. Von dir erstellte Routen und Bewertungen bleiben erhalten.",
+        "deleteAccountConfirm": "Damit wird dein Konto endgültig gelöscht und du wirst abgemeldet. Das kann nicht rückgängig gemacht werden."
     },
     "routes": {
         "home": "Startseite",
@@ -265,9 +281,12 @@
             "create": "Erfolgreich erstellt",
             "edit": "Erfolgreich gespeichert",
             "delete": "Erfolgreich gelöscht",
-            "login": "Anmeldung erfolgreich. Weiterleitung zur Routenverwaltung...",
             "health": "Status: OK",
-            "userCreated": "Benutzer erfolgreich erstellt."
+            "userCreated": "Benutzer erfolgreich erstellt.",
+            "verifyEmail": "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt anmelden.",
+            "emailChange": "Deine E-Mail-Adresse wurde geändert. Bitte melde dich erneut an.",
+            "userInvited": "Benutzer erstellt. Eine Einladungs-E-Mail wurde versendet.",
+            "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden."
         },
         "error": {
             "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
@@ -280,7 +299,11 @@
             "email_not_verified": "Ihre E-Mail-Adresse wurde noch nicht verifiziert.",
             "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
             "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-            "generic": "Ein unerwarteter Fehler ist aufgetreten."
+            "generic": "Ein unerwarteter Fehler ist aufgetreten.",
+            "verifyEmail": "Dieser Bestätigungslink ist ungültig oder abgelaufen.",
+            "emailChange": "Dieser Link zur E-Mail-Änderung ist ungültig oder abgelaufen.",
+            "userInviteMail": "Benutzer erstellt, aber die Einladungs-E-Mail konnte nicht versendet werden.",
+            "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Fordere auf der Anmeldeseite einen neuen an."
         },
         "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
         "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
@@ -306,6 +329,17 @@
             "installedCommit": "Installierter Commit: {0}",
             "empty": "Keine neuen Commits gefunden.",
             "close": "Commit-Liste schließen"
+        },
+        "center": {
+            "title": "Benachrichtigungen",
+            "markAllRead": "Alle als gelesen markieren",
+            "dismiss": "Ausblenden",
+            "empty": "Aktuell nichts Neues.",
+            "types": {
+                "report_filed": "Neue Inhaltsmeldung: „{snippet}“",
+                "report_decided_removed": "Eine Meldung wurde entschieden — Inhalt entfernt",
+                "report_decided_kept": "Eine Meldung wurde entschieden — Inhalt bleibt online"
+            }
         }
     },
     "filter": {
@@ -331,7 +365,9 @@
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Routen-Inventur - Verti-Grade",
             "reports": "Inhaltsmeldungen - Verti-Grade",
-            "activity": "Aktivitätsprotokoll"
+            "activity": "Aktivitätsprotokoll",
+            "verifyEmail": "E-Mail bestätigen - Verti-Grade",
+            "emailChange": "E-Mail ändern - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -403,7 +439,8 @@
         "recentlyJoined": "Diese Woche beigetreten",
         "noUsers": "Keine Benutzer gefunden",
         "noUsersHint": "Suche oder Filter anpassen",
-        "showing": "{n} von {total} Benutzern"
+        "showing": "{n} von {total} Benutzern",
+        "inviteMailNotConfigured": "E-Mail ist nicht konfiguriert, daher kann keine Einladung versendet werden. Der neue Benutzer kann sich nicht anmelden."
     },
     "permissions": {
         "title": "Rollenberechtigungen",

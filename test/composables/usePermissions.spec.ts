@@ -87,9 +87,7 @@ describe('usePermissions', () => {
             getOne: vi.fn().mockResolvedValue({
                 name: 'admin',
                 expand: {
-                    permissions: [
-                        { name: 'manage_routes' },
-                    ],
+                    permissions: [{ name: 'manage_routes' }],
                 },
             }),
         })
@@ -156,12 +154,62 @@ describe('usePermissions', () => {
             getOne: vi.fn().mockRejectedValue(new Error('Network error')),
         })
 
-        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
         const { can, refreshPermissions, roleName } = await loadComposable()
         await refreshPermissions()
 
         expect(roleName.value).toBe('')
         expect(can('manage_routes')).toBe(false)
+        consoleError.mockRestore()
+    })
+
+    it('keeps permissions and stays quiet when a refresh is auto-cancelled', async () => {
+        // A role update over realtime starts a second refresh, which aborts the
+        // first -- the superseded one must not report a failure.
+        const autoCancel = Object.assign(new Error('autocancelled'), {
+            isAbort: true,
+            status: 0,
+        })
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi
+                .fn()
+                .mockResolvedValueOnce({
+                    name: 'routesetter',
+                    expand: { permissions: [{ name: 'manage_routes' }] },
+                })
+                .mockRejectedValueOnce(autoCancel),
+        })
+
+        const { can, refreshPermissions, roleName } = await loadComposable()
+        await refreshPermissions()
+        notifyErrorMock.mockClear()
+
+        await refreshPermissions()
+
+        expect(notifyErrorMock).not.toHaveBeenCalled()
+        expect(roleName.value).toBe('routesetter')
+        expect(can('manage_routes')).toBe(true)
+    })
+
+    it('still reports a genuine fetch failure', async () => {
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi
+                .fn()
+                .mockRejectedValue(
+                    Object.assign(new Error('boom'), { status: 500 }),
+                ),
+        })
+
+        const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+        notifyErrorMock.mockClear()
+        const { refreshPermissions } = await loadComposable()
+        await refreshPermissions()
+
+        expect(notifyErrorMock).toHaveBeenCalled()
         consoleError.mockRestore()
     })
 
@@ -203,20 +251,23 @@ describe('usePermissions', () => {
 
     it('refreshPermissions updates can() results when role changes', async () => {
         // First: routesetter with manage_routes
-        const getOneMock = vi.fn().mockResolvedValueOnce({
-            name: 'routesetter',
-            expand: {
-                permissions: [
-                    { name: 'manage_routes' },
-                    { name: 'view_analytics' },
-                ],
-            },
-        }).mockResolvedValueOnce({
-            name: 'user',
-            expand: {
-                permissions: [],
-            },
-        })
+        const getOneMock = vi
+            .fn()
+            .mockResolvedValueOnce({
+                name: 'routesetter',
+                expand: {
+                    permissions: [
+                        { name: 'manage_routes' },
+                        { name: 'view_analytics' },
+                    ],
+                },
+            })
+            .mockResolvedValueOnce({
+                name: 'user',
+                expand: {
+                    permissions: [],
+                },
+            })
         pbMock.collection = vi.fn().mockReturnValue({ getOne: getOneMock })
 
         const { can, refreshPermissions, roleName } = await loadComposable()

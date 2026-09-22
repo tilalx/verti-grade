@@ -9,33 +9,50 @@
         :heading-key="step"
     >
         <template #brand-headline>
-            {{ $t('account.brandHeadline.reset.l1') }}<br />
-            {{ $t('account.brandHeadline.reset.l2') }}<br />
+            {{ $t('account.brandHeadline.login.l1') }}<br />
+            {{ $t('account.brandHeadline.login.l2') }}<br />
             <span class="text-success">{{
-                $t('account.brandHeadline.reset.accent')
+                $t('account.brandHeadline.login.accent')
             }}</span>
         </template>
 
         <div style="position: relative">
             <Transition name="form-swap" mode="out-in">
-                <!-- ─── STEP 1 · New password ─── -->
-                <div v-if="step === 'reset'" key="reset">
-                    <UserPasswordChangeFields
-                        v-model:password="newPassword"
-                        v-model:password-confirm="confirmPassword"
-                        :require-old-password="false"
-                        @validity="fieldsValid = $event"
-                    />
+                <!-- ─── STEP 1 · Password ─── -->
+                <div v-if="step === 'confirm'" key="confirm">
+                    <v-form
+                        ref="form"
+                        v-model="valid"
+                        data-testid="email-change-form"
+                        @submit.prevent="submitChange"
+                    >
+                        <v-text-field
+                            v-model="password"
+                            :rules="passwordRules"
+                            :label="$t('account.password')"
+                            :type="showPassword ? 'text' : 'password'"
+                            autocomplete="current-password"
+                            prepend-inner-icon="mdi-lock-outline"
+                            :append-inner-icon="
+                                showPassword
+                                    ? 'mdi-eye-off-outline'
+                                    : 'mdi-eye-outline'
+                            "
+                            class="mb-2"
+                            data-testid="email-change-password"
+                            @click:append-inner="showPassword = !showPassword"
+                        />
+                    </v-form>
 
                     <v-btn
                         color="success"
                         block
                         size="large"
                         :loading="loading"
-                        :disabled="loading || !fieldsValid"
+                        :disabled="loading || !valid"
                         class="mb-3 font-weight-semibold"
-                        data-testid="confirm-reset-submit"
-                        @click="submitReset"
+                        data-testid="email-change-submit"
+                        @click="submitChange"
                     >
                         {{ $t('actions.save') }}
                     </v-btn>
@@ -57,7 +74,7 @@
                     v-else-if="step === 'done'"
                     key="done"
                     class="text-center py-6"
-                    data-testid="reset-done"
+                    data-testid="email-change-done"
                 >
                     <div class="success-ring">
                         <v-icon size="40" color="success"
@@ -70,7 +87,7 @@
                         block
                         size="large"
                         class="font-weight-semibold"
-                        data-testid="reset-goto-login"
+                        data-testid="email-change-goto-login"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('account.login') }}
@@ -79,10 +96,10 @@
 
                 <!-- ─── STEP · Invalid / expired token ─── -->
                 <div
-                    v-else-if="step === 'invalid'"
+                    v-else
                     key="invalid"
                     class="text-center py-6"
-                    data-testid="reset-invalid"
+                    data-testid="email-change-invalid"
                 >
                     <v-icon size="48" color="error" class="mb-4"
                         >mdi-link-off</v-icon
@@ -92,7 +109,7 @@
                         variant="tonal"
                         block
                         class="mt-4"
-                        data-testid="reset-back"
+                        data-testid="email-change-back"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('actions.back_to_home') }}
@@ -104,7 +121,9 @@
 </template>
 
 <script setup>
-defineOptions({ name: 'ResetPasswordPage' })
+import { required } from '~/utils/validation'
+
+defineOptions({ name: 'ConfirmEmailChangePage' })
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -113,7 +132,7 @@ const route = useRoute()
 definePageMeta({ layout: 'blank', auth: false })
 
 useHead({
-    title: t('page.title.resetPassword'),
+    title: t('page.title.emailChange'),
 })
 
 let _settings = null
@@ -127,19 +146,21 @@ const { error: notifyError } = useNotification()
 
 // ── Token from URL ─────────────────────────────────────────────────
 const token = computed(() => String(route.params.token ?? ''))
-const step = ref(token.value ? 'reset' : 'invalid')
+const step = ref(token.value ? 'confirm' : 'invalid')
 
 // ── State ──────────────────────────────────────────────────────────
+const form = ref(null)
+const valid = ref(false)
 const loading = ref(false)
-const fieldsValid = ref(false)
-const newPassword = ref('')
-const confirmPassword = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const passwordRules = [required(t)]
 
 // ── Heading meta ───────────────────────────────────────────────────
 const eyebrow = computed(
     () =>
         ({
-            reset: t('account.eyebrowAccountRecovery'),
+            confirm: t('account.eyebrowEmailChange'),
             done: t('account.eyebrowAllDone'),
             invalid: t('account.eyebrowInvalidLink'),
         })[step.value] ?? '',
@@ -147,35 +168,42 @@ const eyebrow = computed(
 const title = computed(
     () =>
         ({
-            reset: t('account.reset_password'),
-            done: t('account.passwordSet'),
+            confirm: t('account.emailChange'),
+            done: t('account.emailChanged'),
             invalid: t('account.linkInvalid'),
         })[step.value] ?? '',
 )
 const subtitle = computed(
     () =>
         ({
-            reset: t('account.reset_hint'),
-            done: t('notifications.success.passwordChanged'),
-            invalid: t('notifications.error.resetLinkInvalid'),
+            confirm: t('account.emailChangeHint'),
+            done: t('notifications.success.emailChange'),
+            invalid: t('notifications.error.emailChange'),
         })[step.value] ?? '',
 )
 
 // ── Submit ─────────────────────────────────────────────────────────
+// PocketBase keys several distinct failures on `token` —
+// validation_invalid_token_payload for a malformed one, validation_invalid_token
+// for an expired one, plus collection/email mismatches. All of them mean the
+// same thing to the user: this link is dead. A wrong password is keyed on
+// `password` instead, and stays an inline error rather than killing the form.
 function isTokenError(err) {
-    return err?.data?.data?.token?.code === 'validation_invalid_token'
+    return !!err?.data?.data?.token
 }
 
-async function submitReset() {
+async function submitChange() {
+    const { valid: formValid } = await form.value.validate()
+    if (!formValid) return
+
     loading.value = true
     try {
         await pb
             .collection('users')
-            .confirmPasswordReset(
-                token.value,
-                newPassword.value,
-                confirmPassword.value,
-            )
+            .confirmEmailChange(token.value, password.value)
+        // PocketBase clears the auth store on success -- the old token is tied
+        // to the old address, so the user has to sign in again either way.
+        pb.authStore.clear()
         step.value = 'done'
     } catch (err) {
         if (isTokenError(err)) {
@@ -184,7 +212,7 @@ async function submitReset() {
             const msg =
                 err?.data?.message ??
                 err?.message ??
-                t('notifications.error.resetPassword')
+                t('notifications.error.emailChange')
             notifyError(msg)
         }
     } finally {

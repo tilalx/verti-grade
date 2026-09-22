@@ -28,6 +28,19 @@
                 </div>
             </template>
 
+            <!-- The invite mail is what makes the account usable. Without
+                 SMTP the new user gets a random password they can never learn. -->
+            <v-alert
+                v-if="!mailConfigured"
+                type="warning"
+                variant="tonal"
+                icon="mdi-email-off-outline"
+                class="mb-4"
+                data-testid="user-create-mail-warning"
+            >
+                {{ $t('users.inviteMailNotConfigured') }}
+            </v-alert>
+
             <v-form ref="form" v-model="valid" @submit.prevent="submit">
                 <!-- Avatar upload -->
                 <div class="d-flex justify-center mb-6">
@@ -170,6 +183,9 @@ function onAvatarPicked(e) {
 
 const { notify, error: notifyError } = useNotification()
 
+const { data: mailStatus } = useMailStatus()
+const mailConfigured = computed(() => mailStatus.value?.configured !== false)
+
 // ── Roles ─────────────────────────────────────────────────────────────────
 
 // ── Validation ────────────────────────────────────────────────────────────
@@ -197,7 +213,10 @@ async function submit() {
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
 
-        // Generate a random password (user will reset via email)
+        // Throwaway password: the invite mail below is how the user sets a
+        // real one. PocketBase also flips verified=true on reset confirm, and
+        // the users collection authRule is verified=true -- so without that
+        // mail the account cannot log in at all.
         const randomPassword = crypto.randomUUID()
 
         const formData = new FormData()
@@ -212,7 +231,17 @@ async function submit() {
         if (avatarFile.value) formData.append('avatar', avatarFile.value)
 
         await pb.collection('users').create(formData)
-        notify(t('notifications.success.userCreated'))
+
+        // Separate try: the record exists either way, so a mail failure must
+        // not read as "user not created".
+        try {
+            await pb.collection('users').requestPasswordReset(user.email)
+            notify(t('notifications.success.userInvited'))
+        } catch (mailError) {
+            console.error('Error sending invite email:', mailError)
+            notifyError(t('notifications.error.userInviteMail'))
+        }
+
         emit('user-created')
         closeDialog()
     } catch (error) {

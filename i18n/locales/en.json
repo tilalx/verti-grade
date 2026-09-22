@@ -67,7 +67,23 @@
                 "l2": "account",
                 "accent": "password."
             }
-        }
+        },
+        "eyebrowVerifyEmail": "EMAIL VERIFICATION",
+        "eyebrowEmailChange": "EMAIL CHANGE",
+        "verifyEmail": "Verify your email",
+        "verifyEmailHint": "Confirming your email address…",
+        "emailChange": "Confirm your new email",
+        "emailChangeHint": "Enter your password to confirm the change.",
+        "passwordSet": "Password updated",
+        "emailVerified": "Email verified",
+        "emailChanged": "Email updated",
+        "linkInvalid": "Link no longer valid",
+        "emailChangeConfirmHint": "A confirmation link is sent to the new address. Your current address stays active until you open it.",
+        "emailChangeSent": "Confirmation link sent to the new address. Your current address stays active until you open it.",
+        "emailChangeFailed": "The confirmation link could not be sent. Your email address is unchanged.",
+        "deleteAccount": "Delete account",
+        "deleteAccountHint": "Permanently removes your account and signs you out. Routes and ratings you created stay in place.",
+        "deleteAccountConfirm": "This permanently deletes your account and signs you out. This cannot be undone."
     },
     "routes": {
         "home": "Home",
@@ -265,9 +281,12 @@
             "create": "Successfully created",
             "edit": "Successfully saved",
             "delete": "Successfully deleted",
-            "login": "Login successful. Redirecting to the Route Manager...",
             "health": "Health: OK",
-            "userCreated": "User created successfully."
+            "userCreated": "User created successfully.",
+            "verifyEmail": "Your email address has been verified. You can sign in now.",
+            "emailChange": "Your email address has been changed. Please sign in again.",
+            "userInvited": "User created. An invitation email has been sent.",
+            "passwordChanged": "Your password has been set. You can sign in now."
         },
         "error": {
             "resetPassword": "Password reset request failed.",
@@ -280,7 +299,11 @@
             "email_not_verified": "Your email address has not been verified.",
             "too_many_attempts": "Too many login attempts. Please try again later.",
             "unknown": "An unknown error occurred. Please try again.",
-            "generic": "An unexpected error occurred."
+            "generic": "An unexpected error occurred.",
+            "verifyEmail": "This verification link is invalid or has expired.",
+            "emailChange": "This email change link is invalid or has expired.",
+            "userInviteMail": "User created, but the invitation email could not be sent.",
+            "resetLinkInvalid": "This password reset link is invalid or has expired. Request a new one from the sign-in page."
         },
         "deleteItem": "Are you sure you want to delete this item?",
         "deleteMoreItems": "Are you sure you want to delete the selected items?",
@@ -306,6 +329,17 @@
             "installedCommit": "Installed commit: {0}",
             "empty": "No new commits found.",
             "close": "Close commit list"
+        },
+        "center": {
+            "title": "Notifications",
+            "markAllRead": "Mark all read",
+            "dismiss": "Dismiss",
+            "empty": "Nothing new right now.",
+            "types": {
+                "report_filed": "New content report: “{snippet}”",
+                "report_decided_removed": "A report was decided — content removed",
+                "report_decided_kept": "A report was decided — content kept online"
+            }
         }
     },
     "filter": {
@@ -331,7 +365,9 @@
             "routeNamed": "{name} - Verti-Grade",
             "inventory": "Route Inventory - Verti-Grade",
             "reports": "Content Reports - Verti-Grade",
-            "activity": "Activity Log"
+            "activity": "Activity Log",
+            "verifyEmail": "Verify Email - Verti-Grade",
+            "emailChange": "Change Email - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -403,7 +439,8 @@
         "recentlyJoined": "Joined this week",
         "noUsers": "No users found",
         "noUsersHint": "Try adjusting your search or filters",
-        "showing": "Showing {n} of {total} users"
+        "showing": "Showing {n} of {total} users",
+        "inviteMailNotConfigured": "Email is not configured, so no invitation can be sent. The new user will not be able to sign in."
     },
     "permissions": {
         "title": "Role Permissions",

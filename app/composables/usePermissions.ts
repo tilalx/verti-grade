@@ -1,12 +1,21 @@
 export function usePermissions() {
     const pb = usePocketbase()
-    const permissions = useState<string[]>(
-        'user-permissions',
-        () => [],
-    )
+    const permissions = useState<string[]>('user-permissions', () => [])
     const roleName = useState<string>('user-role-name', () => '')
     const loading = ref(false)
     const loaded = useState<boolean>('user-permissions-loaded', () => false)
+
+    /**
+     * The request carries a fixed `requestKey`, so the PocketBase SDK aborts an
+     * in-flight fetch as soon as a newer one starts -- which is exactly what
+     * happens when a role update arrives over realtime while a refresh is
+     * already running. That abort is a normal outcome, not a failure: the newer
+     * request is about to deliver the answer, so the superseded one must leave
+     * state alone instead of clearing permissions and alarming the user.
+     */
+    function isAutoCancelled(err: any) {
+        return !!err?.isAbort || err?.status === 0
+    }
 
     async function refreshPermissions() {
         const roleId = pb.authStore.record?.role
@@ -18,6 +27,7 @@ export function usePermissions() {
         }
 
         loading.value = true
+        let superseded = false
         try {
             const roleRecord = await pb.collection('roles').getOne(roleId, {
                 expand: 'permissions',
@@ -27,6 +37,10 @@ export function usePermissions() {
             const perms = (roleRecord.expand?.permissions as any[]) ?? []
             permissions.value = perms.map((p) => p.name)
         } catch (err) {
+            if (isAutoCancelled(err)) {
+                superseded = true
+                return
+            }
             console.error('Failed to fetch permissions:', err)
             permissions.value = []
             roleName.value = ''
@@ -37,8 +51,12 @@ export function usePermissions() {
             const { error: notifyError } = useNotification()
             notifyError($i18n.t('permissions.loadError'))
         } finally {
-            loading.value = false
-            loaded.value = true
+            // The newer request owns both flags -- flipping them here would
+            // report "loaded" with the permissions momentarily emptied.
+            if (!superseded) {
+                loading.value = false
+                loaded.value = true
+            }
         }
     }
 
@@ -56,5 +74,13 @@ export function usePermissions() {
         return permissions.value.includes(featureName)
     }
 
-    return { permissions, roleName, loading, loaded, can, ensureLoaded, refreshPermissions }
+    return {
+        permissions,
+        roleName,
+        loading,
+        loaded,
+        can,
+        ensureLoaded,
+        refreshPermissions,
+    }
 }

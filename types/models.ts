@@ -161,6 +161,22 @@ export interface AuditLogRecord extends BaseRecord {
     ip?: string | null
 }
 
+/**
+ * One queued in-app notification, addressed to a single user.
+ *
+ * `type` is free text rather than a union so a new event kind costs an i18n
+ * key (notifications.center.types.<type>) and nothing else -- the wording is
+ * never stored, only the type and its interpolation `params`, so the queue
+ * reads in whichever locale the recipient uses.
+ */
+export interface NotificationRecord extends BaseRecord {
+    user: RecordId
+    type: string
+    params?: Record<string, unknown> | null
+    url?: string | null
+    read: boolean
+}
+
 export interface RouteScoreRecord extends RouteRecord {
     average_rating?: number | null
     ratings_count?: number
@@ -177,6 +193,7 @@ export type PocketBaseRecord =
     | SettingsRecord
     | ReportRecord
     | AuditLogRecord
+    | NotificationRecord
     | RouteScoreRecord
 
 export interface ListResult<T> {

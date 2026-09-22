@@ -268,6 +268,10 @@
                             :comment="review"
                             date-format="relative"
                             class="mb-3"
+                            :class="{
+                                'comment-card--target':
+                                    review.id === targetCommentId,
+                            }"
                         >
                             <template #actions>
                                 <!-- DSA Art. 16(1): a reporting path on every
@@ -320,6 +324,15 @@ const pb = usePocketbase() as PocketBase
 const nuxtRoute = useRoute()
 
 const route_id = ref<string | null>((nuxtRoute.query.id as string) || null)
+
+// A report addresses a comment as `/route?id=<route>#comment-<rating>`
+// (utils/reports.ts).
+//
+// Read from window on mount rather than from useRoute().hash: a fragment is
+// never sent to the server, so it is empty for the whole SSR render and the
+// highlight silently never applied. Client-only is also honest -- the server
+// genuinely cannot know which comment was linked.
+const targetCommentId = ref('')
 const loading = ref(true)
 const metadata = ref<RouteListItem | null>(null)
 
@@ -522,6 +535,17 @@ if (!metadata.value) await navigateTo('/404')
 loading.value = false
 
 onMounted(async () => {
+    const hash = window.location.hash
+    if (hash.startsWith('#comment-')) {
+        targetCommentId.value = hash.slice('#comment-'.length)
+        // Reviews are server-rendered, so the element is already in the DOM;
+        // nextTick is for the class that was just flipped on.
+        await nextTick()
+        document
+            .getElementById(`comment-${targetCommentId.value}`)
+            ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+
     if (!route_id.value) return
 
     await subscribe('ratings', (event) => {
@@ -533,6 +557,30 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* The reported comment, arrived at from a report link. Outline rather than a
+   background so the card's own tonal surface still reads in both themes. */
+.comment-card--target {
+    outline: 2px solid rgb(var(--v-theme-success));
+    outline-offset: 2px;
+    animation: target-fade 3s ease-out forwards;
+}
+
+@keyframes target-fade {
+    0%,
+    60% {
+        outline-color: rgb(var(--v-theme-success));
+    }
+    100% {
+        outline-color: rgba(var(--v-theme-success), 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .comment-card--target {
+        animation: none;
+    }
+}
+
 .route-page {
     max-width: 600px;
     margin: 0 auto;

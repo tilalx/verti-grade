@@ -383,12 +383,14 @@ async function submitLogin() {
     if (!(await validate(loginForm))) return
     loading.value = true
     try {
+        // No autoRefreshThreshold: the SDK only honours it on _superusers, so
+        // on this collection it was never an option -- just an unknown key the
+        // SDK forwarded as a ?autoRefreshThreshold=0 query param.
         await pb
             .collection('users')
-            .authWithPassword(identity.value, password.value, {
-                autoRefreshThreshold: 0,
-            })
-        notify(t('notifications.success.login'))
+            .authWithPassword(identity.value, password.value)
+        // No success toast: the redirect is the confirmation, and a snackbar
+        // riding along into the next page just gets in the way.
         await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))
@@ -416,7 +418,8 @@ async function loginWithOAuth(provider) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })
-        notify(t('notifications.success.login'))
+        // No success toast: the redirect is the confirmation, and a snackbar
+        // riding along into the next page just gets in the way.
         await navigateTo('/manage/routes', { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))

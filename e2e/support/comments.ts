@@ -1,6 +1,15 @@
 import type { Page } from '@playwright/test'
 import { authHeader } from './nav'
 
+/** Id of a seeded, non-archived route — the one `createComment` posts onto. */
+export async function firstRouteId(page: Page): Promise<string> {
+    const routeRes = await page.request.get(
+        '/api/collections/routes/records?perPage=1&filter=' +
+            encodeURIComponent('name ~ "e2e-route-" && archived = false'),
+    )
+    return (await routeRes.json()).items[0].id as string
+}
+
 /**
  * A comment the calling test owns.
  *
@@ -19,11 +28,7 @@ export async function createComment(
     rating = 5,
 ): Promise<string> {
     const headers = await authHeader(page)
-    const routeRes = await page.request.get(
-        '/api/collections/routes/records?perPage=1&filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false'),
-    )
-    const routeId = (await routeRes.json()).items[0].id as string
+    const routeId = await firstRouteId(page)
 
     const res = await page.request.post('/api/collections/ratings/records', {
         headers,

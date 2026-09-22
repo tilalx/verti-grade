@@ -2,6 +2,7 @@
     <v-card
         variant="tonal"
         class="list-card comment-card"
+        :id="`comment-${comment.id}`"
         :data-testid="`comment-card-${comment.id}`"
     >
         <!-- Header: [checkbox?] avatar · name + date · star rating -->

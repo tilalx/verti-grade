@@ -172,26 +172,12 @@
                                     v-model="user.email"
                                     :label="$t('account.email')"
                                     autocomplete="email"
-                                    disabled
+                                    :rules="[rules.required, rules.email]"
+                                    :hint="$t('account.emailChangeConfirmHint')"
+                                    :persistent-hint="emailChangeRequested"
                                     prepend-inner-icon="mdi-email-outline"
-                                >
-                                    <template #append-inner>
-                                        <v-tooltip
-                                            :text="$t('account.emailLocked')"
-                                            location="top"
-                                        >
-                                            <template
-                                                #activator="{ props: tp }"
-                                            >
-                                                <v-icon
-                                                    v-bind="tp"
-                                                    icon="mdi-lock-outline"
-                                                    size="18"
-                                                />
-                                            </template>
-                                        </v-tooltip>
-                                    </template>
-                                </v-text-field>
+                                    data-testid="profile-email"
+                                />
                             </v-col>
                         </v-row>
                     </v-form>
@@ -227,9 +213,36 @@
                     >
                         {{ $t('account.passwordHint') }}
                     </v-alert>
+
+                    <v-divider class="my-6" />
+
+                    <div class="text-title-small font-weight-semibold mb-1">
+                        {{ $t('account.deleteAccount') }}
+                    </div>
+                    <p class="text-body-small text-medium-emphasis mb-3">
+                        {{ $t('account.deleteAccountHint') }}
+                    </p>
+                    <v-btn
+                        color="error"
+                        variant="tonal"
+                        prepend-icon="mdi-delete-outline"
+                        data-testid="profile-delete-open"
+                        @click="deleteDialog = true"
+                    >
+                        {{ $t('account.deleteAccount') }}
+                    </v-btn>
                 </v-card-text>
             </v-window-item>
         </v-window>
+
+        <ConfirmDialog
+            v-model="deleteDialog"
+            :title="$t('account.deleteAccount')"
+            :message="$t('account.deleteAccountConfirm')"
+            :confirm-text="$t('actions.delete')"
+            :loading="deleting"
+            @confirm="deleteAccount"
+        />
 
         <template #actions>
             <v-btn
@@ -268,7 +281,7 @@
 </template>
 
 <script setup>
-import { required } from '~/utils/validation'
+import { required, validEmail } from '~/utils/validation'
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
@@ -359,23 +372,46 @@ const showSecurityWarning = computed(
 // ── Profile-only validation rule (only "required" needed here) ────────────
 const rules = {
     required: required(t),
+    email: validEmail(t),
 }
 
 // ── Form ref (profile tab only) ───────────────────────────────────────────
 const profileForm = ref(null)
 
 // ── Change detection ──────────────────────────────────────────────────────
-const original = { firstname: user.firstname, name: user.name }
+const original = {
+    firstname: user.firstname,
+    name: user.name,
+    email: user.email,
+}
+
+const normalizedEmail = (value) =>
+    String(value ?? '')
+        .trim()
+        .toLowerCase()
+
+/**
+ * The address is not written directly: PocketBase sends a confirmation link to
+ * the NEW inbox and only swaps it once that link is opened, so the old address
+ * stays live until then.
+ */
+const emailChangeRequested = computed(
+    () =>
+        !!normalizedEmail(user.email) &&
+        normalizedEmail(user.email) !== normalizedEmail(original.email),
+)
 
 const hasChanges = computed(() => {
     if (avatarFile.value) return true
     if (passwordChangeRequested.value) return true
+    if (emailChangeRequested.value) return true
     return user.firstname !== original.firstname || user.name !== original.name
 })
 
 function cancelEdit() {
     user.firstname = original.firstname
     user.name = original.name
+    user.email = original.email
     user.oldPassword = ''
     user.password = ''
     user.passwordConfirm = ''
@@ -421,6 +457,12 @@ async function saveUser() {
 
     saving.value = true
 
+    // Captured before the update: Object.assign() below resets user.email to
+    // whatever PocketBase still has (the old address), which is correct --
+    // the swap only happens once the new inbox confirms.
+    const requestedEmail = user.email.trim()
+    const wantsEmailChange = emailChangeRequested.value
+
     const formData = new FormData()
     formData.append('firstname', user.firstname)
     formData.append('name', user.name)
@@ -458,8 +500,20 @@ async function saveUser() {
         // Update original snapshot so hasChanges resets to false
         original.firstname = updated.firstname
         original.name = updated.name
+        original.email = updated.email ?? original.email
 
-        notify(t('notifications.success.edit'))
+        if (wantsEmailChange) {
+            try {
+                await pb.collection('users').requestEmailChange(requestedEmail)
+                notify(t('account.emailChangeSent'))
+            } catch (mailError) {
+                console.error('Error requesting email change:', mailError)
+                notifyError(t('account.emailChangeFailed'))
+            }
+        } else {
+            notify(t('notifications.success.edit'))
+        }
+
         localDialog.value = false
     } catch (err) {
         const code = err?.response?.data?.oldPassword?.code
@@ -471,6 +525,28 @@ async function saveUser() {
         }
     } finally {
         saving.value = false
+    }
+}
+
+// ── Account deletion ──────────────────────────────────────────────────────
+const deleteDialog = ref(false)
+const deleting = ref(false)
+
+async function deleteAccount() {
+    deleting.value = true
+    try {
+        await pb.collection('users').delete(user.id)
+        // Clear before navigating: the token still looks valid to the auth
+        // middleware, which would bounce the user straight back in.
+        pb.authStore.clear()
+        deleteDialog.value = false
+        localDialog.value = false
+        await navigateTo('/auth/login')
+    } catch (err) {
+        console.error('Error deleting account:', err)
+        notifyError(t('notifications.error.delete'))
+    } finally {
+        deleting.value = false
     }
 }
 
