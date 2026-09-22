@@ -391,6 +391,9 @@
         "passwordTooWeak": "Şifre en az «İyi» düzeyinde olmalıdır.",
         "email": "Lütfen geçerli bir e-posta adresi girin."
     },
+    "captcha": {
+        "verifying": "Doğrulanıyor… {progress}%"
+    },
     "comments": {
         "subtitle": "Tırmanıcı yorumlarını yönetin",
         "totalReviews": "Toplam yorum",

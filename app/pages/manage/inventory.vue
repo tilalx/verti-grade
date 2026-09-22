@@ -534,7 +534,14 @@
 </template>
 
 <script setup lang="ts">
-import { QrcodeStream } from 'vue-qrcode-reader'
+import { QrcodeStream, setZXingModuleOverrides } from 'vue-qrcode-reader'
+// The scanner's 932 KB decoder is fetched from jsDelivr by default, which a
+// gym's wifi may block and a basement may not reach at all -- and the scan is
+// the one thing a route setter needs working while standing at the wall.
+// Vite emits the copy from node_modules as a hashed asset of this app, so the
+// binary always matches the installed zxing-wasm.
+import zxingReaderWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
+
 import { formatAnchorPoint, formatDifficulty } from '~/utils/formatting'
 import {
     clearSession,
@@ -549,6 +556,9 @@ import {
     sortByAnchor,
 } from '~/utils/inventory'
 import type { RouteRecord } from '~/types/models'
+
+// Module-level config, so it must run before <QrcodeStream> mounts.
+setZXingModuleOverrides({ locateFile: () => zxingReaderWasmUrl })
 
 definePageMeta({
     middleware: 'auth',

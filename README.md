@@ -26,18 +26,18 @@ wget https://raw.githubusercontent.com/tilalx/verti-grade/main/docker-compose.ym
 
 ```yaml
 services:
-  verti-grade:
-    container_name: verti-grade-app
-    image: tilalx/verti-grade:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      # Default superuser created on first boot. Change before deploying!
-      PB_SUPERUSER_EMAIL: admin@example.com
-      PB_SUPERUSER_PASSWORD: changeme123
-    volumes:
-      - ./pb_data:/pb/pb_data
+    verti-grade:
+        container_name: verti-grade-app
+        image: tilalx/verti-grade:latest
+        ports:
+            - '80:80'
+            - '443:443'
+        environment:
+            # Default superuser created on first boot. Change before deploying!
+            PB_SUPERUSER_EMAIL: admin@example.com
+            PB_SUPERUSER_PASSWORD: changeme123
+        volumes:
+            - ./pb_data:/pb/pb_data
 ```
 
 ### Running the Project
@@ -60,10 +60,10 @@ Navigate to **`https://localhost`** in your browser.
 
 The superuser account is created automatically on first boot using the credentials set in `docker-compose.yml`:
 
-| Field    | Default value         |
-|----------|-----------------------|
-| Email    | `admin@example.com`   |
-| Password | `changeme123`         |
+| Field    | Default value       |
+| -------- | ------------------- |
+| Email    | `admin@example.com` |
+| Password | `changeme123`       |
 
 **Change these before deploying to production.**
 
@@ -88,14 +88,14 @@ their invitation and cannot sign in, and the DSA Art. 16 notices are not
 delivered. Set these in `docker-compose.yml` (they are read at every boot, so
 no visit to the PocketBase panel is needed):
 
-| Variable | Purpose |
-|----------|---------|
-| `PB_SMTP_HOST` / `PB_SMTP_PORT` | Mail server. Setting the host enables SMTP. |
-| `PB_SMTP_USERNAME` / `PB_SMTP_PASSWORD` | Credentials, if the server needs them. |
-| `PB_SMTP_TLS` | `false` for STARTTLS; anything else enforces TLS. |
-| `PB_APP_URL` | Origin used for links in mail. |
-| `PB_APP_NAME` | Name used in subject lines and signatures. |
-| `PB_SENDER_ADDRESS` / `PB_SENDER_NAME` | From address and display name. |
+| Variable                                | Purpose                                           |
+| --------------------------------------- | ------------------------------------------------- |
+| `PB_SMTP_HOST` / `PB_SMTP_PORT`         | Mail server. Setting the host enables SMTP.       |
+| `PB_SMTP_USERNAME` / `PB_SMTP_PASSWORD` | Credentials, if the server needs them.            |
+| `PB_SMTP_TLS`                           | `false` for STARTTLS; anything else enforces TLS. |
+| `PB_APP_URL`                            | Origin used for links in mail.                    |
+| `PB_APP_NAME`                           | Name used in subject lines and signatures.        |
+| `PB_SENDER_ADDRESS` / `PB_SENDER_NAME`  | From address and display name.                    |
 
 Leave `PB_SMTP_HOST` unset to keep whatever is configured in the PocketBase
 panel instead.
@@ -120,10 +120,60 @@ By default, a self-signed certificate is generated automatically at startup. To 
 
 ```yaml
 volumes:
-  - ./pb_data:/pb/pb_data
-  - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
-  - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+    - ./pb_data:/pb/pb_data
+    - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+    - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
 ```
+
+---
+
+## Rate Limiting
+
+Rate limits are enabled by the migrations and need no configuration. They are
+sized per client IP for a gym: generous on reads and route ratings, because a
+whole hall shares one address behind wifi NAT, and tight on sign-ins and on the
+endpoints that send mail. See `pocketbase/pb_migrations/1790200001_enable_rate_limits.js`
+for each rule and the reasoning behind its numbers.
+
+If you put another reverse proxy in front of the container, make sure it sets
+`X-Forwarded-For`. Without it every visitor is bucketed as one client and the
+limits will start rejecting legitimate traffic.
+
+---
+
+## Captcha (optional)
+
+Set `CAP_SECRET` to a long random string to require a solved
+[Cap](https://trycap.dev) proof-of-work challenge on the actions an anonymous
+visitor can trigger: creating a rating, filing a DSA notice, signing in, and the
+public password-reset form. Leave it unset and the captcha is simply off — every
+form keeps working, which is what an existing install gets after an upgrade.
+
+The puzzle solves itself during submit (about a second on a phone); there is no
+checkbox to tick, and the challenge is issued and verified entirely by this
+application. Signed-in staff are never asked, and the PocketBase panel at `/_/`
+is deliberately not gated — it cannot attach a token, and the rate limits cover
+it instead.
+
+> **Note:** the solver's WebAssembly module is fetched from `cdn.jsdelivr.net`
+> at runtime by the upstream widget. Visitors' browsers therefore contact that
+> CDN, and the captcha degrades (or fails) on a network that cannot reach it.
+> Self-hosting that asset is possible via `window.CAP_CUSTOM_WASM_URL` and is
+> not yet wired up here.
+
+Turning it on also raises the two rate limits the captcha now backs, since each
+submission costs the client real work.
+
+For local development `yarn dev` supplies a throwaway secret of its own, so the
+captcha is on by default there. Export your own to override it:
+
+```sh
+CAP_SECRET=$(openssl rand -hex 32) yarn dev
+```
+
+Do **not** put `CAP_SECRET` in `.env`: Nuxt would read it and PocketBase — a
+sibling process started by `concurrently` — would not, which leaves visitors
+solving puzzles that nothing verifies.
 
 ---
 

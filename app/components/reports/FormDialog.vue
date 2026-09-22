@@ -100,6 +100,7 @@
                 data-testid="report-form-submit"
                 @click="submit"
             >
+                <template #loader><CaptchaLoader /></template>
                 {{ $t('reports.submit') }}
             </v-btn>
         </template>
@@ -126,6 +127,7 @@ const emit = defineEmits<{
 const pb = usePocketbase()
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
+const { capHeaders } = useCapToken()
 
 const internalOpen = ref(false)
 
@@ -196,16 +198,19 @@ async function submit() {
     try {
         // status/decision/receipt fields are stamped by the PocketBase create
         // hook and deliberately not sent from here.
-        await pb.collection('reports').create({
-            content_type: props.contentType,
-            content_id: props.contentId,
-            content_url: props.contentUrl,
-            reason: form.reason,
-            explanation: form.explanation.trim(),
-            notifier_name: form.notifierName.trim(),
-            notifier_email: form.notifierEmail.trim(),
-            good_faith: form.goodFaith,
-        })
+        await pb.collection('reports').create(
+            {
+                content_type: props.contentType,
+                content_id: props.contentId,
+                content_url: props.contentUrl,
+                reason: form.reason,
+                explanation: form.explanation.trim(),
+                notifier_name: form.notifierName.trim(),
+                notifier_email: form.notifierEmail.trim(),
+                good_faith: form.goodFaith,
+            },
+            { headers: await capHeaders('report') },
+        )
 
         notify(t('reports.submitted'))
         emit('submitted')

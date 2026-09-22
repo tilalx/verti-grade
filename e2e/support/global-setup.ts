@@ -39,9 +39,22 @@ async function saveStorageState(
     await browser.close()
 }
 
+/**
+ * The production limits (1790200001_enable_rate_limits.js) are sized per client
+ * IP for a gym full of separate phones. The whole suite runs from one address
+ * and, across the four projects that match **\/auth\/**, sends far more sign-ins
+ * and password-reset mails than any single person ever would -- so leaving them
+ * on would fail the run on its own traffic. Turned off for the test stack only;
+ * the rules themselves are verified against the migration, not through the UI.
+ */
+async function relaxRateLimits(pb: PocketBase) {
+    await pb.settings.update({ rateLimits: { enabled: false } })
+}
+
 export default async function globalSetup(config: FullConfig) {
     const pb = new PocketBase(PB_URL)
     await authAsSuperuser(pb)
+    await relaxRateLimits(pb)
 
     const roleIds = await getRoleIds(pb)
     const admin = await ensureUser(pb, roleIds.admin, 'admin', PREFIX)

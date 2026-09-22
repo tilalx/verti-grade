@@ -114,6 +114,7 @@
                         class="mb-3 font-weight-semibold"
                         data-testid="login-submit"
                     >
+                        <template #loader><CaptchaLoader /></template>
                         {{ $t('account.login') }}
                     </v-btn>
 
@@ -207,6 +208,7 @@
                         class="mb-3 font-weight-semibold"
                         data-testid="reset-submit"
                     >
+                        <template #loader><CaptchaLoader /></template>
                         {{ $t('actions.submit') }}
                     </v-btn>
 
@@ -231,6 +233,7 @@ defineOptions({ name: 'LoginPage' })
 
 const { t } = useI18n()
 const pb = usePocketbase()
+const { capHeaders } = useCapToken()
 
 definePageMeta({ layout: 'blank', auth: false })
 
@@ -386,9 +389,15 @@ async function submitLogin() {
         // No autoRefreshThreshold: the SDK only honours it on _superusers, so
         // on this collection it was never an option -- just an unknown key the
         // SDK forwarded as a ?autoRefreshThreshold=0 query param.
+        // A sign-in is the one anonymous action that is worth guessing at, so
+        // PocketBase wants a solved captcha here too when one is configured.
+        // The superuser panel at /_/ is deliberately not gated -- it cannot
+        // attach a token -- and relies on the rate limit instead.
         await pb
             .collection('users')
-            .authWithPassword(identity.value, password.value)
+            .authWithPassword(identity.value, password.value, {
+                headers: await capHeaders('login'),
+            })
         // No success toast: the redirect is the confirmation, and a snackbar
         // riding along into the next page just gets in the way.
         await navigateTo('/manage/routes', { replace: true })
@@ -403,7 +412,9 @@ async function submitReset() {
     if (!(await validate(resetForm))) return
     loading.value = true
     try {
-        await pb.collection('users').requestPasswordReset(resetEmail.value)
+        await pb.collection('users').requestPasswordReset(resetEmail.value, {
+            headers: await capHeaders('password-reset'),
+        })
         notify(t('notifications.success.resetPassword'))
         view.value = 'login'
         resetEmail.value = ''
