@@ -39,7 +39,7 @@
         "husky": "^9.1.7",
         "lint-staged": "^17.5.1",
         "nuxt": "^4.5.2",
-        "pako": "^2.1.0",
+        "pako": "^3.0.2",
         "pdfkit": "0.20.2",
         "pocketbase": "^0.28.1",
         "prettier": "3.9.8",

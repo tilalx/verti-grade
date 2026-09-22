@@ -1,7 +1,7 @@
 import type { CapScope } from '~~/server/utils/cap'
 
 import capWasmUrl from '@cap.js/wasm/browser/cap_wasm_bg.wasm?url'
-import pakoUrl from 'pako/dist/pako_inflate.min.js?url'
+import pakoUrl from '../../node_modules/pako/dist/browser/pako_inflate.umd.min.js?url'
 
 interface CapStatus {
     enabled: boolean
