@@ -7,21 +7,23 @@ import {
     formatDateToYYYYMMDD,
 } from '~/utils/formatting'
 
-// ---------------------------------------------------------------------------
-// formatDifficulty
-// ---------------------------------------------------------------------------
-
 describe('formatDifficulty', () => {
     it('returns "7+" when difficulty_sign is true', () => {
-        expect(formatDifficulty({ difficulty: 7, difficulty_sign: true })).toBe('7+')
+        expect(formatDifficulty({ difficulty: 7, difficulty_sign: true })).toBe(
+            '7+',
+        )
     })
 
     it('returns "7-" when difficulty_sign is false', () => {
-        expect(formatDifficulty({ difficulty: 7, difficulty_sign: false })).toBe('7-')
+        expect(
+            formatDifficulty({ difficulty: 7, difficulty_sign: false }),
+        ).toBe('7-')
     })
 
     it('returns "7" when difficulty_sign is null', () => {
-        expect(formatDifficulty({ difficulty: 7, difficulty_sign: null })).toBe('7')
+        expect(formatDifficulty({ difficulty: 7, difficulty_sign: null })).toBe(
+            '7',
+        )
     })
 
     it('returns "7" when difficulty_sign is undefined', () => {
@@ -29,7 +31,9 @@ describe('formatDifficulty', () => {
     })
 
     it('accepts a string sign value', () => {
-        expect(formatDifficulty({ difficulty: 5, difficulty_sign: '+' })).toBe('5+')
+        expect(formatDifficulty({ difficulty: 5, difficulty_sign: '+' })).toBe(
+            '5+',
+        )
     })
 
     it('returns "" for null input', () => {
@@ -44,10 +48,6 @@ describe('formatDifficulty', () => {
         expect(formatDifficulty({ difficulty_sign: true })).toBe('+')
     })
 })
-
-// ---------------------------------------------------------------------------
-// formatAnchorPoint
-// ---------------------------------------------------------------------------
 
 describe('formatAnchorPoint', () => {
     it('returns "—" for null', () => {
@@ -78,10 +78,6 @@ describe('formatAnchorPoint', () => {
         expect(formatAnchorPoint('A3')).toBe('A3')
     })
 })
-
-// ---------------------------------------------------------------------------
-// formatScore
-// ---------------------------------------------------------------------------
 
 describe('formatScore', () => {
     it('formats a finite number to two decimal places', () => {
@@ -117,13 +113,13 @@ describe('formatScore', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// normalizeCreators
-// ---------------------------------------------------------------------------
-
 describe('normalizeCreators', () => {
     it('splits a comma-separated string into trimmed parts', () => {
-        expect(normalizeCreators('Alice, Bob, Charlie')).toEqual(['Alice', 'Bob', 'Charlie'])
+        expect(normalizeCreators('Alice, Bob, Charlie')).toEqual([
+            'Alice',
+            'Bob',
+            'Charlie',
+        ])
     })
 
     it('filters out empty segments from a string', () => {
@@ -131,11 +127,16 @@ describe('normalizeCreators', () => {
     })
 
     it('returns an array of trimmed strings when input is an array', () => {
-        expect(normalizeCreators(['  Alice  ', 'Bob'])).toEqual(['Alice', 'Bob'])
+        expect(normalizeCreators(['  Alice  ', 'Bob'])).toEqual([
+            'Alice',
+            'Bob',
+        ])
     })
 
     it('filters out non-string values from an array', () => {
-        expect(normalizeCreators(['Alice', 42, null, 'Bob'] as unknown[])).toEqual(['Alice', 'Bob'])
+        expect(
+            normalizeCreators(['Alice', 42, null, 'Bob'] as unknown[]),
+        ).toEqual(['Alice', 'Bob'])
     })
 
     it('returns [] for an empty string', () => {
@@ -158,10 +159,6 @@ describe('normalizeCreators', () => {
         expect(normalizeCreators(42)).toEqual([])
     })
 })
-
-// ---------------------------------------------------------------------------
-// formatDateToYYYYMMDD
-// ---------------------------------------------------------------------------
 
 describe('formatDateToYYYYMMDD', () => {
     it('returns "" for null', () => {

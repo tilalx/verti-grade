@@ -11,10 +11,6 @@ import {
     pbDateString,
 } from '~/utils/audit'
 
-// ---------------------------------------------------------------------------
-// buildAuditFilter — hand-built PocketBase filter strings
-// ---------------------------------------------------------------------------
-
 describe('buildAuditFilter', () => {
     afterEach(() => {
         vi.useRealTimers()
@@ -33,8 +29,6 @@ describe('buildAuditFilter', () => {
         expect(buildAuditFilter({ actorId: 'usr123' })).toBe('actor = "usr123"')
     })
 
-    // A search term reaches the filter string unquoted, so a stray double
-    // quote would end the literal and the rest would parse as filter syntax.
     it('escapes backslashes and double quotes in the search term', () => {
         const filter = buildAuditFilter({ search: 'a"b\\c' })
         expect(filter).toContain('actor_label ~ "a\\"b\\\\c"')
@@ -71,10 +65,6 @@ describe('buildAuditFilter', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// pbDateString — must match how PocketBase stores dates, or comparisons lie
-// ---------------------------------------------------------------------------
-
 describe('pbDateString', () => {
     it('formats as PocketBase stores dates', () => {
         expect(pbDateString(new Date('2026-06-23T06:28:16.309Z'))).toBe(
@@ -82,10 +72,6 @@ describe('pbDateString', () => {
         )
     })
 })
-
-// ---------------------------------------------------------------------------
-// actionColor
-// ---------------------------------------------------------------------------
 
 describe('actionColor', () => {
     it('gives the destructive and failed actions their own colours', () => {
@@ -98,7 +84,6 @@ describe('actionColor', () => {
         expect(actionColor('something-else')).toBe('medium-emphasis')
     })
 
-    // Catches an action added to the select without a colour to render it.
     it('returns a colour for every action in the list', () => {
         for (const action of AUDIT_ACTIONS) {
             expect(actionColor(action)).toBeTruthy()
@@ -131,7 +116,6 @@ describe('compressIp', () => {
         expect(compressIp(null)).toBe('')
     })
 
-    // A single zero group is not worth a `::`, which may appear only once.
     it('does not collapse a lone zero group', () => {
         expect(compressIp('2001:0db8:0001:0000:0002:0003:0004:0005')).toBe(
             '2001:db8:1:0:2:3:4:5',
@@ -147,10 +131,6 @@ describe('isRecordAction', () => {
         expect(isRecordAction('password_reset')).toBe(false)
     })
 })
-
-// ---------------------------------------------------------------------------
-// AUDIT_ACTIONS — must mirror the PocketBase select field
-// ---------------------------------------------------------------------------
 
 describe('AUDIT_ACTIONS', () => {
     it('has no duplicates', () => {
@@ -173,10 +153,6 @@ describe('AUDIT_ACTIONS', () => {
         )
     })
 })
-
-// ---------------------------------------------------------------------------
-// auditTargetUrl — entries outlive their records, so this is best-effort
-// ---------------------------------------------------------------------------
 
 describe('auditTargetUrl', () => {
     it('links a route entry to its page', () => {

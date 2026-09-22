@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # --------------> Build pocketbase (Go)
-FROM golang:1.27.1-trixie AS pb-build
+FROM golang:1.27.1-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183 AS pb-build
 ARG TARGETOS
 ARG TARGETARCH
 ENV CGO_ENABLED=0 \
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go build -trimpath -ldflags="-s -w" -o /out/pocketbase
 
 # --------------> Build nuxt app (Node)
-FROM node:26.8.2-trixie AS ui-deps
+FROM node:26.8.2-trixie@sha256:fb192b8ad31841aadc4bb79c44ae0f59d193a798ffbc9fdce37ba6ecb20c2236 AS ui-deps
 WORKDIR /app
 
 # Toolchain for native deps (sharp, parcel/watcher, esbuild)
@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
     yarn install --immutable --inline-builds \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
-FROM node:26.8.2-trixie AS ui-build
+FROM node:26.8.2-trixie@sha256:fb192b8ad31841aadc4bb79c44ae0f59d193a798ffbc9fdce37ba6ecb20c2236 AS ui-build
 WORKDIR /app
 ENV NODE_ENV=production NITRO_PRESET=node-server
 ARG APP_VERSION
@@ -69,7 +69,7 @@ RUN --mount=type=cache,target=/root/.cache yarn build \
     || (cat /tmp/xfs-*/build.log || true; exit 1)
 
 # --------------> Runtime (final stage)
-FROM node:26.8.2-trixie-slim
+FROM node:26.8.2-trixie-slim@sha256:f7bb8247fdb16250dbec7fd0e24f091c6f5f0a29d256f3aef5816a7a369166b2
 # Install nginx (cacheable layer)
 RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl openssl \
  && rm -rf /var/lib/apt/lists/*

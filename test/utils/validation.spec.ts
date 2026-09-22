@@ -11,10 +11,6 @@ import {
 // Simple translation stub: just return the key so assertions are readable.
 const t = (key: string) => key
 
-// ---------------------------------------------------------------------------
-// required
-// ---------------------------------------------------------------------------
-
 describe('required', () => {
     const rule = required(t)
 
@@ -47,10 +43,6 @@ describe('required', () => {
         expect(required(customT)('')).toBe('TRANSLATED:validation.required')
     })
 })
-
-// ---------------------------------------------------------------------------
-// minLength
-// ---------------------------------------------------------------------------
 
 describe('minLength', () => {
     const rule = minLength(t, 6)
@@ -86,10 +78,6 @@ describe('minLength', () => {
     })
 })
 
-// ---------------------------------------------------------------------------
-// maxLength
-// ---------------------------------------------------------------------------
-
 describe('maxLength', () => {
     const rule = maxLength(t, 10)
 
@@ -123,10 +111,6 @@ describe('maxLength', () => {
         expect(calls[0]).toEqual(['validation.maxLength', { n: 30 }])
     })
 })
-
-// ---------------------------------------------------------------------------
-// validEmail
-// ---------------------------------------------------------------------------
 
 describe('validEmail', () => {
     const rule = validEmail(t)
@@ -163,10 +147,6 @@ describe('validEmail', () => {
         expect(rule(undefined)).toBe('validation.email')
     })
 })
-
-// ---------------------------------------------------------------------------
-// passwordsMatch
-// ---------------------------------------------------------------------------
 
 describe('passwordsMatch', () => {
     it('passes when values are identical', () => {
