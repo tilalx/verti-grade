@@ -1,6 +1,7 @@
 services:
   app:
     image: ${E2E_IMAGE:?E2E_IMAGE must be set}
+    stop_grace_period: 1s
     networks:
       default:
         aliases:
