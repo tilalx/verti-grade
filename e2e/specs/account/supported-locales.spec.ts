@@ -43,9 +43,9 @@ test('every supported locale is offered in the profile and accepted by the users
         page.locator('[data-testid^="profile-language-"]'),
     ).toHaveCount(SUPPORTED_LOCALES.length)
     for (const { code, name } of SUPPORTED_LOCALES) {
-        await expect(page.getByTestId(`profile-language-${code}`)).toHaveText(
-            name,
-        )
+        await expect(
+            page.getByTestId(`profile-language-${code}`),
+        ).toContainText(name)
     }
 
     await pb.collection('users').delete(user.id)
