@@ -11,5 +11,7 @@ if [[ "$(docker images -q "$E2E_IMAGE" 2>/dev/null)" == "" ]]; then
     docker buildx build --platform linux/amd64 --load -t "$E2E_IMAGE" .
 fi
 
+docker volume inspect vg-e2e-yarn-cache >/dev/null 2>&1 || docker volume create vg-e2e-yarn-cache >/dev/null
+
 docker compose -p "$COMPOSE_PROJECT_NAME" -f e2e/docker-compose.e2e.yml up \
     --abort-on-container-exit --exit-code-from e2e

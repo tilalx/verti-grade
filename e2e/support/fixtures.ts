@@ -1,46 +1,67 @@
-import { test as base, type Page } from '@playwright/test'
+import {
+    test as base,
+    type Browser,
+    type BrowserContextOptions,
+    type Page,
+} from '@playwright/test'
 import path from 'node:path'
 
 const AUTH_DIR = path.join(__dirname, '..', '.auth')
+
+type Role = 'admin' | 'routesetter' | 'user'
 
 interface Fixtures {
     adminPage: Page
     setterPage: Page
     userPage: Page
     testPrefix: string
+    deviceOptions: BrowserContextOptions
+}
+
+async function useRolePage(
+    browser: Browser,
+    deviceOptions: BrowserContextOptions,
+    role: Role,
+    use: (page: Page) => Promise<void>,
+) {
+    const context = await browser.newContext({
+        ...deviceOptions,
+        storageState: path.join(AUTH_DIR, `${role}.json`),
+    })
+    await use(await context.newPage())
+    await context.close()
 }
 
 export const test = base.extend<Fixtures>({
-    adminPage: async ({ browser, baseURL }, use) => {
-        const context = await browser.newContext({
-            storageState: path.join(AUTH_DIR, 'admin.json'),
+    deviceOptions: async (
+        {
+            baseURL,
+            viewport,
+            userAgent,
+            deviceScaleFactor,
+            isMobile,
+            hasTouch,
+            locale,
+        },
+        use,
+    ) => {
+        await use({
             baseURL,
             ignoreHTTPSErrors: true,
+            viewport,
+            userAgent,
+            deviceScaleFactor,
+            isMobile,
+            hasTouch,
+            locale,
         })
-        const page = await context.newPage()
-        await use(page)
-        await context.close()
     },
-    setterPage: async ({ browser, baseURL }, use) => {
-        const context = await browser.newContext({
-            storageState: path.join(AUTH_DIR, 'routesetter.json'),
-            baseURL,
-            ignoreHTTPSErrors: true,
-        })
-        const page = await context.newPage()
-        await use(page)
-        await context.close()
-    },
-    userPage: async ({ browser, baseURL }, use) => {
-        const context = await browser.newContext({
-            storageState: path.join(AUTH_DIR, 'user.json'),
-            baseURL,
-            ignoreHTTPSErrors: true,
-        })
-        const page = await context.newPage()
-        await use(page)
-        await context.close()
-    },
+    adminPage: async ({ browser, deviceOptions }, use) =>
+        useRolePage(browser, deviceOptions, 'admin', use),
+    setterPage: async ({ browser, deviceOptions }, use) =>
+        useRolePage(browser, deviceOptions, 'routesetter', use),
+    userPage: async ({ browser, deviceOptions }, use) =>
+        useRolePage(browser, deviceOptions, 'user', use),
     testPrefix: async ({}, use, testInfo) => {
         await use(`e2e-w${testInfo.workerIndex}-${Date.now()}`)
     },

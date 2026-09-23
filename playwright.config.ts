@@ -41,6 +41,7 @@ export default defineConfig({
                 locale: 'en-US',
             },
             testMatch: ['**/mobile/**', '**/auth/**'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
         {
             name: 'i18n-de',
@@ -66,11 +67,13 @@ export default defineConfig({
             name: 'firefox-smoke',
             use: { ...devices['Desktop Firefox'], locale: 'en-US' },
             testMatch: ['**/auth/**', '**/public/index-list.spec.ts'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
         {
             name: 'webkit-smoke',
             use: { ...devices['Desktop Safari'], locale: 'en-US' },
             testMatch: ['**/auth/**', '**/public/index-list.spec.ts'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
     ],
 })

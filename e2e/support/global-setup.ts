@@ -1,4 +1,4 @@
-import { chromium, type FullConfig } from '@playwright/test'
+import { chromium, type Browser, type FullConfig } from '@playwright/test'
 import PocketBase from 'pocketbase'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -15,25 +15,27 @@ const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 const PREFIX = 'e2e'
 
 async function saveStorageState(
+    browser: Browser,
     baseURL: string,
     email: string,
     password: string,
     file: string,
 ) {
-    const browser = await chromium.launch()
     const context = await browser.newContext({
         baseURL,
         ignoreHTTPSErrors: true,
     })
     const page = await context.newPage()
     await page.goto('/auth/login')
-    await page.waitForLoadState('networkidle')
+    await page
+        .locator('[data-testid="page-hydrated"]')
+        .waitFor({ state: 'attached' })
     await page.getByTestId('login-identity').locator('input').fill(email)
     await page.getByTestId('login-password').locator('input').fill(password)
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
     await context.storageState({ path: file })
-    await browser.close()
+    await context.close()
 }
 
 async function relaxRateLimits(pb: PocketBase) {
@@ -65,16 +67,23 @@ export default async function globalSetup(config: FullConfig) {
         process.env.E2E_BASE_URL ||
         'https://localhost'
 
-    for (const [role, u] of [
-        ['admin', admin],
-        ['routesetter', setter],
-        ['user', user],
-    ] as const) {
-        await saveStorageState(
-            baseURL,
-            u.email,
-            u.password,
-            path.join(AUTH_DIR, `${role}.json`),
-        )
-    }
+    const browser = await chromium.launch()
+    await Promise.all(
+        (
+            [
+                ['admin', admin],
+                ['routesetter', setter],
+                ['user', user],
+            ] as const
+        ).map(([role, u]) =>
+            saveStorageState(
+                browser,
+                baseURL,
+                u.email,
+                u.password,
+                path.join(AUTH_DIR, `${role}.json`),
+            ),
+        ),
+    )
+    await browser.close()
 }
