@@ -549,7 +549,7 @@ const SCAN_COOLDOWN_MS = 2000
 const { t, locale } = useI18n()
 const pb = usePocketbase()
 const { lgAndUp } = useDisplay()
-const { locations } = useRouteFilters()
+const { data: locationRecords } = useLocations()
 const {
     success: notifySuccess,
     error: notifyError,
@@ -564,11 +564,22 @@ const scannedRouteIds = ref<string[]>([])
 const sessionLocation = ref<string | null>(null)
 const restoredUnscoped = ref(false)
 
-const scanning = ref(false)
-const cameraActive = ref(false)
-const torchOn = ref(false)
-const torchSupported = ref(false)
-const scannerError = ref('')
+const viewportRef = useTemplateRef<HTMLElement>('viewportRef')
+const {
+    scanning,
+    cameraActive,
+    torchOn,
+    torchSupported,
+    scannerError,
+    start: startCamera,
+    stop: stopScanner,
+    toggleTorch,
+    onCameraOn,
+    onCameraError,
+    signalAccepted,
+    signalDuplicate,
+    signalRejected,
+} = useQrScanner(viewportRef, () => t('inventory.cameraError'))
 
 const instructionsDialog = ref(false)
 const manualDialog = ref(false)
@@ -586,9 +597,10 @@ const cameraConstraints = {
 }
 
 const locationItems = computed(() =>
-    locations.value
-        .filter((entry) => entry.value)
-        .map((entry) => ({ title: entry.text, value: entry.value })),
+    (locationRecords.value ?? []).map((location) => ({
+        title: location.name,
+        value: location.id,
+    })),
 )
 
 const sessionLocationName = computed(
@@ -720,61 +732,6 @@ const reconcileScannedIds = () => {
 
 watch(sessionLocation, () => reconcileScannedIds())
 
-let audioContext: AudioContext | null = null
-
-const ensureAudio = () => {
-    if (!import.meta.client) return
-    try {
-        audioContext ||= new (
-            window.AudioContext ||
-            (window as unknown as { webkitAudioContext: typeof AudioContext })
-                .webkitAudioContext
-        )()
-        if (audioContext.state === 'suspended') void audioContext.resume()
-    } catch {
-        audioContext = null
-    }
-}
-
-const beep = (frequency: number, duration = 0.12) => {
-    if (!audioContext) return
-    try {
-        const now = audioContext.currentTime
-        const oscillator = audioContext.createOscillator()
-        const gain = audioContext.createGain()
-        oscillator.type = 'sine'
-        oscillator.frequency.value = frequency
-        gain.gain.setValueAtTime(0.0001, now)
-        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01)
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
-        oscillator.connect(gain)
-        gain.connect(audioContext.destination)
-        oscillator.start(now)
-        oscillator.stop(now + duration)
-    } catch {}
-}
-
-const vibrate = (pattern: number | number[]) => {
-    try {
-        navigator.vibrate?.(pattern)
-    } catch {}
-}
-
-const signalAccepted = () => {
-    vibrate(60)
-    beep(880)
-}
-
-const signalDuplicate = () => {
-    vibrate(30)
-    beep(520)
-}
-
-const signalRejected = () => {
-    vibrate([40, 60, 40])
-    beep(220, 0.2)
-}
-
 const acceptingScans = computed(
     () => !finishDialog.value && !manualDialog.value,
 )
@@ -902,59 +859,8 @@ const onDetect = (detectedCodes: { rawValue: string }[]) => {
     }
 }
 
-const viewportRef = useTemplateRef<HTMLElement>('viewportRef')
-
-const videoTrack = (): MediaStreamTrack | null => {
-    const stream = viewportRef.value?.querySelector('video')
-        ?.srcObject as MediaStream | null
-    return stream?.getVideoTracks()[0] ?? null
-}
-
-const toggleTorch = async () => {
-    const track = videoTrack()
-    if (!track) return
-    const next = !torchOn.value
-    try {
-        await track.applyConstraints({
-            advanced: [{ torch: next } as unknown as MediaTrackConstraintSet],
-        })
-        torchOn.value = next
-    } catch (error) {
-        console.error('Failed to toggle the torch:', error)
-        torchSupported.value = false
-    }
-}
-
-const onCameraOn = (capabilities: Partial<MediaTrackCapabilities>) => {
-    scanning.value = true
-    scannerError.value = ''
-    torchSupported.value = !!capabilities && 'torch' in capabilities
-}
-
-const onCameraError = (error: { name?: string; message?: string }) => {
-    console.error('Camera error:', error)
-    scanning.value = false
-    cameraActive.value = false
-    torchSupported.value = false
-    torchOn.value = false
-    scannerError.value =
-        error?.name === 'NotAllowedError' || error?.name === 'NotFoundError'
-            ? t('inventory.cameraError')
-            : error?.message || t('inventory.cameraError')
-}
-
 const startScanner = () => {
-    if (!import.meta.client || !sessionLocation.value) return
-    ensureAudio()
-    scannerError.value = ''
-    cameraActive.value = true
-}
-
-const stopScanner = () => {
-    cameraActive.value = false
-    scanning.value = false
-    torchOn.value = false
-    torchSupported.value = false
+    if (sessionLocation.value) startCamera()
 }
 
 const recentScans = new Map<string, number>()
@@ -1120,11 +1026,6 @@ const confirmFinish = async () => {
     }
 }
 
-const onVisibilityChange = () => {
-    if (document.visibilityState === 'hidden' && cameraActive.value)
-        stopScanner()
-}
-
 const { data: initial } = await useAsyncData('inventory-routes', async () => {
     await loadRoutes()
     return allRoutes.value
@@ -1135,7 +1036,6 @@ if (initial.value) {
 }
 
 onMounted(() => {
-    document.addEventListener('visibilitychange', onVisibilityChange)
     restoreSession()
     reconcileScannedIds()
     if (!hasSeenInstructions()) instructionsDialog.value = true
@@ -1143,13 +1043,6 @@ onMounted(() => {
 
 watch(instructionsDialog, (open) => {
     if (!open) markInstructionsSeen()
-})
-
-onBeforeUnmount(() => {
-    document.removeEventListener('visibilitychange', onVisibilityChange)
-    stopScanner()
-    void audioContext?.close()
-    audioContext = null
 })
 </script>
 

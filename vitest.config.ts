@@ -5,6 +5,7 @@ import path from 'node:path'
 const importMetaFlags: Record<string, string> = {
     'import.meta.dev': '(process.env.NODE_ENV !== "production")',
     'import.meta.server': '(process.server === true)',
+    'import.meta.client': '(process.server !== true)',
 }
 
 const importMetaPolyfill = (): PluginOption => ({
