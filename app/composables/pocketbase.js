@@ -1,6 +1,5 @@
 import PocketBase, { BaseAuthStore } from 'pocketbase'
-
-const AUTH_COOKIE = 'pb_auth'
+import { AUTH_COOKIE } from '~/utils/clientStorage'
 
 class CookieAuthStore extends BaseAuthStore {
     constructor() {

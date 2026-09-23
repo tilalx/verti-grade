@@ -1,3 +1,5 @@
+import { COLOR_SCHEME_COOKIE } from '~/utils/clientStorage'
+
 export default defineNuxtPlugin((nuxtApp) => {
     const browserTheme = window.matchMedia('(prefers-color-scheme: dark)')
         .matches
@@ -10,7 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         vuetifyOptions.theme.defaultTheme = browserTheme
     })
 
-    document.cookie = `color-scheme=${browserTheme}; Path=/; Max-Age=31536000; SameSite=Lax`
+    document.cookie = `${COLOR_SCHEME_COOKIE}=${browserTheme}; Path=/; Max-Age=31536000; SameSite=Lax`
 
     const ssrTheme = browserTheme === 'dark' ? 'light' : 'dark'
     document

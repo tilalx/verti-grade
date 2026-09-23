@@ -349,7 +349,95 @@
     },
     "legal": {
         "privacy": "Datenschutz",
-        "imprint": "Impressum"
+        "imprint": "Impressum",
+        "imprintPage": {
+            "incomplete": "Der Betreiber hat das Impressum noch nicht vollständig ausgefüllt. Bitte wenden Sie sich an die Administration.",
+            "provider": "Anbieter",
+            "representative": "Vertreten durch",
+            "contact": "Kontakt",
+            "phone": "Telefon",
+            "email": "E-Mail",
+            "register": "Register- und Steuerangaben",
+            "disputeTitle": "Verbraucherstreitbeilegung",
+            "dispute": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+            "editorial": "Redaktionell verantwortlich",
+            "registerEntry": "Registereintrag",
+            "vatId": "USt-IdNr.",
+            "subtitle": "Angaben gemäß § 5 DDG"
+        },
+        "privacyPage": {
+            "controllerTitle": "Verantwortlicher",
+            "serverLogs": {
+                "title": "Server-Logfiles",
+                "body": "Beim Aufruf dieser Anwendung verarbeitet der Server technische Daten wie IP-Adresse, Datum und Uhrzeit, aufgerufene URL und Browserkennung, um die Seite auszuliefern und Missbrauch abzuwehren (Art. 6 Abs. 1 lit. f DSGVO). Request-Logs werden nach kurzer Zeit automatisch gelöscht (standardmäßig nach 5 Tagen)."
+            },
+            "accounts": {
+                "title": "Benutzerkonten",
+                "body": "Konten werden von der Administration für Mitarbeitende angelegt. Gespeichert werden E-Mail-Adresse, Benutzername, Vor- und Nachname, ein optionales Profilbild und die zugewiesene Rolle, um den Dienst bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben gespeichert, solange das Konto besteht; Sie können Ihr Konto jederzeit selbst löschen."
+            },
+            "ratings": {
+                "title": "Bewertungen und Kommentare",
+                "body": "Bewertungen, Schwierigkeitseinschätzungen und Kommentare zu Routen können ohne Konto abgegeben werden und werden ohne Namen oder IP-Adresse gespeichert. Kommentare sind öffentlich sichtbar und können moderiert werden."
+            },
+            "reports": {
+                "title": "Meldungen von Inhalten",
+                "body": "Wenn Sie Inhalte melden, verarbeiten wir Name, E-Mail-Adresse, Meldegrund und Ihre Begründung, um die Meldung zu bearbeiten und Sie über die Entscheidung zu informieren (Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 16 DSA). Meldungen werden so lange aufbewahrt, wie es zur Dokumentation erforderlich ist."
+            },
+            "auditLog": {
+                "title": "Audit-Log",
+                "body": "Änderungen, Anmeldungen und fehlgeschlagene Anmeldeversuche von Mitarbeitenden werden mit Benutzer, Aktion und IP-Adresse protokolliert, um Sicherheit und Nachvollziehbarkeit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO). Einträge werden nach {auditDays} Tagen automatisch gelöscht."
+            },
+            "captcha": {
+                "title": "Spamschutz",
+                "body": "Einige Formulare nutzen eine selbst gehostete Proof-of-Work-Prüfung, die in Ihrem Browser läuft. Es werden keine Daten an Dritte übermittelt und keine Tracking-Cookies gesetzt."
+            },
+            "thirdParties": {
+                "title": "Kein Tracking, keine Drittanbieter",
+                "body": "Diese Anwendung verwendet keine Analyse-, Werbe- oder Social-Media-Dienste und lädt keine Ressourcen von Servern Dritter. Alle Daten werden auf unserem eigenen Server verarbeitet. Eine Übermittlung in Drittländer findet nicht statt."
+            },
+            "storage": {
+                "title": "Cookies und lokaler Speicher",
+                "body": "Wir speichern nur Informationen auf Ihrem Endgerät, die für den von Ihnen gewünschten Dienst unbedingt erforderlich sind (§ 25 Abs. 2 TDDDG). Eine Einwilligung ist daher nicht erforderlich. Die vollständige Liste:"
+            },
+            "rights": {
+                "title": "Ihre Rechte",
+                "body": "Nach der DSGVO haben Sie folgende Rechte bezüglich Ihrer personenbezogenen Daten:",
+                "items": {
+                    "access": "Recht auf Auskunft (Art. 15 DSGVO)",
+                    "rectification": "Recht auf Berichtigung (Art. 16 DSGVO)",
+                    "erasure": "Recht auf Löschung (Art. 17 DSGVO)",
+                    "restriction": "Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)",
+                    "portability": "Recht auf Datenübertragbarkeit (Art. 20 DSGVO)",
+                    "objection": "Widerspruchsrecht (Art. 21 DSGVO)",
+                    "withdrawal": "Recht auf jederzeitigen Widerruf einer Einwilligung (Art. 7 Abs. 3 DSGVO)"
+                },
+                "complaint": "Außerdem haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO)."
+            },
+            "subtitle": "Wie wir personenbezogene Daten bei der Nutzung dieser Anwendung verarbeiten."
+        },
+        "storage": {
+            "name": "Name",
+            "type": "Art",
+            "purpose": "Zweck",
+            "duration": "Dauer",
+            "kinds": {
+                "cookie": "Cookie",
+                "localStorage": "Lokaler Speicher"
+            },
+            "purposes": {
+                "auth": "Hält Sie angemeldet",
+                "colorScheme": "Merkt sich hellen oder dunklen Modus",
+                "exportColumns": "Merkt sich die gewählten Export-Spalten",
+                "updateDismissed": "Merkt sich einen ausgeblendeten Update-Hinweis",
+                "inventorySession": "Speichert den Fortschritt einer Inventur",
+                "inventoryInstructions": "Merkt sich, dass die Inventur-Anleitung angezeigt wurde"
+            },
+            "durations": {
+                "session": "Bis zur Abmeldung",
+                "oneYear": "1 Jahr",
+                "persistent": "Bis zur Löschung im Browser"
+            }
+        }
     },
     "page": {
         "title": {
@@ -515,7 +603,24 @@
         "auditRetention": "Aufbewahrung des Audit-Protokolls (Tage)",
         "auditRetentionHint": "Ältere Einträge werden automatisch gelöscht. Standard: 90 Tage.",
         "mailNotConfigured": "E-Mail ist nicht konfiguriert, daher können Passwort-Zurücksetzungen und Meldungsbenachrichtigungen nicht zugestellt werden. SMTP wird in PocketBase konfiguriert, nicht hier.",
-        "mailNotConfiguredAction": "PocketBase-E-Mail-Einstellungen öffnen"
+        "mailNotConfiguredAction": "PocketBase-E-Mail-Einstellungen öffnen",
+        "legalTitle": "Impressum",
+        "legalAddress": "Postanschrift",
+        "legalPhone": "Telefon",
+        "legalRegister": "Registereintrag",
+        "legalUrlHint": "Leer lassen, um die integrierte Seite zu nutzen",
+        "legalIntro": "Wird auf der integrierten Impressums- und Datenschutzseite angezeigt.",
+        "legalAddressPlaceholder": "Straße 1\n12345 Stadt",
+        "legalRegisterPlaceholder": "Amtsgericht Hanau, VR 485",
+        "legalVatId": "USt-IdNr.",
+        "legalEditorial": "Redaktionell verantwortlich",
+        "legalEditorialHint": "Name und Funktion, z. B. nach § 18 MStV",
+        "legalRepresentatives": "Vertreten durch",
+        "legalPersonName": "Name",
+        "legalPersonRole": "Funktion",
+        "legalPersonRolePlaceholder": "z. B. 1. Vorsitzende/r",
+        "legalAddPerson": "Person hinzufügen",
+        "legalRemovePerson": "Person entfernen"
     },
     "errors": {
         "notFound": {

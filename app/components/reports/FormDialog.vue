@@ -66,7 +66,6 @@
             <p class="text-body-small text-medium-emphasis mt-2 mb-1">
                 {{ $t('reports.contactNote') }}
                 <a
-                    v-if="privacyUrl"
                     :href="privacyUrl"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -160,7 +159,7 @@ const reasonItems = computed(() =>
 )
 
 const { data: settings } = useNuxtData<SettingsRecord>('settings')
-const privacyUrl = computed(() => settings.value?.privacy_url || '')
+const privacyUrl = computed(() => settings.value?.privacy_url || '/privacy')
 
 const rules = {
     required: required(t),

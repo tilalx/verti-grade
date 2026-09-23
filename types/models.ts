@@ -83,6 +83,17 @@ export interface SettingsRecord extends BaseRecord {
     organization_unit_name?: string | null
     contact_email?: string | null
     audit_retention_days?: number | null
+    legal_address?: string | null
+    legal_phone?: string | null
+    legal_register?: string | null
+    legal_vat_id?: string | null
+    legal_editorial?: string | null
+    legal_representatives?: LegalPerson[] | null
+}
+
+export interface LegalPerson {
+    name: string
+    role?: string
 }
 
 export type ReportContentType = 'rating' | 'route'

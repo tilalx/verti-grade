@@ -349,7 +349,95 @@
     },
     "legal": {
         "privacy": "Gizlilik",
-        "imprint": "Künye"
+        "imprint": "Künye",
+        "imprintPage": {
+            "incomplete": "İşletmeci künye bilgilerini henüz tamamlamadı. Lütfen yöneticiyle iletişime geçin.",
+            "provider": "Hizmet sağlayıcı",
+            "representative": "Temsilci",
+            "contact": "İletişim",
+            "phone": "Telefon",
+            "email": "E-posta",
+            "register": "Sicil ve vergi bilgileri",
+            "disputeTitle": "Tüketici uyuşmazlık çözümü",
+            "dispute": "Bir tüketici hakem kurulu önündeki uyuşmazlık çözüm süreçlerine katılmaya istekli veya yükümlü değiliz.",
+            "editorial": "İçerikten sorumlu",
+            "registerEntry": "Sicil kaydı",
+            "vatId": "KDV no.",
+            "subtitle": "§ 5 DDG uyarınca bilgiler"
+        },
+        "privacyPage": {
+            "controllerTitle": "Veri sorumlusu",
+            "serverLogs": {
+                "title": "Sunucu kayıtları",
+                "body": "Bu uygulamaya eriştiğinizde sunucu, sayfayı sunmak ve kötüye kullanıma karşı korunmak için IP adresi, tarih ve saat, istenen URL ve tarayıcı kimliği gibi teknik verileri işler (GDPR md. 6(1)(f)). İstek kayıtları kısa süre sonra otomatik olarak silinir (varsayılan olarak 5 gün)."
+            },
+            "accounts": {
+                "title": "Kullanıcı hesapları",
+                "body": "Hesaplar yöneticiler tarafından personel için oluşturulur. Hizmeti sunmak için e-posta adresi, kullanıcı adı, ad ve soyad, isteğe bağlı profil resmi ve atanan rol saklanır (GDPR md. 6(1)(b)). Veriler hesap var olduğu sürece saklanır; hesabınızı istediğiniz zaman kendiniz silebilirsiniz."
+            },
+            "ratings": {
+                "title": "Puanlar ve yorumlar",
+                "body": "Rotalara ilişkin puanlar, zorluk oyları ve yorumlar hesap olmadan gönderilebilir ve ad veya IP adresi olmadan saklanır. Yorumlar herkese açıktır ve denetlenebilir."
+            },
+            "reports": {
+                "title": "İçerik bildirimleri",
+                "body": "Bir içeriği bildirdiğinizde, bildirimi işlemek ve sizi karar hakkında bilgilendirmek için adınızı, e-posta adresinizi, bildirim nedenini ve açıklamanızı işleriz (GDPR md. 6(1)(c) ile DSA md. 16). Bildirimler belgeleme için gerekli olduğu sürece saklanır."
+            },
+            "auditLog": {
+                "title": "Denetim kaydı",
+                "body": "Personelin değişiklikleri, girişleri ve başarısız giriş denemeleri güvenlik ve izlenebilirlik için kullanıcı, işlem ve IP adresiyle kaydedilir (GDPR md. 6(1)(f)). Kayıtlar {auditDays} gün sonra otomatik olarak silinir."
+            },
+            "captcha": {
+                "title": "Spam koruması",
+                "body": "Bazı formlar tarayıcınızda çalışan, kendi sunucumuzda barındırılan bir proof-of-work doğrulaması kullanır. Üçüncü taraflara veri gönderilmez ve izleme çerezi ayarlanmaz."
+            },
+            "thirdParties": {
+                "title": "İzleme yok, üçüncü taraf yok",
+                "body": "Bu uygulama analiz, reklam veya sosyal medya eklentileri kullanmaz ve üçüncü taraf sunuculardan kaynak yüklemez. Tüm veriler kendi sunucumuzda işlenir. Üçüncü ülkelere veri aktarımı yapılmaz."
+            },
+            "storage": {
+                "title": "Çerezler ve yerel depolama",
+                "body": "Cihazınızda yalnızca talep ettiğiniz hizmet için kesinlikle gerekli olan bilgileri saklarız (TDDDG § 25(2)). Bu nedenle onay gerekmez. Tam liste:"
+            },
+            "rights": {
+                "title": "Haklarınız",
+                "body": "GDPR kapsamında kişisel verilerinizle ilgili şu haklara sahipsiniz:",
+                "items": {
+                    "access": "Erişim hakkı (GDPR md. 15)",
+                    "rectification": "Düzeltme hakkı (GDPR md. 16)",
+                    "erasure": "Silme hakkı (GDPR md. 17)",
+                    "restriction": "İşlemeyi kısıtlama hakkı (GDPR md. 18)",
+                    "portability": "Veri taşınabilirliği hakkı (GDPR md. 20)",
+                    "objection": "İtiraz hakkı (GDPR md. 21)",
+                    "withdrawal": "Onayı her zaman geri çekme hakkı (GDPR md. 7(3))"
+                },
+                "complaint": "Ayrıca bir veri koruma denetim makamına şikâyette bulunma hakkınız vardır (GDPR md. 77)."
+            },
+            "subtitle": "Bu uygulamayı kullandığınızda kişisel verileri nasıl işlediğimiz."
+        },
+        "storage": {
+            "name": "Ad",
+            "type": "Tür",
+            "purpose": "Amaç",
+            "duration": "Süre",
+            "kinds": {
+                "cookie": "Çerez",
+                "localStorage": "Yerel depolama"
+            },
+            "purposes": {
+                "auth": "Oturumunuzu açık tutar",
+                "colorScheme": "Açık veya koyu modu hatırlar",
+                "exportColumns": "Seçilen dışa aktarma sütunlarını hatırlar",
+                "updateDismissed": "Kapatılan güncelleme bildirimini hatırlar",
+                "inventorySession": "Envanter taramasının ilerlemesini saklar",
+                "inventoryInstructions": "Envanter talimatlarının gösterildiğini hatırlar"
+            },
+            "durations": {
+                "session": "Çıkış yapılana kadar",
+                "oneYear": "1 yıl",
+                "persistent": "Tarayıcıda silinene kadar"
+            }
+        }
     },
     "page": {
         "title": {
@@ -515,7 +603,24 @@
         "auditRetention": "Denetim günlüğü saklama süresi (gün)",
         "auditRetentionHint": "Daha eski kayıtlar otomatik olarak silinir. Varsayılan 90 gün.",
         "mailNotConfigured": "E-posta yapılandırılmadı, bu nedenle parola sıfırlama ve içerik bildirimi bildirimleri iletilemiyor. SMTP burada değil, PocketBase üzerinde yapılandırılır.",
-        "mailNotConfiguredAction": "PocketBase e-posta ayarlarını aç"
+        "mailNotConfiguredAction": "PocketBase e-posta ayarlarını aç",
+        "legalTitle": "Künye",
+        "legalAddress": "Posta adresi",
+        "legalPhone": "Telefon",
+        "legalRegister": "Sicil kaydı",
+        "legalUrlHint": "Yerleşik sayfayı kullanmak için boş bırakın",
+        "legalIntro": "Yerleşik künye ve gizlilik sayfalarında gösterilir.",
+        "legalAddressPlaceholder": "Sokak 1\n12345 Şehir",
+        "legalRegisterPlaceholder": "Sicil mahkemesi Hanau, VR 485",
+        "legalVatId": "KDV no.",
+        "legalEditorial": "İçerikten sorumlu",
+        "legalEditorialHint": "Ad ve görev, ör. § 18 MStV uyarınca",
+        "legalRepresentatives": "Temsilciler",
+        "legalPersonName": "Ad",
+        "legalPersonRole": "Görev",
+        "legalPersonRolePlaceholder": "ör. Başkan",
+        "legalAddPerson": "Kişi ekle",
+        "legalRemovePerson": "Kişiyi kaldır"
     },
     "errors": {
         "notFound": {
