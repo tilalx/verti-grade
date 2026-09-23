@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { timeAgo } from '~/utils/formatting'
+import { timeAgo } from '#shared/utils/formatting'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()

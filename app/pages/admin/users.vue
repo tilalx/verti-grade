@@ -128,7 +128,7 @@
                         </div>
                         <div class="text-body-small text-disabled mt-1">
                             {{ t('table.created_at') }}:
-                            {{ formatDate(user.created) }}
+                            {{ formatCreatedDate(user.created) }}
                         </div>
                     </v-card-text>
 
@@ -209,8 +209,9 @@
 
 <script setup>
 import { readableTextOn } from '~/utils/roles'
+import { formatDate } from '#shared/utils/formatting'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const pb = usePocketbase()
 
 useHead({
@@ -399,9 +400,10 @@ function avatarColor(name) {
     return AVATAR_COLORS[code % AVATAR_COLORS.length]
 }
 
-function formatDate(date) {
-    if (!date) return '—'
-    return new Date(date).toLocaleDateString(undefined, {
+function formatCreatedDate(date) {
+    return formatDate(date, {
+        locale: locale.value,
+        fallback: '—',
         year: 'numeric',
         month: 'short',
         day: 'numeric',

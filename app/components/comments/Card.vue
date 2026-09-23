@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { timeAgo as sharedTimeAgo } from '~/utils/formatting'
+import { formatDate, timeAgo as sharedTimeAgo } from '#shared/utils/formatting'
 export interface CommentCardItem {
     id: string
     userName: string
@@ -228,7 +228,9 @@ const formattedDate = computed(() => {
     const d = props.comment.created
     if (!d) return '—'
     if (props.dateFormat === 'relative') return timeAgo(d)
-    return new Date(d).toLocaleDateString(undefined, {
+    return formatDate(d, {
+        locale: locale.value,
+        fallback: '—',
         year: 'numeric',
         month: 'short',
         day: 'numeric',

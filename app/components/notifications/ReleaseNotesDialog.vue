@@ -60,7 +60,7 @@
                     {{ $t('notifications.releaseNotes.installed') }}
                 </v-chip>
                 <span class="release-date">
-                    {{ formatDisplayDate(publishedAt, locale) }}
+                    {{ formatDate(publishedAt, { locale }) }}
                 </span>
             </div>
             <div class="release-body">{{ changelog }}</div>
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatDisplayDate } from '~/utils/formatting'
+import { formatDate } from '#shared/utils/formatting'
 
 const props = defineProps<{
     tag?: string | null

@@ -319,7 +319,7 @@
 </template>
 
 <script setup>
-import { formatDifficulty } from '~/utils/formatting'
+import { formatDifficulty } from '#shared/utils/formatting'
 import { DIFFICULTY_LEVELS } from '~/utils/routes'
 
 const { t } = useI18n()

@@ -31,6 +31,7 @@ export default defineConfig({
         alias: {
             '~': path.resolve(__dirname, 'app'),
             '@': path.resolve(__dirname, 'app'),
+            '#shared': path.resolve(__dirname, 'shared'),
             '#imports': path.resolve(__dirname, 'test/__stubs__/imports.ts'),
         },
     },

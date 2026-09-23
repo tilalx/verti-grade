@@ -64,6 +64,7 @@ RUN corepack enable && corepack prepare yarn --activate
 COPY --from=ui-deps /app/ ./
 COPY app ./app
 COPY server ./server
+COPY shared ./shared
 COPY public ./public
 COPY i18n ./i18n
 RUN --mount=type=cache,target=/root/.cache yarn build \

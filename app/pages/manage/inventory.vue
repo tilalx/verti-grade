@@ -520,7 +520,7 @@
 import { QrcodeStream, setZXingModuleOverrides } from 'vue-qrcode-reader'
 import zxingReaderWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
 
-import { formatAnchorPoint, formatDifficulty } from '~/utils/formatting'
+import { formatAnchorPoint, formatDifficulty } from '#shared/utils/formatting'
 import {
     clearSession,
     countUnlocated,

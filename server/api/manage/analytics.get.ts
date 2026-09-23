@@ -1,6 +1,11 @@
 import { createError, eventHandler } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server'
-import { routeLocationName } from '../../utils/export'
+import {
+    formatDifficulty,
+    locationName,
+    normalizeCreators,
+    parseDate,
+} from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -22,17 +27,6 @@ export default eventHandler(async (event) => {
         const routes = routeRecords ?? []
         const ratings = ratingRecords ?? []
 
-        const ratingBuckets = new Map<string, RatingRecord[]>()
-        for (const rating of ratings) {
-            if (!rating.route_id) {
-                continue
-            }
-            if (!ratingBuckets.has(rating.route_id)) {
-                ratingBuckets.set(rating.route_id, [])
-            }
-            ratingBuckets.get(rating.route_id)!.push(rating)
-        }
-
         const difficultyMap = new Map<string, number>()
         const setterMap = new Map<string, number>()
         const routeTimelineMap = new Map<string, number>()
@@ -44,7 +38,6 @@ export default eventHandler(async (event) => {
         for (const route of routes) {
             routeById.set(route.id, route)
             const gradeLabel = buildGradeLabel(route)
-            const ratingList = ratingBuckets.get(route.id) ?? []
 
             increaseCount(difficultyMap, gradeLabel)
             addCreatorsToMap(setterMap, route.creator)
@@ -147,18 +140,9 @@ export default eventHandler(async (event) => {
 })
 
 function buildGradeLabel(route: RouteRecord): string {
-    const base = `${route.difficulty ?? ''}`.trim()
-    if (!base) {
-        return 'Unknown'
-    }
-    const sign = route.difficulty_sign
-    if (typeof sign === 'string' && sign.trim().length > 0) {
-        return `${base}${sign.trim()}`
-    }
-    if (typeof sign === 'boolean') {
-        return `${base}${sign ? '+' : '-'}`
-    }
-    return base
+    return `${route.difficulty ?? ''}`.trim()
+        ? formatDifficulty(route)
+        : 'Unknown'
 }
 
 function computeLatestRoutes(routes: RouteRecord[]) {
@@ -170,9 +154,9 @@ function computeLatestRoutes(routes: RouteRecord[]) {
         id: route.id ?? `route-${index}`,
         name: String(route.name ?? ''),
         difficulty: buildGradeLabel(route),
-        location: routeLocationName(route) || null,
+        location: locationName(route) || null,
         screwDate: route.screw_date ?? route.created ?? null,
-        creators: extractCreators(route.creator),
+        creators: normalizeCreators(route.creator),
         type: route.type ?? null,
     }))
 }
@@ -186,21 +170,6 @@ function routeDateValue(route: RouteRecord): number {
     return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp
 }
 
-function extractCreators(creators: RouteRecord['creator']): string[] {
-    if (!creators) {
-        return []
-    }
-    if (Array.isArray(creators)) {
-        return creators
-            .map((value) => (typeof value === 'string' ? value.trim() : ''))
-            .filter(Boolean)
-    }
-    return String(creators)
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean)
-}
-
 function increaseCount(map: Map<string, number>, key: string) {
     map.set(key, (map.get(key) ?? 0) + 1)
 }
@@ -209,30 +178,14 @@ function addCreatorsToMap(
     map: Map<string, number>,
     creators: RouteRecord['creator'],
 ) {
-    if (!creators) {
-        return
-    }
-
-    const list = Array.isArray(creators)
-        ? creators
-        : `${creators}`.split(',').map((value) => value.trim())
-
-    for (const raw of list) {
-        const label = raw.trim()
-        if (!label) {
-            continue
-        }
-        increaseCount(map, label)
+    for (const creator of normalizeCreators(creators)) {
+        increaseCount(map, creator)
     }
 }
 
 function addDateToTimeline(map: Map<string, number>, rawDate?: string | null) {
-    if (!rawDate) {
-        return
-    }
-
-    const date = new Date(rawDate)
-    if (Number.isNaN(date.getTime())) {
+    const date = parseDate(rawDate)
+    if (!date) {
         return
     }
 

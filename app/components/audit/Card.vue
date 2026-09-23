@@ -81,7 +81,7 @@ import {
     isRecordAction,
     isSuperuserEntry,
 } from '~/utils/audit'
-import { timeAgo } from '~/utils/formatting'
+import { formatDate, timeAgo } from '#shared/utils/formatting'
 import type { AuditLogRecord } from '~/types/models'
 
 const props = defineProps<{ entry: AuditLogRecord }>()
@@ -110,12 +110,9 @@ const relativeTime = computed(() =>
     timeAgo(props.entry.created, t, locale.value),
 )
 
-const absoluteTime = computed(() => {
-    if (!props.entry.created) return ''
-    return new Date(props.entry.created.replace(' ', 'T')).toLocaleString(
-        locale.value,
-    )
-})
+const absoluteTime = computed(() =>
+    formatDate(props.entry.created, { locale: locale.value, withTime: true }),
+)
 </script>
 
 <style scoped>

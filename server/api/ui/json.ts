@@ -1,11 +1,7 @@
 import { eventHandler, createError } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server'
-import {
-    resolveRouteIds,
-    fetchRecordsByIds,
-    normalizeCreators,
-    routeLocationName,
-} from '../../utils/export'
+import { resolveRouteIds, fetchRecordsByIds } from '../../utils/export'
+import { locationName, normalizeCreators } from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -83,7 +79,7 @@ function mapRoute(
         difficulty: normalizeNumber(route.difficulty),
         difficulty_sign: route.difficulty_sign ?? null,
         anchor_point: normalizeNumber(route.anchor_point),
-        location: routeLocationName(route) || null,
+        location: locationName(route) || null,
         type: route.type ?? null,
         comment: route.comment ?? '',
         creator: normalizeCreators(route.creator),

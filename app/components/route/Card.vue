@@ -125,7 +125,8 @@ import {
     formatDifficulty,
     formatAnchorPoint,
     formatScore,
-} from '~/utils/formatting'
+    formatDate,
+} from '#shared/utils/formatting'
 
 const props = withDefaults(
     defineProps<{
@@ -154,15 +155,9 @@ const difficultySplit = computed(() => {
 const anchorPoint = computed(() =>
     String(formatAnchorPoint(props.route.anchor_point)),
 )
-const screwDate = computed(() => {
-    const d = props.route.screw_date
-    if (!d) return ''
-    try {
-        return new Date(d).toLocaleDateString(locale.value ?? undefined)
-    } catch {
-        return ''
-    }
-})
+const screwDate = computed(() =>
+    formatDate(props.route.screw_date, { locale: locale.value }),
+)
 const hasScore = computed(
     () =>
         typeof props.route.score === 'number' &&

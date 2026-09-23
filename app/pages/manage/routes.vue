@@ -433,7 +433,7 @@ import {
     formatAnchorPoint,
     formatScore,
     normalizeCreators,
-} from '~/utils/formatting'
+} from '#shared/utils/formatting'
 import { toPbSort } from '~/utils/sorting'
 
 definePageMeta({
@@ -665,19 +665,6 @@ const loadAllRouteIds = async () => {
         console.error('Failed to load all route ids:', error)
         allRouteIdsCache.value = createAllRouteIdsCache()
         throw error
-    }
-}
-
-const formatDate = (value) => {
-    if (!value) {
-        return '—'
-    }
-
-    try {
-        return new Date(value).toLocaleDateString(locale.value ?? undefined)
-    } catch (error) {
-        console.error('Failed to format date:', error)
-        return '—'
     }
 }
 

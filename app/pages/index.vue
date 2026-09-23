@@ -118,7 +118,7 @@
                     {{ formatScore(item) }}
                 </template>
                 <template #item.screw_date="{ item }">
-                    {{ formatDate(item.screw_date) }}
+                    {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
                     <RouteDetails :route_id="item.id" />
@@ -173,10 +173,11 @@ import {
     formatAnchorPoint,
     formatScore,
     normalizeCreators,
-} from '~/utils/formatting'
+    formatDate,
+} from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { lgAndUp } = useDisplay()
 
@@ -381,11 +382,6 @@ onBeforeUnmount(() => {
     }
     scrollObserver?.disconnect()
 })
-
-function formatDate(date: string | null | undefined) {
-    if (!date) return ''
-    return new Date(date).toLocaleDateString()
-}
 </script>
 
 <style scoped>

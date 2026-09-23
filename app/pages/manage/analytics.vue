@@ -9,7 +9,7 @@
                 <div v-if="summary.generatedAt" class="generated-at">
                     {{
                         t('analytics.generatedAt', {
-                            value: formatDate(summary.generatedAt),
+                            value: formatAnalyticsDate(summary.generatedAt),
                         })
                     }}
                 </div>
@@ -128,7 +128,7 @@
                                             }}</span>
                                         </div>
                                         <span class="time-label">{{
-                                            formatDate(comment.created)
+                                            formatAnalyticsDate(comment.created)
                                         }}</span>
                                     </div>
                                 </template>
@@ -223,7 +223,7 @@
                                 </v-list-item-subtitle>
                                 <template #append>
                                     <span class="time-label">{{
-                                        formatDate(route.screwDate)
+                                        formatAnalyticsDate(route.screwDate)
                                     }}</span>
                                 </template>
                             </v-list-item>
@@ -530,6 +530,7 @@
 </template>
 
 <script setup>
+import { formatDate } from '#shared/utils/formatting'
 const { t, locale } = useI18n()
 
 useHead(() => ({
@@ -1096,19 +1097,15 @@ const routeSettersOption = computed(() => {
 
 // ── Formatters ────────────────────────────────────────────────────────────
 
-function formatDate(isoString) {
-    if (!isoString) return t('analytics.labels.unknown')
-    try {
-        const date = new Date(isoString)
-        const hasTime = typeof isoString === 'string' && isoString.includes('T')
-        return new Intl.DateTimeFormat(undefined, {
-            dateStyle: 'medium',
-            ...(hasTime ? { timeStyle: 'short' } : {}),
-        }).format(date)
-    } catch (e) {
-        console.error('Failed to format date', e)
-        return isoString
-    }
+function formatAnalyticsDate(isoString) {
+    const hasTime = typeof isoString === 'string' && isoString.includes('T')
+    return formatDate(isoString, {
+        locale: locale.value,
+        fallback: t('analytics.labels.unknown'),
+        withTime: hasTime,
+        dateStyle: 'medium',
+        ...(hasTime ? { timeStyle: 'short' } : {}),
+    })
 }
 
 function formatRating(value) {

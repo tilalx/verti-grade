@@ -7,14 +7,38 @@ export function formatDateToYYYYMMDD(date: string | null | undefined): string {
     return `${parsed.getFullYear()}-${month}-${day}`
 }
 
-export function formatDisplayDate(
-    date: string | null | undefined,
-    locale?: string,
+export interface FormatDateOptions extends Intl.DateTimeFormatOptions {
+    locale?: string | null
+    fallback?: string
+    withTime?: boolean
+}
+
+export function parseDate(
+    value: string | Date | null | undefined,
+): Date | null {
+    if (!value) return null
+    const parsed =
+        value instanceof Date
+            ? value
+            : new Date(String(value).replace(' ', 'T'))
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+export function formatDate(
+    value: string | Date | null | undefined,
+    {
+        locale,
+        fallback = '',
+        withTime = false,
+        ...intl
+    }: FormatDateOptions = {},
 ): string {
-    if (!date) return ''
-    const parsed = new Date(date)
-    if (Number.isNaN(parsed.getTime())) return ''
-    return parsed.toLocaleDateString(locale || undefined)
+    const parsed = parseDate(value)
+    if (!parsed) return fallback
+    const resolvedLocale = locale || undefined
+    return withTime
+        ? parsed.toLocaleString(resolvedLocale, intl)
+        : parsed.toLocaleDateString(resolvedLocale, intl)
 }
 
 export function timeAgo(
@@ -22,9 +46,8 @@ export function timeAgo(
     t: (key: string, named?: Record<string, unknown>) => string,
     locale: string,
 ): string {
-    if (!dateStr) return ''
-    const parsed = new Date(String(dateStr).replace(' ', 'T'))
-    if (Number.isNaN(parsed.getTime())) return ''
+    const parsed = parseDate(dateStr)
+    if (!parsed) return ''
     const diff = Date.now() - parsed.getTime()
     const mins = Math.floor(diff / 60_000)
     const hours = Math.floor(diff / 3_600_000)
@@ -45,19 +68,17 @@ export interface DifficultySource {
     difficulty_sign?: boolean | string | null
 }
 
+export function formatDifficultySign(value: unknown): string {
+    if (typeof value === 'string') return value.trim()
+    if (value === true) return '+'
+    if (value === false) return '-'
+    return ''
+}
+
 export function formatDifficulty(
     route: DifficultySource | null | undefined,
 ): string {
-    const base = route?.difficulty ?? ''
-    const sign =
-        route?.difficulty_sign === true
-            ? '+'
-            : route?.difficulty_sign === false
-              ? '-'
-              : typeof route?.difficulty_sign === 'string'
-                ? route.difficulty_sign
-                : ''
-    return `${base}${sign}`.trim()
+    return `${route?.difficulty ?? ''}${formatDifficultySign(route?.difficulty_sign)}`.trim()
 }
 
 export function locationName(

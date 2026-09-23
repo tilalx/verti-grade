@@ -314,7 +314,11 @@
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
-import { formatDifficulty, normalizeCreators } from '~/utils/formatting'
+import {
+    formatDate,
+    formatDifficulty,
+    normalizeCreators,
+} from '#shared/utils/formatting'
 import { reportContentUrl } from '~/utils/reports'
 
 const { t, locale } = useI18n()
@@ -384,21 +388,14 @@ const difficultyBadgeStyle = computed(() => {
     }
 })
 
-const formattedScrewDate = computed(() => {
-    if (!metadata.value?.screw_date) return ''
-    try {
-        return new Date(metadata.value.screw_date).toLocaleDateString(
-            locale.value,
-            {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            },
-        )
-    } catch {
-        return ''
-    }
-})
+const formattedScrewDate = computed(() =>
+    formatDate(metadata.value?.screw_date, {
+        locale: locale.value,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }),
+)
 
 const avgRating = computed(() => {
     const rated = reviews.value.filter((r) => r.rating !== null)
