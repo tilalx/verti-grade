@@ -9,7 +9,7 @@
                 <div v-if="summary.generatedAt" class="generated-at">
                     {{
                         t('analytics.generatedAt', {
-                            value: formatDate(summary.generatedAt),
+                            value: formatAnalyticsDate(summary.generatedAt),
                         })
                     }}
                 </div>
@@ -44,8 +44,6 @@
                     :accent-color="card.accentColor"
                     :icon-bg="card.iconBg"
                     :icon-fg="card.iconFg"
-                    :delta="card.delta"
-                    :sparkline="card.sparkline"
                     :subtitle="card.subtitle"
                     :loading="loading"
                     :format="card.format"
@@ -128,7 +126,7 @@
                                             }}</span>
                                         </div>
                                         <span class="time-label">{{
-                                            formatDate(comment.created)
+                                            formatAnalyticsDate(comment.created)
                                         }}</span>
                                     </div>
                                 </template>
@@ -223,7 +221,7 @@
                                 </v-list-item-subtitle>
                                 <template #append>
                                     <span class="time-label">{{
-                                        formatDate(route.screwDate)
+                                        formatAnalyticsDate(route.screwDate)
                                     }}</span>
                                 </template>
                             </v-list-item>
@@ -324,127 +322,10 @@
                             type="image"
                             class="chart-skeleton"
                         />
-                        <template v-else-if="hasData">
-                            <!-- Mobile year chips -->
-                            <div class="d-flex d-sm-none flex-wrap ga-2 mb-3">
-                                <v-chip
-                                    v-for="year in availableYears"
-                                    :key="year"
-                                    :color="
-                                        year === selectedYear
-                                            ? 'primary'
-                                            : undefined
-                                    "
-                                    :variant="
-                                        year === selectedYear
-                                            ? 'flat'
-                                            : 'outlined'
-                                    "
-                                    size="small"
-                                    @click="selectedYear = year"
-                                    >{{ year }}</v-chip
-                                >
-                            </div>
-
-                            <div class="heatmap-outer">
-                                <!-- Left: day labels + scrollable grid -->
-                                <div class="heatmap-graph">
-                                    <div class="heatmap-day-labels">
-                                        <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{
-                                            heatmapDayLabels.mon
-                                        }}</span>
-                                        <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{
-                                            heatmapDayLabels.wed
-                                        }}</span>
-                                        <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label">{{
-                                            heatmapDayLabels.fri
-                                        }}</span>
-                                        <span class="heatmap-day-label" />
-                                        <span class="heatmap-day-label" />
-                                    </div>
-                                    <div class="heatmap-scroll">
-                                        <div class="heatmap-month-labels">
-                                            <span
-                                                v-for="label in heatmapMonthLabels"
-                                                :key="label.key"
-                                                class="heatmap-month-label"
-                                                :style="{
-                                                    gridColumnStart:
-                                                        label.startCol,
-                                                }"
-                                                >{{ label.text }}</span
-                                            >
-                                        </div>
-                                        <div
-                                            class="heatmap-grid"
-                                            @mouseover="onHeatmapCellHover"
-                                            @mouseleave="
-                                                heatmapTooltipVisible = false
-                                            "
-                                        >
-                                            <div
-                                                v-for="cell in heatmapCells"
-                                                :key="cell.date"
-                                                class="heatmap-cell"
-                                                :class="[
-                                                    `heatmap-level-${cell.level}`,
-                                                    {
-                                                        'heatmap-cell--outside':
-                                                            !cell.inYear,
-                                                    },
-                                                ]"
-                                                :data-label="cell.label"
-                                            />
-                                        </div>
-                                        <teleport to="body">
-                                            <div
-                                                v-if="heatmapTooltipVisible"
-                                                class="heatmap-float-tooltip"
-                                                :style="heatmapTooltipStyle"
-                                            >
-                                                {{ heatmapTooltipText }}
-                                            </div>
-                                        </teleport>
-                                    </div>
-                                </div>
-
-                                <!-- Right: desktop year selector -->
-                                <div
-                                    class="heatmap-years d-none d-sm-flex flex-column"
-                                >
-                                    <button
-                                        v-for="year in availableYears"
-                                        :key="year"
-                                        class="heatmap-year-btn"
-                                        :class="{
-                                            'heatmap-year-btn--active':
-                                                year === selectedYear,
-                                        }"
-                                        @click="selectedYear = year"
-                                    >
-                                        {{ year }}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Legend -->
-                            <div class="heatmap-legend">
-                                <span class="heatmap-legend-label">{{
-                                    t('analytics.heatmap.less')
-                                }}</span>
-                                <div class="heatmap-cell heatmap-level-0" />
-                                <div class="heatmap-cell heatmap-level-1" />
-                                <div class="heatmap-cell heatmap-level-2" />
-                                <div class="heatmap-cell heatmap-level-3" />
-                                <div class="heatmap-cell heatmap-level-4" />
-                                <span class="heatmap-legend-label">{{
-                                    t('analytics.heatmap.more')
-                                }}</span>
-                            </div>
-                        </template>
+                        <AnalyticsActivityHeatmap
+                            v-else-if="hasData"
+                            :timeline="routeTimeline"
+                        />
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -475,6 +356,7 @@
                             inset
                             :label="t('analytics.actions.showAllSetters')"
                             class="setter-switch"
+                            data-testid="analytics-show-all-setters"
                         />
                     </v-card-title>
                     <v-divider />
@@ -529,8 +411,29 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { formatDate } from '#shared/utils/formatting'
+import {
+    SETTER_COLORS,
+    buildTooltip,
+    formatMonthLabel,
+    gridBase,
+    makeBarSeries,
+    makeXAxis,
+    niceAxis,
+    readChartColors,
+    tooltipBase,
+    yAxisBase,
+} from '~/utils/echarts'
+import type { TimelineDatum } from '~/composables/useClimbingAnalytics'
+
+interface AxisTooltipParam {
+    name: string
+    value: number
+}
+
 const { t, locale } = useI18n()
+const theme = useTheme()
 
 useHead(() => ({
     title: t('analytics.meta.title'),
@@ -547,14 +450,14 @@ const {
     difficultyDistribution,
     routeSetters,
     routeTimeline,
-    commentTimeline,
+    routeTimelineMonthly,
+    commentTimelineMonthly,
     latestComments,
     latestRoutes,
     hasData,
     loading,
     error,
     refresh,
-    load,
 } = useClimbingAnalytics()
 
 const { error: notifyError } = useNotification()
@@ -569,28 +472,6 @@ watch(
 
 const showAllSetters = ref(false)
 
-// ── Heatmap tooltip (single floating instance instead of 365+ v-tooltip) ──
-const heatmapTooltipVisible = ref(false)
-const heatmapTooltipText = ref('')
-const heatmapTooltipStyle = ref({})
-
-function onHeatmapCellHover(event) {
-    const label = event.target?.dataset?.label
-    if (label) {
-        const rect = event.target.getBoundingClientRect()
-        heatmapTooltipText.value = label
-        heatmapTooltipStyle.value = {
-            left: `${rect.left + rect.width / 2}px`,
-            top: `${rect.top - 6}px`,
-        }
-        heatmapTooltipVisible.value = true
-    } else {
-        heatmapTooltipVisible.value = false
-    }
-}
-
-// ── Summary cards ─────────────────────────────────────────────────────────
-
 const summaryCards = computed(() => [
     {
         key: 'totalRoutes',
@@ -600,10 +481,8 @@ const summaryCards = computed(() => [
         accentColor: '#1D9E75',
         iconBg: '#E1F5EE',
         iconFg: '#1D9E75',
-        delta: summary.value.totalRoutesDelta ?? null,
-        sparkline: summary.value.totalRoutesTrend ?? [],
         subtitle: t('analytics.cards.totalRoutesSubtitle'),
-        format: (value) => `${value}`,
+        format: (value: number) => `${value}`,
     },
     {
         key: 'activeRoutes',
@@ -613,10 +492,8 @@ const summaryCards = computed(() => [
         accentColor: '#378ADD',
         iconBg: '#E6F1FB',
         iconFg: '#378ADD',
-        delta: summary.value.activeRoutesDelta ?? null,
-        sparkline: summary.value.activeRoutesTrend ?? [],
         subtitle: t('analytics.cards.activeRoutesSubtitle'),
-        format: (value) => `${value}`,
+        format: (value: number) => `${value}`,
     },
     {
         key: 'averageDifficulty',
@@ -626,10 +503,8 @@ const summaryCards = computed(() => [
         accentColor: '#EF9F27',
         iconBg: '#FAEEDA',
         iconFg: '#BA7517',
-        delta: summary.value.averageDifficultyDelta ?? null,
-        sparkline: summary.value.difficultyTrend ?? [],
         subtitle: t('analytics.cards.averageDifficultySubtitle'),
-        format: (value) => Number(value).toFixed(2),
+        format: (value: number) => Number(value).toFixed(2),
     },
     {
         key: 'totalComments',
@@ -639,10 +514,8 @@ const summaryCards = computed(() => [
         accentColor: '#7F77DD',
         iconBg: '#EEEDFE',
         iconFg: '#534AB7',
-        delta: summary.value.totalCommentsDelta ?? null,
-        sparkline: summary.value.commentsTrend ?? [],
         subtitle: t('analytics.cards.totalCommentsSubtitle'),
-        format: (value) => `${value}`,
+        format: (value: number) => `${value}`,
     },
     {
         key: 'averageLifespanDays',
@@ -652,343 +525,89 @@ const summaryCards = computed(() => [
         accentColor: '#D85A30',
         iconBg: '#FDEBD8',
         iconFg: '#D85A30',
-        delta: null,
-        sparkline: [],
         subtitle: t('analytics.cards.averageLifespanSubtitle'),
-        format: (value) => `${value}d`,
+        format: (value: number) => `${value}d`,
     },
 ])
-
-// ── List helpers ──────────────────────────────────────────────────────────
 
 const hasLatestComments = computed(() => latestComments.value.length > 0)
 const hasLatestRoutes = computed(() => latestRoutes.value.length > 0)
 
-// ── Theme-aware chart colors ──────────────────────────────────────────────
+const chartColors = computed(() =>
+    readChartColors(theme.global.current.value.dark),
+)
 
-function getCSSColor(variable) {
-    if (typeof window === 'undefined') return '#888'
-    return getComputedStyle(document.documentElement)
-        .getPropertyValue(variable)
-        .trim()
-}
-
-const chartColors = computed(() => {
-    const isDark = useTheme().global.current.value.dark
-
-    const onSurface =
-        getCSSColor('--v-theme-on-surface') ||
-        (isDark ? '236 236 236' : '18 18 18')
-    const surface =
-        getCSSColor('--v-theme-surface') ||
-        (isDark ? '30 30 30' : '255 255 255')
-
-    const labelColor = `rgba(${onSurface}, 0.45)`
-    const gridColor = `rgba(${onSurface}, 0.08)`
-    const tooltipBg = `rgba(${surface}, 0.96)`
-    const tooltipText = `rgba(${onSurface}, 0.9)`
-    const tooltipMuted = `rgba(${onSurface}, 0.45)`
-    const tooltipBorder = `rgba(${onSurface}, 0.1)`
-
+function barChartOption(
+    labels: string[],
+    values: number[],
+    seriesName: string,
+    unit: string,
+    color: string,
+    emphasisColor: string,
+) {
+    const colors = chartColors.value
     return {
-        labelColor,
-        gridColor,
-        tooltipBg,
-        tooltipText,
-        tooltipMuted,
-        tooltipBorder,
-    }
-})
-
-// ── Shared chart helpers ──────────────────────────────────────────────────
-
-function buildTooltip(name, value, unit) {
-    const { tooltipText, tooltipMuted } = chartColors.value
-    return `<span style="font-size:13px;color:${tooltipMuted}">${name}</span><br/>
-            <span style="font-weight:600;font-size:15px;color:${tooltipText}">${value}</span>
-            <span style="font-size:12px;color:${tooltipMuted};margin-left:4px">${unit}</span>`
-}
-
-const tooltipBase = computed(() => {
-    const { tooltipBg, tooltipText, tooltipBorder } = chartColors.value
-    return {
-        trigger: 'axis',
-        axisPointer: { type: 'none' },
-        backgroundColor: tooltipBg,
-        borderColor: tooltipBorder,
-        textStyle: { color: tooltipText },
-        extraCssText:
-            'border-radius:8px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.12)',
-    }
-})
-
-const gridBase = {
-    left: '0%',
-    right: '1%',
-    bottom: '0%',
-    top: '8%',
-    containLabel: true,
-}
-
-function makeXAxis(labels) {
-    const { labelColor } = chartColors.value
-    return {
-        type: 'category',
-        data: labels,
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: {
-            color: labelColor,
-            fontSize: 11,
-            rotate: labels.length > 9 ? 35 : 0,
-            margin: 10,
+        backgroundColor: 'transparent',
+        tooltip: {
+            ...tooltipBase(colors),
+            formatter: (params: AxisTooltipParam[]) =>
+                buildTooltip(colors, params[0]!.name, params[0]!.value, unit),
         },
+        grid: gridBase,
+        xAxis: makeXAxis(colors, labels),
+        yAxis: yAxisBase(colors),
+        series: [makeBarSeries(seriesName, values, color, emphasisColor)],
+        animationEasing: 'cubicOut',
     }
 }
 
-const yAxisBase = computed(() => {
-    const { labelColor, gridColor } = chartColors.value
+function monthlySeries(timeline: TimelineDatum[]) {
     return {
-        type: 'value',
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { color: labelColor, fontSize: 11 },
-        splitLine: { lineStyle: { color: gridColor, type: 'dashed' } },
-    }
-})
-
-function makeBarSeries(name, data, color, emphasisColor) {
-    return {
-        name,
-        type: 'bar',
-        barMaxWidth: 32,
-        data,
-        itemStyle: { color, borderRadius: [4, 4, 0, 0] },
-        emphasis: { itemStyle: { color: emphasisColor } },
-        animationDelay: (idx) => idx * 40,
-    }
-}
-
-// ── Activity heatmap ──────────────────────────────────────────────────────
-
-const heatmapDayLabels = computed(() => {
-    const fmt = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
-    return {
-        mon: fmt.format(new Date(2024, 0, 1)),
-        wed: fmt.format(new Date(2024, 0, 3)),
-        fri: fmt.format(new Date(2024, 0, 5)),
-    }
-})
-
-const selectedYear = ref(new Date().getFullYear())
-
-const availableYears = computed(() => {
-    const years = new Set([new Date().getFullYear()])
-    for (const item of routeTimeline.value) {
-        const y = parseInt(item.period.slice(0, 4), 10)
-        if (!Number.isNaN(y)) years.add(y)
-    }
-    return Array.from(years).sort((a, b) => b - a)
-})
-
-const heatmapCells = computed(() => {
-    const year = selectedYear.value
-
-    const jan1 = new Date(year, 0, 1)
-    const startDate = new Date(jan1)
-    const jan1Dow = startDate.getDay()
-    startDate.setDate(startDate.getDate() - (jan1Dow === 0 ? 6 : jan1Dow - 1))
-
-    const dec31 = new Date(year, 11, 31)
-    const endDate = new Date(dec31)
-    const dec31Dow = endDate.getDay()
-    endDate.setDate(endDate.getDate() + (dec31Dow === 0 ? 0 : 7 - dec31Dow))
-
-    const dataMap = new Map()
-    let maxCount = 1
-    for (const item of routeTimeline.value) {
-        dataMap.set(item.period, item.count)
-        if (item.period.startsWith(`${year}-`) && item.count > maxCount) {
-            maxCount = item.count
-        }
-    }
-
-    const cells = []
-    const cursor = new Date(startDate)
-    const dateFormatter = new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-    })
-    while (cursor <= endDate) {
-        const mm = String(cursor.getMonth() + 1).padStart(2, '0')
-        const dd = String(cursor.getDate()).padStart(2, '0')
-        const iso = `${cursor.getFullYear()}-${mm}-${dd}`
-        const inYear = cursor.getFullYear() === year
-        const count = dataMap.get(iso) ?? 0
-        const level =
-            !inYear || count === 0
-                ? 0
-                : count >= 4
-                  ? 4
-                  : count >= 3
-                    ? 3
-                    : count >= 2
-                      ? 2
-                      : 1
-        const formatted = dateFormatter.format(new Date(iso + 'T00:00:00'))
-        cells.push({
-            date: iso,
-            count,
-            level,
-            inYear,
-            label: count > 0 ? `${formatted}: ${count}` : formatted,
-        })
-        cursor.setDate(cursor.getDate() + 1)
-    }
-    return cells
-})
-
-const heatmapMonthLabels = computed(() => {
-    const labels = []
-    let prevMonth = null
-    const cells = heatmapCells.value
-    for (let i = 0; i < cells.length; i++) {
-        const cell = cells[i]
-        if (!cell.inYear) continue
-        const month = cell.date.slice(0, 7)
-        if (month !== prevMonth) {
-            const nextSundayIdx = i % 7 === 0 ? i : i + (7 - (i % 7))
-            const weekCol = Math.floor(nextSundayIdx / 7) + 1
-            if (weekCol <= 54) {
-                labels.push({
-                    key: month,
-                    text: new Intl.DateTimeFormat(undefined, {
-                        month: 'short',
-                    }).format(new Date(cell.date + 'T00:00:00')),
-                    startCol: weekCol,
-                })
-            }
-            prevMonth = month
-        }
-    }
-    return labels
-})
-
-function aggregateByMonth(source) {
-    const map = new Map()
-    for (const item of source) {
-        const key = extractMonthKey(item.period)
-        if (!key) continue
-        map.set(key, (map.get(key) ?? 0) + item.count)
-    }
-    const keys = Array.from(map.keys()).sort()
-    return {
-        labels: keys.map(formatMonthLabel),
-        values: keys.map((k) => map.get(k) ?? 0),
-    }
-}
-
-// ── Chart: difficulty distribution ────────────────────────────────────────
-
-const difficultyOption = computed(() => ({
-    backgroundColor: 'transparent',
-    tooltip: {
-        ...tooltipBase.value,
-        formatter: (params) =>
-            buildTooltip(
-                params[0].name,
-                params[0].value,
-                t('analytics.labels.routes'),
-            ),
-    },
-    grid: gridBase,
-    xAxis: makeXAxis(difficultyDistribution.value.map((item) => item.grade)),
-    yAxis: yAxisBase.value,
-    series: [
-        makeBarSeries(
-            t('analytics.charts.difficultyDistribution'),
-            difficultyDistribution.value.map((item) => item.count),
-            '#378ADD',
-            '#85B7EB',
+        labels: timeline.map((item) =>
+            formatMonthLabel(item.period, locale.value),
         ),
-    ],
-    animationEasing: 'cubicOut',
-}))
+        values: timeline.map((item) => item.count),
+    }
+}
 
-// ── Chart: route timeline ─────────────────────────────────────────────────
+const difficultyOption = computed(() =>
+    barChartOption(
+        difficultyDistribution.value.map((item) => item.grade),
+        difficultyDistribution.value.map((item) => item.count),
+        t('analytics.charts.difficultyDistribution'),
+        t('analytics.labels.routes'),
+        '#378ADD',
+        '#85B7EB',
+    ),
+)
 
 const routeTimelineOption = computed(() => {
-    const { labels, values } = aggregateByMonth(routeTimeline.value)
-    return {
-        backgroundColor: 'transparent',
-        tooltip: {
-            ...tooltipBase.value,
-            formatter: (params) =>
-                buildTooltip(
-                    params[0].name,
-                    params[0].value,
-                    t('analytics.labels.routes'),
-                ),
-        },
-        grid: gridBase,
-        xAxis: makeXAxis(labels),
-        yAxis: yAxisBase.value,
-        series: [
-            makeBarSeries(
-                t('analytics.charts.routeTimeline'),
-                values,
-                '#1D9E75',
-                '#5DCAA5',
-            ),
-        ],
-        animationEasing: 'cubicOut',
-    }
+    const { labels, values } = monthlySeries(routeTimelineMonthly.value)
+    return barChartOption(
+        labels,
+        values,
+        t('analytics.charts.routeTimeline'),
+        t('analytics.labels.routes'),
+        '#1D9E75',
+        '#5DCAA5',
+    )
 })
-
-// ── Chart: comment timeline ───────────────────────────────────────────────
 
 const commentTimelineOption = computed(() => {
-    const { labels, values } = aggregateByMonth(commentTimeline.value)
-
-    const maxVal = Math.max(...values, 1)
-    const rawStep = maxVal / 4
-    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)))
-    const niceStep =
-        [1, 2, 5, 10].map((f) => f * magnitude).find((s) => s >= rawStep) ??
-        magnitude * 10
-    const yMax = Math.ceil(maxVal / niceStep) * niceStep
-
-    return {
-        backgroundColor: 'transparent',
-        tooltip: {
-            ...tooltipBase.value,
-            formatter: (params) =>
-                buildTooltip(
-                    params[0].name,
-                    params[0].value,
-                    t('analytics.labels.comments'),
-                ),
-        },
-        grid: gridBase,
-        xAxis: makeXAxis(labels),
-        yAxis: { ...yAxisBase.value, max: yMax, interval: niceStep },
-        series: [
-            makeBarSeries(
-                t('analytics.labels.comments'),
-                values,
-                '#7F77DD',
-                '#AFA9EC',
-            ),
-        ],
-        animationEasing: 'cubicOut',
-    }
+    const { labels, values } = monthlySeries(commentTimelineMonthly.value)
+    const option = barChartOption(
+        labels,
+        values,
+        t('analytics.labels.comments'),
+        t('analytics.labels.comments'),
+        '#7F77DD',
+        '#AFA9EC',
+    )
+    return { ...option, yAxis: { ...option.yAxis, ...niceAxis(values) } }
 })
 
-// ── Chart: route setters ──────────────────────────────────────────────────
-
 const routeSettersData = computed(() => {
-    const otherLabel = t('analytics.labels.other')
     const unknownLabel = t('analytics.labels.unknown')
-
     const sorted = routeSetters.value
         .map((item) => ({
             name: item.setter?.trim() || unknownLabel,
@@ -998,31 +617,14 @@ const routeSettersData = computed(() => {
 
     if (showAllSetters.value) return sorted
 
-    let otherCount = 0
-    const aggregated = []
-    for (const item of sorted) {
-        if (item.value <= 1) otherCount += item.value
-        else aggregated.push(item)
-    }
-    if (otherCount > 0) aggregated.push({ name: otherLabel, value: otherCount })
-
-    return aggregated
+    const kept = sorted.filter((item) => item.value > 1)
+    const otherCount = sorted
+        .filter((item) => item.value <= 1)
+        .reduce((sum, item) => sum + item.value, 0)
+    return otherCount > 0
+        ? [...kept, { name: t('analytics.labels.other'), value: otherCount }]
+        : kept
 })
-
-const SETTER_COLORS = [
-    '#5B8DB8',
-    '#4A9E7A',
-    '#B8893A',
-    '#7B72B8',
-    '#B86A4A',
-    '#A85A7A',
-    '#3A8A8A',
-    '#6A9AB0',
-    '#6A9A5A',
-    '#A89040',
-    '#8A70B0',
-    '#A86060',
-]
 
 const routeSettersOption = computed(() => {
     const { tooltipBg, tooltipText, tooltipMuted, tooltipBorder, labelColor } =
@@ -1031,7 +633,15 @@ const routeSettersOption = computed(() => {
         backgroundColor: 'transparent',
         tooltip: {
             trigger: 'item',
-            formatter: ({ name, value, percent }) =>
+            formatter: ({
+                name,
+                value,
+                percent,
+            }: {
+                name: string
+                value: number
+                percent: number
+            }) =>
                 `<span style="font-size:13px;color:${tooltipMuted}">${name}</span><br/>
                  <span style="font-weight:600;font-size:15px;color:${tooltipText}">${value} ${t('analytics.labels.routes')}</span>
                  <span style="font-size:12px;color:${tooltipMuted};margin-left:4px">(${percent}%)</span>`,
@@ -1052,7 +662,7 @@ const routeSettersOption = computed(() => {
             itemGap: 8,
             icon: 'circle',
             textStyle: { fontSize: 11, color: labelColor },
-            formatter: (name) => {
+            formatter: (name: string) => {
                 const item = routeSettersData.value.find((d) => d.name === name)
                 return item ? `${name}  (${item.value})` : name
             },
@@ -1094,56 +704,26 @@ const routeSettersOption = computed(() => {
     }
 })
 
-// ── Formatters ────────────────────────────────────────────────────────────
-
-function formatDate(isoString) {
-    if (!isoString) return t('analytics.labels.unknown')
-    try {
-        const date = new Date(isoString)
-        const hasTime = typeof isoString === 'string' && isoString.includes('T')
-        return new Intl.DateTimeFormat(undefined, {
-            dateStyle: 'medium',
-            ...(hasTime ? { timeStyle: 'short' } : {}),
-        }).format(date)
-    } catch (e) {
-        console.error('Failed to format date', e)
-        return isoString
-    }
+function formatAnalyticsDate(value: string | null | undefined) {
+    const hasTime = typeof value === 'string' && value.includes('T')
+    return formatDate(value, {
+        locale: locale.value,
+        fallback: t('analytics.labels.unknown'),
+        withTime: hasTime,
+        dateStyle: 'medium',
+        ...(hasTime ? { timeStyle: 'short' } : {}),
+    })
 }
 
-function formatRating(value) {
+function formatRating(value: number | null) {
     const numeric = Number(value)
-    if (!Number.isFinite(numeric)) return ''
-    return numeric.toFixed(1)
+    return Number.isFinite(numeric) ? numeric.toFixed(1) : ''
 }
 
-function formatCreators(creators) {
-    if (!Array.isArray(creators) || creators.length === 0)
-        return t('analytics.labels.unknown')
-    return creators.join(', ')
-}
-
-function extractMonthKey(isoDate) {
-    if (!isoDate) return null
-    const date = new Date(isoDate)
-    if (Number.isNaN(date.getTime())) return null
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
-}
-
-function formatMonthLabel(monthKey) {
-    try {
-        const [year, month] = monthKey.split('-').map(Number)
-        if (!year || !month) return monthKey
-        return new Intl.DateTimeFormat(undefined, {
-            month: 'short',
-            year: 'numeric',
-        }).format(new Date(year, month - 1, 1))
-    } catch (e) {
-        console.error('Failed to format month label', e)
-        return monthKey
-    }
+function formatCreators(creators: string[]) {
+    return creators.length > 0
+        ? creators.join(', ')
+        : t('analytics.labels.unknown')
 }
 </script>
 
@@ -1155,195 +735,6 @@ function formatMonthLabel(monthKey) {
 .generated-at {
     font-size: 0.75rem;
     color: rgba(var(--v-theme-on-background), 0.4);
-}
-
-/* ── Activity heatmap ────────────────────────────────────────────────── */
-.heatmap-wrapper {
-    padding: 12px 16px 16px;
-}
-
-/* Outer flex: graph area + year list */
-.heatmap-outer {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-}
-
-/* Graph: day-label column + scrollable grid */
-.heatmap-graph {
-    display: flex;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-}
-
-/* Day-of-week labels (Mon / Wed / Fri) */
-.heatmap-day-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding-top: 18px;
-    flex-shrink: 0;
-}
-
-.heatmap-day-label {
-    height: 13px;
-    line-height: 13px;
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
-    text-align: right;
-    white-space: nowrap;
-    padding-right: 2px;
-}
-
-/* Scrollable area — scroll on mobile, clips on desktop */
-.heatmap-scroll {
-    overflow-x: auto;
-    flex: 1;
-    min-width: 0;
-}
-
-.heatmap-month-labels {
-    display: grid;
-    grid-template-columns: repeat(54, 13px);
-    gap: 2px;
-    height: 16px;
-    margin-bottom: 2px;
-}
-
-.heatmap-month-label {
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
-    white-space: nowrap;
-    overflow: visible;
-}
-
-.heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(54, 13px);
-    grid-template-rows: repeat(7, 13px);
-    grid-auto-flow: column;
-    gap: 2px;
-    width: fit-content;
-}
-
-.heatmap-cell {
-    width: 13px;
-    height: 13px;
-    border-radius: 3px;
-    cursor: default;
-    flex-shrink: 0;
-}
-
-.heatmap-cell--outside {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Desktop year selector */
-.heatmap-years {
-    flex-shrink: 0;
-    padding-top: 18px;
-    gap: 2px !important;
-}
-
-.heatmap-year-btn {
-    display: block;
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    border: none;
-    background: none;
-    color: rgba(var(--v-theme-on-surface), 0.5);
-    cursor: pointer;
-    text-align: right;
-    transition:
-        color 0.15s,
-        background 0.15s;
-    white-space: nowrap;
-}
-
-.heatmap-year-btn:hover {
-    color: rgb(var(--v-theme-on-surface));
-    background: rgba(var(--v-theme-on-surface), 0.06);
-}
-
-.heatmap-year-btn--active {
-    color: rgb(var(--v-theme-primary));
-    font-weight: 600;
-}
-
-/* Legend */
-.heatmap-legend {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 10px;
-    justify-content: flex-end;
-}
-
-.heatmap-legend-label {
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
-}
-
-.heatmap-level-0 {
-    background: rgba(var(--v-theme-on-surface), 0.07);
-}
-.heatmap-level-1 {
-    background: #0f6e56;
-}
-.heatmap-level-2 {
-    background: #1d9e75;
-}
-.heatmap-level-3 {
-    background: #5dcaa5;
-}
-.heatmap-level-4 {
-    background: #7fffdb;
-}
-
-/* ── Desktop heatmap: scale to fill card width ───────────────────────── */
-@media (min-width: 600px) {
-    .heatmap-scroll {
-        overflow-x: clip;
-    }
-
-    .heatmap-month-labels {
-        grid-template-columns: repeat(54, 1fr);
-        width: 100%;
-    }
-
-    .heatmap-grid {
-        grid-template-columns: repeat(54, 1fr);
-        grid-template-rows: repeat(7, 1fr);
-        width: 100%;
-        aspect-ratio: 54 / 7;
-    }
-
-    .heatmap-grid .heatmap-cell {
-        width: auto;
-        height: auto;
-    }
-
-    .heatmap-day-labels {
-        padding-top: 0;
-        align-self: stretch;
-    }
-
-    .heatmap-day-labels > span:first-child {
-        flex-shrink: 0;
-        height: 16px;
-    }
-
-    .heatmap-day-labels > span:not(:first-child) {
-        flex: 1;
-        height: auto;
-        line-height: 1;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
 }
 
 /* ── Shared card shell ───────────────────────────────────────────────── */

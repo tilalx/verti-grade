@@ -1,10 +1,13 @@
 import { getQuery, readBody, getRequestURL, type H3Event } from 'h3'
 import type PocketBase from 'pocketbase'
-import type {
-    DifficultySignValue,
-    RouteRecord,
-    SettingsRecord,
-} from '../../types/models'
+import type { RouteRecord, SettingsRecord } from '../../types/models'
+import {
+    formatDate,
+    formatDifficulty,
+    formatDifficultySign,
+    locationName,
+    normalizeCreators,
+} from '#shared/utils/formatting'
 
 interface ExportBody {
     ids?: unknown[]
@@ -95,21 +98,6 @@ export async function fetchRecordsByIds<T = RouteRecord>(
     return results.flat()
 }
 
-export function normalizeCreators(creators: unknown): string[] {
-    if (Array.isArray(creators)) {
-        return creators
-            .map((value) => (typeof value === 'string' ? value.trim() : ''))
-            .filter(Boolean)
-    }
-    if (typeof creators === 'string') {
-        return creators
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    }
-    return []
-}
-
 export function resolveApplicationUrl(
     event: H3Event,
     settings: SettingsRecord | null | undefined,
@@ -121,11 +109,6 @@ export function resolveApplicationUrl(
             xForwardedProto: true,
         }).origin
     ).replace(/\/+$/, '')
-}
-
-export function routeLocationName(route: RouteRecord | null | undefined) {
-    const location = route?.expand?.location as { name?: string } | undefined
-    return location?.name ?? ''
 }
 
 export async function resolveExportLocale(event: H3Event): Promise<string> {
@@ -149,19 +132,6 @@ export async function resolveExportLabel(
     return typeof label === 'string' && label.trim() ? label.trim() : fallback
 }
 
-function formatDifficultySign(value: DifficultySignValue | undefined) {
-    if (typeof value === 'string') {
-        return value.trim()
-    }
-    if (value === true) {
-        return '+'
-    }
-    if (value === false) {
-        return '-'
-    }
-    return ''
-}
-
 export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     { key: 'color', header: 'Color' },
     { key: 'name', header: 'Name', value: (r) => r.name ?? '' },
@@ -170,9 +140,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
         header: 'Difficulty',
         value: (r) => {
             const numeric = Number(r.difficulty)
-            return Number.isFinite(numeric)
-                ? numeric
-                : `${r.difficulty ?? ''}${formatDifficultySign(r.difficulty_sign)}`.trim()
+            return Number.isFinite(numeric) ? numeric : formatDifficulty(r)
         },
         numFmt: (r) => {
             const sign = formatDifficultySign(r.difficulty_sign)
@@ -199,16 +167,13 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     {
         key: 'location',
         header: 'Location',
-        value: (r) => routeLocationName(r),
+        value: (r) => locationName(r),
     },
     { key: 'type', header: 'Type', value: (r) => r.type ?? '' },
     {
         key: 'screw_date',
         header: 'Set on',
-        value: (r, locale) =>
-            r.screw_date
-                ? new Date(r.screw_date).toLocaleDateString(locale)
-                : '',
+        value: (r, locale) => formatDate(r.screw_date, { locale }),
     },
     { key: 'qr', header: 'QR' },
 ]

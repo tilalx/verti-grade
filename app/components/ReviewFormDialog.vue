@@ -38,7 +38,7 @@
         >
             <v-avatar size="30" :color="avatarColor(review.userName)">
                 <span class="text-body-small font-weight-bold text-white">{{
-                    initials(review.userName)
+                    nameInitials(review.userName)
                 }}</span>
             </v-avatar>
             <div>
@@ -117,33 +117,37 @@
     </LayoutDialogShell>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { required, nonBlank } from '~/utils/validation'
 import {
     COMBINED_DIFFICULTIES,
     parseCombinedDifficulty,
     toCombinedDifficulty,
 } from '~/utils/routes'
-const props = defineProps({
-    modelValue: {
-        type: Boolean,
-        default: undefined,
-    },
-    routeId: {
-        type: String,
-        default: null,
-    },
-    review: {
-        type: Object,
-        default: null,
-    },
-    callToAction: {
-        type: Boolean,
-        default: false,
-    },
-})
+import type { RatingRecord } from '~/types/models'
+import { avatarColor, nameInitials } from '~/utils/avatar'
 
-const emit = defineEmits(['update:modelValue', 'saved'])
+type EditableReview = RatingRecord & { userName?: string; routeName?: string }
+
+const props = withDefaults(
+    defineProps<{
+        modelValue?: boolean
+        routeId?: string | null
+        review?: EditableReview | null
+        callToAction?: boolean
+    }>(),
+    {
+        modelValue: undefined,
+        routeId: null,
+        review: null,
+        callToAction: false,
+    },
+)
+
+const emit = defineEmits<{
+    'update:modelValue': [open: boolean]
+    saved: [rating: RatingRecord | null]
+}>()
 
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -177,8 +181,8 @@ const isFormValid = ref(false)
 const saving = ref(false)
 
 const form = reactive({
-    rating: null,
-    combinedDifficulty: null,
+    rating: undefined as number | undefined,
+    combinedDifficulty: null as string | null,
     comment: '',
 })
 
@@ -191,7 +195,7 @@ watch(
     () => props.review,
     (review) => {
         if (review) {
-            form.rating = review.rating
+            form.rating = review.rating ?? undefined
             form.combinedDifficulty = toCombinedDifficulty(
                 review.difficulty,
                 review.difficulty_sign,
@@ -205,7 +209,7 @@ watch(
 watch(sheetOpen, (open) => {
     if (open) {
         if (props.review) {
-            form.rating = props.review.rating
+            form.rating = props.review.rating ?? undefined
             form.combinedDifficulty = toCombinedDifficulty(
                 props.review.difficulty,
                 props.review.difficulty_sign,
@@ -221,36 +225,8 @@ watch(sheetOpen, (open) => {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-const AVATAR_COLORS = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'deep-purple',
-    'teal',
-    'indigo',
-    'pink',
-    'cyan',
-    'orange',
-]
-
-function avatarColor(name) {
-    if (!name) return 'primary'
-    const code = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-    return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function initials(name) {
-    if (!name) return '?'
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? '')
-        .join('')
-}
-
 function resetForm() {
-    form.rating = null
+    form.rating = undefined
     form.combinedDifficulty = null
     form.comment = ''
     isFormValid.value = false
@@ -272,7 +248,7 @@ async function submit() {
         if (isEditMode.value) {
             const updated = await pb
                 .collection('ratings')
-                .update(props.review.id, {
+                .update<RatingRecord>(props.review!.id, {
                     rating: form.rating,
                     difficulty,
                     difficulty_sign,

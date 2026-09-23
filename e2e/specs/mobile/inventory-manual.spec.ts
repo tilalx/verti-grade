@@ -107,3 +107,20 @@ test('reserves no camera space until scanning starts', async ({
     const tabs = await page.getByTestId('inventory-tab-missing').boundingBox()
     expect(tabs!.y).toBeLessThan(300)
 })
+
+test('restores found routes after a reload', async ({ adminPage: page }) => {
+    await openScopedInventory(page)
+    const routeId = await firstMissingRouteId(page)
+
+    await page.getByTestId(`inventory-mark-${routeId}`).click()
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+
+    await page.reload()
+    await page
+        .locator('[data-testid="inventory-progress"]')
+        .waitFor({ state: 'visible' })
+    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toHaveCount(
+        0,
+    )
+})

@@ -122,27 +122,34 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
     required,
     minLength,
     maxLength,
     passwordsMatch as makePasswordsMatchRule,
 } from '~/utils/validation'
-const props = defineProps({
-    requireOldPassword: { type: Boolean, default: true },
+const props = withDefaults(
+    defineProps<{
+        requireOldPassword?: boolean
+        oldPassword?: string
+        password?: string
+        passwordConfirm?: string
+    }>(),
+    {
+        requireOldPassword: true,
+        oldPassword: '',
+        password: '',
+        passwordConfirm: '',
+    },
+)
 
-    oldPassword: { type: String, default: '' },
-    password: { type: String, default: '' },
-    passwordConfirm: { type: String, default: '' },
-})
-
-const emit = defineEmits([
-    'update:oldPassword',
-    'update:password',
-    'update:passwordConfirm',
-    'validity',
-])
+const emit = defineEmits<{
+    'update:oldPassword': [value: string]
+    'update:password': [value: string]
+    'update:passwordConfirm': [value: string]
+    validity: [valid: boolean]
+}>()
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t } = useI18n()

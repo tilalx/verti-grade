@@ -14,7 +14,10 @@
     </ClientOnly>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { ClientResponseError, UnsubscribeFunc } from 'pocketbase'
+import type { SettingsRecord } from '~/types/models'
+
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 const { refreshPermissions } = usePermissions()
@@ -23,11 +26,13 @@ const { error: notifyError } = useNotification()
 
 const getSettings = async () => {
     try {
-        return await pb.collection('settings').getOne('settings_123456')
+        return await pb
+            .collection('settings')
+            .getOne<SettingsRecord>('settings_123456')
     } catch (error) {
-        if (error.data && error.data.code === 404) {
+        if ((error as ClientResponseError).status === 404) {
             try {
-                return await pb.collection('settings').create({
+                return await pb.collection('settings').create<SettingsRecord>({
                     id: 'settings_123456',
                 })
             } catch (createError) {
@@ -44,7 +49,7 @@ const getSettings = async () => {
 
 const { data: settingsData } = await useAsyncData('settings', getSettings)
 
-const settings = ref(settingsData.value ?? {})
+const settings = ref<Partial<SettingsRecord>>(settingsData.value ?? {})
 watch(settingsData, (val) => {
     if (val) settings.value = val
 })
@@ -75,12 +80,12 @@ useHead(
     })),
 )
 
-let unsubAuthChange = null
-let unsubUser = null
-let unsubSettings = null
-let unsubRole = null
+let unsubAuthChange: (() => void) | null = null
+let unsubUser: UnsubscribeFunc | null = null
+let unsubSettings: UnsubscribeFunc | null = null
+let unsubRole: UnsubscribeFunc | null = null
 
-async function subscribeToRole(roleId) {
+async function subscribeToRole(roleId: string | null | undefined) {
     unsubRole?.()?.catch?.(() => {})
     if (!roleId) return
     unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
@@ -88,7 +93,7 @@ async function subscribeToRole(roleId) {
     })
 }
 
-async function subscribeToUser(userId) {
+async function subscribeToUser(userId: string) {
     unsubUser?.()
     unsubUser = await pb.collection('users').subscribe(userId, (e) => {
         if (e.action === 'delete') {
@@ -135,7 +140,7 @@ onMounted(async () => {
         unsubSettings = await pb
             .collection('settings')
             .subscribe('settings_123456', (e) => {
-                settings.value = e.record
+                settings.value = e.record as SettingsRecord
             })
     } catch (error) {
         console.error('Error during initialization:', error)

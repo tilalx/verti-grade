@@ -8,38 +8,36 @@
     </div>
 </template>
 
-<script setup>
-const props = defineProps({
-    estimatedHeight: {
-        type: Number,
-        default: 240,
+<script setup lang="ts">
+const props = withDefaults(
+    defineProps<{
+        estimatedHeight?: number
+        mountMargin?: string
+        unmountMargin?: string
+    }>(),
+    {
+        estimatedHeight: 240,
+        mountMargin: '200px 0px',
+        unmountMargin: '800px 0px',
     },
-    mountMargin: {
-        type: String,
-        default: '200px 0px',
-    },
-    unmountMargin: {
-        type: String,
-        default: '800px 0px',
-    },
-})
+)
 
-const el = ref(null)
+const el = ref<HTMLElement | null>(null)
 const rendered = ref(false)
 const placeholderHeight = ref(props.estimatedHeight)
 
-let nearObserver = null
-let farObserver = null
+let nearObserver: IntersectionObserver | null = null
+let farObserver: IntersectionObserver | null = null
 
 onMounted(() => {
-    if (typeof IntersectionObserver === 'undefined') {
+    if (typeof IntersectionObserver === 'undefined' || !el.value) {
         rendered.value = true
         return
     }
 
     nearObserver = new IntersectionObserver(
         (entries) => {
-            if (entries[entries.length - 1].isIntersecting) {
+            if (entries.at(-1)?.isIntersecting) {
                 rendered.value = true
             }
         },
@@ -49,7 +47,7 @@ onMounted(() => {
 
     farObserver = new IntersectionObserver(
         (entries) => {
-            if (!entries[entries.length - 1].isIntersecting) {
+            if (!entries.at(-1)?.isIntersecting) {
                 if (rendered.value && el.value) {
                     const h = el.value.offsetHeight
                     if (h > 0) placeholderHeight.value = h

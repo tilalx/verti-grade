@@ -7,6 +7,11 @@ import {
     resolveExportLocale,
     resolveExportLabel,
 } from '../../utils/export'
+import {
+    formatDate,
+    formatDifficulty,
+    normalizeCreators,
+} from '#shared/utils/formatting'
 import type { SettingsRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -78,15 +83,7 @@ export default eventHandler(async (event) => {
             doc.fillColor('black')
 
             const textOptions = { align: 'left' as const, width: 200 }
-            let sign = ''
-
-            if (typeof climbingRoute.difficulty_sign === 'string') {
-                sign = climbingRoute.difficulty_sign.trim()
-            } else if (typeof climbingRoute.difficulty_sign === 'boolean') {
-                sign = climbingRoute.difficulty_sign ? '+' : '-'
-            }
-
-            const difficulty = `${climbingRoute.difficulty}${sign}`
+            const difficulty = formatDifficulty(climbingRoute)
 
             doc.text(
                 difficulty,
@@ -138,8 +135,8 @@ export default eventHandler(async (event) => {
                     })
             }
 
-            const creators = climbingRoute.creator || []
-            if (Array.isArray(creators) && creators.length > 0) {
+            const creators = normalizeCreators(climbingRoute.creator)
+            if (creators.length > 0) {
                 const creatorText = creators.join(' / ')
                 doc.font('Helvetica').fontSize(8)
                 const maxWidth = 130
@@ -159,8 +156,7 @@ export default eventHandler(async (event) => {
                 )
             }
 
-            const date = new Date(climbingRoute.screw_date ?? 0)
-            const screw_date = date.toLocaleDateString(locale)
+            const screw_date = formatDate(climbingRoute.screw_date, { locale })
             doc.fontSize(8).text(
                 screw_date,
                 calculateStartX(x + 80, screw_date, doc),

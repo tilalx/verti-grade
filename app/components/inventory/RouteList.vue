@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatAnchorPoint, formatDifficulty } from '~/utils/formatting'
+import { formatAnchorPoint, formatDifficulty } from '#shared/utils/formatting'
 import type { RouteRecord } from '~/types/models'
 
 const props = defineProps<{

@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
-    normalizeCreators,
     resolveApplicationUrl,
     resolveExportColumns,
     resolveRouteIds,
@@ -145,13 +144,5 @@ describe('resolveApplicationUrl', () => {
         expect(resolveApplicationUrl({} as never, {})).toBe(
             'https://request.example',
         )
-    })
-})
-
-describe('normalizeCreators', () => {
-    it('trims and drops empty entries', () => {
-        expect(normalizeCreators([' Max ', '', null])).toEqual(['Max'])
-        expect(normalizeCreators('Max , Moritz')).toEqual(['Max', 'Moritz'])
-        expect(normalizeCreators(undefined)).toEqual([])
     })
 })

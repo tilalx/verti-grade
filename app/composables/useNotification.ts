@@ -2,7 +2,10 @@ type NotificationColor = 'success' | 'error' | 'warning' | 'info'
 
 export function useNotification() {
     const message = useState<string>('notification-message', () => '')
-    const color = useState<NotificationColor>('notification-color', () => 'success')
+    const color = useState<NotificationColor>(
+        'notification-color',
+        () => 'success',
+    )
     const visible = useState<boolean>('notification-visible', () => false)
 
     function notify(msg: string, c: NotificationColor = 'success') {

@@ -26,7 +26,7 @@ export interface VersionPayload {
 export function useVersionCheck() {
     const { data, status, refresh } = useAsyncData<VersionPayload>(
         'version',
-        () => $fetch('/api/version'),
+        () => $fetch<VersionPayload, string>('/api/version'),
         { server: false, lazy: true },
     )
 

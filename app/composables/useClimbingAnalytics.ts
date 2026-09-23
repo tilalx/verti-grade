@@ -11,7 +11,7 @@ interface RouteSetterDatum {
     count: number
 }
 
-interface TimelineDatum {
+export interface TimelineDatum {
     period: string
     count: number
 }
@@ -49,7 +49,8 @@ export interface ClimbingAnalyticsResponse {
     difficultyDistribution: DifficultyDatum[]
     routeSetters: RouteSetterDatum[]
     routeTimeline: TimelineDatum[]
-    commentTimeline: TimelineDatum[]
+    routeTimelineMonthly: TimelineDatum[]
+    commentTimelineMonthly: TimelineDatum[]
     latestComments: LatestCommentDatum[]
     latestRoutes: LatestRouteDatum[]
 }
@@ -66,7 +67,8 @@ const defaultResult: ClimbingAnalyticsResponse = {
     difficultyDistribution: [],
     routeSetters: [],
     routeTimeline: [],
-    commentTimeline: [],
+    routeTimelineMonthly: [],
+    commentTimelineMonthly: [],
     latestComments: [],
     latestRoutes: [],
 }
@@ -118,7 +120,12 @@ export function useClimbingAnalytics() {
     )
     const routeSetters = computed(() => normalized.value.routeSetters)
     const routeTimeline = computed(() => normalized.value.routeTimeline)
-    const commentTimeline = computed(() => normalized.value.commentTimeline)
+    const routeTimelineMonthly = computed(
+        () => normalized.value.routeTimelineMonthly,
+    )
+    const commentTimelineMonthly = computed(
+        () => normalized.value.commentTimelineMonthly,
+    )
     const latestComments = computed(() => normalized.value.latestComments)
     const latestRoutes = computed(() => normalized.value.latestRoutes)
 
@@ -128,7 +135,8 @@ export function useClimbingAnalytics() {
         difficultyDistribution,
         routeSetters,
         routeTimeline,
-        commentTimeline,
+        routeTimelineMonthly,
+        commentTimelineMonthly,
         latestComments,
         latestRoutes,
         hasData,
@@ -144,6 +152,11 @@ function normalizeResponse(
 ): ClimbingAnalyticsResponse {
     const dedupe = <T>(items: T[]) => items.filter(Boolean)
     const formatNumber = (value: number) => (Number.isFinite(value) ? value : 0)
+    const normalizeTimeline = (items: TimelineDatum[] | undefined) =>
+        dedupe(items ?? []).map((item) => ({
+            period: item.period,
+            count: formatNumber(item.count),
+        }))
 
     return {
         summary: {
@@ -169,14 +182,11 @@ function normalizeResponse(
             setter: item.setter,
             count: formatNumber(item.count),
         })),
-        routeTimeline: dedupe(response.routeTimeline ?? []).map((item) => ({
-            period: item.period,
-            count: formatNumber(item.count),
-        })),
-        commentTimeline: dedupe(response.commentTimeline ?? []).map((item) => ({
-            period: item.period,
-            count: formatNumber(item.count),
-        })),
+        routeTimeline: normalizeTimeline(response.routeTimeline),
+        routeTimelineMonthly: normalizeTimeline(response.routeTimelineMonthly),
+        commentTimelineMonthly: normalizeTimeline(
+            response.commentTimelineMonthly,
+        ),
         latestComments: dedupe(response.latestComments ?? []).map((item) => ({
             id: item.id,
             routeId: item.routeId,

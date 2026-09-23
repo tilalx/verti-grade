@@ -26,7 +26,7 @@ export function toHex6(value: string | null | undefined): string {
     const match = /^#?([0-9a-fA-F]{6})(?:[0-9a-fA-F]{2})?$/.exec(
         (value ?? '').trim(),
     )
-    return match ? `#${match[1].toUpperCase()}` : ''
+    return match?.[1] ? `#${match[1].toUpperCase()}` : ''
 }
 
 export function readableTextOn(hex: string | null | undefined): string {

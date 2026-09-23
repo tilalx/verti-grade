@@ -312,9 +312,15 @@
 </template>
 
 <script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
-import { formatDifficulty, normalizeCreators } from '~/utils/formatting'
+import {
+    formatDate,
+    formatDifficulty,
+    locationName,
+    normalizeCreators,
+} from '#shared/utils/formatting'
 import { reportContentUrl } from '~/utils/reports'
 
 const { t, locale } = useI18n()
@@ -384,21 +390,14 @@ const difficultyBadgeStyle = computed(() => {
     }
 })
 
-const formattedScrewDate = computed(() => {
-    if (!metadata.value?.screw_date) return ''
-    try {
-        return new Date(metadata.value.screw_date).toLocaleDateString(
-            locale.value,
-            {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            },
-        )
-    } catch {
-        return ''
-    }
-})
+const formattedScrewDate = computed(() =>
+    formatDate(metadata.value?.screw_date, {
+        locale: locale.value,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }),
+)
 
 const avgRating = computed(() => {
     const rated = reviews.value.filter((r) => r.rating !== null)
@@ -414,7 +413,7 @@ const avgPerceivedDifficulty = computed(() => {
     withDiff.forEach((r) => {
         counts[r.difficultyLabel] = (counts[r.difficultyLabel] ?? 0) + 1
     })
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 })
 
 // ── Data fetching ──────────────────────────────────────────────────────────
@@ -445,7 +444,7 @@ const getAllRouteRatings = async (): Promise<void> => {
         })
         reviews.value = data.map(mapReview)
     } catch (err: unknown) {
-        if ((err as { isAbort?: boolean })?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Error fetching ratings:', err)
         notifyError(t('ratings.loadError'))
     }
@@ -479,7 +478,7 @@ function onReviewSaved() {
 function isLightColor(hex: string): boolean {
     let color = hex.replace('#', '')
     if (color.length === 3) {
-        color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
+        color = [...color].map((digit) => digit + digit).join('')
     }
     const num = parseInt(color, 16)
     const r = (num >> 16) & 0xff
@@ -491,7 +490,7 @@ function isLightColor(hex: string): boolean {
 function adjustColor(hex: string, amount: number): string {
     let color = hex.replace('#', '')
     if (color.length === 3) {
-        color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
+        color = [...color].map((digit) => digit + digit).join('')
     }
     const num = parseInt(color, 16)
     const r = Math.min(255, Math.max(0, ((num >> 16) & 0xff) + amount))

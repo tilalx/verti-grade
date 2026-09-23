@@ -22,12 +22,12 @@ const asSheet = computed(() => props.sheetOnMobile && !smAndUp.value)
 
 const sheetProps = computed(() =>
     asSheet.value
-        ? {
+        ? ({
               contentClass: 'dialog-shell--sheet',
               transition: 'dialog-bottom-transition',
               location: 'bottom center',
               origin: 'bottom center',
-          }
+          } as const)
         : { maxWidth: props.maxWidth },
 )
 </script>

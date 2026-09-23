@@ -52,14 +52,23 @@
     </v-menu>
 </template>
 
-<script setup>
-const props = defineProps({
-    to: { type: String, default: '' },
-    icon: { type: String, required: true },
-    label: { type: String, required: true },
-    children: { type: Array, default: null },
-    groupKey: { type: String, default: '' },
-})
+<script setup lang="ts">
+interface NavChild {
+    to: string
+    icon: string
+    label: string
+}
+
+const props = withDefaults(
+    defineProps<{
+        to?: string
+        icon: string
+        label: string
+        children?: NavChild[] | null
+        groupKey?: string
+    }>(),
+    { to: '', children: null, groupKey: '' },
+)
 
 const route = useRoute()
 

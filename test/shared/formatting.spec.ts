@@ -5,7 +5,9 @@ import {
     formatScore,
     normalizeCreators,
     formatDateToYYYYMMDD,
-} from '~/utils/formatting'
+    formatDate,
+    formatDifficultySign,
+} from '#shared/utils/formatting'
 
 describe('formatDifficulty', () => {
     it('returns "7+" when difficulty_sign is true', () => {
@@ -188,5 +190,49 @@ describe('formatDateToYYYYMMDD', () => {
     it('zero-pads single-digit month and day', () => {
         const result = formatDateToYYYYMMDD('2024-01-05')
         expect(result).toMatch(/^\d{4}-01-\d{2}$/)
+    })
+})
+
+describe('formatDate', () => {
+    it('returns fallback for empty or invalid input', () => {
+        expect(formatDate(null)).toBe('')
+        expect(formatDate('nope', { fallback: '—' })).toBe('—')
+    })
+
+    it('parses PocketBase space-separated dates', () => {
+        expect(
+            formatDate('2024-03-05 10:00:00.000Z', {
+                locale: 'en-US',
+                timeZone: 'UTC',
+            }),
+        ).toBe('3/5/2024')
+    })
+
+    it('forwards Intl options and switches to date-time', () => {
+        expect(
+            formatDate('2024-03-05T10:00:00Z', {
+                locale: 'en-US',
+                timeZone: 'UTC',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+            }),
+        ).toBe('March 5, 2024')
+        expect(
+            formatDate('2024-03-05T10:00:00Z', {
+                locale: 'en-US',
+                timeZone: 'UTC',
+                withTime: true,
+            }),
+        ).toContain('10:00')
+    })
+})
+
+describe('formatDifficultySign', () => {
+    it('maps booleans and trims strings', () => {
+        expect(formatDifficultySign(true)).toBe('+')
+        expect(formatDifficultySign(false)).toBe('-')
+        expect(formatDifficultySign(' + ')).toBe('+')
+        expect(formatDifficultySign(null)).toBe('')
     })
 })

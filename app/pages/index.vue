@@ -77,7 +77,7 @@
                 @update:options="loadRoutes"
             >
                 <template #item.color="{ item }">
-                    <v-avatar :color="item.color" size="30" />
+                    <v-avatar :color="item.color ?? undefined" size="30" />
                 </template>
                 <template #item.name="{ item }">
                     <div
@@ -118,7 +118,7 @@
                     {{ formatScore(item) }}
                 </template>
                 <template #item.screw_date="{ item }">
-                    {{ formatDate(item.screw_date) }}
+                    {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
                     <RouteDetails :route_id="item.id" />
@@ -166,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 import {
@@ -173,10 +174,11 @@ import {
     formatAnchorPoint,
     formatScore,
     normalizeCreators,
-} from '~/utils/formatting'
+    formatDate,
+} from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
 const { lgAndUp } = useDisplay()
 
@@ -202,7 +204,6 @@ useHead({
         {
             name: 'description',
             content: t('page.content.index'),
-            authRequired: false,
         },
     ],
 })
@@ -314,7 +315,7 @@ async function loadRoutes(
 
         totalItems.value = res.totalItems
     } catch (error) {
-        if (error?.isAbort) return
+        if (isAbortError(error)) return
         console.error('Failed to load routes:', error)
         notifyError(t('notifications.error.generic'))
     } finally {
@@ -381,11 +382,6 @@ onBeforeUnmount(() => {
     }
     scrollObserver?.disconnect()
 })
-
-function formatDate(date: string | null | undefined) {
-    if (!date) return ''
-    return new Date(date).toLocaleDateString()
-}
 </script>
 
 <style scoped>

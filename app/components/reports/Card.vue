@@ -44,7 +44,7 @@
                     </v-chip>
                 </div>
                 <div class="text-body-small text-medium-emphasis">
-                    {{ formatDate(report.created) }}
+                    {{ formatReportDate(report.created) }}
                 </div>
             </div>
         </div>
@@ -126,6 +126,7 @@
 
 <script setup lang="ts">
 import { statusColor } from '~/utils/reports'
+import { formatDate } from '#shared/utils/formatting'
 import type { ReportDecision, ReportRecord } from '~/types/models'
 
 defineProps<{ report: ReportRecord }>()
@@ -134,8 +135,7 @@ defineEmits<{ decide: [report: ReportRecord, decision: ReportDecision] }>()
 
 const { t, locale } = useI18n()
 
-function formatDate(value?: string | null) {
-    if (!value) return ''
-    return new Date(value.replace(' ', 'T')).toLocaleString(locale.value)
+function formatReportDate(value?: string | null) {
+    return formatDate(value, { locale: locale.value, withTime: true })
 }
 </script>

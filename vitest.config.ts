@@ -5,6 +5,7 @@ import path from 'node:path'
 const importMetaFlags: Record<string, string> = {
     'import.meta.dev': '(process.env.NODE_ENV !== "production")',
     'import.meta.server': '(process.server === true)',
+    'import.meta.client': '(process.server !== true)',
 }
 
 const importMetaPolyfill = (): PluginOption => ({
@@ -31,6 +32,7 @@ export default defineConfig({
         alias: {
             '~': path.resolve(__dirname, 'app'),
             '@': path.resolve(__dirname, 'app'),
+            '#shared': path.resolve(__dirname, 'shared'),
             '#imports': path.resolve(__dirname, 'test/__stubs__/imports.ts'),
         },
     },

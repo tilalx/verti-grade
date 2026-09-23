@@ -63,7 +63,7 @@
 import type PocketBase from 'pocketbase'
 import type { RatingRecord } from '~/types/models'
 import type { CommentCardItem } from '~/components/comments/Card.vue'
-import { formatDifficulty } from '~/utils/formatting'
+import { formatDifficulty } from '#shared/utils/formatting'
 import { reportContentUrl } from '~/utils/reports'
 
 const { t } = useI18n()

@@ -195,7 +195,10 @@
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
 import type { RouteRecord } from '~/types/models'
-import { normalizeCreators, formatDateToYYYYMMDD } from '~/utils/formatting'
+import {
+    normalizeCreators,
+    formatDateToYYYYMMDD,
+} from '#shared/utils/formatting'
 import { required, maxLength } from '~/utils/validation'
 import {
     COMBINED_DIFFICULTIES,

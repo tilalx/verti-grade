@@ -65,7 +65,7 @@ test('a location that still has routes cannot be deleted', async ({
         })
     ).json()
 
-    await page.reload()
+    await gotoSettled(page, '/admin/settings')
     const row = locationRow(page, name)
     await row.getByTestId('settings-location-delete').click()
     await expect(page.getByTestId('global-snackbar')).toContainText(

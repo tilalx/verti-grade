@@ -144,17 +144,19 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { ClientResponseError } from 'pocketbase'
+import type { VForm } from 'vuetify/components'
 import { required, maxLength, validEmail } from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const emit = defineEmits(['user-created', 'closed'])
+const emit = defineEmits<{ 'user-created': []; closed: [] }>()
 
 const dialog = ref(false)
 const valid = ref(false)
 const saving = ref(false)
-const form = ref(null)
+const form = ref<VForm | null>(null)
 const { data: roles } = useRoles()
 
 const user = reactive({
@@ -162,21 +164,22 @@ const user = reactive({
     emailVisibility: true,
     name: '',
     firstname: '',
-    role: null,
+    role: null as string | null,
 })
 
 // ── Avatar ────────────────────────────────────────────────────────────────
-const avatarFile = ref(null)
-const avatarPreview = ref(null)
-const avatarInput = ref(null)
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref<string | null>(null)
+const avatarInput = ref<HTMLInputElement | null>(null)
 
-function onAvatarPicked(e) {
-    const file = e.target.files?.[0]
+function onAvatarPicked(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
     if (file) {
         avatarFile.value = file
         avatarPreview.value = URL.createObjectURL(file)
     }
-    e.target.value = ''
+    input.value = ''
 }
 
 const { notify, error: notifyError } = useNotification()
@@ -201,8 +204,8 @@ function closeDialog() {
 
 // ── Submit ────────────────────────────────────────────────────────────────
 async function submit() {
-    const { valid: formValid } = await form.value.validate()
-    if (!formValid) return
+    const result = await form.value?.validate()
+    if (!result?.valid) return
 
     saving.value = true
     try {
@@ -237,9 +240,10 @@ async function submit() {
         closeDialog()
     } catch (error) {
         console.error('Error creating user:', error)
+        const fieldErrors = (error as ClientResponseError).data?.data
         const message =
-            error.data?.data?.email?.message ||
-            error.data?.data?.username?.message ||
+            fieldErrors?.email?.message ||
+            fieldErrors?.username?.message ||
             t('notifications.error.generic')
         notifyError(message)
     } finally {

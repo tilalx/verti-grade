@@ -30,7 +30,7 @@
             <div class="d-flex align-center flex-wrap ga-2 mb-1">
                 <span class="commit-sha">{{ commit.sha }}</span>
                 <span class="commit-date">
-                    {{ formatDisplayDate(commit.date, locale) }}
+                    {{ formatDate(commit.date, { locale }) }}
                 </span>
             </div>
             <div class="commit-message">{{ commit.message }}</div>
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatDisplayDate } from '~/utils/formatting'
+import { formatDate } from '#shared/utils/formatting'
 import type { VersionCommit } from '~/composables/useVersionCheck'
 
 const props = withDefaults(

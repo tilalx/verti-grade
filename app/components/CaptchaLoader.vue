@@ -15,6 +15,6 @@
     <v-progress-circular v-else indeterminate size="20" width="2" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 const { solving, progress } = useCapToken()
 </script>

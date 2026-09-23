@@ -30,7 +30,7 @@
                 show-expand
             >
                 <template #item.color="{ item }">
-                    <v-avatar :color="item.color" size="24" />
+                    <v-avatar :color="item.color ?? undefined" size="24" />
                 </template>
 
                 <template #item.ratings="{ item }">
@@ -117,16 +117,48 @@
         </LayoutDialogShell>
     </div>
 </template>
-<script setup>
-const pb = usePocketbase()
-const emit = defineEmits(['closed'])
-const currentUser = pb.authStore.model
+<script setup lang="ts">
+import { normalizeCreators } from '#shared/utils/formatting'
+import type { UserRecord } from '~/types/models'
 
-const fileInput = ref(null)
+interface ImportedRating {
+    rating?: unknown
+    difficulty?: unknown
+    difficulty_sign?: unknown
+    comment?: unknown
+    user?: string
+}
+
+interface ImportedRoute {
+    name?: unknown
+    difficulty?: unknown
+    difficulty_sign?: unknown
+    anchor_point?: unknown
+    location?: unknown
+    type?: string | null
+    comment?: unknown
+    creator?: unknown
+    screw_date?: string | null
+    color?: string | null
+    archived?: unknown
+    ratings?: ImportedRating[]
+    ratingsCount?: number
+}
+
+interface ImportError {
+    routeName: unknown
+    message: string
+}
+
+const pb = usePocketbase()
+const emit = defineEmits<{ closed: [] }>()
+const currentUser = pb.authStore.record as UserRecord | null
+
+const fileInput = ref<HTMLInputElement | null>(null)
 const showPreviewDialog = ref(false)
 const loading = ref(false)
-const routesToImport = ref([])
-const expanded = ref([])
+const routesToImport = ref<ImportedRoute[]>([])
+const expanded = ref<string[]>([])
 
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
@@ -142,23 +174,24 @@ const previewHeaders = computed(() => [
 ])
 
 const open = () => {
-    fileInput.value.click()
+    fileInput.value?.click()
 }
 
 defineExpose({ open })
 
-const handleFileChange = async (event) => {
-    const file = event.target.files[0]
+const handleFileChange = async (event: Event) => {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
     reader.onload = () => {
         try {
-            const parsedData = JSON.parse(reader.result)
+            const parsedData = JSON.parse(String(reader.result))
             if (!Array.isArray(parsedData)) {
                 throw new Error('JSON file is not an array.')
             }
-            routesToImport.value = parsedData.map((route) => ({
+            routesToImport.value = parsedData.map((route: ImportedRoute) => ({
                 ...route,
                 ratingsCount: route.ratings?.length || 0,
             }))
@@ -173,7 +206,7 @@ const handleFileChange = async (event) => {
     }
     reader.readAsText(file)
 
-    event.target.value = ''
+    input.value = ''
 }
 
 const cancelImport = () => {
@@ -188,13 +221,13 @@ const confirmImport = async () => {
     try {
         const fallbackCreator = buildFallbackCreator(currentUser)
         const locationIdByName = new Map(
-            locationRecords.value.map((location) => [
+            (locationRecords.value ?? []).map((location) => [
                 location.name.toLowerCase(),
                 location.id,
             ]),
         )
-        const routeErrors = []
-        const ratingErrors = []
+        const routeErrors: ImportError[] = []
+        const ratingErrors: ImportError[] = []
 
         for (const route of jsonData) {
             try {
@@ -225,7 +258,7 @@ const confirmImport = async () => {
                             ratingErrors.push({
                                 routeName: route.name,
                                 message:
-                                    ratingError?.message ??
+                                    (ratingError as Error)?.message ??
                                     'Unknown rating error',
                             })
                         }
@@ -235,7 +268,8 @@ const confirmImport = async () => {
                 console.error('Failed to insert route', routeError)
                 routeErrors.push({
                     routeName: route?.name ?? 'Unnamed Route',
-                    message: routeError?.message ?? 'Unknown route error',
+                    message:
+                        (routeError as Error)?.message ?? 'Unknown route error',
                 })
             }
         }
@@ -243,7 +277,7 @@ const confirmImport = async () => {
         if (routeErrors.length === 0 && ratingErrors.length === 0) {
             notify(t('importRoutes.success'))
         } else {
-            const summaryParts = []
+            const summaryParts: string[] = []
             if (routeErrors.length > 0) {
                 summaryParts.push(
                     t('importRoutes.routesFailed', {
@@ -267,33 +301,26 @@ const confirmImport = async () => {
         emit('closed')
     } catch (error) {
         console.error('Error during import:', error)
-        notifyError(error.message || t('importRoutes.failed'))
+        notifyError((error as Error).message || t('importRoutes.failed'))
     } finally {
         loading.value = false
         cancelImport()
     }
 }
 
-function sanitizeRoutePayload(route, fallbackCreator, locationIdByName) {
-    const normalizeSign = (value) => {
-        if (value === true || value === false || value === null) {
-            return value
-        }
-        const sign = typeof value === 'string' ? value.trim() : ''
-        return sign === '+' ? true : sign === '-' ? false : null
-    }
+function normalizeSign(value: unknown): boolean | null {
+    if (value === true || value === false || value === null) return value
+    const sign = typeof value === 'string' ? value.trim() : ''
+    return sign === '+' ? true : sign === '-' ? false : null
+}
 
+function sanitizeRoutePayload(
+    route: ImportedRoute,
+    fallbackCreator: string,
+    locationIdByName: Map<string, string>,
+) {
     const numericDifficulty = Number(route.difficulty)
-    const normalizedCreators = Array.isArray(route.creator)
-        ? route.creator
-              .map((value) => (typeof value === 'string' ? value.trim() : ''))
-              .filter(Boolean)
-        : typeof route.creator === 'string'
-          ? route.creator
-                .split(',')
-                .map((value) => value.trim())
-                .filter(Boolean)
-          : []
+    const normalizedCreators = normalizeCreators(route.creator)
 
     return {
         name: typeof route.name === 'string' ? route.name : '',
@@ -321,16 +348,12 @@ function sanitizeRoutePayload(route, fallbackCreator, locationIdByName) {
     }
 }
 
-function sanitizeRatingPayload(rating, meta) {
-    const normalizeSign = (value) => {
-        if (value === true || value === false || value === null) {
-            return value
-        }
-        const sign = typeof value === 'string' ? value.trim() : ''
-        return sign === '+' ? true : sign === '-' ? false : null
-    }
-
-    const payload = {
+function sanitizeRatingPayload(
+    rating: ImportedRating,
+    meta: { routeId: string; fallbackUserId?: string },
+) {
+    const userId = rating.user || meta.fallbackUserId
+    return {
         route_id: meta.routeId,
         rating: Number.isFinite(Number(rating.rating))
             ? Number(rating.rating)
@@ -340,17 +363,11 @@ function sanitizeRatingPayload(rating, meta) {
             : 0,
         difficulty_sign: normalizeSign(rating.difficulty_sign),
         comment: typeof rating.comment === 'string' ? rating.comment : '',
+        ...(userId ? { user: userId } : {}),
     }
-
-    const userId = rating.user || meta.fallbackUserId
-    if (userId) {
-        payload.user = userId
-    }
-
-    return payload
 }
 
-function buildFallbackCreator(user) {
+function buildFallbackCreator(user: UserRecord | null) {
     if (!user) {
         return 'Imported'
     }

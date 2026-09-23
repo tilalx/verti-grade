@@ -1,6 +1,6 @@
 export interface SortOption {
     key: string
-    order?: 'asc' | 'desc' | string
+    order?: 'asc' | 'desc'
 }
 
 export function toPbSort(

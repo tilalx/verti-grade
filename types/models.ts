@@ -75,6 +75,7 @@ export interface UserRecord extends BaseRecord {
     verified?: boolean
     firstname?: string | null
     lastname?: string | null
+    name?: string | null
     avatar?: string | null
     role?: RecordId | null
     language?: string | null

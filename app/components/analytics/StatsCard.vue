@@ -13,20 +13,6 @@
                         size="18"
                     />
                 </div>
-                <div
-                    class="sparkline"
-                    v-if="!loading && normalizedSparkline.length"
-                >
-                    <span
-                        v-for="(v, i) in normalizedSparkline"
-                        :key="i"
-                        class="spark-bar"
-                        :style="{
-                            height: v + '%',
-                            background: resolvedAccentColor,
-                        }"
-                    />
-                </div>
             </div>
 
             <div class="card-label">{{ title }}</div>
@@ -39,13 +25,7 @@
                     {{ formattedValue }}
                 </div>
                 <div class="card-footer mt-1">
-                    <template v-if="delta !== null && delta !== undefined">
-                        <span :class="delta >= 0 ? 'delta-up' : 'delta-down'">
-                            {{ delta >= 0 ? '↑' : '↓' }} {{ Math.abs(delta) }}
-                        </span>
-                        <span class="footer-sub">vs last month</span>
-                    </template>
-                    <span v-else-if="subtitle" class="footer-sub">{{
+                    <span v-if="subtitle" class="footer-sub">{{
                         subtitle
                     }}</span>
                 </div>
@@ -54,71 +34,30 @@
     </v-card>
 </template>
 
-<script setup>
-const props = defineProps({
-    title: {
-        type: String,
-        required: true,
+<script setup lang="ts">
+const props = withDefaults(
+    defineProps<{
+        title: string
+        value: string | number
+        icon?: string
+        subtitle?: string
+        loading?: boolean
+        format?: (value: number) => string
+        accentColor?: string
+        iconBg?: string
+        iconFg?: string
+    }>(),
+    {
+        loading: false,
+        format: (value: number) => `${value}`,
+        accentColor: '#378ADD',
     },
-    value: {
-        type: [String, Number],
-        required: true,
-    },
-    icon: {
-        type: String,
-        default: undefined,
-    },
-    subtitle: {
-        type: String,
-        default: undefined,
-    },
-    loading: {
-        type: Boolean,
-        default: false,
-    },
-    format: {
-        type: Function,
-        default: (value) => `${value}`,
-    },
-    delta: {
-        type: Number,
-        default: null,
-    },
-    sparkline: {
-        type: Array,
-        default: () => [],
-    },
-    accentColor: {
-        type: String,
-        default: '#378ADD',
-    },
-    iconBg: {
-        type: String,
-        default: undefined,
-    },
-    iconFg: {
-        type: String,
-        default: undefined,
-    },
-})
+)
 
 const resolvedAccentColor = computed(() => props.accentColor)
-
-const resolvedIconBg = computed(() => {
-    if (props.iconBg) return props.iconBg
-    return props.accentColor + '1F'
-})
-
+const resolvedIconBg = computed(() => props.iconBg ?? `${props.accentColor}1F`)
 const resolvedIconFg = computed(() => props.iconFg ?? props.accentColor)
-
-const formattedValue = computed(() => props.format(props.value))
-
-const normalizedSparkline = computed(() => {
-    if (!props.sparkline?.length) return []
-    const max = Math.max(...props.sparkline)
-    if (max === 0) return props.sparkline.map(() => 20)
-    return props.sparkline.map((v) => Math.max(12, Math.round((v / max) * 100)))
-})
+const formattedValue = computed(() => props.format(Number(props.value)))
 </script>
 
 <style scoped>
@@ -159,22 +98,6 @@ const normalizedSparkline = computed(() => {
     flex-shrink: 0;
 }
 
-.sparkline {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    opacity: 0.4;
-    height: 28px;
-}
-
-.spark-bar {
-    width: 4px;
-    border-radius: 2px;
-    display: block;
-    min-height: 4px;
-    transition: height 0.3s ease;
-}
-
 .card-label {
     font-size: 11px;
     font-weight: 500;
@@ -198,18 +121,6 @@ const normalizedSparkline = computed(() => {
     gap: 5px;
     font-size: 12px;
     min-height: 18px;
-}
-
-.delta-up {
-    color: #1d9e75;
-    font-weight: 600;
-    font-size: 11px;
-}
-
-.delta-down {
-    color: #d85a30;
-    font-weight: 600;
-    font-size: 11px;
 }
 
 .footer-sub {

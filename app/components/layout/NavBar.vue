@@ -122,21 +122,15 @@
     </template>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { SettingsRecord } from '~/types/models'
 const theme = useTheme()
 const { lgAndUp } = useDisplay()
 
-const props = defineProps({
-    loggedIn: {
-        type: Boolean,
-        required: true,
-        default: false,
-    },
-    settings: {
-        type: Object,
-        required: true,
-    },
-})
+const props = defineProps<{
+    loggedIn: boolean
+    settings: Partial<SettingsRecord>
+}>()
 
 const { loggedIn, settings } = toRefs(props)
 
@@ -208,7 +202,8 @@ const navItems = [
     },
 ]
 
-const allowed = (entry) => !entry.permission || can(entry.permission)
+const allowed = (entry: { permission?: string }) =>
+    !entry.permission || can(entry.permission)
 
 const visibleNav = computed(() =>
     navItems

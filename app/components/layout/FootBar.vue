@@ -102,12 +102,10 @@
     </v-footer>
 </template>
 
-<script setup>
-const props = defineProps({
-    settings: {
-        type: Object,
-        default: () => ({}),
-    },
+<script setup lang="ts">
+import type { SettingsRecord } from '~/types/models'
+withDefaults(defineProps<{ settings?: Partial<SettingsRecord> }>(), {
+    settings: () => ({}),
 })
 
 const pb = usePocketbase()
@@ -115,7 +113,10 @@ const { appVersion, installedNotes, installedBase, error, loading } =
     useVersionCheck()
 const currentYear = computed(() => new Date().getFullYear())
 
-const legalLinkProps = (externalUrl, internalPath) =>
+const legalLinkProps = (
+    externalUrl: string | null | undefined,
+    internalPath: string,
+) =>
     externalUrl
         ? { href: externalUrl, target: '_blank', rel: 'noopener noreferrer' }
         : { to: internalPath }

@@ -33,7 +33,7 @@ async function seedSession(page: Page, location: string, ids: string[]) {
         },
         { location, ids },
     )
-    await page.reload()
+    await gotoSettled(page, '/manage/inventory')
     await page
         .locator('[data-testid="inventory-progress"]')
         .waitFor({ state: 'visible' })
@@ -112,7 +112,7 @@ test('requires a location before scanning can start', async ({
         localStorage.removeItem('inventory-scanned-route-ids')
         localStorage.setItem('inventory-instructions-seen', '1')
     })
-    await page.reload()
+    await gotoSettled(page, '/manage/inventory')
 
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
     await page.getByTestId(`inventory-location-${HALL_A}`).click()
@@ -135,7 +135,7 @@ test('restores a legacy session and asks which location it belongs to', async ({
         },
         [hallA[0].id, hallA[1].id],
     )
-    await page.reload()
+    await gotoSettled(page, '/manage/inventory')
     await page
         .locator('[data-testid="inventory-progress"]')
         .waitFor({ state: 'visible' })
