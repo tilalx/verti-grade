@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
 import { fetchAuditRows } from '../../support/audit'
 
 test('a user sees their own entries and nobody else’s', async ({
@@ -54,12 +55,13 @@ test('an admin sees entries from other actors too', async ({
     await gotoSettled(page, '/account/activity', /\/account\/activity/)
 
     const headers = await authHeader(page)
+    const hallA = await locationId(page, LOCATIONS[0])
     const res = await page.request.post('/api/collections/routes/records', {
         headers,
         data: {
             name: `${testPrefix}-admin-visible`,
             difficulty: 5,
-            location: 'Hanau',
+            location: hallA,
             type: 'Boulder',
             creator: [testPrefix],
         },

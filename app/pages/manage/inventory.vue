@@ -84,7 +84,7 @@
                                         ? 'primary'
                                         : undefined
                                 "
-                                :data-testid="`inventory-location-${item.value}`"
+                                :data-testid="`inventory-location-${item.title}`"
                                 @click="sessionLocation = item.value"
                             >
                                 {{ item.title }}
@@ -100,7 +100,7 @@
                             data-testid="inventory-change-location"
                             @click:close="resetDialog = true"
                         >
-                            {{ sessionLocation }}
+                            {{ sessionLocationName }}
                         </v-chip>
 
                         <div class="progress-group d-flex align-center ga-2">
@@ -543,7 +543,7 @@ definePageMeta({
 })
 
 const ROUTE_FIELDS =
-    'id,name,location,difficulty,difficulty_sign,anchor_point,archived'
+    'id,name,location,difficulty,difficulty_sign,anchor_point,archived,expand.location.name'
 const SCAN_COOLDOWN_MS = 2000
 
 const { t, locale } = useI18n()
@@ -589,6 +589,12 @@ const locationItems = computed(() =>
     locations.value
         .filter((entry) => entry.value)
         .map((entry) => ({ title: entry.text, value: entry.value })),
+)
+
+const sessionLocationName = computed(
+    () =>
+        locationItems.value.find((item) => item.value === sessionLocation.value)
+            ?.title ?? '',
 )
 
 const locationLocked = computed(
@@ -773,7 +779,10 @@ const acceptingScans = computed(
     () => !finishDialog.value && !manualDialog.value,
 )
 
-let routeInfoById = new Map<string, { name: string; location: string | null }>()
+let routeInfoById = new Map<
+    string,
+    { name: string; location: string | null; locationName: string }
+>()
 let scannedIdSet = new Set<string>()
 let activeLocation: string | null = null
 let tagUnknown = ''
@@ -788,6 +797,7 @@ watch(
                 {
                     name: route.name || route.id,
                     location: route.location ?? null,
+                    locationName: locationName(route),
                 },
             ]),
         )
@@ -829,7 +839,7 @@ const codeTag = (rawValue: string) => {
     if (info.location !== activeLocation) {
         return {
             color: '#EF4444',
-            label: `${info.name} · ${info.location || '—'}`,
+            label: `${info.name} · ${info.locationName || '—'}`,
         }
     }
     if (scannedIdSet.has(id)) {
@@ -1032,6 +1042,7 @@ const loadRoutes = async () => {
             .collection('routes')
             .getFullList<RouteRecord>({
                 fields: ROUTE_FIELDS,
+                expand: 'location',
                 $autoCancel: false,
             })
         reconcileScannedIds()

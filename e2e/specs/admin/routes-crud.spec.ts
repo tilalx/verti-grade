@@ -1,4 +1,5 @@
 import { test, expect } from '../../support/fixtures'
+import { LOCATIONS } from '../../support/seed'
 import { gotoSettled } from '../../support/nav'
 
 test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
@@ -18,7 +19,7 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
         .locator('input')
         .fill('10')
     await page.getByTestId('route-form-location').click()
-    await page.getByRole('option', { name: 'Hanau', exact: true }).click()
+    await page.getByRole('option', { name: LOCATIONS[0], exact: true }).click()
     await page
         .getByTestId('route-form-creator')
         .locator('input')

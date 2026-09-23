@@ -61,7 +61,9 @@
                     <v-select
                         v-model="form.location"
                         :label="$t('climbing.location')"
-                        :items="locations"
+                        :items="locationRecords"
+                        item-title="name"
+                        item-value="id"
                         :rules="[requiredRule]"
                         data-testid="route-form-location"
                     />
@@ -311,7 +313,7 @@ const hasChanges = computed(
 const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
 
-const locations = ['Hanau', 'Gelnhausen']
+const { data: locationRecords } = useLocations()
 
 const combinedDifficulties = Array.from({ length: 10 }, (_, i) => {
     const d = i + 1

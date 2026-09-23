@@ -391,10 +391,14 @@ const difficulties = computed(() => [
     })),
 ])
 
+const { data: locationRecords } = useLocations()
+
 const locations = computed(() => [
     { text: t('filter.all'), value: null },
-    { text: 'Hanau', value: 'Hanau' },
-    { text: 'Gelnhausen', value: 'Gelnhausen' },
+    ...locationRecords.value.map((location) => ({
+        text: location.name,
+        value: location.id,
+    })),
 ])
 
 const sortOptions = computed(() => [
@@ -447,7 +451,7 @@ const LIST_FIELDS = [
     '*',
     'expand.route_id.id',
     'expand.route_id.name',
-    'expand.route_id.location',
+    'expand.route_id.expand.location.name',
     'expand.user.id',
     'expand.user.collectionId',
     'expand.user.name',
@@ -460,7 +464,7 @@ function mapComment(c) {
         ...c,
         routeId: c.expand?.route_id?.id ?? null,
         routeName: c.expand?.route_id?.name ?? 'N/A',
-        location: c.expand?.route_id?.location ?? null,
+        location: locationName(c.expand?.route_id) || null,
         difficultyLabel: c.difficulty != null ? formatDifficulty(c) : null,
         userName:
             c.expand?.user?.name ||
@@ -514,7 +518,7 @@ const fetchList = async (append = false) => {
             .getList(page.value, PER_PAGE, {
                 sort: buildSort(),
                 filter: buildFilter(search.value.trim()),
-                expand: 'route_id,user',
+                expand: 'route_id.location,user',
                 fields: LIST_FIELDS,
                 requestKey: 'commentsList',
             })
@@ -701,7 +705,7 @@ onMounted(async () => {
                     const rec = await pb
                         .collection('ratings')
                         .getOne(e.record.id, {
-                            expand: 'route_id,user',
+                            expand: 'route_id.location,user',
                             fields: LIST_FIELDS,
                             requestKey: null,
                         })
@@ -716,7 +720,7 @@ onMounted(async () => {
                     const rec = await pb
                         .collection('ratings')
                         .getOne(e.record.id, {
-                            expand: 'route_id,user',
+                            expand: 'route_id.location,user',
                             fields: LIST_FIELDS,
                             requestKey: null,
                         })

@@ -13,7 +13,7 @@ export interface InventorySession {
 
 export const INVENTORY_STORAGE_KEY = 'inventory-scanned-route-ids'
 export const INVENTORY_INSTRUCTIONS_KEY = 'inventory-instructions-seen'
-export const INVENTORY_SESSION_VERSION = 2
+export const INVENTORY_SESSION_VERSION = 3
 
 function emptySession(): InventorySession {
     return { location: null, ids: [] }
@@ -49,7 +49,9 @@ export function loadSession(): InventorySession {
     const record = parsed as Record<string, unknown>
     return {
         location:
-            typeof record.location === 'string' && record.location.length > 0
+            record.v === INVENTORY_SESSION_VERSION &&
+            typeof record.location === 'string' &&
+            record.location.length > 0
                 ? record.location
                 : null,
         ids: validIds(record.ids),

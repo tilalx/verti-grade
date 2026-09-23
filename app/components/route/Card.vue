@@ -97,9 +97,9 @@
                     <v-icon size="13">mdi-calendar-month-outline</v-icon>
                     {{ screwDate }}
                 </span>
-                <span v-if="route.location" class="list-card__pill">
+                <span v-if="locationName(route)" class="list-card__pill">
                     <v-icon size="13">mdi-map-marker-outline</v-icon>
-                    {{ route.location }}
+                    {{ locationName(route) }}
                 </span>
                 <span v-if="route.type" class="list-card__pill">
                     <v-icon size="13">mdi-shape</v-icon>

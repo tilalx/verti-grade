@@ -44,14 +44,14 @@
                                     {{ metadata.type }}
                                 </v-chip>
                                 <v-chip
-                                    v-if="metadata.location"
+                                    v-if="locationName(metadata)"
                                     size="small"
                                     variant="flat"
                                     color="rgba(255,255,255,0.2)"
                                     class="text-white"
                                     prepend-icon="mdi-map-marker-outline"
                                 >
-                                    {{ metadata.location }}
+                                    {{ locationName(metadata) }}
                                 </v-chip>
                             </div>
 
@@ -424,7 +424,7 @@ const getRouteMetadata = async (): Promise<void> => {
     try {
         const record = await pb
             .collection('routes')
-            .getOne<RouteRecord>(route_id.value)
+            .getOne<RouteRecord>(route_id.value, { expand: 'location' })
         metadata.value = {
             ...record,
             creator: normalizeCreators(record.creator),

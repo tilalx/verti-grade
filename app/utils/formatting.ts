@@ -60,6 +60,18 @@ export function formatDifficulty(
     return `${base}${sign}`.trim()
 }
 
+export function locationName(
+    record:
+        | {
+              expand?: Record<string, unknown>
+          }
+        | null
+        | undefined,
+): string {
+    const location = record?.expand?.location as { name?: string } | undefined
+    return location?.name ?? ''
+}
+
 export function formatAnchorPoint(value: unknown): unknown {
     if (value === null || value === undefined || value === '') {
         return '—'

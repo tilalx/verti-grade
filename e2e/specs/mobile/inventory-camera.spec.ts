@@ -3,6 +3,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { generateRouteQrY4m } from '../../support/qr'
 import { gotoSettled } from '../../support/nav'
+import { LOCATIONS } from '../../support/seed'
 
 const AUTH_FILE = path.join(__dirname, '..', '..', '.auth', 'admin.json')
 
@@ -15,7 +16,7 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     const res = await routeRes.get(
         '/api/collections/routes/records?filter=' +
             encodeURIComponent(
-                'name ~ "e2e-route-" && archived = false && location = "Hanau"',
+                `name ~ "e2e-route-" && archived = false && location.name = "${LOCATIONS[0]}"`,
             ) +
             '&perPage=1',
     )
@@ -49,8 +50,9 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
     })
     await page.reload()
 
-    await expect(page.getByTestId('inventory-location-Hanau')).toBeVisible()
-    await page.getByTestId('inventory-location-Hanau').click()
+    const hallButton = page.getByTestId(`inventory-location-${LOCATIONS[0]}`)
+    await expect(hallButton).toBeVisible()
+    await hallButton.click()
 
     await expect(page.getByTestId('inventory-start')).toBeEnabled({
         timeout: 30_000,

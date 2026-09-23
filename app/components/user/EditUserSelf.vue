@@ -56,6 +56,7 @@
                             size="small"
                             rounded="pill"
                             class="flex-shrink-0"
+                            data-testid="profile-language"
                         >
                             <span class="locale-flag mr-1">{{
                                 currentLocale.flag
@@ -73,11 +74,12 @@
                         <v-list-item
                             v-for="loc in locales"
                             :key="loc.code"
-                            :active="locale === loc.code"
+                            :active="user.language === loc.code"
                             :value="loc.code"
                             :title="loc.label"
                             rounded="lg"
-                            @click="setLocale(loc.code)"
+                            :data-testid="`profile-language-${loc.code}`"
+                            @click="user.language = loc.code"
                         >
                             <template #prepend>
                                 <span class="locale-flag mr-3">{{
@@ -280,7 +282,7 @@ const locales = [
     { code: 'uk', label: 'Українська', flag: '🇺🇦' },
 ]
 const currentLocale = computed(
-    () => locales.find((l) => l.code === locale.value) ?? locales[0],
+    () => locales.find((l) => l.code === user.language) ?? locales[0],
 )
 
 // ── PocketBase ────────────────────────────────────────────────────────────
@@ -296,6 +298,7 @@ const user = reactive({
         email: '',
         avatar: null,
     }),
+    language: authRecord?.language || locale.value,
     oldPassword: '',
     password: '',
     passwordConfirm: '',
@@ -359,6 +362,7 @@ const original = {
     firstname: user.firstname,
     name: user.name,
     email: user.email,
+    language: user.language,
 }
 
 const normalizedEmail = (value) =>
@@ -376,13 +380,18 @@ const hasChanges = computed(() => {
     if (avatarFile.value) return true
     if (passwordChangeRequested.value) return true
     if (emailChangeRequested.value) return true
-    return user.firstname !== original.firstname || user.name !== original.name
+    return (
+        user.firstname !== original.firstname ||
+        user.name !== original.name ||
+        user.language !== original.language
+    )
 })
 
 function cancelEdit() {
     user.firstname = original.firstname
     user.name = original.name
     user.email = original.email
+    user.language = original.language
     user.oldPassword = ''
     user.password = ''
     user.passwordConfirm = ''
@@ -425,6 +434,7 @@ async function saveUser() {
     const formData = new FormData()
     formData.append('firstname', user.firstname)
     formData.append('name', user.name)
+    formData.append('language', user.language)
 
     if (passwordChangeRequested.value) {
         formData.append('oldPassword', user.oldPassword)
@@ -454,6 +464,8 @@ async function saveUser() {
         original.firstname = updated.firstname
         original.name = updated.name
         original.email = updated.email ?? original.email
+        original.language = updated.language
+        await setLocale(updated.language)
 
         if (wantsEmailChange) {
             try {

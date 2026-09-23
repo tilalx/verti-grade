@@ -87,7 +87,7 @@
                     <v-divider class="mt-3" />
 
                     <v-card-text class="py-2 flex-grow-1">
-                        <v-row dense>
+                        <v-row density="compact">
                             <v-col
                                 v-for="perm in allPermissions"
                                 :key="perm.id"

@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { LOCATIONS } from '../../support/seed'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -15,7 +16,7 @@ test('imports routes from a JSON file', async ({ adminPage: page }) => {
                 difficulty: 6,
                 difficulty_sign: '+',
                 anchor_point: 8,
-                location: 'Gelnhausen',
+                location: LOCATIONS[1].toUpperCase(),
                 type: 'Boulder',
                 comment: 'imported by e2e',
                 creator: ['E2E Importer'],
@@ -39,6 +40,7 @@ test('imports routes from a JSON file', async ({ adminPage: page }) => {
 
     await page.getByTestId('filter-search').locator('input').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText(name)
+    await expect(page.getByTestId('routes-table')).toContainText(LOCATIONS[1])
 
     fs.unlinkSync(file)
 })
@@ -54,7 +56,7 @@ test('reports import issues when route creation fails server-side', async ({
             {
                 name,
                 difficulty: 6,
-                location: 'Gelnhausen',
+                location: LOCATIONS[1],
                 type: 'Boulder',
                 creator: ['E2E Importer'],
                 screw_date: '2026-01-01',

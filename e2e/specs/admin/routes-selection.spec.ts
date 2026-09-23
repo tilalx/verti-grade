@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
 
 test('row checkboxes and select-all reflect the selected route ids', async ({
     adminPage: page,
@@ -8,6 +9,7 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
 
     await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
+    const hallA = await locationId(page, LOCATIONS[0])
 
     for (let i = 0; i < 2; i++) {
         await page.request.post('/api/collections/routes/records', {
@@ -16,7 +18,7 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
                 name: `${prefix}-${i}`,
                 difficulty: 5,
                 anchor_point: 5,
-                location: 'Hanau',
+                location: hallA,
                 type: 'Route',
                 creator: ['E2E'],
                 screw_date: '2026-01-01',
