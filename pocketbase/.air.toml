@@ -6,7 +6,7 @@ cmd = "go build -o ./pocketbase ."
 entrypoint = "./pocketbase"
 args_bin = ["serve", "--http=0.0.0.0:8090"]
 include_ext = ["go"]
-exclude_dir = ["pb_data", "pb_data_backup", "pb_hooks", "pb_migrations", "tmp"]
+exclude_dir = ["pb_data", "pb_data_backup", "pb_migrations", "tmp"]
 send_interrupt = true
 kill_delay = "2s"
 
