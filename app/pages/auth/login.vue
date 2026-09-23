@@ -255,12 +255,7 @@ const hasAnyAuth = !!(
     authMethods?.password?.enabled || authMethods?.oauth2?.enabled
 )
 
-let _settings = null
-try {
-    _settings = await pb.collection('settings').getOne('settings_123456')
-} catch {}
-const orgName = _settings?.organization_name || ''
-const orgUnitName = _settings?.organization_unit_name || ''
+const { orgName, orgUnitName } = useOrgSettings()
 
 // ── State ──────────────────────────────────────────────────────────
 const { notify, error: notifyError } = useNotification()
