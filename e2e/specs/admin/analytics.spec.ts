@@ -41,6 +41,8 @@ test('heatmap switches years and setters toggle groups single routes', async ({
     adminPage: page,
 }) => {
     const year = new Date().getFullYear()
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await gotoSettled(page, '/manage/analytics')
     await page.route('**/api/manage/analytics*', async (route) => {
         const response = await route.fetch()
         const body = await response.json()
@@ -60,8 +62,8 @@ test('heatmap switches years and setters toggle groups single routes', async ({
             },
         })
     })
-    await page.setViewportSize({ width: 1280, height: 900 })
-    await gotoSettled(page, '/manage/analytics')
+    await page.getByTestId('analytics-refresh').click()
+    await expect(page.getByTestId('analytics-refresh')).toBeEnabled()
 
     const heatmap = page.getByTestId('analytics-heatmap')
     await expect(heatmap.locator('[data-count="1"]')).toHaveCount(1)
