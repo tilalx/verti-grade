@@ -21,7 +21,8 @@ const sampleResponse = {
     ],
     routeSetters: [{ setter: 'Alice', count: 5 }],
     routeTimeline: [{ period: '2024-01-01', count: 2 }],
-    commentTimeline: [{ period: '2024-01-01', count: 4 }],
+    routeTimelineMonthly: [{ period: '2024-01', count: 2 }],
+    commentTimelineMonthly: [{ period: '2024-01', count: 4 }],
     latestComments: [
         {
             id: 'c1',

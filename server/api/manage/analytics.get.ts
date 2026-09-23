@@ -96,7 +96,10 @@ export default eventHandler(async (event) => {
             count,
         }))
         const routeTimeline = mapTimeline(routeTimelineMap)
-        const commentTimeline = mapTimeline(commentTimelineMap)
+        const routeTimelineMonthly = mapMonthly(routeTimeline)
+        const commentTimelineMonthly = mapMonthly(
+            mapTimeline(commentTimelineMap),
+        )
         const latestRoutes = computeLatestRoutes(routes)
 
         const latestComments = commentRecords
@@ -124,7 +127,8 @@ export default eventHandler(async (event) => {
             difficultyDistribution,
             routeSetters,
             routeTimeline,
-            commentTimeline,
+            routeTimelineMonthly,
+            commentTimelineMonthly,
             latestRoutes,
             latestComments,
         }
@@ -170,8 +174,8 @@ function routeDateValue(route: RouteRecord): number {
     return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp
 }
 
-function increaseCount(map: Map<string, number>, key: string) {
-    map.set(key, (map.get(key) ?? 0) + 1)
+function increaseCount(map: Map<string, number>, key: string, by = 1) {
+    map.set(key, (map.get(key) ?? 0) + by)
 }
 
 function addCreatorsToMap(
@@ -189,7 +193,7 @@ function addDateToTimeline(map: Map<string, number>, rawDate?: string | null) {
         return
     }
 
-    const period = date.toISOString().split('T')[0]
+    const period = date.toISOString().slice(0, 10)
     increaseCount(map, period)
 }
 
@@ -203,6 +207,14 @@ function mapTimeline(source: Map<string, number>) {
     return Array.from(source.entries())
         .map(([period, count]) => ({ period, count }))
         .sort((a, b) => a.period.localeCompare(b.period))
+}
+
+export function mapMonthly(daily: { period: string; count: number }[]) {
+    const months = new Map<string, number>()
+    for (const { period, count } of daily) {
+        increaseCount(months, period.slice(0, 7), count)
+    }
+    return mapTimeline(months)
 }
 
 function compareGrades(left: string, right: string): number {
@@ -236,7 +248,7 @@ function gradeScore(raw: string): number {
         return Number.MAX_SAFE_INTEGER - 1
     }
 
-    const base = Number.parseInt(match[1], 10)
+    const base = Number.parseInt(match[1] ?? '', 10)
     const letter = match[2]?.toLowerCase() ?? ''
     const sign = match[3] ?? ''
 
