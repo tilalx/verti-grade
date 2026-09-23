@@ -1,5 +1,6 @@
 export function useRouteFilters() {
     const { t } = useI18n()
+    const { data: locationRecords } = useLocations()
 
     const searchRouteName = ref('')
     const selectedDifficulty = ref('')
@@ -22,8 +23,10 @@ export function useRouteFilters() {
 
     const locations = computed(() => [
         { text: t('filter.all'), value: '' },
-        { text: 'Hanau', value: 'Hanau' },
-        { text: 'Gelnhausen', value: 'Gelnhausen' },
+        ...locationRecords.value.map((location) => ({
+            text: location.name,
+            value: location.id,
+        })),
     ])
 
     const activeFilterCount = computed(

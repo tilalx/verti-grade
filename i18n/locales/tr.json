@@ -373,7 +373,7 @@
             },
             "accounts": {
                 "title": "Kullanıcı hesapları",
-                "body": "Hesaplar yöneticiler tarafından personel için oluşturulur. Hizmeti sunmak için e-posta adresi, kullanıcı adı, ad ve soyad, isteğe bağlı profil resmi ve atanan rol saklanır (GDPR md. 6(1)(b)). Veriler hesap var olduğu sürece saklanır; hesabınızı istediğiniz zaman kendiniz silebilirsiniz."
+                "body": "Hesaplar yöneticiler tarafından personel için oluşturulur. Hizmeti sunmak için e-posta adresi, kullanıcı adı, ad ve soyad, isteğe bağlı profil resmi, tercih edilen dil ve atanan rol saklanır (GDPR md. 6(1)(b)). Veriler hesap var olduğu sürece saklanır; hesabınızı istediğiniz zaman kendiniz silebilirsiniz."
             },
             "ratings": {
                 "title": "Puanlar ve yorumlar",
@@ -589,9 +589,9 @@
         "initError": "Ayarlar başlatılamadı.",
         "organization": "Organizasyon",
         "organizationName": "Organizasyon adı",
-        "organizationNamePlaceholder": "ör. Deutscher Alpenverein",
+        "organizationNamePlaceholder": "ör. Dağcılık Kulübü",
         "organizationUnit": "Organizasyon birimi",
-        "organizationUnitPlaceholder": "ör. Sektion Hanau",
+        "organizationUnitPlaceholder": "ör. Tırmanış Salonu Kuzey",
         "publicUrls": "Herkese açık URL'ler",
         "applicationUrl": "Uygulama URL'si",
         "imprintUrl": "Künye URL'si",
@@ -611,7 +611,7 @@
         "legalUrlHint": "Yerleşik sayfayı kullanmak için boş bırakın",
         "legalIntro": "Yerleşik künye ve gizlilik sayfalarında gösterilir.",
         "legalAddressPlaceholder": "Sokak 1\n12345 Şehir",
-        "legalRegisterPlaceholder": "Sicil mahkemesi Hanau, VR 485",
+        "legalRegisterPlaceholder": "Sicil mahkemesi Şehir, VR 12345",
         "legalVatId": "KDV no.",
         "legalEditorial": "İçerikten sorumlu",
         "legalEditorialHint": "Ad ve görev, ör. § 18 MStV uyarınca",
@@ -620,7 +620,15 @@
         "legalPersonRole": "Görev",
         "legalPersonRolePlaceholder": "ör. Başkan",
         "legalAddPerson": "Kişi ekle",
-        "legalRemovePerson": "Kişiyi kaldır"
+        "legalRemovePerson": "Kişiyi kaldır",
+        "locations": "Konumlar",
+        "locationsIntro": "Rotaların kurulduğu salonlar veya alanlar. Rotalar, filtreler ve envanter bu listeyi kullanır.",
+        "locationName": "Ad",
+        "locationNew": "Yeni konum",
+        "locationAdd": "Ekle",
+        "locationDelete": "Konumu sil",
+        "locationSaved": "Konum kaydedildi.",
+        "locationSaveFailed": "Mümkün değil: adlar benzersiz olmalı ve hâlâ rotası olan bir konum silinemez."
     },
     "errors": {
         "notFound": {
@@ -633,7 +641,9 @@
         "columns": "Sütunlar",
         "qr_code": "QR kodu",
         "move_up": "Yukarı taşı",
-        "move_down": "Aşağı taşı"
+        "move_down": "Aşağı taşı",
+        "rope": "İp",
+        "fileName": "tirmanis-rotalari"
     },
     "importRoutes": {
         "title": "İçe aktarmayı onayla",

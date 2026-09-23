@@ -9,7 +9,6 @@ export interface BaseRecord {
     expand?: Record<string, unknown>
 }
 
-export type RouteLocation = 'Hanau' | 'Gelnhausen' | string
 export type RouteType = 'Route' | 'Boulder' | string
 export type DifficultySignValue = '+' | '-' | true | false | '' | null
 
@@ -21,13 +20,17 @@ export interface RouteRecord extends BaseRecord {
     difficulty: number | string
     difficulty_sign?: DifficultySignValue
     anchor_point?: number | null
-    location?: RouteLocation | null
+    location?: RecordId | null
     type?: RouteType | null
     comment?: string | null
     creator?: JsonValue<string> | null
     archived?: boolean
     color?: string | null
     screw_date?: string | null
+}
+
+export interface LocationRecord extends BaseRecord {
+    name: string
 }
 
 export interface RouteListItem extends Omit<RouteRecord, 'creator'> {
@@ -70,6 +73,7 @@ export interface UserRecord extends BaseRecord {
     lastname?: string | null
     avatar?: string | null
     role?: RecordId | null
+    language?: string | null
 }
 
 export interface SettingsRecord extends BaseRecord {

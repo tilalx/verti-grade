@@ -1,16 +1,18 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
 
 async function openScopedInventory(page: Page) {
     await gotoSettled(page, '/manage/inventory')
-    await page.evaluate(() => {
+    const hallA = await locationId(page, LOCATIONS[0])
+    await page.evaluate((location) => {
         localStorage.setItem('inventory-instructions-seen', '1')
         localStorage.setItem(
             'inventory-scanned-route-ids',
-            JSON.stringify({ v: 2, location: 'Hanau', ids: [] }),
+            JSON.stringify({ v: 3, location, ids: [] }),
         )
-    })
+    }, hallA)
     await page.reload()
     await page
         .locator('[data-testid="inventory-progress"]')
@@ -21,7 +23,7 @@ async function firstMissingRouteId(page: Page) {
     const res = await page.request.get(
         '/api/collections/routes/records?' +
             new URLSearchParams({
-                filter: 'name ~ "e2e-route-" && archived = false && location = "Hanau"',
+                filter: `name ~ "e2e-route-" && archived = false && location.name = "${LOCATIONS[0]}"`,
                 perPage: '1',
                 sort: 'anchor_point,name',
             }),

@@ -130,6 +130,7 @@ const expanded = ref([])
 
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
+const { data: locationRecords } = useLocations()
 
 const previewHeaders = computed(() => [
     { title: t('climbing.color'), value: 'color', sortable: false },
@@ -186,6 +187,12 @@ const confirmImport = async () => {
 
     try {
         const fallbackCreator = buildFallbackCreator(currentUser)
+        const locationIdByName = new Map(
+            locationRecords.value.map((location) => [
+                location.name.toLowerCase(),
+                location.id,
+            ]),
+        )
         const routeErrors = []
         const ratingErrors = []
 
@@ -193,7 +200,13 @@ const confirmImport = async () => {
             try {
                 const createdRoute = await pb
                     .collection('routes')
-                    .create(sanitizeRoutePayload(route, fallbackCreator))
+                    .create(
+                        sanitizeRoutePayload(
+                            route,
+                            fallbackCreator,
+                            locationIdByName,
+                        ),
+                    )
 
                 if (Array.isArray(route.ratings) && route.ratings.length > 0) {
                     for (const rating of route.ratings) {
@@ -261,7 +274,7 @@ const confirmImport = async () => {
     }
 }
 
-function sanitizeRoutePayload(route, fallbackCreator) {
+function sanitizeRoutePayload(route, fallbackCreator, locationIdByName) {
     const normalizeSign = (value) => {
         if (value === true || value === false || value === null) {
             return value
@@ -289,7 +302,11 @@ function sanitizeRoutePayload(route, fallbackCreator) {
         anchor_point: Number.isFinite(Number(route.anchor_point))
             ? Number(route.anchor_point)
             : null,
-        location: route.location || null,
+        location:
+            typeof route.location === 'string'
+                ? (locationIdByName.get(route.location.trim().toLowerCase()) ??
+                  null)
+                : null,
         type: route.type || null,
         comment: typeof route.comment === 'string' ? route.comment : '',
         creator:

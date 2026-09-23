@@ -373,7 +373,7 @@
             },
             "accounts": {
                 "title": "Benutzerkonten",
-                "body": "Konten werden von der Administration für Mitarbeitende angelegt. Gespeichert werden E-Mail-Adresse, Benutzername, Vor- und Nachname, ein optionales Profilbild und die zugewiesene Rolle, um den Dienst bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben gespeichert, solange das Konto besteht; Sie können Ihr Konto jederzeit selbst löschen."
+                "body": "Konten werden von der Administration für Mitarbeitende angelegt. Gespeichert werden E-Mail-Adresse, Benutzername, Vor- und Nachname, ein optionales Profilbild, die bevorzugte Sprache und die zugewiesene Rolle, um den Dienst bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben gespeichert, solange das Konto besteht; Sie können Ihr Konto jederzeit selbst löschen."
             },
             "ratings": {
                 "title": "Bewertungen und Kommentare",
@@ -589,9 +589,9 @@
         "initError": "Einstellungen konnten nicht initialisiert werden.",
         "organization": "Organisation",
         "organizationName": "Name der Organisation",
-        "organizationNamePlaceholder": "z. B. Deutscher Alpenverein",
+        "organizationNamePlaceholder": "z. B. Bergsportverein",
         "organizationUnit": "Organisationseinheit",
-        "organizationUnitPlaceholder": "z. B. Sektion Hanau",
+        "organizationUnitPlaceholder": "z. B. Kletterhalle Nord",
         "publicUrls": "Öffentliche URLs",
         "applicationUrl": "Anwendungs-URL",
         "imprintUrl": "Impressum-URL",
@@ -611,7 +611,7 @@
         "legalUrlHint": "Leer lassen, um die integrierte Seite zu nutzen",
         "legalIntro": "Wird auf der integrierten Impressums- und Datenschutzseite angezeigt.",
         "legalAddressPlaceholder": "Straße 1\n12345 Stadt",
-        "legalRegisterPlaceholder": "Amtsgericht Hanau, VR 485",
+        "legalRegisterPlaceholder": "Amtsgericht Stadt, VR 12345",
         "legalVatId": "USt-IdNr.",
         "legalEditorial": "Redaktionell verantwortlich",
         "legalEditorialHint": "Name und Funktion, z. B. nach § 18 MStV",
@@ -620,7 +620,15 @@
         "legalPersonRole": "Funktion",
         "legalPersonRolePlaceholder": "z. B. 1. Vorsitzende/r",
         "legalAddPerson": "Person hinzufügen",
-        "legalRemovePerson": "Person entfernen"
+        "legalRemovePerson": "Person entfernen",
+        "locations": "Standorte",
+        "locationsIntro": "Hallen oder Bereiche, in denen Routen geschraubt werden. Routen, Filter und die Inventur nutzen diese Liste.",
+        "locationName": "Name",
+        "locationNew": "Neuer Standort",
+        "locationAdd": "Hinzufügen",
+        "locationDelete": "Standort löschen",
+        "locationSaved": "Standort gespeichert.",
+        "locationSaveFailed": "Nicht möglich: Namen müssen eindeutig sein, und ein Standort mit Routen kann nicht gelöscht werden."
     },
     "errors": {
         "notFound": {
@@ -633,7 +641,9 @@
         "columns": "Spalten",
         "qr_code": "QR-Code",
         "move_up": "Nach oben",
-        "move_down": "Nach unten"
+        "move_down": "Nach unten",
+        "rope": "Seil",
+        "fileName": "kletterrouten"
     },
     "importRoutes": {
         "title": "Import bestätigen",

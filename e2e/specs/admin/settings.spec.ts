@@ -53,7 +53,7 @@ test('legal fields feed the built-in imprint page', async ({
 }) => {
     await gotoSettled(page, '/admin/settings')
 
-    const address = `E2E Street ${Date.now()}\n63450 Hanau`
+    const address = `E2E Street ${Date.now()}\n12345 City`
     await page.getByTestId('settings-imprint-url').locator('input').fill('')
     await page.getByTestId('settings-privacy-url').locator('input').fill('')
     await page

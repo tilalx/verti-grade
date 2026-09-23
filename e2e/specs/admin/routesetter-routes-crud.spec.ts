@@ -1,4 +1,5 @@
 import { test, expect } from '../../support/fixtures'
+import { LOCATIONS } from '../../support/seed'
 import { gotoSettled, authHeader } from '../../support/nav'
 
 test('routesetter can create and delete a route (manage_routes permission)', async ({
@@ -20,7 +21,7 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
         .locator('input')
         .fill('10')
     await page.getByTestId('route-form-location').click()
-    await page.getByRole('option', { name: 'Hanau', exact: true }).click()
+    await page.getByRole('option', { name: LOCATIONS[0], exact: true }).click()
     await page
         .getByTestId('route-form-creator')
         .locator('input')

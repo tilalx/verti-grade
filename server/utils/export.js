@@ -46,7 +46,7 @@ export function chunk(source, size) {
 }
 
 export async function fetchRecordsByIds(pb, options) {
-    const { collection, ids, field, requestKey } = options
+    const { collection, ids, field, requestKey, expand } = options
     if (ids.length === 0) {
         return []
     }
@@ -55,6 +55,7 @@ export async function fetchRecordsByIds(pb, options) {
     const requests = chunks.map((chunkIds, index) => {
         return pb.collection(collection).getFullList({
             filter: buildIdFilter(pb, chunkIds, field),
+            expand,
             requestKey: `${requestKey}-${index}`,
         })
     })
@@ -88,6 +89,27 @@ export function resolveApplicationUrl(event, settings) {
     ).replace(/\/+$/, '')
 }
 
+export function routeLocationName(route) {
+    return route?.expand?.location?.name ?? ''
+}
+
+export async function resolveExportLocale(event) {
+    const body = await readExportBody(event)
+    try {
+        return (
+            Intl.DateTimeFormat.supportedLocalesOf([String(body?.locale)])[0] ??
+            'en'
+        )
+    } catch {
+        return 'en'
+    }
+}
+
+export async function resolveExportLabel(event, key, fallback) {
+    const label = (await readExportBody(event))?.labels?.[key]
+    return typeof label === 'string' && label.trim() ? label.trim() : fallback
+}
+
 function formatDifficultySign(value) {
     if (typeof value === 'string') {
         return value.trim()
@@ -102,11 +124,11 @@ function formatDifficultySign(value) {
 }
 
 export const ROUTE_EXPORT_COLUMNS = [
-    { key: 'color', header: 'Farbe' },
+    { key: 'color', header: 'Color' },
     { key: 'name', header: 'Name', value: (r) => r.name ?? '' },
     {
         key: 'difficulty',
-        header: 'Schwierigkeit',
+        header: 'Difficulty',
         value: (r) => {
             const numeric = Number(r.difficulty)
             return Number.isFinite(numeric)
@@ -122,31 +144,31 @@ export const ROUTE_EXPORT_COLUMNS = [
     },
     {
         key: 'anchor_point',
-        header: 'Umlenkerpunkt',
+        header: 'Anchor point',
         value: (r) => r.anchor_point ?? '',
     },
     {
         key: 'comment',
-        header: 'Kommentar',
+        header: 'Comment',
         value: (r) => r.comment ?? '',
     },
     {
         key: 'creator',
-        header: 'Schrauber',
+        header: 'Route setters',
         value: (r) => normalizeCreators(r.creator).join(', '),
     },
     {
         key: 'location',
-        header: 'Ort',
-        value: (r) => r.location ?? '',
+        header: 'Location',
+        value: (r) => routeLocationName(r),
     },
-    { key: 'type', header: 'Typ', value: (r) => r.type ?? '' },
+    { key: 'type', header: 'Type', value: (r) => r.type ?? '' },
     {
         key: 'screw_date',
-        header: 'Schraubdatum',
-        value: (r) =>
+        header: 'Set on',
+        value: (r, locale) =>
             r.screw_date
-                ? new Date(r.screw_date).toLocaleDateString('de-DE')
+                ? new Date(r.screw_date).toLocaleDateString(locale)
                 : '',
     },
     { key: 'qr', header: 'QR' },
@@ -177,9 +199,11 @@ export async function resolveExportColumns(event) {
         : DEFAULT_EXPORT_COLUMNS
     const labels =
         body?.labels && typeof body.labels === 'object' ? body.labels : {}
+    const locale = await resolveExportLocale(event)
 
     return chosen.map((column) => ({
         ...column,
+        value: column.value && ((route) => column.value(route, locale)),
         header:
             typeof labels[column.key] === 'string' && labels[column.key].trim()
                 ? labels[column.key].trim()

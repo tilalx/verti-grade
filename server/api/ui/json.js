@@ -4,6 +4,7 @@ import {
     resolveRouteIds,
     fetchRecordsByIds,
     normalizeCreators,
+    routeLocationName,
 } from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
@@ -23,6 +24,7 @@ export default eventHandler(async (event) => {
             collection: 'routes',
             ids: uniqueIds,
             field: 'id',
+            expand: 'location',
             requestKey: 'export-json-routes',
         })
         const ratings = await fetchRecordsByIds(pb, {
@@ -75,7 +77,7 @@ function mapRoute(route, ratings) {
         difficulty: normalizeNumber(route.difficulty),
         difficulty_sign: route.difficulty_sign ?? null,
         anchor_point: normalizeNumber(route.anchor_point),
-        location: route.location ?? null,
+        location: routeLocationName(route) || null,
         type: route.type ?? null,
         comment: route.comment ?? '',
         creator: normalizeCreators(route.creator),

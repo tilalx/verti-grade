@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
+    INVENTORY_SESSION_VERSION,
     INVENTORY_STORAGE_KEY,
     clearSession,
     countUnlocated,
@@ -19,20 +20,32 @@ beforeEach(() => {
 const route = (
     id: string,
     overrides: Partial<InventoryRoute> = {},
-): InventoryRoute => ({ id, name: id, location: 'Hanau', ...overrides })
+): InventoryRoute => ({ id, name: id, location: 'loc-main', ...overrides })
 
 describe('loadSession', () => {
     it('returns an empty session when nothing is stored', () => {
         expect(loadSession()).toEqual({ location: null, ids: [] })
     })
 
-    it('reads the v2 record', () => {
+    it('keeps ids but drops the location of an older session version', () => {
         localStorage.setItem(
             INVENTORY_STORAGE_KEY,
-            JSON.stringify({ v: 2, location: 'Hanau', ids: ['abc', 'def'] }),
+            JSON.stringify({ v: 2, location: 'Hall A', ids: ['abc'] }),
+        )
+        expect(loadSession()).toEqual({ location: null, ids: ['abc'] })
+    })
+
+    it('reads the current record', () => {
+        localStorage.setItem(
+            INVENTORY_STORAGE_KEY,
+            JSON.stringify({
+                v: INVENTORY_SESSION_VERSION,
+                location: 'loc-main',
+                ids: ['abc', 'def'],
+            }),
         )
         expect(loadSession()).toEqual({
-            location: 'Hanau',
+            location: 'loc-main',
             ids: ['abc', 'def'],
         })
     })
@@ -49,8 +62,8 @@ describe('loadSession', () => {
         localStorage.setItem(
             INVENTORY_STORAGE_KEY,
             JSON.stringify({
-                v: 2,
-                location: 'Hanau',
+                v: INVENTORY_SESSION_VERSION,
+                location: 'loc-main',
                 ids: ['abc', 42, null, '', 'def'],
             }),
         )
@@ -60,7 +73,11 @@ describe('loadSession', () => {
     it('treats a blank stored location as unscoped', () => {
         localStorage.setItem(
             INVENTORY_STORAGE_KEY,
-            JSON.stringify({ v: 2, location: '', ids: ['abc'] }),
+            JSON.stringify({
+                v: INVENTORY_SESSION_VERSION,
+                location: '',
+                ids: ['abc'],
+            }),
         )
         expect(loadSession().location).toBeNull()
     })
@@ -78,17 +95,17 @@ describe('loadSession', () => {
 
 describe('persistSession', () => {
     it('round-trips through loadSession', () => {
-        persistSession({ location: 'Gelnhausen', ids: ['abc'] })
-        expect(loadSession()).toEqual({ location: 'Gelnhausen', ids: ['abc'] })
+        persistSession({ location: 'loc-other', ids: ['abc'] })
+        expect(loadSession()).toEqual({ location: 'loc-other', ids: ['abc'] })
     })
 
     it('always writes the v2 shape', () => {
-        persistSession({ location: 'Hanau', ids: ['abc'] })
+        persistSession({ location: 'loc-main', ids: ['abc'] })
         expect(
             JSON.parse(localStorage.getItem(INVENTORY_STORAGE_KEY)!),
         ).toEqual({
-            v: 2,
-            location: 'Hanau',
+            v: INVENTORY_SESSION_VERSION,
+            location: 'loc-main',
             ids: ['abc'],
         })
     })
@@ -96,25 +113,25 @@ describe('persistSession', () => {
     it('upgrades a legacy session once a location is chosen', () => {
         localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(['abc']))
         const restored = loadSession()
-        persistSession({ ...restored, location: 'Hanau' })
-        expect(loadSession()).toEqual({ location: 'Hanau', ids: ['abc'] })
+        persistSession({ ...restored, location: 'loc-main' })
+        expect(loadSession()).toEqual({ location: 'loc-main', ids: ['abc'] })
     })
 
     it('removes the key for a fully empty session', () => {
-        persistSession({ location: 'Hanau', ids: ['abc'] })
+        persistSession({ location: 'loc-main', ids: ['abc'] })
         persistSession({ location: null, ids: [] })
         expect(localStorage.getItem(INVENTORY_STORAGE_KEY)).toBeNull()
     })
 
     it('keeps a chosen location with no scans yet', () => {
-        persistSession({ location: 'Hanau', ids: [] })
-        expect(loadSession()).toEqual({ location: 'Hanau', ids: [] })
+        persistSession({ location: 'loc-main', ids: [] })
+        expect(loadSession()).toEqual({ location: 'loc-main', ids: [] })
     })
 })
 
 describe('clearSession', () => {
     it('removes the stored session', () => {
-        persistSession({ location: 'Hanau', ids: ['abc'] })
+        persistSession({ location: 'loc-main', ids: ['abc'] })
         clearSession()
         expect(localStorage.getItem(INVENTORY_STORAGE_KEY)).toBeNull()
     })
@@ -123,13 +140,13 @@ describe('clearSession', () => {
 describe('scopedRoutes', () => {
     const routes = [
         route('a'),
-        route('b', { location: 'Gelnhausen' }),
+        route('b', { location: 'loc-other' }),
         route('c', { archived: true }),
         route('d', { location: null }),
     ]
 
     it('keeps only active routes at the given location', () => {
-        expect(scopedRoutes(routes, 'Hanau').map((r) => r.id)).toEqual(['a'])
+        expect(scopedRoutes(routes, 'loc-main').map((r) => r.id)).toEqual(['a'])
     })
 
     it('returns nothing without a location, so nothing can be archived', () => {
@@ -141,17 +158,17 @@ describe('missingRoutes', () => {
     const routes = [
         route('a', { anchor_point: 2 }),
         route('b', { anchor_point: 1 }),
-        route('other', { location: 'Gelnhausen', anchor_point: 1 }),
+        route('other', { location: 'loc-other', anchor_point: 1 }),
     ]
 
     it('excludes scanned routes', () => {
-        expect(missingRoutes(routes, ['b'], 'Hanau').map((r) => r.id)).toEqual([
-            'a',
-        ])
+        expect(
+            missingRoutes(routes, ['b'], 'loc-main').map((r) => r.id),
+        ).toEqual(['a'])
     })
 
     it('never reaches across locations', () => {
-        expect(missingRoutes(routes, [], 'Hanau').map((r) => r.id)).toEqual([
+        expect(missingRoutes(routes, [], 'loc-main').map((r) => r.id)).toEqual([
             'b',
             'a',
         ])

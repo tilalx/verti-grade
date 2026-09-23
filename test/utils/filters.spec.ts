@@ -32,21 +32,21 @@ function filteredComments(
 const sampleComments: Comment[] = [
     {
         difficulty: 5,
-        location: 'Hanau',
+        location: 'loc-main',
         routeName: 'Blue Wave',
         comment: 'Great route!',
         userName: 'Alice',
     },
     {
         difficulty: 7,
-        location: 'Gelnhausen',
+        location: 'loc-other',
         routeName: 'Red Wall',
         comment: 'Very hard',
         userName: 'Bob',
     },
     {
         difficulty: 5,
-        location: 'Gelnhausen',
+        location: 'loc-other',
         routeName: 'Green Path',
         comment: 'Fun climb',
         userName: 'Carol',
@@ -65,13 +65,13 @@ describe('filteredComments', () => {
     })
 
     it('filters by location', () => {
-        const result = filteredComments(sampleComments, null, 'Hanau', '')
+        const result = filteredComments(sampleComments, null, 'loc-main', '')
         expect(result).toHaveLength(1)
         expect(result[0].routeName).toBe('Blue Wave')
     })
 
     it('combines difficulty and location filters', () => {
-        const result = filteredComments(sampleComments, 5, 'Gelnhausen', '')
+        const result = filteredComments(sampleComments, 5, 'loc-other', '')
         expect(result).toHaveLength(1)
         expect(result[0].routeName).toBe('Green Path')
     })
@@ -169,8 +169,8 @@ describe('pbFilter builder', () => {
 
     it('appends a quoted location filter', () => {
         expect(
-            buildPbFilter({ ...empty, selectedLocation: 'Hanau' }),
-        ).toContain('location = "Hanau"')
+            buildPbFilter({ ...empty, selectedLocation: 'loc-main' }),
+        ).toContain('location = "loc-main"')
     })
 
     it('appends a quoted type filter', () => {
@@ -199,12 +199,12 @@ describe('pbFilter builder', () => {
     it('combines multiple active filters with &&', () => {
         const filter = buildPbFilter({
             selectedDifficulty: '5',
-            selectedLocation: 'Hanau',
+            selectedLocation: 'loc-main',
             selectedType: '',
             searchRouteName: '',
         })
         expect(filter).toBe(
-            'archived = false && difficulty = 5 && location = "Hanau"',
+            'archived = false && difficulty = 5 && location = "loc-main"',
         )
     })
 })

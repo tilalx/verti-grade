@@ -1,12 +1,15 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
+
+const [HALL_A, HALL_B] = LOCATIONS
 
 async function activeRoutesAt(page: Page, location: string) {
     const res = await page.request.get(
         '/api/collections/routes/records?' +
             new URLSearchParams({
-                filter: `name ~ "e2e-route-" && archived = false && location = "${location}"`,
+                filter: `name ~ "e2e-route-" && archived = false && location.name = "${location}"`,
                 perPage: '200',
                 sort: 'name',
             }),
@@ -24,7 +27,7 @@ async function seedSession(page: Page, location: string, ids: string[]) {
         ({ location: loc, ids: scanned }) => {
             localStorage.setItem(
                 'inventory-scanned-route-ids',
-                JSON.stringify({ v: 2, location: loc, ids: scanned }),
+                JSON.stringify({ v: 3, location: loc, ids: scanned }),
             )
             localStorage.setItem('inventory-instructions-seen', '1')
         },
@@ -41,16 +44,16 @@ test('archives only the checked routes at the scanned location', async ({
 }) => {
     await gotoSettled(page, '/manage/inventory')
 
-    const hanau = await activeRoutesAt(page, 'Hanau')
-    const gelnhausen = await activeRoutesAt(page, 'Gelnhausen')
-    expect(hanau.length).toBeGreaterThan(2)
-    expect(gelnhausen.length).toBeGreaterThan(0)
+    const hallA = await activeRoutesAt(page, HALL_A)
+    const hallB = await activeRoutesAt(page, HALL_B)
+    expect(hallA.length).toBeGreaterThan(2)
+    expect(hallB.length).toBeGreaterThan(0)
 
-    const missing = hanau.slice(-2)
-    const scanned = hanau.slice(0, -2)
+    const missing = hallA.slice(-2)
+    const scanned = hallA.slice(0, -2)
     await seedSession(
         page,
-        'Hanau',
+        await locationId(page, HALL_A),
         scanned.map((route) => route.id),
     )
 
@@ -69,7 +72,7 @@ test('archives only the checked routes at the scanned location', async ({
     const dialog = page.getByTestId('inventory-finish-dialog')
     await expect(dialog).toBeVisible()
 
-    for (const route of gelnhausen) {
+    for (const route of hallB) {
         await expect(
             page.getByTestId(`inventory-archive-toggle-${route.id}`),
         ).toHaveCount(0)
@@ -93,9 +96,7 @@ test('archives only the checked routes at the scanned location', async ({
     expect(await isArchived(page, toArchive.id)).toBe(true)
     expect(await isArchived(page, toKeep.id)).toBe(false)
 
-    expect((await activeRoutesAt(page, 'Gelnhausen')).length).toBe(
-        gelnhausen.length,
-    )
+    expect((await activeRoutesAt(page, HALL_B)).length).toBe(hallB.length)
 
     await page.request.patch(
         `/api/collections/routes/records/${toArchive.id}`,
@@ -114,7 +115,7 @@ test('requires a location before scanning can start', async ({
     await page.reload()
 
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
-    await page.getByTestId('inventory-location-Hanau').click()
+    await page.getByTestId(`inventory-location-${HALL_A}`).click()
     await expect(page.getByTestId('inventory-start')).toBeEnabled()
 })
 
@@ -123,7 +124,7 @@ test('restores a legacy session and asks which location it belongs to', async ({
 }) => {
     await gotoSettled(page, '/manage/inventory')
 
-    const hanau = await activeRoutesAt(page, 'Hanau')
+    const hallA = await activeRoutesAt(page, HALL_A)
     await page.evaluate(
         (ids) => {
             localStorage.setItem(
@@ -132,7 +133,7 @@ test('restores a legacy session and asks which location it belongs to', async ({
             )
             localStorage.setItem('inventory-instructions-seen', '1')
         },
-        [hanau[0].id, hanau[1].id],
+        [hallA[0].id, hallA[1].id],
     )
     await page.reload()
     await page
@@ -143,7 +144,7 @@ test('restores a legacy session and asks which location it belongs to', async ({
     await expect(page.getByTestId('inventory-missing-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
 
-    await page.getByTestId('inventory-location-Hanau').click()
+    await page.getByTestId(`inventory-location-${HALL_A}`).click()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('2')
     await expect
@@ -154,5 +155,5 @@ test('restores a legacy session and asks which location it belongs to', async ({
                 ),
             ),
         )
-        .toMatchObject({ v: 2, location: 'Hanau' })
+        .toMatchObject({ v: 3, location: await locationId(page, HALL_A) })
 })

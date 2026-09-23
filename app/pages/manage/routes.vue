@@ -264,6 +264,9 @@
                                 >
                             </div>
                         </template>
+                        <template #item.location="{ item }">
+                            {{ locationName(item) }}
+                        </template>
                         <template #item.score="{ item }">
                             {{ formatScore(item) }}
                         </template>
@@ -613,7 +616,10 @@ const removeSelectedIds = (ids) => {
 }
 
 const toPbSortRoutes = (sortByArr) =>
-    toPbSort(sortByArr, '-created', { score: 'average_rating' })
+    toPbSort(sortByArr, '-created', {
+        score: 'average_rating',
+        location: 'location.name',
+    })
 
 const sortItemsMobile = computed(() => [
     { title: t('table.created_at'), key: 'screw_date', defaultOrder: 'desc' },
@@ -676,7 +682,7 @@ const formatDate = (value) => {
 }
 
 const generateFilename = () => {
-    const name = locale.value === 'de' ? 'kletterrouten' : 'climbing-routes'
+    const name = t('export.fileName')
     const date = new Date()
     const pad = (n) => n.toString().padStart(2, '0')
     const hh = pad(date.getHours())
@@ -711,6 +717,7 @@ const loadRoutes = async (options = {}) => {
             .getList(tableOptions.page, tableOptions.itemsPerPage, {
                 filter: pbFilter.value || undefined,
                 sort: toPbSortRoutes(tableOptions.sortBy),
+                expand: 'location',
                 requestKey: 'adminRoutesList',
             })
 
@@ -824,7 +831,7 @@ const downloadExport = async (endpoint, extension, mimeType, payload = {}) => {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ ids, ...payload }),
+            body: JSON.stringify({ ids, locale: locale.value, ...payload }),
         })
 
         if (!response.ok) {
@@ -854,7 +861,9 @@ const downloadExport = async (endpoint, extension, mimeType, payload = {}) => {
 }
 
 const printSelected = () =>
-    downloadExport('/api/ui/pdf', 'pdf', 'application/pdf')
+    downloadExport('/api/ui/pdf', 'pdf', 'application/pdf', {
+        labels: { rope: t('export.rope') },
+    })
 const showExportOptions = ref(false)
 const exportSelectedExcel = (payload) =>
     downloadExport(

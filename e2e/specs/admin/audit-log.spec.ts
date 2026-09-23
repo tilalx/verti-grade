@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
 import { createComment, deleteComment } from '../../support/comments'
 import {
     fetchAuditRows,
@@ -122,6 +123,7 @@ test('a bulk archive leaves one entry per route', async ({
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
     const headers = await authHeader(page)
+    const hallA = await locationId(page, LOCATIONS[0])
 
     const ids: string[] = []
     for (let i = 0; i < 2; i++) {
@@ -130,7 +132,7 @@ test('a bulk archive leaves one entry per route', async ({
             data: {
                 name: `${testPrefix}-bulk-${i}`,
                 difficulty: 5,
-                location: 'Hanau',
+                location: hallA,
                 type: 'Boulder',
                 creator: [testPrefix],
             },

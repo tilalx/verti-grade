@@ -1,5 +1,6 @@
 import { createError, eventHandler } from 'h3'
 import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { routeLocationName } from '../../utils/export.js'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -9,6 +10,7 @@ export default eventHandler(async (event) => {
         const [routeRecords, ratingRecords] = await Promise.all([
             pb.collection('routes').getFullList<RouteRecord>({
                 batch: 200,
+                expand: 'location',
                 requestKey: 'analytics-routes',
             }),
             pb.collection('ratings').getFullList<RatingRecord>({
@@ -46,7 +48,10 @@ export default eventHandler(async (event) => {
 
             increaseCount(difficultyMap, gradeLabel)
             addCreatorsToMap(setterMap, route.creator)
-            addDateToTimeline(routeTimelineMap, route.screw_date || route.created)
+            addDateToTimeline(
+                routeTimelineMap,
+                route.screw_date || route.created,
+            )
 
             const numericDifficulty = Number(route.difficulty)
             if (!Number.isNaN(numericDifficulty)) {
@@ -67,10 +72,13 @@ export default eventHandler(async (event) => {
             lifespanSum += diffDays
             lifespanCount++
         }
-        const averageLifespanDays = lifespanCount > 0 ? Math.round(lifespanSum / lifespanCount) : 0
+        const averageLifespanDays =
+            lifespanCount > 0 ? Math.round(lifespanSum / lifespanCount) : 0
 
-        const commentRecords = ratings.filter((rating) =>
-            typeof rating.comment === 'string' && rating.comment.trim().length > 0,
+        const commentRecords = ratings.filter(
+            (rating) =>
+                typeof rating.comment === 'string' &&
+                rating.comment.trim().length > 0,
         )
 
         for (const rating of commentRecords) {
@@ -80,7 +88,8 @@ export default eventHandler(async (event) => {
         const summary = {
             totalRoutes: routes.length,
             activeRoutes: routes.filter((route) => !route.archived).length,
-            averageDifficulty: difficultyCount > 0 ? difficultySum / difficultyCount : 0,
+            averageDifficulty:
+                difficultyCount > 0 ? difficultySum / difficultyCount : 0,
             totalComments: commentRecords.length,
             averageLifespanDays,
             generatedAt: new Date().toISOString(),
@@ -102,12 +111,16 @@ export default eventHandler(async (event) => {
             .sort((a, b) => (b.created || '').localeCompare(a.created || ''))
             .slice(0, 5)
             .map((rating, index) => {
-                const route = rating.route_id ? routeById.get(rating.route_id) : undefined
+                const route = rating.route_id
+                    ? routeById.get(rating.route_id)
+                    : undefined
                 return {
                     id: rating.id ?? `comment-${index}`,
                     routeId: rating.route_id ?? null,
                     routeName: route?.name ?? '',
-                    rating: Number.isFinite(Number(rating.rating)) ? Number(rating.rating) : null,
+                    rating: Number.isFinite(Number(rating.rating))
+                        ? Number(rating.rating)
+                        : null,
                     comment: (rating.comment || '').trim(),
                     created: rating.created ?? null,
                 }
@@ -157,7 +170,7 @@ function computeLatestRoutes(routes: RouteRecord[]) {
         id: route.id ?? `route-${index}`,
         name: String(route.name ?? ''),
         difficulty: buildGradeLabel(route),
-        location: route.location ?? null,
+        location: routeLocationName(route) || null,
         screwDate: route.screw_date ?? route.created ?? null,
         creators: extractCreators(route.creator),
         type: route.type ?? null,
@@ -192,16 +205,17 @@ function increaseCount(map: Map<string, number>, key: string) {
     map.set(key, (map.get(key) ?? 0) + 1)
 }
 
-function addCreatorsToMap(map: Map<string, number>, creators: RouteRecord['creator']) {
+function addCreatorsToMap(
+    map: Map<string, number>,
+    creators: RouteRecord['creator'],
+) {
     if (!creators) {
         return
     }
 
     const list = Array.isArray(creators)
         ? creators
-        : `${creators}`
-              .split(',')
-              .map((value) => value.trim())
+        : `${creators}`.split(',').map((value) => value.trim())
 
     for (const raw of list) {
         const label = raw.trim()

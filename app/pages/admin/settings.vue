@@ -243,6 +243,8 @@
             </v-card-text>
         </v-card>
 
+        <AdminLocationsCard />
+
         <!-- URL Fields -->
         <v-card border flat class="mb-6">
             <v-card-text class="pa-4">

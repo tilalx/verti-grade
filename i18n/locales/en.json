@@ -373,7 +373,7 @@
             },
             "accounts": {
                 "title": "User accounts",
-                "body": "Accounts are created by administrators for staff. We store email address, username, first and last name, an optional avatar and the assigned role to provide the service (Art. 6(1)(b) GDPR). Data is kept while the account exists; you can delete your account yourself at any time."
+                "body": "Accounts are created by administrators for staff. We store email address, username, first and last name, an optional avatar, your preferred language and the assigned role to provide the service (Art. 6(1)(b) GDPR). Data is kept while the account exists; you can delete your account yourself at any time."
             },
             "ratings": {
                 "title": "Ratings and comments",
@@ -589,9 +589,9 @@
         "initError": "Failed to initialize settings.",
         "organization": "Organization",
         "organizationName": "Organization name",
-        "organizationNamePlaceholder": "e.g. Deutscher Alpenverein",
+        "organizationNamePlaceholder": "e.g. Mountain Club",
         "organizationUnit": "Organization unit",
-        "organizationUnitPlaceholder": "e.g. Sektion Hanau",
+        "organizationUnitPlaceholder": "e.g. Climbing Gym North",
         "publicUrls": "Public URLs",
         "applicationUrl": "Application URL",
         "imprintUrl": "Imprint URL",
@@ -611,7 +611,7 @@
         "legalUrlHint": "Leave empty to use the built-in page",
         "legalIntro": "Shown on the built-in imprint and privacy pages.",
         "legalAddressPlaceholder": "Street 1\n12345 City",
-        "legalRegisterPlaceholder": "Register court Hanau, VR 485",
+        "legalRegisterPlaceholder": "Register court City, VR 12345",
         "legalVatId": "VAT ID",
         "legalEditorial": "Editorially responsible",
         "legalEditorialHint": "Name and role, e.g. per § 18 MStV",
@@ -620,7 +620,15 @@
         "legalPersonRole": "Role",
         "legalPersonRolePlaceholder": "e.g. Chair",
         "legalAddPerson": "Add person",
-        "legalRemovePerson": "Remove person"
+        "legalRemovePerson": "Remove person",
+        "locations": "Locations",
+        "locationsIntro": "Halls or areas where routes are set. Routes, filters and the inventory use this list.",
+        "locationName": "Name",
+        "locationNew": "New location",
+        "locationAdd": "Add",
+        "locationDelete": "Delete location",
+        "locationSaved": "Location saved.",
+        "locationSaveFailed": "Not possible: names must be unique and a location that still has routes cannot be deleted."
     },
     "errors": {
         "notFound": {
@@ -633,7 +641,9 @@
         "columns": "Columns",
         "qr_code": "QR code",
         "move_up": "Move up",
-        "move_down": "Move down"
+        "move_down": "Move down",
+        "rope": "Rope",
+        "fileName": "climbing-routes"
     },
     "importRoutes": {
         "title": "Confirm import",

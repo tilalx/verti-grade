@@ -1,6 +1,7 @@
 import PocketBase from 'pocketbase'
+import type { Page } from '@playwright/test'
 
-export const LOCATIONS = ['Hanau', 'Gelnhausen'] as const
+export const LOCATIONS = ['Hall A', 'Hall B'] as const
 export const TYPES = ['Route', 'Boulder'] as const
 
 export interface SeededUser {
@@ -54,15 +55,54 @@ export async function ensureUser(
     return { id: record.id, email, password, role }
 }
 
+export async function ensureLocations(pb: PocketBase) {
+    const idByName: Record<string, string> = {}
+    for (const name of LOCATIONS) {
+        let record
+        try {
+            record = await pb
+                .collection('locations')
+                .getFirstListItem(pb.filter('name = {:name}', { name }), {
+                    requestKey: null,
+                })
+        } catch {
+            record = await pb.collection('locations').create({ name })
+        }
+        idByName[name] = record.id
+    }
+    return idByName
+}
+
+export async function locationId(page: Page, name: string) {
+    const response = await page.request.get(
+        '/api/collections/locations/records',
+        { params: { filter: `name = "${name}"` } },
+    )
+    const { items } = await response.json()
+    return items[0].id as string
+}
+
 function randomDifficulty() {
     return 1 + Math.floor(Math.random() * 10)
 }
 
 export async function seedRoutes(pb: PocketBase, prefix: string, count = 60) {
+    const locationIds = await ensureLocations(pb)
+    const locationFor = (index: number) =>
+        locationIds[LOCATIONS[index % LOCATIONS.length]]
+
     const existing = await pb.collection('routes').getFullList({
         filter: `name ~ "${prefix}-route-"`,
         requestKey: null,
     })
+    for (const route of existing) {
+        const index = Number(route.name.split('-').pop())
+        if (route.location !== locationFor(index)) {
+            await pb
+                .collection('routes')
+                .update(route.id, { location: locationFor(index) })
+        }
+    }
     if (existing.length >= count) return existing
 
     const created = [...existing]
@@ -72,7 +112,7 @@ export async function seedRoutes(pb: PocketBase, prefix: string, count = 60) {
             difficulty: randomDifficulty(),
             difficulty_sign: i % 3 === 0 ? true : i % 3 === 1 ? false : null,
             anchor_point: 1 + (i % 40),
-            location: LOCATIONS[i % LOCATIONS.length],
+            location: locationFor(i),
             type: TYPES[i % TYPES.length],
             comment: `Seed comment ${i}`,
             creator: [`Setter ${1 + (i % 5)}`],

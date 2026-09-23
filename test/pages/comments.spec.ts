@@ -290,7 +290,7 @@ const sampleComments: FullComment[] = [
         id: '1',
         rating: 5,
         difficulty: 7,
-        location: 'Hanau',
+        location: 'loc-main',
         created: '2024-01-01',
         routeName: 'Blue Wall',
         comment: 'Amazing!',
@@ -300,7 +300,7 @@ const sampleComments: FullComment[] = [
         id: '2',
         rating: 2,
         difficulty: 5,
-        location: 'Gelnhausen',
+        location: 'loc-other',
         created: '2024-01-02',
         routeName: 'Red Slab',
         comment: 'Too hard',
@@ -310,7 +310,7 @@ const sampleComments: FullComment[] = [
         id: '3',
         rating: 4,
         difficulty: 7,
-        location: 'Hanau',
+        location: 'loc-main',
         created: '2024-01-03',
         routeName: 'Green Overhang',
         comment: 'Fun route',
@@ -326,10 +326,10 @@ describe('filteredAndSorted', () => {
     it('filters by location', () => {
         const result = filteredAndSorted(sampleComments, {
             ...baseOpts,
-            selectedLocation: 'Hanau',
+            selectedLocation: 'loc-main',
         })
         expect(result).toHaveLength(2)
-        expect(result.every((c) => c.location === 'Hanau')).toBe(true)
+        expect(result.every((c) => c.location === 'loc-main')).toBe(true)
     })
 
     it('filters by difficulty', () => {
@@ -405,7 +405,7 @@ describe('filteredAndSorted', () => {
                 id: '4',
                 rating: 3,
                 difficulty: 6,
-                location: 'Hanau',
+                location: 'loc-main',
                 created: recentDate,
                 routeName: 'New Route',
                 comment: 'Fresh!',
@@ -450,7 +450,7 @@ describe('filteredAndSorted', () => {
     it('combines location + rating filters', () => {
         const result = filteredAndSorted(sampleComments, {
             ...baseOpts,
-            selectedLocation: 'Hanau',
+            selectedLocation: 'loc-main',
             selectedRating: 5,
         })
         expect(result).toHaveLength(1)

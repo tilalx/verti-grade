@@ -290,6 +290,7 @@ async function loadRoutes(
                 {
                     filter: pbFilter.value,
                     sort,
+                    expand: 'location',
                 },
             )
 

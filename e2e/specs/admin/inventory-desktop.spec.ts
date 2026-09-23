@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { LOCATIONS } from '../../support/seed'
 
 test.beforeEach(async ({ adminPage: page }) => {
     await page.addInitScript(() =>
@@ -35,7 +36,7 @@ test('runs an inventory without a camera: pick a site, mark a route found', asyn
 }) => {
     await gotoSettled(page, '/manage/inventory')
 
-    await page.getByTestId('inventory-location-Hanau').click()
+    await page.getByTestId(`inventory-location-${LOCATIONS[0]}`).click()
 
     const firstMissing = page
         .locator('[data-testid^="inventory-mark-"]')
@@ -53,6 +54,9 @@ test('runs an inventory without a camera: pick a site, mark a route found', asyn
         0,
     )
     await expect(page.getByTestId('inventory-progress')).toContainText('1/')
+    await expect(page.getByTestId('inventory-change-location')).toContainText(
+        LOCATIONS[0],
+    )
 
     await expect(
         page.getByTestId('inventory-change-location').getByLabel(/./),
@@ -66,7 +70,7 @@ test('manual add dialog opens from the missing column', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/inventory')
-    await page.getByTestId('inventory-location-Hanau').click()
+    await page.getByTestId(`inventory-location-${LOCATIONS[0]}`).click()
 
     await page.getByTestId('inventory-manual-open').click()
     await expect(page.getByTestId('inventory-manual-dialog')).toBeVisible()

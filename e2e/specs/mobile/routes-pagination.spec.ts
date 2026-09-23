@@ -1,11 +1,13 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
+import { LOCATIONS, locationId } from '../../support/seed'
 
 test('paginates the mobile route card list', async ({ adminPage: page }) => {
     const prefix = `e2e-pg-${Date.now()}`
 
     await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
+    const hallA = await locationId(page, LOCATIONS[0])
     for (let i = 0; i < 12; i++) {
         await page.request.post('/api/collections/routes/records', {
             headers,
@@ -13,7 +15,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
                 name: `${prefix}-${i}`,
                 difficulty: 5,
                 anchor_point: 5,
-                location: 'Hanau',
+                location: hallA,
                 type: 'Route',
                 creator: ['E2E'],
                 screw_date: '2026-01-01',

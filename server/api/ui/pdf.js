@@ -4,6 +4,8 @@ import {
     resolveRouteIds,
     resolveApplicationUrl,
     fetchRecordsByIds,
+    resolveExportLocale,
+    resolveExportLabel,
 } from '../../utils/export.js'
 
 export default eventHandler(async (event) => {
@@ -32,6 +34,8 @@ export default eventHandler(async (event) => {
         }
 
         const applicationUrl = resolveApplicationUrl(event, settings)
+        const locale = await resolveExportLocale(event)
+        const ropeLabel = await resolveExportLabel(event, 'rope', 'Rope')
 
         // ── Layout constants ───────────────────────────────────────────────
         const QR_SIZE = 110 // Rendered size of the QR code in PDF points (square)
@@ -118,7 +122,7 @@ export default eventHandler(async (event) => {
                 doc.font('Helvetica')
                     .fontSize(8)
                     .fillColor('black')
-                    .text('Seil', boxX, boxY + 4, {
+                    .text(ropeLabel, boxX, boxY + 4, {
                         width: boxWidth,
                         align: 'center',
                     })
@@ -153,7 +157,7 @@ export default eventHandler(async (event) => {
             }
 
             const date = new Date(climbingRoute.screw_date)
-            const screw_date = date.toLocaleDateString('DE-de')
+            const screw_date = date.toLocaleDateString(locale)
             doc.fontSize(8).text(
                 screw_date,
                 calculateStartX(x + 80, screw_date, doc),
