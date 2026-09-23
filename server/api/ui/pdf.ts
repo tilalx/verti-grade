@@ -1,12 +1,13 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { getAuthenticatedPb } from '../../utils/pb-server'
 import {
     resolveRouteIds,
     resolveApplicationUrl,
     fetchRecordsByIds,
     resolveExportLocale,
     resolveExportLabel,
-} from '../../utils/export.js'
+} from '../../utils/export'
+import type { SettingsRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
@@ -25,9 +26,9 @@ export default eventHandler(async (event) => {
     try {
         const settings = await pb
             .collection('settings')
-            .getOne('settings_123456')
+            .getOne<SettingsRecord>('settings_123456')
 
-        let logo = null
+        let logo: Buffer | null = null
         if (settings.sign_image) {
             const logoUrl = pb.files.getURL(settings, settings.sign_image)
             logo = await fetchLogo(logoUrl)
@@ -52,7 +53,9 @@ export default eventHandler(async (event) => {
             requestKey: 'pdfExport',
         })
         const byId = new Map(records.map((record) => [record.id, record]))
-        const routes = ids.map((id) => byId.get(id)).filter(Boolean)
+        const routes = ids
+            .map((id) => byId.get(id))
+            .filter((route) => route !== undefined)
 
         const doc = new PDFDocument({ size: [595.28, 841.89] })
         res.setHeader('Content-Type', 'application/pdf')
@@ -74,7 +77,7 @@ export default eventHandler(async (event) => {
 
             doc.fillColor('black')
 
-            const textOptions = { align: 'left', width: 200 }
+            const textOptions = { align: 'left' as const, width: 200 }
             let sign = ''
 
             if (typeof climbingRoute.difficulty_sign === 'string') {
@@ -83,7 +86,7 @@ export default eventHandler(async (event) => {
                 sign = climbingRoute.difficulty_sign ? '+' : '-'
             }
 
-            const difficulty = climbingRoute.difficulty + sign
+            const difficulty = `${climbingRoute.difficulty}${sign}`
 
             doc.text(
                 difficulty,
@@ -100,8 +103,8 @@ export default eventHandler(async (event) => {
             )
 
             doc.text(
-                climbingRoute.comment,
-                calculateStartX(x + 80, climbingRoute.comment, doc),
+                climbingRoute.comment ?? '',
+                calculateStartX(x + 80, climbingRoute.comment ?? '', doc),
                 y + 100,
                 textOptions,
             )
@@ -156,7 +159,7 @@ export default eventHandler(async (event) => {
                 )
             }
 
-            const date = new Date(climbingRoute.screw_date)
+            const date = new Date(climbingRoute.screw_date ?? 0)
             const screw_date = date.toLocaleDateString(locale)
             doc.fontSize(8).text(
                 screw_date,
@@ -193,15 +196,13 @@ export default eventHandler(async (event) => {
             )
             doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER).fill('#333333')
             doc.circle(cx, cy, CIRCLE_RADIUS + 0.5).fill('#FFFFFF')
-            doc.circle(cx, cy, CIRCLE_RADIUS).fill(climbingRoute.color)
+            doc.circle(cx, cy, CIRCLE_RADIUS).fill(
+                climbingRoute.color as string,
+            )
             // ──────────────────────────────────────────────────────────────
 
             if (logo) {
-                doc.image(logo, {
-                    fit: [100, 100],
-                    y: y + 100,
-                    x: x + 165,
-                })
+                doc.image(logo, x + 165, y + 100, { fit: [100, 100] })
             }
 
             entryCount++
@@ -218,7 +219,12 @@ export default eventHandler(async (event) => {
     }
 })
 
-function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
+function calculateStartX(
+    desiredXCenter: number,
+    text: string | null,
+    doc: PDFKit.PDFDocument,
+    fontSize = 12,
+) {
     if (text !== null) {
         doc.font('Helvetica').fontSize(fontSize)
         const textWidth = doc.widthOfString(text)
@@ -227,14 +233,14 @@ function calculateStartX(desiredXCenter, text, doc, fontSize = 12) {
     return 0
 }
 
-async function fetchLogo(url) {
+async function fetchLogo(url: string) {
     if (!url) {
         return null
     }
     try {
         const response = await fetch(url)
         if (!response.ok) throw new Error('Failed to fetch logo')
-        return await response.arrayBuffer()
+        return Buffer.from(await response.arrayBuffer())
     } catch (error) {
         console.error('Failed to fetch logo:', error)
         return null

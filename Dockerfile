@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 # Now copy the rest needed to build
 COPY pocketbase/main.go ./
-COPY pocketbase/pb_hooks ./pb_hooks
+COPY pocketbase/hooks ./hooks
 COPY pocketbase/pb_migrations ./pb_migrations
 
 # Compile to /out; -trimpath makes cache keys stable
@@ -82,7 +82,6 @@ ENV APP_VERSION=${APP_VERSION}
 # Copy artifacts only
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
 COPY ./pocketbase/pb_migrations /pb/pb_migrations
-COPY ./pocketbase/pb_hooks /pb/pb_hooks
 COPY --from=ui-build /app/.output /app/ui
 
 # Entrypoint + nginx config

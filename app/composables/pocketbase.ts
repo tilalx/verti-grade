@@ -1,4 +1,4 @@
-import PocketBase, { BaseAuthStore } from 'pocketbase'
+import PocketBase, { BaseAuthStore, type AuthRecord } from 'pocketbase'
 import { AUTH_COOKIE } from '~/utils/clientStorage'
 
 class CookieAuthStore extends BaseAuthStore {
@@ -7,12 +7,12 @@ class CookieAuthStore extends BaseAuthStore {
         this.loadFromCookie(document.cookie, AUTH_COOKIE)
     }
 
-    save(token, record) {
+    override save(token: string, record?: AuthRecord) {
         super.save(token, record)
         this.#persist()
     }
 
-    clear() {
+    override clear() {
         super.clear()
         this.#persist()
     }
@@ -30,7 +30,11 @@ class CookieAuthStore extends BaseAuthStore {
     }
 }
 
-export const usePocketbase = () => {
+declare global {
+    var _pb: PocketBase | undefined
+}
+
+export const usePocketbase = (): PocketBase => {
     if (import.meta.server) {
         const url = import.meta.dev
             ? 'http://localhost:8090'
@@ -51,7 +55,11 @@ export const usePocketbase = () => {
     return globalThis._pb
 }
 
-export const usePbFileUrl = (record, filename, query) => {
+export const usePbFileUrl = (
+    record: { id?: string; collectionId?: string } | null | undefined,
+    filename: string | null | undefined,
+    query?: Record<string, string>,
+) => {
     if (!record?.id || !filename) return ''
     const base = import.meta.dev ? 'http://localhost:8090' : ''
     const q = query ? `?${new URLSearchParams(query)}` : ''

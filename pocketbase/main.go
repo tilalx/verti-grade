@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"pocketbase/hooks"
+
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -21,30 +23,6 @@ func main() {
 	// ---------------------------------------------------------------
 	// Optional plugin flags:
 	// ---------------------------------------------------------------
-
-	var hooksDir string
-	app.RootCmd.PersistentFlags().StringVar(
-		&hooksDir,
-		"hooksDir",
-		"",
-		"the directory with the JS app hooks",
-	)
-
-	var hooksWatch bool
-	app.RootCmd.PersistentFlags().BoolVar(
-		&hooksWatch,
-		"hooksWatch",
-		true,
-		"auto restart the app on pb_hooks file change",
-	)
-
-	var hooksPool int
-	app.RootCmd.PersistentFlags().IntVar(
-		&hooksPool,
-		"hooksPool",
-		25,
-		"the total prewarm goja.Runtime instances for the JS app hooks execution",
-	)
 
 	var migrationsDir string
 	app.RootCmd.PersistentFlags().StringVar(
@@ -84,12 +62,9 @@ func main() {
 	// Plugins and hooks:
 	// ---------------------------------------------------------------
 
-	// Load JSVM (hooks and migrations)
+	// Load JSVM (migrations)
 	jsvm.MustRegister(app, jsvm.Config{
 		MigrationsDir: migrationsDir,
-		HooksDir:      hooksDir,
-		HooksWatch:    hooksWatch,
-		HooksPoolSize: hooksPool,
 	})
 
 	// Migrate command (with JS templates)
@@ -104,8 +79,15 @@ func main() {
 
 	// ---------------------------------------------------------------
 
+	hooks.Register(app)
+
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		// Serve static files from the provided public directory (if exists)
+		se.Router.GET("/{$}", func(e *core.RequestEvent) error {
+			return e.JSON(http.StatusOK, map[string]string{
+				"message": "This is only the pocketbase server. Please visit https://pocketbase.io for more information.",
+			})
+		})
 		se.Router.GET("/*", apis.Static(os.DirFS(publicDir), indexFallback))
 		se.Router.GET("/api/online", func(e *core.RequestEvent) error {
 			count := 0

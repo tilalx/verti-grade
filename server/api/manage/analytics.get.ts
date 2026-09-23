@@ -1,6 +1,6 @@
 import { createError, eventHandler } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server.js'
-import { routeLocationName } from '../../utils/export.js'
+import { getAuthenticatedPb } from '../../utils/pb-server'
+import { routeLocationName } from '../../utils/export'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {

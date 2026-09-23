@@ -30,7 +30,7 @@ describe('auth middleware', () => {
 
     it('redirects unauthenticated users to /auth/login on protected routes', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
@@ -39,7 +39,7 @@ describe('auth middleware', () => {
 
     it('allows authenticated users through protected routes', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
@@ -48,7 +48,7 @@ describe('auth middleware', () => {
 
     it('allows unauthenticated access to the home page', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/', meta: {} }, {})
 
@@ -58,7 +58,7 @@ describe('auth middleware', () => {
     it('guards on the server side too, so no content is flashed first', async () => {
         process.client = false
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
@@ -69,7 +69,7 @@ describe('auth middleware', () => {
 
     it('allows unauthenticated access to pages with auth: false', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/auth/login', meta: { auth: false } }, {})
 
@@ -78,7 +78,7 @@ describe('auth middleware', () => {
 
     it('redirects authenticated users away from auth: false pages', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/auth/login', meta: { auth: false } }, {})
 
@@ -87,7 +87,7 @@ describe('auth middleware', () => {
 
     it('allows unauthenticated access to password reset with auth: false', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: false } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware(
             {
@@ -105,7 +105,7 @@ describe('auth middleware', () => {
     it('allows access when user has the required permission', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
         canMock.mockReturnValue(true)
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware(
             {
@@ -123,7 +123,7 @@ describe('auth middleware', () => {
     it('redirects to / when user lacks the required permission', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
         canMock.mockReturnValue(false)
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware(
             {
@@ -140,7 +140,7 @@ describe('auth middleware', () => {
 
     it('does not check permissions when none is required', async () => {
         globalThis.__POCKETBASE_CLIENT__ = { authStore: { isValid: true } }
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
@@ -158,7 +158,7 @@ describe('auth middleware', () => {
             callOrder.push('can')
             return true
         })
-        const { default: middleware } = await import('~/middleware/auth.js')
+        const { default: middleware } = await import('~/middleware/auth')
 
         await middleware(
             {
@@ -187,7 +187,7 @@ describe('auth middleware', () => {
             canMock.mockReset().mockReturnValue(false)
             navigateToMock.mockReset()
             vi.resetModules()
-            const { default: middleware } = await import('~/middleware/auth.js')
+            const { default: middleware } = await import('~/middleware/auth')
 
             await middleware(
                 { path, meta: { requiredPermission: permission } },
