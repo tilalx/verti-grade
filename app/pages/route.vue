@@ -317,6 +317,7 @@ import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import {
     formatDate,
     formatDifficulty,
+    locationName,
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { reportContentUrl } from '~/utils/reports'

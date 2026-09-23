@@ -432,6 +432,7 @@ import {
     formatDifficulty,
     formatAnchorPoint,
     formatScore,
+    locationName,
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { toPbSort } from '~/utils/sorting'

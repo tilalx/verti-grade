@@ -126,6 +126,7 @@ import {
     formatAnchorPoint,
     formatScore,
     formatDate,
+    locationName,
 } from '#shared/utils/formatting'
 
 const props = withDefaults(
