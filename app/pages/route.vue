@@ -413,7 +413,7 @@ const avgPerceivedDifficulty = computed(() => {
     withDiff.forEach((r) => {
         counts[r.difficultyLabel] = (counts[r.difficultyLabel] ?? 0) + 1
     })
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 })
 
 // ── Data fetching ──────────────────────────────────────────────────────────
@@ -478,7 +478,7 @@ function onReviewSaved() {
 function isLightColor(hex: string): boolean {
     let color = hex.replace('#', '')
     if (color.length === 3) {
-        color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
+        color = [...color].map((digit) => digit + digit).join('')
     }
     const num = parseInt(color, 16)
     const r = (num >> 16) & 0xff
@@ -490,7 +490,7 @@ function isLightColor(hex: string): boolean {
 function adjustColor(hex: string, amount: number): string {
     let color = hex.replace('#', '')
     if (color.length === 3) {
-        color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2]
+        color = [...color].map((digit) => digit + digit).join('')
     }
     const num = parseInt(color, 16)
     const r = Math.min(255, Math.max(0, ((num >> 16) & 0xff) + amount))

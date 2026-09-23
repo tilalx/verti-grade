@@ -204,7 +204,6 @@ useHead({
         {
             name: 'description',
             content: t('page.content.index'),
-            authRequired: false,
         },
     ],
 })
