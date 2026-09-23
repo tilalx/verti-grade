@@ -312,6 +312,7 @@
 </template>
 
 <script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import {
@@ -443,7 +444,7 @@ const getAllRouteRatings = async (): Promise<void> => {
         })
         reviews.value = data.map(mapReview)
     } catch (err: unknown) {
-        if ((err as { isAbort?: boolean })?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Error fetching ratings:', err)
         notifyError(t('ratings.loadError'))
     }

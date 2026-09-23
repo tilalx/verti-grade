@@ -124,18 +124,29 @@
     </v-app>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'AuthLayout' })
 
-const props = defineProps({
-    orgName: { type: String, default: '' },
-    orgUnitName: { type: String, default: '' },
-    loading: { type: Boolean, default: false },
-    eyebrow: { type: String, default: '' },
-    title: { type: String, default: '' },
-    subtitle: { type: String, default: '' },
-    headingKey: { type: String, default: 'heading' },
-})
+withDefaults(
+    defineProps<{
+        orgName?: string
+        orgUnitName?: string
+        loading?: boolean
+        eyebrow?: string
+        title?: string
+        subtitle?: string
+        headingKey?: string
+    }>(),
+    {
+        orgName: '',
+        orgUnitName: '',
+        loading: false,
+        eyebrow: '',
+        title: '',
+        subtitle: '',
+        headingKey: 'heading',
+    },
+)
 </script>
 
 <style scoped>

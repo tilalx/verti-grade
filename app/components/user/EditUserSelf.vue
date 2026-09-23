@@ -268,9 +268,19 @@
     </LayoutDialogShell>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { required, validEmail } from '~/utils/validation'
-import { SUPPORTED_LOCALES } from '~/utils/locales'
+import type { ClientResponseError } from 'pocketbase'
+import type { VForm } from 'vuetify/components'
+import { SUPPORTED_LOCALES, isLocaleCode } from '~/utils/locales'
+import type { UserRecord } from '~/types/models'
+
+type EditableSelf = UserRecord & {
+    language: string
+    oldPassword: string
+    password: string
+    passwordConfirm: string
+}
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
@@ -283,12 +293,13 @@ const currentLocale = computed(
 
 // ── PocketBase ────────────────────────────────────────────────────────────
 const pb = usePocketbase()
-const authRecord = pb.authStore.record
+const authRecord = pb.authStore.record as UserRecord | null
 
 // ── User state ────────────────────────────────────────────────────────────
-const user = reactive({
+const user = reactive<EditableSelf>({
     ...(authRecord ?? {
         id: '',
+        username: '',
         firstname: '',
         name: '',
         email: '',
@@ -305,9 +316,9 @@ const fullName = computed(() =>
 )
 
 // ── Avatar ────────────────────────────────────────────────────────────────
-const avatarFile = ref(null)
-const avatarPreview = ref(null)
-const avatarInput = ref(null)
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref<string | null>(null)
+const avatarInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => {
     avatarPreview.value = user.avatar
@@ -319,13 +330,14 @@ function openAvatarPicker() {
     avatarInput.value?.click()
 }
 
-function onAvatarNative(e) {
-    const file = e.target.files?.[0]
+function onAvatarNative(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
     if (file) {
         avatarFile.value = file
         avatarPreview.value = URL.createObjectURL(file)
     }
-    e.target.value = ''
+    input.value = ''
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────
@@ -351,7 +363,7 @@ const rules = {
 }
 
 // ── Form ref (profile tab only) ───────────────────────────────────────────
-const profileForm = ref(null)
+const profileForm = ref<VForm | null>(null)
 
 // ── Change detection ──────────────────────────────────────────────────────
 const original = {
@@ -361,7 +373,7 @@ const original = {
     language: user.language,
 }
 
-const normalizedEmail = (value) =>
+const normalizedEmail = (value: unknown) =>
     String(value ?? '')
         .trim()
         .toLowerCase()
@@ -424,12 +436,12 @@ async function saveUser() {
 
     saving.value = true
 
-    const requestedEmail = user.email.trim()
+    const requestedEmail = (user.email ?? '').trim()
     const wantsEmailChange = emailChangeRequested.value
 
     const formData = new FormData()
-    formData.append('firstname', user.firstname)
-    formData.append('name', user.name)
+    formData.append('firstname', user.firstname ?? '')
+    formData.append('name', user.name ?? '')
     formData.append('language', user.language)
 
     if (passwordChangeRequested.value) {
@@ -461,7 +473,7 @@ async function saveUser() {
         original.name = updated.name
         original.email = updated.email ?? original.email
         original.language = updated.language
-        await setLocale(updated.language)
+        if (isLocaleCode(updated.language)) await setLocale(updated.language)
 
         if (wantsEmailChange) {
             try {
@@ -477,7 +489,8 @@ async function saveUser() {
 
         localDialog.value = false
     } catch (err) {
-        const code = err?.response?.data?.oldPassword?.code
+        const code = (err as ClientResponseError)?.response?.data?.oldPassword
+            ?.code
         if (code === 'validation_invalid_old_password') {
             notifyError(t('account.wrongOldPassword'))
             activeTab.value = 'security'
@@ -510,10 +523,8 @@ async function deleteAccount() {
 }
 
 // ── Dialog v-model ────────────────────────────────────────────────────────
-const props = defineProps({
-    dialogOpen: { type: Boolean, required: true },
-})
-const emit = defineEmits(['update:dialogOpen'])
+const props = defineProps<{ dialogOpen: boolean }>()
+const emit = defineEmits<{ 'update:dialogOpen': [open: boolean] }>()
 const localDialog = ref(props.dialogOpen)
 
 watch(localDialog, (val) => emit('update:dialogOpen', val))

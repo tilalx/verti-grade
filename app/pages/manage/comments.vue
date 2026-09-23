@@ -318,9 +318,21 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import { formatDifficulty, locationName } from '#shared/utils/formatting'
 import { DIFFICULTY_LEVELS } from '~/utils/routes'
+import type { RatingRecord, RouteRecord, UserRecord } from '~/types/models'
+
+type ManagedComment = RatingRecord & {
+    created: string
+    routeId: string | null
+    routeName: string
+    location: string | null
+    difficultyLabel: string | null
+    userName: string
+    userAvatar: string | null
+}
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -341,7 +353,7 @@ const loading = ref(true)
 const loadingMore = ref(false)
 const bulkDeleting = ref(false)
 
-const comments = ref([])
+const comments = ref<ManagedComment[]>([])
 const stats = ref({ totalReviews: 0, avgRating: '—', thisWeek: 0, lowRated: 0 })
 
 const page = ref(1)
@@ -350,17 +362,17 @@ const totalItems = ref(0)
 const hasMore = computed(() => comments.value.length < totalItems.value)
 
 const search = ref('')
-const selectedLocation = ref(null)
-const selectedDifficulty = ref(null)
+const selectedLocation = ref<string | null>(null)
+const selectedDifficulty = ref<number | null>(null)
 const selectedRating = ref(0)
 const dateFilter = ref('')
 const sortOrder = ref('newest')
 
-const selectedMap = reactive({})
+const selectedMap = reactive<Record<string, true>>({})
 const selectedCount = computed(() => Object.keys(selectedMap).length)
 
 const editDialog = ref(false)
-const editingReview = ref(null)
+const editingReview = ref<ManagedComment | null>(null)
 
 const bulkDeleteDialog = ref(false)
 
@@ -396,7 +408,7 @@ const { data: locationRecords } = useLocations()
 
 const locations = computed(() => [
     { text: t('filter.all'), value: null },
-    ...locationRecords.value.map((location) => ({
+    ...(locationRecords.value ?? []).map((location) => ({
         text: location.name,
         value: location.id,
     })),
@@ -411,7 +423,7 @@ const sortOptions = computed(() => [
 
 // ── Query builders ─────────────────────────────────────────────────────────
 
-function buildFilter(searchTerm) {
+function buildFilter(searchTerm: string) {
     const parts = []
     if (selectedRating.value !== 0)
         parts.push(`rating = ${selectedRating.value}`)
@@ -460,21 +472,20 @@ const LIST_FIELDS = [
     'expand.user.avatar',
 ].join(',')
 
-function mapComment(c) {
+function mapComment(rating: RatingRecord): ManagedComment {
+    const route = rating.expand?.route_id as RouteRecord | undefined
+    const user = rating.expand?.user as UserRecord | undefined
     return {
-        ...c,
-        routeId: c.expand?.route_id?.id ?? null,
-        routeName: c.expand?.route_id?.name ?? 'N/A',
-        location: locationName(c.expand?.route_id) || null,
-        difficultyLabel: c.difficulty != null ? formatDifficulty(c) : null,
-        userName:
-            c.expand?.user?.name ||
-            c.expand?.user?.username ||
-            t('comments.anonymous'),
+        ...rating,
+        created: rating.created ?? '',
+        routeId: route?.id ?? null,
+        routeName: route?.name ?? 'N/A',
+        location: locationName(route) || null,
+        difficultyLabel:
+            rating.difficulty != null ? formatDifficulty(rating) : null,
+        userName: user?.name || user?.username || t('comments.anonymous'),
         userAvatar:
-            usePbFileUrl(c.expand?.user, c.expand?.user?.avatar, {
-                thumb: '100x100',
-            }) || null,
+            usePbFileUrl(user, user?.avatar, { thumb: '100x100' }) || null,
     }
 }
 
@@ -494,11 +505,11 @@ const fetchStats = async () => {
             lowRated: Number(rec.lowRated) || 0,
         }
     } catch (err) {
-        if (err?.isAbort) return
+        if (isAbortError(err)) return
     }
 }
 
-let statsDebounce = null
+let statsDebounce: ReturnType<typeof setTimeout> | undefined
 function scheduleStatsRefresh() {
     clearTimeout(statsDebounce)
     statsDebounce = setTimeout(() => fetchStats(), 500)
@@ -516,7 +527,7 @@ const fetchList = async (append = false) => {
     try {
         const result = await pb
             .collection('ratings')
-            .getList(page.value, PER_PAGE, {
+            .getList<RatingRecord>(page.value, PER_PAGE, {
                 sort: buildSort(),
                 filter: buildFilter(search.value.trim()),
                 expand: 'route_id.location,user',
@@ -527,7 +538,7 @@ const fetchList = async (append = false) => {
         const mapped = result.items.map(mapComment)
         comments.value = append ? [...comments.value, ...mapped] : mapped
     } catch (err) {
-        if (err?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Failed to fetch comments:', err)
         notifyError(t('notifications.error.generic'))
     } finally {
@@ -548,8 +559,8 @@ async function loadMore() {
 
 // ── Infinite scroll ────────────────────────────────────────────────────────
 
-const sentinelRef = ref(null)
-let scrollObserver = null
+const sentinelRef = ref<HTMLElement | null>(null)
+let scrollObserver: IntersectionObserver | null = null
 
 function maybeLoadMore() {
     if (loading.value || loadingMore.value || !hasMore.value) return
@@ -572,7 +583,7 @@ watch(sentinelRef, (el) => {
 
 // ── Watchers ───────────────────────────────────────────────────────────────
 
-let searchDebounce = null
+let searchDebounce: ReturnType<typeof setTimeout> | undefined
 watch(search, () => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => fetchList(), 300)
@@ -591,17 +602,20 @@ watch(
 
 // ── Edit ───────────────────────────────────────────────────────────────────
 
-function openEdit(comment) {
+function openEdit(comment: ManagedComment) {
     editingReview.value = comment
     editDialog.value = true
 }
 
-function onReviewSaved(updated) {
-    const idx = comments.value.findIndex((c) => c.id === updated.id)
-    if (idx !== -1) {
+function onReviewSaved(updated: RatingRecord | null) {
+    const idx = updated
+        ? comments.value.findIndex((c) => c.id === updated.id)
+        : -1
+    const existing = comments.value[idx]
+    if (updated && existing) {
         comments.value[idx] = mapComment({
             ...updated,
-            expand: comments.value[idx].expand,
+            expand: existing.expand,
         })
     }
     notify(t('notifications.success.edit'))
@@ -612,9 +626,9 @@ function onReviewSaved(updated) {
 
 const deleteDialog = ref(false)
 const deleting = ref(false)
-const deleteTarget = ref(null)
+const deleteTarget = ref<ManagedComment | null>(null)
 
-function openDelete(comment) {
+function openDelete(comment: ManagedComment) {
     deleteTarget.value = comment
     deleteDialog.value = true
 }
@@ -664,7 +678,7 @@ async function bulkDelete() {
 
 // ── Selection helpers ──────────────────────────────────────────────────────
 
-function toggleSelect(id) {
+function toggleSelect(id: string) {
     if (selectedMap[id]) delete selectedMap[id]
     else selectedMap[id] = true
 }
@@ -705,7 +719,7 @@ onMounted(async () => {
                 try {
                     const rec = await pb
                         .collection('ratings')
-                        .getOne(e.record.id, {
+                        .getOne<RatingRecord>(e.record.id, {
                             expand: 'route_id.location,user',
                             fields: LIST_FIELDS,
                             requestKey: null,
@@ -720,7 +734,7 @@ onMounted(async () => {
                 try {
                     const rec = await pb
                         .collection('ratings')
-                        .getOne(e.record.id, {
+                        .getOne<RatingRecord>(e.record.id, {
                             expand: 'route_id.location,user',
                             fields: LIST_FIELDS,
                             requestKey: null,

@@ -167,7 +167,12 @@
                             "
                             :accept="asset.accept"
                             :model-value="asset.file.value"
-                            @update:model-value="(f) => asset.onSelect(f)"
+                            @update:model-value="
+                                (f) =>
+                                    asset.onSelect(
+                                        Array.isArray(f) ? (f[0] ?? null) : f,
+                                    )
+                            "
                             style="display: none"
                             hide-details
                         />
@@ -459,7 +464,13 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+import type { UnsubscribeFunc } from 'pocketbase'
+import type { SettingsRecord } from '~/types/models'
+
+type FileInputRef = Element | ComponentPublicInstance | null
+
 const pb = usePocketbase()
 const { t } = useI18n()
 
@@ -475,7 +486,7 @@ definePageMeta({
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 
-const { data: settings } = useNuxtData('settings')
+const { data: settings } = useNuxtData<SettingsRecord>('settings')
 
 const { data: mailStatus } = useMailStatus()
 const pbMailSettingsUrl =
@@ -491,13 +502,13 @@ const original = reactive({
     organization_name: '',
     organization_unit_name: '',
     contact_email: '',
-    audit_retention_days: 90,
+    audit_retention_days: 90 as number | null,
     ...legalFieldsFrom({}),
 })
 
 const copySettings = reactive({ ...original, ...legalFieldsFrom(original) })
 
-function legalFieldsFrom(rec) {
+function legalFieldsFrom(rec: Partial<SettingsRecord>) {
     return {
         legal_address: rec.legal_address ?? '',
         legal_phone: rec.legal_phone ?? '',
@@ -505,12 +516,15 @@ function legalFieldsFrom(rec) {
         legal_vat_id: rec.legal_vat_id ?? '',
         legal_editorial: rec.legal_editorial ?? '',
         legal_representatives: (rec.legal_representatives ?? []).map(
-            (person) => ({ name: person.name ?? '', role: person.role ?? '' }),
+            (person) => ({
+                name: person.name ?? '',
+                role: person.role ?? '',
+            }),
         ),
     }
 }
 
-function legalPayload(state) {
+function legalPayload(state: Partial<SettingsRecord>) {
     const fields = legalFieldsFrom(state)
     fields.legal_representatives = fields.legal_representatives
         .map((person) => ({
@@ -521,7 +535,7 @@ function legalPayload(state) {
     return fields
 }
 
-function adoptRecord(rec) {
+function adoptRecord(rec: SettingsRecord | null | undefined) {
     if (!rec) return
     const dirty = hasChanges.value
     original.application_url = rec.application_url ?? ''
@@ -539,29 +553,37 @@ function adoptRecord(rec) {
     signPreview.value = pbFileUrl(rec, rec.sign_image)
 }
 
-const logoFile = ref(null)
-const iconFile = ref(null)
-const signFile = ref(null)
+const logoFile = ref<File | null>(null)
+const iconFile = ref<File | null>(null)
+const signFile = ref<File | null>(null)
 
 const logoClear = ref(false)
 const iconClear = ref(false)
 const signClear = ref(false)
 
-const logoInputRef = ref(null)
-const iconInputRef = ref(null)
-const signInputRef = ref(null)
+const logoInputRef = ref<FileInputRef>(null)
+const iconInputRef = ref<FileInputRef>(null)
+const signInputRef = ref<FileInputRef>(null)
 
-const logoPreview = ref(null)
-const iconPreview = ref(null)
-const signPreview = ref(null)
+const logoPreview = ref<string | null>(null)
+const iconPreview = ref<string | null>(null)
+const signPreview = ref<string | null>(null)
 
 const saving = ref(false)
 const { notify, error: notifyError } = useNotification()
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function pbFileUrl(rec, filename) {
+function pbFileUrl(
+    rec: Partial<SettingsRecord> | null | undefined,
+    filename: string | null | undefined,
+) {
     return usePbFileUrl(rec, filename) || null
+}
+
+function clickFileInput(target: FileInputRef) {
+    const root = target && '$el' in target ? target.$el : target
+    ;(root as HTMLElement | null)?.querySelector('input')?.click()
 }
 
 // ── Asset field descriptors (drives the template v-for) ───────────────────────
@@ -578,8 +600,7 @@ const assetFields = computed(() => [
         onSelect: onLogoSelected,
         onRevert: onLogoRevert,
         onDelete: onLogoDelete,
-        triggerInput: () =>
-            logoInputRef.value?.$el?.querySelector('input')?.click(),
+        triggerInput: () => clickFileInput(logoInputRef.value),
     },
     {
         key: 'icon',
@@ -592,8 +613,7 @@ const assetFields = computed(() => [
         onSelect: onIconSelected,
         onRevert: onIconRevert,
         onDelete: onIconDelete,
-        triggerInput: () =>
-            iconInputRef.value?.$el?.querySelector('input')?.click(),
+        triggerInput: () => clickFileInput(iconInputRef.value),
     },
     {
         key: 'sign',
@@ -606,19 +626,20 @@ const assetFields = computed(() => [
         onSelect: onSignSelected,
         onRevert: onSignRevert,
         onDelete: onSignDelete,
-        triggerInput: () =>
-            signInputRef.value?.$el?.querySelector('input')?.click(),
+        triggerInput: () => clickFileInput(signInputRef.value),
     },
 ])
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
-let unsubscribe = null
+let unsubscribe: UnsubscribeFunc | null = null
 
 onMounted(async () => {
     unsubscribe = await pb
         .collection('settings')
-        .subscribe('settings_123456', (e) => adoptRecord(e.record))
+        .subscribe<SettingsRecord>('settings_123456', (e) =>
+            adoptRecord(e.record),
+        )
 })
 
 onUnmounted(() => {
@@ -627,34 +648,34 @@ onUnmounted(() => {
 
 // ── File selection handlers ───────────────────────────────────────────────────
 
-function onLogoSelected(file) {
+function onLogoSelected(file: File | null) {
     logoFile.value = file
     logoClear.value = false
     logoPreview.value = file
         ? URL.createObjectURL(file)
-        : pbFileUrl(settings.value, settings.value.page_logo)
+        : pbFileUrl(settings.value, settings.value?.page_logo)
 }
 
-function onIconSelected(file) {
+function onIconSelected(file: File | null) {
     iconFile.value = file
     iconClear.value = false
     iconPreview.value = file
         ? URL.createObjectURL(file)
-        : pbFileUrl(settings.value, settings.value.page_icon)
+        : pbFileUrl(settings.value, settings.value?.page_icon)
 }
 
-function onSignSelected(file) {
+function onSignSelected(file: File | null) {
     signFile.value = file
     signClear.value = false
     signPreview.value = file
         ? URL.createObjectURL(file)
-        : pbFileUrl(settings.value, settings.value.sign_image)
+        : pbFileUrl(settings.value, settings.value?.sign_image)
 }
 
 function onLogoRevert() {
     logoFile.value = null
     logoClear.value = false
-    logoPreview.value = pbFileUrl(settings.value, settings.value.page_logo)
+    logoPreview.value = pbFileUrl(settings.value, settings.value?.page_logo)
 }
 function onLogoDelete() {
     logoClear.value = true
@@ -664,7 +685,7 @@ function onLogoDelete() {
 function onIconRevert() {
     iconFile.value = null
     iconClear.value = false
-    iconPreview.value = pbFileUrl(settings.value, settings.value.page_icon)
+    iconPreview.value = pbFileUrl(settings.value, settings.value?.page_icon)
 }
 function onIconDelete() {
     iconClear.value = true
@@ -674,7 +695,7 @@ function onIconDelete() {
 function onSignRevert() {
     signFile.value = null
     signClear.value = false
-    signPreview.value = pbFileUrl(settings.value, settings.value.sign_image)
+    signPreview.value = pbFileUrl(settings.value, settings.value?.sign_image)
 }
 function onSignDelete() {
     signClear.value = true
@@ -709,7 +730,7 @@ async function saveSettings() {
     saving.value = true
 
     try {
-        const payload = {
+        const payload: Record<string, unknown> = {
             application_url: copySettings.application_url,
             imprint_url: copySettings.imprint_url,
             privacy_url: copySettings.privacy_url,
@@ -729,7 +750,7 @@ async function saveSettings() {
 
         const updated = await pb
             .collection('settings')
-            .update(settings.value.id, payload)
+            .update<SettingsRecord>(settings.value!.id, payload)
 
         logoPreview.value = pbFileUrl(updated, updated.page_logo)
         iconPreview.value = pbFileUrl(updated, updated.page_icon)
@@ -738,21 +759,21 @@ async function saveSettings() {
         logoFile.value = iconFile.value = signFile.value = null
         logoClear.value = iconClear.value = signClear.value = false
 
-        original.application_url = updated.application_url
-        original.imprint_url = updated.imprint_url
-        original.privacy_url = updated.privacy_url
-        original.organization_name = updated.organization_name
-        original.organization_unit_name = updated.organization_unit_name
+        original.application_url = updated.application_url ?? ''
+        original.imprint_url = updated.imprint_url ?? ''
+        original.privacy_url = updated.privacy_url ?? ''
+        original.organization_name = updated.organization_name ?? ''
+        original.organization_unit_name = updated.organization_unit_name ?? ''
         original.contact_email = updated.contact_email ?? ''
         original.audit_retention_days = updated.audit_retention_days ?? 90
         Object.assign(original, legalFieldsFrom(updated))
 
         Object.assign(copySettings, {
-            application_url: updated.application_url,
-            imprint_url: updated.imprint_url,
-            privacy_url: updated.privacy_url,
-            organization_name: updated.organization_name,
-            organization_unit_name: updated.organization_unit_name,
+            application_url: updated.application_url ?? '',
+            imprint_url: updated.imprint_url ?? '',
+            privacy_url: updated.privacy_url ?? '',
+            organization_name: updated.organization_name ?? '',
+            organization_unit_name: updated.organization_unit_name ?? '',
             contact_email: updated.contact_email ?? '',
             audit_retention_days: updated.audit_retention_days ?? 90,
             ...legalFieldsFrom(updated),

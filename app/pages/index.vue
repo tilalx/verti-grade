@@ -77,7 +77,7 @@
                 @update:options="loadRoutes"
             >
                 <template #item.color="{ item }">
-                    <v-avatar :color="item.color" size="30" />
+                    <v-avatar :color="item.color ?? undefined" size="30" />
                 </template>
                 <template #item.name="{ item }">
                     <div
@@ -166,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 import {
@@ -315,7 +316,7 @@ async function loadRoutes(
 
         totalItems.value = res.totalItems
     } catch (error) {
-        if (error?.isAbort) return
+        if (isAbortError(error)) return
         console.error('Failed to load routes:', error)
         notifyError(t('notifications.error.generic'))
     } finally {

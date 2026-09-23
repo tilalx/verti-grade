@@ -207,9 +207,18 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import { readableTextOn } from '~/utils/roles'
+import { avatarColor } from '~/utils/avatar'
 import { formatDate } from '#shared/utils/formatting'
+import type { RoleRecord, UserRecord } from '~/types/models'
+
+type AdminUser = UserRecord & {
+    avatarUrl: string | null
+    roleName: string | null
+    roleColor: string | null
+}
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
@@ -230,17 +239,17 @@ const loading = ref(true)
 const loadingMore = ref(false)
 const deleting = ref(false)
 
-const users = ref([])
+const users = ref<AdminUser[]>([])
 const page = ref(1)
 const PER_PAGE = 48
 const totalItems = ref(0)
 const hasMore = computed(() => users.value.length < totalItems.value)
 
 const search = ref('')
-const selectedRole = ref(null)
+const selectedRole = ref<string | null>(null)
 
-const editingUser = ref(null)
-const deletingUser = ref(null)
+const editingUser = ref<AdminUser | null>(null)
+const deletingUser = ref<AdminUser | null>(null)
 const deleteDialog = ref(false)
 
 const { notify, error: notifyError } = useNotification()
@@ -258,12 +267,14 @@ const roleOptions = computed(() => [
 
 // ── Data fetching ──────────────────────────────────────────────────────────
 
-function mapUser(u) {
+function mapUser(user: UserRecord): AdminUser {
+    const role = user.expand?.role as RoleRecord | undefined
     return {
-        ...u,
-        avatarUrl: usePbFileUrl(u, u.avatar, { thumb: '100x100' }) || null,
-        roleName: u.expand?.role?.name ?? null,
-        roleColor: u.expand?.role?.color ?? null,
+        ...user,
+        avatarUrl:
+            usePbFileUrl(user, user.avatar, { thumb: '100x100' }) || null,
+        roleName: role?.name ?? null,
+        roleColor: role?.color ?? null,
     }
 }
 
@@ -296,7 +307,7 @@ async function fetchList(append = false) {
     try {
         const result = await pb
             .collection('users')
-            .getList(page.value, PER_PAGE, {
+            .getList<UserRecord>(page.value, PER_PAGE, {
                 sort: '-created',
                 filter: buildFilter(),
                 expand: 'role',
@@ -306,7 +317,7 @@ async function fetchList(append = false) {
         const mapped = result.items.map(mapUser)
         users.value = append ? [...users.value, ...mapped] : mapped
     } catch (err) {
-        if (err?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Failed to fetch users:', err)
         notifyError(t('notifications.error.generic'))
     } finally {
@@ -330,7 +341,7 @@ function clearFilters() {
     selectedRole.value = null
 }
 
-let searchDebounce = null
+let searchDebounce: ReturnType<typeof setTimeout> | undefined
 watch(search, () => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => fetchList(), 300)
@@ -340,7 +351,7 @@ watch(selectedRole, () => fetchList())
 
 // ── Edit ───────────────────────────────────────────────────────────────────
 
-function editUser(user) {
+function editUser(user: AdminUser) {
     editingUser.value = user
 }
 
@@ -351,16 +362,18 @@ function onUserUpdated() {
 
 // ── Delete ─────────────────────────────────────────────────────────────────
 
-function confirmDelete(user) {
+function confirmDelete(user: AdminUser) {
     deletingUser.value = user
     deleteDialog.value = true
 }
 
 async function deleteUser() {
+    const target = deletingUser.value
+    if (!target) return
     deleting.value = true
     try {
-        await pb.collection('users').delete(deletingUser.value.id)
-        users.value = users.value.filter((u) => u.id !== deletingUser.value.id)
+        await pb.collection('users').delete(target.id)
+        users.value = users.value.filter((u) => u.id !== target.id)
         totalItems.value = Math.max(0, totalItems.value - 1)
         notify(t('users.deleteSuccess'))
         deleteDialog.value = false
@@ -375,32 +388,16 @@ async function deleteUser() {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function initials(firstname, lastname) {
+function initials(
+    firstname: string | null | undefined,
+    lastname: string | null | undefined,
+) {
     const f = firstname?.[0]?.toUpperCase() ?? ''
     const l = lastname?.[0]?.toUpperCase() ?? ''
     return f + l || '?'
 }
 
-const AVATAR_COLORS = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'deep-purple',
-    'teal',
-    'indigo',
-    'pink',
-    'cyan',
-    'orange',
-]
-
-function avatarColor(name) {
-    if (!name) return 'primary'
-    const code = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-    return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function formatCreatedDate(date) {
+function formatCreatedDate(date: string | undefined) {
     return formatDate(date, {
         locale: locale.value,
         fallback: '—',
@@ -433,10 +430,12 @@ onMounted(async () => {
         } else if (e.action === 'create') {
             totalItems.value++
             try {
-                const rec = await pb.collection('users').getOne(e.record.id, {
-                    expand: 'role',
-                    requestKey: null,
-                })
+                const rec = await pb
+                    .collection('users')
+                    .getOne<UserRecord>(e.record.id, {
+                        expand: 'role',
+                        requestKey: null,
+                    })
                 users.value = [mapUser(rec), ...users.value]
             } catch (err) {
                 console.error('Realtime user create refresh failed:', err)
@@ -447,7 +446,7 @@ onMounted(async () => {
                 try {
                     const rec = await pb
                         .collection('users')
-                        .getOne(e.record.id, {
+                        .getOne<UserRecord>(e.record.id, {
                             expand: 'role',
                             requestKey: null,
                         })

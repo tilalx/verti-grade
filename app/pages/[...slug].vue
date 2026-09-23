@@ -9,7 +9,7 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'NotFoundView' })
 
 const { t } = useI18n()
@@ -18,7 +18,8 @@ useHead({
     title: t('page.title.notFound'),
 })
 
-if (import.meta.server) setResponseStatus(useRequestEvent(), 404)
+const requestEvent = useRequestEvent()
+if (requestEvent) setResponseStatus(requestEvent, 404)
 </script>
 
 <style scoped></style>

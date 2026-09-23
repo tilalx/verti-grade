@@ -14,7 +14,7 @@
                 density="compact"
                 class="list-card__checkbox"
                 data-testid="route-card-checkbox"
-                @update:modelValue="$emit('update:modelValue', $event)"
+                @update:modelValue="$emit('update:modelValue', !!$event)"
             />
             <v-avatar
                 :color="route.color ?? undefined"

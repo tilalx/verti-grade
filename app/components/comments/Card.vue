@@ -36,7 +36,7 @@
                     v-else
                     class="text-body-small font-weight-bold text-white"
                 >
-                    {{ initials(comment.userName) }}
+                    {{ nameInitials(comment.userName) }}
                 </span>
             </v-avatar>
 
@@ -162,6 +162,7 @@
 </template>
 
 <script setup lang="ts">
+import { avatarColor, nameInitials } from '~/utils/avatar'
 import { formatDate, timeAgo as sharedTimeAgo } from '#shared/utils/formatting'
 export interface CommentCardItem {
     id: string
@@ -239,36 +240,6 @@ const formattedDate = computed(() => {
 
 function timeAgo(dateStr: string): string {
     return sharedTimeAgo(dateStr, t, locale.value)
-}
-
-// ── Avatar ──────────────────────────────────────────────────────────────────
-
-const AVATAR_COLORS = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'deep-purple',
-    'teal',
-    'indigo',
-    'pink',
-    'cyan',
-    'orange',
-]
-
-function avatarColor(name: string): string {
-    if (!name) return 'primary'
-    const code = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-    return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function initials(name: string): string {
-    if (!name) return '?'
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? '')
-        .join('')
 }
 </script>
 

@@ -113,8 +113,11 @@
     </LayoutDialogShell>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { ClientResponseError } from 'pocketbase'
+import type { VForm } from 'vuetify/components'
 import { required, maxLength } from '~/utils/validation'
+import type { RoleRecord } from '~/types/models'
 import { toHex6, isProtectedRole, readableTextOn } from '~/utils/roles'
 
 const ROLE_COLORS = [
@@ -132,18 +135,22 @@ const ROLE_COLORS = [
     '#78909C',
 ]
 
-const props = defineProps({
-    role: { type: Object, default: null },
-})
+const props = withDefaults(
+    defineProps<{ role?: Partial<RoleRecord> | null }>(),
+    { role: null },
+)
 
-const emit = defineEmits(['saved', 'close'])
+const emit = defineEmits<{
+    saved: [action: 'updated' | 'created']
+    close: []
+}>()
 
 const { t } = useI18n()
 const pb = usePocketbase()
 const { error: notifyError } = useNotification()
 
 const dialog = ref(false)
-const form = ref(null)
+const form = ref<VForm | null>(null)
 const valid = ref(false)
 const saving = ref(false)
 const customOpen = ref(false)
@@ -155,7 +162,7 @@ const original = reactive({ name: '', description: '', color: '' })
 const isEdit = computed(() => !!props.role?.id)
 
 const nameLocked = computed(
-    () => isEdit.value && isProtectedRole({ name: props.role.name }),
+    () => isEdit.value && isProtectedRole({ name: props.role?.name ?? '' }),
 )
 
 const nameRules = [required(t), maxLength(t, 50)]
@@ -168,17 +175,17 @@ const hasChanges = computed(
         draft.color !== original.color,
 )
 
-function isSelected(hex) {
+function isSelected(hex: string) {
     return toHex6(draft.color) === toHex6(hex)
 }
 
-function pickSwatch(hex) {
+function pickSwatch(hex: string) {
     draft.color = hex
     customOpen.value = false
 }
 
 function toggleCustom() {
-    if (!customOpen.value && !draft.color) draft.color = ROLE_COLORS[0]
+    if (!customOpen.value && !draft.color) draft.color = ROLE_COLORS[0]!
     customOpen.value = !customOpen.value
 }
 
@@ -212,11 +219,11 @@ function close() {
 }
 
 async function save() {
-    const { valid: formValid } = await form.value.validate()
-    if (!formValid) return
+    const result = await form.value?.validate()
+    if (!result?.valid) return
 
     const payload = {
-        name: nameLocked.value ? props.role.name : draft.name.trim(),
+        name: nameLocked.value ? (props.role?.name ?? '') : draft.name.trim(),
         description: draft.description.trim(),
         color: toHex6(draft.color),
     }
@@ -224,14 +231,14 @@ async function save() {
     saving.value = true
     try {
         if (isEdit.value) {
-            await pb.collection('roles').update(props.role.id, payload)
+            await pb.collection('roles').update(props.role!.id!, payload)
         } else {
             await pb.collection('roles').create(payload)
         }
         emit('saved', isEdit.value ? 'updated' : 'created')
         close()
     } catch (err) {
-        if (err?.response?.data?.name) {
+        if ((err as ClientResponseError)?.response?.data?.name) {
             nameError.value = t('permissions.nameTaken')
             return
         }

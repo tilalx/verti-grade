@@ -51,7 +51,7 @@
     />
 </template>
 
-<script setup>
+<script setup lang="ts">
 const router = useRouter()
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -77,7 +77,7 @@ const initials = computed(() => {
     return name
         .split(' ')
         .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? '')
+        .map((part: string) => part[0]?.toUpperCase() ?? '')
         .join('')
 })
 
@@ -121,7 +121,7 @@ const menuItems = computed(() => [
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 
-function handleAction(item) {
+function handleAction(item: { action?: () => unknown }) {
     item.action?.()
 }
 

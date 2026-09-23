@@ -222,13 +222,15 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import {
     isProtectedRole,
     reassignTargets,
     defaultReassignTarget,
     readableTextOn,
 } from '~/utils/roles'
+import type { PermissionRecord, RoleRecord } from '~/types/models'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -237,17 +239,17 @@ const REASSIGN_BATCH_SIZE = 200
 
 const loading = ref(true)
 const saving = ref(false)
-const roles = ref([])
-const allPermissions = ref([])
+const roles = ref<RoleRecord[]>([])
+const allPermissions = ref<PermissionRecord[]>([])
 const { notify, error: notifyError } = useNotification()
 
-const editingRole = ref(null)
+const editingRole = ref<Partial<RoleRecord> | null>(null)
 
 const deleteDialog = ref(false)
-const deletingRole = ref(null)
+const deletingRole = ref<RoleRecord | null>(null)
 const holderCount = ref(0)
 const countingHolders = ref(false)
-const reassignTo = ref(null)
+const reassignTo = ref<string | null>(null)
 const deleting = ref(false)
 
 const reassignOptions = computed(() =>
@@ -256,16 +258,16 @@ const reassignOptions = computed(() =>
         : [],
 )
 
-function grantedCount(role) {
+function grantedCount(role: RoleRecord) {
     return (role.permissions ?? []).length
 }
 
-function hasPermission(role, permId) {
+function hasPermission(role: RoleRecord, permId: string) {
     const perms = role.permissions ?? []
     return perms.includes(permId)
 }
 
-async function togglePermission(role, perm) {
+async function togglePermission(role: RoleRecord, perm: PermissionRecord) {
     const previousPerms = role.permissions ?? []
     const currentPerms = [...previousPerms]
     const idx = currentPerms.indexOf(perm.id)
@@ -297,11 +299,11 @@ function startCreate() {
     editingRole.value = { name: '', description: '', color: '' }
 }
 
-function startEdit(role) {
+function startEdit(role: RoleRecord) {
     editingRole.value = { ...role }
 }
 
-async function onRoleSaved(kind) {
+async function onRoleSaved(kind: 'created' | 'updated') {
     editingRole.value = null
     notify(
         t(
@@ -320,7 +322,7 @@ async function refreshRoles() {
 
 // ── Delete ─────────────────────────────────────────────────────────────────
 
-async function confirmDelete(role) {
+async function confirmDelete(role: RoleRecord) {
     deletingRole.value = role
     holderCount.value = 0
     countingHolders.value = true
@@ -335,7 +337,7 @@ async function confirmDelete(role) {
         })
         holderCount.value = held.totalItems
     } catch (err) {
-        if (err?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Failed to count role holders:', err)
         notifyError(t('permissions.loadError'))
         deleteDialog.value = false
@@ -386,11 +388,11 @@ async function fetchData({ silent = false } = {}) {
     if (!silent) loading.value = true
     try {
         const [rolesData, permsData] = await Promise.all([
-            pb.collection('roles').getFullList({
+            pb.collection('roles').getFullList<RoleRecord>({
                 sort: 'name',
                 requestKey: 'rolePermEditor_roles',
             }),
-            pb.collection('permissions').getFullList({
+            pb.collection('permissions').getFullList<PermissionRecord>({
                 sort: 'name',
                 requestKey: 'rolePermEditor_perms',
             }),
@@ -398,7 +400,7 @@ async function fetchData({ silent = false } = {}) {
         roles.value = rolesData
         allPermissions.value = permsData
     } catch (err) {
-        if (err?.isAbort) return
+        if (isAbortError(err)) return
         console.error('Failed to fetch roles/permissions:', err)
         notifyError(t('permissions.loadError'))
     } finally {

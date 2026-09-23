@@ -6,7 +6,7 @@
                     color="primary"
                     prepend-icon="mdi-routes"
                     data-testid="routes-create-open"
-                    @click="routeFormRef.open()"
+                    @click="routeFormRef?.open()"
                 >
                     {{ $t('climbing.create') }}
                 </v-btn>
@@ -15,7 +15,7 @@
                     variant="tonal"
                     prepend-icon="mdi-file-import-outline"
                     data-testid="routes-import-open"
-                    @click="importRouteRef.open()"
+                    @click="importRouteRef?.open()"
                 >
                     {{ $t('actions.import') }}
                 </v-btn>
@@ -211,12 +211,15 @@
                                 density="compact"
                                 data-testid="routes-row-checkbox"
                                 @update:modelValue="
-                                    updateRouteSelection(item, $event)
+                                    updateRouteSelection(item, !!$event)
                                 "
                             />
                         </template>
                         <template #item.color="{ item }">
-                            <v-avatar :color="item.color" size="24" />
+                            <v-avatar
+                                :color="item.color ?? undefined"
+                                size="24"
+                            />
                         </template>
                         <template #item.name="{ item }">
                             <div
@@ -279,7 +282,7 @@
                                     class="mr-1"
                                     :aria-label="$t('actions.edit')"
                                     data-testid="routes-row-edit"
-                                    @click="routeFormRef.open(item)"
+                                    @click="routeFormRef?.open(item)"
                                 />
                                 <RouteDetails :route_id="item.id" />
                             </div>
@@ -320,7 +323,7 @@
                                         variant="text"
                                         size="small"
                                         :aria-label="$t('actions.edit')"
-                                        @click="routeFormRef.open(route)"
+                                        @click="routeFormRef?.open(route)"
                                     />
                                 </template>
                             </RouteCard>
@@ -427,7 +430,8 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { isAbortError } from '~/utils/errors'
 import {
     formatDifficulty,
     formatAnchorPoint,
@@ -435,7 +439,14 @@ import {
     locationName,
     normalizeCreators,
 } from '#shared/utils/formatting'
-import { toPbSort } from '~/utils/sorting'
+import { toPbSort, type SortOption } from '~/utils/sorting'
+import type { RouteListItem, RouteScoreRecord } from '~/types/models'
+
+interface LoadOptions {
+    page?: number
+    itemsPerPage?: number
+    sortBy?: SortOption[]
+}
 
 definePageMeta({
     middleware: ['auth'],
@@ -475,11 +486,15 @@ function clearFilters() {
 
 const showArchiveConfirmation = ref(false)
 
-const routes = ref([])
+const routes = ref<RouteListItem[]>([])
 const totalItems = ref(0)
 const loading = ref(false)
 
-const tableOptions = reactive({
+const tableOptions = reactive<{
+    page: number
+    itemsPerPage: number
+    sortBy: SortOption[]
+}>({
     page: 1,
     itemsPerPage: 25,
     sortBy: [{ key: 'screw_date', order: 'desc' }],
@@ -505,7 +520,7 @@ const tableHeaders = computed(() => [
         title: t('table.actions'),
         key: 'actions',
         sortable: false,
-        align: 'end',
+        align: 'end' as const,
     },
 ])
 
@@ -542,7 +557,7 @@ const pageWindowSize = computed(() => {
     return Math.max(1, Math.min(7, Math.floor(spare / PAGE_BUTTON)))
 })
 
-const ELLIPSIS = '...'
+const ELLIPSIS = '...' as const
 
 const pageItems = computed(() => {
     const total = pageLength.value
@@ -560,7 +575,7 @@ const pageItems = computed(() => {
     )
     const end = Math.min(total - 1, start + inner - 1)
 
-    const items = [1]
+    const items: (number | typeof ELLIPSIS)[] = [1]
     if (start > 2) items.push(ELLIPSIS)
     for (let page = start; page <= end; page++) items.push(page)
     if (end < total - 1) items.push(ELLIPSIS)
@@ -568,7 +583,7 @@ const pageItems = computed(() => {
     return items
 })
 
-const updateRouteSelection = (route, isSelected) =>
+const updateRouteSelection = (route: RouteListItem, isSelected: boolean) =>
     updateSelection(route.id, isSelected)
 
 const selectAll = async () => {
@@ -580,15 +595,19 @@ const selectAll = async () => {
     }
 }
 
-const toPbSortRoutes = (sortByArr) =>
+const toPbSortRoutes = (sortByArr: SortOption[]) =>
     toPbSort(sortByArr, '-created', {
         score: 'average_rating',
         location: 'location.name',
     })
 
 const sortItemsMobile = computed(() => [
-    { title: t('table.created_at'), key: 'screw_date', defaultOrder: 'desc' },
-    { title: t('ratings.score'), key: 'score', defaultOrder: 'desc' },
+    {
+        title: t('table.created_at'),
+        key: 'screw_date',
+        defaultOrder: 'desc' as const,
+    },
+    { title: t('ratings.score'), key: 'score', defaultOrder: 'desc' as const },
     { title: t('climbing.routename'), key: 'name' },
     { title: t('climbing.difficulty'), key: 'difficulty' },
     { title: t('climbing.anchor_point'), key: 'anchor_point' },
@@ -596,11 +615,11 @@ const sortItemsMobile = computed(() => [
     { title: t('climbing.type'), key: 'type' },
 ])
 
-const onMobileSortChange = (sortBy) => {
+const onMobileSortChange = (sortBy: SortOption[]) => {
     void loadRoutes({ page: 1, sortBy })
 }
 
-const loadRoutes = async (options = {}) => {
+const loadRoutes = async (options: LoadOptions = {}) => {
     const { page, itemsPerPage, sortBy } = options
 
     if (typeof page === 'number') {
@@ -620,12 +639,16 @@ const loadRoutes = async (options = {}) => {
     try {
         const list = await pb
             .collection('averageRating')
-            .getList(tableOptions.page, tableOptions.itemsPerPage, {
-                filter: pbFilter.value || undefined,
-                sort: toPbSortRoutes(tableOptions.sortBy),
-                expand: 'location',
-                requestKey: 'adminRoutesList',
-            })
+            .getList<RouteScoreRecord>(
+                tableOptions.page,
+                tableOptions.itemsPerPage,
+                {
+                    filter: pbFilter.value || undefined,
+                    sort: toPbSortRoutes(tableOptions.sortBy),
+                    expand: 'location',
+                    requestKey: 'adminRoutesList',
+                },
+            )
 
         const normalizedRoutes = list.items.map((route) => {
             const hasRatings =
@@ -644,7 +667,7 @@ const loadRoutes = async (options = {}) => {
         routes.value = normalizedRoutes
         totalItems.value = list.totalItems
     } catch (error) {
-        if (error?.isAbort) return
+        if (isAbortError(error)) return
         console.error('Failed to load routes:', error)
         notifyError(t('notifications.error.generic'))
     } finally {
@@ -652,7 +675,7 @@ const loadRoutes = async (options = {}) => {
     }
 }
 
-const onRouteSaved = async (payload) => {
+const onRouteSaved = async (payload?: { id?: string } | null) => {
     notify(
         t(
             payload?.id
@@ -723,23 +746,25 @@ const archiveSelected = async () => {
 
 const showExportOptions = ref(false)
 const printSelected = () => exportPdf(selectedIds())
-const exportSelectedExcel = (payload) => exportXlsx(selectedIds(), payload)
+const exportSelectedExcel = (payload?: Record<string, unknown>) =>
+    exportXlsx(selectedIds(), payload)
 const exportSelectedJson = () => exportJson(selectedIds())
 
 const mobileListRef = useTemplateRef('mobileListRef')
 
-const onMobilePageChange = async (value) => {
+const onMobilePageChange = async (value: number) => {
     if (value === tableOptions.page) {
         return
     }
 
     await loadRoutes({ page: value })
 
-    const list = mobileListRef.value?.$el ?? mobileListRef.value
-    list?.scrollIntoView({ block: 'start' })
+    ;(mobileListRef.value?.$el as HTMLElement | undefined)?.scrollIntoView({
+        block: 'start',
+    })
 }
 
-const onMobileItemsPerPageChange = (value) => {
+const onMobileItemsPerPageChange = (value: number | string) => {
     const size = Number(value)
     if (!size || size === tableOptions.itemsPerPage) {
         return
@@ -749,8 +774,8 @@ const onMobileItemsPerPageChange = (value) => {
     void loadRoutes({ page: 1, itemsPerPage: size })
 }
 
-let filterDebounceTimer = null
-let subscriptionDebounceTimer = null
+let filterDebounceTimer: ReturnType<typeof setTimeout> | undefined
+let subscriptionDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
 watch(pbFilter, () => {
     if (filterDebounceTimer) {

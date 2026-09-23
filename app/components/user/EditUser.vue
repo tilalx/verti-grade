@@ -134,23 +134,25 @@
     </LayoutDialogShell>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { VForm } from 'vuetify/components'
 import { required, maxLength } from '~/utils/validation'
+import type { UserRecord } from '~/types/models'
+
+type EditableUserSource = UserRecord & { avatarUrl?: string | null }
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const emit = defineEmits(['user-updated', 'close'])
-const props = defineProps({
-    user: {
-        type: Object,
-        default: null,
-    },
-})
+const emit = defineEmits<{ 'user-updated': []; close: [] }>()
+const props = withDefaults(
+    defineProps<{ user?: EditableUserSource | null }>(),
+    { user: null },
+)
 
 const dialog = ref(false)
 const valid = ref(false)
 const saving = ref(false)
-const form = ref(null)
+const form = ref<VForm | null>(null)
 const { data: roles } = useRoles()
 
 const editableUser = reactive({
@@ -158,26 +160,27 @@ const editableUser = reactive({
     firstname: '',
     name: '',
     email: '',
-    role: null,
-    avatar: null,
+    role: null as string | null,
+    avatar: null as string | null,
 })
 const originalUser = reactive({ ...editableUser })
 
 // ── Avatar ────────────────────────────────────────────────────────────────
-const avatarFile = ref(null)
-const avatarPreview = ref(null)
-const avatarInput = ref(null)
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref<string | null>(null)
+const avatarInput = ref<HTMLInputElement | null>(null)
 
-function onAvatarPicked(e) {
-    const file = e.target.files?.[0]
+function onAvatarPicked(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
     if (file) {
         avatarFile.value = file
         avatarPreview.value = URL.createObjectURL(file)
     }
-    e.target.value = ''
+    input.value = ''
 }
 
-function initAvatarPreview(user) {
+function initAvatarPreview(user: EditableUserSource) {
     if (user?.avatar) {
         avatarPreview.value = usePbFileUrl(user, user.avatar, {
             thumb: '100x100',
@@ -212,7 +215,7 @@ watch(
                 id: newUser.id,
                 firstname: newUser.firstname || '',
                 name: newUser.name || '',
-                email: newUser.email,
+                email: newUser.email ?? '',
                 role: newUser.role || null,
                 avatar: newUser.avatar || null,
             })
@@ -233,8 +236,8 @@ function close() {
 
 // ── Save ──────────────────────────────────────────────────────────────────
 async function save() {
-    const { valid: formValid } = await form.value.validate()
-    if (!formValid) return
+    const result = await form.value?.validate()
+    if (!result?.valid) return
 
     saving.value = true
     try {

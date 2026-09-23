@@ -117,8 +117,9 @@
     </v-menu>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { timeAgo } from '#shared/utils/formatting'
+import type { NotificationRecord } from '~/types/models'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
@@ -129,11 +130,11 @@ const { items, unreadCount, refresh, markRead, markAllRead, dismiss } =
 const open = ref(false)
 const isLoggedIn = ref(false)
 
-function label(item) {
+function label(item: NotificationRecord) {
     return t(`notifications.center.types.${item.type}`, item.params ?? {})
 }
 
-async function openItem(item) {
+async function openItem(item: NotificationRecord) {
     await markRead(item.id)
     if (item.url) {
         open.value = false

@@ -227,7 +227,9 @@
     </LayoutAuthLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { Ref } from 'vue'
+import type { VForm } from 'vuetify/components'
 import { required, validEmail, minLength } from '~/utils/validation'
 defineOptions({ name: 'LoginPage' })
 
@@ -270,8 +272,8 @@ const rememberMe = ref(true)
 const showPassword = ref(false)
 const capsLockOn = ref(false)
 
-const loginForm = useTemplateRef('loginForm')
-const resetForm = useTemplateRef('resetForm')
+const loginForm = useTemplateRef<VForm>('loginForm')
+const resetForm = useTemplateRef<VForm>('resetForm')
 
 // ── Identity config ────────────────────────────────────────────────
 const idFields = authMethods?.password?.identityFields ?? []
@@ -330,7 +332,7 @@ const passwordRules = [required(t), minLength(t, 6)]
 const emailRules = [required(t), validEmail(t)]
 
 // ── OAuth icons ────────────────────────────────────────────────────
-const PROVIDER_ICONS = {
+const PROVIDER_ICONS: Record<string, string> = {
     apple: 'mdi-apple',
     google: 'mdi-google',
     microsoft: 'mdi-microsoft',
@@ -346,17 +348,16 @@ const PROVIDER_ICONS = {
     oidc2: 'mdi-lock-outline',
     oidc3: 'mdi-lock-outline',
 }
-const providerIcon = (name) => PROVIDER_ICONS[name] ?? 'mdi-login'
+const providerIcon = (name: string) => PROVIDER_ICONS[name] ?? 'mdi-login'
 
 // ── Helpers ────────────────────────────────────────────────────────
-async function validate(ref) {
-    const f = ref?.value
-    if (!f) return true
-    const { valid } = await f.validate()
+async function validate(form: Readonly<Ref<VForm | null>>) {
+    if (!form.value) return true
+    const { valid } = await form.value.validate()
     return valid
 }
 
-function detectCapsLock(ev) {
+function detectCapsLock(ev: KeyboardEvent) {
     if (typeof ev.getModifierState === 'function')
         capsLockOn.value = ev.getModifierState('CapsLock')
 }
@@ -366,8 +367,12 @@ watch(view, async () => {
     document.querySelector('input')?.focus()
 })
 
-function resolveAuthError(err) {
-    const msg = err?.data?.message ?? err?.message ?? ''
+function resolveAuthError(err: unknown) {
+    const { data, message } = (err ?? {}) as {
+        data?: { message?: string }
+        message?: string
+    }
+    const msg = data?.message ?? message ?? ''
     if (/invalid.+credentials/i.test(msg))
         return t('notifications.error.invalid_credentials')
     if (/not verified/i.test(msg))
@@ -411,7 +416,7 @@ async function submitReset() {
     }
 }
 
-async function loginWithOAuth(provider) {
+async function loginWithOAuth(provider: string) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })

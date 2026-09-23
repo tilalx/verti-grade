@@ -9,3 +9,7 @@ export const SUPPORTED_LOCALES = [
 export type LocaleCode = (typeof SUPPORTED_LOCALES)[number]['code']
 
 export const DEFAULT_LOCALE: LocaleCode = 'en'
+
+export function isLocaleCode(value: unknown): value is LocaleCode {
+    return SUPPORTED_LOCALES.some((locale) => locale.code === value)
+}
