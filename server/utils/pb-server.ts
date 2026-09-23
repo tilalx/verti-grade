@@ -1,12 +1,12 @@
 import PocketBase from 'pocketbase'
-import { getHeader, createError } from 'h3'
+import { getHeader, createError, type H3Event } from 'h3'
 
 export function createPocketBase() {
     const url = import.meta.dev ? 'http://localhost:8090' : 'http://pb:8080'
     return new PocketBase(url)
 }
 
-export function getAuthenticatedPb(event) {
+export function getAuthenticatedPb(event: H3Event) {
     const header = getHeader(event, 'authorization') || ''
     const token = header.replace(/^Bearer\s+/i, '').trim()
 

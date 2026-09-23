@@ -17,7 +17,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         return navigateTo('/auth/login')
     }
 
-    const requiredPermission = to.meta.requiredPermission
+    const requiredPermission = to.meta.requiredPermission as string | undefined
     if (requiredPermission) {
         const { can, ensureLoaded } = usePermissions()
         await ensureLoaded()

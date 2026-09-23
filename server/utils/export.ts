@@ -1,6 +1,34 @@
-import { getQuery, readBody, getRequestURL } from 'h3'
+import { getQuery, readBody, getRequestURL, type H3Event } from 'h3'
+import type PocketBase from 'pocketbase'
+import type {
+    DifficultySignValue,
+    RouteRecord,
+    SettingsRecord,
+} from '../../types/models'
 
-async function readExportBody(event) {
+interface ExportBody {
+    ids?: unknown[]
+    locale?: unknown
+    labels?: Record<string, unknown>
+    columns?: unknown[]
+}
+
+interface FetchByIdsOptions {
+    collection: string
+    ids: string[]
+    field: string
+    requestKey: string
+    expand?: string
+}
+
+export interface ExportColumn {
+    key: string
+    header: string
+    value?: (route: RouteRecord, locale?: string) => string | number
+    numFmt?: (route: RouteRecord) => string | null
+}
+
+async function readExportBody(event: H3Event): Promise<ExportBody | null> {
     if (event.context._exportBody === undefined) {
         try {
             event.context._exportBody = (await readBody(event)) ?? null
@@ -11,7 +39,7 @@ async function readExportBody(event) {
     return event.context._exportBody
 }
 
-export async function resolveRouteIds(event) {
+export async function resolveRouteIds(event: H3Event): Promise<string[]> {
     const body = await readExportBody(event)
     if (body && Array.isArray(body.ids)) {
         return body.ids
@@ -30,22 +58,25 @@ export async function resolveRouteIds(event) {
     return []
 }
 
-export function buildIdFilter(pb, ids, field) {
+export function buildIdFilter(pb: PocketBase, ids: string[], field: string) {
     if (ids.length === 0) {
         return ''
     }
     return ids.map((id) => pb.filter(`${field} = {:id}`, { id })).join(' || ')
 }
 
-export function chunk(source, size) {
-    const output = []
+export function chunk<T>(source: T[], size: number): T[][] {
+    const output: T[][] = []
     for (let index = 0; index < source.length; index += size) {
         output.push(source.slice(index, index + size))
     }
     return output
 }
 
-export async function fetchRecordsByIds(pb, options) {
+export async function fetchRecordsByIds<T = RouteRecord>(
+    pb: PocketBase,
+    options: FetchByIdsOptions,
+): Promise<T[]> {
     const { collection, ids, field, requestKey, expand } = options
     if (ids.length === 0) {
         return []
@@ -53,7 +84,7 @@ export async function fetchRecordsByIds(pb, options) {
 
     const chunks = chunk(ids, 25)
     const requests = chunks.map((chunkIds, index) => {
-        return pb.collection(collection).getFullList({
+        return pb.collection(collection).getFullList<T>({
             filter: buildIdFilter(pb, chunkIds, field),
             expand,
             requestKey: `${requestKey}-${index}`,
@@ -64,7 +95,7 @@ export async function fetchRecordsByIds(pb, options) {
     return results.flat()
 }
 
-export function normalizeCreators(creators) {
+export function normalizeCreators(creators: unknown): string[] {
     if (Array.isArray(creators)) {
         return creators
             .map((value) => (typeof value === 'string' ? value.trim() : ''))
@@ -79,7 +110,10 @@ export function normalizeCreators(creators) {
     return []
 }
 
-export function resolveApplicationUrl(event, settings) {
+export function resolveApplicationUrl(
+    event: H3Event,
+    settings: SettingsRecord | null | undefined,
+) {
     return (
         settings?.application_url ||
         getRequestURL(event, {
@@ -89,11 +123,12 @@ export function resolveApplicationUrl(event, settings) {
     ).replace(/\/+$/, '')
 }
 
-export function routeLocationName(route) {
-    return route?.expand?.location?.name ?? ''
+export function routeLocationName(route: RouteRecord | null | undefined) {
+    const location = route?.expand?.location as { name?: string } | undefined
+    return location?.name ?? ''
 }
 
-export async function resolveExportLocale(event) {
+export async function resolveExportLocale(event: H3Event): Promise<string> {
     const body = await readExportBody(event)
     try {
         return (
@@ -105,12 +140,16 @@ export async function resolveExportLocale(event) {
     }
 }
 
-export async function resolveExportLabel(event, key, fallback) {
+export async function resolveExportLabel(
+    event: H3Event,
+    key: string,
+    fallback: string,
+) {
     const label = (await readExportBody(event))?.labels?.[key]
     return typeof label === 'string' && label.trim() ? label.trim() : fallback
 }
 
-function formatDifficultySign(value) {
+function formatDifficultySign(value: DifficultySignValue | undefined) {
     if (typeof value === 'string') {
         return value.trim()
     }
@@ -123,7 +162,7 @@ function formatDifficultySign(value) {
     return ''
 }
 
-export const ROUTE_EXPORT_COLUMNS = [
+export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     { key: 'color', header: 'Color' },
     { key: 'name', header: 'Name', value: (r) => r.name ?? '' },
     {
@@ -178,7 +217,9 @@ const DEFAULT_EXPORT_COLUMNS = ROUTE_EXPORT_COLUMNS.filter(
     (column) => column.key !== 'qr',
 )
 
-export async function resolveExportColumns(event) {
+export async function resolveExportColumns(
+    event: H3Event,
+): Promise<ExportColumn[]> {
     const body = await readExportBody(event)
     const columnByKey = new Map(
         ROUTE_EXPORT_COLUMNS.map((column) => [column.key, column]),
@@ -188,25 +229,32 @@ export async function resolveExportColumns(event) {
         ? Array.from(
               new Set(
                   body.columns.filter(
-                      (key) => typeof key === 'string' && columnByKey.has(key),
+                      (key): key is string =>
+                          typeof key === 'string' && columnByKey.has(key),
                   ),
               ),
           )
         : []
 
     const chosen = requested.length
-        ? requested.map((key) => columnByKey.get(key))
+        ? requested.map((key) => columnByKey.get(key)!)
         : DEFAULT_EXPORT_COLUMNS
-    const labels =
+    const labels: Record<string, unknown> =
         body?.labels && typeof body.labels === 'object' ? body.labels : {}
     const locale = await resolveExportLocale(event)
 
-    return chosen.map((column) => ({
-        ...column,
-        value: column.value && ((route) => column.value(route, locale)),
-        header:
-            typeof labels[column.key] === 'string' && labels[column.key].trim()
-                ? labels[column.key].trim()
-                : column.header,
-    }))
+    return chosen.map((column) => {
+        const label = labels[column.key]
+        const columnValue = column.value
+        return {
+            ...column,
+            value:
+                columnValue &&
+                ((route: RouteRecord) => columnValue(route, locale)),
+            header:
+                typeof label === 'string' && label.trim()
+                    ? label.trim()
+                    : column.header,
+        }
+    })
 }

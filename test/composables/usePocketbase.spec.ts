@@ -41,7 +41,7 @@ describe('usePocketbase', () => {
 
     it('creates a new PocketBase instance on the server in development', async () => {
         process.server = true
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         const instance = usePocketbase()
 
@@ -53,7 +53,7 @@ describe('usePocketbase', () => {
 
     it('loads the auth cookie from the request on the server', async () => {
         process.server = true
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         const instance = usePocketbase()
 
@@ -66,7 +66,7 @@ describe('usePocketbase', () => {
     it('creates a new PocketBase instance on the server in production', async () => {
         process.server = true
         process.env.NODE_ENV = 'production'
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         usePocketbase()
 
@@ -74,7 +74,7 @@ describe('usePocketbase', () => {
     })
 
     it('reuses the same client-side instance after the first call', async () => {
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         const first = usePocketbase()
         const second = usePocketbase()
@@ -85,7 +85,7 @@ describe('usePocketbase', () => {
     })
 
     it('backs the client store with the auth cookie, not localStorage', async () => {
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         const store = usePocketbase().authStore as BaseAuthStoreMock
 
@@ -101,7 +101,7 @@ describe('usePocketbase', () => {
 
     it('uses the public root url on the client in production builds', async () => {
         process.env.NODE_ENV = 'production'
-        const { usePocketbase } = await import('~/composables/pocketbase.js')
+        const { usePocketbase } = await import('~/composables/pocketbase')
 
         usePocketbase()
 

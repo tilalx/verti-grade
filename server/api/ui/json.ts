@@ -1,11 +1,12 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { getAuthenticatedPb } from '../../utils/pb-server'
 import {
     resolveRouteIds,
     fetchRecordsByIds,
     normalizeCreators,
     routeLocationName,
-} from '../../utils/export.js'
+} from '../../utils/export'
+import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
     const pb = getAuthenticatedPb(event)
@@ -27,27 +28,29 @@ export default eventHandler(async (event) => {
             expand: 'location',
             requestKey: 'export-json-routes',
         })
-        const ratings = await fetchRecordsByIds(pb, {
+        const ratings = await fetchRecordsByIds<RatingRecord>(pb, {
             collection: 'ratings',
             ids: uniqueIds,
             field: 'route_id',
             requestKey: 'export-json-ratings',
         })
 
-        const routeById = new Map()
+        const routeById = new Map<string, RouteRecord>()
         for (const route of routes) {
             routeById.set(route.id, route)
         }
 
-        const ratingsByRouteId = new Map()
+        const ratingsByRouteId = new Map<
+            string,
+            ReturnType<typeof mapRating>[]
+        >()
         for (const rating of ratings) {
             if (!rating.route_id) {
                 continue
             }
-            if (!ratingsByRouteId.has(rating.route_id)) {
-                ratingsByRouteId.set(rating.route_id, [])
-            }
-            ratingsByRouteId.get(rating.route_id).push(mapRating(rating))
+            const routeRatings = ratingsByRouteId.get(rating.route_id) ?? []
+            routeRatings.push(mapRating(rating))
+            ratingsByRouteId.set(rating.route_id, routeRatings)
         }
 
         const payload = []
@@ -69,7 +72,10 @@ export default eventHandler(async (event) => {
     }
 })
 
-function mapRoute(route, ratings) {
+function mapRoute(
+    route: RouteRecord & { score?: number | null },
+    ratings: ReturnType<typeof mapRating>[],
+) {
     return {
         id: route.id ?? null,
         name: route.name ?? '',
@@ -90,7 +96,7 @@ function mapRoute(route, ratings) {
     }
 }
 
-function mapRating(rating) {
+function mapRating(rating: RatingRecord) {
     return {
         rating: normalizeNumber(rating.rating),
         difficulty: normalizeNumber(rating.difficulty),
@@ -101,7 +107,7 @@ function mapRating(rating) {
     }
 }
 
-function normalizeNumber(value) {
+function normalizeNumber(value: unknown) {
     const numeric = Number(value)
     return Number.isFinite(numeric) ? numeric : null
 }

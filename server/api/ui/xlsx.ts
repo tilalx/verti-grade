@@ -1,11 +1,12 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server.js'
+import { getAuthenticatedPb } from '../../utils/pb-server'
 import {
     resolveRouteIds,
     resolveExportColumns,
     resolveApplicationUrl,
     fetchRecordsByIds,
-} from '../../utils/export.js'
+} from '../../utils/export'
+import type { SettingsRecord } from '../../../types/models'
 
 const QR_PX = 240 // generated QR bitmap size
 const QR_CELL_SIZE = 72 // rendered size inside the sheet, in pixels
@@ -49,19 +50,18 @@ export default eventHandler(async (event) => {
         const recordById = new Map(records.map((record) => [record.id, record]))
         const climbingRoutes = uniqueIds
             .map((id) => recordById.get(id))
-            .filter(Boolean)
+            .filter((route) => route !== undefined)
 
         const qrIndex = columns.findIndex((column) => column.key === 'qr')
         const colorIndex = columns.findIndex((column) => column.key === 'color')
 
-        let applicationUrl = null
-        let QRCode = null
+        const QRCode = (await import('qrcode')).default
+        let applicationUrl = ''
         if (qrIndex !== -1) {
             const settings = await pb
                 .collection('settings')
-                .getOne('settings_123456')
+                .getOne<SettingsRecord>('settings_123456')
             applicationUrl = resolveApplicationUrl(event, settings)
-            QRCode = (await import('qrcode')).default
         }
 
         const workbook = new Workbook()
@@ -81,7 +81,7 @@ export default eventHandler(async (event) => {
                         .filter((column) => column.value)
                         .map((column) => [
                             column.key,
-                            column.value(climbingRoute),
+                            column.value!(climbingRoute),
                         ]),
                 ),
             )
@@ -96,7 +96,7 @@ export default eventHandler(async (event) => {
                     cell.numFmt = numFmt
                 }
                 widths[index] = Math.max(
-                    widths[index],
+                    widths[index] ?? 0,
                     String(cell.value ?? '').length + (numFmt ? 2 : 0),
                 )
             })
@@ -135,7 +135,7 @@ export default eventHandler(async (event) => {
                 column.key === 'qr'
                     ? QR_COLUMN_WIDTH
                     : Math.min(
-                          Math.max(widths[index] + 2, MIN_COLUMN_WIDTH),
+                          Math.max((widths[index] ?? 0) + 2, MIN_COLUMN_WIDTH),
                           MAX_COLUMN_WIDTH,
                       )
         })
@@ -162,7 +162,7 @@ export default eventHandler(async (event) => {
     }
 })
 
-function toArgb(color) {
+function toArgb(color: unknown) {
     if (typeof color !== 'string') {
         return null
     }

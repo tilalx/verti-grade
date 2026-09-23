@@ -4,7 +4,7 @@ import {
     resolveApplicationUrl,
     resolveExportColumns,
     resolveRouteIds,
-} from '../../server/utils/export.js'
+} from '../../server/utils/export'
 
 vi.mock('h3', async () => {
     return {
