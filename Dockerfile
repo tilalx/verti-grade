@@ -44,6 +44,7 @@ COPY yarn.lock ./
 
 # add the bits Nuxt i18n expects during install
 COPY i18n ./i18n
+COPY app/utils/locales.ts ./app/utils/locales.ts
 
 # Pin Yarn and install with cache mounts
 RUN npm install -g corepack --force
