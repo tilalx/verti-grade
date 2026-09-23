@@ -269,6 +269,9 @@
                             hide-details="auto"
                             prepend-inner-icon="mdi-file-document-outline"
                             placeholder="https://example.com/imprint"
+                            :hint="$t('settings.legalUrlHint')"
+                            persistent-hint
+                            data-testid="settings-imprint-url"
                         />
                     </v-col>
                     <v-col cols="12" md="4">
@@ -279,9 +282,150 @@
                             hide-details="auto"
                             prepend-inner-icon="mdi-shield-outline"
                             placeholder="https://example.com/privacy"
+                            :hint="$t('settings.legalUrlHint')"
+                            persistent-hint
+                            data-testid="settings-privacy-url"
                         />
                     </v-col>
                 </v-row>
+            </v-card-text>
+        </v-card>
+
+        <v-card border flat class="mb-6">
+            <v-card-text class="pa-4">
+                <p class="text-title-small font-weight-semibold mb-1">
+                    {{ $t('settings.legalTitle') }}
+                </p>
+                <p class="text-body-small text-medium-emphasis mb-4">
+                    {{ $t('settings.legalIntro') }}
+                </p>
+                <v-row density="comfortable">
+                    <v-col cols="12">
+                        <v-textarea
+                            v-model="copySettings.legal_address"
+                            :label="$t('settings.legalAddress')"
+                            :placeholder="
+                                $t('settings.legalAddressPlaceholder')
+                            "
+                            density="compact"
+                            rows="3"
+                            auto-grow
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-map-marker-outline"
+                            data-testid="settings-legal-address"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.legal_phone"
+                            :label="$t('settings.legalPhone')"
+                            density="compact"
+                            hide-details="auto"
+                            type="tel"
+                            prepend-inner-icon="mdi-phone-outline"
+                            data-testid="settings-legal-phone"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.legal_register"
+                            :label="$t('settings.legalRegister')"
+                            :placeholder="
+                                $t('settings.legalRegisterPlaceholder')
+                            "
+                            density="compact"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-file-certificate-outline"
+                            data-testid="settings-legal-register"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <v-text-field
+                            v-model="copySettings.legal_vat_id"
+                            :label="$t('settings.legalVatId')"
+                            placeholder="DE123456789"
+                            density="compact"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-cash-register"
+                            data-testid="settings-legal-vat-id"
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field
+                            v-model="copySettings.legal_editorial"
+                            :label="$t('settings.legalEditorial')"
+                            :hint="$t('settings.legalEditorialHint')"
+                            persistent-hint
+                            density="compact"
+                            prepend-inner-icon="mdi-pencil-outline"
+                            data-testid="settings-legal-editorial"
+                        />
+                    </v-col>
+                </v-row>
+
+                <p class="text-title-small font-weight-semibold mt-6 mb-3">
+                    {{ $t('settings.legalRepresentatives') }}
+                </p>
+                <div class="person-list">
+                    <div
+                        v-for="(
+                            person, index
+                        ) in copySettings.legal_representatives"
+                        :key="index"
+                        class="person-row"
+                        data-testid="settings-legal-representative"
+                    >
+                        <v-text-field
+                            v-model="person.name"
+                            :label="$t('settings.legalPersonName')"
+                            density="compact"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-account-outline"
+                            data-testid="settings-legal-representative-name"
+                        />
+                        <v-text-field
+                            v-model="person.role"
+                            :label="$t('settings.legalPersonRole')"
+                            :placeholder="
+                                $t('settings.legalPersonRolePlaceholder')
+                            "
+                            density="compact"
+                            hide-details="auto"
+                            prepend-inner-icon="mdi-badge-account-outline"
+                            data-testid="settings-legal-representative-role"
+                        />
+                        <v-btn
+                            icon="mdi-delete-outline"
+                            variant="text"
+                            color="error"
+                            density="comfortable"
+                            :aria-label="$t('settings.legalRemovePerson')"
+                            :title="$t('settings.legalRemovePerson')"
+                            data-testid="settings-legal-remove-representative"
+                            @click="
+                                copySettings.legal_representatives.splice(
+                                    index,
+                                    1,
+                                )
+                            "
+                        />
+                    </div>
+                </div>
+                <v-btn
+                    variant="tonal"
+                    size="small"
+                    prepend-icon="mdi-account-plus-outline"
+                    class="mt-3"
+                    data-testid="settings-legal-add-representative"
+                    @click="
+                        copySettings.legal_representatives.push({
+                            name: '',
+                            role: '',
+                        })
+                    "
+                >
+                    {{ $t('settings.legalAddPerson') }}
+                </v-btn>
             </v-card-text>
         </v-card>
 
@@ -346,9 +490,34 @@ const original = reactive({
     organization_unit_name: '',
     contact_email: '',
     audit_retention_days: 90,
+    ...legalFieldsFrom({}),
 })
 
-const copySettings = reactive({ ...original })
+const copySettings = reactive({ ...original, ...legalFieldsFrom(original) })
+
+function legalFieldsFrom(rec) {
+    return {
+        legal_address: rec.legal_address ?? '',
+        legal_phone: rec.legal_phone ?? '',
+        legal_register: rec.legal_register ?? '',
+        legal_vat_id: rec.legal_vat_id ?? '',
+        legal_editorial: rec.legal_editorial ?? '',
+        legal_representatives: (rec.legal_representatives ?? []).map(
+            (person) => ({ name: person.name ?? '', role: person.role ?? '' }),
+        ),
+    }
+}
+
+function legalPayload(state) {
+    const fields = legalFieldsFrom(state)
+    fields.legal_representatives = fields.legal_representatives
+        .map((person) => ({
+            name: person.name.trim(),
+            role: person.role.trim(),
+        }))
+        .filter((person) => person.name)
+    return fields
+}
 
 function adoptRecord(rec) {
     if (!rec) return
@@ -360,7 +529,8 @@ function adoptRecord(rec) {
     original.organization_unit_name = rec.organization_unit_name ?? ''
     original.contact_email = rec.contact_email ?? ''
     original.audit_retention_days = rec.audit_retention_days ?? 90
-    if (!dirty) Object.assign(copySettings, original)
+    Object.assign(original, legalFieldsFrom(rec))
+    if (!dirty) Object.assign(copySettings, original, legalFieldsFrom(original))
 
     logoPreview.value = pbFileUrl(rec, rec.page_logo)
     iconPreview.value = pbFileUrl(rec, rec.page_icon)
@@ -522,7 +692,9 @@ const hasChanges = computed(() => {
         copySettings.organization_unit_name !==
             original.organization_unit_name ||
         copySettings.contact_email !== original.contact_email ||
-        copySettings.audit_retention_days !== original.audit_retention_days
+        copySettings.audit_retention_days !== original.audit_retention_days ||
+        JSON.stringify(legalFieldsFrom(copySettings)) !==
+            JSON.stringify(legalFieldsFrom(original))
     )
 })
 
@@ -544,6 +716,7 @@ async function saveSettings() {
             contact_email: copySettings.contact_email,
             audit_retention_days:
                 Number(copySettings.audit_retention_days) || null,
+            ...legalPayload(copySettings),
         }
         if (logoFile.value) payload.page_logo = logoFile.value
         else if (logoClear.value) payload.page_logo = null
@@ -570,6 +743,7 @@ async function saveSettings() {
         original.organization_unit_name = updated.organization_unit_name
         original.contact_email = updated.contact_email ?? ''
         original.audit_retention_days = updated.audit_retention_days ?? 90
+        Object.assign(original, legalFieldsFrom(updated))
 
         Object.assign(copySettings, {
             application_url: updated.application_url,
@@ -579,6 +753,7 @@ async function saveSettings() {
             organization_unit_name: updated.organization_unit_name,
             contact_email: updated.contact_email ?? '',
             audit_retention_days: updated.audit_retention_days ?? 90,
+            ...legalFieldsFrom(updated),
         })
 
         notify(t('settings.saveSuccess'))
@@ -592,6 +767,33 @@ async function saveSettings() {
 </script>
 
 <style scoped>
+.person-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.person-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+@media (max-width: 599px) {
+    .person-list {
+        gap: 24px;
+    }
+
+    .person-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .person-row > :nth-child(2) {
+        grid-row: 2;
+    }
+}
+
 .asset-drop-zone {
     border: 1.5px dashed rgba(var(--v-border-color), 0.28);
     overflow: hidden;

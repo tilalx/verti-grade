@@ -349,7 +349,95 @@
     },
     "legal": {
         "privacy": "Privacy",
-        "imprint": "Imprint"
+        "imprint": "Imprint",
+        "imprintPage": {
+            "incomplete": "The operator has not completed the legal notice yet. Please contact the administrator.",
+            "provider": "Service provider",
+            "representative": "Represented by",
+            "contact": "Contact",
+            "phone": "Phone",
+            "email": "Email",
+            "register": "Register and tax information",
+            "disputeTitle": "Consumer dispute resolution",
+            "dispute": "We are neither willing nor obliged to participate in dispute resolution proceedings before a consumer arbitration board.",
+            "editorial": "Editorially responsible",
+            "registerEntry": "Register entry",
+            "vatId": "VAT ID",
+            "subtitle": "Information according to § 5 DDG"
+        },
+        "privacyPage": {
+            "controllerTitle": "Controller",
+            "serverLogs": {
+                "title": "Server logs",
+                "body": "When you access this application, the server processes technical data such as IP address, date and time, requested URL and browser user agent to deliver the page and protect against abuse (Art. 6(1)(f) GDPR). Request logs are deleted automatically after a short period (5 days by default)."
+            },
+            "accounts": {
+                "title": "User accounts",
+                "body": "Accounts are created by administrators for staff. We store email address, username, first and last name, an optional avatar and the assigned role to provide the service (Art. 6(1)(b) GDPR). Data is kept while the account exists; you can delete your account yourself at any time."
+            },
+            "ratings": {
+                "title": "Ratings and comments",
+                "body": "Ratings, difficulty votes and comments on routes can be submitted without an account and are stored without name or IP address. Comments are publicly visible and may be moderated."
+            },
+            "reports": {
+                "title": "Content reports",
+                "body": "If you report content, we process your name, email address, the report reason and your explanation to handle the report and inform you about the decision (Art. 6(1)(c) GDPR in conjunction with Art. 16 DSA). Reports are kept as long as needed for documentation."
+            },
+            "auditLog": {
+                "title": "Audit log",
+                "body": "Changes, logins and failed login attempts by staff are logged with user, action and IP address to ensure security and traceability (Art. 6(1)(f) GDPR). Entries are deleted automatically after {auditDays} days."
+            },
+            "captcha": {
+                "title": "Spam protection",
+                "body": "Some forms use a self-hosted proof-of-work check that runs in your browser. No data is sent to third parties and no tracking cookies are set."
+            },
+            "thirdParties": {
+                "title": "No tracking, no third parties",
+                "body": "This application does not use analytics, advertising or social media plugins and loads no resources from third-party servers. All data is processed on our own server. Data is not transferred to third countries."
+            },
+            "storage": {
+                "title": "Cookies and local storage",
+                "body": "We only store information on your device that is strictly necessary to provide the service you requested (§ 25(2) TDDDG). Therefore no consent is required. The complete list:"
+            },
+            "rights": {
+                "title": "Your rights",
+                "body": "Under the GDPR you have the following rights regarding your personal data:",
+                "items": {
+                    "access": "Right of access (Art. 15 GDPR)",
+                    "rectification": "Right to rectification (Art. 16 GDPR)",
+                    "erasure": "Right to erasure (Art. 17 GDPR)",
+                    "restriction": "Right to restriction of processing (Art. 18 GDPR)",
+                    "portability": "Right to data portability (Art. 20 GDPR)",
+                    "objection": "Right to object (Art. 21 GDPR)",
+                    "withdrawal": "Right to withdraw consent at any time (Art. 7(3) GDPR)"
+                },
+                "complaint": "You also have the right to lodge a complaint with a data protection supervisory authority (Art. 77 GDPR)."
+            },
+            "subtitle": "How we process personal data when you use this application."
+        },
+        "storage": {
+            "name": "Name",
+            "type": "Type",
+            "purpose": "Purpose",
+            "duration": "Duration",
+            "kinds": {
+                "cookie": "Cookie",
+                "localStorage": "Local storage"
+            },
+            "purposes": {
+                "auth": "Keeps you signed in",
+                "colorScheme": "Remembers light or dark mode",
+                "exportColumns": "Remembers selected export columns",
+                "updateDismissed": "Remembers a dismissed update notice",
+                "inventorySession": "Keeps the progress of an inventory scan",
+                "inventoryInstructions": "Remembers that inventory instructions were shown"
+            },
+            "durations": {
+                "session": "Until sign-out",
+                "oneYear": "1 year",
+                "persistent": "Until deleted in the browser"
+            }
+        }
     },
     "page": {
         "title": {
@@ -515,7 +603,24 @@
         "auditRetention": "Audit log retention (days)",
         "auditRetentionHint": "Entries older than this are deleted automatically. Default 90 days.",
         "mailNotConfigured": "Email is not configured, so password resets and content report notices cannot be delivered. SMTP is configured in PocketBase, not here.",
-        "mailNotConfiguredAction": "Open PocketBase mail settings"
+        "mailNotConfiguredAction": "Open PocketBase mail settings",
+        "legalTitle": "Legal notice",
+        "legalAddress": "Postal address",
+        "legalPhone": "Phone",
+        "legalRegister": "Register entry",
+        "legalUrlHint": "Leave empty to use the built-in page",
+        "legalIntro": "Shown on the built-in imprint and privacy pages.",
+        "legalAddressPlaceholder": "Street 1\n12345 City",
+        "legalRegisterPlaceholder": "Register court Hanau, VR 485",
+        "legalVatId": "VAT ID",
+        "legalEditorial": "Editorially responsible",
+        "legalEditorialHint": "Name and role, e.g. per § 18 MStV",
+        "legalRepresentatives": "Represented by",
+        "legalPersonName": "Name",
+        "legalPersonRole": "Role",
+        "legalPersonRolePlaceholder": "e.g. Chair",
+        "legalAddPerson": "Add person",
+        "legalRemovePerson": "Remove person"
     },
     "errors": {
         "notFound": {

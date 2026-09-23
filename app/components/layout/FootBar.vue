@@ -8,41 +8,28 @@
             <!-- Left: legal links -->
             <div class="footer-left">
                 <v-btn
-                    v-if="settings.privacy_url"
-                    :href="settings.privacy_url"
-                    target="_blank"
+                    v-bind="legalLinkProps(settings.privacy_url, '/privacy')"
                     variant="plain"
                     density="compact"
                     class="footer-link-btn"
+                    data-testid="footer-privacy"
                 >
                     {{ $t('legal.privacy') }}
                 </v-btn>
 
-                <span
-                    v-if="settings.privacy_url && settings.imprint_url"
-                    class="link-sep"
-                    >·</span
-                >
+                <span class="link-sep">·</span>
 
                 <v-btn
-                    v-if="settings.imprint_url"
-                    :href="settings.imprint_url"
-                    target="_blank"
+                    v-bind="legalLinkProps(settings.imprint_url, '/imprint')"
                     variant="plain"
                     density="compact"
                     class="footer-link-btn"
+                    data-testid="footer-imprint"
                 >
                     {{ $t('legal.imprint') }}
                 </v-btn>
 
-                <span
-                    v-if="
-                        (settings.privacy_url || settings.imprint_url) &&
-                        settings.contact_email
-                    "
-                    class="link-sep"
-                    >·</span
-                >
+                <span v-if="settings.contact_email" class="link-sep">·</span>
 
                 <v-btn
                     v-if="settings.contact_email"
@@ -127,6 +114,11 @@ const pb = usePocketbase()
 const { appVersion, installedNotes, installedBase, error, loading } =
     useVersionCheck()
 const currentYear = computed(() => new Date().getFullYear())
+
+const legalLinkProps = (externalUrl, internalPath) =>
+    externalUrl
+        ? { href: externalUrl, target: '_blank', rel: 'noopener noreferrer' }
+        : { to: internalPath }
 
 const { data: health } = await useAsyncData(
     'footer:health',

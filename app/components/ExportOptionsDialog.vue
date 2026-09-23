@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { EXPORT_COLUMNS_KEY } from '~/utils/clientStorage'
+
 const open = defineModel<boolean>({ default: false })
 
 const emit = defineEmits<{
@@ -6,8 +8,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-
-const STORAGE_KEY = 'verti-grade.export-columns'
 
 const EXPORT_COLUMNS = [
     { key: 'color', labelKey: 'climbing.color' },
@@ -50,7 +50,9 @@ function sanitizeOrder(keys: unknown): string[] | null {
 
 function readStored(): { order: string[]; selected: string[] } {
     try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')
+        const parsed = JSON.parse(
+            localStorage.getItem(EXPORT_COLUMNS_KEY) ?? 'null',
+        )
         const storedOrder = sanitizeOrder(parsed?.order)
         const storedSelected = Array.isArray(parsed?.selected)
             ? parsed.selected.filter((key: string) =>
@@ -94,7 +96,7 @@ const confirm = () => {
 
     try {
         localStorage.setItem(
-            STORAGE_KEY,
+            EXPORT_COLUMNS_KEY,
             JSON.stringify({ order: order.value, selected: selected.value }),
         )
     } catch {}

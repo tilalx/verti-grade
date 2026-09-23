@@ -71,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+import { UPDATE_DISMISSED_KEY } from '~/utils/clientStorage'
+
 const {
     appVersion,
     mode,
@@ -82,13 +84,11 @@ const {
     loading,
 } = useVersionCheck()
 
-const DISMISS_KEY = 'verti-grade:update-dismissed'
-
 const dismissedId = ref('')
 
 onMounted(() => {
     try {
-        dismissedId.value = localStorage.getItem(DISMISS_KEY) ?? ''
+        dismissedId.value = localStorage.getItem(UPDATE_DISMISSED_KEY) ?? ''
     } catch {}
 })
 
@@ -99,7 +99,7 @@ const dismissed = computed(
 const dismiss = () => {
     dismissedId.value = updateId.value
     try {
-        localStorage.setItem(DISMISS_KEY, updateId.value)
+        localStorage.setItem(UPDATE_DISMISSED_KEY, updateId.value)
     } catch {}
 }
 </script>
