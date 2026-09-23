@@ -48,7 +48,7 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         localStorage.setItem('inventory-instructions-seen', '1')
         localStorage.removeItem('inventory-scanned-route-ids')
     })
-    await page.reload()
+    await gotoSettled(page, '/manage/inventory')
 
     const hallButton = page.getByTestId(`inventory-location-${LOCATIONS[0]}`)
     await expect(hallButton).toBeVisible()

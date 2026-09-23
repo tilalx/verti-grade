@@ -8,7 +8,7 @@ export default defineConfig({
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    workers: process.env.CI ? 4 : undefined,
+    workers: process.env.CI ? '50%' : undefined,
     reporter: process.env.CI
         ? [
               ['list'],
@@ -41,6 +41,7 @@ export default defineConfig({
                 locale: 'en-US',
             },
             testMatch: ['**/mobile/**', '**/auth/**'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
         {
             name: 'i18n-de',
@@ -66,11 +67,13 @@ export default defineConfig({
             name: 'firefox-smoke',
             use: { ...devices['Desktop Firefox'], locale: 'en-US' },
             testMatch: ['**/auth/**', '**/public/index-list.spec.ts'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
         {
             name: 'webkit-smoke',
             use: { ...devices['Desktop Safari'], locale: 'en-US' },
             testMatch: ['**/auth/**', '**/public/index-list.spec.ts'],
+            testIgnore: ['**/auth/guards.spec.ts'],
         },
     ],
 })

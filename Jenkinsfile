@@ -77,10 +77,14 @@ pipeline {
         stage('E2E Tests') {
             steps {
                 sh """
-                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --abort-on-container-exit --exit-code-from e2e
+                    docker volume create vg-e2e-yarn-cache
+                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --attach e2e --abort-on-container-exit --exit-code-from e2e
                 """
             }
             post {
+                failure {
+                    sh "E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml logs --tail=500 app || true"
+                }
                 always {
                     junit testResults: 'e2e/results/junit.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'e2e/results/html/**, e2e/results/artifacts/**', allowEmptyArchive: true

@@ -27,8 +27,7 @@ test('selects filtered routes and archives them', async ({
         })
     }
 
-    await page.reload()
-    await page.waitForLoadState('networkidle')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('filter-search').locator('input').fill(prefix)
     await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
 
@@ -73,8 +72,7 @@ test('shows an error and keeps routes when archiving fails', async ({
         })
     }
 
-    await page.reload()
-    await page.waitForLoadState('networkidle')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('filter-search').locator('input').fill(prefix)
     await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
 

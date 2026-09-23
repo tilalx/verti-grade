@@ -51,6 +51,7 @@ services:
     volumes:
       - ..:/work:Z
       - e2e-ssl:/ssl:ro
+      - yarn-cache:/root/.yarn/berry/cache
     environment:
       E2E_BASE_URL: https://vg.test
       E2E_PB_URL: https://vg.test
@@ -67,7 +68,10 @@ services:
     command: >
       sh -c "cp /ssl/cert.pem /usr/local/share/ca-certificates/vg-e2e.crt &&
       update-ca-certificates &&
-      corepack enable && yarn install --immutable && yarn test:e2e"
+      corepack enable && yarn install --immutable --mode=skip-build && yarn test:e2e"
 
 volumes:
   e2e-ssl:
+  yarn-cache:
+    name: vg-e2e-yarn-cache
+    external: true

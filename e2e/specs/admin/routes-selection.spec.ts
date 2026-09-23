@@ -27,8 +27,7 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
         })
     }
 
-    await page.reload()
-    await page.waitForLoadState('networkidle')
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('filter-search').locator('input').fill(prefix)
     await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
 
@@ -76,8 +75,8 @@ test('repeated select-all reuses the loaded id list', async ({
         })
     }
 
-    await page.reload()
-    await page.waitForLoadState('networkidle')
+    await page.route('**/api/realtime**', (route) => route.abort())
+    await gotoSettled(page, '/manage/routes')
     await page.getByTestId('filter-search').locator('input').fill(prefix)
     await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
 
