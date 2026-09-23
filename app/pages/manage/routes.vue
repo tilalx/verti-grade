@@ -484,15 +484,6 @@ const tableOptions = reactive({
     sortBy: [{ key: 'screw_date', order: 'desc' }],
 })
 
-const selectedRouteIds = ref(new Set())
-
-const createAllRouteIdsCache = () => ({
-    key: null,
-    ids: [],
-})
-
-const allRouteIdsCache = shallowRef(createAllRouteIdsCache())
-
 const pageSizeOptions = [10, 25, 50, 100]
 
 const routeFormRef = useTemplateRef('routeFormRef')
@@ -525,17 +516,21 @@ const pbFilter = computed(() => {
     return parts.join(' && ')
 })
 
-const buildSelectionCacheKey = () =>
-    JSON.stringify({
-        filter: pbFilter.value || null,
-    })
+const {
+    selectedRouteIds,
+    selectedCount,
+    hasSelection,
+    areAllSelected,
+    update: updateSelection,
+    clear: clearSelection,
+    remove: removeSelectedIds,
+    toggleAll,
+    invalidate: invalidateAllRouteIdsCache,
+} = useRouteSelection(pbFilter, totalItems)
 
-const invalidateAllRouteIdsCache = () => {
-    allRouteIdsCache.value = createAllRouteIdsCache()
-}
+const { exportingFormat, exportPdf, exportXlsx, exportJson } = useRouteExport()
+const selectedIds = () => Array.from(selectedRouteIds.value)
 
-const selectedCount = computed(() => selectedRouteIds.value.size)
-const hasSelection = computed(() => selectedCount.value > 0)
 const pageLength = computed(() =>
     Math.max(1, Math.ceil(totalItems.value / tableOptions.itemsPerPage)),
 )
@@ -572,47 +567,16 @@ const pageItems = computed(() => {
     return items
 })
 
-const areAllSelected = computed(
-    () => totalItems.value > 0 && selectedCount.value >= totalItems.value,
-)
-
-const updateRouteSelection = (route, isSelected) => {
-    const next = new Set(selectedRouteIds.value)
-    if (isSelected) {
-        next.add(route.id)
-    } else {
-        next.delete(route.id)
-    }
-    selectedRouteIds.value = next
-}
+const updateRouteSelection = (route, isSelected) =>
+    updateSelection(route.id, isSelected)
 
 const selectAll = async () => {
-    if (areAllSelected.value) {
-        clearSelection()
-        return
-    }
-
     try {
-        const ids = await loadAllRouteIds()
-        selectedRouteIds.value = new Set(ids)
+        await toggleAll()
     } catch (error) {
         console.error('Failed to select all routes:', error)
         notifyError(t('routes.selectAllError'))
     }
-}
-
-const clearSelection = () => {
-    selectedRouteIds.value = new Set()
-}
-
-const removeSelectedIds = (ids) => {
-    if (!ids.length) {
-        return
-    }
-
-    const next = new Set(selectedRouteIds.value)
-    ids.forEach((id) => next.delete(id))
-    selectedRouteIds.value = next
 }
 
 const toPbSortRoutes = (sortByArr) =>
@@ -633,52 +597,6 @@ const sortItemsMobile = computed(() => [
 
 const onMobileSortChange = (sortBy) => {
     void loadRoutes({ page: 1, sortBy })
-}
-
-const loadAllRouteIds = async () => {
-    const cacheKey = buildSelectionCacheKey()
-
-    if (
-        allRouteIdsCache.value.key === cacheKey &&
-        allRouteIdsCache.value.ids.length
-    ) {
-        return allRouteIdsCache.value.ids
-    }
-
-    try {
-        const fullList = await pb.collection('routes').getFullList(200, {
-            fields: 'id',
-            filter: pbFilter.value || undefined,
-        })
-
-        const ids = fullList
-            .map((route) => route.id)
-            .filter((id) => typeof id === 'string' && id.length > 0)
-
-        allRouteIdsCache.value = {
-            key: cacheKey,
-            ids,
-        }
-
-        return ids
-    } catch (error) {
-        console.error('Failed to load all route ids:', error)
-        allRouteIdsCache.value = createAllRouteIdsCache()
-        throw error
-    }
-}
-
-const generateFilename = () => {
-    const name = t('export.fileName')
-    const date = new Date()
-    const pad = (n) => n.toString().padStart(2, '0')
-    const hh = pad(date.getHours())
-    const mm = pad(date.getMinutes())
-    const dd = pad(date.getDate())
-    const MM = pad(date.getMonth() + 1)
-    const yyyy = date.getFullYear()
-    const timestamp = `${hh}-${mm}_${dd}.${MM}.${yyyy}`
-    return `${name}-${timestamp}`
 }
 
 const loadRoutes = async (options = {}) => {
@@ -802,65 +720,10 @@ const archiveSelected = async () => {
     }
 }
 
-const exportingFormat = ref(null)
-
-const downloadExport = async (endpoint, extension, mimeType, payload = {}) => {
-    const ids = Array.from(selectedRouteIds.value)
-    if (!ids.length || exportingFormat.value) return
-
-    exportingFormat.value = extension
-    try {
-        const headers = { 'Content-Type': 'application/json' }
-        if (pb.authStore.token) {
-            headers.Authorization = pb.authStore.token
-        }
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ ids, locale: locale.value, ...payload }),
-        })
-
-        if (!response.ok) {
-            throw new Error(`Export failed with status ${response.status}`)
-        }
-
-        let blob
-        if (extension === 'json') {
-            const text = JSON.stringify(await response.json(), null, 2)
-            blob = new Blob([text], { type: mimeType })
-        } else {
-            blob = new Blob([await response.blob()], { type: mimeType })
-        }
-
-        const link = document.createElement('a')
-        link.href = URL.createObjectURL(blob)
-        link.download = `${generateFilename()}.${extension}`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    } catch (error) {
-        console.error(`Export error (${extension}):`, error)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        exportingFormat.value = null
-    }
-}
-
-const printSelected = () =>
-    downloadExport('/api/ui/pdf', 'pdf', 'application/pdf', {
-        labels: { rope: t('export.rope') },
-    })
 const showExportOptions = ref(false)
-const exportSelectedExcel = (payload) =>
-    downloadExport(
-        '/api/ui/xlsx',
-        'xlsx',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        payload,
-    )
-const exportSelectedJson = () =>
-    downloadExport('/api/ui/json', 'json', 'application/json')
+const printSelected = () => exportPdf(selectedIds())
+const exportSelectedExcel = (payload) => exportXlsx(selectedIds(), payload)
+const exportSelectedJson = () => exportJson(selectedIds())
 
 const mobileListRef = useTemplateRef('mobileListRef')
 
