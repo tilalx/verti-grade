@@ -320,6 +320,7 @@
 
 <script setup>
 import { formatDifficulty } from '~/utils/formatting'
+import { DIFFICULTY_LEVELS } from '~/utils/routes'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -385,9 +386,9 @@ function clearFilters() {
 
 const difficulties = computed(() => [
     { text: t('filter.all'), value: null },
-    ...Array.from({ length: 10 }, (_, i) => ({
-        text: String(i + 1),
-        value: i + 1,
+    ...DIFFICULTY_LEVELS.map((level) => ({
+        text: String(level),
+        value: level,
     })),
 ])
 

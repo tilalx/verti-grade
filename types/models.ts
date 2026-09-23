@@ -1,3 +1,7 @@
+import type { AUDIT_ACTIONS } from '../app/utils/audit'
+import type { REPORT_REASONS, REPORT_STATUSES } from '../app/utils/reports'
+import type { ROUTE_TYPES } from '../app/utils/routes'
+
 export type RecordId = string
 
 export interface BaseRecord {
@@ -9,7 +13,7 @@ export interface BaseRecord {
     expand?: Record<string, unknown>
 }
 
-export type RouteType = 'Route' | 'Boulder' | string
+export type RouteType = (typeof ROUTE_TYPES)[number] | string
 export type DifficultySignValue = '+' | '-' | true | false | '' | null
 
 type JsonArray<T> = T[] | readonly T[]
@@ -101,16 +105,8 @@ export interface LegalPerson {
 }
 
 export type ReportContentType = 'rating' | 'route'
-export type ReportReason =
-    | 'hate_speech'
-    | 'harassment'
-    | 'violence_threat'
-    | 'sexual_content'
-    | 'personal_data'
-    | 'ip_infringement'
-    | 'spam_fraud'
-    | 'other'
-export type ReportStatus = 'open' | 'actioned' | 'rejected'
+export type ReportReason = (typeof REPORT_REASONS)[number]
+export type ReportStatus = (typeof REPORT_STATUSES)[number]
 export type ReportDecision = 'content_removed' | 'content_kept'
 
 export interface ReportRecord extends BaseRecord {
@@ -132,16 +128,7 @@ export interface ReportRecord extends BaseRecord {
     notified_at?: string | null
 }
 
-export type AuditAction =
-    | 'create'
-    | 'update'
-    | 'delete'
-    | 'login'
-    | 'login_failed'
-    | 'password_reset_request'
-    | 'password_reset'
-    | 'email_change_request'
-    | 'email_change'
+export type AuditAction = (typeof AUDIT_ACTIONS)[number]
 
 export interface AuditLogRecord extends BaseRecord {
     actor?: RecordId | null

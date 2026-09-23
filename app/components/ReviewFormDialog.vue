@@ -75,7 +75,7 @@
                     <v-select
                         v-model="form.combinedDifficulty"
                         :label="$t('ratings.difficulty')"
-                        :items="combinedDifficulties"
+                        :items="COMBINED_DIFFICULTIES"
                         :rules="isEditMode ? [] : [rules.required]"
                         clearable
                         hide-details="auto"
@@ -119,6 +119,11 @@
 
 <script setup>
 import { required, nonBlank } from '~/utils/validation'
+import {
+    COMBINED_DIFFICULTIES,
+    parseCombinedDifficulty,
+    toCombinedDifficulty,
+} from '~/utils/routes'
 const props = defineProps({
     modelValue: {
         type: Boolean,
@@ -177,14 +182,6 @@ const form = reactive({
     comment: '',
 })
 
-const combinedDifficulties = computed(() => {
-    const result = []
-    for (let d = 1; d <= 10; d++) {
-        result.push(`${d} -`, String(d), `${d} +`)
-    }
-    return result
-})
-
 const rules = {
     required: required(t),
     requiredAndNotEmpty: nonBlank(t),
@@ -195,7 +192,7 @@ watch(
     (review) => {
         if (review) {
             form.rating = review.rating
-            form.combinedDifficulty = toCombined(
+            form.combinedDifficulty = toCombinedDifficulty(
                 review.difficulty,
                 review.difficulty_sign,
             )
@@ -209,7 +206,7 @@ watch(sheetOpen, (open) => {
     if (open) {
         if (props.review) {
             form.rating = props.review.rating
-            form.combinedDifficulty = toCombined(
+            form.combinedDifficulty = toCombinedDifficulty(
                 props.review.difficulty,
                 props.review.difficulty_sign,
             )
@@ -223,24 +220,6 @@ watch(sheetOpen, (open) => {
 })
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function toCombined(difficulty, sign) {
-    if (difficulty === null || difficulty === undefined) return null
-    const suffix = sign === true ? ' +' : sign === false ? ' -' : ''
-    return `${difficulty}${suffix}`
-}
-
-function fromCombined(combined) {
-    if (!combined) return { difficulty: null, difficulty_sign: null }
-    const num = parseInt(combined, 10)
-    const trimmed = combined.trim()
-    const sign = trimmed.endsWith('+')
-        ? true
-        : trimmed.endsWith('-')
-          ? false
-          : null
-    return { difficulty: Number.isNaN(num) ? null : num, difficulty_sign: sign }
-}
 
 const AVATAR_COLORS = [
     'primary',
@@ -286,7 +265,7 @@ function close() {
 async function submit() {
     saving.value = true
     try {
-        const { difficulty, difficulty_sign } = fromCombined(
+        const { difficulty, difficulty_sign } = parseCombinedDifficulty(
             form.combinedDifficulty,
         )
 
