@@ -1,6 +1,6 @@
 import type { AuditAction, AuditLogRecord, RecordId } from '~/types/models'
 
-export const AUDIT_ACTIONS: AuditAction[] = [
+export const AUDIT_ACTIONS = [
     'create',
     'update',
     'delete',
@@ -10,7 +10,7 @@ export const AUDIT_ACTIONS: AuditAction[] = [
     'password_reset',
     'email_change_request',
     'email_change',
-]
+] as const
 
 export const AUDITED_COLLECTIONS: string[] = [
     'routes',

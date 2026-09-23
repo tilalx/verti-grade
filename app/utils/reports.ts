@@ -1,11 +1,6 @@
-import type {
-    ReportContentType,
-    ReportReason,
-    ReportStatus,
-    RecordId,
-} from '~/types/models'
+import type { ReportContentType, ReportStatus, RecordId } from '~/types/models'
 
-export const REPORT_REASONS: ReportReason[] = [
+export const REPORT_REASONS = [
     'hate_speech',
     'harassment',
     'violence_threat',
@@ -14,7 +9,9 @@ export const REPORT_REASONS: ReportReason[] = [
     'ip_infringement',
     'spam_fraud',
     'other',
-]
+] as const
+
+export const REPORT_STATUSES = ['open', 'actioned', 'rejected'] as const
 
 export function reportContentUrl(
     type: ReportContentType,

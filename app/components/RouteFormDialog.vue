@@ -25,7 +25,7 @@
                     <v-select
                         v-model="form.combinedDifficulty"
                         :label="$t('climbing.difficulty')"
-                        :items="combinedDifficulties"
+                        :items="COMBINED_DIFFICULTIES"
                         :rules="[requiredRule]"
                         data-testid="route-form-difficulty"
                     />
@@ -197,6 +197,12 @@ import type PocketBase from 'pocketbase'
 import type { RouteRecord } from '~/types/models'
 import { normalizeCreators, formatDateToYYYYMMDD } from '~/utils/formatting'
 import { required, maxLength } from '~/utils/validation'
+import {
+    COMBINED_DIFFICULTIES,
+    ROUTE_TYPES,
+    parseCombinedDifficulty,
+    toCombinedDifficulty,
+} from '~/utils/routes'
 
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
@@ -315,15 +321,12 @@ const isBoulderRoute = computed(() => form.type === 'Boulder')
 
 const { data: locationRecords } = useLocations()
 
-const combinedDifficulties = Array.from({ length: 10 }, (_, i) => {
-    const d = i + 1
-    return [`${d} -`, String(d), `${d} +`]
-}).flat()
-
-const typeItems = computed(() => [
-    { title: t('routes.types.route'), value: 'Route' },
-    { title: t('routes.types.boulder'), value: 'Boulder' },
-])
+const typeItems = computed(() =>
+    ROUTE_TYPES.map((value) => ({
+        title: t(`routes.types.${value.toLowerCase()}`),
+        value,
+    })),
+)
 
 const requiredRule = required(t)
 
@@ -348,34 +351,6 @@ const anchorPointRules = [
 
 const creatorRule = (v: string[]) =>
     (Array.isArray(v) && v.length > 0) || t('validation.required')
-
-const toCombinedDifficulty = (
-    difficulty: RouteRecord['difficulty'],
-    sign: RouteRecord['difficulty_sign'],
-): string | null => {
-    if (difficulty === null || difficulty === undefined) return null
-    const d = String(difficulty)
-    if (sign === true || sign === '+') return `${d} +`
-    if (sign === false || sign === '-') return `${d} -`
-    return d
-}
-
-const parseCombinedDifficulty = (
-    combined: string | null,
-): { difficulty: number | null; difficulty_sign: boolean | null } => {
-    if (!combined) return { difficulty: null, difficulty_sign: null }
-    if (combined.endsWith(' +'))
-        return {
-            difficulty: Number(combined.slice(0, -2)),
-            difficulty_sign: true,
-        }
-    if (combined.endsWith(' -'))
-        return {
-            difficulty: Number(combined.slice(0, -2)),
-            difficulty_sign: false,
-        }
-    return { difficulty: Number(combined), difficulty_sign: null }
-}
 
 const resetForm = () => {
     form.name = ''

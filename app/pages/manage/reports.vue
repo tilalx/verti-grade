@@ -137,6 +137,7 @@
 
 <script setup lang="ts">
 import type { ListResult, ReportDecision, ReportRecord } from '~/types/models'
+import { REPORT_STATUSES } from '~/utils/reports'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -162,7 +163,7 @@ const pendingDecision = ref<ReportDecision | null>(null)
 const pendingReport = ref<ReportRecord | null>(null)
 
 const statusItems = computed(() =>
-    (['open', 'actioned', 'rejected'] as const).map((value) => ({
+    REPORT_STATUSES.map((value) => ({
         value,
         title: t(`reports.status.${value}`),
     })),

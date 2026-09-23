@@ -1,3 +1,5 @@
+import { DIFFICULTY_LEVELS, ROUTE_TYPES } from '~/utils/routes'
+
 export function useRouteFilters() {
     const { t } = useI18n()
     const { data: locationRecords } = useLocations()
@@ -9,16 +11,18 @@ export function useRouteFilters() {
 
     const difficulties = computed(() => [
         { text: t('filter.all'), value: '' },
-        ...Array.from({ length: 10 }, (_, i) => ({
-            text: String(i + 1),
-            value: String(i + 1),
+        ...DIFFICULTY_LEVELS.map((level) => ({
+            text: String(level),
+            value: String(level),
         })),
     ])
 
     const types = computed(() => [
         { text: t('filter.all'), value: '' },
-        { text: t('routes.types.route'), value: 'Route' },
-        { text: t('routes.types.boulder'), value: 'Boulder' },
+        ...ROUTE_TYPES.map((value) => ({
+            text: t(`routes.types.${value.toLowerCase()}`),
+            value,
+        })),
     ])
 
     const locations = computed(() => [

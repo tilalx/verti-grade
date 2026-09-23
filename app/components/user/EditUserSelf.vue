@@ -72,11 +72,11 @@
                         elevation="4"
                     >
                         <v-list-item
-                            v-for="loc in locales"
+                            v-for="loc in SUPPORTED_LOCALES"
                             :key="loc.code"
                             :active="user.language === loc.code"
                             :value="loc.code"
-                            :title="loc.label"
+                            :title="loc.name"
                             rounded="lg"
                             :data-testid="`profile-language-${loc.code}`"
                             @click="user.language = loc.code"
@@ -270,19 +270,15 @@
 
 <script setup>
 import { required, validEmail } from '~/utils/validation'
+import { SUPPORTED_LOCALES } from '~/utils/locales'
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
 
-const locales = [
-    { code: 'en', label: 'English', flag: '🇬🇧' },
-    { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-    { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-    { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
-    { code: 'uk', label: 'Українська', flag: '🇺🇦' },
-]
 const currentLocale = computed(
-    () => locales.find((l) => l.code === user.language) ?? locales[0],
+    () =>
+        SUPPORTED_LOCALES.find((l) => l.code === user.language) ??
+        SUPPORTED_LOCALES[0],
 )
 
 // ── PocketBase ────────────────────────────────────────────────────────────

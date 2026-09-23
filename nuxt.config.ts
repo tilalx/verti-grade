@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './app/utils/locales'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     future: {
@@ -146,18 +148,16 @@ export default defineNuxtConfig({
         strategy: 'no_prefix',
         lazy: true,
         langDir: 'locales/',
-        defaultLocale: 'en',
+        defaultLocale: DEFAULT_LOCALE,
         detectBrowserLanguage: {
             useCookie: false,
         },
         vueI18n: './i18n.config.ts',
-        locales: [
-            { code: 'en', file: 'en.ts', name: 'English' },
-            { code: 'de', file: 'de.ts', name: 'Deutsch' },
-            { code: 'ru', file: 'ru.ts', name: 'Русский' },
-            { code: 'tr', file: 'tr.ts', name: 'Türkçe' },
-            { code: 'uk', file: 'uk.ts', name: 'Українська' },
-        ],
+        locales: SUPPORTED_LOCALES.map(({ code, name }) => ({
+            code,
+            name,
+            file: `${code}.ts`,
+        })),
     },
     image: {
         formats: ['avif', 'webp'],
