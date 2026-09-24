@@ -111,55 +111,96 @@
     "analytics": {
         "title": "Аналітика маршрутів",
         "subtitle": "Відстежуйте ключові показники всіх маршрутів.",
-        "refresh": "Оновити",
-        "retry": "Спробувати ще раз",
-        "empty": "Аналітичні дані поки відсутні.",
-        "generatedAt": "Останнє оновлення {value}",
         "meta": {
             "title": "Аналітика - Verti-Grade",
             "description": "Адміністративна панель аналітики для скелелазних маршрутів."
         },
-        "cards": {
-            "totalRoutes": "Усього маршрутів",
-            "totalRoutesSubtitle": "По всіх локаціях",
-            "activeRoutes": "Активні маршрути",
-            "activeRoutesSubtitle": "Доступні зараз",
-            "averageDifficulty": "Середня складність",
-            "averageDifficultySubtitle": "Середній рівень",
-            "totalComments": "Коментарі",
-            "totalCommentsSubtitle": "Всі відгуки",
-            "averageLifespan": "Сер. термін маршруту",
-            "averageLifespanSubtitle": "Лише архівні маршрути"
-        },
-        "charts": {
-            "difficultyDistribution": "Розподіл складностей",
-            "routeSetters": "Маршрути за автором",
-            "routeTimeline": "Маршрути у часі",
-            "commentTimeline": "Коментарі у часі",
-            "activityHeatmap": "Активність прокладання маршрутів"
-        },
-        "sections": {
-            "latestComments": "Останні коментарі",
-            "latestRoutes": "Останні маршрути"
-        },
-        "emptyComments": "Коментарів поки немає.",
-        "emptyRoutes": "Нових маршрутів поки немає.",
-        "actions": {
-            "showAllSetters": "Показати всіх постановників"
-        },
-        "labels": {
-            "attempts": "Спроби",
-            "sends": "Проходження",
-            "comments": "Коментарі",
-            "routes": "Маршрути",
-            "unknown": "Невідомо",
-            "other": "Інші"
-        },
         "heatmap": {
             "less": "Менше",
-            "more": "Більше"
+            "more": "Більше",
+            "total": "Накручено в {year}: {n}",
+            "totalLastYear": "Накручено за останній рік: {n}",
+            "cell": "{date}: маршрутів {n}"
         },
-        "error": "Не вдалося завантажити аналітичні дані. Будь ласка, спробуйте ще раз."
+        "error": "Не вдалося завантажити аналітичні дані. Будь ласка, спробуйте ще раз.",
+        "emptySection": "Немає даних для вибраних фільтрів.",
+        "filters": {
+            "ranges": {
+                "30d": "30 днів",
+                "90d": "90 днів",
+                "12m": "12 місяців",
+                "all": "Весь час",
+                "custom": "Власний"
+            },
+            "from": "З",
+            "to": "По",
+            "locations": "Локації",
+            "types": "Типи",
+            "includeArchived": "Включно з архівними"
+        },
+        "cards": {
+            "activeRoutes": "Активні маршрути",
+            "activeRoutesSubtitle": "з оцінками: {n}",
+            "routesSet": "Накручено маршрутів",
+            "routesSetSubtitle": "За вибраний період",
+            "ratings": "Оцінки",
+            "ratingsSubtitle": "За вибраний період",
+            "averageRating": "Сер. оцінка",
+            "averageRatingSubtitle": "Зірки за період",
+            "comments": "Коментарі",
+            "commentsSubtitle": "За вибраний період",
+            "averageLifespan": "Сер. термін життя",
+            "averageLifespanSubtitle": "Архівовані за період"
+        },
+        "sections": {
+            "grades": "Розподіл категорій",
+            "activity": "Накрутка та оцінки",
+            "oldestActive": "Найстаріші активні",
+            "setters": "Маршрути за накрутниками",
+            "latestComments": "Останні коментарі",
+            "activityHeatmap": "Активність накрутки",
+            "gradeBalance": "Баланс категорій",
+            "ratingDistribution": "Оцінки в зірках",
+            "gradeFeedback": "Заявлена й проголосована категорія",
+            "ratedRoutes": "Найкращі та найгірші",
+            "locationGrades": "Категорії за локаціями"
+        },
+        "empty": {
+            "latestComments": "За період немає коментарів.",
+            "gradeFeedback": "Поки недостатньо голосів.",
+            "ratedRoutes": "Поки недостатньо оцінок.",
+            "gradeBalance": "Активний набір категорій відповідає історичному."
+        },
+        "hints": {
+            "gradeBalance": "Активні маршрути мінус історичне очікування – червоних категорій бракує.",
+            "gradeFeedback": "Кожна точка – маршрут щонайменше з 3 голосами. Вище лінії – складніше за заявлене.",
+            "ratedRoutes": "Відхилення від середньої оцінки всіх оцінених маршрутів.",
+            "oldestActive": "Найдовше на стіні – кандидати на перекрутку."
+        },
+        "columns": {
+            "routes": "Маршрути",
+            "averageRating": "Сер. оцінка",
+            "averageDeviation": "Відхилення"
+        },
+        "labels": {
+            "unknown": "Невідомо",
+            "expected": "Очікується",
+            "routesSet": "Накручено",
+            "ratings": "Оцінки",
+            "days": "{n} дн.",
+            "ratingCount": "оцінок: {n}",
+            "activeVsExpected": "активно / очікується",
+            "climbsHarder": "Складніше",
+            "gradedFair": "Точно",
+            "climbsSofter": "Легше",
+            "setGrade": "Заявлена",
+            "votedGrade": "За голосами",
+            "routeCount": "маршрутів: {n}",
+            "voteCount": "голосів: {n}",
+            "setInPeriod": "За період",
+            "setEarlier": "Раніше",
+            "otherSetters": "ще {n}"
+        }
     },
     "climbing": {
         "create": "Створити маршрут",

@@ -1,109 +1,118 @@
 <template>
-    <div data-testid="analytics-heatmap">
-        <div class="d-flex d-sm-none flex-wrap ga-2 mb-3">
-            <v-chip
-                v-for="year in availableYears"
-                :key="year"
-                :color="year === selectedYear ? 'primary' : undefined"
-                :variant="year === selectedYear ? 'flat' : 'outlined'"
-                size="small"
-                @click="selectedYear = year"
-                >{{ year }}</v-chip
-            >
-        </div>
-
-        <div class="heatmap-outer">
-            <div class="heatmap-graph">
-                <div class="heatmap-day-labels">
-                    <span class="heatmap-day-label" />
-                    <span class="heatmap-day-label">{{ dayLabels.mon }}</span>
-                    <span class="heatmap-day-label" />
-                    <span class="heatmap-day-label">{{ dayLabels.wed }}</span>
-                    <span class="heatmap-day-label" />
-                    <span class="heatmap-day-label">{{ dayLabels.fri }}</span>
-                    <span class="heatmap-day-label" />
-                    <span class="heatmap-day-label" />
-                </div>
-                <div class="heatmap-scroll">
-                    <div class="heatmap-month-labels">
+    <div class="heatmap" data-testid="analytics-heatmap">
+        <div class="heatmap-main">
+            <div class="heatmap-title" data-testid="analytics-heatmap-total">
+                {{
+                    selectedYear === null
+                        ? t('analytics.heatmap.totalLastYear', {
+                              n: rangeTotal,
+                          })
+                        : t('analytics.heatmap.total', {
+                              n: rangeTotal,
+                              year: selectedYear,
+                          })
+                }}
+            </div>
+            <div class="heatmap-box">
+                <div ref="scrollRef" class="heatmap-scroll">
+                    <div
+                        class="heatmap-grid"
+                        :style="{ '--weeks': weeks.length }"
+                        @mouseover="onCellHover"
+                        @mouseleave="tooltip.visible = false"
+                    >
                         <span
                             v-for="label in monthLabels"
                             :key="label.key"
-                            class="heatmap-month-label"
-                            :style="{ gridColumnStart: label.startCol }"
-                            >{{ label.text }}</span
+                            class="heatmap-label heatmap-month"
+                            :style="{ gridColumn: label.column, gridRow: 1 }"
                         >
-                    </div>
-                    <div
-                        class="heatmap-grid"
-                        @mouseover="onCellHover"
-                        @mouseleave="tooltipVisible = false"
-                    >
-                        <div
-                            v-for="cell in cells"
-                            :key="cell.date"
-                            class="heatmap-cell"
-                            :class="[
-                                `heatmap-level-${cell.level}`,
-                                { 'heatmap-cell--outside': !cell.inYear },
-                            ]"
-                            :data-label="cell.label"
-                            :data-count="cell.count"
-                        />
-                    </div>
-                    <teleport to="body">
-                        <div
-                            v-if="tooltipVisible"
-                            class="heatmap-float-tooltip"
-                            :style="tooltipStyle"
+                            {{ label.text }}
+                        </span>
+                        <span
+                            v-for="weekday in [0, 2, 4]"
+                            :key="weekday"
+                            class="heatmap-label heatmap-weekday"
+                            :style="{ gridColumn: 1, gridRow: weekday + 2 }"
                         >
-                            {{ tooltipText }}
-                        </div>
-                    </teleport>
+                            {{ dayLabels[weekday] }}
+                        </span>
+                        <template v-for="(week, weekIndex) in weeks">
+                            <span
+                                v-for="(cell, weekday) in week"
+                                :key="cell.date"
+                                class="heatmap-cell"
+                                :class="
+                                    cell.inRange
+                                        ? `heatmap-level-${cell.level}`
+                                        : 'heatmap-cell--outside'
+                                "
+                                :style="{
+                                    gridColumn: weekIndex + 2,
+                                    gridRow: weekday + 2,
+                                }"
+                                :aria-label="
+                                    cell.inRange ? cell.label : undefined
+                                "
+                                :data-date="
+                                    cell.inRange ? cell.date : undefined
+                                "
+                                :data-count="
+                                    cell.inRange ? cell.count : undefined
+                                "
+                            />
+                        </template>
+                    </div>
+                </div>
+                <div class="heatmap-legend">
+                    <span>{{ t('analytics.heatmap.less') }}</span>
+                    <span
+                        v-for="level in 5"
+                        :key="level"
+                        class="heatmap-cell"
+                        :class="`heatmap-level-${level - 1}`"
+                    />
+                    <span>{{ t('analytics.heatmap.more') }}</span>
                 </div>
             </div>
-
-            <div class="heatmap-years d-none d-sm-flex flex-column">
-                <button
-                    v-for="year in availableYears"
-                    :key="year"
-                    class="heatmap-year-btn"
-                    :class="{
-                        'heatmap-year-btn--active': year === selectedYear,
-                    }"
-                    :data-testid="`analytics-heatmap-year-${year}`"
-                    @click="selectedYear = year"
-                >
-                    {{ year }}
-                </button>
-            </div>
         </div>
 
-        <div class="heatmap-legend">
-            <span class="heatmap-legend-label">{{
-                t('analytics.heatmap.less')
-            }}</span>
+        <nav class="heatmap-years">
+            <v-btn
+                v-for="year in availableYears"
+                :key="year"
+                size="small"
+                density="comfortable"
+                class="heatmap-year"
+                :color="year === selectedYear ? 'primary' : undefined"
+                :variant="year === selectedYear ? 'flat' : 'text'"
+                :data-testid="`analytics-heatmap-year-${year}`"
+                @click="selectedYear = year"
+            >
+                {{ year }}
+            </v-btn>
+        </nav>
+
+        <teleport to="body">
             <div
-                v-for="level in 5"
-                :key="level"
-                class="heatmap-cell"
-                :class="`heatmap-level-${level - 1}`"
-            />
-            <span class="heatmap-legend-label">{{
-                t('analytics.heatmap.more')
-            }}</span>
-        </div>
+                v-if="tooltip.visible"
+                class="heatmap-tooltip"
+                :style="{ left: tooltip.left, top: tooltip.top }"
+            >
+                {{ tooltip.text }}
+            </div>
+        </teleport>
     </div>
 </template>
 
 <script setup lang="ts">
-import type { TimelineDatum } from '~/composables/useClimbingAnalytics'
+import type { TimelineDatum } from '#shared/utils/analytics'
 
 interface HeatmapCell {
     date: string
     count: number
     level: number
-    inYear: boolean
+    inRange: boolean
     label: string
 }
 
@@ -111,44 +120,27 @@ const props = defineProps<{ timeline: TimelineDatum[] }>()
 
 const { t, locale } = useI18n()
 
-const selectedYear = ref(new Date().getFullYear())
+const currentYear = new Date().getFullYear()
+const selectedYear = ref<number | null>(null)
+const scrollRef = ref<HTMLElement>()
+const tooltip = reactive({ visible: false, text: '', left: '0', top: '0' })
 
-const tooltipVisible = ref(false)
-const tooltipText = ref('')
-const tooltipStyle = ref<Record<string, string>>({})
+const countByDay = computed(
+    () => new Map(props.timeline.map((item) => [item.period, item.count])),
+)
 
-function onCellHover(event: MouseEvent) {
-    const target = event.target as HTMLElement | null
-    const label = target?.dataset?.label
-    if (!target || !label) {
-        tooltipVisible.value = false
-        return
-    }
-    const rect = target.getBoundingClientRect()
-    tooltipText.value = label
-    tooltipStyle.value = {
-        left: `${rect.left + rect.width / 2}px`,
-        top: `${rect.top - 6}px`,
-    }
-    tooltipVisible.value = true
-}
+const availableYears = computed(() => {
+    const years = new Set([currentYear])
+    for (const item of props.timeline)
+        years.add(Number(item.period.slice(0, 4)))
+    return [...years].filter(Number.isFinite).sort((a, b) => b - a)
+})
 
 const dayLabels = computed(() => {
     const format = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
-    return {
-        mon: format.format(new Date(2024, 0, 1)),
-        wed: format.format(new Date(2024, 0, 3)),
-        fri: format.format(new Date(2024, 0, 5)),
-    }
-})
-
-const availableYears = computed(() => {
-    const years = new Set([new Date().getFullYear()])
-    for (const item of props.timeline) {
-        const year = Number.parseInt(item.period.slice(0, 4), 10)
-        if (!Number.isNaN(year)) years.add(year)
-    }
-    return Array.from(years).sort((a, b) => b - a)
+    return Array.from({ length: 7 }, (_, index) =>
+        format.format(new Date(2024, 0, index + 1)),
+    )
 })
 
 function toIsoDay(date: Date) {
@@ -157,266 +149,277 @@ function toIsoDay(date: Date) {
     return `${date.getFullYear()}-${month}-${day}`
 }
 
-function levelFor(count: number) {
-    return Math.min(count, 4)
+function quartileThresholds(counts: number[]) {
+    const sorted = counts.filter((count) => count > 0).sort((a, b) => a - b)
+    const at = (share: number) =>
+        sorted[Math.floor((sorted.length - 1) * share)] ?? 0
+    return [at(0.25), at(0.5), at(0.75)]
 }
 
-const cells = computed<HeatmapCell[]>(() => {
+const range = computed(() => {
     const year = selectedYear.value
+    if (year !== null)
+        return { start: new Date(year, 0, 1), end: new Date(year, 11, 31) }
+    const end = new Date()
+    end.setHours(0, 0, 0, 0)
+    const start = new Date(end)
+    start.setFullYear(start.getFullYear() - 1)
+    start.setDate(start.getDate() + 1)
+    return { start, end }
+})
 
-    const startDate = new Date(year, 0, 1)
-    const jan1Weekday = startDate.getDay()
-    startDate.setDate(
-        startDate.getDate() - (jan1Weekday === 0 ? 6 : jan1Weekday - 1),
-    )
+const weeks = computed<HeatmapCell[][]>(() => {
+    const { start, end } = range.value
+    const startDay = toIsoDay(start)
+    const endDay = toIsoDay(end)
+    const isInRange = (day: string) => day >= startDay && day <= endDay
+    const cursor = new Date(start)
+    cursor.setDate(cursor.getDate() - ((cursor.getDay() + 6) % 7))
 
-    const endDate = new Date(year, 11, 31)
-    const dec31Weekday = endDate.getDay()
-    endDate.setDate(
-        endDate.getDate() + (dec31Weekday === 0 ? 0 : 7 - dec31Weekday),
+    const thresholds = quartileThresholds(
+        [...countByDay.value.entries()]
+            .filter(([day]) => isInRange(day))
+            .map(([, count]) => count),
     )
-
-    const countByDay = new Map(
-        props.timeline.map((item) => [item.period, item.count]),
-    )
-    const dateFormatter = new Intl.DateTimeFormat(locale.value, {
+    const formatter = new Intl.DateTimeFormat(locale.value, {
         dateStyle: 'medium',
     })
 
-    const result: HeatmapCell[] = []
-    for (
-        const cursor = new Date(startDate);
-        cursor <= endDate;
-        cursor.setDate(cursor.getDate() + 1)
-    ) {
-        const iso = toIsoDay(cursor)
-        const inYear = cursor.getFullYear() === year
-        const count = countByDay.get(iso) ?? 0
-        const formatted = dateFormatter.format(cursor)
-        result.push({
-            date: iso,
-            count,
-            level: inYear ? levelFor(count) : 0,
-            inYear,
-            label: count > 0 ? `${formatted}: ${count}` : formatted,
-        })
+    const result: HeatmapCell[][] = []
+    while (cursor <= end) {
+        const week: HeatmapCell[] = []
+        for (let weekday = 0; weekday < 7; weekday++) {
+            const date = toIsoDay(cursor)
+            const count = countByDay.value.get(date) ?? 0
+            week.push({
+                date,
+                count,
+                level:
+                    count === 0
+                        ? 0
+                        : 1 +
+                          thresholds.filter((limit) => count > limit).length,
+                inRange: isInRange(date),
+                label: t('analytics.heatmap.cell', {
+                    n: count,
+                    date: formatter.format(cursor),
+                }),
+            })
+            cursor.setDate(cursor.getDate() + 1)
+        }
+        result.push(week)
     }
     return result
 })
 
+const rangeTotal = computed(() =>
+    weeks.value
+        .flat()
+        .reduce((sum, cell) => sum + (cell.inRange ? cell.count : 0), 0),
+)
+
 const monthLabels = computed(() => {
-    const monthFormatter = new Intl.DateTimeFormat(locale.value, {
-        month: 'short',
-    })
-    const labels: { key: string; text: string; startCol: number }[] = []
-    let previousMonth: string | null = null
-    cells.value.forEach((cell, index) => {
-        if (!cell.inYear) return
-        const month = cell.date.slice(0, 7)
-        if (month === previousMonth) return
-        previousMonth = month
-        const weekStartIndex =
-            index % 7 === 0 ? index : index + (7 - (index % 7))
-        const weekCol = Math.floor(weekStartIndex / 7) + 1
-        if (weekCol > 54) return
-        labels.push({
-            key: month,
-            text: monthFormatter.format(new Date(`${cell.date}T00:00:00`)),
-            startCol: weekCol,
+    const formatter = new Intl.DateTimeFormat(locale.value, { month: 'short' })
+    const starts: { key: string; start: number; text: string }[] = []
+    weeks.value.forEach((week, index) => {
+        const firstInRange = week.find((cell) => cell.inRange) ?? week[0]!
+        const key = firstInRange.date.slice(0, 7)
+        if (starts[starts.length - 1]?.key === key) return
+        starts.push({
+            key,
+            start: index,
+            text: formatter.format(new Date(`${firstInRange.date}T00:00:00`)),
         })
     })
-    return labels
+    return starts
+        .map((month, index) => ({
+            ...month,
+            span:
+                (starts[index + 1]?.start ?? weeks.value.length) - month.start,
+        }))
+        .filter((month) => month.span >= 2)
+        .map((month) => ({
+            key: month.key,
+            text: month.text,
+            column: `${month.start + 2} / span ${month.span}`,
+        }))
 })
+
+function scrollToToday() {
+    const scroller = scrollRef.value
+    if (!scroller) return
+    const today = scroller.querySelector<HTMLElement>(
+        `[data-date="${toIsoDay(new Date())}"]`,
+    )
+    scroller.scrollLeft = today
+        ? today.offsetLeft + today.offsetWidth - scroller.clientWidth
+        : 0
+}
+
+onMounted(scrollToToday)
+watch(selectedYear, () => nextTick(scrollToToday))
+
+function onCellHover(event: MouseEvent) {
+    const target = event.target as HTMLElement | null
+    const label = target?.getAttribute('aria-label')
+    if (!target || !label) {
+        tooltip.visible = false
+        return
+    }
+    const rect = target.getBoundingClientRect()
+    tooltip.text = label
+    tooltip.left = `${rect.left + rect.width / 2}px`
+    tooltip.top = `${rect.top - 6}px`
+    tooltip.visible = true
+}
 </script>
 
 <style scoped>
-.heatmap-outer {
+.heatmap {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
 }
 
-.heatmap-graph {
-    display: flex;
-    gap: 4px;
+.heatmap-main {
     flex: 1;
     min-width: 0;
 }
 
-.heatmap-day-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding-top: 18px;
-    flex-shrink: 0;
+.heatmap-title {
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    color: rgb(var(--v-theme-on-surface));
 }
 
-.heatmap-day-label {
-    height: 13px;
-    line-height: 13px;
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
-    text-align: right;
-    white-space: nowrap;
-    padding-right: 2px;
+.heatmap-box {
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+    border-radius: 8px;
+    padding: 12px 16px 10px;
 }
 
 .heatmap-scroll {
+    position: relative;
     overflow-x: auto;
-    flex: 1;
-    min-width: 0;
-}
-
-.heatmap-month-labels {
-    display: grid;
-    grid-template-columns: repeat(54, 13px);
-    gap: 2px;
-    height: 16px;
-    margin-bottom: 2px;
-}
-
-.heatmap-month-label {
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
-    white-space: nowrap;
-    overflow: visible;
 }
 
 .heatmap-grid {
     display: grid;
-    grid-template-columns: repeat(54, 13px);
-    grid-template-rows: repeat(7, 13px);
-    grid-auto-flow: column;
-    gap: 2px;
-    width: fit-content;
+    grid-template-columns: auto repeat(var(--weeks), minmax(10px, 1fr));
+    grid-template-rows: auto;
+    gap: 3px;
+    min-width: calc(var(--weeks) * 13px + 32px);
+}
+
+.heatmap-label {
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+    white-space: nowrap;
+    align-self: center;
+}
+
+.heatmap-month {
+    padding-bottom: 4px;
+}
+
+.heatmap-weekday {
+    padding-right: 6px;
+    text-align: right;
 }
 
 .heatmap-cell {
-    width: 13px;
-    height: 13px;
+    aspect-ratio: 1;
     border-radius: 3px;
-    cursor: default;
-    flex-shrink: 0;
+    outline: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+    outline-offset: -1px;
 }
 
 .heatmap-cell--outside {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.heatmap-years {
-    flex-shrink: 0;
-    padding-top: 18px;
-    gap: 2px !important;
-}
-
-.heatmap-year-btn {
-    display: block;
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    border: none;
-    background: none;
-    color: rgba(var(--v-theme-on-surface), 0.5);
-    cursor: pointer;
-    text-align: right;
-    transition:
-        color 0.15s,
-        background 0.15s;
-    white-space: nowrap;
-}
-
-.heatmap-year-btn:hover {
-    color: rgb(var(--v-theme-on-surface));
-    background: rgba(var(--v-theme-on-surface), 0.06);
-}
-
-.heatmap-year-btn--active {
-    color: rgb(var(--v-theme-primary));
-    font-weight: 600;
-}
-
-.heatmap-legend {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 10px;
-    justify-content: flex-end;
-}
-
-.heatmap-legend-label {
-    font-size: 10px;
-    color: rgba(var(--v-theme-on-surface), 0.45);
+    outline: none;
 }
 
 .heatmap-level-0 {
     background: rgba(var(--v-theme-on-surface), 0.07);
 }
 .heatmap-level-1 {
-    background: #0f6e56;
+    background: rgba(var(--v-theme-primary), 0.35);
 }
 .heatmap-level-2 {
-    background: #1d9e75;
+    background: rgba(var(--v-theme-primary), 0.6);
 }
 .heatmap-level-3 {
-    background: #5dcaa5;
+    background: rgba(var(--v-theme-primary), 0.8);
 }
 .heatmap-level-4 {
-    background: #7fffdb;
+    background: rgb(var(--v-theme-primary));
 }
 
-.heatmap-float-tooltip {
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+}
+
+.heatmap-legend .heatmap-cell {
+    width: 10px;
+}
+
+.heatmap-legend span:first-child {
+    margin-right: 4px;
+}
+
+.heatmap-legend span:last-child {
+    margin-left: 4px;
+}
+
+.heatmap-years {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 28px;
+    flex-shrink: 0;
+}
+
+.heatmap-year {
+    justify-content: flex-start;
+    min-width: 72px;
+}
+
+.heatmap-tooltip {
     position: fixed;
     z-index: 2000;
     transform: translate(-50%, -100%);
     pointer-events: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
     white-space: nowrap;
-    background: rgb(var(--v-theme-surface-variant));
-    color: rgb(var(--v-theme-on-surface-variant));
+    background: rgba(var(--v-theme-surface), 0.96);
+    color: rgba(var(--v-theme-on-surface), 0.9);
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-@media (min-width: 600px) {
-    .heatmap-scroll {
-        overflow-x: clip;
+@media (max-width: 959px) {
+    .heatmap {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 8px;
     }
 
-    .heatmap-month-labels {
-        grid-template-columns: repeat(54, 1fr);
-        width: 100%;
-    }
-
-    .heatmap-grid {
-        grid-template-columns: repeat(54, 1fr);
-        grid-template-rows: repeat(7, 1fr);
-        width: 100%;
-        aspect-ratio: 54 / 7;
-    }
-
-    .heatmap-grid .heatmap-cell {
-        width: auto;
-        height: auto;
-    }
-
-    .heatmap-day-labels {
+    .heatmap-years {
+        flex-direction: row;
+        flex-wrap: wrap;
         padding-top: 0;
-        align-self: stretch;
     }
 
-    .heatmap-day-labels > span:first-child {
-        flex-shrink: 0;
-        height: 16px;
-    }
-
-    .heatmap-day-labels > span:not(:first-child) {
-        flex: 1;
-        height: auto;
-        line-height: 1;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
+    .heatmap-year {
+        min-width: 0;
     }
 }
 </style>

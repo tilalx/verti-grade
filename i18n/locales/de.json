@@ -111,55 +111,96 @@
     "analytics": {
         "title": "Routen-Analyse",
         "subtitle": "Überwache wichtige Kennzahlen aller Kletterrouten.",
-        "refresh": "Aktualisieren",
-        "retry": "Erneut versuchen",
-        "empty": "Noch keine Analysedaten verfügbar.",
-        "generatedAt": "Zuletzt aktualisiert {value}",
         "meta": {
             "title": "Analysen - Verti-Grade",
             "description": "Administratives Analyse-Dashboard für Kletterrouten."
         },
-        "cards": {
-            "totalRoutes": "Gesamtanzahl Routen",
-            "totalRoutesSubtitle": "Über alle Standorte",
-            "activeRoutes": "Aktive Routen",
-            "activeRoutesSubtitle": "Derzeit verfügbar",
-            "averageDifficulty": "Durchschnittliche Schwierigkeit",
-            "averageDifficultySubtitle": "Mittlerer Grad",
-            "totalComments": "Kommentare",
-            "totalCommentsSubtitle": "Gesamtes Feedback",
-            "averageLifespan": "Ø Lebensdauer",
-            "averageLifespanSubtitle": "Nur archivierte Routen"
-        },
-        "charts": {
-            "difficultyDistribution": "Verteilung der Schwierigkeiten",
-            "routeSetters": "Routen nach Schrauber",
-            "routeTimeline": "Routen im Zeitverlauf",
-            "commentTimeline": "Kommentare im Zeitverlauf",
-            "activityHeatmap": "Schrauberaktivität"
-        },
-        "sections": {
-            "latestComments": "Neueste Kommentare",
-            "latestRoutes": "Neueste Routen"
-        },
-        "emptyComments": "Noch keine Kommentare vorhanden.",
-        "emptyRoutes": "Noch keine neuen Routen vorhanden.",
-        "actions": {
-            "showAllSetters": "Alle Schrauber anzeigen"
-        },
-        "labels": {
-            "attempts": "Versuche",
-            "sends": "Begehungen",
-            "comments": "Kommentare",
-            "routes": "Routen",
-            "unknown": "Unbekannt",
-            "other": "Andere"
-        },
         "heatmap": {
             "less": "Weniger",
-            "more": "Mehr"
+            "more": "Mehr",
+            "total": "{n} Routen in {year} geschraubt",
+            "totalLastYear": "{n} Routen im letzten Jahr geschraubt",
+            "cell": "{n} Routen am {date}"
         },
-        "error": "Analysedaten konnten nicht geladen werden. Bitte erneut versuchen."
+        "error": "Analysedaten konnten nicht geladen werden. Bitte erneut versuchen.",
+        "emptySection": "Keine Daten für die gewählten Filter.",
+        "filters": {
+            "ranges": {
+                "30d": "30 Tage",
+                "90d": "90 Tage",
+                "12m": "12 Monate",
+                "all": "Gesamt",
+                "custom": "Eigener"
+            },
+            "from": "Von",
+            "to": "Bis",
+            "locations": "Standorte",
+            "types": "Typen",
+            "includeArchived": "Archivierte einbeziehen"
+        },
+        "cards": {
+            "activeRoutes": "Aktive Routen",
+            "activeRoutesSubtitle": "{n} davon bewertet",
+            "routesSet": "Geschraubte Routen",
+            "routesSetSubtitle": "Im gewählten Zeitraum",
+            "ratings": "Bewertungen",
+            "ratingsSubtitle": "Im gewählten Zeitraum",
+            "averageRating": "Ø Bewertung",
+            "averageRatingSubtitle": "Sterne im Zeitraum",
+            "comments": "Kommentare",
+            "commentsSubtitle": "Im gewählten Zeitraum",
+            "averageLifespan": "Ø Standzeit",
+            "averageLifespanSubtitle": "Im Zeitraum archivierte Routen"
+        },
+        "sections": {
+            "grades": "Schwierigkeitsverteilung",
+            "activity": "Schraub- & Bewertungsaktivität",
+            "oldestActive": "Älteste aktive Routen",
+            "setters": "Routen pro Routenbauer",
+            "latestComments": "Neueste Kommentare",
+            "activityHeatmap": "Schraubaktivität",
+            "gradeBalance": "Grad-Balance",
+            "ratingDistribution": "Sternebewertungen",
+            "gradeFeedback": "Gesetzter vs. abgestimmter Grad",
+            "ratedRoutes": "Beste & schlechteste Routen",
+            "locationGrades": "Grade pro Standort"
+        },
+        "empty": {
+            "latestComments": "Keine Kommentare in diesem Zeitraum.",
+            "gradeFeedback": "Noch nicht genug Grad-Stimmen.",
+            "ratedRoutes": "Noch nicht genug Bewertungen.",
+            "gradeBalance": "Der aktive Grad-Mix entspricht der bisherigen Verteilung."
+        },
+        "hints": {
+            "gradeBalance": "Aktive Routen minus historischer Erwartung – rote Grade fehlen.",
+            "gradeFeedback": "Jeder Punkt ist eine Route mit mindestens 3 Grad-Stimmen. Über der Linie ist sie schwerer als bewertet.",
+            "ratedRoutes": "Abstand zur Durchschnittsbewertung aller bewerteten Routen.",
+            "oldestActive": "Am längsten an der Wand – Kandidaten zum Umschrauben."
+        },
+        "columns": {
+            "routes": "Routen",
+            "averageRating": "Ø Bewertung",
+            "averageDeviation": "Grad-Abweichung"
+        },
+        "labels": {
+            "unknown": "Unbekannt",
+            "expected": "Erwartet",
+            "routesSet": "Geschraubte Routen",
+            "ratings": "Bewertungen",
+            "days": "{n} T",
+            "ratingCount": "{n} Bewertungen",
+            "activeVsExpected": "aktiv / erwartet",
+            "climbsHarder": "Schwerer",
+            "gradedFair": "Passend",
+            "climbsSofter": "Leichter",
+            "setGrade": "Gesetzter Grad",
+            "votedGrade": "Abgestimmter Grad",
+            "routeCount": "{n} Routen",
+            "voteCount": "{n} Stimmen",
+            "setInPeriod": "Im Zeitraum geschraubt",
+            "setEarlier": "Früher geschraubt",
+            "otherSetters": "{n} weitere"
+        }
     },
     "climbing": {
         "create": "Route erstellen",

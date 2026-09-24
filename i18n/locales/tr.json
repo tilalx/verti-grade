@@ -111,55 +111,96 @@
     "analytics": {
         "title": "Tırmanış Rota Analitiği",
         "subtitle": "Tüm rotalar için temel metrikleri izleyin.",
-        "refresh": "Yenile",
-        "retry": "Tekrar dene",
-        "empty": "Henüz analitik verisi mevcut değil.",
-        "generatedAt": "Son güncelleme {value}",
         "meta": {
             "title": "Analitik - Verti-Grade",
             "description": "Tırmanış rotaları için yönetici analitik paneli."
         },
-        "cards": {
-            "totalRoutes": "Toplam Rota",
-            "totalRoutesSubtitle": "Tüm lokasyonlar",
-            "activeRoutes": "Aktif Rotalar",
-            "activeRoutesSubtitle": "Şu anda erişilebilir",
-            "averageDifficulty": "Ort. Zorluk",
-            "averageDifficultySubtitle": "Ortalama derece",
-            "totalComments": "Yorumlar",
-            "totalCommentsSubtitle": "Tüm geri bildirimler",
-            "averageLifespan": "Ort. Rota Ömrü",
-            "averageLifespanSubtitle": "Yalnızca arşivlenen rotalar"
-        },
-        "charts": {
-            "difficultyDistribution": "Zorluk Dağılımı",
-            "routeSetters": "Rotalar Ayarlayıcıya Göre",
-            "routeTimeline": "Zaman İçinde Rotalar",
-            "commentTimeline": "Zaman İçinde Yorumlar",
-            "activityHeatmap": "Rota Kurma Aktivitesi"
-        },
-        "sections": {
-            "latestComments": "En son yorumlar",
-            "latestRoutes": "En yeni rotalar"
-        },
-        "emptyComments": "Henüz yorum yok.",
-        "emptyRoutes": "Henüz yeni rota yok.",
-        "actions": {
-            "showAllSetters": "Tüm ayarlayıcıları göster"
-        },
-        "labels": {
-            "attempts": "Denemeler",
-            "sends": "Tamamlamalar",
-            "comments": "Yorumlar",
-            "routes": "Rotalar",
-            "unknown": "Bilinmiyor",
-            "other": "Diğer"
-        },
         "heatmap": {
             "less": "Az",
-            "more": "Fazla"
+            "more": "Fazla",
+            "total": "{year} yılında {n} rota kuruldu",
+            "totalLastYear": "Son bir yılda {n} rota kuruldu",
+            "cell": "{date}: {n} rota"
         },
-        "error": "Analiz verileri yüklenemedi. Lütfen tekrar deneyin."
+        "error": "Analiz verileri yüklenemedi. Lütfen tekrar deneyin.",
+        "emptySection": "Seçilen filtreler için veri yok.",
+        "filters": {
+            "ranges": {
+                "30d": "30 gün",
+                "90d": "90 gün",
+                "12m": "12 ay",
+                "all": "Tümü",
+                "custom": "Özel"
+            },
+            "from": "Başlangıç",
+            "to": "Bitiş",
+            "locations": "Konumlar",
+            "types": "Türler",
+            "includeArchived": "Arşivlenenleri dahil et"
+        },
+        "cards": {
+            "activeRoutes": "Aktif Rotalar",
+            "activeRoutesSubtitle": "{n} değerlendirilmiş",
+            "routesSet": "Kurulan Rotalar",
+            "routesSetSubtitle": "Seçilen dönemde",
+            "ratings": "Değerlendirmeler",
+            "ratingsSubtitle": "Seçilen dönemde",
+            "averageRating": "Ort. Puan",
+            "averageRatingSubtitle": "Dönemdeki yıldızlar",
+            "comments": "Yorumlar",
+            "commentsSubtitle": "Seçilen dönemde",
+            "averageLifespan": "Ort. Rota Ömrü",
+            "averageLifespanSubtitle": "Dönemde arşivlenenler"
+        },
+        "sections": {
+            "grades": "Zorluk Dağılımı",
+            "activity": "Kurulum ve Değerlendirme",
+            "oldestActive": "En Eski Aktif Rotalar",
+            "setters": "Kurucuya Göre Rotalar",
+            "latestComments": "Son Yorumlar",
+            "activityHeatmap": "Rota Kurma Aktivitesi",
+            "gradeBalance": "Zorluk Dengesi",
+            "ratingDistribution": "Yıldız Puanları",
+            "gradeFeedback": "Verilen ve Oylanan Derece",
+            "ratedRoutes": "En İyi ve En Kötü",
+            "locationGrades": "Konuma Göre Dereceler"
+        },
+        "empty": {
+            "latestComments": "Bu dönemde yorum yok.",
+            "gradeFeedback": "Henüz yeterli derece oyu yok.",
+            "ratedRoutes": "Henüz yeterli değerlendirme yok.",
+            "gradeBalance": "Aktif zorluk dağılımı geçmişle uyumlu."
+        },
+        "hints": {
+            "gradeBalance": "Aktif rotalar eksi geçmiş beklenti – kırmızı dereceler eksik.",
+            "gradeFeedback": "Her nokta en az 3 derece oyu olan bir rotadır. Çizginin üstü derecesinden zordur.",
+            "ratedRoutes": "Tüm değerlendirilen rotaların ortalamasına uzaklık.",
+            "oldestActive": "Duvarda en uzun kalanlar – yenileme adayları."
+        },
+        "columns": {
+            "routes": "Rotalar",
+            "averageRating": "Ort. puan",
+            "averageDeviation": "Derece sapması"
+        },
+        "labels": {
+            "unknown": "Bilinmiyor",
+            "expected": "Beklenen",
+            "routesSet": "Kurulan rotalar",
+            "ratings": "Değerlendirmeler",
+            "days": "{n} g",
+            "ratingCount": "{n} değerlendirme",
+            "activeVsExpected": "aktif / beklenen",
+            "climbsHarder": "Daha zor",
+            "gradedFair": "Uygun",
+            "climbsSofter": "Daha kolay",
+            "setGrade": "Verilen derece",
+            "votedGrade": "Oylanan derece",
+            "routeCount": "{n} rota",
+            "voteCount": "{n} oy",
+            "setInPeriod": "Dönemde kurulan",
+            "setEarlier": "Daha önce kurulan",
+            "otherSetters": "{n} diğer"
+        }
     },
     "climbing": {
         "create": "Rota Oluştur",

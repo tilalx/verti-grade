@@ -111,55 +111,96 @@
     "analytics": {
         "title": "Аналитика маршрутов",
         "subtitle": "Отслеживайте ключевые показатели всех маршрутов.",
-        "refresh": "Обновить",
-        "retry": "Повторить",
-        "empty": "Данные аналитики пока отсутствуют.",
-        "generatedAt": "Последнее обновление {value}",
         "meta": {
             "title": "Аналитика - Verti-Grade",
             "description": "Административная панель аналитики для скалолазных маршрутов."
         },
-        "cards": {
-            "totalRoutes": "Всего маршрутов",
-            "totalRoutesSubtitle": "По всем площадкам",
-            "activeRoutes": "Активные маршруты",
-            "activeRoutesSubtitle": "Доступны сейчас",
-            "averageDifficulty": "Средняя сложность",
-            "averageDifficultySubtitle": "Средний уровень",
-            "totalComments": "Комментарии",
-            "totalCommentsSubtitle": "Все отзывы",
-            "averageLifespan": "Ср. срок жизни",
-            "averageLifespanSubtitle": "Только архивные маршруты"
-        },
-        "charts": {
-            "difficultyDistribution": "Распределение сложностей",
-            "routeSetters": "Маршруты по авторам",
-            "routeTimeline": "Маршруты по времени",
-            "commentTimeline": "Комментарии по времени",
-            "activityHeatmap": "Активность прокладки маршрутов"
-        },
-        "sections": {
-            "latestComments": "Последние комментарии",
-            "latestRoutes": "Последние маршруты"
-        },
-        "emptyComments": "Комментарии пока отсутствуют.",
-        "emptyRoutes": "Недавних маршрутов пока нет.",
-        "actions": {
-            "showAllSetters": "Показать всех постановщиков"
-        },
-        "labels": {
-            "attempts": "Попытки",
-            "sends": "Прохождения",
-            "comments": "Комментарии",
-            "routes": "Маршруты",
-            "unknown": "Неизвестно",
-            "other": "Прочие"
-        },
         "heatmap": {
             "less": "Меньше",
-            "more": "Больше"
+            "more": "Больше",
+            "total": "Накручено в {year}: {n}",
+            "totalLastYear": "Накручено за последний год: {n}",
+            "cell": "{date}: маршрутов {n}"
         },
-        "error": "Не удалось загрузить аналитические данные. Пожалуйста, попробуйте ещё раз."
+        "error": "Не удалось загрузить аналитические данные. Пожалуйста, попробуйте ещё раз.",
+        "emptySection": "Нет данных для выбранных фильтров.",
+        "filters": {
+            "ranges": {
+                "30d": "30 дней",
+                "90d": "90 дней",
+                "12m": "12 месяцев",
+                "all": "Всё время",
+                "custom": "Свой"
+            },
+            "from": "С",
+            "to": "По",
+            "locations": "Локации",
+            "types": "Типы",
+            "includeArchived": "Включая архивные"
+        },
+        "cards": {
+            "activeRoutes": "Активные маршруты",
+            "activeRoutesSubtitle": "с оценками: {n}",
+            "routesSet": "Накручено маршрутов",
+            "routesSetSubtitle": "За выбранный период",
+            "ratings": "Оценки",
+            "ratingsSubtitle": "За выбранный период",
+            "averageRating": "Ср. оценка",
+            "averageRatingSubtitle": "Звёзды за период",
+            "comments": "Комментарии",
+            "commentsSubtitle": "За выбранный период",
+            "averageLifespan": "Ср. срок жизни",
+            "averageLifespanSubtitle": "Архивированные за период"
+        },
+        "sections": {
+            "grades": "Распределение категорий",
+            "activity": "Накрутка и оценки",
+            "oldestActive": "Самые старые активные",
+            "setters": "Маршруты по накрутчикам",
+            "latestComments": "Последние комментарии",
+            "activityHeatmap": "Активность накрутки",
+            "gradeBalance": "Баланс категорий",
+            "ratingDistribution": "Оценки в звёздах",
+            "gradeFeedback": "Заявленная и голосованная категория",
+            "ratedRoutes": "Лучшие и худшие",
+            "locationGrades": "Категории по локациям"
+        },
+        "empty": {
+            "latestComments": "За период нет комментариев.",
+            "gradeFeedback": "Пока недостаточно голосов.",
+            "ratedRoutes": "Пока недостаточно оценок.",
+            "gradeBalance": "Активный набор категорий соответствует историческому."
+        },
+        "hints": {
+            "gradeBalance": "Активные маршруты минус историческое ожидание – красных категорий не хватает.",
+            "gradeFeedback": "Каждая точка – маршрут минимум с 3 голосами. Выше линии – сложнее заявленного.",
+            "ratedRoutes": "Отклонение от средней оценки всех оценённых маршрутов.",
+            "oldestActive": "Дольше всех на стене – кандидаты на перекрутку."
+        },
+        "columns": {
+            "routes": "Маршруты",
+            "averageRating": "Ср. оценка",
+            "averageDeviation": "Отклонение"
+        },
+        "labels": {
+            "unknown": "Неизвестно",
+            "expected": "Ожидается",
+            "routesSet": "Накручено",
+            "ratings": "Оценки",
+            "days": "{n} дн.",
+            "ratingCount": "оценок: {n}",
+            "activeVsExpected": "активно / ожидается",
+            "climbsHarder": "Сложнее",
+            "gradedFair": "Верно",
+            "climbsSofter": "Легче",
+            "setGrade": "Заявленная",
+            "votedGrade": "По голосам",
+            "routeCount": "маршрутов: {n}",
+            "voteCount": "голосов: {n}",
+            "setInPeriod": "За период",
+            "setEarlier": "Ранее",
+            "otherSetters": "ещё {n}"
+        }
     },
     "climbing": {
         "create": "Создать маршрут",
