@@ -132,6 +132,8 @@ export async function resolveExportLabel(
     return typeof label === 'string' && label.trim() ? label.trim() : fallback
 }
 
+export const TAG_QR_ERROR_CORRECTION = 'Q'
+
 export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     { key: 'color', header: 'Color' },
     { key: 'name', header: 'Name', value: (r) => r.name ?? '' },

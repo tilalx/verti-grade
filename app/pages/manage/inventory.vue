@@ -10,10 +10,10 @@
                     ref="viewportRef"
                     class="scanner-viewport"
                 >
-                    <QrcodeStream
-                        :formats="['qr_code']"
+                    <QrStream
+                        :formats="['QRCode']"
                         :constraints="cameraConstraints"
-                        :track="trackQrCode"
+                        :tag="codeTag"
                         @detect="onDetect"
                         @camera-on="onCameraOn"
                         @error="onCameraError"
@@ -517,9 +517,6 @@
 </template>
 
 <script setup lang="ts">
-import { QrcodeStream, setZXingModuleOverrides } from 'vue-qrcode-reader'
-import zxingReaderWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
-
 import {
     formatAnchorPoint,
     formatDifficulty,
@@ -538,8 +535,6 @@ import {
     sortByAnchor,
 } from '~/utils/inventory'
 import type { RouteRecord } from '~/types/models'
-
-setZXingModuleOverrides({ locateFile: () => zxingReaderWasmUrl })
 
 definePageMeta({
     middleware: 'auth',
@@ -596,6 +591,7 @@ const archiveSelection = ref(new Set<string>())
 
 const cameraConstraints = {
     facingMode: 'environment',
+    frameRate: { ideal: 60 },
     width: { ideal: 1920 },
     height: { ideal: 1080 },
 }
@@ -807,53 +803,6 @@ const codeTag = (rawValue: string) => {
         return { color: '#0EA5E9', label: `${tagCounted} · ${info.name}` }
     }
     return { color: '#1D9E75', label: info.name }
-}
-
-const trackQrCode = (
-    detectedCodes: { boundingBox?: DOMRectReadOnly; rawValue: string }[],
-    ctx: CanvasRenderingContext2D,
-) => {
-    for (const code of detectedCodes) {
-        const { boundingBox } = code
-        if (!boundingBox) continue
-        const { color, label } = codeTag(code.rawValue)
-
-        ctx.lineWidth = 3
-        ctx.strokeStyle = color
-        ctx.strokeRect(
-            boundingBox.x,
-            boundingBox.y,
-            boundingBox.width,
-            boundingBox.height,
-        )
-
-        const fontSize = Math.max(16, boundingBox.width * 0.1)
-        ctx.font = `600 ${fontSize}px sans-serif`
-        const textWidth = ctx.measureText(label).width
-        const padding = 6
-        const labelX = Math.min(
-            Math.max(
-                boundingBox.x + (boundingBox.width - textWidth) / 2,
-                padding,
-            ),
-            Math.max(padding, ctx.canvas.width - textWidth - padding),
-        )
-        const below = boundingBox.y + boundingBox.height + fontSize + padding
-        const labelY =
-            below + padding / 2 > ctx.canvas.height
-                ? boundingBox.y - padding
-                : below
-
-        ctx.fillStyle = color
-        ctx.fillRect(
-            labelX - padding,
-            labelY - fontSize,
-            textWidth + padding * 2,
-            fontSize + padding,
-        )
-        ctx.fillStyle = '#fff'
-        ctx.fillText(label, labelX, labelY - padding / 2)
-    }
 }
 
 const onDetect = (detectedCodes: { rawValue: string }[]) => {
@@ -1077,13 +1026,6 @@ watch(instructionsDialog, (open) => {
     min-height: 200px;
     background: #111;
     overflow: hidden;
-}
-
-.scanner-viewport :deep(video),
-.scanner-viewport :deep(#qrcode-stream-pause-frame) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 .scanner-viewport__torch {
