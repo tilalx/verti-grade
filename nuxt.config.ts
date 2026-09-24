@@ -176,7 +176,6 @@ export default defineNuxtConfig({
             include: [
                 'pocketbase',
                 'echarts',
-                'vue-qrcode-reader',
                 '@vue/devtools-core',
                 '@vue/devtools-kit',
             ],

@@ -64,24 +64,16 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
         timeout: 30_000,
     })
 
-    const overlay = await page.evaluate(() => {
-        const canvas = document.querySelector<HTMLCanvasElement>(
-            '#qrcode-stream-tracking-layer',
-        )
-        const video = document.querySelector<HTMLVideoElement>(
-            '.scanner-viewport video',
-        )
-        if (!canvas || !video) return null
-        const box = canvas.getBoundingClientRect()
-        return {
-            bitmap: [canvas.width, canvas.height],
-            cssBox: [Math.round(box.width), Math.round(box.height)],
-            videoBox: [video.offsetWidth, video.offsetHeight],
-        }
-    })
-    expect(overlay).not.toBeNull()
-    expect(overlay!.cssBox).toEqual(overlay!.bitmap)
-    expect(overlay!.videoBox).toEqual(overlay!.bitmap)
+    const overlay = page.getByTestId('qr-tracking-layer')
+    await expect(overlay.locator('rect').first()).toBeAttached()
+    const overlayBox = (await overlay.boundingBox())!
+    const videoBox = (await page
+        .locator('.scanner-viewport video')
+        .boundingBox())!
+    expect(overlayBox).toEqual(videoBox)
+    expect(await overlay.getAttribute('viewBox')).toBe(
+        `0 0 ${Math.round(videoBox.width)} ${Math.round(videoBox.height)}`,
+    )
 
     const torch = page.getByTestId('inventory-torch')
     if (await torch.isVisible()) {

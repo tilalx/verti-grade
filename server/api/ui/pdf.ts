@@ -6,6 +6,7 @@ import {
     fetchRecordsByIds,
     resolveExportLocale,
     resolveExportLabel,
+    TAG_QR_ERROR_CORRECTION,
 } from '../../utils/export'
 import {
     formatDate,
@@ -170,7 +171,7 @@ export default eventHandler(async (event) => {
 
             const serverUrl = applicationUrl + `/route?id=${id}`
             const qrCodeBuffer = await QRCode.toBuffer(serverUrl, {
-                errorCorrectionLevel: 'H',
+                errorCorrectionLevel: TAG_QR_ERROR_CORRECTION,
                 width: QR_PX,
                 margin: 1,
                 color: {
