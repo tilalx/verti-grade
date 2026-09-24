@@ -29,6 +29,7 @@ export interface RouteRecord extends BaseRecord {
     comment?: string | null
     creator?: JsonValue<string> | null
     archived?: boolean
+    archived_at?: string | null
     color?: string | null
     screw_date?: string | null
 }

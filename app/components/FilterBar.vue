@@ -29,16 +29,18 @@ function handleClear() {
     <v-card border flat class="mb-4">
         <v-card-text class="pa-3">
             <div class="d-flex align-center ga-2">
-                <v-text-field
-                    v-model="search"
-                    :label="searchLabel"
-                    :prepend-inner-icon="searchIcon"
-                    clearable
-                    hide-details
-                    density="compact"
-                    class="flex-grow-1"
-                    data-testid="filter-search"
-                />
+                <slot name="search">
+                    <v-text-field
+                        v-model="search"
+                        :label="searchLabel"
+                        :prepend-inner-icon="searchIcon"
+                        clearable
+                        hide-details
+                        density="compact"
+                        class="flex-grow-1"
+                        data-testid="filter-search"
+                    />
+                </slot>
                 <!-- Mobile: open bottom sheet -->
                 <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
                      shrinking a small button until it clips its own icon. -->

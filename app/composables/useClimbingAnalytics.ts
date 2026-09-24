@@ -1,208 +1,94 @@
-import { computed, ref } from 'vue'
-import { useRequestFetch } from 'nuxt/app'
+import type { AnalyticsQuery, AnalyticsResponse } from '#shared/utils/analytics'
 
-interface DifficultyDatum {
-    grade: string
-    count: number
-}
-
-interface RouteSetterDatum {
-    setter: string
-    count: number
-}
-
-export interface TimelineDatum {
-    period: string
-    count: number
-}
-
-interface LatestCommentDatum {
-    id: string
-    routeId: string | null
-    routeName: string
-    rating: number | null
-    comment: string
-    created: string | null
-}
-
-export interface LatestRouteDatum {
-    id: string
-    name: string
-    difficulty: string
-    location: string | null
-    screwDate: string | null
-    creators: string[]
-    type: string | null
-}
-
-interface AnalyticsSummary {
-    totalRoutes: number
-    activeRoutes: number
-    averageDifficulty: number
-    totalComments: number
-    averageLifespanDays: number
-    generatedAt: string
-}
-
-export interface ClimbingAnalyticsResponse {
-    summary: AnalyticsSummary
-    difficultyDistribution: DifficultyDatum[]
-    routeSetters: RouteSetterDatum[]
-    routeTimeline: TimelineDatum[]
-    routeTimelineMonthly: TimelineDatum[]
-    commentTimelineMonthly: TimelineDatum[]
-    latestComments: LatestCommentDatum[]
-    latestRoutes: LatestRouteDatum[]
-}
-
-const defaultResult: ClimbingAnalyticsResponse = {
-    summary: {
-        totalRoutes: 0,
-        activeRoutes: 0,
-        averageDifficulty: 0,
-        totalComments: 0,
-        averageLifespanDays: 0,
-        generatedAt: '',
-    },
-    difficultyDistribution: [],
-    routeSetters: [],
-    routeTimeline: [],
-    routeTimelineMonthly: [],
-    commentTimelineMonthly: [],
-    latestComments: [],
-    latestRoutes: [],
-}
+const QUERY_KEYS = [
+    'range',
+    'from',
+    'to',
+    'location',
+    'type',
+    'archived',
+] as const
+const LIVE_DEBOUNCE_MS = 2000
 
 export function useClimbingAnalytics() {
-    const analytics = ref<ClimbingAnalyticsResponse | null>(null)
-    const loading = ref(false)
-    const error = useState('climbing-analytics-error', () => false)
-
-    const normalized = computed(() => analytics.value ?? defaultResult)
-    const hasData = computed(() => normalized.value.summary.totalRoutes > 0)
-
-    const requestFetch = useRequestFetch()
+    const route = useRoute()
+    const router = useRouter()
     const pb = usePocketbase()
+    const requestFetch = useRequestFetch()
 
-    const load = async () => {
-        loading.value = true
-        error.value = false
+    const query = computed<AnalyticsQuery>(() =>
+        Object.fromEntries(
+            QUERY_KEYS.flatMap((key) => {
+                const value = route.query[key]
+                return typeof value === 'string' && value ? [[key, value]] : []
+            }),
+        ),
+    )
 
-        try {
-            const response = await requestFetch<ClimbingAnalyticsResponse>(
-                '/api/manage/analytics',
-                {
-                    headers: pb.authStore.token
-                        ? { Authorization: pb.authStore.token }
-                        : undefined,
-                },
-            )
-
-            analytics.value = normalizeResponse(response)
-        } catch {
-            error.value = true
-            analytics.value = null
-        } finally {
-            loading.value = false
-        }
+    function updateQuery(patch: Partial<AnalyticsQuery>) {
+        const next = { ...route.query, ...patch }
+        void router.replace({
+            query: Object.fromEntries(
+                Object.entries(next).filter(([, value]) => value),
+            ),
+        })
     }
 
-    const { data: initial } = useAsyncData('climbing-analytics', async () => {
-        await load()
-        return analytics.value
+    const { data, status, error, refresh } = useAsyncData(
+        'climbing-analytics',
+        () =>
+            requestFetch<AnalyticsResponse>('/api/manage/analytics', {
+                query: query.value,
+                headers: pb.authStore.token
+                    ? { Authorization: pb.authStore.token }
+                    : undefined,
+            }),
+        { watch: [query] },
+    )
+
+    const initialLoading = computed(
+        () => status.value === 'pending' && !data.value,
+    )
+
+    const { subscribe } = usePbSubscription()
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined
+    let staleWhileHidden = false
+
+    function scheduleRefresh() {
+        clearTimeout(refreshTimer)
+        refreshTimer = setTimeout(() => {
+            if (document.visibilityState === 'hidden') {
+                staleWhileHidden = true
+                return
+            }
+            void refresh()
+        }, LIVE_DEBOUNCE_MS)
+    }
+
+    function refreshIfStale() {
+        if (document.visibilityState !== 'visible' || !staleWhileHidden) return
+        staleWhileHidden = false
+        void refresh()
+    }
+
+    onMounted(async () => {
+        document.addEventListener('visibilitychange', refreshIfStale)
+        await Promise.all([
+            subscribe('routes', scheduleRefresh),
+            subscribe('ratings', scheduleRefresh),
+        ]).catch(() => {})
     })
 
-    if (initial.value) analytics.value = initial.value
-
-    const summary = computed(() => normalized.value.summary)
-    const difficultyDistribution = computed(
-        () => normalized.value.difficultyDistribution,
-    )
-    const routeSetters = computed(() => normalized.value.routeSetters)
-    const routeTimeline = computed(() => normalized.value.routeTimeline)
-    const routeTimelineMonthly = computed(
-        () => normalized.value.routeTimelineMonthly,
-    )
-    const commentTimelineMonthly = computed(
-        () => normalized.value.commentTimelineMonthly,
-    )
-    const latestComments = computed(() => normalized.value.latestComments)
-    const latestRoutes = computed(() => normalized.value.latestRoutes)
+    onBeforeUnmount(() => {
+        clearTimeout(refreshTimer)
+        document.removeEventListener('visibilitychange', refreshIfStale)
+    })
 
     return {
-        analytics: normalized,
-        summary,
-        difficultyDistribution,
-        routeSetters,
-        routeTimeline,
-        routeTimelineMonthly,
-        commentTimelineMonthly,
-        latestComments,
-        latestRoutes,
-        hasData,
-        loading,
+        query,
+        updateQuery,
+        analytics: data,
+        initialLoading,
         error,
-        load,
-        refresh: load,
-    }
-}
-
-function normalizeResponse(
-    response: ClimbingAnalyticsResponse,
-): ClimbingAnalyticsResponse {
-    const dedupe = <T>(items: T[]) => items.filter(Boolean)
-    const formatNumber = (value: number) => (Number.isFinite(value) ? value : 0)
-    const normalizeTimeline = (items: TimelineDatum[] | undefined) =>
-        dedupe(items ?? []).map((item) => ({
-            period: item.period,
-            count: formatNumber(item.count),
-        }))
-
-    return {
-        summary: {
-            totalRoutes: formatNumber(response.summary.totalRoutes),
-            activeRoutes: formatNumber(response.summary.activeRoutes),
-            averageDifficulty: Number(
-                formatNumber(response.summary.averageDifficulty).toFixed(2),
-            ),
-            totalComments: formatNumber(response.summary.totalComments),
-            averageLifespanDays: formatNumber(
-                response.summary.averageLifespanDays ?? 0,
-            ),
-            generatedAt:
-                response.summary.generatedAt || new Date().toISOString(),
-        },
-        difficultyDistribution: dedupe(
-            response.difficultyDistribution ?? [],
-        ).map((item) => ({
-            grade: item.grade,
-            count: formatNumber(item.count),
-        })),
-        routeSetters: dedupe(response.routeSetters ?? []).map((item) => ({
-            setter: item.setter,
-            count: formatNumber(item.count),
-        })),
-        routeTimeline: normalizeTimeline(response.routeTimeline),
-        routeTimelineMonthly: normalizeTimeline(response.routeTimelineMonthly),
-        commentTimelineMonthly: normalizeTimeline(
-            response.commentTimelineMonthly,
-        ),
-        latestComments: dedupe(response.latestComments ?? []).map((item) => ({
-            id: item.id,
-            routeId: item.routeId,
-            routeName: item.routeName,
-            rating: item.rating,
-            comment: item.comment,
-            created: item.created,
-        })),
-        latestRoutes: dedupe(response.latestRoutes ?? []).map((item) => ({
-            id: item.id,
-            name: item.name,
-            difficulty: item.difficulty,
-            location: item.location ?? null,
-            screwDate: item.screwDate ?? null,
-            creators: Array.isArray(item.creators) ? item.creators : [],
-            type: item.type ?? null,
-        })),
     }
 }

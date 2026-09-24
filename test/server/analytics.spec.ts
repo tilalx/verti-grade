@@ -1,26 +1,72 @@
 import { describe, expect, it, vi } from 'vitest'
 
+let authRefresh: () => Promise<unknown>
+
+vi.mock('pocketbase', () => ({
+    default: vi.fn(function () {
+        return {
+            authStore: { save: vi.fn(), isValid: true },
+            collection: () => ({ authRefresh: () => authRefresh() }),
+        }
+    }),
+}))
 vi.mock('h3', () => ({
     createError: (input: unknown) => input,
-    eventHandler: (handler: unknown) => handler,
-}))
-vi.mock('../../server/utils/pb-server', () => ({
-    getAuthenticatedPb: vi.fn(),
+    getHeader: () => 'Bearer token',
 }))
 
-const { mapMonthly } = await import('../../server/api/manage/analytics.get')
+const { requirePermission } = await import('../../server/utils/pb-server')
 
-describe('mapMonthly', () => {
-    it('sums daily counts per month in order', () => {
-        expect(
-            mapMonthly([
-                { period: '2024-01-03', count: 2 },
-                { period: '2024-01-20', count: 1 },
-                { period: '2024-03-01', count: 4 },
-            ]),
-        ).toEqual([
-            { period: '2024-01', count: 3 },
-            { period: '2024-03', count: 4 },
-        ])
+function userWithRole(name: string, permissions: string[] = []) {
+    return {
+        record: {
+            expand: {
+                role: {
+                    name,
+                    expand: {
+                        permissions: permissions.map((entry) => ({
+                            name: entry,
+                        })),
+                    },
+                },
+            },
+        },
+    }
+}
+
+describe('requirePermission', () => {
+    it('allows a role that has the permission', async () => {
+        authRefresh = async () =>
+            userWithRole('routesetter', ['view_analytics'])
+        await expect(
+            requirePermission({} as never, 'view_analytics'),
+        ).resolves.toBeDefined()
+    })
+
+    it('allows admins without explicit permission', async () => {
+        authRefresh = async () => userWithRole('admin')
+        await expect(
+            requirePermission({} as never, 'view_analytics'),
+        ).resolves.toBeDefined()
+    })
+
+    it('rejects a role without the permission with 403', async () => {
+        authRefresh = async () => userWithRole('user', ['manage_routes'])
+        await expect(
+            requirePermission({} as never, 'view_analytics'),
+        ).rejects.toMatchObject({
+            statusCode: 403,
+        })
+    })
+
+    it('rejects a token PocketBase does not accept with 401', async () => {
+        authRefresh = async () => {
+            throw new Error('invalid')
+        }
+        const caught = await requirePermission(
+            {} as never,
+            'view_analytics',
+        ).catch((e) => e)
+        expect(caught).toMatchObject({ statusCode: 401 })
     })
 })

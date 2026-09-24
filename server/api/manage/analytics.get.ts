@@ -1,272 +1,52 @@
-import { createError, eventHandler } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server'
+import { createError, eventHandler, getQuery } from 'h3'
+import { requirePermission } from '../../utils/pb-server'
 import {
-    formatDifficulty,
-    locationName,
-    normalizeCreators,
-    parseDate,
-} from '#shared/utils/formatting'
+    buildAnalytics,
+    resolveFilters,
+    type AnalyticsQuery,
+    type AnalyticsRating,
+    type AnalyticsRoute,
+} from '#shared/utils/analytics'
+import { locationName } from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
+const ROUTE_FIELDS =
+    'id,name,difficulty,difficulty_sign,type,location,creator,archived,archived_at,screw_date,created,expand.location.name'
+const RATING_FIELDS =
+    'id,route_id,rating,difficulty,difficulty_sign,comment,created'
+
 export default eventHandler(async (event) => {
-    const pb = getAuthenticatedPb(event)
+    const pb = await requirePermission(event, 'view_analytics')
+    const filters = resolveFilters(getQuery(event) as AnalyticsQuery)
 
     try {
-        const [routeRecords, ratingRecords] = await Promise.all([
+        const [routes, ratings] = await Promise.all([
             pb.collection('routes').getFullList<RouteRecord>({
-                batch: 200,
+                batch: 500,
                 expand: 'location',
-                requestKey: 'analytics-routes',
+                fields: ROUTE_FIELDS,
+                requestKey: null,
             }),
             pb.collection('ratings').getFullList<RatingRecord>({
-                batch: 200,
-                requestKey: 'analytics-ratings',
+                batch: 500,
+                fields: RATING_FIELDS,
+                requestKey: null,
             }),
         ])
 
-        const routes = routeRecords ?? []
-        const ratings = ratingRecords ?? []
-
-        const difficultyMap = new Map<string, number>()
-        const setterMap = new Map<string, number>()
-        const routeTimelineMap = new Map<string, number>()
-        const commentTimelineMap = new Map<string, number>()
-        let difficultySum = 0
-        let difficultyCount = 0
-        const routeById = new Map<string, RouteRecord>()
-
-        for (const route of routes) {
-            routeById.set(route.id, route)
-            const gradeLabel = buildGradeLabel(route)
-
-            increaseCount(difficultyMap, gradeLabel)
-            addCreatorsToMap(setterMap, route.creator)
-            addDateToTimeline(
-                routeTimelineMap,
-                route.screw_date || route.created,
-            )
-
-            const numericDifficulty = Number(route.difficulty)
-            if (!Number.isNaN(numericDifficulty)) {
-                difficultySum += numericDifficulty
-                difficultyCount += 1
-            }
-        }
-
-        let lifespanSum = 0
-        let lifespanCount = 0
-        for (const route of routes) {
-            if (!route.archived || !route.screw_date || !route.updated) continue
-            const screwTime = new Date(route.screw_date).getTime()
-            const updatedTime = new Date(route.updated).getTime()
-            if (Number.isNaN(screwTime) || Number.isNaN(updatedTime)) continue
-            const diffDays = (updatedTime - screwTime) / 86_400_000
-            if (diffDays < 0) continue
-            lifespanSum += diffDays
-            lifespanCount++
-        }
-        const averageLifespanDays =
-            lifespanCount > 0 ? Math.round(lifespanSum / lifespanCount) : 0
-
-        const commentRecords = ratings.filter(
-            (rating) =>
-                typeof rating.comment === 'string' &&
-                rating.comment.trim().length > 0,
+        return buildAnalytics(
+            routes.map((route): AnalyticsRoute => ({
+                ...route,
+                locationName: locationName(route) || null,
+            })),
+            ratings as AnalyticsRating[],
+            filters,
         )
-
-        for (const rating of commentRecords) {
-            addDateToTimeline(commentTimelineMap, rating.created)
-        }
-
-        const summary = {
-            totalRoutes: routes.length,
-            activeRoutes: routes.filter((route) => !route.archived).length,
-            averageDifficulty:
-                difficultyCount > 0 ? difficultySum / difficultyCount : 0,
-            totalComments: commentRecords.length,
-            averageLifespanDays,
-            generatedAt: new Date().toISOString(),
-        }
-
-        const difficultyDistribution = mapToArray(difficultyMap)
-            .map(({ label, count }) => ({ grade: label, count }))
-            .sort((a, b) => compareGrades(a.grade, b.grade))
-        const routeSetters = mapToArray(setterMap).map(({ label, count }) => ({
-            setter: label,
-            count,
-        }))
-        const routeTimeline = mapTimeline(routeTimelineMap)
-        const routeTimelineMonthly = mapMonthly(routeTimeline)
-        const commentTimelineMonthly = mapMonthly(
-            mapTimeline(commentTimelineMap),
-        )
-        const latestRoutes = computeLatestRoutes(routes)
-
-        const latestComments = commentRecords
-            .slice()
-            .sort((a, b) => (b.created || '').localeCompare(a.created || ''))
-            .slice(0, 5)
-            .map((rating, index) => {
-                const route = rating.route_id
-                    ? routeById.get(rating.route_id)
-                    : undefined
-                return {
-                    id: rating.id ?? `comment-${index}`,
-                    routeId: rating.route_id ?? null,
-                    routeName: route?.name ?? '',
-                    rating: Number.isFinite(Number(rating.rating))
-                        ? Number(rating.rating)
-                        : null,
-                    comment: (rating.comment || '').trim(),
-                    created: rating.created ?? null,
-                }
-            })
-
-        return {
-            summary,
-            difficultyDistribution,
-            routeSetters,
-            routeTimeline,
-            routeTimelineMonthly,
-            commentTimelineMonthly,
-            latestRoutes,
-            latestComments,
-        }
     } catch (error: any) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to load analytics data',
-            data: {
-                message: error?.message || 'Unknown error',
-            },
+            data: { message: error?.message || 'Unknown error' },
         })
     }
 })
-
-function buildGradeLabel(route: RouteRecord): string {
-    return `${route.difficulty ?? ''}`.trim()
-        ? formatDifficulty(route)
-        : 'Unknown'
-}
-
-function computeLatestRoutes(routes: RouteRecord[]) {
-    const sorted = routes
-        .slice()
-        .sort((a, b) => routeDateValue(b) - routeDateValue(a))
-
-    return sorted.slice(0, 3).map((route, index) => ({
-        id: route.id ?? `route-${index}`,
-        name: String(route.name ?? ''),
-        difficulty: buildGradeLabel(route),
-        location: locationName(route) || null,
-        screwDate: route.screw_date ?? route.created ?? null,
-        creators: normalizeCreators(route.creator),
-        type: route.type ?? null,
-    }))
-}
-
-function routeDateValue(route: RouteRecord): number {
-    const raw = route.screw_date || route.created
-    if (!raw) {
-        return Number.NEGATIVE_INFINITY
-    }
-    const timestamp = new Date(raw).getTime()
-    return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp
-}
-
-function increaseCount(map: Map<string, number>, key: string, by = 1) {
-    map.set(key, (map.get(key) ?? 0) + by)
-}
-
-function addCreatorsToMap(
-    map: Map<string, number>,
-    creators: RouteRecord['creator'],
-) {
-    for (const creator of normalizeCreators(creators)) {
-        increaseCount(map, creator)
-    }
-}
-
-function addDateToTimeline(map: Map<string, number>, rawDate?: string | null) {
-    const date = parseDate(rawDate)
-    if (!date) {
-        return
-    }
-
-    const period = date.toISOString().slice(0, 10)
-    increaseCount(map, period)
-}
-
-function mapToArray(source: Map<string, number>) {
-    return Array.from(source.entries())
-        .map(([label, count]) => ({ label, count }))
-        .sort((a, b) => b.count - a.count)
-}
-
-function mapTimeline(source: Map<string, number>) {
-    return Array.from(source.entries())
-        .map(([period, count]) => ({ period, count }))
-        .sort((a, b) => a.period.localeCompare(b.period))
-}
-
-export function mapMonthly(daily: { period: string; count: number }[]) {
-    const months = new Map<string, number>()
-    for (const { period, count } of daily) {
-        increaseCount(months, period.slice(0, 7), count)
-    }
-    return mapTimeline(months)
-}
-
-function compareGrades(left: string, right: string): number {
-    const leftScore = gradeScore(left)
-    const rightScore = gradeScore(right)
-    const leftFinite = Number.isFinite(leftScore)
-    const rightFinite = Number.isFinite(rightScore)
-
-    if (!leftFinite && !rightFinite) {
-        return left.localeCompare(right)
-    }
-    if (!leftFinite) {
-        return 1
-    }
-    if (!rightFinite) {
-        return -1
-    }
-
-    return leftScore - rightScore
-}
-
-function gradeScore(raw: string): number {
-    const value = raw.trim()
-    if (!value || value.toLowerCase() === 'unknown') {
-        return Number.MAX_SAFE_INTEGER
-    }
-
-    const pattern = /^(\d+)([abc]?)([+-]?)$/i
-    const match = value.match(pattern)
-    if (!match) {
-        return Number.MAX_SAFE_INTEGER - 1
-    }
-
-    const base = Number.parseInt(match[1] ?? '', 10)
-    const letter = match[2]?.toLowerCase() ?? ''
-    const sign = match[3] ?? ''
-
-    const letterMap: Record<string, number> = {
-        '': 0,
-        a: 1,
-        b: 2,
-        c: 3,
-    }
-
-    const signMap: Record<string, number> = {
-        '-': -1,
-        '': 0,
-        '+': 1,
-    }
-
-    const letterScore = letterMap[letter] ?? 0
-    const signScore = signMap[sign] ?? 0
-
-    return base * 100 + letterScore * 10 + signScore
-}

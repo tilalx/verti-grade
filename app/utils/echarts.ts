@@ -7,20 +7,51 @@ export interface ChartColors {
     tooltipBorder: string
 }
 
-export const SETTER_COLORS = [
-    '#5B8DB8',
-    '#4A9E7A',
-    '#B8893A',
-    '#7B72B8',
-    '#B86A4A',
-    '#A85A7A',
-    '#3A8A8A',
-    '#6A9AB0',
-    '#6A9A5A',
-    '#A89040',
-    '#8A70B0',
-    '#A86060',
-]
+export interface ChartPalette {
+    categorical: string[]
+    sequential: string[]
+    positive: string
+    negative: string
+    neutral: string
+}
+
+const LIGHT_PALETTE: ChartPalette = {
+    categorical: [
+        '#2a78d6',
+        '#eb6834',
+        '#1baf7a',
+        '#eda100',
+        '#e87ba4',
+        '#008300',
+        '#4a3aa7',
+        '#e34948',
+    ],
+    sequential: ['#cde2fb', '#86b6ef', '#3987e5', '#1c5cab', '#0d366b'],
+    positive: '#2a78d6',
+    negative: '#e34948',
+    neutral: '#a8a7a2',
+}
+
+const DARK_PALETTE: ChartPalette = {
+    categorical: [
+        '#3987e5',
+        '#d95926',
+        '#199e70',
+        '#c98500',
+        '#d55181',
+        '#008300',
+        '#9085e9',
+        '#e66767',
+    ],
+    sequential: ['#184f95', '#256abf', '#3987e5', '#6da7ec', '#b7d3f6'],
+    positive: '#3987e5',
+    negative: '#e66767',
+    neutral: '#6b6a66',
+}
+
+export function chartPalette(isDark: boolean): ChartPalette {
+    return isDark ? DARK_PALETTE : LIGHT_PALETTE
+}
 
 export const gridBase = {
     left: '0%',
@@ -136,4 +167,25 @@ export function formatMonthLabel(monthKey: string, locale?: string) {
         month: 'short',
         year: 'numeric',
     }).format(new Date(year, month - 1, 1))
+}
+
+export function escapeHtml(value: string) {
+    return value.replace(
+        /[&<>"']/g,
+        (char) =>
+            ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+            })[char]!,
+    )
+}
+
+export function itemTooltip(
+    colors: ChartColors,
+    formatter: (params: any) => string,
+) {
+    return { ...tooltipBase(colors), trigger: 'item', formatter }
 }

@@ -3,6 +3,9 @@ package hooks
 import (
 	"slices"
 	"testing"
+	"time"
+
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func TestChangedFieldNames(t *testing.T) {
@@ -38,5 +41,26 @@ func TestClaimString(t *testing.T) {
 	claims := map[string]any{"scope": "login", "jti": 42}
 	if claimString(claims, "scope") != "login" || claimString(claims, "jti") != "" || claimString(claims, "missing") != "" {
 		t.Fatalf("claimString() returned unexpected values")
+	}
+}
+
+func TestArchivedAt(t *testing.T) {
+	now := types.NowDateTime()
+	earlier := now.Add(-time.Hour)
+	cases := []struct {
+		name                    string
+		wasArchived, isArchived bool
+		current, want           types.DateTime
+	}{
+		{"archiving stamps now", false, true, types.DateTime{}, now},
+		{"stays archived keeps stamp", true, true, earlier, earlier},
+		{"archived without stamp gets now", true, true, types.DateTime{}, now},
+		{"restoring clears stamp", true, false, earlier, types.DateTime{}},
+		{"active stays empty", false, false, types.DateTime{}, types.DateTime{}},
+	}
+	for _, c := range cases {
+		if got := archivedAt(c.wasArchived, c.isArchived, c.current, now); !got.Equal(c.want) {
+			t.Errorf("%s: archivedAt() = %v, want %v", c.name, got, c.want)
+		}
 	}
 }

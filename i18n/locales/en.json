@@ -111,55 +111,96 @@
     "analytics": {
         "title": "Climbing Route Analytics",
         "subtitle": "Monitor key metrics for all climbing routes.",
-        "refresh": "Refresh",
-        "retry": "Retry",
-        "empty": "No analytics data available yet.",
-        "generatedAt": "Last updated {value}",
         "meta": {
             "title": "Analytics - Verti-Grade",
             "description": "Admin analytics dashboard for climbing routes."
         },
-        "cards": {
-            "totalRoutes": "Total Routes",
-            "totalRoutesSubtitle": "Across all locations",
-            "activeRoutes": "Active Routes",
-            "activeRoutesSubtitle": "Currently available",
-            "averageDifficulty": "Avg. Difficulty",
-            "averageDifficultySubtitle": "Mean grade",
-            "totalComments": "Comments",
-            "totalCommentsSubtitle": "All route feedback",
-            "averageLifespan": "Avg. Route Lifespan",
-            "averageLifespanSubtitle": "Archived routes only"
-        },
-        "charts": {
-            "difficultyDistribution": "Difficulty Distribution",
-            "routeSetters": "Routes by Setter",
-            "routeTimeline": "Routes Over Time",
-            "commentTimeline": "Comments Over Time",
-            "activityHeatmap": "Route Setting Activity"
-        },
-        "sections": {
-            "latestComments": "Latest Comments",
-            "latestRoutes": "Latest Routes"
-        },
-        "emptyComments": "No comments recorded yet.",
-        "emptyRoutes": "No recent routes yet.",
-        "actions": {
-            "showAllSetters": "Show all setters"
-        },
-        "labels": {
-            "attempts": "Attempts",
-            "sends": "Sends",
-            "comments": "Comments",
-            "routes": "Routes",
-            "unknown": "Unknown",
-            "other": "Other"
-        },
         "heatmap": {
             "less": "Less",
-            "more": "More"
+            "more": "More",
+            "total": "{n} routes set in {year}",
+            "totalLastYear": "{n} routes set in the last year",
+            "cell": "{n} routes on {date}"
         },
-        "error": "Analytics data could not be loaded. Please try again."
+        "error": "Analytics data could not be loaded. Please try again.",
+        "emptySection": "No data for the selected filters.",
+        "filters": {
+            "ranges": {
+                "30d": "30 days",
+                "90d": "90 days",
+                "12m": "12 months",
+                "all": "All time",
+                "custom": "Custom"
+            },
+            "from": "From",
+            "to": "To",
+            "locations": "Locations",
+            "types": "Types",
+            "includeArchived": "Include archived"
+        },
+        "cards": {
+            "activeRoutes": "Active Routes",
+            "activeRoutesSubtitle": "{n} with ratings",
+            "routesSet": "Routes Set",
+            "routesSetSubtitle": "In selected period",
+            "ratings": "Ratings",
+            "ratingsSubtitle": "In selected period",
+            "averageRating": "Avg. Rating",
+            "averageRatingSubtitle": "Stars in selected period",
+            "comments": "Comments",
+            "commentsSubtitle": "In selected period",
+            "averageLifespan": "Avg. Route Lifespan",
+            "averageLifespanSubtitle": "Routes archived in period"
+        },
+        "sections": {
+            "grades": "Grade Distribution",
+            "activity": "Setting & Rating Activity",
+            "oldestActive": "Oldest Active Routes",
+            "setters": "Routes per Setter",
+            "latestComments": "Latest Comments",
+            "activityHeatmap": "Route Setting Activity",
+            "gradeBalance": "Grade Balance",
+            "ratingDistribution": "Star Ratings",
+            "gradeFeedback": "Set vs. Voted Grade",
+            "ratedRoutes": "Best & Worst Rated",
+            "locationGrades": "Grades per Location"
+        },
+        "empty": {
+            "latestComments": "No comments in this period.",
+            "gradeFeedback": "Not enough grade votes yet.",
+            "ratedRoutes": "Not enough ratings yet.",
+            "gradeBalance": "The active grade mix matches the historic distribution."
+        },
+        "hints": {
+            "gradeBalance": "Active routes minus what history suggests – red grades are missing.",
+            "gradeFeedback": "Each dot is a route with at least 3 grade votes. Above the line it climbs harder than graded.",
+            "ratedRoutes": "Distance from the average rating of all rated routes.",
+            "oldestActive": "Longest on the wall – candidates for rescrewing."
+        },
+        "columns": {
+            "routes": "Routes",
+            "averageRating": "Avg. rating",
+            "averageDeviation": "Grade deviation"
+        },
+        "labels": {
+            "unknown": "Unknown",
+            "expected": "Expected",
+            "routesSet": "Routes set",
+            "ratings": "Ratings",
+            "days": "{n} d",
+            "ratingCount": "{n} ratings",
+            "activeVsExpected": "active / expected",
+            "climbsHarder": "Climbs harder",
+            "gradedFair": "Graded fair",
+            "climbsSofter": "Climbs softer",
+            "setGrade": "Set grade",
+            "votedGrade": "Voted grade",
+            "routeCount": "{n} routes",
+            "voteCount": "{n} votes",
+            "setInPeriod": "Set in period",
+            "setEarlier": "Set earlier",
+            "otherSetters": "{n} others"
+        }
     },
     "climbing": {
         "create": "Create route",

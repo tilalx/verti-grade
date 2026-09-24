@@ -18,6 +18,8 @@ interface ChartProps {
     testid?: string
 }
 
+const emit = defineEmits<{ click: [params: { data?: unknown }] }>()
+
 const props = withDefaults(defineProps<ChartProps>(), {
     height: '320px',
     responsive: true,
@@ -64,6 +66,9 @@ const renderChart = async () => {
         chartInstance = echartsModule.init(chartEl.value, null, {
             renderer: props.renderer,
         })
+        chartInstance.on('click', (params: { data?: unknown }) =>
+            emit('click', params),
+        )
         if (props.responsive) {
             window.addEventListener('resize', resizeChart)
         }
