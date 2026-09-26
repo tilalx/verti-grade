@@ -352,7 +352,16 @@ function sanitizeRatingPayload(
         rating: Number.isFinite(Number(rating.rating))
             ? Number(rating.rating)
             : null,
-        ...resolveImportedGrading(rating, gradeSystemFor(meta.routeType)),
+        ...resolveImportedGrading(
+            {
+                ...rating,
+                difficulty_sign:
+                    rating.difficulty_sign === false
+                        ? null
+                        : rating.difficulty_sign,
+            },
+            gradeSystemFor(meta.routeType),
+        ),
         comment: typeof rating.comment === 'string' ? rating.comment : '',
         ...(userId ? { user: userId } : {}),
     }

@@ -23,13 +23,13 @@ test('filters by grade, and every visible row actually matches', async ({
 }) => {
     await gotoSettled(page, '/')
     await page.getByTestId('index-filter-difficulty').click()
-    await page.getByRole('option', { name: '5', exact: true }).click()
+    await page.getByRole('option', { name: '5 · UIAA', exact: true }).click()
     await expect(page.getByTestId('index-table')).toBeVisible()
 
     const res = await page.request.get(
         '/api/collections/routes/records?filter=' +
             encodeURIComponent(
-                'name ~ "e2e-route-" && grade = "5" && archived = false',
+                'name ~ "e2e-route-" && grade_system = "uiaa" && grade = "5" && archived = false',
             ) +
             '&perPage=1',
     )

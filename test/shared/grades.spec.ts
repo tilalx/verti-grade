@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest'
 import {
     GRADE_SYSTEMS,
     GRADE_TABLES,
+    canonicalGrade,
     formatGrade,
+    gradeKey,
+    gradeKeyIndex,
     gradeIndex,
     gradeLabels,
     nearestGrade,
@@ -56,6 +59,29 @@ describe('nearestGrade', () => {
     })
 })
 
+describe('canonicalGrade', () => {
+    it('returns the table spelling', () => {
+        expect(canonicalGrade('font', '6a+')).toBe('6A+')
+        expect(canonicalGrade('v', 'v5')).toBe('V5')
+        expect(canonicalGrade('uiaa', '6a')).toBeNull()
+    })
+})
+
+describe('gradeKey', () => {
+    it('adds the scale only when asked', () => {
+        const font = { grade: '5', grade_system: 'font' }
+        expect(gradeKey(font, false)).toBe('5')
+        expect(gradeKey(font, true)).toBe('5 · Font')
+        expect(gradeKey({ grade: '' }, true)).toBe('?')
+    })
+
+    it('orders keys by the scale they name', () => {
+        expect(gradeKeyIndex('5 · Font')).toBe(14.2)
+        expect(gradeKeyIndex('5 · UIAA')).toBe(7.4)
+        expect(gradeKeyIndex('?')).toBe(Number.MAX_SAFE_INTEGER)
+    })
+})
+
 describe('formatGrade', () => {
     it('returns the stored label', () => {
         expect(formatGrade({ grade: ' 6a+ ' })).toBe('6a+')
@@ -64,6 +90,15 @@ describe('formatGrade', () => {
 })
 
 describe('resolveImportedGrading', () => {
+    it('stores the canonical label for new-format grades', () => {
+        expect(
+            resolveImportedGrading(
+                { grade: '6A', grade_system: 'french' },
+                'uiaa',
+            ),
+        ).toEqual({ grade: '6a', grade_system: 'french', grade_index: 11 })
+    })
+
     it('keeps valid new-format grades', () => {
         expect(
             resolveImportedGrading(

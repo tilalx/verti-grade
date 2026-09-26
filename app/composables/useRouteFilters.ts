@@ -4,7 +4,7 @@ import { routeSearchFilter } from '~/utils/routeSearch'
 export function useRouteFilters() {
     const { t } = useI18n()
     const { data: locationRecords } = useLocations()
-    const { activeGrades } = useGradeSystems()
+    const { gradeFilterItems, gradeFilterClause } = useGradeSystems()
 
     const searchRouteName = ref('')
     const selectedDifficulty = ref('')
@@ -13,7 +13,7 @@ export function useRouteFilters() {
 
     const difficulties = computed(() => [
         { text: t('filter.all'), value: '' },
-        ...activeGrades.value.map((grade) => ({ text: grade, value: grade })),
+        ...gradeFilterItems.value,
     ])
 
     const types = computed(() => [
@@ -44,7 +44,7 @@ export function useRouteFilters() {
     const pbFilter = computed(() => {
         const parts: string[] = []
         if (selectedDifficulty.value)
-            parts.push(`grade = "${selectedDifficulty.value}"`)
+            parts.push(gradeFilterClause(selectedDifficulty.value))
         if (selectedLocation.value)
             parts.push(`location = "${selectedLocation.value}"`)
         if (selectedType.value) parts.push(`type = "${selectedType.value}"`)

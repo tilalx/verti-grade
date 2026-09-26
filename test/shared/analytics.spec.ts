@@ -286,6 +286,23 @@ describe('buildAnalytics', () => {
         ])
     })
 
+    it('keeps equal labels of different scales apart', () => {
+        const routes = [
+            route('uiaa-five', uiaa('5')),
+            route('font-five', {
+                type: 'Boulder',
+                grade: '5',
+                grade_system: 'font',
+                grade_index: gradeIndex('font', '5'),
+            }),
+        ]
+        const result = buildAnalytics(routes, [], allTime, NOW)
+        expect(result.gradeDistribution.map((row) => row.grade)).toEqual([
+            '5 · UIAA',
+            '5 · Font',
+        ])
+    })
+
     it('counts stars, comments per bucket and grades per location', () => {
         const routes = [
             route('a'),

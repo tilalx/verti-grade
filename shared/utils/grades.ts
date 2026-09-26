@@ -185,16 +185,58 @@ export function gradeLabels(system: GradeSystem): string[] {
     return GRADE_TABLES[system].map(([label]) => label)
 }
 
+function findGrade(
+    system: string | null | undefined,
+    grade: string | null | undefined,
+) {
+    if (!isGradeSystem(system) || !grade) return undefined
+    const normalized = grade.replace(/\s+/g, '').toLowerCase()
+    return GRADE_TABLES[system].find(
+        ([label]) => label.toLowerCase() === normalized,
+    )
+}
+
 export function gradeIndex(
     system: string | null | undefined,
     grade: string | null | undefined,
 ): number | null {
-    if (!isGradeSystem(system) || !grade) return null
-    const normalized = grade.replace(/\s+/g, '')
-    const entry = GRADE_TABLES[system].find(
-        ([label]) => label.toLowerCase() === normalized.toLowerCase(),
-    )
-    return entry ? entry[1] : null
+    return findGrade(system, grade)?.[1] ?? null
+}
+
+export function canonicalGrade(
+    system: string | null | undefined,
+    grade: string | null | undefined,
+): string | null {
+    return findGrade(system, grade)?.[0] ?? null
+}
+
+export const GRADE_SYSTEM_SHORT: Record<GradeSystem, string> = {
+    uiaa: 'UIAA',
+    french: 'Fr',
+    yds: 'YDS',
+    font: 'Font',
+    v: 'Hueco',
+}
+
+const SYSTEM_SUFFIX = ' · '
+
+export function gradeKey(source: GradeSource, withSystem: boolean): string {
+    const grade = formatGrade(source)
+    if (!grade) return '?'
+    return withSystem && isGradeSystem(source.grade_system)
+        ? `${grade}${SYSTEM_SUFFIX}${GRADE_SYSTEM_SHORT[source.grade_system]}`
+        : grade
+}
+
+export function gradeKeyIndex(key: string): number {
+    const [grade, short] = key.split(SYSTEM_SUFFIX)
+    const systems = short
+        ? GRADE_SYSTEMS.filter((system) => GRADE_SYSTEM_SHORT[system] === short)
+        : GRADE_SYSTEMS
+    const indexes = systems
+        .map((system) => gradeIndex(system, grade))
+        .filter((index): index is number => index !== null)
+    return indexes.length ? Math.min(...indexes) : Number.MAX_SAFE_INTEGER
 }
 
 export function nearestGrade(system: GradeSystem, index: number): string {
@@ -228,12 +270,12 @@ export function resolveImportedGrading(
         isGradeSystem(source.grade_system) &&
         typeof source.grade === 'string'
     ) {
-        const index = gradeIndex(source.grade_system, source.grade)
-        if (index !== null)
+        const entry = findGrade(source.grade_system, source.grade)
+        if (entry)
             return {
-                grade: source.grade.trim(),
+                grade: entry[0],
                 grade_system: source.grade_system,
-                grade_index: index,
+                grade_index: entry[1],
             }
     }
     const legacyLabel = `${source.difficulty ?? ''}${legacySign(source.difficulty_sign)}`

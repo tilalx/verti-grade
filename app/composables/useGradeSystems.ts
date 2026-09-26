@@ -26,12 +26,23 @@ export function useGradeSystems() {
             : routeGradeSystem.value
     }
 
-    const activeGrades = computed(() => [
-        ...new Set([
-            ...gradeLabels(routeGradeSystem.value),
-            ...gradeLabels(boulderGradeSystem.value),
-        ]),
-    ])
+    const gradeFilterItems = computed(() =>
+        [
+            ...new Set([routeGradeSystem.value, boulderGradeSystem.value]),
+        ].flatMap((system) =>
+            gradeLabels(system).map((grade) => ({
+                text: `${grade} · ${t(`gradeSystemsShort.${system}`)}`,
+                value: `${system}:${grade}`,
+            })),
+        ),
+    )
+
+    function gradeFilterClause(value: string) {
+        const separator = value.indexOf(':')
+        const system = value.slice(0, separator)
+        const grade = value.slice(separator + 1)
+        return `(grade_system = ${JSON.stringify(system)} && grade = ${JSON.stringify(grade)})`
+    }
 
     const gradeColumnTitle = computed(
         () =>
@@ -54,6 +65,7 @@ export function useGradeSystems() {
         routeGradeSystem,
         boulderGradeSystem,
         gradeSystemFor,
-        activeGrades,
+        gradeFilterItems,
+        gradeFilterClause,
     }
 }

@@ -407,11 +407,11 @@ function clearFilters() {
 
 // ── Static options ─────────────────────────────────────────────────────────
 
-const { activeGrades } = useGradeSystems()
+const { gradeFilterItems, gradeFilterClause } = useGradeSystems()
 
 const difficulties = computed(() => [
     { text: t('filter.all'), value: null },
-    ...activeGrades.value.map((grade) => ({ text: grade, value: grade })),
+    ...gradeFilterItems.value,
 ])
 
 const { data: locationRecords } = useLocations()
@@ -440,7 +440,7 @@ function buildFilter(searchTerm: string) {
     if (selectedLocation.value)
         parts.push(`route_id.location = "${selectedLocation.value}"`)
     if (selectedDifficulty.value !== null)
-        parts.push(`grade = "${selectedDifficulty.value}"`)
+        parts.push(gradeFilterClause(selectedDifficulty.value))
     if (dateFilter.value === 'week') {
         const d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         parts.push(`created >= "${d}"`)

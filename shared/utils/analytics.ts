@@ -1,8 +1,8 @@
 import { normalizeCreators, parseDate } from './formatting'
 import {
-    GRADE_SYSTEMS,
-    formatGrade,
     gradeIndex,
+    gradeKey,
+    gradeKeyIndex,
     isGradeSystem,
     nearestGrade,
     type GradeSource,
@@ -211,18 +211,9 @@ export function gradeScore(source: GradeSource): number | null {
 }
 
 export function compareGrades(left: string, right: string): number {
-    return gradeOrder(left) - gradeOrder(right) || left.localeCompare(right)
-}
-
-function gradeOrder(grade: string): number {
-    const indexes = GRADE_SYSTEMS.map((system) =>
-        gradeIndex(system, grade),
-    ).filter((index): index is number => index !== null)
-    return indexes.length ? Math.min(...indexes) : Number.MAX_SAFE_INTEGER
-}
-
-function gradeLabel(route: AnalyticsRoute): string {
-    return formatGrade(route) || '?'
+    return (
+        gradeKeyIndex(left) - gradeKeyIndex(right) || left.localeCompare(right)
+    )
 }
 
 function routeDate(route: AnalyticsRoute): Date | null {
@@ -286,11 +277,11 @@ function toTimeline(map: Map<string, number>): TimelineDatum[] {
         .sort((a, b) => a.period.localeCompare(b.period))
 }
 
-function summarize(route: AnalyticsRoute): RouteSummary {
+function summarize(route: AnalyticsRoute, withSystem: boolean): RouteSummary {
     return {
         id: route.id,
         name: String(route.name ?? ''),
-        grade: gradeLabel(route),
+        grade: gradeKey(route, withSystem),
         type: route.type ?? null,
         location: route.locationName || null,
         creators: normalizeCreators(route.creator),
@@ -304,6 +295,9 @@ export function buildAnalytics(
     filters: AnalyticsFilters,
     now = new Date(),
 ): AnalyticsResponse {
+    const withSystem =
+        new Set(allRoutes.map((route) => route.grade_system).filter(Boolean))
+            .size > 1
     const { from, to } = filters
     const periodMs = from ? to.getTime() - from.getTime() : 0
     const previousFrom = from ? new Date(from.getTime() - periodMs) : null
@@ -414,9 +408,9 @@ export function buildAnalytics(
     const gradeRows = new Map<string, GradeDatum>()
     const historicShare = new Map<string, number>()
     for (const route of matchingRoutes)
-        increase(historicShare, gradeLabel(route))
+        increase(historicShare, gradeKey(route, withSystem))
     for (const route of scopedRoutes) {
-        const grade = gradeLabel(route)
+        const grade = gradeKey(route, withSystem)
         const row = gradeRows.get(grade) ?? {
             grade,
             byType: {},
@@ -476,7 +470,7 @@ export function buildAnalytics(
     const locationGradeCounts = new Map<string, LocationGradeDatum>()
     for (const route of scopedRoutes) {
         const location = route.locationName || '?'
-        const grade = gradeLabel(route)
+        const grade = gradeKey(route, withSystem)
         const key = `${location}\u0000${grade}`
         const cell = locationGradeCounts.get(key) ?? {
             location,
@@ -492,7 +486,7 @@ export function buildAnalytics(
         return stars.length >= MIN_VOTES_FOR_FEEDBACK
             ? [
                   {
-                      ...summarize(route),
+                      ...summarize(route, withSystem),
                       averageRating: round(mean(stars))!,
                       ratings: stars.length,
                   },
@@ -504,7 +498,7 @@ export function buildAnalytics(
         return result
             ? [
                   {
-                      ...summarize(route),
+                      ...summarize(route, withSystem),
                       setGrade: round(gradeScore(route))!,
                       votedGrade: round(result.votedGrade)!,
                       votedGradeLabel: isGradeSystem(route.grade_system)
@@ -575,7 +569,7 @@ export function buildAnalytics(
             .sort(byRouteDate)
             .slice(0, OLDEST_LIMIT)
             .map((route) => ({
-                ...summarize(route),
+                ...summarize(route, withSystem),
                 ageDays: Math.floor(
                     (now.getTime() -
                         (routeDate(route)?.getTime() ?? now.getTime())) /
