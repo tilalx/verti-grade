@@ -31,7 +31,10 @@ test('links an installable web app manifest', async ({ page, request }) => {
 })
 
 test.describe('service worker', () => {
-    test.use({ serviceWorkers: 'allow' })
+    test.use({
+        serviceWorkers: 'allow',
+        launchOptions: { args: ['--ignore-certificate-errors'] },
+    })
 
     test('shows the offline page when the network is gone', async ({
         page,
