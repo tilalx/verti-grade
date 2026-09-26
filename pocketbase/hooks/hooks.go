@@ -4,6 +4,7 @@ import "github.com/pocketbase/pocketbase/core"
 
 func Register(app core.App) {
 	registerAudit(app)
+	registerBatchHeaderGuard(app)
 	registerCaptcha(app)
 	registerUserGuards(app)
 	registerLocationGuards(app)
