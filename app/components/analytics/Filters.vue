@@ -1,39 +1,36 @@
 <template>
     <div data-testid="analytics-filters">
         <FilterBar
+            inline-filters
             :active-filter-count="activeFilterCount"
             @clear="clearFilters"
         >
             <template #search>
-                <div class="flex-grow-1 min-w-0">
-                    <v-btn-toggle
+                <div class="flex-grow-1 flex-xl-grow-0 min-w-0">
+                    <v-chip-group
                         :model-value="range"
                         mandatory
-                        variant="outlined"
-                        color="primary"
-                        divided
-                        rounded="lg"
-                        density="compact"
+                        selected-class="text-primary"
                         class="range-toggle"
                         @update:model-value="selectRange"
                     >
-                        <v-btn
+                        <v-chip
                             v-for="option in ANALYTICS_RANGES"
                             :key="option"
                             :value="option"
-                            size="small"
+                            :variant="option === range ? 'tonal' : 'outlined'"
                             :data-testid="`analytics-range-${option}`"
                         >
                             {{ $t(`analytics.filters.ranges.${option}`) }}
-                        </v-btn>
-                    </v-btn-toggle>
+                        </v-chip>
+                    </v-chip-group>
                 </div>
             </template>
 
             <template #filters>
                 <v-row density="comfortable" align="center">
                     <template v-if="range === 'custom'">
-                        <v-col cols="6" sm="3" md="2">
+                        <v-col cols="6" sm="3" md="2" xl="auto">
                             <v-text-field
                                 :model-value="query.from ?? ''"
                                 type="date"
@@ -46,7 +43,7 @@
                                 "
                             />
                         </v-col>
-                        <v-col cols="6" sm="3" md="2">
+                        <v-col cols="6" sm="3" md="2" xl="auto">
                             <v-text-field
                                 :model-value="query.to ?? ''"
                                 type="date"
@@ -60,7 +57,7 @@
                             />
                         </v-col>
                     </template>
-                    <v-col cols="12" sm="6" md="3">
+                    <v-col cols="12" sm="6" md="3" xl>
                         <v-select
                             :model-value="selectedLocations"
                             :items="locations"
@@ -78,7 +75,7 @@
                             "
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="3">
+                    <v-col cols="12" sm="6" md="3" xl>
                         <v-select
                             :model-value="selectedTypes"
                             :items="typeOptions"
@@ -94,21 +91,20 @@
                             "
                         />
                     </v-col>
-                    <v-col cols="12" sm="6" md="auto">
-                        <v-switch
-                            :model-value="query.archived === 'true'"
-                            :label="$t('analytics.filters.includeArchived')"
-                            color="primary"
-                            density="compact"
-                            hide-details
-                            inset
+                    <v-col cols="12" sm="auto" class="d-flex align-center">
+                        <v-chip
+                            :color="includeArchived ? 'warning' : undefined"
+                            :variant="includeArchived ? 'tonal' : 'outlined'"
+                            prepend-icon="mdi-archive-outline"
                             data-testid="analytics-filter-archived"
-                            @update:model-value="
+                            @click="
                                 emit('update', {
-                                    archived: $event ? 'true' : '',
+                                    archived: includeArchived ? '' : 'true',
                                 })
                             "
-                        />
+                        >
+                            {{ $t('filter.archived') }}
+                        </v-chip>
                     </v-col>
                 </v-row>
             </template>
@@ -144,12 +140,13 @@ const selectedLocations = computed(() =>
 const selectedTypes = computed(() =>
     (props.query.type ?? '').split(',').filter(Boolean),
 )
+const includeArchived = computed(() => props.query.archived === 'true')
 const activeFilterCount = computed(
     () =>
         [
             selectedLocations.value.length,
             selectedTypes.value.length,
-            props.query.archived === 'true',
+            includeArchived.value,
         ].filter(Boolean).length,
 )
 

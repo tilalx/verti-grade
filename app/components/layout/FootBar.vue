@@ -50,7 +50,7 @@
                         class="status-dot"
                         :class="isHealthy ? 'dot--ok' : 'dot--err'"
                     />
-                    <span class="status-label">{{
+                    <span class="status-label" data-testid="footer-health">{{
                         isHealthy
                             ? $t('notifications.success.health')
                             : $t('notifications.error.health')

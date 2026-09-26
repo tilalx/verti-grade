@@ -1,13 +1,41 @@
 <script setup lang="ts">
 import { EXPORT_COLUMNS_KEY } from '~/utils/clientStorage'
+import { SUPPORTED_LOCALES, type LocaleCode } from '~/utils/locales'
+
+export interface ExportOptions {
+    locale: LocaleCode
+    labels: Record<string, string>
+    columns?: string[]
+    show?: Record<PdfField, boolean>
+}
+
+type PdfField = 'creators' | 'date' | 'logo'
 
 const open = defineModel<boolean>({ default: false })
 
-const emit = defineEmits<{
-    confirm: [payload: { columns: string[]; labels: Record<string, string> }]
-}>()
+const props = withDefaults(defineProps<{ format?: 'pdf' | 'xlsx' }>(), {
+    format: 'xlsx',
+})
 
-const { t } = useI18n()
+const emit = defineEmits<{ confirm: [payload: ExportOptions] }>()
+
+const { t, locale, loadLocaleMessages } = useI18n()
+
+const exportLocale = ref(locale.value as LocaleCode)
+watch(open, (isOpen) => {
+    if (isOpen) exportLocale.value = locale.value as LocaleCode
+})
+const localeItems = SUPPORTED_LOCALES.map(({ code, name }) => ({
+    title: name,
+    value: code,
+}))
+
+const PDF_FIELDS: { key: PdfField; labelKey: string }[] = [
+    { key: 'creators', labelKey: 'climbing.creators' },
+    { key: 'date', labelKey: 'routes.screwed_at' },
+    { key: 'logo', labelKey: 'export.logo' },
+]
+const pdfFields = ref<PdfField[]>(PDF_FIELDS.map((field) => field.key))
 
 const EXPORT_COLUMNS = [
     { key: 'color', labelKey: 'climbing.color' },
@@ -91,7 +119,26 @@ const toggleAll = () => {
     selected.value = allSelected.value ? [] : [...DEFAULT_ORDER]
 }
 
-const confirm = () => {
+const confirm = async () => {
+    await loadLocaleMessages(exportLocale.value)
+    const translate = (key: string) =>
+        t(key, {}, { locale: exportLocale.value })
+
+    if (props.format === 'pdf') {
+        emit('confirm', {
+            locale: exportLocale.value,
+            labels: { anchor: translate('climbing.anchor_point') },
+            show: Object.fromEntries(
+                PDF_FIELDS.map(({ key }) => [
+                    key,
+                    pdfFields.value.includes(key),
+                ]),
+            ) as Record<PdfField, boolean>,
+        })
+        open.value = false
+        return
+    }
+
     const columns = order.value.filter((key) => selected.value.includes(key))
 
     try {
@@ -102,16 +149,20 @@ const confirm = () => {
     } catch {}
 
     emit('confirm', {
+        locale: exportLocale.value,
         columns,
-        labels: Object.fromEntries(
-            columns.map((key) => [
-                key,
-                t(
-                    EXPORT_COLUMNS.find((column) => column.key === key)!
-                        .labelKey,
-                ),
-            ]),
-        ),
+        labels: {
+            sheet: translate('page.content.index'),
+            ...Object.fromEntries(
+                columns.map((key) => [
+                    key,
+                    translate(
+                        EXPORT_COLUMNS.find((column) => column.key === key)!
+                            .labelKey,
+                    ),
+                ]),
+            ),
+        },
     })
     open.value = false
 }
@@ -120,66 +171,88 @@ const confirm = () => {
 <template>
     <LayoutDialogShell
         v-model="open"
-        :title="$t('export.title')"
+        :title="$t(format === 'pdf' ? 'export.title_pdf' : 'export.title')"
         data-testid="export-options-dialog"
     >
-        <div class="d-flex align-center justify-space-between mb-1">
-            <span class="text-body-medium text-medium-emphasis">
-                {{ $t('export.columns') }}
-            </span>
-            <v-btn
-                variant="text"
-                size="small"
-                data-testid="export-toggle-all"
-                @click="toggleAll"
-            >
-                {{
-                    allSelected
-                        ? $t('actions.deselect_all')
-                        : $t('actions.select_all')
-                }}
-            </v-btn>
-        </div>
-        <div
-            v-for="(column, index) in orderedColumns"
-            :key="column.key"
-            class="export-column d-flex align-center"
-            draggable="true"
-            :data-testid="`export-column-${column.key}`"
-            @dragstart="dragKey = column.key"
-            @dragover.prevent
-            @drop.prevent="onDrop(column.key)"
-        >
-            <v-icon class="export-column__handle" size="small">
-                mdi-drag-horizontal-variant
-            </v-icon>
+        <v-select
+            v-model="exportLocale"
+            :items="localeItems"
+            :label="$t('export.language')"
+            density="compact"
+            class="mb-2"
+            data-testid="export-locale"
+        />
+        <template v-if="format === 'pdf'">
             <v-checkbox
-                v-model="selected"
-                :value="column.key"
-                :label="$t(column.labelKey)"
+                v-for="field in PDF_FIELDS"
+                :key="field.key"
+                v-model="pdfFields"
+                :value="field.key"
+                :label="$t(field.labelKey)"
                 density="compact"
                 hide-details
+                :data-testid="`export-show-${field.key}`"
             />
-            <v-spacer />
-            <v-btn
-                icon="mdi-chevron-up"
-                variant="text"
-                size="small"
-                :disabled="index === 0"
-                :aria-label="$t('export.move_up')"
-                :data-testid="`export-move-up-${column.key}`"
-                @click="move(column.key, -1)"
-            />
-            <v-btn
-                icon="mdi-chevron-down"
-                variant="text"
-                size="small"
-                :disabled="index === orderedColumns.length - 1"
-                :aria-label="$t('export.move_down')"
-                :data-testid="`export-move-down-${column.key}`"
-                @click="move(column.key, 1)"
-            />
-        </div>
+        </template>
+        <template v-else>
+            <div class="d-flex align-center justify-space-between mb-1">
+                <span class="text-body-medium text-medium-emphasis">
+                    {{ $t('export.columns') }}
+                </span>
+                <v-btn
+                    variant="text"
+                    size="small"
+                    data-testid="export-toggle-all"
+                    @click="toggleAll"
+                >
+                    {{
+                        allSelected
+                            ? $t('actions.deselect_all')
+                            : $t('actions.select_all')
+                    }}
+                </v-btn>
+            </div>
+            <div
+                v-for="(column, index) in orderedColumns"
+                :key="column.key"
+                class="export-column d-flex align-center"
+                draggable="true"
+                :data-testid="`export-column-${column.key}`"
+                @dragstart="dragKey = column.key"
+                @dragover.prevent
+                @drop.prevent="onDrop(column.key)"
+            >
+                <v-icon class="export-column__handle" size="small">
+                    mdi-drag-horizontal-variant
+                </v-icon>
+                <v-checkbox
+                    v-model="selected"
+                    :value="column.key"
+                    :label="$t(column.labelKey)"
+                    density="compact"
+                    hide-details
+                />
+                <v-spacer />
+                <v-btn
+                    icon="mdi-chevron-up"
+                    variant="text"
+                    size="small"
+                    :disabled="index === 0"
+                    :aria-label="$t('export.move_up')"
+                    :data-testid="`export-move-up-${column.key}`"
+                    @click="move(column.key, -1)"
+                />
+                <v-btn
+                    icon="mdi-chevron-down"
+                    variant="text"
+                    size="small"
+                    :disabled="index === orderedColumns.length - 1"
+                    :aria-label="$t('export.move_down')"
+                    :data-testid="`export-move-down-${column.key}`"
+                    @click="move(column.key, 1)"
+                />
+            </div>
+        </template>
         <template #actions>
             <v-btn variant="text" @click="open = false">
                 {{ $t('actions.cancel') }}
@@ -187,7 +260,7 @@ const confirm = () => {
             <v-spacer />
             <v-btn
                 color="primary"
-                :disabled="!selected.length"
+                :disabled="format === 'xlsx' && !selected.length"
                 data-testid="export-confirm"
                 @click="confirm"
             >

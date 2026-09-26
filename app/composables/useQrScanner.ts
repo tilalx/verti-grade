@@ -111,10 +111,7 @@ export function useQrScanner(
     const onCameraError = (error: CameraError) => {
         console.error('Camera error:', error)
         stop()
-        scannerError.value =
-            error?.name === 'NotAllowedError' || error?.name === 'NotFoundError'
-                ? cameraErrorMessage()
-                : error?.message || cameraErrorMessage()
+        scannerError.value = cameraErrorMessage()
     }
 
     const start = () => {

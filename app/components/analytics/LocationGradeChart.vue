@@ -29,7 +29,7 @@ const option = computed(() => {
         tooltip: itemTooltip(colors.value, ({ value }) => {
             const [gradeIndex, locationIndex, count] = value as number[]
             return `<strong>${escapeHtml(locations.value[locationIndex!]!)}</strong> · ${grades.value[gradeIndex!]}<br/>
-                ${t('analytics.labels.routeCount', { n: count })}`
+                ${t('analytics.labels.routeCount', { n: count }, count!)}`
         }),
         grid: { ...gridBase, left: 12, top: 8, bottom: 40 },
         xAxis: {

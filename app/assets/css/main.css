@@ -193,8 +193,8 @@
     color: rgba(var(--v-theme-on-surface), 0.6);
 }
 
-/* Matches the inventory page's desktop breakpoint (Vuetify 4 lg). */
-@media (min-width: 1145px) {
+/* Matches the inventory page's desktop breakpoint (Vuetify 4 xl). */
+@media (min-width: 1545px) {
     .scope-list {
         max-height: calc(100vh - 320px);
     }

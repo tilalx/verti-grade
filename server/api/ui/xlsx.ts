@@ -65,7 +65,10 @@ export default eventHandler(async (event) => {
         }
 
         const workbook = new Workbook()
-        const worksheet = workbook.addWorksheet('Climbing Routes')
+        const sheetName = await resolveExportLabel(event, 'sheet', 'Routes')
+        const worksheet = workbook.addWorksheet(
+            sheetName.replace(/[[\]:*?/\\]/g, '').slice(0, 31) || 'Routes',
+        )
 
         worksheet.columns = columns.map((column) => ({
             header: column.header,

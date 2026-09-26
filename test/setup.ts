@@ -29,6 +29,7 @@ declare global {
     var useI18n: () => {
         t: (key: string) => string
         locale: { value: string }
+        loadLocaleMessages: (locale: string) => Promise<void>
     }
     var useNuxtApp: () => {
         $i18n: { t: (key: string) => string }
@@ -71,6 +72,7 @@ const pocketbaseGetter = () => {
 const i18nGetter = () => ({
     t: (key: string) => key,
     locale: vueRef('en'),
+    loadLocaleMessages: async () => {},
 })
 
 const nuxtAppGetter = () => ({ $i18n: { t: (key: string) => key } })

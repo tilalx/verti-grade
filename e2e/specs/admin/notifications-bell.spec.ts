@@ -174,3 +174,24 @@ test('a plain user with no notifications still gets a bell', async ({
     await page.getByTestId('notification-bell').click()
     await expect(page.getByTestId('notification-empty')).toBeVisible()
 })
+
+test('menu keeps a readable width and fits on phones', async ({
+    adminPage: page,
+}) => {
+    for (const viewport of [
+        { width: 1440, height: 900, minWidth: 340 },
+        { width: 360, height: 780, minWidth: 320 },
+    ]) {
+        await page.setViewportSize(viewport)
+        await gotoSettled(page, '/')
+        await page.getByTestId('notification-bell').click()
+        const menuLocator = page.getByTestId('notification-menu')
+        await expect
+            .poll(async () => (await menuLocator.boundingBox())?.width ?? 0)
+            .toBeGreaterThanOrEqual(viewport.minWidth)
+        const menu = (await menuLocator.boundingBox())!
+        expect(menu.x).toBeGreaterThanOrEqual(0)
+        expect(menu.x + menu.width).toBeLessThanOrEqual(viewport.width)
+        await page.keyboard.press('Escape')
+    }
+})

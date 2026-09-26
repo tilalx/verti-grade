@@ -32,7 +32,7 @@ describe('useQrScanner', () => {
         expect(scanner.torchSupported.value).toBe(false)
     })
 
-    it('maps permission errors to the generic message', () => {
+    it('never shows raw browser error text', () => {
         const { scanner } = mountScanner()
         scanner.start()
         scanner.onCameraError({ name: 'NotAllowedError', message: 'denied' })
@@ -40,7 +40,7 @@ describe('useQrScanner', () => {
         expect(scanner.scannerError.value).toBe('camera-error')
 
         scanner.onCameraError({ name: 'Other', message: 'boom' })
-        expect(scanner.scannerError.value).toBe('boom')
+        expect(scanner.scannerError.value).toBe('camera-error')
     })
 
     it('stops when the page is hidden', () => {

@@ -378,7 +378,8 @@ function resolveAuthError(err: unknown) {
     if (/not verified/i.test(msg))
         return t('notifications.error.email_not_verified')
     if (/too many/i.test(msg)) return t('notifications.error.too_many_attempts')
-    return msg || t('notifications.error.unknown')
+    if (/captcha/i.test(msg)) return t('notifications.error.captcha')
+    return t('notifications.error.unknown')
 }
 
 // ── Auth handlers ──────────────────────────────────────────────────

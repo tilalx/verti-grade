@@ -175,6 +175,34 @@ describe('buildAnalytics', () => {
         expect(withArchived.gradeDistribution[0]!.total).toBe(4)
     })
 
+    it('leaves archived routes and their ratings out unless included', () => {
+        const routes = [
+            route('a', { creator: ['Active'] }),
+            route('b', {
+                creator: ['Retired'],
+                archived: true,
+                archived_at: daysAgo(1),
+            }),
+        ]
+        const ratings = [rating('a'), rating('b')]
+
+        const hidden = buildAnalytics(routes, ratings, allTime, NOW)
+        expect(hidden.summary.routesSet.value).toBe(1)
+        expect(hidden.summary.ratings.value).toBe(1)
+        expect(hidden.setters.map((entry) => entry.setter)).toEqual(['Active'])
+        expect(hidden.summary.averageLifespanDays).not.toBeNull()
+
+        const shown = buildAnalytics(
+            routes,
+            ratings,
+            resolveFilters({ range: 'all', archived: 'true' }, NOW),
+            NOW,
+        )
+        expect(shown.summary.routesSet.value).toBe(2)
+        expect(shown.summary.ratings.value).toBe(2)
+        expect(shown.setters).toHaveLength(2)
+    })
+
     it('uses archived_at for the lifespan', () => {
         const routes = [
             route('a', {

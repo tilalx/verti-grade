@@ -5,14 +5,13 @@
         :form-heading="{
             eyebrow: $t('account.eyebrowAccountRecovery'),
             title: $t('account.reset_password'),
-            subtitle: $t('account.reset_hint'),
+            subtitle: $t('account.newPasswordHint'),
         }"
         :done-title="$t('account.passwordSet')"
         :done-subtitle="$t('notifications.success.passwordChanged')"
         :invalid-subtitle="$t('notifications.error.resetLinkInvalid')"
         :action="resetPassword"
         :is-token-error="isInvalidToken"
-        :error-message="$t('notifications.error.resetPassword')"
     >
         <template #default="{ submit, loading }">
             <UserPasswordChangeFields

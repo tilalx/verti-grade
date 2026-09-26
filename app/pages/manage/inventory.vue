@@ -187,7 +187,11 @@
                     data-testid="inventory-unlocated-note"
                 >
                     {{
-                        $t('inventory.unlocatedNote', { count: unlocatedCount })
+                        $t(
+                            'inventory.unlocatedNote',
+                            { count: unlocatedCount },
+                            unlocatedCount,
+                        )
                     }}
                 </div>
             </div>
@@ -508,7 +512,11 @@
             v-model="resetDialog"
             :title="$t('inventory.resetTitle')"
             :message="
-                $t('inventory.resetMessage', { count: scannedRouteIds.length })
+                $t(
+                    'inventory.resetMessage',
+                    { count: scannedRouteIds.length },
+                    scannedRouteIds.length,
+                )
             "
             :confirm-text="$t('inventory.reset')"
             @confirm="confirmReset"
@@ -547,7 +555,7 @@ const SCAN_COOLDOWN_MS = 2000
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
-const { lgAndUp } = useDisplay()
+const { width: viewportWidth } = useDisplay()
 const { data: locationRecords } = useLocations()
 const {
     success: notifySuccess,
@@ -555,7 +563,7 @@ const {
     warning: notifyWarning,
 } = useNotification()
 
-const isWideLayout = computed(() => lgAndUp.value)
+const isWideLayout = computed(() => viewportWidth.value >= 740)
 
 const allRoutes = ref<RouteRecord[]>([])
 const loadingRoutes = ref(false)
@@ -721,7 +729,11 @@ const reconcileScannedIds = () => {
     const wrongLocation = resolved.length - kept.length
     if (wrongLocation > 0) {
         notifyWarning(
-            t('inventory.droppedForLocation', { count: wrongLocation }),
+            t(
+                'inventory.droppedForLocation',
+                { count: wrongLocation },
+                wrongLocation,
+            ),
         )
     }
     if (kept.length !== scannedRouteIds.value.length) {
@@ -969,7 +981,9 @@ const confirmFinish = async () => {
         })
         await batch.send()
         resetInventory()
-        notifySuccess(t('inventory.archiveSuccess', { count: ids.length }))
+        notifySuccess(
+            t('inventory.archiveSuccess', { count: ids.length }, ids.length),
+        )
         await loadRoutes()
     } catch (error) {
         console.error('Failed to archive routes:', error)
@@ -1053,22 +1067,22 @@ watch(instructionsDialog, (open) => {
     }
 }
 
-@media (min-width: 1145px) {
+@media (min-width: 740px) {
     .inventory-page {
-        max-width: 1400px;
-        padding: 16px 16px 24px;
+        max-width: none;
+        padding: 16px 0 24px;
     }
 
     .inventory-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 360px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         column-gap: 24px;
         align-items: start;
     }
 
     .inventory-layout__controls {
-        grid-column: 2;
-        grid-row: 1;
+        grid-column: 1 / -1;
+        margin-bottom: 16px;
     }
 
     .inventory-layout__lists,
@@ -1076,19 +1090,56 @@ watch(instructionsDialog, (open) => {
         display: contents;
     }
 
+    .inventory-column {
+        padding-inline: 16px;
+    }
+
+    .inventory-column :deep(.scope-list) {
+        max-height: calc(100vh - 360px);
+    }
+
     .inventory-column--missing {
         grid-column: 1;
+        grid-row: 2;
+    }
+
+    .inventory-column--found {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .inventory-title {
+        font-size: 1.125rem;
+        white-space: normal;
+    }
+
+    .scanner-viewport {
+        height: 45vh;
+        border-radius: 12px;
+    }
+}
+
+@media (min-width: 1545px) {
+    .inventory-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(440px, 1.4fr) minmax(
+                0,
+                1fr
+            );
+    }
+
+    .inventory-layout__controls {
+        grid-column: 2;
+        grid-row: 1;
+        margin-bottom: 0;
+    }
+
+    .inventory-column--missing {
         grid-row: 1;
     }
 
     .inventory-column--found {
         grid-column: 3;
         grid-row: 1;
-    }
-
-    .inventory-title {
-        font-size: 1.125rem;
-        white-space: normal;
     }
 
     .progress-group {
@@ -1100,8 +1151,9 @@ watch(instructionsDialog, (open) => {
     }
 
     .scanner-viewport {
-        height: 260px;
-        border-radius: 12px;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        max-height: calc(100vh - 300px);
     }
 }
 </style>

@@ -39,8 +39,9 @@
                                 <div
                                     class="text-label-medium text-success mb-3"
                                     style="letter-spacing: 0.2em"
+                                    data-testid="auth-brand-eyebrow"
                                 >
-                                    ROUTE MANAGEMENT
+                                    {{ $t('account.eyebrowBrand') }}
                                 </div>
                                 <h1 class="brand-title text-white">
                                     <slot name="brand-headline" />
@@ -99,6 +100,7 @@
                                     </h2>
                                     <p
                                         class="text-body-medium text-medium-emphasis"
+                                        data-testid="auth-subtitle"
                                     >
                                         {{ subtitle }}
                                     </p>

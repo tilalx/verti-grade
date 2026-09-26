@@ -241,11 +241,12 @@ async function submit() {
     } catch (error) {
         console.error('Error creating user:', error)
         const fieldErrors = (error as ClientResponseError).data?.data
-        const message =
-            fieldErrors?.email?.message ||
-            fieldErrors?.username?.message ||
-            t('notifications.error.generic')
-        notifyError(message)
+        if (fieldErrors?.email?.code === 'validation_not_unique')
+            notifyError(t('users.emailTaken'))
+        else if (fieldErrors?.email) notifyError(t('validation.email'))
+        else if (fieldErrors?.username?.code === 'validation_not_unique')
+            notifyError(t('users.usernameTaken'))
+        else notifyError(t('notifications.error.generic'))
     } finally {
         saving.value = false
     }

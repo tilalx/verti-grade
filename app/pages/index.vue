@@ -72,7 +72,7 @@
                 :page="tableOptions.page"
                 :items-per-page="tableOptions.itemsPerPage"
                 :sort-by="tableOptions.sortBy"
-                no-data-text="table.no_data"
+                :no-data-text="$t('table.no_data')"
                 item-value="id"
                 @update:options="loadRoutes"
             >
@@ -235,7 +235,7 @@ const headersDesktop = computed<
     { title: t('climbing.comment'), key: 'comment' },
     { title: t('climbing.creators'), key: 'creator' },
     { title: t('ratings.score'), key: 'score' },
-    { title: t('table.created_at'), key: 'screw_date' },
+    { title: t('routes.screwed_at'), key: 'screw_date' },
     { title: t('table.actions'), key: 'actions', sortable: false },
 ])
 
@@ -246,7 +246,7 @@ const pbFilter = computed(() => {
 
 const sortItemsMobile = computed(() => [
     {
-        title: t('table.created_at'),
+        title: t('routes.screwed_at'),
         key: 'screw_date',
         defaultOrder: 'desc' as const,
     },

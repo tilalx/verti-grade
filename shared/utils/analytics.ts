@@ -313,17 +313,17 @@ export function buildAnalytics(
     const periodMs = from ? to.getTime() - from.getTime() : 0
     const previousFrom = from ? new Date(from.getTime() - periodMs) : null
 
-    const scopedRoutes = allRoutes.filter(
+    const matchingRoutes = allRoutes.filter(
         (route) =>
             (filters.locations.length === 0 ||
                 filters.locations.includes(route.location ?? '')) &&
             (filters.types.length === 0 ||
                 filters.types.includes(route.type ?? '')),
     )
-    const routeById = new Map(scopedRoutes.map((route) => [route.id, route]))
-    const inventory = scopedRoutes.filter(
+    const scopedRoutes = matchingRoutes.filter(
         (route) => filters.includeArchived || !route.archived,
     )
+    const routeById = new Map(scopedRoutes.map((route) => [route.id, route]))
     const activeRoutes = scopedRoutes.filter((route) => !route.archived)
 
     const scopedRatings = allRatings.filter(
@@ -361,7 +361,7 @@ export function buildAnalytics(
         previous: number | null | undefined,
     ): Trend => ({ value: current, previous: previous ?? null })
 
-    const lifespans = scopedRoutes
+    const lifespans = matchingRoutes
         .filter((route) => route.archived)
         .flatMap((route) => {
             const archivedAt = parseDate(route.archived_at)
@@ -418,8 +418,9 @@ export function buildAnalytics(
     ].sort()
     const gradeRows = new Map<string, GradeDatum>()
     const historicShare = new Map<string, number>()
-    for (const route of scopedRoutes) increase(historicShare, gradeLabel(route))
-    for (const route of inventory) {
+    for (const route of matchingRoutes)
+        increase(historicShare, gradeLabel(route))
+    for (const route of scopedRoutes) {
         const grade = gradeLabel(route)
         const row = gradeRows.get(grade) ?? {
             grade,
@@ -435,7 +436,7 @@ export function buildAnalytics(
         if (!gradeRows.has(grade))
             gradeRows.set(grade, { grade, byType: {}, total: 0, expected: 0 })
         gradeRows.get(grade)!.expected = round(
-            (count / scopedRoutes.length) * inventory.length,
+            (count / matchingRoutes.length) * scopedRoutes.length,
             1,
         )!
     }
@@ -444,7 +445,7 @@ export function buildAnalytics(
     )
     const routesSetIds = new Set(routesSet.map((route) => route.id))
     const setterRoutes = new Map<string, AnalyticsRoute[]>()
-    for (const route of inventory) {
+    for (const route of scopedRoutes) {
         for (const setter of normalizeCreators(route.creator)) {
             setterRoutes.set(setter, [
                 ...(setterRoutes.get(setter) ?? []),
@@ -478,7 +479,7 @@ export function buildAnalytics(
         .sort((a, b) => b.routes - a.routes || a.setter.localeCompare(b.setter))
 
     const locationGradeCounts = new Map<string, LocationGradeDatum>()
-    for (const route of inventory) {
+    for (const route of scopedRoutes) {
         const location = route.locationName || '?'
         const grade = gradeLabel(route)
         const key = `${location}\u0000${grade}`
@@ -491,7 +492,7 @@ export function buildAnalytics(
         locationGradeCounts.set(key, cell)
     }
 
-    const rated = inventory.flatMap((route) => {
+    const rated = scopedRoutes.flatMap((route) => {
         const stars = starValues(ratingsByRoute.get(route.id) ?? [])
         return stars.length >= MIN_VOTES_FOR_FEEDBACK
             ? [
@@ -503,7 +504,7 @@ export function buildAnalytics(
               ]
             : []
     })
-    const feedback = inventory.flatMap((route) => {
+    const feedback = scopedRoutes.flatMap((route) => {
         const result = deviationOf(route)
         return result
             ? [

@@ -8,11 +8,12 @@
                     to="/"
                     class="nav-logo"
                     :aria-label="$t('routes.home')"
+                    data-testid="nav-logo"
                 >
                     <img
                         v-if="logo_url"
                         :src="logo_url"
-                        alt="Logo"
+                        :alt="logoAlt"
                         :style="logoStyle"
                     />
                     <NuxtImg
@@ -22,7 +23,7 @@
                                 ? '/verti-grade-dark.svg'
                                 : '/verti-grade-light.svg'
                         "
-                        alt="Logo"
+                        :alt="logoAlt"
                         :style="defaultLogoStyle"
                         height="36"
                         densities="x1 x2"
@@ -133,6 +134,9 @@ const props = defineProps<{
 }>()
 
 const { loggedIn, settings } = toRefs(props)
+const logoAlt = computed(
+    () => settings.value?.organization_name || 'Verti-Grade',
+)
 
 const { can } = usePermissions()
 
