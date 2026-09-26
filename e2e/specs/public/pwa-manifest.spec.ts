@@ -1,5 +1,7 @@
 import { test, expect } from '../../support/fixtures'
 
+test.use({ launchOptions: { args: ['--ignore-certificate-errors'] } })
+
 test('links an installable web app manifest', async ({ page, request }) => {
     const response = await page.goto('/')
     const html = (await response?.text()) ?? ''
@@ -31,10 +33,7 @@ test('links an installable web app manifest', async ({ page, request }) => {
 })
 
 test.describe('service worker', () => {
-    test.use({
-        serviceWorkers: 'allow',
-        launchOptions: { args: ['--ignore-certificate-errors'] },
-    })
+    test.use({ serviceWorkers: 'allow' })
 
     test('shows the offline page when the network is gone', async ({
         page,
