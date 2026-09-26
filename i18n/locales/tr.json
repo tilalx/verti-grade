@@ -91,7 +91,8 @@
         "usernameInvalid": "Harf, rakam, nokta, tire veya alt çizgi kullan.",
         "emailTaken": "Bu e-posta adresi kullanılamaz.",
         "resendVerification": "Doğrulama e-postasını yeniden gönder",
-        "resendVerificationInfo": "E-posta adresine yeni bir doğrulama bağlantısı göndereceğiz."
+        "resendVerificationInfo": "E-posta adresine yeni bir doğrulama bağlantısı göndereceğiz.",
+        "confirmPassword": "Şifreyi onayla"
     },
     "routes": {
         "home": "Ana Sayfa",

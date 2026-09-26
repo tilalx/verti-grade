@@ -41,11 +41,7 @@
                 :data-tick-id="tick.id"
             >
                 <div class="d-flex align-center ga-3 pa-3">
-                    <v-avatar
-                        :color="routeOf(tick)?.color || 'grey'"
-                        size="32"
-                        class="flex-shrink-0"
-                    />
+                    <RouteColorDot :color="routeOf(tick)?.color" :size="32" />
                     <div class="flex-grow-1 logbook-tick__body">
                         <NuxtLink
                             v-if="routeOf(tick)"
@@ -68,7 +64,9 @@
                                 {{ t(`ticks.types.${tick.type}`) }}
                             </v-chip>
                             <span
-                                v-if="tick.type !== 'flash'"
+                                v-if="
+                                    tick.type !== 'flash' && tick.attempts > 1
+                                "
                                 class="text-body-small text-medium-emphasis"
                                 data-testid="logbook-tick-attempts"
                             >

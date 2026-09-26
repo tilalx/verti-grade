@@ -8,40 +8,40 @@
         data-testid="tick-dialog"
     >
         <v-form ref="formRef" @submit.prevent="submit">
-            <v-btn-toggle
-                v-model="form.type"
-                mandatory
-                divided
-                color="primary"
-                variant="outlined"
-                class="mb-4 w-100 tick-dialog__types"
-            >
+            <div class="d-flex ga-2 mb-5" role="radiogroup">
                 <v-btn
                     v-for="type in TICK_TYPES"
                     :key="type"
-                    :value="type"
-                    class="flex-grow-1"
+                    role="radio"
+                    :aria-checked="form.type === type"
+                    :color="form.type === type ? 'primary' : undefined"
+                    :variant="form.type === type ? 'flat' : 'tonal'"
+                    :prepend-icon="TYPE_ICONS[type]"
+                    height="48"
+                    class="tick-dialog__type"
                     :data-testid="`tick-type-${type}`"
+                    @click="form.type = type"
                 >
                     {{ $t(`ticks.types.${type}`) }}
                 </v-btn>
-            </v-btn-toggle>
+            </div>
 
             <v-row density="comfortable">
-                <v-col cols="6">
-                    <v-text-field
-                        v-model.number="form.attempts"
-                        type="number"
+                <v-col cols="12" sm="6">
+                    <v-number-input
+                        v-model="form.attempts"
                         :min="1"
                         :max="999"
                         :disabled="form.type === 'flash'"
                         :label="$t('ticks.attempts')"
                         :rules="[attemptsRule]"
-                        prepend-inner-icon="mdi-counter"
+                        control-variant="split"
+                        variant="outlined"
+                        inset
                         data-testid="tick-attempts"
                     />
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" sm="6">
                     <v-text-field
                         v-model="form.day"
                         type="date"
@@ -94,6 +94,12 @@ import {
     type TickType,
 } from '#shared/utils/ticks'
 import { formatDateToYYYYMMDD } from '#shared/utils/formatting'
+
+const TYPE_ICONS: Record<TickType, string> = {
+    flash: 'mdi-lightning-bolt',
+    top: 'mdi-flag-checkered',
+    attempt: 'mdi-reload',
+}
 
 const open = defineModel<boolean>({ default: false })
 
@@ -174,7 +180,8 @@ async function submit() {
 </script>
 
 <style scoped>
-.tick-dialog__types {
-    height: 44px;
+.tick-dialog__type {
+    flex: 1 1 0;
+    min-width: 0;
 }
 </style>

@@ -91,7 +91,8 @@
         "usernameInvalid": "Use letters, numbers, dots, dashes or underscores.",
         "emailTaken": "This email address can't be used.",
         "resendVerification": "Resend verification email",
-        "resendVerificationInfo": "We'll send a new verification link to your email address."
+        "resendVerificationInfo": "We'll send a new verification link to your email address.",
+        "confirmPassword": "Confirm password"
     },
     "routes": {
         "home": "Home",

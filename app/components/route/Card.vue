@@ -16,27 +16,15 @@
                 data-testid="route-card-checkbox"
                 @update:modelValue="$emit('update:modelValue', !!$event)"
             />
-            <v-avatar
-                :color="route.color ?? undefined"
-                size="32"
-                class="flex-shrink-0"
-            />
+            <RouteColorDot :color="route.color" :ticked="ticked" :size="32" />
             <div class="list-card__title">
                 <span class="list-card__name" data-testid="route-card-name">{{
                     route.name
                 }}</span>
                 <span
-                    v-if="route.has_ratings || route.archived || ticked"
+                    v-if="route.has_ratings || route.archived"
                     class="route-card__badges"
                 >
-                    <v-icon
-                        v-if="ticked"
-                        color="success"
-                        size="14"
-                        :aria-label="$t('ticks.sent')"
-                        data-testid="route-card-ticked"
-                        >mdi-check-circle</v-icon
-                    >
                     <v-icon
                         v-if="route.has_ratings"
                         color="yellow-darken-2"

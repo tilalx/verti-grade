@@ -100,7 +100,11 @@
                 @update:options="loadRoutes"
             >
                 <template #item.color="{ item }">
-                    <v-avatar :color="item.color ?? undefined" size="30" />
+                    <RouteColorDot
+                        :color="item.color"
+                        :ticked="tickedRouteIds.has(item.id)"
+                        :size="30"
+                    />
                 </template>
                 <template #item.name="{ item }">
                     <div
@@ -108,15 +112,6 @@
                         :data-testid="`index-row-${item.id}`"
                     >
                         <span class="route-name">{{ item.name }}</span>
-                        <v-icon
-                            v-if="tickedRouteIds.has(item.id)"
-                            color="success"
-                            size="small"
-                            class="ml-2"
-                            :aria-label="$t('ticks.sent')"
-                            data-testid="index-row-ticked"
-                            >mdi-check-circle</v-icon
-                        >
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"

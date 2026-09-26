@@ -91,7 +91,8 @@
         "usernameInvalid": "Nur Buchstaben, Zahlen, Punkte, Binde- oder Unterstriche.",
         "emailTaken": "Diese E-Mail-Adresse kann nicht verwendet werden.",
         "resendVerification": "Bestätigungs-E-Mail erneut senden",
-        "resendVerificationInfo": "Wir senden dir einen neuen Bestätigungslink an deine E-Mail-Adresse."
+        "resendVerificationInfo": "Wir senden dir einen neuen Bestätigungslink an deine E-Mail-Adresse.",
+        "confirmPassword": "Passwort bestätigen"
     },
     "routes": {
         "home": "Startseite",
