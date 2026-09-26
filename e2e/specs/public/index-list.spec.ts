@@ -19,3 +19,10 @@ test('a route name in the list opens its detail page', async ({ page }) => {
     await page.waitForURL(/\/route\?id=/)
     await expect(page.getByTestId('route-page-name')).toHaveText(name)
 })
+
+test('the view action opens the route page', async ({ page }) => {
+    await gotoSettled(page, '/')
+    await page.getByTestId('route-view').first().click()
+    await page.waitForURL(/\/route\?id=/)
+    await expect(page.getByTestId('route-page-name')).toBeVisible()
+})

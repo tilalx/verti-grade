@@ -153,7 +153,17 @@
                     {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
-                    <RouteDetails :route_id="item.id" />
+                    <div class="d-flex ga-2 justify-end">
+                        <v-btn
+                            :to="`/route?id=${item.id}`"
+                            variant="tonal"
+                            append-icon="mdi-chevron-right"
+                            data-testid="route-view"
+                        >
+                            {{ $t('routes.view') }}
+                        </v-btn>
+                        <RouteDetails :route_id="item.id" />
+                    </div>
                 </template>
             </v-data-table-server>
         </div>
@@ -167,7 +177,17 @@
                         :ticked="tickedRouteIds.has(route.id)"
                     >
                         <template #actions>
-                            <RouteDetails :route_id="route.id" />
+                            <div class="d-flex ga-2 justify-end">
+                                <v-btn
+                                    :to="`/route?id=${route.id}`"
+                                    variant="tonal"
+                                    append-icon="mdi-chevron-right"
+                                    data-testid="route-view"
+                                >
+                                    {{ $t('routes.view') }}
+                                </v-btn>
+                                <RouteDetails :route_id="route.id" />
+                            </div>
                         </template>
                     </RouteCard>
                 </v-col>

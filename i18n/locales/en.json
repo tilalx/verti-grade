@@ -113,7 +113,8 @@
         "name": "Name",
         "reports": "Reports",
         "activity": "Activity",
-        "logbook": "Logbook"
+        "logbook": "Logbook",
+        "view": "View"
     },
     "dashboard": {
         "online": "{0} online"

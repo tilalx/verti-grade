@@ -113,7 +113,8 @@
         "name": "Название",
         "reports": "Жалобы",
         "activity": "Активность",
-        "logbook": "Журнал"
+        "logbook": "Журнал",
+        "view": "Открыть"
     },
     "dashboard": {
         "online": "{0} онлайн"

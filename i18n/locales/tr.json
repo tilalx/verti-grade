@@ -113,7 +113,8 @@
         "name": "Ad",
         "reports": "Şikâyetler",
         "activity": "Etkinlik",
-        "logbook": "Kayıt defteri"
+        "logbook": "Kayıt defteri",
+        "view": "Görüntüle"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"

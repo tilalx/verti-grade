@@ -113,7 +113,8 @@
         "name": "Назва",
         "reports": "Скарги",
         "activity": "Активність",
-        "logbook": "Журнал"
+        "logbook": "Журнал",
+        "view": "Відкрити"
     },
     "dashboard": {
         "online": "{0} онлайн"

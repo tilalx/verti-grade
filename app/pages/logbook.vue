@@ -1,5 +1,5 @@
 <template>
-    <v-container class="logbook-page">
+    <v-container>
         <LayoutPageHeader
             :title="t('ticks.logbook')"
             :subtitle="t('ticks.logbookSubtitle')"
@@ -32,96 +32,110 @@
                 </span>
             </div>
 
-            <v-card
-                v-for="tick in session.ticks"
-                :key="tick.id"
-                variant="tonal"
-                class="mb-2"
-                data-testid="logbook-tick"
-                :data-tick-id="tick.id"
-            >
-                <div class="d-flex align-center ga-3 pa-3">
-                    <RouteColorDot :color="routeOf(tick)?.color" :size="32" />
-                    <div class="flex-grow-1 logbook-tick__body">
-                        <NuxtLink
-                            v-if="routeOf(tick)"
-                            :to="`/route?id=${tick.route}`"
-                            class="logbook-tick__name"
-                            data-testid="logbook-tick-route"
-                        >
-                            {{ routeOf(tick)?.name }}
-                        </NuxtLink>
-                        <span v-else class="text-medium-emphasis">
-                            {{ t('ticks.removedRoute') }}
-                        </span>
-                        <div class="d-flex align-center ga-2 mt-1 flex-wrap">
-                            <v-chip
-                                size="x-small"
-                                variant="flat"
-                                :color="TYPE_COLORS[tick.type]"
-                                data-testid="logbook-tick-type"
-                            >
-                                {{ t(`ticks.types.${tick.type}`) }}
-                            </v-chip>
-                            <span
-                                v-if="
-                                    tick.type !== 'flash' && tick.attempts > 1
-                                "
-                                class="text-body-small text-medium-emphasis"
-                                data-testid="logbook-tick-attempts"
-                            >
-                                {{
-                                    t('ticks.attemptCount', {
-                                        count: tick.attempts,
-                                    })
-                                }}
-                            </span>
-                            <v-chip
-                                v-if="routeOf(tick)?.archived"
-                                size="x-small"
-                                variant="outlined"
-                            >
-                                {{ t('filter.archived') }}
-                            </v-chip>
+            <v-row density="comfortable">
+                <v-col
+                    v-for="tick in session.ticks"
+                    :key="tick.id"
+                    cols="12"
+                    md="6"
+                    xl="4"
+                >
+                    <v-card
+                        variant="tonal"
+                        class="h-100"
+                        data-testid="logbook-tick"
+                        :data-tick-id="tick.id"
+                    >
+                        <div class="d-flex align-center ga-3 pa-3">
+                            <RouteColorDot
+                                :color="routeOf(tick)?.color"
+                                :size="32"
+                            />
+                            <div class="flex-grow-1 logbook-tick__body">
+                                <NuxtLink
+                                    v-if="routeOf(tick)"
+                                    :to="`/route?id=${tick.route}`"
+                                    class="logbook-tick__name"
+                                    data-testid="logbook-tick-route"
+                                >
+                                    {{ routeOf(tick)?.name }}
+                                </NuxtLink>
+                                <span v-else class="text-medium-emphasis">
+                                    {{ t('ticks.removedRoute') }}
+                                </span>
+                                <div
+                                    class="d-flex align-center ga-2 mt-1 flex-wrap"
+                                >
+                                    <v-chip
+                                        size="x-small"
+                                        variant="flat"
+                                        :color="TYPE_COLORS[tick.type]"
+                                        data-testid="logbook-tick-type"
+                                    >
+                                        {{ t(`ticks.types.${tick.type}`) }}
+                                    </v-chip>
+                                    <span
+                                        v-if="
+                                            tick.type !== 'flash' &&
+                                            tick.attempts > 1
+                                        "
+                                        class="text-body-small text-medium-emphasis"
+                                        data-testid="logbook-tick-attempts"
+                                    >
+                                        {{
+                                            t('ticks.attemptCount', {
+                                                count: tick.attempts,
+                                            })
+                                        }}
+                                    </span>
+                                    <v-chip
+                                        v-if="routeOf(tick)?.archived"
+                                        size="x-small"
+                                        variant="outlined"
+                                    >
+                                        {{ t('filter.archived') }}
+                                    </v-chip>
+                                </div>
+                                <p
+                                    v-if="tick.note"
+                                    class="text-body-small mt-1 mb-0"
+                                    data-testid="logbook-tick-note"
+                                >
+                                    {{ tick.note }}
+                                </p>
+                            </div>
+                            <GradeLabel :source="tick" />
+                            <v-menu location="bottom end">
+                                <template #activator="{ props: menu }">
+                                    <v-btn
+                                        v-bind="menu"
+                                        icon="mdi-dots-vertical"
+                                        variant="text"
+                                        size="small"
+                                        :aria-label="t('ticks.moreActions')"
+                                        data-testid="logbook-tick-menu"
+                                    />
+                                </template>
+                                <v-list density="compact">
+                                    <v-list-item
+                                        prepend-icon="mdi-pencil-outline"
+                                        :title="t('actions.edit')"
+                                        data-testid="logbook-tick-edit"
+                                        @click="openEdit(tick)"
+                                    />
+                                    <v-list-item
+                                        prepend-icon="mdi-delete-outline"
+                                        :title="t('actions.delete')"
+                                        base-color="error"
+                                        data-testid="logbook-tick-delete"
+                                        @click="deleteTarget = tick"
+                                    />
+                                </v-list>
+                            </v-menu>
                         </div>
-                        <p
-                            v-if="tick.note"
-                            class="text-body-small mt-1 mb-0"
-                            data-testid="logbook-tick-note"
-                        >
-                            {{ tick.note }}
-                        </p>
-                    </div>
-                    <GradeLabel :source="tick" />
-                    <v-menu location="bottom end">
-                        <template #activator="{ props: menu }">
-                            <v-btn
-                                v-bind="menu"
-                                icon="mdi-dots-vertical"
-                                variant="text"
-                                size="small"
-                                :aria-label="t('ticks.moreActions')"
-                                data-testid="logbook-tick-menu"
-                            />
-                        </template>
-                        <v-list density="compact">
-                            <v-list-item
-                                prepend-icon="mdi-pencil-outline"
-                                :title="t('actions.edit')"
-                                data-testid="logbook-tick-edit"
-                                @click="openEdit(tick)"
-                            />
-                            <v-list-item
-                                prepend-icon="mdi-delete-outline"
-                                :title="t('actions.delete')"
-                                base-color="error"
-                                data-testid="logbook-tick-delete"
-                                @click="deleteTarget = tick"
-                            />
-                        </v-list>
-                    </v-menu>
-                </div>
-            </v-card>
+                    </v-card>
+                </v-col>
+            </v-row>
         </section>
 
         <TickDialog v-model="editOpen" :tick="editing" @saved="reload" />
@@ -226,10 +240,6 @@ async function confirmDelete() {
 </script>
 
 <style scoped>
-.logbook-page {
-    max-width: 720px;
-}
-
 .logbook-tick__body {
     min-width: 0;
 }
