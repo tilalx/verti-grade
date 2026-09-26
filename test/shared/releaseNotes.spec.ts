@@ -42,6 +42,21 @@ describe('parseReleaseNotes', () => {
 })
 
 describe('parseChange', () => {
+    it('turns a bare pull request url into a pr link, not a type', () => {
+        expect(parseChange('https://github.com/o/r/pull/42')).toMatchObject({
+            type: null,
+            subject: '',
+            pr: '42',
+        })
+    })
+
+    it('needs a space after the colon to read a commit type', () => {
+        expect(parseChange('note:no space')).toMatchObject({
+            type: null,
+            subject: 'note:no space',
+        })
+    })
+
     it('parses plain commit messages', () => {
         expect(parseChange('feat(search): global search (#480)')).toMatchObject(
             {

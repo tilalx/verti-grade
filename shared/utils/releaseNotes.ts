@@ -10,7 +10,8 @@ export interface ReleaseChange {
     category: ChangeCategory
 }
 
-const CONVENTIONAL = /^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/
+const CONVENTIONAL = /^(\w+)(?:\(([^)]+)\))?(!)?:\s+(.+)$/
+const BARE_PR = /^https:\/\/github\.com\/\S+\/pull\/(\d+)$/
 const BULLET = /^\s*[-*]\s+(.+)$/
 const TRAILER =
     /^(.*?)(?:\s+by\s+@(\S+))?(?:\s+in\s+(?:https:\/\/github\.com\/\S+\/pull\/(\d+)|#(\d+)))?\s*$/
@@ -36,6 +37,17 @@ const stripMarkdown = (text: string) =>
         .replace(/`([^`]+)`/g, '$1')
 
 export function parseChange(line: string): ReleaseChange {
+    const barePr = line.trim().match(BARE_PR)
+    if (barePr)
+        return {
+            type: null,
+            scope: null,
+            breaking: false,
+            subject: '',
+            author: null,
+            pr: barePr[1]!,
+            category: 'other',
+        }
     const [, trailed = line, author = null, prUrl, prRef] =
         stripMarkdown(line.trim()).match(TRAILER) ?? []
     const squash = trailed.match(SQUASH_PR)
