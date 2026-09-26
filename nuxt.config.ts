@@ -52,7 +52,16 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
-            meta: [{ name: 'color-scheme', content: 'light dark' }],
+            meta: [
+                { name: 'color-scheme', content: 'light dark' },
+                { name: 'theme-color', content: '#38741C' },
+                { name: 'mobile-web-app-capable', content: 'yes' },
+                { name: 'apple-mobile-web-app-title', content: 'Verti-Grade' },
+            ],
+            link: [
+                { rel: 'manifest', href: '/manifest.webmanifest' },
+                { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+            ],
         },
     },
     modules: ['@nuxtjs/i18n', '@nuxt/image', 'vuetify-nuxt-module'],
