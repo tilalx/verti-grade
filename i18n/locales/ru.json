@@ -111,7 +111,8 @@
         },
         "name": "Название",
         "reports": "Жалобы",
-        "activity": "Активность"
+        "activity": "Активность",
+        "logbook": "Журнал"
     },
     "dashboard": {
         "online": "{0} онлайн"
@@ -513,7 +514,8 @@
             "reports": "Жалобы на контент - Verti-Grade",
             "activity": "Журнал активности - Verti-Grade",
             "verifyEmail": "Подтверждение e-mail - Verti-Grade",
-            "emailChange": "Смена e-mail - Verti-Grade"
+            "emailChange": "Смена e-mail - Verti-Grade",
+            "logbook": "Журнал - Verti-Grade"
         },
         "content": {
             "settings": "Настройки",
@@ -886,5 +888,32 @@
         "yds": "YDS",
         "font": "Font",
         "v": "Hueco"
+    },
+    "ticks": {
+        "logbook": "Журнал",
+        "logbookSubtitle": "Ваши восхождения по сессиям.",
+        "empty": "Пока нет восхождений",
+        "emptyHint": "Откройте трассу и нажмите «Отметить восхождение», чтобы начать журнал.",
+        "sendCount": "Пролазы: {count}",
+        "attemptCount": "Попытки: {count}",
+        "removedRoute": "Удалённая трасса",
+        "logAscent": "Отметить восхождение",
+        "edit": "Изменить восхождение",
+        "attempts": "Попытки",
+        "attemptsInvalid": "Введите целое число от 1 до 999.",
+        "date": "Дата",
+        "note": "Личная заметка",
+        "noteHint": "Эту заметку видите только вы.",
+        "saved": "Восхождение сохранено.",
+        "saveError": "Не удалось сохранить восхождение.",
+        "deleted": "Восхождение удалено.",
+        "deleteConfirm": "Удалить это восхождение? Это действие нельзя отменить.",
+        "sent": "Пройдено",
+        "moreActions": "Другие действия",
+        "types": {
+            "flash": "Флэш",
+            "top": "Топ",
+            "attempt": "Попытка"
+        }
     }
 }

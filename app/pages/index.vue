@@ -109,6 +109,15 @@
                     >
                         <span class="route-name">{{ item.name }}</span>
                         <v-icon
+                            v-if="tickedRouteIds.has(item.id)"
+                            color="success"
+                            size="small"
+                            class="ml-2"
+                            :aria-label="$t('ticks.sent')"
+                            data-testid="index-row-ticked"
+                            >mdi-check-circle</v-icon
+                        >
+                        <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"
                             size="small"
@@ -153,7 +162,10 @@
         <div v-if="!isWideLayout">
             <v-row class="mt-2">
                 <v-col v-for="route in routes" :key="route.id" cols="12">
-                    <RouteCard :route="route">
+                    <RouteCard
+                        :route="route"
+                        :ticked="tickedRouteIds.has(route.id)"
+                    >
                         <template #actions>
                             <RouteDetails :route_id="route.id" />
                         </template>
@@ -243,6 +255,7 @@ const tableOptions = reactive<TableOptions>({
 
 const loading = ref(true)
 const routes = shallowRef<RouteListItem[]>([])
+const { tickedRouteIds } = useTickedRoutes()
 const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 

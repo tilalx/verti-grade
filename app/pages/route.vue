@@ -252,6 +252,36 @@
                             </div>
                         </div>
 
+                        <div
+                            v-if="isLoggedIn && route_id"
+                            class="d-flex align-center ga-2 mb-3"
+                        >
+                            <v-btn
+                                color="success"
+                                variant="tonal"
+                                size="large"
+                                class="flex-grow-1"
+                                prepend-icon="mdi-check-circle-outline"
+                                data-testid="tick-open"
+                                @click="tickDialog = true"
+                            >
+                                {{ t('ticks.logAscent') }}
+                            </v-btn>
+                            <v-chip
+                                v-if="tickedRouteIds.has(route_id)"
+                                color="success"
+                                prepend-icon="mdi-check"
+                                data-testid="route-ticked"
+                            >
+                                {{ t('ticks.sent') }}
+                            </v-chip>
+                            <TickDialog
+                                v-model="tickDialog"
+                                :route-id="route_id"
+                                @saved="refreshTickedRoutes()"
+                            />
+                        </div>
+
                         <!-- ── Rate CTA ───────────────────────────────────────────── -->
                         <div class="mb-6">
                             <ReviewFormDialog
@@ -383,6 +413,9 @@ function openReport(id: string) {
 }
 
 const { subscribe } = usePbSubscription()
+const isLoggedIn = pb.authStore.isValid
+const tickDialog = ref(false)
+const { tickedRouteIds, refreshTickedRoutes } = useTickedRoutes()
 const { error: notifyError } = useNotification()
 
 // ── Page meta ──────────────────────────────────────────────────────────────

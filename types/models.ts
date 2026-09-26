@@ -1,6 +1,7 @@
 import type { AUDIT_ACTIONS } from '../app/utils/audit'
 import type { REPORT_REASONS, REPORT_STATUSES } from '../app/utils/reports'
 import type { ROUTE_TYPES } from '../app/utils/routes'
+import type { TickType } from '../shared/utils/ticks'
 
 export type RecordId = string
 
@@ -52,6 +53,18 @@ export interface RatingRecord extends BaseRecord {
     grade_system?: string | null
     grade_index?: number | null
     comment?: string | null
+}
+
+export interface TickRecord extends BaseRecord {
+    user: RecordId
+    route?: RecordId | null
+    type: TickType
+    attempts: number
+    date: string
+    note?: string | null
+    grade?: string | null
+    grade_system?: string | null
+    grade_index?: number | null
 }
 
 export interface RouteComment extends RatingRecord {
@@ -163,6 +176,7 @@ export type PocketBaseRecord =
     | RouteRecord
     | RouteListItem
     | RatingRecord
+    | TickRecord
     | RouteComment
     | PermissionRecord
     | RoleRecord

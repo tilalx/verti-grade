@@ -111,7 +111,8 @@
         },
         "name": "Назва",
         "reports": "Скарги",
-        "activity": "Активність"
+        "activity": "Активність",
+        "logbook": "Журнал"
     },
     "dashboard": {
         "online": "{0} онлайн"
@@ -513,7 +514,8 @@
             "reports": "Скарги на вміст - Verti-Grade",
             "activity": "Журнал активності - Verti-Grade",
             "verifyEmail": "Підтвердження e-mail - Verti-Grade",
-            "emailChange": "Зміна e-mail - Verti-Grade"
+            "emailChange": "Зміна e-mail - Verti-Grade",
+            "logbook": "Журнал - Verti-Grade"
         },
         "content": {
             "settings": "Налаштування",
@@ -886,5 +888,32 @@
         "yds": "YDS",
         "font": "Font",
         "v": "Hueco"
+    },
+    "ticks": {
+        "logbook": "Журнал",
+        "logbookSubtitle": "Ваші сходження за сесіями.",
+        "empty": "Ще немає сходжень",
+        "emptyHint": "Відкрийте трасу й натисніть «Відмітити сходження», щоб почати журнал.",
+        "sendCount": "Пролази: {count}",
+        "attemptCount": "Спроби: {count}",
+        "removedRoute": "Видалена траса",
+        "logAscent": "Відмітити сходження",
+        "edit": "Змінити сходження",
+        "attempts": "Спроби",
+        "attemptsInvalid": "Введіть ціле число від 1 до 999.",
+        "date": "Дата",
+        "note": "Особиста нотатка",
+        "noteHint": "Цю нотатку бачите лише ви.",
+        "saved": "Сходження збережено.",
+        "saveError": "Не вдалося зберегти сходження.",
+        "deleted": "Сходження видалено.",
+        "deleteConfirm": "Видалити це сходження? Цю дію не можна скасувати.",
+        "sent": "Пройдено",
+        "moreActions": "Інші дії",
+        "types": {
+            "flash": "Флеш",
+            "top": "Топ",
+            "attempt": "Спроба"
+        }
     }
 }

@@ -26,9 +26,17 @@
                     route.name
                 }}</span>
                 <span
-                    v-if="route.has_ratings || route.archived"
+                    v-if="route.has_ratings || route.archived || ticked"
                     class="route-card__badges"
                 >
+                    <v-icon
+                        v-if="ticked"
+                        color="success"
+                        size="14"
+                        :aria-label="$t('ticks.sent')"
+                        data-testid="route-card-ticked"
+                        >mdi-check-circle</v-icon
+                    >
                     <v-icon
                         v-if="route.has_ratings"
                         color="yellow-darken-2"
@@ -138,10 +146,12 @@ const props = withDefaults(
         route: RouteListItem
         selectable?: boolean
         modelValue?: boolean
+        ticked?: boolean
     }>(),
     {
         selectable: false,
         modelValue: false,
+        ticked: false,
     },
 )
 

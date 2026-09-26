@@ -111,7 +111,8 @@
         },
         "name": "Name",
         "reports": "Meldungen",
-        "activity": "Aktivität"
+        "activity": "Aktivität",
+        "logbook": "Logbuch"
     },
     "dashboard": {
         "online": "{0} online"
@@ -513,7 +514,8 @@
             "reports": "Inhaltsmeldungen - Verti-Grade",
             "activity": "Aktivitätsprotokoll - Verti-Grade",
             "verifyEmail": "E-Mail bestätigen - Verti-Grade",
-            "emailChange": "E-Mail ändern - Verti-Grade"
+            "emailChange": "E-Mail ändern - Verti-Grade",
+            "logbook": "Logbuch - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
@@ -886,5 +888,32 @@
         "yds": "YDS",
         "font": "Font",
         "v": "Hueco"
+    },
+    "ticks": {
+        "logbook": "Logbuch",
+        "logbookSubtitle": "Deine Begehungen, nach Session gruppiert.",
+        "empty": "Noch keine Begehungen",
+        "emptyHint": "Öffne eine Route und tippe auf „Begehung eintragen“, um dein Logbuch zu beginnen.",
+        "sendCount": "Durchstiege: {count}",
+        "attemptCount": "Versuche: {count}",
+        "removedRoute": "Entfernte Route",
+        "logAscent": "Begehung eintragen",
+        "edit": "Begehung bearbeiten",
+        "attempts": "Versuche",
+        "attemptsInvalid": "Gib eine ganze Zahl von 1 bis 999 ein.",
+        "date": "Datum",
+        "note": "Private Notiz",
+        "noteHint": "Nur du siehst diese Notiz.",
+        "saved": "Begehung gespeichert.",
+        "saveError": "Die Begehung konnte nicht gespeichert werden.",
+        "deleted": "Begehung gelöscht.",
+        "deleteConfirm": "Diese Begehung löschen? Das kann nicht rückgängig gemacht werden.",
+        "sent": "Geschafft",
+        "moreActions": "Weitere Aktionen",
+        "types": {
+            "flash": "Flash",
+            "top": "Top",
+            "attempt": "Versuch"
+        }
     }
 }

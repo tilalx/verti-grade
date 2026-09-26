@@ -99,3 +99,20 @@ func TestDropSubRequestHeaders(t *testing.T) {
 		}
 	}
 }
+
+func TestNormalizeFlashAttempts(t *testing.T) {
+	tick := core.NewRecord(core.NewBaseCollection("ticks"))
+	tick.Set("type", "flash")
+	tick.Set("attempts", 4)
+	normalizeFlashAttempts(tick)
+	if tick.GetInt("attempts") != 1 {
+		t.Fatalf("flash attempts = %d, want 1", tick.GetInt("attempts"))
+	}
+
+	tick.Set("type", "top")
+	tick.Set("attempts", 4)
+	normalizeFlashAttempts(tick)
+	if tick.GetInt("attempts") != 4 {
+		t.Fatalf("top attempts = %d, want 4", tick.GetInt("attempts"))
+	}
+}
