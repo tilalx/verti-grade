@@ -23,7 +23,7 @@
                                 </v-avatar>
                                 <div>
                                     <div
-                                        class="text-title-small font-weight-bold text-white"
+                                        class="text-title-small font-weight-bold text-high-emphasis"
                                     >
                                         {{ orgName }}
                                     </div>
@@ -43,7 +43,10 @@
                                 >
                                     {{ $t('account.eyebrowBrand') }}
                                 </div>
-                                <h1 class="brand-title text-white">
+                                <h1
+                                    class="brand-title text-high-emphasis"
+                                    data-testid="auth-brand-title"
+                                >
                                     <slot name="brand-headline" />
                                 </h1>
                             </div>

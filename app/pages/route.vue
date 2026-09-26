@@ -512,7 +512,7 @@ if (initial.value) {
     reviews.value = initial.value.reviews
 }
 
-if (!metadata.value) await navigateTo('/404')
+if (!metadata.value) throw createError({ status: 404, fatal: true })
 
 loading.value = false
 

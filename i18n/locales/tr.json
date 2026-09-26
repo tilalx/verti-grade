@@ -667,7 +667,15 @@
     "errors": {
         "notFound": {
             "title": "Sayfa bulunamadı",
-            "subtitle": "İstenen sayfa bulunamadı."
+            "subtitle": "İstenen sayfa bulunamadı.",
+            "accent": "Rotadan çıktınız"
+        },
+        "eyebrow": "Hata {code}",
+        "goBack": "Geri dön",
+        "retry": "Tekrar dene",
+        "server": {
+            "title": "Bir şeyler ters gitti",
+            "subtitle": "Beklenmeyen bir hata oluştu. Lütfen birazdan tekrar deneyin."
         }
     },
     "export": {
