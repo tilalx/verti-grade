@@ -78,7 +78,7 @@ function signSuffix(raw) {
         .replace(/"/g, '')
         .trim()
     if (value === 'true' || value === '+' || value === '1') return '+'
-    if (value === '-') return '-'
+    if (value === 'false' || value === '-') return '-'
     return ''
 }
 
