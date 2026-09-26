@@ -48,3 +48,59 @@ test('a user can mark a notification read but not hand it to someone else', asyn
 
     await root.collection('notifications').delete(notification.id)
 })
+
+test('only the recipient can see or touch a notification', async ({}, info) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const roleIds = await getRoleIds(root)
+    const prefix = `notif-read-w${info.workerIndex}`
+    const owner = await ensureUser(root, roleIds.user, 'user', `${prefix}-a`)
+    const other = await ensureUser(root, roleIds.admin, 'admin', `${prefix}-b`)
+
+    const notification = await root.collection('notifications').create({
+        user: owner.id,
+        type: 'report_filed',
+        params: { snippet: prefix },
+        url: '/manage/reports',
+        read: false,
+    })
+
+    const anonymous = new PocketBase(PB_URL)
+    const otherUser = new PocketBase(PB_URL)
+    await otherUser
+        .collection('users')
+        .authWithPassword(other.email, other.password)
+
+    for (const client of [anonymous, otherUser]) {
+        const notifications = client.collection('notifications')
+        const listed = await notifications.getList(1, 200, {
+            filter: client.filter('id = {:id}', { id: notification.id }),
+            requestKey: null,
+        })
+        expect(listed.items).toHaveLength(0)
+        await expect(
+            notifications.getOne(notification.id, { requestKey: null }),
+        ).rejects.toMatchObject({ status: 404 })
+        await expect(
+            notifications.update(
+                notification.id,
+                { read: true },
+                { requestKey: null },
+            ),
+        ).rejects.toMatchObject({ status: 404 })
+        await expect(
+            notifications.delete(notification.id, { requestKey: null }),
+        ).rejects.toMatchObject({ status: 404 })
+    }
+
+    const recipient = new PocketBase(PB_URL)
+    await recipient
+        .collection('users')
+        .authWithPassword(owner.email, owner.password)
+    const seen = await recipient
+        .collection('notifications')
+        .getOne(notification.id)
+    expect(seen.read).toBe(false)
+
+    await root.collection('notifications').delete(notification.id)
+})
