@@ -33,7 +33,7 @@ pipeline {
                     def releaseVersion = ""
 
                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim().toLowerCase()
-                    if (commitMessage ==~ /.*release\s+v?(\d+\.\d+\.\d+).*/) {
+                    if (branchName == "main" && commitMessage ==~ /.*release\s+v?(\d+\.\d+\.\d+).*/) {
                         def matcher = (commitMessage =~ /release\s+v?(\d+\.\d+\.\d+)/)
                         if (matcher) {
                             releaseVersion = matcher[0][1]
