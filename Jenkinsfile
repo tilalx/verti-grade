@@ -66,6 +66,29 @@ pipeline {
             }
         }
 
+        stage('Unit Tests') {
+            parallel {
+                stage('Vitest') {
+                    steps {
+                        sh '''
+                            docker run --rm -v "$PWD":/work -w /work -v vg-e2e-yarn-cache:/root/.yarn/berry/cache \
+                                node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 \
+                                sh -c "corepack enable && yarn install --immutable --mode=skip-build && yarn test"
+                        '''
+                    }
+                }
+                stage('Go Hooks') {
+                    steps {
+                        sh '''
+                            docker run --rm -v "$PWD/pocketbase":/src -w /src \
+                                golang:1.27.1-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183 \
+                                go test ./...
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Build (test image)') {
             steps {
                 sh """
