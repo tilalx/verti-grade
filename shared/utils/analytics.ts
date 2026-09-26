@@ -1,21 +1,24 @@
+import { normalizeCreators, parseDate } from './formatting'
 import {
-    formatDifficulty,
-    normalizeCreators,
-    parseDate,
-    type DifficultySource,
-} from './formatting'
+    GRADE_SYSTEMS,
+    formatGrade,
+    gradeIndex,
+    isGradeSystem,
+    nearestGrade,
+    type GradeSource,
+} from './grades'
 
 export const ANALYTICS_RANGES = ['30d', '90d', '12m', 'all', 'custom'] as const
 export type AnalyticsRange = (typeof ANALYTICS_RANGES)[number]
 
 export const MIN_VOTES_FOR_FEEDBACK = 3
-export const GRADE_DEVIATION_THRESHOLD = 0.5
+export const GRADE_DEVIATION_THRESHOLD = 1.5
 const LIST_LIMIT = 5
 const OLDEST_LIMIT = 10
 const FEEDBACK_LIMIT = 300
 const DAY_MS = 86_400_000
 
-export interface AnalyticsRoute extends DifficultySource {
+export interface AnalyticsRoute extends GradeSource {
     id: string
     name?: string | null
     type?: string | null
@@ -28,7 +31,7 @@ export interface AnalyticsRoute extends DifficultySource {
     created?: string
 }
 
-export interface AnalyticsRating extends DifficultySource {
+export interface AnalyticsRating extends GradeSource {
     id: string
     route_id?: string | null
     rating?: number | null
@@ -88,6 +91,7 @@ export interface RatedRoute extends RouteSummary {
 export interface FeedbackRoute extends RouteSummary {
     setGrade: number
     votedGrade: number
+    votedGradeLabel: string
     deviation: number
     votes: number
 }
@@ -200,19 +204,10 @@ export function resolveFilters(
     }
 }
 
-export function difficultyScore(source: DifficultySource): number | null {
-    const level = Number(source.difficulty)
-    if (
-        source.difficulty === null ||
-        source.difficulty === '' ||
-        !Number.isFinite(level)
-    ) {
-        return null
-    }
-    const sign = source.difficulty_sign
-    if (sign === true || sign === '+') return level + 1 / 3
-    if (sign === false || sign === '-') return level - 1 / 3
-    return level
+export function gradeScore(source: GradeSource): number | null {
+    const index =
+        source.grade_index ?? gradeIndex(source.grade_system, source.grade)
+    return typeof index === 'number' && Number.isFinite(index) ? index : null
 }
 
 export function compareGrades(left: string, right: string): number {
@@ -220,14 +215,14 @@ export function compareGrades(left: string, right: string): number {
 }
 
 function gradeOrder(grade: string): number {
-    const match = grade.trim().match(/^(\d+)([+-]?)$/)
-    if (!match) return Number.MAX_SAFE_INTEGER
-    const sign = match[2] === '+' ? 1 : match[2] === '-' ? -1 : 0
-    return Number(match[1]) * 10 + sign
+    const indexes = GRADE_SYSTEMS.map((system) =>
+        gradeIndex(system, grade),
+    ).filter((index): index is number => index !== null)
+    return indexes.length ? Math.min(...indexes) : Number.MAX_SAFE_INTEGER
 }
 
 function gradeLabel(route: AnalyticsRoute): string {
-    return `${route.difficulty ?? ''}`.trim() ? formatDifficulty(route) : '?'
+    return formatGrade(route) || '?'
 }
 
 function routeDate(route: AnalyticsRoute): Date | null {
@@ -373,9 +368,9 @@ export function buildAnalytics(
         })
 
     const deviationOf = (route: AnalyticsRoute) => {
-        const setScore = difficultyScore(route)
+        const setScore = gradeScore(route)
         const votes = (ratingsByRoute.get(route.id) ?? [])
-            .map(difficultyScore)
+            .map(gradeScore)
             .filter((score): score is number => score !== null)
         if (setScore === null || votes.length < MIN_VOTES_FOR_FEEDBACK)
             return null
@@ -510,8 +505,11 @@ export function buildAnalytics(
             ? [
                   {
                       ...summarize(route),
-                      setGrade: round(difficultyScore(route))!,
+                      setGrade: round(gradeScore(route))!,
                       votedGrade: round(result.votedGrade)!,
+                      votedGradeLabel: isGradeSystem(route.grade_system)
+                          ? nearestGrade(route.grade_system, result.votedGrade)
+                          : '',
                       deviation: round(result.deviation)!,
                       votes: result.votes,
                   },

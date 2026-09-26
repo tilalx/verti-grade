@@ -326,8 +326,8 @@
 
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
-import { formatDifficulty, locationName } from '#shared/utils/formatting'
-import { DIFFICULTY_LEVELS } from '~/utils/routes'
+import { locationName } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 import type { RatingRecord, RouteRecord, UserRecord } from '~/types/models'
 
 type ManagedComment = RatingRecord & {
@@ -374,7 +374,7 @@ watch(
     (value) => (search.value = String(value ?? '')),
 )
 const selectedLocation = ref<string | null>(null)
-const selectedDifficulty = ref<number | null>(null)
+const selectedDifficulty = ref<string | null>(null)
 const selectedRating = ref(0)
 const dateFilter = ref('')
 const sortOrder = ref('newest')
@@ -407,12 +407,11 @@ function clearFilters() {
 
 // ── Static options ─────────────────────────────────────────────────────────
 
+const { activeGrades } = useGradeSystems()
+
 const difficulties = computed(() => [
     { text: t('filter.all'), value: null },
-    ...DIFFICULTY_LEVELS.map((level) => ({
-        text: String(level),
-        value: level,
-    })),
+    ...activeGrades.value.map((grade) => ({ text: grade, value: grade })),
 ])
 
 const { data: locationRecords } = useLocations()
@@ -441,7 +440,7 @@ function buildFilter(searchTerm: string) {
     if (selectedLocation.value)
         parts.push(`route_id.location = "${selectedLocation.value}"`)
     if (selectedDifficulty.value !== null)
-        parts.push(`difficulty = ${selectedDifficulty.value}`)
+        parts.push(`grade = "${selectedDifficulty.value}"`)
     if (dateFilter.value === 'week') {
         const d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         parts.push(`created >= "${d}"`)
@@ -492,8 +491,7 @@ function mapComment(rating: RatingRecord): ManagedComment {
         routeId: route?.id ?? null,
         routeName: route?.name ?? 'N/A',
         location: locationName(route) || null,
-        difficultyLabel:
-            rating.difficulty != null ? formatDifficulty(rating) : null,
+        difficultyLabel: formatGrade(rating) || null,
         userName: user?.name || user?.username || t('comments.anonymous'),
         userAvatar:
             usePbFileUrl(user, user?.avatar, { thumb: '100x100' }) || null,

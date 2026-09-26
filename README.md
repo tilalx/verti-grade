@@ -107,6 +107,7 @@ Go to **Admin → Settings** in the Verti-Grade UI to configure:
 - Organisation name and logo
 - Privacy policy / imprint URL
 - Sign image for route cards
+- Grading scale for routes (UIAA, French, YDS) and boulders (Fontainebleau, V-Scale)
 
 ### 6. Start Adding Routes
 

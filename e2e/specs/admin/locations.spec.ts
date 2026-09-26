@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
+import { uiaa } from '../../support/seed'
 import { authHeader, gotoSettled } from '../../support/nav'
 
 const locationRow = (page: Page, name: string) =>
@@ -57,7 +58,7 @@ test('a location that still has routes cannot be deleted', async ({
             headers,
             data: {
                 name: `${testPrefix}-busy-route`,
-                difficulty: 4,
+                ...uiaa('4'),
                 location: location.id,
                 type: 'Boulder',
                 creator: ['E2E'],

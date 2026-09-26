@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('pdf labels embed a unicode font for cyrillic and turkish text', async ({
     adminPage: page,
@@ -12,7 +12,7 @@ test('pdf labels embed a unicode font for cyrillic and turkish text', async ({
         headers,
         data: {
             name: `${testPrefix}-Скала İzmir`,
-            difficulty: 6,
+            ...uiaa('6'),
             anchor_point: 12,
             location: await locationId(page, LOCATIONS[0]),
             type: 'Route',

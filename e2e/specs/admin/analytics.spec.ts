@@ -2,7 +2,7 @@ import PocketBase from 'pocketbase'
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { authAsSuperuser } from '../../support/seed'
+import { authAsSuperuser, uiaa } from '../../support/seed'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
@@ -174,7 +174,7 @@ test('updates live when a route is created elsewhere', async ({
     const setter = `${testPrefix}-live-setter`
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-live-route`,
-        difficulty: 5,
+        ...uiaa('5'),
         type: 'Route',
         creator: [setter],
         screw_date: new Date().toISOString(),
@@ -203,7 +203,7 @@ test('heatmap switches years and shows day counts', async ({
     const pb = await superuserPb()
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-heatmap-route`,
-        difficulty: 5,
+        ...uiaa('5'),
         type: 'Route',
         creator: [`${testPrefix}-heatmap-setter`],
         screw_date: '2011-06-15 12:00:00.000Z',
@@ -239,7 +239,7 @@ test('reports routes whose grade votes are harder than the set grade', async ({
     const pb = await superuserPb()
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-sandbag`,
-        difficulty: 1,
+        ...uiaa('1'),
         type: 'Route',
         creator: ['Sandbagger'],
         screw_date: new Date().toISOString(),
@@ -249,7 +249,7 @@ test('reports routes whose grade votes are harder than the set grade', async ({
             await pb.collection('ratings').create({
                 route_id: route.id,
                 rating: 4,
-                difficulty: 10,
+                ...uiaa('10'),
             })
         }
         await gotoSettled(page, '/manage/analytics?range=all')
@@ -265,7 +265,7 @@ test('reports routes whose grade votes are harder than the set grade', async ({
         const sandbag = gradeFeedback.find(
             (entry: { id: string }) => entry.id === route.id,
         )
-        expect(sandbag).toMatchObject({ setGrade: 1 })
+        expect(sandbag).toMatchObject({ setGrade: 1.5, grade: '1' })
         expect(sandbag.deviation).toBeGreaterThan(8)
     } finally {
         await pb.collection('routes').delete(route.id)
@@ -278,7 +278,7 @@ test('archiving a route stamps archived_at and restoring clears it', async ({
     const pb = await superuserPb()
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-archive`,
-        difficulty: 4,
+        ...uiaa('4'),
         type: 'Boulder',
         creator: [`${testPrefix}-archive-setter`],
     })
@@ -312,7 +312,7 @@ test('archived routes are left out like on the routes page unless included', asy
     const setter = `${testPrefix}-archived-setter`
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-archived-analytics`,
-        difficulty: 5,
+        ...uiaa('5'),
         type: 'Boulder',
         creator: [setter],
         archived: true,

@@ -1,5 +1,10 @@
 import PocketBase from 'pocketbase'
 import type { Page } from '@playwright/test'
+import {
+    gradeIndex,
+    gradeLabels,
+    type GradeSystem,
+} from '../../shared/utils/grades'
 
 export const LOCATIONS = ['Hall A', 'Hall B'] as const
 export const TYPES = ['Route', 'Boulder'] as const
@@ -82,8 +87,20 @@ export async function locationId(page: Page, name: string) {
     return items[0].id as string
 }
 
-function randomDifficulty() {
-    return 1 + Math.floor(Math.random() * 10)
+export function gradeOf(system: GradeSystem, grade: string) {
+    return {
+        grade,
+        grade_system: system,
+        grade_index: gradeIndex(system, grade),
+    }
+}
+
+export const uiaa = (grade: string) => gradeOf('uiaa', grade)
+
+function randomGrade(type: string) {
+    const system = type === 'Boulder' ? 'font' : 'uiaa'
+    const labels = gradeLabels(system)
+    return gradeOf(system, labels[Math.floor(Math.random() * labels.length)]!)
 }
 
 export async function seedRoutes(pb: PocketBase, prefix: string, count = 60) {
@@ -109,8 +126,7 @@ export async function seedRoutes(pb: PocketBase, prefix: string, count = 60) {
     for (let i = existing.length; i < count; i++) {
         const route = await pb.collection('routes').create({
             name: `${prefix}-route-${i}`,
-            difficulty: randomDifficulty(),
-            difficulty_sign: i % 3 === 0 ? true : i % 3 === 1 ? false : null,
+            ...randomGrade(TYPES[i % TYPES.length]!),
             anchor_point: 1 + (i % 40),
             location: locationFor(i),
             type: TYPES[i % TYPES.length],
@@ -145,8 +161,7 @@ export async function seedRatings(
         const rating = await pb.collection('ratings').create({
             route_id: route.id,
             rating: 1 + (i % 5),
-            difficulty: randomDifficulty(),
-            difficulty_sign: null,
+            ...uiaa(String(1 + (i % 10))),
             comment: `${prefix}-rating-${i}`,
         })
         created.push(rating)

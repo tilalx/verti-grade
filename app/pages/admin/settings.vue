@@ -262,6 +262,45 @@
 
         <AdminLocationsCard />
 
+        <v-card border flat class="mb-6">
+            <v-card-text class="pa-4">
+                <p class="text-title-small font-weight-semibold mb-1">
+                    {{ $t('settings.grading') }}
+                </p>
+                <div class="d-flex align-center flex-wrap ga-2 mb-4">
+                    <p class="text-body-small text-medium-emphasis">
+                        {{ $t('settings.gradingHint') }}
+                    </p>
+                    <v-spacer />
+                    <GradeConversionDialog />
+                </div>
+                <v-row density="comfortable">
+                    <v-col cols="12" md="6">
+                        <v-select
+                            v-model="copySettings.route_grade_system"
+                            :label="$t('settings.routeGradeSystem')"
+                            :items="gradeSystemItems(ROUTE_GRADE_SYSTEMS)"
+                            density="compact"
+                            hide-details
+                            prepend-inner-icon="mdi-stairs-up"
+                            data-testid="settings-route-grade-system"
+                        />
+                    </v-col>
+                    <v-col cols="12" md="6">
+                        <v-select
+                            v-model="copySettings.boulder_grade_system"
+                            :label="$t('settings.boulderGradeSystem')"
+                            :items="gradeSystemItems(BOULDER_GRADE_SYSTEMS)"
+                            density="compact"
+                            hide-details
+                            prepend-inner-icon="mdi-cube-outline"
+                            data-testid="settings-boulder-grade-system"
+                        />
+                    </v-col>
+                </v-row>
+            </v-card-text>
+        </v-card>
+
         <!-- URL Fields -->
         <v-card id="settings-urls" border flat class="mb-6 scroll-anchor">
             <v-card-text class="pa-4">
@@ -480,6 +519,13 @@
 import type { ComponentPublicInstance } from 'vue'
 import type { UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
+import {
+    BOULDER_GRADE_SYSTEMS,
+    DEFAULT_BOULDER_GRADE_SYSTEM,
+    DEFAULT_ROUTE_GRADE_SYSTEM,
+    ROUTE_GRADE_SYSTEMS,
+    type GradeSystem,
+} from '#shared/utils/grades'
 
 type FileInputRef = Element | ComponentPublicInstance | null
 
@@ -515,8 +561,17 @@ const original = reactive({
     organization_unit_name: '',
     contact_email: '',
     audit_retention_days: 90 as number | null,
+    route_grade_system: DEFAULT_ROUTE_GRADE_SYSTEM as string,
+    boulder_grade_system: DEFAULT_BOULDER_GRADE_SYSTEM as string,
     ...legalFieldsFrom({}),
 })
+
+function gradeSystemItems(systems: GradeSystem[]) {
+    return systems.map((value) => ({
+        title: t(`gradeSystems.${value}`),
+        value,
+    }))
+}
 
 const copySettings = reactive({ ...original, ...legalFieldsFrom(original) })
 
@@ -557,6 +612,10 @@ function adoptRecord(rec: SettingsRecord | null | undefined) {
     original.organization_unit_name = rec.organization_unit_name ?? ''
     original.contact_email = rec.contact_email ?? ''
     original.audit_retention_days = rec.audit_retention_days ?? 90
+    original.route_grade_system =
+        rec.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
+    original.boulder_grade_system =
+        rec.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
     Object.assign(original, legalFieldsFrom(rec))
     if (!dirty) Object.assign(copySettings, original, legalFieldsFrom(original))
 
@@ -728,6 +787,8 @@ const hasChanges = computed(() => {
             original.organization_unit_name ||
         copySettings.contact_email !== original.contact_email ||
         copySettings.audit_retention_days !== original.audit_retention_days ||
+        copySettings.route_grade_system !== original.route_grade_system ||
+        copySettings.boulder_grade_system !== original.boulder_grade_system ||
         JSON.stringify(legalFieldsFrom(copySettings)) !==
             JSON.stringify(legalFieldsFrom(original))
     )
@@ -751,6 +812,8 @@ async function saveSettings() {
             contact_email: copySettings.contact_email,
             audit_retention_days:
                 Number(copySettings.audit_retention_days) || null,
+            route_grade_system: copySettings.route_grade_system,
+            boulder_grade_system: copySettings.boulder_grade_system,
             ...legalPayload(copySettings),
         }
         if (logoFile.value) payload.page_logo = logoFile.value
@@ -778,6 +841,10 @@ async function saveSettings() {
         original.organization_unit_name = updated.organization_unit_name ?? ''
         original.contact_email = updated.contact_email ?? ''
         original.audit_retention_days = updated.audit_retention_days ?? 90
+        original.route_grade_system =
+            updated.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
+        original.boulder_grade_system =
+            updated.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
         Object.assign(original, legalFieldsFrom(updated))
 
         Object.assign(copySettings, {
@@ -788,8 +855,11 @@ async function saveSettings() {
             organization_unit_name: updated.organization_unit_name ?? '',
             contact_email: updated.contact_email ?? '',
             audit_retention_days: updated.audit_retention_days ?? 90,
+            route_grade_system: original.route_grade_system,
+            boulder_grade_system: original.boulder_grade_system,
             ...legalFieldsFrom(updated),
         })
+        settings.value = updated
 
         notify(t('settings.saveSuccess'))
     } catch (err) {

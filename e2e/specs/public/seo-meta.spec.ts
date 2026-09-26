@@ -23,7 +23,5 @@ test('server-renders the route name as og:title on route pages', async ({
     const html = await (await page.request.get(`/route?id=${route.id}`)).text()
     expect(ogContent(html, 'og:title')).toBe(route.name)
     expect(ogContent(html, 'og:type')).toBe('article')
-    expect(ogContent(html, 'og:description')).toContain(
-        String(route.difficulty),
-    )
+    expect(ogContent(html, 'og:description')).toContain(route.grade)
 })

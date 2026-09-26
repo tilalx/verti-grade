@@ -76,8 +76,8 @@ function mapRoute(
         id: route.id ?? null,
         name: route.name ?? '',
         color: route.color ?? null,
-        difficulty: normalizeNumber(route.difficulty),
-        difficulty_sign: route.difficulty_sign ?? null,
+        grade: route.grade ?? '',
+        grade_system: route.grade_system ?? null,
         anchor_point: normalizeNumber(route.anchor_point),
         location: locationName(route) || null,
         type: route.type ?? null,
@@ -95,8 +95,8 @@ function mapRoute(
 function mapRating(rating: RatingRecord) {
     return {
         rating: normalizeNumber(rating.rating),
-        difficulty: normalizeNumber(rating.difficulty),
-        difficulty_sign: rating.difficulty_sign ?? null,
+        grade: rating.grade ?? null,
+        grade_system: rating.grade_system ?? null,
         comment: rating.comment ?? '',
         created: rating.created ?? null,
         updated: rating.updated ?? null,

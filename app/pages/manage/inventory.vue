@@ -401,7 +401,7 @@
                     </v-list-item-title>
                     <template #append>
                         <span class="text-body-small text-medium-emphasis">
-                            {{ formatDifficulty(route) }}
+                            <GradeLabel :source="route" />
                         </span>
                     </template>
                 </v-list-item>
@@ -459,7 +459,7 @@
                     </v-list-item-title>
                     <template #append>
                         <span class="text-body-small text-medium-emphasis">
-                            {{ formatDifficulty(route) }}
+                            <GradeLabel :source="route" />
                         </span>
                     </template>
                 </v-list-item>
@@ -525,11 +525,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-    formatAnchorPoint,
-    formatDifficulty,
-    locationName,
-} from '#shared/utils/formatting'
+import { formatAnchorPoint, locationName } from '#shared/utils/formatting'
 import {
     clearSession,
     countUnlocated,
@@ -550,7 +546,7 @@ definePageMeta({
 })
 
 const ROUTE_FIELDS =
-    'id,name,location,difficulty,difficulty_sign,anchor_point,archived,expand.location.name'
+    'id,name,location,type,grade,grade_system,grade_index,anchor_point,archived,expand.location.name'
 const SCAN_COOLDOWN_MS = 2000
 
 const { t, locale } = useI18n()

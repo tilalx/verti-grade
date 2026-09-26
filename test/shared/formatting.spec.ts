@@ -1,55 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
-    formatDifficulty,
     formatAnchorPoint,
     formatScore,
     normalizeCreators,
     formatDateToYYYYMMDD,
     formatDate,
-    formatDifficultySign,
 } from '#shared/utils/formatting'
-
-describe('formatDifficulty', () => {
-    it('returns "7+" when difficulty_sign is true', () => {
-        expect(formatDifficulty({ difficulty: 7, difficulty_sign: true })).toBe(
-            '7+',
-        )
-    })
-
-    it('returns "7-" when difficulty_sign is false', () => {
-        expect(
-            formatDifficulty({ difficulty: 7, difficulty_sign: false }),
-        ).toBe('7-')
-    })
-
-    it('returns "7" when difficulty_sign is null', () => {
-        expect(formatDifficulty({ difficulty: 7, difficulty_sign: null })).toBe(
-            '7',
-        )
-    })
-
-    it('returns "7" when difficulty_sign is undefined', () => {
-        expect(formatDifficulty({ difficulty: 7 })).toBe('7')
-    })
-
-    it('accepts a string sign value', () => {
-        expect(formatDifficulty({ difficulty: 5, difficulty_sign: '+' })).toBe(
-            '5+',
-        )
-    })
-
-    it('returns "" for null input', () => {
-        expect(formatDifficulty(null)).toBe('')
-    })
-
-    it('returns "" for undefined input', () => {
-        expect(formatDifficulty(undefined)).toBe('')
-    })
-
-    it('returns just the sign when difficulty is absent', () => {
-        expect(formatDifficulty({ difficulty_sign: true })).toBe('+')
-    })
-})
 
 describe('formatAnchorPoint', () => {
     it('returns "—" for null', () => {
@@ -225,14 +181,5 @@ describe('formatDate', () => {
                 withTime: true,
             }),
         ).toContain('10:00')
-    })
-})
-
-describe('formatDifficultySign', () => {
-    it('maps booleans and trims strings', () => {
-        expect(formatDifficultySign(true)).toBe('+')
-        expect(formatDifficultySign(false)).toBe('-')
-        expect(formatDifficultySign(' + ')).toBe('+')
-        expect(formatDifficultySign(null)).toBe('')
     })
 })

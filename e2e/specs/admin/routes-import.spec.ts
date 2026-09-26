@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { LOCATIONS } from '../../support/seed'
+import { LOCATIONS, uiaa } from '../../support/seed'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -13,8 +13,8 @@ test('imports routes from a JSON file', async ({ adminPage: page }) => {
         JSON.stringify([
             {
                 name,
-                difficulty: 6,
-                difficulty_sign: '+',
+                difficulty: 8,
+                difficulty_sign: null,
                 anchor_point: 8,
                 location: LOCATIONS[1].toUpperCase(),
                 type: 'Boulder',
@@ -41,6 +41,7 @@ test('imports routes from a JSON file', async ({ adminPage: page }) => {
     await page.getByTestId('filter-search').locator('input').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText(name)
     await expect(page.getByTestId('routes-table')).toContainText(LOCATIONS[1])
+    await expect(page.getByTestId('routes-table')).toContainText('6B')
 
     fs.unlinkSync(file)
 })
@@ -55,7 +56,7 @@ test('reports import issues when route creation fails server-side', async ({
         JSON.stringify([
             {
                 name,
-                difficulty: 6,
+                ...uiaa('6'),
                 location: LOCATIONS[1],
                 type: 'Boulder',
                 creator: ['E2E Importer'],

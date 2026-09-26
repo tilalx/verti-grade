@@ -63,7 +63,7 @@
 import type PocketBase from 'pocketbase'
 import type { RatingRecord } from '~/types/models'
 import type { CommentCardItem } from '~/components/comments/Card.vue'
-import { formatDifficulty } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 import { reportContentUrl } from '~/utils/reports'
 
 const { t } = useI18n()
@@ -139,7 +139,7 @@ function mapReview(
     return {
         id: r.id,
         rating: typeof r.rating === 'number' ? r.rating : null,
-        difficultyLabel: formatDifficulty(r),
+        difficultyLabel: formatGrade(r),
         comment: r.comment ?? null,
         created: r.created ?? '',
         userName: user?.name || user?.username || t('comments.anonymous'),

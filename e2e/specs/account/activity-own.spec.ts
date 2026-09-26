@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 import { fetchAuditRows } from '../../support/audit'
 
 test('a user sees their own entries and nobody else’s', async ({
@@ -60,7 +60,7 @@ test('an admin sees entries from other actors too', async ({
         headers,
         data: {
             name: `${testPrefix}-admin-visible`,
-            difficulty: 5,
+            ...uiaa('5'),
             location: hallA,
             type: 'Boulder',
             creator: [testPrefix],

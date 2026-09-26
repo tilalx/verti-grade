@@ -1,6 +1,28 @@
 <template>
     <v-container>
-        <LayoutPageHeader :title="$t('page.content.index')" />
+        <LayoutPageHeader :title="$t('page.content.index')" inline-actions>
+            <template #actions>
+                <GradeConversionDialog>
+                    <template #activator="{ props: activator }">
+                        <v-btn
+                            v-bind="activator"
+                            variant="tonal"
+                            :icon="!smAndUp"
+                            :aria-label="$t('gradeConversion.title')"
+                            :title="$t('gradeConversion.title')"
+                            data-testid="index-grade-conversion-open"
+                        >
+                            <v-icon :start="smAndUp"
+                                >mdi-swap-horizontal</v-icon
+                            >
+                            <template v-if="smAndUp">{{
+                                $t('gradeConversion.title')
+                            }}</template>
+                        </v-btn>
+                    </template>
+                </GradeConversionDialog>
+            </template>
+        </LayoutPageHeader>
 
         <!-- Filter Bar -->
         <FilterBar
@@ -21,7 +43,7 @@
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-select
-                            :label="$t('climbing.difficulty')"
+                            :label="gradeColumnTitle"
                             :items="difficulties"
                             v-model="selectedDifficulty"
                             item-title="text"
@@ -96,7 +118,7 @@
                     </div>
                 </template>
                 <template #item.difficulty="{ item }">
-                    <span>{{ formatDifficulty(item) }}</span>
+                    <GradeLabel :source="item" />
                 </template>
                 <template #item.anchor_point="{ item }">
                     <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
@@ -171,7 +193,6 @@ import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 import {
-    formatDifficulty,
     formatAnchorPoint,
     formatScore,
     normalizeCreators,
@@ -181,7 +202,7 @@ import { toPbSort, type SortOption } from '~/utils/sorting'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
-const { lgAndUp } = useDisplay()
+const { lgAndUp, smAndUp } = useDisplay()
 
 const isWideLayout = computed(() => lgAndUp.value)
 const { error: notifyError } = useNotification()
@@ -225,12 +246,14 @@ const routes = shallowRef<RouteListItem[]>([])
 const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 
+const { gradeColumnTitle } = useGradeSystems()
+
 const headersDesktop = computed<
     Array<{ title: string; key: string; sortable?: boolean }>
 >(() => [
     { title: t('climbing.color'), key: 'color', sortable: false },
     { title: t('climbing.routename'), key: 'name' },
-    { title: t('climbing.difficulty'), key: 'difficulty' },
+    { title: gradeColumnTitle.value, key: 'difficulty', nowrap: true },
     { title: t('climbing.anchor_point'), key: 'anchor_point' },
     { title: t('climbing.comment'), key: 'comment' },
     { title: t('climbing.creators'), key: 'creator' },
@@ -267,7 +290,10 @@ function onMobileSortChange(sortBy: SortOption[]) {
 }
 
 const toPbSortIndex = (sortByArr: SortOption[]) =>
-    toPbSort(sortByArr, '-screw_date', { score: 'average_rating' })
+    toPbSort(sortByArr, '-screw_date', {
+        score: 'average_rating',
+        difficulty: 'grade_index',
+    })
 
 async function loadRoutes(
     options: Partial<TableOptions> = {},

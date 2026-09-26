@@ -61,25 +61,14 @@ describe('resolveExportColumns', () => {
         expect(columns.map((column) => column.key)).toEqual(['name'])
     })
 
-    it('merges the difficulty sign into a numeric cell format', async () => {
+    it('exports the grade label as text', async () => {
         const [difficulty] = await resolveExportColumns(
             eventWith({ columns: ['difficulty'] }),
         )
 
-        // Numeric value plus a display-only suffix: sorts as 6 < 10, reads "6 +".
         expect(
-            difficulty.value!({ difficulty: 6, difficulty_sign: true }),
-        ).toBe(6)
-        expect(
-            difficulty.numFmt!({ difficulty: 6, difficulty_sign: true }),
-        ).toBe('0" +"')
-        expect(
-            difficulty.numFmt!({ difficulty: 5, difficulty_sign: null }),
-        ).toBeNull()
-        // Non-numeric grades keep the merged text instead.
-        expect(
-            difficulty.value!({ difficulty: 'VI', difficulty_sign: '-' }),
-        ).toBe('VI-')
+            difficulty.value!({ grade: '6a+', grade_system: 'french' }),
+        ).toBe('6a+')
     })
 
     it('prefers client labels over the default headers', async () => {

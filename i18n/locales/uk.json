@@ -688,7 +688,11 @@
             "logo": "Логотип застосунку",
             "icon": "Значок браузера",
             "sign": "Логотип на табличках маршрутів"
-        }
+        },
+        "grading": "Шкали складності",
+        "routeGradeSystem": "Шкала для трас",
+        "boulderGradeSystem": "Шкала для боулдерингу",
+        "gradingHint": "Застосовується до нових трас. Наявні траси зберігають свою шкалу до редагування."
     },
     "errors": {
         "notFound": {
@@ -834,5 +838,41 @@
             "reports": "Скарга"
         },
         "changedLabel": "Змінено"
+    },
+    "gradeSystems": {
+        "uiaa": "UIAA",
+        "french": "Французька",
+        "yds": "YDS",
+        "font": "Fontainebleau",
+        "v": "V-Scale"
+    },
+    "gradeConversion": {
+        "title": "Переведення категорій",
+        "source": "Приблизні відповідності за {source}.",
+        "open": "Таблиця переведення",
+        "show": "Порівняти з іншими шкалами",
+        "columns": {
+            "male": "Рівень (чоловіки)",
+            "female": "Рівень (жінки)",
+            "britishTech": "British Tech",
+            "ewbank": "Ewbank",
+            "brazilian": "Бразильська (BRZ)",
+            "metricUiaa": "UIAA (метрична)",
+            "watts": "Watts"
+        },
+        "levels": {
+            "lower": "Початковий (L1)",
+            "intermediate": "Середній (L2)",
+            "advanced": "Просунутий (L3)",
+            "elite": "Еліта (L4)",
+            "higherElite": "Вища еліта (L5)"
+        }
+    },
+    "gradeSystemsShort": {
+        "uiaa": "UIAA",
+        "french": "Фр.",
+        "yds": "YDS",
+        "font": "Font",
+        "v": "Hueco"
     }
 }

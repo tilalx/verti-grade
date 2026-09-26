@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 import { createComment, deleteComment } from '../../support/comments'
 import {
     fetchAuditRows,
@@ -131,7 +131,7 @@ test('a bulk archive leaves one entry per route', async ({
             headers,
             data: {
                 name: `${testPrefix}-bulk-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 location: hallA,
                 type: 'Boulder',
                 creator: [testPrefix],

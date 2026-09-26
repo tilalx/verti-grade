@@ -3,11 +3,10 @@ import type PocketBase from 'pocketbase'
 import type { RouteRecord, SettingsRecord } from '../../types/models'
 import {
     formatDate,
-    formatDifficulty,
-    formatDifficultySign,
     locationName,
     normalizeCreators,
 } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 
 interface ExportBody {
     ids?: unknown[]
@@ -29,7 +28,6 @@ export interface ExportColumn {
     key: string
     header: string
     value?: (route: RouteRecord, locale?: string) => string | number
-    numFmt?: (route: RouteRecord) => string | null
 }
 
 async function readExportBody(event: H3Event): Promise<ExportBody | null> {
@@ -150,16 +148,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     {
         key: 'difficulty',
         header: 'Grade',
-        value: (r) => {
-            const numeric = Number(r.difficulty)
-            return Number.isFinite(numeric) ? numeric : formatDifficulty(r)
-        },
-        numFmt: (r) => {
-            const sign = formatDifficultySign(r.difficulty_sign)
-            return Number.isFinite(Number(r.difficulty)) && sign
-                ? `0" ${sign}"`
-                : null
-        },
+        value: (r) => formatGrade(r),
     },
     {
         key: 'anchor_point',

@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('paginates the mobile route card list', async ({ adminPage: page }) => {
     const prefix = `e2e-pg-${Date.now()}`
@@ -13,7 +13,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
             headers,
             data: {
                 name: `${prefix}-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 anchor_point: 5,
                 location: hallA,
                 type: 'Route',

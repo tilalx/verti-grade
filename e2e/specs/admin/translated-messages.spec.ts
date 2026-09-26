@@ -1,7 +1,7 @@
 import { Workbook } from '@cj-tech-master/excelts'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('duplicate email on user creation shows a readable message', async ({
     adminPage: page,
@@ -57,7 +57,7 @@ test('xlsx worksheet is named from the sent label without invalid characters', a
         headers,
         data: {
             name: `${testPrefix}-sheet`,
-            difficulty: 5,
+            ...uiaa('5'),
             location: await locationId(page, LOCATIONS[0]),
             type: 'Route',
             creator: ['E2E'],
