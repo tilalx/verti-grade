@@ -2,7 +2,9 @@ import PocketBase from 'pocketbase'
 import { getHeader, createError, type H3Event } from 'h3'
 
 export function createPocketBase() {
-    const url = import.meta.dev ? 'http://localhost:8090' : 'http://pb:8080'
+    const url = import.meta.dev
+        ? 'http://localhost:8090'
+        : 'http://127.0.0.1:8080'
     return new PocketBase(url)
 }
 

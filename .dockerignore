@@ -1,29 +1,18 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-
-# Ignore node_modules directory
-**/node_modules/
-# Ignore build artifacts
-**/dist/
-/.nuxt/
-**/.env
-
-# Ignore Pocketbase 
-/pocketbase/pb_data
-
-# Ignore logs
-**/.log
-
-# Ignore Vue CLI service worker
-/service-worker.js
-
-# Ignore Docker specific files
-.dockerignore
-.dockerignore.template
-Dockerfile*
-docker-compose.yml
+*
+!.docker
+!.yarnrc.yml
+!package.json
+!yarn.lock
+!nuxt.config.ts
+!app
+!server
+!shared
+!public
+!i18n
+!types
+!pocketbase/go.mod
+!pocketbase/go.sum
+!pocketbase/main.go
+!pocketbase/hooks
+!pocketbase/pb_migrations
+**/node_modules
