@@ -265,7 +265,7 @@ test('reports routes whose grade votes are harder than the set grade', async ({
         const sandbag = gradeFeedback.find(
             (entry: { id: string }) => entry.id === route.id,
         )
-        expect(sandbag).toMatchObject({ setGrade: 1.5, grade: '1' })
+        expect(sandbag).toMatchObject({ setGrade: 1, grade: '1 · UIAA' })
         expect(sandbag.deviation).toBeGreaterThan(8)
     } finally {
         await pb.collection('routes').delete(route.id)

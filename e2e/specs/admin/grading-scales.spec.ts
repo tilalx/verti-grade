@@ -41,7 +41,7 @@ test('creates a boulder graded on the boulder scale', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes')
-    const name = `e2e-boulder-grade-${Date.now()}`
+    const name = `e2e-bldr-${Date.now()}`
 
     await page.getByTestId('routes-create-open').click()
     await page.getByTestId('route-form-name').locator('input').fill(name)

@@ -370,7 +370,8 @@ const gradeFieldLabel = computed(
 )
 
 watch(gradeSystem, (system) => {
-    if (form.grade && gradeIndex(system, form.grade) === null) form.grade = null
+    if (form.grade && !gradeLabels(system).includes(form.grade))
+        form.grade = null
 })
 
 const resetForm = () => {
