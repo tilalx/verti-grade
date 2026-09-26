@@ -44,6 +44,18 @@
                                     {{ metadata.type }}
                                 </v-chip>
                                 <v-chip
+                                    v-if="
+                                        route_id && tickedRouteIds.has(route_id)
+                                    "
+                                    size="small"
+                                    variant="flat"
+                                    color="primary"
+                                    prepend-icon="mdi-check"
+                                    data-testid="route-ticked"
+                                >
+                                    {{ t('ticks.sent') }}
+                                </v-chip>
+                                <v-chip
                                     v-if="locationName(metadata)"
                                     size="small"
                                     variant="flat"
@@ -252,13 +264,40 @@
                             </div>
                         </div>
 
-                        <!-- ── Rate CTA ───────────────────────────────────────────── -->
-                        <div class="mb-6">
+                        <div v-if="route_id" class="d-flex flex-wrap ga-2 mb-6">
+                            <v-btn
+                                v-if="isLoggedIn"
+                                color="primary"
+                                variant="flat"
+                                size="large"
+                                class="flex-grow-1"
+                                prepend-icon="mdi-check-circle-outline"
+                                data-testid="tick-open"
+                                @click="tickDialog = true"
+                            >
+                                {{ t('ticks.logAscent') }}
+                            </v-btn>
+                            <v-btn
+                                :color="isLoggedIn ? undefined : 'primary'"
+                                :variant="isLoggedIn ? 'tonal' : 'flat'"
+                                size="large"
+                                class="flex-grow-1"
+                                prepend-icon="mdi-star-plus-outline"
+                                data-testid="review-open-cta"
+                                @click="reviewDialog = true"
+                            >
+                                {{ t('ratings.createReview') }}
+                            </v-btn>
+                            <TickDialog
+                                v-if="isLoggedIn"
+                                v-model="tickDialog"
+                                :route-id="route_id"
+                                @saved="refreshTickedRoutes()"
+                            />
                             <ReviewFormDialog
-                                v-if="route_id"
+                                v-model="reviewDialog"
                                 :route-id="route_id"
                                 :grade-system="metadata?.grade_system"
-                                call-to-action
                                 @saved="onReviewSaved"
                             />
                         </div>
@@ -383,6 +422,10 @@ function openReport(id: string) {
 }
 
 const { subscribe } = usePbSubscription()
+const isLoggedIn = pb.authStore.isValid
+const tickDialog = ref(false)
+const reviewDialog = ref(false)
+const { tickedRouteIds, refreshTickedRoutes } = useTickedRoutes()
 const { error: notifyError } = useNotification()
 
 // ── Page meta ──────────────────────────────────────────────────────────────

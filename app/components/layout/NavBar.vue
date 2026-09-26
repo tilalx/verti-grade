@@ -176,6 +176,12 @@ const navItems = [
         label: 'routes.home',
     },
     {
+        key: 'logbook',
+        to: '/logbook',
+        icon: 'mdi-notebook-check-outline',
+        label: 'routes.logbook',
+    },
+    {
         key: 'routes',
         to: '/manage/routes',
         icon: 'mdi-map-marker-path',

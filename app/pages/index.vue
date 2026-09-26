@@ -100,14 +100,23 @@
                 @update:options="loadRoutes"
             >
                 <template #item.color="{ item }">
-                    <v-avatar :color="item.color ?? undefined" size="30" />
+                    <RouteColorDot
+                        :color="item.color"
+                        :ticked="tickedRouteIds.has(item.id)"
+                        :size="30"
+                    />
                 </template>
                 <template #item.name="{ item }">
                     <div
                         class="d-flex align-center"
                         :data-testid="`index-row-${item.id}`"
                     >
-                        <span class="route-name">{{ item.name }}</span>
+                        <NuxtLink
+                            :to="`/route?id=${item.id}`"
+                            class="route-name route-link"
+                            data-testid="index-row-link"
+                            >{{ item.name }}</NuxtLink
+                        >
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"
@@ -144,7 +153,17 @@
                     {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
-                    <RouteDetails :route_id="item.id" />
+                    <div class="d-flex ga-2 justify-end">
+                        <v-btn
+                            :to="`/route?id=${item.id}`"
+                            variant="tonal"
+                            append-icon="mdi-chevron-right"
+                            data-testid="route-view"
+                        >
+                            {{ $t('routes.view') }}
+                        </v-btn>
+                        <RouteDetails :route_id="item.id" />
+                    </div>
                 </template>
             </v-data-table-server>
         </div>
@@ -153,9 +172,22 @@
         <div v-if="!isWideLayout">
             <v-row class="mt-2">
                 <v-col v-for="route in routes" :key="route.id" cols="12">
-                    <RouteCard :route="route">
+                    <RouteCard
+                        :route="route"
+                        :ticked="tickedRouteIds.has(route.id)"
+                    >
                         <template #actions>
-                            <RouteDetails :route_id="route.id" />
+                            <div class="d-flex ga-2 justify-end">
+                                <v-btn
+                                    :to="`/route?id=${route.id}`"
+                                    variant="tonal"
+                                    append-icon="mdi-chevron-right"
+                                    data-testid="route-view"
+                                >
+                                    {{ $t('routes.view') }}
+                                </v-btn>
+                                <RouteDetails :route_id="route.id" />
+                            </div>
                         </template>
                     </RouteCard>
                 </v-col>
@@ -243,6 +275,7 @@ const tableOptions = reactive<TableOptions>({
 
 const loading = ref(true)
 const routes = shallowRef<RouteListItem[]>([])
+const { tickedRouteIds } = useTickedRoutes()
 const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 

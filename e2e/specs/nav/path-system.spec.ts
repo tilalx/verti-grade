@@ -1,10 +1,14 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-const TOP_LEVEL = ['nav-link-home', 'nav-link-manage-routes']
+const TOP_LEVEL = [
+    'nav-link-home',
+    'nav-link-logbook',
+    'nav-link-manage-routes',
+]
 const GROUPS = ['nav-group-manage', 'nav-group-admin']
 
-test('the desktop link row is the four grouped items, not one per page', async ({
+test('the desktop link row is the grouped items, not one per page', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)

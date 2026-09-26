@@ -328,11 +328,14 @@
 import type { Ref } from 'vue'
 import type { VForm } from 'vuetify/components'
 import { required, validEmail, minLength } from '~/utils/validation'
+import { safeRedirect } from '~/utils/nav'
 defineOptions({ name: 'LoginPage' })
 
 const { t } = useI18n()
 const pb = usePocketbase()
 const { capHeaders } = useCapToken()
+const afterLoginPath =
+    safeRedirect(useRoute().query.redirect) ?? '/manage/routes'
 
 definePageMeta({ layout: 'blank', auth: false })
 
@@ -343,7 +346,7 @@ useHead({
 if (pb.authStore.isValid) {
     try {
         await pb.collection('users').authRefresh()
-        await navigateTo('/manage/routes', { replace: true })
+        await navigateTo(afterLoginPath, { replace: true })
     } catch {
         pb.authStore.clear()
     }
@@ -525,7 +528,7 @@ async function submitLogin() {
             .authWithPassword(identity.value, password.value, {
                 headers: await capHeaders('login'),
             })
-        await navigateTo('/manage/routes', { replace: true })
+        await navigateTo(afterLoginPath, { replace: true })
     } catch (err) {
         unverified.value = isUnverifiedError(err)
         notifyError(resolveAuthError(err))
@@ -624,7 +627,7 @@ async function loginWithOAuth(provider: string) {
     loading.value = true
     try {
         await pb.collection('users').authWithOAuth2({ provider })
-        await navigateTo('/manage/routes', { replace: true })
+        await navigateTo(afterLoginPath, { replace: true })
     } catch (err) {
         notifyError(resolveAuthError(err))
     } finally {

@@ -91,7 +91,8 @@
         "usernameInvalid": "Use letters, numbers, dots, dashes or underscores.",
         "emailTaken": "This email address can't be used.",
         "resendVerification": "Resend verification email",
-        "resendVerificationInfo": "We'll send a new verification link to your email address."
+        "resendVerificationInfo": "We'll send a new verification link to your email address.",
+        "confirmPassword": "Confirm password"
     },
     "routes": {
         "home": "Home",
@@ -111,7 +112,9 @@
         },
         "name": "Name",
         "reports": "Reports",
-        "activity": "Activity"
+        "activity": "Activity",
+        "logbook": "Logbook",
+        "view": "View"
     },
     "dashboard": {
         "online": "{0} online"
@@ -513,7 +516,8 @@
             "reports": "Content reports - Verti-Grade",
             "activity": "Activity log - Verti-Grade",
             "verifyEmail": "Verify email - Verti-Grade",
-            "emailChange": "Change email - Verti-Grade"
+            "emailChange": "Change email - Verti-Grade",
+            "logbook": "Logbook - Verti-Grade"
         },
         "content": {
             "settings": "Settings",
@@ -886,5 +890,32 @@
         "yds": "YDS",
         "font": "Font",
         "v": "Hueco"
+    },
+    "ticks": {
+        "logbook": "Logbook",
+        "logbookSubtitle": "Your ascents, grouped by session.",
+        "empty": "No ascents yet",
+        "emptyHint": "Open a route and tap “Log ascent” to start your logbook.",
+        "sendCount": "Sends: {count}",
+        "attemptCount": "Attempts: {count}",
+        "removedRoute": "Removed route",
+        "logAscent": "Log ascent",
+        "edit": "Edit ascent",
+        "attempts": "Attempts",
+        "attemptsInvalid": "Enter a whole number from 1 to 999.",
+        "date": "Date",
+        "note": "Private note",
+        "noteHint": "Only you can see this note.",
+        "saved": "Ascent saved.",
+        "saveError": "The ascent could not be saved.",
+        "deleted": "Ascent deleted.",
+        "deleteConfirm": "Delete this ascent? This cannot be undone.",
+        "sent": "Sent",
+        "moreActions": "More actions",
+        "types": {
+            "flash": "Flash",
+            "top": "Top",
+            "attempt": "Attempt"
+        }
     }
 }

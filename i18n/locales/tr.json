@@ -91,7 +91,8 @@
         "usernameInvalid": "Harf, rakam, nokta, tire veya alt çizgi kullan.",
         "emailTaken": "Bu e-posta adresi kullanılamaz.",
         "resendVerification": "Doğrulama e-postasını yeniden gönder",
-        "resendVerificationInfo": "E-posta adresine yeni bir doğrulama bağlantısı göndereceğiz."
+        "resendVerificationInfo": "E-posta adresine yeni bir doğrulama bağlantısı göndereceğiz.",
+        "confirmPassword": "Şifreyi onayla"
     },
     "routes": {
         "home": "Ana Sayfa",
@@ -111,7 +112,9 @@
         },
         "name": "Ad",
         "reports": "Şikâyetler",
-        "activity": "Etkinlik"
+        "activity": "Etkinlik",
+        "logbook": "Kayıt defteri",
+        "view": "Görüntüle"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -513,7 +516,8 @@
             "reports": "İçerik Şikâyetleri - Verti-Grade",
             "activity": "Etkinlik Günlüğü - Verti-Grade",
             "verifyEmail": "E-posta Doğrulama - Verti-Grade",
-            "emailChange": "E-posta Değiştirme - Verti-Grade"
+            "emailChange": "E-posta Değiştirme - Verti-Grade",
+            "logbook": "Kayıt defteri - Verti-Grade"
         },
         "content": {
             "settings": "Ayarlar",
@@ -886,5 +890,32 @@
         "yds": "YDS",
         "font": "Font",
         "v": "Hueco"
+    },
+    "ticks": {
+        "logbook": "Kayıt defteri",
+        "logbookSubtitle": "Tırmanışların, seanslara göre gruplanmış.",
+        "empty": "Henüz tırmanış yok",
+        "emptyHint": "Kayıt defterini başlatmak için bir rota aç ve “Tırmanış kaydet”e dokun.",
+        "sendCount": "Tamamlanan: {count}",
+        "attemptCount": "Deneme: {count}",
+        "removedRoute": "Kaldırılmış rota",
+        "logAscent": "Tırmanış kaydet",
+        "edit": "Tırmanışı düzenle",
+        "attempts": "Deneme sayısı",
+        "attemptsInvalid": "1 ile 999 arasında bir tam sayı gir.",
+        "date": "Tarih",
+        "note": "Özel not",
+        "noteHint": "Bu notu yalnızca sen görebilirsin.",
+        "saved": "Tırmanış kaydedildi.",
+        "saveError": "Tırmanış kaydedilemedi.",
+        "deleted": "Tırmanış silindi.",
+        "deleteConfirm": "Bu tırmanış silinsin mi? Bu işlem geri alınamaz.",
+        "sent": "Tamamlandı",
+        "moreActions": "Diğer işlemler",
+        "types": {
+            "flash": "Flash",
+            "top": "Top",
+            "attempt": "Deneme"
+        }
     }
 }

@@ -92,7 +92,7 @@
 
         <v-text-field
             :model-value="passwordConfirm"
-            :label="$t('account.newPassword')"
+            :label="$t('account.confirmPassword')"
             :placeholder="$t('account.placeholders.confirmPassword')"
             :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"

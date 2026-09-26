@@ -15,7 +15,11 @@ test.describe('unauthenticated guard', () => {
     for (const path of ADMIN_PATHS) {
         test(`${path} redirects to login`, async ({ page }) => {
             await gotoSettled(page, path)
-            await page.waitForURL('**/auth/login')
+            await page.waitForURL(
+                (url) =>
+                    url.pathname === '/auth/login' &&
+                    url.searchParams.get('redirect') === path,
+            )
         })
     }
 })

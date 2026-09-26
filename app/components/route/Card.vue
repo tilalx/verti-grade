@@ -16,15 +16,14 @@
                 data-testid="route-card-checkbox"
                 @update:modelValue="$emit('update:modelValue', !!$event)"
             />
-            <v-avatar
-                :color="route.color ?? undefined"
-                size="32"
-                class="flex-shrink-0"
-            />
+            <RouteColorDot :color="route.color" :ticked="ticked" :size="32" />
             <div class="list-card__title">
-                <span class="list-card__name" data-testid="route-card-name">{{
-                    route.name
-                }}</span>
+                <NuxtLink
+                    :to="`/route?id=${route.id}`"
+                    class="list-card__name route-link"
+                    data-testid="route-card-name"
+                    >{{ route.name }}</NuxtLink
+                >
                 <span
                     v-if="route.has_ratings || route.archived"
                     class="route-card__badges"
@@ -138,10 +137,12 @@ const props = withDefaults(
         route: RouteListItem
         selectable?: boolean
         modelValue?: boolean
+        ticked?: boolean
     }>(),
     {
         selectable: false,
         modelValue: false,
+        ticked: false,
     },
 )
 
