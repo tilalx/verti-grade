@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 import { waitForMail, linkPath, mailbox, mailCount } from '../../support/mail'
@@ -34,6 +35,12 @@ function signup(email: string, username: string, extra = {}) {
         passwordConfirm: PASSWORD,
         ...extra,
     })
+}
+
+async function signIn(page: Page, email: string) {
+    await page.getByTestId('login-identity').locator('input').fill(email)
+    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
+    await page.getByTestId('login-submit').click()
 }
 
 async function expectRejected(request: Promise<unknown>) {
@@ -97,7 +104,7 @@ test('a guest cannot pick their own role when signing up', async ({
     )
 })
 
-test('a climber signs up, resends the verification mail, verifies and signs in', async ({
+test('a climber signs up, verifies the email and signs in', async ({
     page,
     testPrefix,
 }) => {
@@ -119,27 +126,44 @@ test('a climber signs up, resends the verification mail, verifies and signs in',
         .getFirstListItem(`email = "${email}"`, { requestKey: null })
     expect(created.verified).toBe(false)
     expect(created.role).toBe((await getRoleIds(root)).user)
-    await waitForMail(page, email, { subject: /verify/i })
-
-    await page.getByTestId('login-identity').locator('input').fill(email)
-    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
-    await page.getByTestId('login-submit').click()
-    await page.getByTestId('login-resend-verification').click()
-    await expect(page.getByTestId('reset-email').locator('input')).toHaveValue(
-        email,
-    )
-    await page.getByTestId('reset-submit').click()
-    await expect.poll(() => mailCount(page, email)).toBe(2)
 
     const mail = await waitForMail(page, email, { subject: /verify/i })
     await gotoSettled(page, linkPath(mail, VERIFY_LINK))
     await expect(page.getByTestId('verify-done')).toBeVisible()
 
-    await gotoSettled(page, '/auth/login')
-    await page.getByTestId('login-identity').locator('input').fill(email)
-    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
-    await page.getByTestId('login-submit').click()
+    await signIn(page, email)
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
+
+    await root.collection('users').delete(created.id)
+})
+
+test('an unverified climber resends the verification mail from the sign-in page', async ({
+    page,
+    testPrefix,
+}) => {
+    const email = mailbox(testPrefix, 'resend')
+    const created = await root.collection('users').create({
+        email,
+        username: `${testPrefix}resend`.replace(/-/g, ''),
+        password: PASSWORD,
+        passwordConfirm: PASSWORD,
+        role: (await getRoleIds(root)).user,
+    })
+    expect(await mailCount(page, email)).toBe(0)
+
+    await gotoSettled(page, '/auth/login')
+    await signIn(page, email)
+    await expect(page.getByTestId('login-unverified')).toBeVisible()
+    await page.getByTestId('login-resend-verification').click()
+    await expect(page.getByTestId('reset-email').locator('input')).toHaveValue(
+        email,
+    )
+    await page.getByTestId('reset-submit').click()
+    await expect(page.getByTestId('login-form')).toBeVisible()
+
+    const mail = await waitForMail(page, email, { subject: /verify/i })
+    await gotoSettled(page, linkPath(mail, VERIFY_LINK))
+    await expect(page.getByTestId('verify-done')).toBeVisible()
 
     await root.collection('users').delete(created.id)
 })
