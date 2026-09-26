@@ -205,4 +205,4 @@ Verti-Grade is designed to be simple and straightforward. Once set up, manage an
 
 ## License
 
-Verti-Grade is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+Verti-Grade is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more details.
