@@ -92,7 +92,7 @@
             <v-btn
                 variant="text"
                 size="small"
-                :href="report.content_url"
+                :href="appContentUrl(report.content_url)"
                 target="_blank"
                 rel="noopener noreferrer"
                 prepend-icon="mdi-open-in-new"
@@ -134,6 +134,9 @@ defineProps<{ report: ReportRecord }>()
 defineEmits<{ decide: [report: ReportRecord, decision: ReportDecision] }>()
 
 const { t, locale } = useI18n()
+
+const appContentUrl = (url: string) =>
+    /^\/route\?id=\w+(#comment-\w+)?$/.test(url) ? url : undefined
 
 function formatReportDate(value?: string | null) {
     return formatDate(value, { locale: locale.value, withTime: true })
