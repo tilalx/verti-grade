@@ -148,20 +148,8 @@
                     {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
-                    <div class="d-flex ga-2 justify-end">
-                        <v-tooltip :text="$t('routes.view')" location="top">
-                            <template #activator="{ props: tooltip }">
-                                <v-btn
-                                    v-bind="tooltip"
-                                    :to="`/route?id=${item.id}`"
-                                    variant="tonal"
-                                    icon="mdi-chevron-right"
-                                    size="small"
-                                    :aria-label="$t('routes.view')"
-                                    data-testid="route-view"
-                                />
-                            </template>
-                        </v-tooltip>
+                    <div class="d-flex align-center ga-2 justify-end">
+                        <RouteViewButton :route-id="item.id" compact />
                         <RouteDetails :route_id="item.id" />
                     </div>
                 </template>
@@ -177,15 +165,8 @@
                         :ticked="tickedRouteIds.has(route.id)"
                     >
                         <template #actions>
-                            <div class="d-flex ga-2 justify-end">
-                                <v-btn
-                                    :to="`/route?id=${route.id}`"
-                                    variant="tonal"
-                                    append-icon="mdi-chevron-right"
-                                    data-testid="route-view"
-                                >
-                                    {{ $t('routes.view') }}
-                                </v-btn>
+                            <div class="d-flex align-center ga-2 justify-end">
+                                <RouteViewButton :route-id="route.id" />
                                 <RouteDetails :route_id="route.id" />
                             </div>
                         </template>
