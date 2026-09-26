@@ -111,12 +111,7 @@
                         class="d-flex align-center"
                         :data-testid="`index-row-${item.id}`"
                     >
-                        <NuxtLink
-                            :to="`/route?id=${item.id}`"
-                            class="route-name route-link"
-                            data-testid="index-row-link"
-                            >{{ item.name }}</NuxtLink
-                        >
+                        <span class="route-name">{{ item.name }}</span>
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"
@@ -154,14 +149,19 @@
                 </template>
                 <template #item.actions="{ item }">
                     <div class="d-flex ga-2 justify-end">
-                        <v-btn
-                            :to="`/route?id=${item.id}`"
-                            variant="tonal"
-                            append-icon="mdi-chevron-right"
-                            data-testid="route-view"
-                        >
-                            {{ $t('routes.view') }}
-                        </v-btn>
+                        <v-tooltip :text="$t('routes.view')" location="top">
+                            <template #activator="{ props: tooltip }">
+                                <v-btn
+                                    v-bind="tooltip"
+                                    :to="`/route?id=${item.id}`"
+                                    variant="tonal"
+                                    icon="mdi-chevron-right"
+                                    size="small"
+                                    :aria-label="$t('routes.view')"
+                                    data-testid="route-view"
+                                />
+                            </template>
+                        </v-tooltip>
                         <RouteDetails :route_id="item.id" />
                     </div>
                 </template>
