@@ -18,9 +18,12 @@
             />
             <RouteColorDot :color="route.color" :ticked="ticked" :size="32" />
             <div class="list-card__title">
-                <span class="list-card__name" data-testid="route-card-name">{{
-                    route.name
-                }}</span>
+                <NuxtLink
+                    :to="`/route?id=${route.id}`"
+                    class="list-card__name route-link"
+                    data-testid="route-card-name"
+                    >{{ route.name }}</NuxtLink
+                >
                 <span
                     v-if="route.has_ratings || route.archived"
                     class="route-card__badges"

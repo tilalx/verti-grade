@@ -148,7 +148,7 @@ type LogbookTick = TickRecord & { expand?: { route?: RouteRecord } }
 const TYPE_COLORS: Record<TickType, string> = {
     flash: 'amber-darken-2',
     top: 'success',
-    attempt: 'grey',
+    attempt: 'blue-grey-darken-1',
 }
 
 const { t, locale } = useI18n()
@@ -157,6 +157,10 @@ const { notify, error: notifyError } = useNotification()
 const { refreshTickedRoutes } = useTickedRoutes()
 
 useHead({ title: t('page.title.logbook') })
+
+definePageMeta({
+    middleware: ['auth'],
+})
 
 // ponytail: loads the whole logbook at once, paginate by session once logbooks grow into the thousands
 const { data: ticks, refresh } = await useAsyncData(

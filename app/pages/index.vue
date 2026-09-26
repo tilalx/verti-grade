@@ -111,7 +111,12 @@
                         class="d-flex align-center"
                         :data-testid="`index-row-${item.id}`"
                     >
-                        <span class="route-name">{{ item.name }}</span>
+                        <NuxtLink
+                            :to="`/route?id=${item.id}`"
+                            class="route-name route-link"
+                            data-testid="index-row-link"
+                            >{{ item.name }}</NuxtLink
+                        >
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"

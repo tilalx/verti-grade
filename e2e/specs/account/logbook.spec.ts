@@ -12,6 +12,15 @@ import {
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
+test('the logbook sends guests to sign in and back', async ({ page }) => {
+    await page.goto('/logbook')
+    await page.waitForURL(
+        (url) =>
+            url.pathname === '/auth/login' &&
+            url.searchParams.get('redirect') === '/logbook',
+    )
+})
+
 test('a climber logs, edits and deletes an ascent', async ({
     page,
     testPrefix,
