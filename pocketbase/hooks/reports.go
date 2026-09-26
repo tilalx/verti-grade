@@ -5,6 +5,7 @@ import (
 	"html"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -35,6 +36,7 @@ func registerReports(app core.App) {
 		e.Record.Set("receipt_sent", false)
 		e.Record.Set("notified_at", "")
 		e.Record.Set("content_snapshot", truncateRunes(reportedContentSnapshot(e.App, e.Record), 5000))
+		e.Record.Set("content_url", reportedContentURL(e.App, e.Record))
 		return e.Next()
 	})
 
@@ -87,6 +89,18 @@ func reportedContentSnapshot(app core.App, report *core.Record) string {
 		return ""
 	}
 	return rating.GetString("comment")
+}
+
+func reportedContentURL(app core.App, report *core.Record) string {
+	contentID := report.GetString("content_id")
+	if report.GetString("content_type") == "route" {
+		return "/route?id=" + url.QueryEscape(contentID)
+	}
+	rating, err := app.FindRecordById("ratings", contentID)
+	if err != nil {
+		return "/"
+	}
+	return "/route?id=" + url.QueryEscape(rating.GetString("route_id")) + "#comment-" + url.QueryEscape(contentID)
 }
 
 func notifyReportDecided(app core.App, report *core.Record) {
