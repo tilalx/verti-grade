@@ -21,6 +21,8 @@ services:
             #PB_SENDER_NAME: Verti-Grade
             # Proof-of-work captcha (Cap). Unset = off.
             #CAP_SECRET: change-me-to-a-long-random-string
+            # Reverse proxies in front of this container whose X-Forwarded-For is trusted.
+            #TRUSTED_PROXIES: 172.18.0.0/16
         volumes:
             - ./pb_data:/pb/pb_data
             # Custom TLS certificates, replacing the auto-generated self-signed ones:

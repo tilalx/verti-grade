@@ -136,9 +136,13 @@ whole hall shares one address behind wifi NAT, and tight on sign-ins and on the
 endpoints that send mail. See `pocketbase/pb_migrations/1790200001_enable_rate_limits.js`
 for each rule and the reasoning behind its numbers.
 
-If you put another reverse proxy in front of the container, make sure it sets
-`X-Forwarded-For`. Without it every visitor is bucketed as one client and the
-limits will start rejecting legitimate traffic.
+The container only believes `X-Forwarded-For` from the addresses in
+`TRUSTED_PROXIES` (default `127.0.0.1 ::1`). If you put another reverse proxy in
+front of it, make sure that proxy sets `X-Forwarded-For` and list its address or
+network, e.g. `TRUSTED_PROXIES: "172.18.0.0/16"`. Without it every visitor is
+bucketed as one client and the limits will start rejecting legitimate traffic.
+Never list networks that untrusted clients connect from: they could then pick
+their own IP and step around the limits.
 
 ---
 
