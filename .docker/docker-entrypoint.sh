@@ -9,6 +9,11 @@ echo "127.0.0.1 pb" >> /etc/hosts.bak
 echo "127.0.0.1 ui" >> /etc/hosts.bak
 cat /etc/hosts.bak > /etc/hosts
 
+TRUSTED_PROXIES="${TRUSTED_PROXIES:-127.0.0.1 ::1}"
+for proxy in ${TRUSTED_PROXIES//,/ }; do
+    echo "set_real_ip_from ${proxy//[^0-9A-Fa-f.:\/]/};"
+done > /etc/nginx/real-ip.conf
+
 # Generate a self-signed TLS certificate if none is present.
 # Mount real certs at /etc/nginx/ssl/cert.pem and /etc/nginx/ssl/key.pem to override.
 SSL_CERT=/etc/nginx/ssl/cert.pem
