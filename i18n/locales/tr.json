@@ -893,7 +893,7 @@
     },
     "ticks": {
         "logbook": "Kayıt defteri",
-        "logbookSubtitle": "Tırmanışların, seanslara göre gruplanmış.",
+        "logbookSubtitle": "Tırmanış geçmişin, istatistiklerin ve projelerin.",
         "empty": "Henüz tırmanış yok",
         "emptyHint": "Kayıt defterini başlatmak için bir rota aç ve “Tırmanış kaydet”e dokun.",
         "sendCount": "Tamamlanan: {count}",
@@ -916,6 +916,55 @@
             "flash": "Flash",
             "top": "Top",
             "attempt": "Deneme"
+        },
+        "kind": {
+            "boulder": "Boulder",
+            "route": "Rotalar"
+        },
+        "range": {
+            "30d": "30 gün",
+            "12m": "12 ay",
+            "all": "Tüm zamanlar"
+        },
+        "tabs": {
+            "sessions": "Seanslar",
+            "stats": "İstatistik",
+            "projects": "Projeler"
+        },
+        "stats": {
+            "sends": "Tamamlanan",
+            "hardest": "En zor tırmanış",
+            "flashRate": "Flash oranı",
+            "sessions": "Seanslar",
+            "previousHardest": "Önceki: {grade}"
+        },
+        "pyramid": {
+            "title": "Derece piramidi",
+            "subtitle": "Dereceye göre tamamlananlar, flash ve top"
+        },
+        "progression": {
+            "title": "Gelişim",
+            "subtitle": "Aylık en zor tırmanış ve tamamlananlar",
+            "hardest": "En zor tırmanış",
+            "sends": "Tamamlanan"
+        },
+        "chartEmpty": "Bu dönemde henüz tamamlanan yok.",
+        "session": {
+            "climbs": "Rota: {count}",
+            "flashes": "Flash: {count}",
+            "hardest": "En zor {grade}"
+        },
+        "projects": {
+            "empty": "Açık proje yok",
+            "emptyHint": "Denediğin ama henüz tamamlamadığın rotalar burada görünür.",
+            "lastTried": "son deneme {date}",
+            "logSend": "Tamamlandı olarak kaydet"
+        },
+        "suggestions": {
+            "title": "Denenecek rotalar",
+            "subtitle": "Seviyene yakın, henüz tamamlamadığın rotalar",
+            "subtitleNew": "Salonun en yeni rotaları",
+            "new": "Yeni"
         }
     }
 }
