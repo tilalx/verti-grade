@@ -2,9 +2,11 @@ package hooks
 
 import (
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
@@ -25,6 +27,26 @@ func TestReportReasonLabel(t *testing.T) {
 		if got := reportReasonLabel(reason); got != want {
 			t.Errorf("reportReasonLabel(%q) = %q, want %q", reason, got, want)
 		}
+	}
+}
+
+func TestReportReceiptOmitsNotifierText(t *testing.T) {
+	collection := core.NewBaseCollection("reports")
+	report := core.NewRecord(collection)
+	report.Id = "ref123"
+	report.Set("reason", "spam_fraud")
+	report.Set("notifier_name", "Buy cheap pills")
+	report.Set("explanation", "visit spam.example")
+	report.Set("content_snapshot", "more spam")
+
+	body := reportReceiptHTML(report)
+	for _, injected := range []string{"Buy cheap pills", "spam.example", "more spam"} {
+		if strings.Contains(body, injected) {
+			t.Errorf("receipt contains notifier-controlled text %q", injected)
+		}
+	}
+	if !strings.Contains(body, "ref123") || !strings.Contains(body, "Spam or fraud") {
+		t.Errorf("receipt lacks reference or reason: %s", body)
 	}
 }
 

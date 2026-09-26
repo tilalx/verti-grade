@@ -19,8 +19,8 @@ test('Art. 16(4): the notifier gets a receipt and moderators get an alert', asyn
     })
 
     const receipt = await waitForMail(page, notifier, { subject: /received/i })
-    expect(receipt.HTML).toContain(`${testPrefix}-receipt-explanation`)
-    expect(receipt.HTML).toContain(commentId)
+    expect(receipt.HTML).not.toContain(`${testPrefix}-receipt-explanation`)
+    expect(receipt.HTML).toContain(reportId)
 
     const alert = await waitForMail(page, 'e2e-admin@verti-grade.test', {
         subject: /new content report/i,
