@@ -38,12 +38,22 @@ export async function ensureUser(
     const email = `${prefix}-${role}@verti-grade.test`
     const password = 'E2ePassw0rd!'
 
+    const existing = await pb
+        .collection('users')
+        .getFirstListItem(pb.filter('email = {:email}', { email }), {
+            requestKey: null,
+        })
+        .catch(() => null)
+
     let record
-    try {
-        record = await pb
-            .collection('users')
-            .getFirstListItem(`email = "${email}"`, { requestKey: null })
-    } catch {
+    if (existing) {
+        record = await pb.collection('users').update(existing.id, {
+            password,
+            passwordConfirm: password,
+            verified: true,
+            role: roleId,
+        })
+    } else {
         record = await pb.collection('users').create({
             email,
             emailVisibility: true,

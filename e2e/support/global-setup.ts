@@ -1,4 +1,4 @@
-import { chromium, type Browser, type FullConfig } from '@playwright/test'
+import type { FullConfig } from '@playwright/test'
 import PocketBase from 'pocketbase'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -14,28 +14,55 @@ const AUTH_DIR = path.join(__dirname, '..', '.auth')
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 const PREFIX = 'e2e'
 
-async function saveStorageState(
-    browser: Browser,
-    baseURL: string,
-    email: string,
-    password: string,
-    file: string,
-) {
-    const context = await browser.newContext({
-        baseURL,
-        ignoreHTTPSErrors: true,
-    })
-    const page = await context.newPage()
-    await page.goto('/auth/login')
-    await page
-        .locator('[data-testid="page-hydrated"]')
-        .waitFor({ state: 'attached' })
-    await page.getByTestId('login-identity').locator('input').fill(email)
-    await page.getByTestId('login-password').locator('input').fill(password)
-    await page.getByTestId('login-submit').click()
-    await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
-    await context.storageState({ path: file })
-    await context.close()
+async function withRetry<T>(action: () => Promise<T>, attempts = 6) {
+    for (let attempt = 1; ; attempt++) {
+        try {
+            return await action()
+        } catch (error) {
+            if (attempt >= attempts) throw error
+            await new Promise((resolve) => setTimeout(resolve, attempt * 500))
+        }
+    }
+}
+
+async function authCookieValue(email: string, password: string) {
+    const pb = new PocketBase(PB_URL)
+    await pb.collection('users').authWithPassword(email, password)
+    const cookie = pb.authStore.exportToCookie({}, 'pb_auth')
+    return cookie.slice('pb_auth='.length, cookie.indexOf(';'))
+}
+
+function saveStorageState(baseURL: string, cookieValue: string, file: string) {
+    const url = new URL(baseURL)
+    const state = {
+        cookies: [
+            {
+                name: 'pb_auth',
+                value: cookieValue,
+                domain: url.hostname,
+                path: '/',
+                expires: -1,
+                httpOnly: false,
+                secure: url.protocol === 'https:',
+                sameSite: 'Lax',
+            },
+        ],
+        origins: [],
+    }
+    fs.writeFileSync(file, JSON.stringify(state))
+}
+
+async function warmUpPages(baseURL: string, adminCookie: string) {
+    for (const pagePath of ['/', '/auth/login', '/route', '/manage/routes']) {
+        await withRetry(async () => {
+            const response = await fetch(new URL(pagePath, baseURL), {
+                headers: { cookie: `pb_auth=${adminCookie}` },
+            })
+            if (response.status >= 500) {
+                throw new Error(`${pagePath} answered ${response.status}`)
+            }
+        })
+    }
 }
 
 async function relaxRateLimits(pb: PocketBase) {
@@ -44,18 +71,20 @@ async function relaxRateLimits(pb: PocketBase) {
 
 export default async function globalSetup(config: FullConfig) {
     const pb = new PocketBase(PB_URL)
-    await authAsSuperuser(pb)
+    await withRetry(() => authAsSuperuser(pb))
     await relaxRateLimits(pb)
 
     const roleIds = await getRoleIds(pb)
-    const admin = await ensureUser(pb, roleIds.admin, 'admin', PREFIX)
-    const setter = await ensureUser(
-        pb,
-        roleIds.routesetter,
-        'routesetter',
-        PREFIX,
-    )
-    const user = await ensureUser(pb, roleIds.user, 'user', PREFIX)
+    const seededUsers = {
+        admin: await ensureUser(pb, roleIds.admin, 'admin', PREFIX),
+        routesetter: await ensureUser(
+            pb,
+            roleIds.routesetter,
+            'routesetter',
+            PREFIX,
+        ),
+        user: await ensureUser(pb, roleIds.user, 'user', PREFIX),
+    }
 
     const routes = await seedRoutes(pb, PREFIX)
     await seedRatings(pb, PREFIX, routes)
@@ -67,23 +96,17 @@ export default async function globalSetup(config: FullConfig) {
         process.env.E2E_BASE_URL ||
         'https://localhost'
 
-    const browser = await chromium.launch()
-    await Promise.all(
-        (
-            [
-                ['admin', admin],
-                ['routesetter', setter],
-                ['user', user],
-            ] as const
-        ).map(([role, u]) =>
-            saveStorageState(
-                browser,
-                baseURL,
-                u.email,
-                u.password,
-                path.join(AUTH_DIR, `${role}.json`),
-            ),
-        ),
-    )
-    await browser.close()
+    const cookies: Record<string, string> = {}
+    for (const [role, seeded] of Object.entries(seededUsers)) {
+        cookies[role] = await withRetry(() =>
+            authCookieValue(seeded.email, seeded.password),
+        )
+        saveStorageState(
+            baseURL,
+            cookies[role]!,
+            path.join(AUTH_DIR, `${role}.json`),
+        )
+    }
+
+    await warmUpPages(baseURL, cookies.admin!)
 }
