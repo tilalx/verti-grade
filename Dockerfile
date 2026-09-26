@@ -1,100 +1,60 @@
 # syntax=docker/dockerfile:1.7
-# --------------> Build pocketbase (Go)
 FROM golang:1.27.1-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183 AS pb-build
 ARG TARGETOS
 ARG TARGETARCH
-ENV CGO_ENABLED=0 \
-    GOOS=${TARGETOS} \
-    GOARCH=${TARGETARCH}
-
+ENV CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH}
 WORKDIR /src
-
-# Copy only go mod/sum first for better caching
-COPY pocketbase/go.mod pocketbase/go.sum ./pocketbase/
-WORKDIR /src/pocketbase
-
-# BuildKit caches: module + build cache
+COPY pocketbase/go.mod pocketbase/go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
     go mod download
-
-# Now copy the rest needed to build
 COPY pocketbase/main.go ./
 COPY pocketbase/hooks ./hooks
-COPY pocketbase/pb_migrations ./pb_migrations
-
-# Compile to /out; -trimpath makes cache keys stable
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -trimpath -ldflags="-s -w" -o /out/pocketbase
-
-# --------------> Build nuxt app (Node)
-FROM node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 AS ui-deps
-WORKDIR /app
-
-# Toolchain for native deps (sharp, parcel/watcher, esbuild)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      git python3 make g++ pkg-config \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy only what Yarn needs for dependency resolution
-COPY .yarnrc.yml package.json nuxt.config.ts ./
-# IMPORTANT: commit yarn.lock to the repo and copy it in
-COPY yarn.lock ./
-
-# add the bits Nuxt i18n expects during install
-COPY i18n ./i18n
-COPY app/utils/locales.ts ./app/utils/locales.ts
-
-# Pin Yarn and install with cache mounts
-RUN npm install -g corepack --force
-RUN corepack enable && corepack prepare yarn --activate
-RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
-    --mount=type=cache,target=/root/.cache \
-    yarn install --immutable --inline-builds \
-    || (cat /tmp/xfs-*/build.log || true; exit 1)
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/pocketbase
 
 FROM node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 AS ui-build
 WORKDIR /app
-ENV NODE_ENV=production NITRO_PRESET=node-server
-ARG APP_VERSION
-ENV APP_VERSION=${APP_VERSION}
-RUN npm install -g corepack --force
-RUN corepack enable && corepack prepare yarn --activate
-COPY --from=ui-deps /app/ ./
-COPY app ./app
-COPY server ./server
-COPY shared ./shared
-COPY public ./public
+RUN npm install -g corepack --force && corepack enable
+COPY .yarnrc.yml package.json yarn.lock ./
+RUN --mount=type=cache,target=/root/.yarn/berry/cache \
+    yarn install --immutable --inline-builds
+COPY nuxt.config.ts ./
+COPY types ./types
 COPY i18n ./i18n
-RUN --mount=type=cache,target=/root/.cache yarn build \
-    || (cat /tmp/xfs-*/build.log || true; exit 1)
-
-# --------------> Runtime (final stage)
-FROM node:26.10.0-trixie-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1
-# Install nginx (cacheable layer)
-RUN apt-get update && apt-get install -y --no-install-recommends nginx ca-certificates curl openssl \
- && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
+COPY shared ./shared
+COPY server ./server
+COPY public ./public
+COPY app ./app
 ARG APP_VERSION
-ENV APP_VERSION=${APP_VERSION}
+ENV NODE_ENV=production NITRO_PRESET=node-server APP_VERSION=${APP_VERSION}
+RUN yarn build
 
-# Copy artifacts only
+FROM node:26.10.0-trixie-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends nginx openssl ca-certificates libcap2-bin \
+ && setcap cap_net_bind_service=+ep /usr/sbin/nginx \
+ && rm -rf /var/lib/apt/lists/* /var/log/nginx /etc/nginx/sites-* /etc/nginx/conf.d \
+    /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+    /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-* \
+ && mkdir -p /pb/pb_data /pb/pb_migrations /etc/nginx/ssl \
+ && touch /etc/nginx/real-ip.conf \
+ && chown node:node /pb/pb_data /pb/pb_migrations /etc/nginx/ssl /etc/nginx/real-ip.conf
+
+COPY .docker/nginx.conf /etc/nginx/nginx.conf
+COPY --chmod=755 .docker/docker-entrypoint.sh /app/entrypoint.sh
+COPY .docker/healthcheck.mjs /app/healthcheck.mjs
 COPY --from=pb-build /out/pocketbase /pb/pocketbase
-COPY ./pocketbase/pb_migrations /pb/pb_migrations
+COPY --chown=node:node pocketbase/pb_migrations /pb/pb_migrations
 COPY --from=ui-build /app/.output /app/ui
 
-# Entrypoint + nginx config
-COPY .docker/docker-entrypoint.sh /app/entrypoint.sh
-COPY .docker/nginx.conf /etc/nginx/nginx.conf
-RUN chmod +x /app/entrypoint.sh
+ARG APP_VERSION
+ENV NODE_ENV=production APP_VERSION=${APP_VERSION}
+WORKDIR /app
+USER node
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -fs http://localhost:8080/api/health \
-   && curl -fs http://localhost:3000/ \
-   && curl -fsk https://localhost/ || exit 1
+  CMD ["node", "/app/healthcheck.mjs"]
 
 EXPOSE 80 443
 ENTRYPOINT ["/app/entrypoint.sh"]

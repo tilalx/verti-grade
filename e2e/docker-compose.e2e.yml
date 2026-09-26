@@ -28,7 +28,7 @@ services:
           'CMD',
           'sh',
           '-c',
-          'curl -fs http://localhost:8080/api/health && curl -fs http://localhost:3000/ && curl -fsk https://localhost/',
+          'node /app/healthcheck.mjs',
         ]
       interval: 5s
       timeout: 5s

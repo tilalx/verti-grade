@@ -38,6 +38,6 @@ describe('createPocketBase', () => {
 
         createPocketBase()
 
-        expect(PocketBaseMock).toHaveBeenCalledWith('http://pb:8080')
+        expect(PocketBaseMock).toHaveBeenCalledWith('http://127.0.0.1:8080')
     })
 })
