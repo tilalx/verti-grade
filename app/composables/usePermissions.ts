@@ -4,6 +4,8 @@ export function usePermissions() {
     const roleName = useState<string>('user-role-name', () => '')
     const loading = ref(false)
     const loaded = useState<boolean>('user-permissions-loaded', () => false)
+    const { $i18n } = useNuxtApp()
+    const { error: notifyError } = useNotification()
 
     function isAutoCancelled(err: any) {
         return !!err?.isAbort || err?.status === 0
@@ -36,8 +38,6 @@ export function usePermissions() {
             console.error('Failed to fetch permissions:', err)
             permissions.value = []
             roleName.value = ''
-            const { $i18n } = useNuxtApp()
-            const { error: notifyError } = useNotification()
             notifyError($i18n.t('permissions.loadError'))
         } finally {
             if (!superseded) {

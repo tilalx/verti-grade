@@ -207,6 +207,36 @@ describe('usePermissions', () => {
         consoleError.mockRestore()
     })
 
+    it('reports a failure without needing the Nuxt instance after the request', async () => {
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi
+                .fn()
+                .mockRejectedValue(
+                    Object.assign(new Error('gone'), { status: 404 }),
+                ),
+        })
+        const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+        notifyErrorMock.mockClear()
+        const { refreshPermissions } = await loadComposable()
+
+        const nuxtApp = globalThis.useNuxtApp
+        const outsideNuxt = () => {
+            throw new Error('NUXT_E1001')
+        }
+        vi.stubGlobal('useNuxtApp', outsideNuxt)
+        vi.stubGlobal('useNotification', outsideNuxt)
+        try {
+            await expect(refreshPermissions()).resolves.toBeUndefined()
+            expect(notifyErrorMock).toHaveBeenCalled()
+        } finally {
+            vi.stubGlobal('useNuxtApp', nuxtApp)
+            vi.stubGlobal('useNotification', () => ({ error: notifyErrorMock }))
+            consoleError.mockRestore()
+        }
+    })
+
     it('handles role with no expanded permissions gracefully', async () => {
         pbMock.collection = vi.fn().mockReturnValue({
             getOne: vi.fn().mockResolvedValue({
