@@ -84,6 +84,24 @@
                         :text="$t('account.capsLockOn')"
                     />
 
+                    <v-alert
+                        v-if="unverified"
+                        type="warning"
+                        class="mb-3"
+                        data-testid="login-unverified"
+                        :text="$t('notifications.error.email_not_verified')"
+                    >
+                        <v-btn
+                            variant="text"
+                            size="small"
+                            class="text-none px-0 mt-1"
+                            data-testid="login-resend-verification"
+                            @click="openResendVerification"
+                        >
+                            {{ $t('account.resendVerification') }}
+                        </v-btn>
+                    </v-alert>
+
                     <div class="d-flex align-center justify-space-between mb-5">
                         <v-checkbox
                             v-model="rememberMe"
@@ -242,20 +260,24 @@
 
                 <!-- ─── RESET ─── -->
                 <v-form
-                    v-else-if="view === 'requestReset'"
-                    key="requestReset"
+                    v-else-if="isEmailRequestView"
+                    :key="view"
                     ref="resetForm"
                     v-model="resetValid"
                     validate-on="submit"
                     data-testid="reset-form"
-                    @submit.prevent="submitReset"
+                    @submit.prevent="submitEmailRequest"
                 >
                     <v-alert
                         type="info"
                         color="success"
                         icon="mdi-email-outline"
                         class="mb-6"
-                        :text="$t('account.resetInfo')"
+                        :text="
+                            view === 'requestReset'
+                                ? $t('account.resetInfo')
+                                : $t('account.resendVerificationInfo')
+                        "
                     />
 
                     <v-text-field
@@ -353,6 +375,7 @@ const registerPasswordConfirm = ref('')
 const rememberMe = ref(true)
 const showPassword = ref(false)
 const capsLockOn = ref(false)
+const unverified = ref(false)
 
 const loginForm = useTemplateRef<VForm>('loginForm')
 const resetForm = useTemplateRef<VForm>('resetForm')
@@ -389,6 +412,7 @@ const viewEyebrow = computed(
             login: t('account.eyebrowWelcomeBack'),
             requestReset: t('account.eyebrowAccountRecovery'),
             register: t('account.eyebrowRegister'),
+            resendVerification: t('account.eyebrowVerifyEmail'),
         })[view.value] ?? '',
 )
 const viewTitle = computed(
@@ -397,6 +421,7 @@ const viewTitle = computed(
             login: t('account.login'),
             requestReset: t('account.reset_password'),
             register: t('account.createAccount'),
+            resendVerification: t('account.resendVerification'),
         })[view.value] ?? '',
 )
 const viewSubtitle = computed(
@@ -405,6 +430,7 @@ const viewSubtitle = computed(
             login: t('account.login_hint'),
             requestReset: t('account.reset_hint'),
             register: t('account.register_hint'),
+            resendVerification: t('account.reset_hint'),
         })[view.value] ?? '',
 )
 
@@ -459,15 +485,30 @@ watch(view, async () => {
     document.querySelector('input')?.focus()
 })
 
-function resolveAuthError(err: unknown) {
+const isEmailRequestView = computed(() =>
+    ['requestReset', 'resendVerification'].includes(view.value),
+)
+
+function authErrorMessage(err: unknown) {
     const { data, message } = (err ?? {}) as {
         data?: { message?: string }
         message?: string
     }
-    const msg = data?.message ?? message ?? ''
+    return data?.message ?? message ?? ''
+}
+
+function isUnverifiedError(err: unknown) {
+    return (
+        (err as { status?: number })?.status === 403 ||
+        /not verified/i.test(authErrorMessage(err))
+    )
+}
+
+function resolveAuthError(err: unknown) {
+    const msg = authErrorMessage(err)
     if (/invalid.+credentials/i.test(msg))
         return t('notifications.error.invalid_credentials')
-    if (/not verified/i.test(msg))
+    if (isUnverifiedError(err))
         return t('notifications.error.email_not_verified')
     if (/too many/i.test(msg)) return t('notifications.error.too_many_attempts')
     if (/captcha/i.test(msg)) return t('notifications.error.captcha')
@@ -485,6 +526,34 @@ async function submitLogin() {
                 headers: await capHeaders('login'),
             })
         await navigateTo('/manage/routes', { replace: true })
+    } catch (err) {
+        unverified.value = isUnverifiedError(err)
+        notifyError(resolveAuthError(err))
+    } finally {
+        loading.value = false
+    }
+}
+
+function openResendVerification() {
+    resetEmail.value = identity.value.includes('@') ? identity.value : ''
+    view.value = 'resendVerification'
+}
+
+function submitEmailRequest() {
+    return view.value === 'requestReset'
+        ? submitReset()
+        : submitResendVerification()
+}
+
+async function submitResendVerification() {
+    if (!(await validate(resetForm))) return
+    loading.value = true
+    try {
+        await pb.collection('users').requestVerification(resetEmail.value)
+        notify(t('notifications.success.verificationSent'))
+        unverified.value = false
+        view.value = 'login'
+        resetEmail.value = ''
     } catch (err) {
         notifyError(resolveAuthError(err))
     } finally {
@@ -532,11 +601,15 @@ async function submitRegister() {
             },
             { headers: await capHeaders('register') },
         )
-        await pb
+        const verificationSent = await pb
             .collection('users')
             .requestVerification(registerEmail.value)
-            .catch(() => {})
-        notify(t('notifications.success.registered'))
+            .then(
+                () => true,
+                () => false,
+            )
+        if (verificationSent) notify(t('notifications.success.registered'))
+        else notifyError(t('notifications.error.verificationMail'))
         identity.value = registerUsername.value
         registerPassword.value = registerPasswordConfirm.value = ''
         view.value = 'login'

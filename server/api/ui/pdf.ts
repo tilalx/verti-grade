@@ -1,5 +1,5 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server'
+import { requirePermission } from '../../utils/pb-server'
 import {
     resolveRouteIds,
     resolveApplicationUrl,
@@ -15,7 +15,7 @@ import type { SettingsRecord } from '../../../types/models'
 export default eventHandler(async (event) => {
     const { default: QRCode } = await import('qrcode')
     const { default: PDFDocument } = await import('pdfkit')
-    const pb = getAuthenticatedPb(event)
+    const pb = await requirePermission(event, 'manage_routes')
     const res = event.node.res
 
     const ids = await resolveRouteIds(event)

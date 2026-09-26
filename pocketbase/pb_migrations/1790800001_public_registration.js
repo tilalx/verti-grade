@@ -9,7 +9,15 @@ const SIGNUP_RATE_LIMIT = {
     label: 'users:create',
     audience: '@guest',
     duration: 3600,
-    maxRequests: 5,
+    maxRequests: 30,
+}
+const VERIFICATION_LABEL = '*:requestVerification'
+const VERIFICATION_LIMIT = { before: 3, after: 20 }
+
+function setVerificationLimit(appSettings, maxRequests) {
+    for (const rule of appSettings.rateLimits.rules) {
+        if (rule.label === VERIFICATION_LABEL) rule.maxRequests = maxRequests
+    }
 }
 
 migrate(
@@ -35,6 +43,7 @@ migrate(
             (rule) => rule.label !== SIGNUP_RATE_LIMIT.label,
         )
         appSettings.rateLimits.rules = [...rules, SIGNUP_RATE_LIMIT]
+        setVerificationLimit(appSettings, VERIFICATION_LIMIT.after)
         app.save(appSettings)
     },
     (app) => {
@@ -51,6 +60,7 @@ migrate(
         appSettings.rateLimits.rules = appSettings.rateLimits.rules.filter(
             (rule) => rule.label !== SIGNUP_RATE_LIMIT.label,
         )
+        setVerificationLimit(appSettings, VERIFICATION_LIMIT.before)
         app.save(appSettings)
     },
 )

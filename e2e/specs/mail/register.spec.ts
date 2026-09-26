@@ -1,16 +1,24 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { waitForMail, linkPath, mailbox } from '../../support/mail'
+import { waitForMail, linkPath, mailbox, mailCount } from '../../support/mail'
 import PocketBase from 'pocketbase'
 import { authAsSuperuser, getRoleIds } from '../../support/seed'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 const SETTINGS_ID = 'settings_123456'
 const PASSWORD = 'E2eSignup!123'
+const VERIFY_LINK = /https?:\/\/[^"'\s]*\/auth\/confirm-verification\/[^"'\s]+/
 
 test.describe.configure({ mode: 'serial' })
 
 let root: PocketBase
+
+async function registrationAllowed() {
+    const settings = await root
+        .collection('settings')
+        .getOne(SETTINGS_ID, { requestKey: null })
+    return settings.allow_registration
+}
 
 async function setRegistration(allowed: boolean) {
     await root
@@ -44,7 +52,7 @@ test.afterAll(async () => {
 })
 
 test('registration is closed by default', async ({ page, testPrefix }) => {
-    await setRegistration(false)
+    expect(await registrationAllowed()).toBe(false)
 
     await gotoSettled(page, '/auth/login')
     await expect(page.getByTestId('login-form')).toBeVisible()
@@ -58,6 +66,22 @@ test('registration is closed by default', async ({ page, testPrefix }) => {
     )
 })
 
+test('an admin opens registration from the settings page', async ({
+    adminPage,
+    page,
+}) => {
+    await gotoSettled(adminPage, '/admin/settings')
+    await adminPage
+        .getByTestId('settings-allow-registration')
+        .locator('input')
+        .check()
+    await adminPage.getByTestId('settings-save').click()
+    await expect.poll(registrationAllowed).toBe(true)
+
+    await gotoSettled(page, '/auth/login')
+    await expect(page.getByTestId('login-goto-register')).toBeVisible()
+})
+
 test('a guest cannot pick their own role when signing up', async ({
     testPrefix,
 }) => {
@@ -68,14 +92,12 @@ test('a guest cannot pick their own role when signing up', async ({
         signup(
             mailbox(testPrefix, 'escalate'),
             `${testPrefix}esc`.replace(/-/g, ''),
-            {
-                role: admin,
-            },
+            { role: admin },
         ),
     )
 })
 
-test('a climber signs up, verifies the email and signs in', async ({
+test('a climber signs up, resends the verification mail, verifies and signs in', async ({
     page,
     testPrefix,
 }) => {
@@ -97,15 +119,20 @@ test('a climber signs up, verifies the email and signs in', async ({
         .getFirstListItem(`email = "${email}"`, { requestKey: null })
     expect(created.verified).toBe(false)
     expect(created.role).toBe((await getRoleIds(root)).user)
+    await waitForMail(page, email, { subject: /verify/i })
+
+    await page.getByTestId('login-identity').locator('input').fill(email)
+    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
+    await page.getByTestId('login-submit').click()
+    await page.getByTestId('login-resend-verification').click()
+    await expect(page.getByTestId('reset-email').locator('input')).toHaveValue(
+        email,
+    )
+    await page.getByTestId('reset-submit').click()
+    await expect.poll(() => mailCount(page, email)).toBe(2)
 
     const mail = await waitForMail(page, email, { subject: /verify/i })
-    await gotoSettled(
-        page,
-        linkPath(
-            mail,
-            /https?:\/\/[^"'\s]*\/auth\/confirm-verification\/[^"'\s]+/,
-        ),
-    )
+    await gotoSettled(page, linkPath(mail, VERIFY_LINK))
     await expect(page.getByTestId('verify-done')).toBeVisible()
 
     await gotoSettled(page, '/auth/login')

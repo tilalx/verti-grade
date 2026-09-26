@@ -89,7 +89,9 @@
         "eyebrowRegister": "NEU HIER",
         "register_hint": "Registriere dich, um deine Begehungen zu speichern.",
         "usernameInvalid": "Nur Buchstaben, Zahlen, Punkte, Binde- oder Unterstriche.",
-        "emailTaken": "Diese E-Mail-Adresse kann nicht verwendet werden."
+        "emailTaken": "Diese E-Mail-Adresse kann nicht verwendet werden.",
+        "resendVerification": "Bestätigungs-E-Mail erneut senden",
+        "resendVerificationInfo": "Wir senden dir einen neuen Bestätigungslink an deine E-Mail-Adresse."
     },
     "routes": {
         "home": "Startseite",
@@ -331,7 +333,8 @@
             "emailChange": "Deine E-Mail-Adresse wurde geändert. Bitte melde dich erneut an.",
             "userInvited": "Benutzer erstellt. Eine Einladungs-E-Mail wurde versendet.",
             "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden.",
-            "registered": "Konto erstellt. Bestätige deine E-Mail-Adresse über den Link in deinem Postfach und melde dich dann an."
+            "registered": "Konto erstellt. Bestätige deine E-Mail-Adresse über den Link in deinem Postfach und melde dich dann an.",
+            "verificationSent": "Falls ein unbestätigtes Konto existiert, ist ein neuer Bestätigungslink unterwegs."
         },
         "error": {
             "resetPassword": "Der Link zum Zurücksetzen konnte nicht gesendet werden.",
@@ -348,7 +351,8 @@
             "emailChange": "Dieser Link zur E-Mail-Änderung ist ungültig oder abgelaufen.",
             "userInviteMail": "Benutzer erstellt, aber die Einladungs-E-Mail konnte nicht versendet werden.",
             "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Fordere auf der Anmeldeseite einen neuen an.",
-            "captcha": "Die Spam-Prüfung ist fehlgeschlagen. Bitte versuche es erneut."
+            "captcha": "Die Spam-Prüfung ist fehlgeschlagen. Bitte versuche es erneut.",
+            "verificationMail": "Dein Konto wurde erstellt, aber die Bestätigungs-E-Mail konnte nicht gesendet werden. Fordere auf der Anmeldeseite eine neue an."
         },
         "deleteItem": "Diesen Eintrag löschen? Das kann nicht rückgängig gemacht werden.",
         "deleteMoreItems": "Die ausgewählten Einträge löschen? Das kann nicht rückgängig gemacht werden.",
