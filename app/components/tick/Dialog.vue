@@ -16,7 +16,7 @@
                     :aria-checked="form.type === type"
                     :color="form.type === type ? 'primary' : undefined"
                     :variant="form.type === type ? 'flat' : 'tonal'"
-                    :prepend-icon="TYPE_ICONS[type]"
+                    :prepend-icon="TICK_TYPE_ICONS[type]"
                     height="48"
                     class="tick-dialog__type"
                     :data-testid="`tick-type-${type}`"
@@ -94,12 +94,7 @@ import {
     type TickType,
 } from '#shared/utils/ticks'
 import { formatDateToYYYYMMDD } from '#shared/utils/formatting'
-
-const TYPE_ICONS: Record<TickType, string> = {
-    flash: 'mdi-lightning-bolt',
-    top: 'mdi-flag-checkered',
-    attempt: 'mdi-reload',
-}
+import { TICK_TYPE_ICONS } from '~/utils/ticks'
 
 const open = defineModel<boolean>({ default: false })
 

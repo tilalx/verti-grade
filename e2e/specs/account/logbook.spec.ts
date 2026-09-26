@@ -54,6 +54,7 @@ test('a climber logs, edits and deletes an ascent', async ({
 
     await gotoSettled(page, '/logbook')
     await expect(page.getByTestId('logbook-empty')).toBeVisible()
+    await expect(page.getByTestId('logbook-suggestions')).toBeVisible()
 
     await gotoSettled(page, `/route?id=${route.id}`)
     await expect(page.getByTestId('route-ticked')).toHaveCount(0)
@@ -100,4 +101,85 @@ test('a climber logs, edits and deletes an ascent', async ({
 
     await root.collection('routes').delete(route.id)
     await root.collection('users').delete(climber.id)
+})
+
+test('the dashboard sums up sends and turns a project into a send', async ({
+    page,
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const roleIds = await getRoleIds(root)
+    const climber = await ensureUser(
+        root,
+        roleIds.user,
+        'user',
+        `${testPrefix}-dash`,
+    )
+    const locations = await ensureLocations(root)
+    const createRoute = (name: string, grade: string) =>
+        root.collection('routes').create({
+            name: `${testPrefix}-${name}`,
+            ...uiaa(grade),
+            location: locations[LOCATIONS[0]],
+            type: 'Route',
+            creator: ['E2E'],
+            screw_date: '2026-09-01',
+        })
+    const easy = await createRoute('easy', '6+')
+    const hard = await createRoute('hard', '7-')
+    const project = await createRoute('project', '8')
+    const today = `${new Date().toISOString().slice(0, 10)} 12:00:00.000Z`
+    for (const [route, type] of [
+        [easy, 'flash'],
+        [hard, 'top'],
+        [project, 'attempt'],
+    ] as const) {
+        await root.collection('ticks').create({
+            user: climber.id,
+            route: route.id,
+            type,
+            attempts: type === 'flash' ? 1 : 3,
+            date: today,
+        })
+    }
+
+    await gotoSettled(page, '/auth/login')
+    await page
+        .getByTestId('login-identity')
+        .locator('input')
+        .fill(climber.email)
+    await page
+        .getByTestId('login-password')
+        .locator('input')
+        .fill(climber.password)
+    await page.getByTestId('login-submit').click()
+    await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
+
+    await gotoSettled(page, '/logbook')
+    await page.getByTestId('logbook-kind-route').click()
+    const value = (key: string) =>
+        page.getByTestId(`logbook-stat-${key}`).getByTestId('stats-card-value')
+    await expect(value('sends')).toHaveText('2')
+    await expect(value('hardest')).toHaveText('7-')
+    await expect(value('flashRate')).toHaveText('50%')
+    await expect(value('sessions')).toHaveText('1')
+
+    await page.getByTestId('logbook-tab-stats').click()
+    await expect(page.getByTestId('logbook-pyramid')).toBeVisible()
+    await expect(page.getByTestId('logbook-progression')).toBeVisible()
+
+    await page.getByTestId('logbook-tab-projects').click()
+    await expect(page.getByTestId('logbook-projects-count')).toHaveText('1')
+    const card = page.getByTestId('logbook-project')
+    await expect(card).toHaveAttribute('data-route-id', project.id)
+    await card.getByTestId('logbook-project-log').click()
+    await page.getByTestId('tick-submit').click()
+    await expect(page.getByTestId('logbook-projects-empty')).toBeVisible()
+    await expect(value('sends')).toHaveText('3')
+
+    await root.collection('users').delete(climber.id)
+    for (const route of [easy, hard, project]) {
+        await root.collection('routes').delete(route.id)
+    }
 })

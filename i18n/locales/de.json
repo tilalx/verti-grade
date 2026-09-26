@@ -893,7 +893,7 @@
     },
     "ticks": {
         "logbook": "Logbuch",
-        "logbookSubtitle": "Deine Begehungen, nach Session gruppiert.",
+        "logbookSubtitle": "Deine Begehungen, Statistiken und Projekte.",
         "empty": "Noch keine Begehungen",
         "emptyHint": "Öffne eine Route und tippe auf „Begehung eintragen“, um dein Logbuch zu beginnen.",
         "sendCount": "Durchstiege: {count}",
@@ -916,6 +916,55 @@
             "flash": "Flash",
             "top": "Top",
             "attempt": "Versuch"
+        },
+        "kind": {
+            "boulder": "Boulder",
+            "route": "Routen"
+        },
+        "range": {
+            "30d": "30 Tage",
+            "12m": "12 Monate",
+            "all": "Gesamt"
+        },
+        "tabs": {
+            "sessions": "Sessions",
+            "stats": "Statistik",
+            "projects": "Projekte"
+        },
+        "stats": {
+            "sends": "Durchstiege",
+            "hardest": "Schwerster Durchstieg",
+            "flashRate": "Flash-Quote",
+            "sessions": "Sessions",
+            "previousHardest": "Davor: {grade}"
+        },
+        "pyramid": {
+            "title": "Grad-Pyramide",
+            "subtitle": "Durchstiege pro Grad, Flash vs. Top"
+        },
+        "progression": {
+            "title": "Entwicklung",
+            "subtitle": "Schwerster Durchstieg und Durchstiege pro Monat",
+            "hardest": "Schwerster Durchstieg",
+            "sends": "Durchstiege"
+        },
+        "chartEmpty": "In diesem Zeitraum noch keine Durchstiege.",
+        "session": {
+            "climbs": "Routen: {count}",
+            "flashes": "Flashes: {count}",
+            "hardest": "Schwerste {grade}"
+        },
+        "projects": {
+            "empty": "Keine offenen Projekte",
+            "emptyHint": "Routen, die du versucht, aber noch nicht geschafft hast, erscheinen hier.",
+            "lastTried": "zuletzt versucht {date}",
+            "logSend": "Durchstieg eintragen"
+        },
+        "suggestions": {
+            "title": "Routen zum Ausprobieren",
+            "subtitle": "Noch nicht geschaffte Routen nahe deinem Niveau",
+            "subtitleNew": "Die neuesten Routen der Halle",
+            "new": "Neu"
         }
     }
 }

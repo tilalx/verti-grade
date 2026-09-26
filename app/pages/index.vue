@@ -111,12 +111,7 @@
                         class="d-flex align-center"
                         :data-testid="`index-row-${item.id}`"
                     >
-                        <NuxtLink
-                            :to="`/route?id=${item.id}`"
-                            class="route-name route-link"
-                            data-testid="index-row-link"
-                            >{{ item.name }}</NuxtLink
-                        >
+                        <span class="route-name">{{ item.name }}</span>
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"
@@ -153,15 +148,8 @@
                     {{ formatDate(item.screw_date, { locale }) }}
                 </template>
                 <template #item.actions="{ item }">
-                    <div class="d-flex ga-2 justify-end">
-                        <v-btn
-                            :to="`/route?id=${item.id}`"
-                            variant="tonal"
-                            append-icon="mdi-chevron-right"
-                            data-testid="route-view"
-                        >
-                            {{ $t('routes.view') }}
-                        </v-btn>
+                    <div class="d-flex align-center ga-2 justify-end">
+                        <RouteViewButton :route-id="item.id" compact />
                         <RouteDetails :route_id="item.id" />
                     </div>
                 </template>
@@ -177,15 +165,8 @@
                         :ticked="tickedRouteIds.has(route.id)"
                     >
                         <template #actions>
-                            <div class="d-flex ga-2 justify-end">
-                                <v-btn
-                                    :to="`/route?id=${route.id}`"
-                                    variant="tonal"
-                                    append-icon="mdi-chevron-right"
-                                    data-testid="route-view"
-                                >
-                                    {{ $t('routes.view') }}
-                                </v-btn>
+                            <div class="d-flex align-center ga-2 justify-end">
+                                <RouteViewButton :route-id="route.id" />
                                 <RouteDetails :route_id="route.id" />
                             </div>
                         </template>

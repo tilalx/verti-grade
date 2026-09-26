@@ -285,6 +285,7 @@
                                     data-testid="routes-row-edit"
                                     @click="routeFormRef?.open(item)"
                                 />
+                                <RouteViewButton :route-id="item.id" compact />
                                 <RouteDetails :route_id="item.id" />
                             </div>
                         </template>
@@ -318,6 +319,10 @@
                                 "
                             >
                                 <template #actions>
+                                    <RouteViewButton
+                                        :route-id="route.id"
+                                        compact
+                                    />
                                     <RouteDetails :route_id="route.id" />
                                     <v-btn
                                         icon="mdi-pencil-outline"
@@ -897,7 +902,8 @@ useHead(() => ({
 
 .route-manager__row-actions {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    gap: 8px;
     justify-content: flex-end;
 }
 
