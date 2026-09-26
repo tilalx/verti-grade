@@ -119,6 +119,18 @@
                     </v-btn>
 
                     <v-btn
+                        v-if="canRegister"
+                        variant="tonal"
+                        block
+                        class="text-none mb-3"
+                        :disabled="loading"
+                        data-testid="login-goto-register"
+                        @click="view = 'register'"
+                    >
+                        {{ $t('account.createAccount') }}
+                    </v-btn>
+
+                    <v-btn
                         variant="text"
                         block
                         class="text-none text-medium-emphasis mb-1"
@@ -163,6 +175,69 @@
                             </v-col>
                         </v-row>
                     </template>
+                </v-form>
+
+                <v-form
+                    v-else-if="view === 'register'"
+                    key="register"
+                    ref="registerForm"
+                    validate-on="submit"
+                    data-testid="register-form"
+                    @submit.prevent="submitRegister"
+                >
+                    <v-text-field
+                        v-model="registerUsername"
+                        :label="$t('account.username')"
+                        prepend-inner-icon="mdi-account-outline"
+                        autocomplete="username"
+                        :rules="usernameRules"
+                        :disabled="loading"
+                        color="success"
+                        class="mb-2"
+                        data-testid="register-username"
+                        autofocus
+                    />
+                    <v-text-field
+                        v-model="registerEmail"
+                        :label="$t('account.email')"
+                        prepend-inner-icon="mdi-email-outline"
+                        type="email"
+                        autocomplete="email"
+                        :rules="emailRules"
+                        :disabled="loading"
+                        color="success"
+                        class="mb-2"
+                        data-testid="register-email"
+                    />
+                    <UserPasswordChangeFields
+                        v-model:password="registerPassword"
+                        v-model:password-confirm="registerPasswordConfirm"
+                        :require-old-password="false"
+                    />
+
+                    <v-btn
+                        type="submit"
+                        color="primary"
+                        block
+                        size="large"
+                        :loading="loading"
+                        :disabled="loading"
+                        class="mt-2 mb-3 font-weight-semibold"
+                        data-testid="register-submit"
+                    >
+                        <template #loader><CaptchaLoader /></template>
+                        {{ $t('account.createAccount') }}
+                    </v-btn>
+
+                    <v-btn
+                        variant="text"
+                        block
+                        :disabled="loading"
+                        class="text-none text-medium-emphasis"
+                        @click="view = 'login'"
+                    >
+                        {{ $t('actions.cancel') }}
+                    </v-btn>
                 </v-form>
 
                 <!-- ─── RESET ─── -->
@@ -257,7 +332,10 @@ const hasAnyAuth = !!(
     authMethods?.password?.enabled || authMethods?.oauth2?.enabled
 )
 
-const { orgName, orgUnitName } = useOrgSettings()
+const { orgName, orgUnitName, allowRegistration } = useOrgSettings()
+const canRegister = computed(
+    () => allowRegistration.value && !!authMethods?.password?.enabled,
+)
 
 // ── State ──────────────────────────────────────────────────────────
 const { notify, error: notifyError } = useNotification()
@@ -268,12 +346,17 @@ const resetValid = ref(false)
 const identity = ref('')
 const password = ref('')
 const resetEmail = ref('')
+const registerUsername = ref('')
+const registerEmail = ref('')
+const registerPassword = ref('')
+const registerPasswordConfirm = ref('')
 const rememberMe = ref(true)
 const showPassword = ref(false)
 const capsLockOn = ref(false)
 
 const loginForm = useTemplateRef<VForm>('loginForm')
 const resetForm = useTemplateRef<VForm>('resetForm')
+const registerForm = useTemplateRef<VForm>('registerForm')
 
 // ── Identity config ────────────────────────────────────────────────
 const idFields = authMethods?.password?.identityFields ?? []
@@ -305,6 +388,7 @@ const viewEyebrow = computed(
         ({
             login: t('account.eyebrowWelcomeBack'),
             requestReset: t('account.eyebrowAccountRecovery'),
+            register: t('account.eyebrowRegister'),
         })[view.value] ?? '',
 )
 const viewTitle = computed(
@@ -312,6 +396,7 @@ const viewTitle = computed(
         ({
             login: t('account.login'),
             requestReset: t('account.reset_password'),
+            register: t('account.createAccount'),
         })[view.value] ?? '',
 )
 const viewSubtitle = computed(
@@ -319,6 +404,7 @@ const viewSubtitle = computed(
         ({
             login: t('account.login_hint'),
             requestReset: t('account.reset_hint'),
+            register: t('account.register_hint'),
         })[view.value] ?? '',
 )
 
@@ -330,6 +416,12 @@ const identityRules = computed(() => {
 })
 const passwordRules = [required(t), minLength(t, 6)]
 const emailRules = [required(t), validEmail(t)]
+const usernameRules = [
+    required(t),
+    minLength(t, 3),
+    (value: string) =>
+        /^[\w][\w.-]*$/.test(value) || t('account.usernameInvalid'),
+]
 
 // ── OAuth icons ────────────────────────────────────────────────────
 const PROVIDER_ICONS: Record<string, string> = {
@@ -412,6 +504,44 @@ async function submitReset() {
         resetEmail.value = ''
     } catch (err) {
         notifyError(resolveAuthError(err))
+    } finally {
+        loading.value = false
+    }
+}
+
+function resolveRegisterError(err: unknown) {
+    const fields = (
+        err as { data?: { data?: Record<string, { code?: string }> } }
+    )?.data?.data
+    if (fields?.username?.code === 'validation_not_unique')
+        return t('users.usernameTaken')
+    if (fields?.email) return t('account.emailTaken')
+    return resolveAuthError(err)
+}
+
+async function submitRegister() {
+    if (!(await validate(registerForm))) return
+    loading.value = true
+    try {
+        await pb.collection('users').create(
+            {
+                username: registerUsername.value,
+                email: registerEmail.value,
+                password: registerPassword.value,
+                passwordConfirm: registerPasswordConfirm.value,
+            },
+            { headers: await capHeaders('register') },
+        )
+        await pb
+            .collection('users')
+            .requestVerification(registerEmail.value)
+            .catch(() => {})
+        notify(t('notifications.success.registered'))
+        identity.value = registerUsername.value
+        registerPassword.value = registerPasswordConfirm.value = ''
+        view.value = 'login'
+    } catch (err) {
+        notifyError(resolveRegisterError(err))
     } finally {
         loading.value = false
     }

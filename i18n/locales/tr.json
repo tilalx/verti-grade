@@ -84,7 +84,12 @@
         "deleteAccountHint": "Hesabınızı kalıcı olarak siler ve oturumunuzu kapatır. Oluşturduğunuz rotalar ve değerlendirmeler kalır.",
         "deleteAccountConfirm": "Bu işlem hesabınızı kalıcı olarak siler ve oturumunuzu kapatır. Geri alınamaz.",
         "eyebrowBrand": "ROTA YÖNETİMİ",
-        "newPasswordHint": "Hesabınız için yeni bir şifre belirleyin."
+        "newPasswordHint": "Hesabınız için yeni bir şifre belirleyin.",
+        "createAccount": "Hesap oluştur",
+        "eyebrowRegister": "YENİ MİSİN",
+        "register_hint": "Tırmanışlarını kaydetmek için kaydol.",
+        "usernameInvalid": "Harf, rakam, nokta, tire veya alt çizgi kullan.",
+        "emailTaken": "Bu e-posta adresi kullanılamaz."
     },
     "routes": {
         "home": "Ana Sayfa",
@@ -325,7 +330,8 @@
             "verifyEmail": "E-posta adresiniz doğrulandı. Şimdi giriş yapabilirsiniz.",
             "emailChange": "E-posta adresiniz değiştirildi. Lütfen tekrar giriş yapın.",
             "userInvited": "Kullanıcı oluşturuldu. Bir davet e-postası gönderildi.",
-            "passwordChanged": "Şifreniz belirlendi. Şimdi giriş yapabilirsiniz."
+            "passwordChanged": "Şifreniz belirlendi. Şimdi giriş yapabilirsiniz.",
+            "registered": "Hesap oluşturuldu. E-postandaki bağlantıyla adresini doğrula, ardından giriş yap."
         },
         "error": {
             "resetPassword": "Şifre sıfırlama isteği başarısız oldu.",
@@ -692,7 +698,9 @@
         "grading": "Zorluk skalaları",
         "routeGradeSystem": "Rota skalası",
         "boulderGradeSystem": "Boulder skalası",
-        "gradingHint": "Yeni kurulan rotalara uygulanır. Mevcut rotalar düzenlenene kadar skalalarını korur."
+        "gradingHint": "Yeni kurulan rotalara uygulanır. Mevcut rotalar düzenlenene kadar skalalarını korur.",
+        "allowRegistration": "Herkese açık kayda izin ver",
+        "allowRegistrationHint": "Herkes yetkisiz bir tırmanıcı hesabı oluşturabilir. E-posta doğrulaması için çalışan bir posta sunucusu gerekir."
     },
     "errors": {
         "notFound": {

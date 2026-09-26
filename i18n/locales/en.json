@@ -84,7 +84,12 @@
         "deleteAccountHint": "Permanently removes your account and signs you out. Routes and reviews you created stay in place.",
         "deleteAccountConfirm": "This permanently deletes your account and signs you out. This cannot be undone.",
         "eyebrowBrand": "ROUTE MANAGEMENT",
-        "newPasswordHint": "Choose a new password for your account."
+        "newPasswordHint": "Choose a new password for your account.",
+        "createAccount": "Create account",
+        "eyebrowRegister": "NEW HERE",
+        "register_hint": "Sign up to log your climbs.",
+        "usernameInvalid": "Use letters, numbers, dots, dashes or underscores.",
+        "emailTaken": "This email address can't be used."
     },
     "routes": {
         "home": "Home",
@@ -325,7 +330,8 @@
             "verifyEmail": "Your email address has been verified. You can sign in now.",
             "emailChange": "Your email address has been changed. Please sign in again.",
             "userInvited": "User created. An invitation email has been sent.",
-            "passwordChanged": "Your password has been set. You can sign in now."
+            "passwordChanged": "Your password has been set. You can sign in now.",
+            "registered": "Account created. Check your email to verify your address, then sign in."
         },
         "error": {
             "resetPassword": "The reset link could not be sent.",
@@ -692,7 +698,9 @@
         "grading": "Grading scales",
         "routeGradeSystem": "Route scale",
         "boulderGradeSystem": "Boulder scale",
-        "gradingHint": "Applies to newly set routes. Existing routes keep their scale until edited."
+        "gradingHint": "Applies to newly set routes. Existing routes keep their scale until edited.",
+        "allowRegistration": "Allow public registration",
+        "allowRegistrationHint": "Anyone can create a climber account without permissions. Requires a working mail server for email verification."
     },
     "errors": {
         "notFound": {

@@ -84,7 +84,12 @@
         "deleteAccountHint": "Löscht dein Konto endgültig und meldet dich ab. Von dir erstellte Routen und Bewertungen bleiben erhalten.",
         "deleteAccountConfirm": "Damit wird dein Konto endgültig gelöscht und du wirst abgemeldet. Das kann nicht rückgängig gemacht werden.",
         "eyebrowBrand": "ROUTENVERWALTUNG",
-        "newPasswordHint": "Wähle ein neues Passwort für dein Konto."
+        "newPasswordHint": "Wähle ein neues Passwort für dein Konto.",
+        "createAccount": "Konto erstellen",
+        "eyebrowRegister": "NEU HIER",
+        "register_hint": "Registriere dich, um deine Begehungen zu speichern.",
+        "usernameInvalid": "Nur Buchstaben, Zahlen, Punkte, Binde- oder Unterstriche.",
+        "emailTaken": "Diese E-Mail-Adresse kann nicht verwendet werden."
     },
     "routes": {
         "home": "Startseite",
@@ -325,7 +330,8 @@
             "verifyEmail": "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt anmelden.",
             "emailChange": "Deine E-Mail-Adresse wurde geändert. Bitte melde dich erneut an.",
             "userInvited": "Benutzer erstellt. Eine Einladungs-E-Mail wurde versendet.",
-            "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden."
+            "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden.",
+            "registered": "Konto erstellt. Bestätige deine E-Mail-Adresse über den Link in deinem Postfach und melde dich dann an."
         },
         "error": {
             "resetPassword": "Der Link zum Zurücksetzen konnte nicht gesendet werden.",
@@ -692,7 +698,9 @@
         "grading": "Bewertungsskalen",
         "routeGradeSystem": "Skala für Routen",
         "boulderGradeSystem": "Skala für Boulder",
-        "gradingHint": "Gilt für neu geschraubte Routen. Bestehende Routen behalten ihre Skala bis zur Bearbeitung."
+        "gradingHint": "Gilt für neu geschraubte Routen. Bestehende Routen behalten ihre Skala bis zur Bearbeitung.",
+        "allowRegistration": "Öffentliche Registrierung erlauben",
+        "allowRegistrationHint": "Jede Person kann ein Kletterkonto ohne Berechtigungen anlegen. Erfordert einen funktionierenden Mailserver für die E-Mail-Bestätigung."
     },
     "errors": {
         "notFound": {

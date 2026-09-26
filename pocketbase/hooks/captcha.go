@@ -33,6 +33,15 @@ func registerCaptcha(app core.App) {
 		return e.Next()
 	})
 
+	app.OnRecordCreateRequest("users").BindFunc(func(e *core.RecordRequestEvent) error {
+		if e.Auth == nil && !isOAuth2Request(e.RequestEvent) {
+			if err := enforceCaptcha(e.RequestEvent, "register"); err != nil {
+				return err
+			}
+		}
+		return e.Next()
+	})
+
 	app.OnRecordAuthWithPasswordRequest("users").BindFunc(func(e *core.RecordAuthWithPasswordRequestEvent) error {
 		if err := enforceCaptcha(e.RequestEvent, "login"); err != nil {
 			return err
@@ -120,6 +129,11 @@ func enforceCaptcha(e *core.RequestEvent, scope string) error {
 		return apis.NewBadRequestError("Captcha token already used.", nil)
 	}
 	return nil
+}
+
+func isOAuth2Request(e *core.RequestEvent) bool {
+	info, err := e.RequestInfo()
+	return err == nil && info.Context == core.RequestInfoContextOAuth2
 }
 
 func claimString(claims map[string]any, key string) string {
