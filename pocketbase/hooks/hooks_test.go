@@ -86,3 +86,16 @@ func TestArchivedAt(t *testing.T) {
 		}
 	}
 }
+
+func TestDropSubRequestHeaders(t *testing.T) {
+	batch := []*core.InternalRequest{
+		{Method: "POST", URL: "/api/collections/reports/records", Headers: map[string]string{"X-Real-IP": "127.0.0.1"}},
+		{Method: "POST", URL: "/api/collections/ratings/records", Headers: map[string]string{"x-forwarded-for": "10.0.0.1"}},
+	}
+	dropSubRequestHeaders(batch)
+	for _, request := range batch {
+		if len(request.Headers) != 0 {
+			t.Fatalf("headers kept on %s: %v", request.URL, request.Headers)
+		}
+	}
+}
