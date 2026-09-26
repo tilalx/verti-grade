@@ -131,6 +131,7 @@ test('a climber signs up, verifies the email and signs in', async ({
     await gotoSettled(page, linkPath(mail, VERIFY_LINK))
     await expect(page.getByTestId('verify-done')).toBeVisible()
 
+    await gotoSettled(page, '/auth/login')
     await signIn(page, email)
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 
