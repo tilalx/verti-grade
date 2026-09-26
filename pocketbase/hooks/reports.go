@@ -125,15 +125,7 @@ func sendReportReceipt(app core.App, report *core.Record) error {
 		app,
 		[]string{report.GetString("notifier_email")},
 		"We received your report - "+appName,
-		fmt.Sprintf(`<p>Hello %s,</p>
-             <p>We have received your report and will review it without undue delay.
-             You will be informed of the decision and of the ways to challenge it.</p>
-             %s
-             <p>Reference: %s</p>`,
-			html.EscapeString(report.GetString("notifier_name")),
-			summary,
-			html.EscapeString(report.Id),
-		),
+		reportReceiptHTML(report),
 	)
 	if err != nil {
 		return err
@@ -162,6 +154,17 @@ func sendReportReceipt(app core.App, report *core.Record) error {
 	}
 	report.Set("receipt_sent", true)
 	return app.Save(report)
+}
+
+func reportReceiptHTML(report *core.Record) string {
+	return fmt.Sprintf(`<p>Hello,</p>
+             <p>We have received your report and will review it without undue delay.
+             You will be informed of the decision and of the ways to challenge it.</p>
+             <p><strong>Reason:</strong> %s</p>
+             <p>Reference: %s</p>`,
+		html.EscapeString(reportReasonLabel(report.GetString("reason"))),
+		html.EscapeString(report.Id),
+	)
 }
 
 func sendReportDecision(app core.App, report *core.Record) error {
