@@ -28,11 +28,12 @@ function trend(page: Page, key: string) {
         .getByTestId('stats-card-trend')
 }
 
-async function gotoSubscribed(page: Page, path: string) {
+async function gotoSubscribed(page: Page, path: string, topic: string) {
     const subscribed = page.waitForResponse(
         (response) =>
             response.url().includes('/api/realtime') &&
-            response.request().method() === 'POST',
+            response.request().method() === 'POST' &&
+            !!response.request().postData()?.includes(topic),
     )
     await gotoSettled(page, path)
     await subscribed
@@ -167,7 +168,7 @@ test('updates live when a route is created elsewhere', async ({
     testPrefix,
 }) => {
     const pb = await superuserPb()
-    await gotoSubscribed(page, '/manage/analytics?range=30d')
+    await gotoSubscribed(page, '/manage/analytics?range=30d', 'routes/*')
     const routesBefore = await statValue(page, 'routesSet')
 
     const setter = `${testPrefix}-live-setter`

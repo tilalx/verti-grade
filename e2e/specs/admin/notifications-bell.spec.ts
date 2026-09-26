@@ -185,10 +185,11 @@ test('menu keeps a readable width and fits on phones', async ({
         await page.setViewportSize(viewport)
         await gotoSettled(page, '/')
         await page.getByTestId('notification-bell').click()
-        const menu = (await page
-            .getByTestId('notification-menu')
-            .boundingBox())!
-        expect(menu.width).toBeGreaterThanOrEqual(viewport.minWidth)
+        const menuLocator = page.getByTestId('notification-menu')
+        await expect
+            .poll(async () => (await menuLocator.boundingBox())?.width ?? 0)
+            .toBeGreaterThanOrEqual(viewport.minWidth)
+        const menu = (await menuLocator.boundingBox())!
         expect(menu.x).toBeGreaterThanOrEqual(0)
         expect(menu.x + menu.width).toBeLessThanOrEqual(viewport.width)
         await page.keyboard.press('Escape')
