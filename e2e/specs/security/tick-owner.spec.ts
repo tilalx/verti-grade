@@ -50,6 +50,24 @@ test('ticks stay private to their owner and keep the grade they were logged at',
     expect(tick.grade_system).toBe('uiaa')
     expect(tick.attempts).toBe(1)
 
+    await expect(
+        ownerClient.collection('ticks').create({
+            user: owner.id,
+            route: route.id,
+            type: 'top',
+            attempts: 1,
+            date: '2099-01-01 12:00:00.000Z',
+        }),
+    ).rejects.toMatchObject({ status: 400 })
+
+    const ownSends = await ownerClient.collection('tick_sends').getFullList()
+    expect(ownSends.map((send) => send.route)).toContain(route.id)
+    expect(
+        (await otherClient.collection('tick_sends').getFullList()).map(
+            (send) => send.route,
+        ),
+    ).not.toContain(route.id)
+
     await root.collection('routes').update(route.id, uiaa('7'))
     expect((await ownerClient.collection('ticks').getOne(tick.id)).grade).toBe(
         '7-',

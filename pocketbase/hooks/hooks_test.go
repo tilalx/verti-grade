@@ -116,3 +116,17 @@ func TestNormalizeFlashAttempts(t *testing.T) {
 		t.Fatalf("top attempts = %d, want 4", tick.GetInt("attempts"))
 	}
 }
+
+func TestTickDateInFuture(t *testing.T) {
+	now := time.Date(2026, 9, 26, 23, 30, 0, 0, time.UTC)
+	cases := map[time.Time]bool{
+		time.Date(2026, 9, 26, 12, 0, 0, 0, time.UTC): false,
+		time.Date(2026, 9, 27, 12, 0, 0, 0, time.UTC): false,
+		time.Date(2026, 9, 29, 12, 0, 0, 0, time.UTC): true,
+	}
+	for date, want := range cases {
+		if got := tickDateInFuture(date, now); got != want {
+			t.Fatalf("tickDateInFuture(%s) = %v, want %v", date, got, want)
+		}
+	}
+}

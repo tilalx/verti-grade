@@ -34,7 +34,10 @@ describe('auth middleware', () => {
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
-        expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
+        expect(navigateToMock).toHaveBeenCalledWith({
+            path: '/auth/login',
+            query: { redirect: '/manage/routes' },
+        })
     })
 
     it('allows authenticated users through protected routes', async () => {
@@ -62,7 +65,10 @@ describe('auth middleware', () => {
 
         await middleware({ path: '/manage/routes', meta: {} }, {})
 
-        expect(navigateToMock).toHaveBeenCalledWith('/auth/login')
+        expect(navigateToMock).toHaveBeenCalledWith({
+            path: '/auth/login',
+            query: { redirect: '/manage/routes' },
+        })
     })
 
     // ── auth: false pages (login, password reset) ────────────────────────

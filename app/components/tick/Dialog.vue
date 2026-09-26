@@ -119,12 +119,12 @@ const { notify, error: notifyError } = useNotification()
 
 const formRef = useTemplateRef<VForm>('formRef')
 const saving = ref(false)
-const today = formatDateToYYYYMMDD(new Date().toISOString())
+const today = ref(localToday())
 
 const form = reactive({
     type: 'top' as TickType,
     attempts: 1,
-    day: today,
+    day: today.value,
     note: '',
 })
 
@@ -132,11 +132,16 @@ const attemptsRule = (value: number) =>
     (Number.isInteger(value) && value >= 1 && value <= 999) ||
     t('ticks.attemptsInvalid')
 
+function localToday() {
+    return formatDateToYYYYMMDD(new Date().toISOString())
+}
+
 watch(open, (isOpen) => {
     if (!isOpen) return
+    today.value = localToday()
     form.type = props.tick?.type ?? 'top'
     form.attempts = props.tick?.attempts ?? 1
-    form.day = props.tick ? tickDay(props.tick.date) : today
+    form.day = props.tick ? tickDay(props.tick.date) : today.value
     form.note = props.tick?.note ?? ''
 })
 

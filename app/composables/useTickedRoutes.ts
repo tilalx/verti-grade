@@ -6,15 +6,14 @@ export function useTickedRoutes() {
         'ticked-routes',
         async () => {
             if (!pb.authStore.isValid) return []
-            const ticks = await pb
-                .collection('ticks')
+            const sends = await pb
+                .collection('tick_sends')
                 .getFullList<Pick<TickRecord, 'route'>>({
                     fields: 'route',
-                    filter: 'type != "attempt"',
                     requestKey: null,
                 })
                 .catch(() => [])
-            return [...new Set(ticks.map((tick) => tick.route ?? ''))]
+            return sends.map((send) => send.route ?? '')
         },
         { default: () => [] },
     )

@@ -14,7 +14,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (to.path === '/') return
 
     if (!isValidSession) {
-        return navigateTo('/auth/login')
+        return navigateTo({
+            path: '/auth/login',
+            query: { redirect: to.fullPath ?? to.path },
+        })
     }
 
     const requiredPermission = to.meta.requiredPermission as string | undefined
