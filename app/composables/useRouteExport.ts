@@ -1,3 +1,5 @@
+import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
+
 type ExportFormat = 'pdf' | 'xlsx' | 'json'
 
 const MIME_TYPES: Record<ExportFormat, string> = {
@@ -74,10 +76,10 @@ export function useRouteExport() {
 
     return {
         exportingFormat,
-        exportPdf: (ids: string[]) =>
-            downloadExport('pdf', ids, { labels: { rope: t('export.rope') } }),
-        exportXlsx: (ids: string[], payload?: Record<string, unknown>) =>
-            downloadExport('xlsx', ids, payload),
+        exportPdf: (ids: string[], options: ExportOptions) =>
+            downloadExport('pdf', ids, { ...options }),
+        exportXlsx: (ids: string[], options: ExportOptions) =>
+            downloadExport('xlsx', ids, { ...options }),
         exportJson: (ids: string[]) => downloadExport('json', ids),
     }
 }

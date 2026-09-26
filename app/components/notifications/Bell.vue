@@ -5,8 +5,6 @@
         :close-on-content-click="false"
         location="bottom end"
         offset="8"
-        min-width="320"
-        max-width="380"
     >
         <template #activator="{ props: activatorProps }">
             <v-btn
@@ -34,7 +32,11 @@
             </v-btn>
         </template>
 
-        <v-card data-testid="notification-menu">
+        <v-card
+            width="360"
+            max-width="calc(100vw - 24px)"
+            data-testid="notification-menu"
+        >
             <div
                 class="d-flex align-center justify-space-between px-4 py-3 ga-2"
             >

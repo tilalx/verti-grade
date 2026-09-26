@@ -38,8 +38,8 @@ test('keeps the form and notifies on a non-token error', async ({ page }) => {
     await fillNewPassword(page)
     await page.getByTestId('confirm-reset-submit').click()
 
-    await expect(page.getByTestId('global-snackbar')).toContainText(
-        'Password too weak',
-    )
+    const snackbar = page.getByTestId('global-snackbar')
+    await expect(snackbar).toContainText('Something went wrong')
+    await expect(snackbar).not.toContainText('Password too weak')
     await expect(page.getByTestId('confirm-reset-submit')).toBeVisible()
 })

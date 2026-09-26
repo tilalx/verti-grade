@@ -7,7 +7,9 @@ test('server-renders the favicon, logo and logged-out navbar', async ({
     const html = (await response?.text()) ?? ''
 
     expect(html).toMatch(/<link[^>]+rel="icon"[^>]+href="[^"]+"/)
-    expect(html).toMatch(/<img[^>]+alt="Logo"/)
+    expect(html).toMatch(
+        /data-testid="nav-logo"[^>]*>[\s\S]{0,120}?<img[^>]+alt="(?!Logo")[^"]+"/,
+    )
     expect(html).toContain('data-testid="nav-login"')
 })
 
@@ -23,7 +25,7 @@ test('server-renders the logged-in navbar', async ({ adminPage: page }) => {
 test('the navbar logo actually loads', async ({ page }) => {
     await page.goto('/')
 
-    const logo = page.locator('img[alt="Logo"]').first()
+    const logo = page.getByTestId('nav-logo').locator('img')
     await expect(logo).toBeVisible()
 
     await expect

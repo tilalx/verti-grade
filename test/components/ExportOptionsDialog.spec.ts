@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import ExportOptionsDialog from '~/components/ExportOptionsDialog.vue'
 
 const slotStub = { template: '<div><slot /></div>' }
@@ -17,9 +17,16 @@ const checkboxStub = {
       : [...modelValue, value])" />`,
 }
 
-function createWrapper() {
+const selectStub = {
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    template: `<input data-testid="export-locale" :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)" />`,
+}
+
+function createWrapper(format: 'pdf' | 'xlsx' = 'xlsx') {
     return mount(ExportOptionsDialog, {
-        props: { modelValue: true },
+        props: { modelValue: true, format },
         global: {
             mocks: { $t: (key: string) => key },
             stubs: {
@@ -32,6 +39,7 @@ function createWrapper() {
                 'v-icon': iconStub,
                 'v-btn': buttonStub,
                 'v-checkbox': checkboxStub,
+                'v-select': selectStub,
             },
         },
     })
@@ -39,8 +47,10 @@ function createWrapper() {
 
 type Wrapper = ReturnType<typeof createWrapper>
 
-const confirmButton = (wrapper: Wrapper) =>
-    wrapper.find('[data-testid="export-confirm"]')
+const confirmButton = async (wrapper: Wrapper) => {
+    await wrapper.find('[data-testid="export-confirm"]').trigger('click')
+    await flushPromises()
+}
 const confirmedColumns = (wrapper: Wrapper) =>
     (wrapper.emitted('confirm')![0] as [{ columns: string[] }])[0].columns
 const checkbox = (wrapper: Wrapper, key: string) =>
@@ -52,7 +62,7 @@ describe('ExportOptionsDialog', () => {
     it('confirms the table column order without the QR column', async () => {
         const wrapper = createWrapper()
 
-        await confirmButton(wrapper).trigger('click')
+        await confirmButton(wrapper)
 
         expect(confirmedColumns(wrapper)).toEqual([
             'color',
@@ -84,7 +94,7 @@ describe('ExportOptionsDialog', () => {
                 .find('[data-testid="export-move-down-difficulty"]')
                 .trigger('click')
         }
-        await confirmButton(wrapper).trigger('click')
+        await confirmButton(wrapper)
 
         expect(confirmedColumns(wrapper)).toEqual([
             'name',
@@ -112,7 +122,7 @@ describe('ExportOptionsDialog', () => {
         }
         await checkbox(wrapper, 'qr').trigger('change')
         await wrapper.find('[data-testid="export-move-up-qr"]').trigger('click')
-        await confirmButton(wrapper).trigger('click')
+        await confirmButton(wrapper)
 
         // QR was moved above screw_date, so it precedes nothing else selected.
         expect(confirmedColumns(wrapper)).toEqual(['name', 'qr'])
@@ -124,7 +134,7 @@ describe('ExportOptionsDialog', () => {
                 .filter((input) => (input.element as HTMLInputElement).checked)
                 .map((input) => input.attributes('value')),
         ).toEqual(['name', 'qr'])
-        await confirmButton(restored).trigger('click')
+        await confirmButton(restored)
         expect(confirmedColumns(restored)).toEqual(['name', 'qr'])
     })
 
@@ -137,6 +147,29 @@ describe('ExportOptionsDialog', () => {
             }
         }
 
-        expect(confirmButton(wrapper).attributes('disabled')).toBeDefined()
+        expect(
+            wrapper
+                .find('[data-testid="export-confirm"]')
+                .attributes('disabled'),
+        ).toBeDefined()
+    })
+
+    it('confirms the pdf language and hidden fields without columns', async () => {
+        const wrapper = createWrapper('pdf')
+
+        expect(
+            wrapper.find('[data-testid="export-move-up-name"]').exists(),
+        ).toBe(false)
+        await wrapper.find('[data-testid="export-locale"]').setValue('ru')
+        await checkbox(wrapper, 'logo').trigger('change')
+        await confirmButton(wrapper)
+
+        expect(wrapper.emitted('confirm')![0]).toEqual([
+            {
+                locale: 'ru',
+                labels: { anchor: 'climbing.anchor_point' },
+                show: { creators: true, date: true, logo: false },
+            },
+        ])
     })
 })

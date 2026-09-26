@@ -1,15 +1,15 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-const DIFFICULTY: Record<string, string> = {
-    'en-US': 'Difficulty',
-    'de-DE': 'Schwierigkeitsgrad',
-    'ru-RU': 'Сложность',
-    'tr-TR': 'Zorluk',
-    'uk-UA': 'Складність',
+const HEADERS: Record<string, string[]> = {
+    'en-US': ['Grade', 'Anchor', 'Setters', 'Set on'],
+    'de-DE': ['Grad', 'Umlenker', 'Schrauber', 'Geschraubt am'],
+    'ru-RU': ['Категория', 'Станция', 'Рутсеттеры', 'Дата накрутки'],
+    'tr-TR': ['Derece', 'Ankraj', 'Rota kurucuları', 'Kurulum tarihi'],
+    'uk-UA': ['Категорія', 'Станція', 'Рутсетери', 'Дата накрутки'],
 }
 
-test('public route table headers render in the active locale', async ({
+test('public route table headers use the climbing terms of the active locale', async ({
     page,
 }, testInfo) => {
     const locale = testInfo.project.use.locale as string
@@ -17,5 +17,5 @@ test('public route table headers render in the active locale', async ({
 
     const table = page.getByTestId('index-table')
     await expect(table).toBeVisible()
-    await expect(table.locator('th')).toContainText([DIFFICULTY[locale]!])
+    await expect(table.locator('th')).toContainText(HEADERS[locale]!)
 })

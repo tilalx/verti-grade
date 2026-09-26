@@ -155,14 +155,6 @@ const heading = computed<Heading>(() => {
     return props.formHeading
 })
 
-function errorText(error: unknown) {
-    const { data, message } = (error ?? {}) as {
-        data?: { message?: string }
-        message?: string
-    }
-    return data?.message ?? message ?? props.errorMessage
-}
-
 async function submit() {
     submitting.value = true
     try {
@@ -170,7 +162,7 @@ async function submit() {
         step.value = 'done'
     } catch (error) {
         if (props.isTokenError(error)) step.value = 'invalid'
-        else notifyError(errorText(error))
+        else notifyError(props.errorMessage || t('notifications.error.unknown'))
     } finally {
         submitting.value = false
     }

@@ -5,7 +5,6 @@
         location="bottom end"
         offset="8"
         transition="scale-transition"
-        min-width="220"
     >
         <template #activator="{ props: menuProps }">
             <v-btn
@@ -25,7 +24,7 @@
             </v-btn>
         </template>
 
-        <v-card elevation="3" border>
+        <v-card elevation="3" border min-width="220">
             <v-list density="compact" :lines="false" nav slim class="py-1">
                 <v-list-item
                     v-for="item in menuItems"

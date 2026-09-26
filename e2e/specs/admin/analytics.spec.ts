@@ -104,7 +104,7 @@ test('filters live in the url and survive a reload', async ({
 
     await gotoSettled(page, page.url())
     await expect(page.getByTestId('analytics-range-30d')).toHaveClass(
-        /v-btn--active/,
+        /text-primary/,
     )
 
     await gotoSettled(page, '/manage/analytics?range=all&type=Boulder')
@@ -112,6 +112,41 @@ test('filters live in the url and survive a reload', async ({
         'Boulder',
     )
     expect(await statValue(page, 'activeRoutes')).toBeLessThan(allRoutes)
+})
+
+test('archived chip matches the routes page and toggles the url', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/manage/analytics?range=all')
+    const chip = page.getByTestId('analytics-filter-archived')
+    await expect(chip.locator('.mdi-archive-outline')).toBeVisible()
+
+    await chip.click()
+    await expect(page).toHaveURL(/archived=true/)
+    await expect(chip).toHaveClass(/text-warning/)
+
+    await chip.click()
+    await expect(page).not.toHaveURL(/archived=true/)
+})
+
+test('filters share one row with the ranges on wide screens', async ({
+    adminPage: page,
+}) => {
+    const rowOf = async (testId: string) => {
+        const box = await page.getByTestId(testId).boundingBox()
+        return Math.round(box!.y + box!.height / 2)
+    }
+
+    await page.setViewportSize({ width: 1920, height: 900 })
+    await gotoSettled(page, '/manage/analytics?range=all')
+    expect(await rowOf('analytics-filter-location')).toBe(
+        await rowOf('analytics-range-all'),
+    )
+
+    await page.setViewportSize({ width: 1024, height: 900 })
+    await expect
+        .poll(() => rowOf('analytics-filter-location'))
+        .toBeGreaterThan(await rowOf('analytics-range-all'))
 })
 
 test('custom range writes the dates into the url', async ({
@@ -263,6 +298,39 @@ test('archiving a route stamps archived_at and restoring clears it', async ({
             .collection('routes')
             .update(route.id, { archived: false })
         expect(restored.archived_at).toBe('')
+    } finally {
+        await pb.collection('routes').delete(route.id)
+    }
+})
+
+test('archived routes are left out like on the routes page unless included', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const pb = await superuserPb()
+    const setter = `${testPrefix}-archived-setter`
+    const route = await pb.collection('routes').create({
+        name: `${testPrefix}-archived-analytics`,
+        difficulty: 5,
+        type: 'Boulder',
+        creator: [setter],
+        archived: true,
+    })
+    try {
+        await gotoSettled(page, '/manage/analytics')
+        const settersFor = async (query: string) => {
+            const response = await page.request.get(
+                `/api/manage/analytics?range=all${query}`,
+                { headers: await authHeader(page) },
+            )
+            const body = (await response.json()) as {
+                setters: { setter: string }[]
+            }
+            return body.setters.map((entry) => entry.setter)
+        }
+
+        expect(await settersFor('')).not.toContain(setter)
+        expect(await settersFor('&archived=true')).toContain(setter)
     } finally {
         await pb.collection('routes').delete(route.id)
     }

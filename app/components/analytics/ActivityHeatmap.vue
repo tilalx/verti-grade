@@ -4,13 +4,16 @@
             <div class="heatmap-title" data-testid="analytics-heatmap-total">
                 {{
                     selectedYear === null
-                        ? t('analytics.heatmap.totalLastYear', {
-                              n: rangeTotal,
-                          })
-                        : t('analytics.heatmap.total', {
-                              n: rangeTotal,
-                              year: selectedYear,
-                          })
+                        ? t(
+                              'analytics.heatmap.totalLastYear',
+                              { n: rangeTotal },
+                              rangeTotal,
+                          )
+                        : t(
+                              'analytics.heatmap.total',
+                              { n: rangeTotal, year: selectedYear },
+                              rangeTotal,
+                          )
                 }}
             </div>
             <div class="heatmap-box">
@@ -200,10 +203,11 @@ const weeks = computed<HeatmapCell[][]>(() => {
                         : 1 +
                           thresholds.filter((limit) => count > limit).length,
                 inRange: isInRange(date),
-                label: t('analytics.heatmap.cell', {
-                    n: count,
-                    date: formatter.format(cursor),
-                }),
+                label: t(
+                    'analytics.heatmap.cell',
+                    { n: count, date: formatter.format(cursor) },
+                    count,
+                ),
             })
             cursor.setDate(cursor.getDate() + 1)
         }

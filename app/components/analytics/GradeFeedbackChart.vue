@@ -64,7 +64,7 @@ const option = computed(() => {
             return `<strong>${escapeHtml(route.name)}</strong><br/>
                 ${t('analytics.labels.setGrade')}: ${route.grade}<br/>
                 ${t('analytics.labels.votedGrade')}: ${route.votedGrade.toFixed(1)}<br/>
-                ${t('analytics.labels.voteCount', { n: route.votes })}`
+                ${t('analytics.labels.voteCount', { n: route.votes }, route.votes)}`
         }),
         grid: { ...gridBase, left: 36, bottom: 30, top: 16 },
         xAxis: { ...axis, name: t('analytics.labels.setGrade') },

@@ -7,8 +7,6 @@
             <template #actions>
                 <v-btn
                     color="primary"
-                    variant="tonal"
-                    size="small"
                     prepend-icon="mdi-shield-plus-outline"
                     data-testid="role-create-open"
                     @click="startCreate"
@@ -179,7 +177,11 @@
                     data-testid="role-delete-holders"
                 >
                     {{
-                        t('permissions.deleteRoleReassign', { n: holderCount })
+                        t(
+                            'permissions.deleteRoleReassign',
+                            { n: holderCount },
+                            holderCount,
+                        )
                     }}
                 </v-alert>
 

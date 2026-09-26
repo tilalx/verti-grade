@@ -1,6 +1,7 @@
 export type TranslateFn = (
     key: string,
     params?: Record<string, unknown>,
+    plural?: number,
 ) => string
 export type Rule = (v: unknown) => true | string
 
@@ -13,13 +14,13 @@ export const minLength =
     (t: TranslateFn, n: number): Rule =>
     (v) =>
         (typeof v === 'string' && v.length >= n) ||
-        t('validation.minLength', { n })
+        t('validation.minLength', { n }, n)
 
 export const maxLength =
     (t: TranslateFn, n: number): Rule =>
     (v) =>
         (typeof v === 'string' && v.length <= n) ||
-        t('validation.maxLength', { n })
+        t('validation.maxLength', { n }, n)
 
 export const validEmail =
     (t: TranslateFn): Rule =>

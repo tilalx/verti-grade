@@ -43,7 +43,11 @@ export function formatDate(
 
 export function timeAgo(
     dateStr: string | null | undefined,
-    t: (key: string, named?: Record<string, unknown>) => string,
+    t: (
+        key: string,
+        named?: Record<string, unknown>,
+        plural?: number,
+    ) => string,
     locale: string,
 ): string {
     const parsed = parseDate(dateStr)
@@ -53,9 +57,9 @@ export function timeAgo(
     const hours = Math.floor(diff / 3_600_000)
     const days = Math.floor(diff / 86_400_000)
     if (mins < 1) return t('time.justNow')
-    if (mins < 60) return t('time.minutesAgo', { n: mins })
-    if (hours < 24) return t('time.hoursAgo', { n: hours })
-    if (days < 30) return t('time.daysAgo', { n: days })
+    if (mins < 60) return t('time.minutesAgo', { n: mins }, mins)
+    if (hours < 24) return t('time.hoursAgo', { n: hours }, hours)
+    if (days < 30) return t('time.daysAgo', { n: days }, days)
     return parsed.toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',

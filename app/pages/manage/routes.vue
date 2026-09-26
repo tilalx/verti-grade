@@ -132,7 +132,7 @@
                             </v-btn>
                             <v-btn
                                 v-if="hasSelection"
-                                @click="printSelected"
+                                @click="openExportOptions('pdf')"
                                 color="success"
                                 variant="tonal"
                                 :loading="exportingFormat === 'pdf'"
@@ -147,7 +147,7 @@
                             </v-btn>
                             <v-btn
                                 v-if="hasSelection"
-                                @click="showExportOptions = true"
+                                @click="openExportOptions('xlsx')"
                                 color="success"
                                 variant="tonal"
                                 :loading="exportingFormat === 'xlsx'"
@@ -199,7 +199,7 @@
                         :sort-by="tableOptions.sortBy"
                         :loading="loading"
                         :items-per-page-options="pageSizeOptions"
-                        no-data-text="table.no_data"
+                        :no-data-text="$t('table.no_data')"
                         item-value="id"
                         @update:options="loadRoutes"
                     >
@@ -417,7 +417,8 @@
 
         <ExportOptionsDialog
             v-model="showExportOptions"
-            @confirm="exportSelectedExcel"
+            :format="exportFormat"
+            @confirm="exportSelected"
         />
 
         <ConfirmDialog
@@ -432,6 +433,7 @@
 
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
+import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
 import {
     formatDifficulty,
     formatAnchorPoint,
@@ -603,7 +605,7 @@ const toPbSortRoutes = (sortByArr: SortOption[]) =>
 
 const sortItemsMobile = computed(() => [
     {
-        title: t('table.created_at'),
+        title: t('routes.screwed_at'),
         key: 'screw_date',
         defaultOrder: 'desc' as const,
     },
@@ -744,10 +746,17 @@ const archiveSelected = async () => {
     }
 }
 
+const exportFormat = ref<'pdf' | 'xlsx'>('xlsx')
 const showExportOptions = ref(false)
-const printSelected = () => exportPdf(selectedIds())
-const exportSelectedExcel = (payload?: Record<string, unknown>) =>
-    exportXlsx(selectedIds(), payload)
+const openExportOptions = (format: 'pdf' | 'xlsx') => {
+    exportFormat.value = format
+    showExportOptions.value = true
+}
+const exportSelected = (options: ExportOptions) =>
+    (exportFormat.value === 'pdf' ? exportPdf : exportXlsx)(
+        selectedIds(),
+        options,
+    )
 const exportSelectedJson = () => exportJson(selectedIds())
 
 const mobileListRef = useTemplateRef('mobileListRef')

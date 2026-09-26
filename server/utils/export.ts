@@ -14,6 +14,7 @@ interface ExportBody {
     locale?: unknown
     labels?: Record<string, unknown>
     columns?: unknown[]
+    show?: Record<string, unknown>
 }
 
 interface FetchByIdsOptions {
@@ -132,6 +133,15 @@ export async function resolveExportLabel(
     return typeof label === 'string' && label.trim() ? label.trim() : fallback
 }
 
+export async function resolveExportShow(event: H3Event) {
+    const show = (await readExportBody(event))?.show
+    return {
+        creators: show?.creators !== false,
+        date: show?.date !== false,
+        logo: show?.logo !== false,
+    }
+}
+
 export const TAG_QR_ERROR_CORRECTION = 'Q'
 
 export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
@@ -139,7 +149,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     { key: 'name', header: 'Name', value: (r) => r.name ?? '' },
     {
         key: 'difficulty',
-        header: 'Difficulty',
+        header: 'Grade',
         value: (r) => {
             const numeric = Number(r.difficulty)
             return Number.isFinite(numeric) ? numeric : formatDifficulty(r)
@@ -153,7 +163,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     },
     {
         key: 'anchor_point',
-        header: 'Anchor point',
+        header: 'Anchor',
         value: (r) => r.anchor_point ?? '',
     },
     {
@@ -163,7 +173,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
     },
     {
         key: 'creator',
-        header: 'Route setters',
+        header: 'Setters',
         value: (r) => normalizeCreators(r.creator).join(', '),
     },
     {

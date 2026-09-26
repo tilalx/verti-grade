@@ -310,7 +310,13 @@
         <!-- ── Bulk Delete Dialog ───────────────────────────────────────────── -->
         <ConfirmDialog
             v-model="bulkDeleteDialog"
-            :title="t('comments.bulkDeleteTitle', { n: selectedCount })"
+            :title="
+                t(
+                    'comments.bulkDeleteTitle',
+                    { n: selectedCount },
+                    selectedCount,
+                )
+            "
             :message="t('notifications.deleteMoreItems')"
             :loading="bulkDeleting"
             @confirm="bulkDelete"

@@ -145,11 +145,6 @@ interface ImportedRoute {
     ratingsCount?: number
 }
 
-interface ImportError {
-    routeName: unknown
-    message: string
-}
-
 const pb = usePocketbase()
 const emit = defineEmits<{ closed: [] }>()
 const currentUser = pb.authStore.record as UserRecord | null
@@ -226,8 +221,8 @@ const confirmImport = async () => {
                 location.id,
             ]),
         )
-        const routeErrors: ImportError[] = []
-        const ratingErrors: ImportError[] = []
+        let failedRoutes = 0
+        let failedRatings = 0
 
         for (const route of jsonData) {
             try {
@@ -255,41 +250,36 @@ const confirmImport = async () => {
                                 'Failed to insert rating',
                                 ratingError,
                             )
-                            ratingErrors.push({
-                                routeName: route.name,
-                                message:
-                                    (ratingError as Error)?.message ??
-                                    'Unknown rating error',
-                            })
+                            failedRatings++
                         }
                     }
                 }
             } catch (routeError) {
                 console.error('Failed to insert route', routeError)
-                routeErrors.push({
-                    routeName: route?.name ?? 'Unnamed Route',
-                    message:
-                        (routeError as Error)?.message ?? 'Unknown route error',
-                })
+                failedRoutes++
             }
         }
 
-        if (routeErrors.length === 0 && ratingErrors.length === 0) {
+        if (failedRoutes === 0 && failedRatings === 0) {
             notify(t('importRoutes.success'))
         } else {
             const summaryParts: string[] = []
-            if (routeErrors.length > 0) {
+            if (failedRoutes > 0) {
                 summaryParts.push(
-                    t('importRoutes.routesFailed', {
-                        count: routeErrors.length,
-                    }),
+                    t(
+                        'importRoutes.routesFailed',
+                        { count: failedRoutes },
+                        failedRoutes,
+                    ),
                 )
             }
-            if (ratingErrors.length > 0) {
+            if (failedRatings > 0) {
                 summaryParts.push(
-                    t('importRoutes.commentsFailed', {
-                        count: ratingErrors.length,
-                    }),
+                    t(
+                        'importRoutes.commentsFailed',
+                        { count: failedRatings },
+                        failedRatings,
+                    ),
                 )
             }
             notify(
@@ -301,7 +291,7 @@ const confirmImport = async () => {
         emit('closed')
     } catch (error) {
         console.error('Error during import:', error)
-        notifyError((error as Error).message || t('importRoutes.failed'))
+        notifyError(t('importRoutes.failed'))
     } finally {
         loading.value = false
         cancelImport()

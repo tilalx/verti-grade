@@ -5,8 +5,9 @@ test.describe('exports', () => {
     test('exports selected routes as PDF', async ({ adminPage: page }) => {
         await gotoSettled(page, '/manage/routes')
         await page.getByTestId('routes-select-all').click()
-        const downloadPromise = page.waitForEvent('download')
         await page.getByTestId('routes-export-pdf').click()
+        const downloadPromise = page.waitForEvent('download')
+        await page.getByTestId('export-confirm').click()
         const download = await downloadPromise
         const filePath = await download.path()
         expect(filePath).toBeTruthy()

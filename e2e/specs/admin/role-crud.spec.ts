@@ -131,3 +131,23 @@ test('rejects a role name that is already taken', async ({
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
     await expect(page.getByTestId('role-form-name')).toContainText('already')
 })
+
+test('add role button looks like the add user button', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/admin/users')
+    const style = (testId: string) =>
+        page.getByTestId(testId).evaluate((button) => {
+            const computed = getComputedStyle(button)
+            return {
+                height: button.getBoundingClientRect().height,
+                background: computed.backgroundColor,
+                color: computed.color,
+                fontSize: computed.fontSize,
+            }
+        })
+
+    expect(await style('role-create-open')).toEqual(
+        await style('user-create-open'),
+    )
+})

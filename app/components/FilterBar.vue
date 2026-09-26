@@ -1,11 +1,12 @@
 <script setup lang="ts">
 const search = defineModel<string>({ default: '' })
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         searchLabel?: string
         searchIcon?: string
         activeFilterCount?: number
+        inlineFilters?: boolean
     }>(),
     {
         searchIcon: 'mdi-magnify',
@@ -15,7 +16,8 @@ withDefaults(
 
 const emit = defineEmits<{ clear: [] }>()
 
-const { smAndUp } = useDisplay()
+const { smAndUp, xlAndUp } = useDisplay()
+const filtersInline = computed(() => props.inlineFilters && xlAndUp.value)
 const sheetOpen = ref(false)
 
 function handleClear() {
@@ -41,6 +43,9 @@ function handleClear() {
                         data-testid="filter-search"
                     />
                 </slot>
+                <div v-if="filtersInline" class="flex-grow-1 min-w-0">
+                    <slot name="filters" />
+                </div>
                 <!-- Mobile: open bottom sheet -->
                 <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
                      shrinking a small button until it clips its own icon. -->
@@ -75,7 +80,7 @@ function handleClear() {
             </div>
 
             <!-- Desktop: inline filters below search -->
-            <div v-if="smAndUp" class="mt-2">
+            <div v-if="smAndUp && !filtersInline" class="mt-2">
                 <slot name="filters" />
             </div>
         </v-card-text>
@@ -118,3 +123,9 @@ function handleClear() {
         </v-card>
     </v-bottom-sheet>
 </template>
+
+<style scoped>
+.min-w-0 {
+    min-width: 0;
+}
+</style>

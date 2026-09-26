@@ -46,7 +46,10 @@
                         <div
                             class="d-flex align-center justify-space-between mb-3"
                         >
-                            <span class="text-title-small font-weight-semibold">
+                            <span
+                                class="text-title-small font-weight-semibold"
+                                :data-testid="`settings-asset-label-${asset.key}`"
+                            >
                                 {{ asset.label }}
                             </span>
                             <div class="d-flex align-center ga-1">
@@ -591,7 +594,7 @@ function clickFileInput(target: FileInputRef) {
 const assetFields = computed(() => [
     {
         key: 'logo',
-        label: 'Page Logo',
+        label: t('settings.assets.logo'),
         accept: 'image/jpeg,image/png,image/svg+xml,image/webp',
         file: logoFile,
         preview: logoPreview,
@@ -604,7 +607,7 @@ const assetFields = computed(() => [
     },
     {
         key: 'icon',
-        label: 'Page Icon',
+        label: t('settings.assets.icon'),
         accept: '.ico,image/vnd.microsoft.icon,image/x-icon',
         file: iconFile,
         preview: iconPreview,
@@ -617,7 +620,7 @@ const assetFields = computed(() => [
     },
     {
         key: 'sign',
-        label: 'Sign Image',
+        label: t('settings.assets.sign'),
         accept: 'image/jpeg,image/png,image/svg+xml,image/webp',
         file: signFile,
         preview: signPreview,

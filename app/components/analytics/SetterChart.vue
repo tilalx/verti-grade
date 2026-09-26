@@ -27,9 +27,11 @@ const rows = computed(() => {
     const other: SetterStats[] = rest.length
         ? [
               {
-                  setter: t('analytics.labels.otherSetters', {
-                      n: rest.length,
-                  }),
+                  setter: t(
+                      'analytics.labels.otherSetters',
+                      { n: rest.length },
+                      rest.length,
+                  ),
                   routes: rest.reduce((sum, setter) => sum + setter.routes, 0),
                   routesInPeriod: rest.reduce(
                       (sum, setter) => sum + setter.routesInPeriod,
@@ -60,7 +62,7 @@ const option = computed(() => {
         tooltip: itemTooltip(colors.value, ({ data }) => {
             const setter = data.setter as SetterStats
             return `<strong>${escapeHtml(setter.setter)}</strong><br/>
-                ${t('analytics.labels.routeCount', { n: setter.routes })} (${share(setter.routes)}%)<br/>
+                ${t('analytics.labels.routeCount', { n: setter.routes }, setter.routes)} (${share(setter.routes)}%)<br/>
                 ${t('analytics.labels.setInPeriod')}: ${setter.routesInPeriod}<br/>
                 ${t('analytics.columns.averageRating')}: ${setter.averageRating?.toFixed(2) ?? '—'}<br/>
                 ${t('analytics.columns.averageDeviation')}: ${formatSigned(setter.averageDeviation)}`

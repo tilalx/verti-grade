@@ -12,16 +12,15 @@
         "username_or_email": "Benutzername oder E-Mail",
         "login_hint": "Benutzername oder E-Mail eingeben.",
         "reset_password": "Passwort zurücksetzen",
-        "reset_hint": "Link zum Zurücksetzen wird per E-Mail gesendet.",
-        "confirmPassword": "Passwort bestätigen",
+        "reset_hint": "Gib die E-Mail-Adresse deines Kontos ein.",
         "userProfile": "Benutzerprofil",
         "oldPassword": "Aktuelles Passwort",
-        "or_login_with": "Oder mit OAuth anmelden",
+        "or_login_with": "Oder anmelden mit",
         "remember_me": "Angemeldet bleiben",
         "changeAvatar": "Avatar ändern",
         "emailLocked": "E-Mail kann hier nicht geändert werden",
         "passwordStrength": "Passwortstärke",
-        "passwordHint": "Lassen Sie die Passwortfelder leer, um das aktuelle Passwort beizubehalten.",
+        "passwordHint": "Lass die Passwortfelder leer, um dein aktuelles Passwort zu behalten.",
         "unsavedChanges": "Ungespeicherte Änderungen",
         "wrongOldPassword": "Aktuelles Passwort ist falsch",
         "unknownUser": "Unbekannter Benutzer",
@@ -32,8 +31,8 @@
         "placeholders": {
             "firstname": "Max",
             "lastname": "Mustermann",
-            "oldPassword": "Ihr aktuelles Passwort",
-            "newPassword": "Ihr neues Passwort",
+            "oldPassword": "Dein aktuelles Passwort",
+            "newPassword": "Dein neues Passwort",
             "confirmPassword": "Neues Passwort wiederholen"
         },
         "strength": {
@@ -83,18 +82,20 @@
         "emailChangeFailed": "Der Bestätigungslink konnte nicht gesendet werden. Deine E-Mail-Adresse wurde nicht geändert.",
         "deleteAccount": "Konto löschen",
         "deleteAccountHint": "Löscht dein Konto endgültig und meldet dich ab. Von dir erstellte Routen und Bewertungen bleiben erhalten.",
-        "deleteAccountConfirm": "Damit wird dein Konto endgültig gelöscht und du wirst abgemeldet. Das kann nicht rückgängig gemacht werden."
+        "deleteAccountConfirm": "Damit wird dein Konto endgültig gelöscht und du wirst abgemeldet. Das kann nicht rückgängig gemacht werden.",
+        "eyebrowBrand": "ROUTENVERWALTUNG",
+        "newPasswordHint": "Wähle ein neues Passwort für dein Konto."
     },
     "routes": {
         "home": "Startseite",
-        "dashboard": "Routenverwaltung",
+        "dashboard": "Routen verwalten",
         "inventory": "Inventur",
         "login": "Anmelden",
         "analytics": "Analysen",
-        "comments": "Kommentare",
+        "comments": "Bewertungen",
         "users": "Benutzer",
         "settings": "Einstellungen",
-        "route_setter": "Routen Schrauber",
+        "route_setter": "Schrauber",
         "screwed_at": "Geschraubt am",
         "selectAllError": "Alle Routen konnten nicht ausgewählt werden.",
         "types": {
@@ -106,21 +107,21 @@
         "activity": "Aktivität"
     },
     "dashboard": {
-        "online": "{0} Online"
+        "online": "{0} online"
     },
     "analytics": {
-        "title": "Routen-Analyse",
-        "subtitle": "Überwache wichtige Kennzahlen aller Kletterrouten.",
+        "title": "Analysen",
+        "subtitle": "Wie eure Routen geschraubt, geklettert und bewertet werden.",
         "meta": {
             "title": "Analysen - Verti-Grade",
-            "description": "Administratives Analyse-Dashboard für Kletterrouten."
+            "description": "Statistiken zu Schrauben, Graden und Bewertungen."
         },
         "heatmap": {
             "less": "Weniger",
             "more": "Mehr",
-            "total": "{n} Routen in {year} geschraubt",
-            "totalLastYear": "{n} Routen im letzten Jahr geschraubt",
-            "cell": "{n} Routen am {date}"
+            "total": "{n} Route in {year} geschraubt | {n} Routen in {year} geschraubt",
+            "totalLastYear": "{n} Route im letzten Jahr geschraubt | {n} Routen im letzten Jahr geschraubt",
+            "cell": "{n} Route am {date} | {n} Routen am {date}"
         },
         "error": "Analysedaten konnten nicht geladen werden. Bitte erneut versuchen.",
         "emptySection": "Keine Daten für die gewählten Filter.",
@@ -135,8 +136,7 @@
             "from": "Von",
             "to": "Bis",
             "locations": "Standorte",
-            "types": "Typen",
-            "includeArchived": "Archivierte einbeziehen"
+            "types": "Typen"
         },
         "cards": {
             "activeRoutes": "Aktive Routen",
@@ -145,7 +145,7 @@
             "routesSetSubtitle": "Im gewählten Zeitraum",
             "ratings": "Bewertungen",
             "ratingsSubtitle": "Im gewählten Zeitraum",
-            "averageRating": "Ø Bewertung",
+            "averageRating": "Ø Sterne",
             "averageRatingSubtitle": "Sterne im Zeitraum",
             "comments": "Kommentare",
             "commentsSubtitle": "Im gewählten Zeitraum",
@@ -154,49 +154,48 @@
         },
         "sections": {
             "grades": "Schwierigkeitsverteilung",
-            "activity": "Schraub- & Bewertungsaktivität",
+            "activity": "Schrauben & Bewertungen im Verlauf",
             "oldestActive": "Älteste aktive Routen",
-            "setters": "Routen pro Routenbauer",
+            "setters": "Routen pro Schrauber",
             "latestComments": "Neueste Kommentare",
             "activityHeatmap": "Schraubaktivität",
-            "gradeBalance": "Grad-Balance",
+            "gradeBalance": "Fehlende Grade",
             "ratingDistribution": "Sternebewertungen",
-            "gradeFeedback": "Gesetzter vs. abgestimmter Grad",
+            "gradeFeedback": "Geschraubter vs. gefühlter Grad",
             "ratedRoutes": "Beste & schlechteste Routen",
             "locationGrades": "Grade pro Standort"
         },
         "empty": {
             "latestComments": "Keine Kommentare in diesem Zeitraum.",
-            "gradeFeedback": "Noch nicht genug Grad-Stimmen.",
+            "gradeFeedback": "Noch nicht genug Grad-Einschätzungen.",
             "ratedRoutes": "Noch nicht genug Bewertungen.",
-            "gradeBalance": "Der aktive Grad-Mix entspricht der bisherigen Verteilung."
+            "gradeBalance": "Der aktuelle Grad-Mix entspricht dem, was ihr sonst schraubt."
         },
         "hints": {
-            "gradeBalance": "Aktive Routen minus historischer Erwartung – rote Grade fehlen.",
-            "gradeFeedback": "Jeder Punkt ist eine Route mit mindestens 3 Grad-Stimmen. Über der Linie ist sie schwerer als bewertet.",
-            "ratedRoutes": "Abstand zur Durchschnittsbewertung aller bewerteten Routen.",
+            "gradeBalance": "Aktive Routen im Vergleich zu eurem üblichen Grad-Mix – rote Grade fehlen an der Wand.",
+            "gradeFeedback": "Jeder Punkt ist eine Route mit mindestens 3 Grad-Einschätzungen. Über der Linie empfinden Kletternde sie schwerer als geschraubt.",
+            "ratedRoutes": "Sterne im Vergleich zum Durchschnitt aller bewerteten Routen.",
             "oldestActive": "Am längsten an der Wand – Kandidaten zum Umschrauben."
         },
         "columns": {
-            "routes": "Routen",
-            "averageRating": "Ø Bewertung",
-            "averageDeviation": "Grad-Abweichung"
+            "averageRating": "Ø Sterne",
+            "averageDeviation": "Grad-Differenz"
         },
         "labels": {
             "unknown": "Unbekannt",
-            "expected": "Erwartet",
+            "expected": "Üblich",
             "routesSet": "Geschraubte Routen",
             "ratings": "Bewertungen",
             "days": "{n} T",
-            "ratingCount": "{n} Bewertungen",
-            "activeVsExpected": "aktiv / erwartet",
-            "climbsHarder": "Schwerer",
-            "gradedFair": "Passend",
-            "climbsSofter": "Leichter",
-            "setGrade": "Gesetzter Grad",
-            "votedGrade": "Abgestimmter Grad",
-            "routeCount": "{n} Routen",
-            "voteCount": "{n} Stimmen",
+            "ratingCount": "{n} Bewertung | {n} Bewertungen",
+            "activeVsExpected": "aktiv / üblich",
+            "climbsHarder": "Fühlt sich schwerer an",
+            "gradedFair": "Passt",
+            "climbsSofter": "Fühlt sich leichter an",
+            "setGrade": "Geschraubter Grad",
+            "votedGrade": "Gefühlter Grad",
+            "routeCount": "{n} Route | {n} Routen",
+            "voteCount": "{n} Einschätzung | {n} Einschätzungen",
             "setInPeriod": "Im Zeitraum geschraubt",
             "setEarlier": "Früher geschraubt",
             "otherSetters": "{n} weitere"
@@ -206,29 +205,27 @@
         "create": "Route erstellen",
         "color": "Farbe",
         "routename": "Routenname",
-        "difficulty": "Schwierigkeitsgrad",
-        "difficulty_sign": "Schwierigkeitszeichen",
-        "anchor_point": "Umlenkerpunkt",
-        "location": "Ort",
-        "searchRouteName": "Suchen",
+        "difficulty": "Grad",
+        "anchor_point": "Umlenker",
+        "location": "Standort",
+        "searchRouteName": "Routen suchen",
         "type": "Typ",
         "archived": "Archiviert",
-        "active": "Aktiv",
         "comment": "Kommentar",
-        "creators": "Ersteller"
+        "creators": "Schrauber"
     },
     "ratings": {
         "ratings": "Bewertungen",
-        "createReview": "Bewertung erstellen",
-        "no_reviews_yet": "Noch keine Bewertungen vorhanden",
-        "be_the_first": "Sei der Erste",
+        "createReview": "Bewertung schreiben",
+        "no_reviews_yet": "Noch keine Bewertungen",
+        "be_the_first": "Bewerte diese Route als Erste:r",
         "stars": "Sterne",
-        "difficulty": "Schwierigkeitsgrad",
-        "score": "Punktzahl",
+        "difficulty": "Gefühlter Grad",
+        "score": "Ø Sterne",
         "comment": "Kommentar",
-        "climber_reviews": "Kletterer Bewertungen",
+        "climber_reviews": "Bewertungen",
         "felt": "gefühlt",
-        "perceived_difficulty": "Gefühlte Schwierigkeit",
+        "perceived_difficulty": "Gefühlter Grad",
         "loadError": "Bewertungen konnten nicht geladen werden."
     },
     "table": {
@@ -246,7 +243,7 @@
     },
     "actions": {
         "search": "Suchen",
-        "clear": "Löschen",
+        "clear": "Zurücksetzen",
         "import": "Routen importieren",
         "print": "Drucken",
         "create": "Erstellen",
@@ -270,30 +267,30 @@
         "stop": "Scan stoppen",
         "finish": "Inventur abschließen",
         "noScans": "Noch keine Routen gescannt.",
-        "archiveSuccess": "Inventur abgeschlossen. {count} Routen archiviert.",
+        "archiveSuccess": "Inventur abgeschlossen. {count} Route archiviert. | Inventur abgeschlossen. {count} Routen archiviert.",
         "nothingToArchive": "Alle Routen wurden gescannt. Nichts zu archivieren.",
         "archiveError": "Fehler beim Archivieren der fehlenden Routen.",
         "loadError": "Aktive Routen konnten nicht geladen werden.",
         "cameraError": "Auf die Gerätekamera konnte nicht zugegriffen werden. Bitte Kamerazugriff erlauben oder ein anderes Gerät verwenden.",
         "restoreSuccess": "Route {name} wurde reaktiviert.",
         "restoreError": "Fehler beim Reaktivieren der Route.",
-        "storageWarning": "Der Scan-Fortschritt konnte auf diesem Gerät nicht gespeichert werden. Ihr Fortschritt könnte verloren gehen, wenn Sie diese Seite verlassen.",
+        "storageWarning": "Der Scan-Fortschritt konnte auf diesem Gerät nicht gespeichert werden. Wenn du die Seite verlässt, kann er verloren gehen.",
         "showInstructions": "Anleitung anzeigen",
         "instructionsTitle": "Inventur-Anleitung",
         "instructionsIntro": "Folge diesen Schritten, um alle Routen-QR-Codes zu scannen.",
         "instructionsStep1": "Erlaube den Kamerazugriff und richte dein Gerät auf einen Routen-QR-Code.",
         "instructionsStep2": "Prüfe die angezeigten Routeninformationen in der Informationsleiste.",
-        "instructionsStep3": "Tippe auf \"Inventur abschließen\", um fehlende Routen zu archivieren.",
+        "instructionsStep3": "Tippe zum Schluss auf „Inventur abschließen“, um nicht gefundene Routen zu archivieren.",
         "instructionsClose": "Verstanden",
         "reset": "Inventur zurücksetzen",
         "reviewTitle": "Inventur überprüfen",
         "reviewFoundTitle": "Gescannt",
         "reviewMissingTitle": "Nicht gescannt",
         "reviewMissingDescription": "Diese Routen wurden nicht gefunden. Nicht angehakte Routen bleiben aktiv.",
-        "locationLabel": "Halle",
+        "locationLabel": "Standort",
         "locationHint": "Nur Routen an diesem Standort werden gezählt und archiviert.",
         "locationRequired": "Wähle einen Standort, um zu starten.",
-        "locationRestoreHint": "Gespeicherter Fortschritt aus einer früheren Version – wähle die zugehörige Halle.",
+        "locationRestoreHint": "Gespeicherter Fortschritt aus einer früheren Version – wähle den zugehörigen Standort.",
         "changeLocation": "Standort wechseln",
         "progress": "{found} von {total} gefunden",
         "stillToFind": "Noch zu finden",
@@ -303,52 +300,51 @@
         "undone": "{name} aus dieser Inventur entfernt.",
         "addManually": "Manuell hinzufügen",
         "addManuallyTitle": "Route als gefunden markieren",
-        "addManuallyHint": "Für beschädigte oder unerreichbare Etiketten.",
+        "addManuallyHint": "Für beschädigte oder unerreichbare QR-Etiketten.",
         "searchRoutes": "Routen suchen",
         "allFound": "Alle Routen an diesem Standort wurden gefunden.",
-        "unlocatedNote": "{count} aktive Routen haben keinen Standort und gehören nicht zu dieser Inventur.",
+        "unlocatedNote": "{count} aktive Route hat keinen Standort und gehört nicht zu dieser Inventur. | {count} aktive Routen haben keinen Standort und gehören nicht zu dieser Inventur.",
         "toggleTorch": "Taschenlampe umschalten",
         "resetTitle": "Inventur zurücksetzen?",
-        "resetMessage": "Damit werden die bisher gezählten {count} Routen verworfen. Es wird nichts archiviert.",
+        "resetMessage": "Damit wird {count} bisher gezählte Route verworfen. Es wird nichts archiviert. | Damit werden {count} bisher gezählte Routen verworfen. Es wird nichts archiviert.",
         "archiveSelected": "{count} archivieren",
         "archiveNone": "Nichts archivieren",
-        "droppedForLocation": "{count} gespeicherte Scans von einem anderen Standort wurden entfernt.",
+        "droppedForLocation": "{count} gespeicherter Scan von einem anderen Standort wurde entfernt. | {count} gespeicherte Scans von einem anderen Standort wurden entfernt.",
         "tagUnknown": "Unbekannt",
         "tagCounted": "Gezählt"
     },
     "notifications": {
         "success": {
-            "resetPassword": "Passwort zurücksetzen Anfrage gesendet. Bitte überprüfen Sie Ihre E-Mails.",
-            "create": "Erfolgreich erstellt",
-            "edit": "Erfolgreich gespeichert",
-            "delete": "Erfolgreich gelöscht",
-            "health": "Status: OK",
-            "userCreated": "Benutzer erfolgreich erstellt.",
+            "resetPassword": "Falls ein Konto existiert, ist ein Link zum Zurücksetzen unterwegs. Schau in dein Postfach.",
+            "create": "Erstellt",
+            "edit": "Gespeichert",
+            "delete": "Gelöscht",
+            "health": "Server online",
             "verifyEmail": "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt anmelden.",
             "emailChange": "Deine E-Mail-Adresse wurde geändert. Bitte melde dich erneut an.",
             "userInvited": "Benutzer erstellt. Eine Einladungs-E-Mail wurde versendet.",
             "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden."
         },
         "error": {
-            "resetPassword": "Passwort zurücksetzen Anfrage fehlgeschlagen.",
-            "create": "Fehler beim Erstellen",
-            "edit": "Fehler beim Speichern des Profils",
-            "delete": "Fehler beim Löschen",
-            "health": "Status: Schlecht",
-            "no_auth_methods_available": "Keine Authentifizierungsmethoden verfügbar",
-            "invalid_credentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie Benutzernamen und Passwort.",
-            "email_not_verified": "Ihre E-Mail-Adresse wurde noch nicht verifiziert.",
-            "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
-            "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-            "generic": "Ein unerwarteter Fehler ist aufgetreten.",
+            "resetPassword": "Der Link zum Zurücksetzen konnte nicht gesendet werden.",
+            "edit": "Änderungen konnten nicht gespeichert werden.",
+            "delete": "Löschen fehlgeschlagen.",
+            "health": "Server offline",
+            "no_auth_methods_available": "Keine Anmeldemethoden verfügbar.",
+            "invalid_credentials": "Benutzername oder Passwort ist falsch.",
+            "email_not_verified": "Deine E-Mail-Adresse ist noch nicht bestätigt.",
+            "too_many_attempts": "Zu viele Anmeldeversuche. Bitte versuche es später erneut.",
+            "unknown": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+            "generic": "Etwas ist schiefgelaufen.",
             "verifyEmail": "Dieser Bestätigungslink ist ungültig oder abgelaufen.",
             "emailChange": "Dieser Link zur E-Mail-Änderung ist ungültig oder abgelaufen.",
             "userInviteMail": "Benutzer erstellt, aber die Einladungs-E-Mail konnte nicht versendet werden.",
-            "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Fordere auf der Anmeldeseite einen neuen an."
+            "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Fordere auf der Anmeldeseite einen neuen an.",
+            "captcha": "Die Spam-Prüfung ist fehlgeschlagen. Bitte versuche es erneut."
         },
-        "deleteItem": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-        "deleteMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen möchten?",
-        "archiveMoreItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente archivieren möchten?",
+        "deleteItem": "Diesen Eintrag löschen? Das kann nicht rückgängig gemacht werden.",
+        "deleteMoreItems": "Die ausgewählten Einträge löschen? Das kann nicht rückgängig gemacht werden.",
+        "archiveMoreItems": "Die ausgewählten Routen archivieren?",
         "updateBanner": {
             "title": "Update verfügbar —",
             "message": "Version {0} ist verfügbar.",
@@ -362,14 +358,12 @@
             "installedVersion": "Installierte Version: {0}",
             "installed": "Installiert",
             "error": "Versionshinweise konnten nicht geladen werden.",
-            "notFound": "Keine Versionshinweise für diese Version gefunden.",
-            "close": "Versionshinweise schließen"
+            "notFound": "Keine Versionshinweise für diese Version gefunden."
         },
         "commitList": {
             "title": "Neue Commits",
             "installedCommit": "Installierter Commit: {0}",
-            "empty": "Keine neuen Commits gefunden.",
-            "close": "Commit-Liste schließen"
+            "empty": "Keine neuen Commits gefunden."
         },
         "center": {
             "title": "Benachrichtigungen",
@@ -392,7 +386,7 @@
         "privacy": "Datenschutz",
         "imprint": "Impressum",
         "imprintPage": {
-            "incomplete": "Der Betreiber hat das Impressum noch nicht vollständig ausgefüllt. Bitte wenden Sie sich an die Administration.",
+            "incomplete": "Der Betreiber hat das Impressum noch nicht vollständig ausgefüllt. Bitte wende dich an die Administration.",
             "provider": "Anbieter",
             "representative": "Vertreten durch",
             "contact": "Kontakt",
@@ -414,15 +408,15 @@
             },
             "accounts": {
                 "title": "Benutzerkonten",
-                "body": "Konten werden von der Administration für Mitarbeitende angelegt. Gespeichert werden E-Mail-Adresse, Benutzername, Vor- und Nachname, ein optionales Profilbild, die bevorzugte Sprache und die zugewiesene Rolle, um den Dienst bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben gespeichert, solange das Konto besteht; Sie können Ihr Konto jederzeit selbst löschen."
+                "body": "Konten werden von der Administration für Mitarbeitende angelegt. Gespeichert werden E-Mail-Adresse, Benutzername, Vor- und Nachname, ein optionales Profilbild, die bevorzugte Sprache und die zugewiesene Rolle, um den Dienst bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben gespeichert, solange das Konto besteht; du kannst dein Konto jederzeit selbst löschen."
             },
             "ratings": {
-                "title": "Bewertungen und Kommentare",
-                "body": "Bewertungen, Schwierigkeitseinschätzungen und Kommentare zu Routen können ohne Konto abgegeben werden und werden ohne Namen oder IP-Adresse gespeichert. Kommentare sind öffentlich sichtbar und können moderiert werden."
+                "title": "Bewertungen",
+                "body": "Sternebewertungen, Grad-Einschätzungen und Kommentare zu Routen können ohne Konto abgegeben werden und werden ohne Namen oder IP-Adresse gespeichert. Kommentare sind öffentlich sichtbar und können moderiert werden."
             },
             "reports": {
                 "title": "Meldungen von Inhalten",
-                "body": "Wenn Sie Inhalte melden, verarbeiten wir Name, E-Mail-Adresse, Meldegrund und Ihre Begründung, um die Meldung zu bearbeiten und Sie über die Entscheidung zu informieren (Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 16 DSA). Meldungen werden so lange aufbewahrt, wie es zur Dokumentation erforderlich ist."
+                "body": "Wenn du Inhalte meldest, verarbeiten wir Name, E-Mail-Adresse, Meldegrund und deine Begründung, um die Meldung zu bearbeiten und dich über die Entscheidung zu informieren (Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 16 DSA). Meldungen werden so lange aufbewahrt, wie es zur Dokumentation erforderlich ist."
             },
             "auditLog": {
                 "title": "Audit-Log",
@@ -430,7 +424,7 @@
             },
             "captcha": {
                 "title": "Spamschutz",
-                "body": "Einige Formulare nutzen eine selbst gehostete Proof-of-Work-Prüfung, die in Ihrem Browser läuft. Es werden keine Daten an Dritte übermittelt und keine Tracking-Cookies gesetzt."
+                "body": "Einige Formulare nutzen eine selbst gehostete Proof-of-Work-Prüfung, die in deinem Browser läuft. Es werden keine Daten an Dritte übermittelt und keine Tracking-Cookies gesetzt."
             },
             "thirdParties": {
                 "title": "Kein Tracking, keine Drittanbieter",
@@ -438,11 +432,11 @@
             },
             "storage": {
                 "title": "Cookies und lokaler Speicher",
-                "body": "Wir speichern nur Informationen auf Ihrem Endgerät, die für den von Ihnen gewünschten Dienst unbedingt erforderlich sind (§ 25 Abs. 2 TDDDG). Eine Einwilligung ist daher nicht erforderlich. Die vollständige Liste:"
+                "body": "Wir speichern auf deinem Gerät nur Informationen, die für den von dir gewünschten Dienst unbedingt erforderlich sind (§ 25 Abs. 2 TDDDG). Eine Einwilligung ist daher nicht erforderlich. Die vollständige Liste:"
             },
             "rights": {
-                "title": "Ihre Rechte",
-                "body": "Nach der DSGVO haben Sie folgende Rechte bezüglich Ihrer personenbezogenen Daten:",
+                "title": "Deine Rechte",
+                "body": "Nach der DSGVO hast du folgende Rechte bezüglich deiner personenbezogenen Daten:",
                 "items": {
                     "access": "Recht auf Auskunft (Art. 15 DSGVO)",
                     "rectification": "Recht auf Berichtigung (Art. 16 DSGVO)",
@@ -452,7 +446,7 @@
                     "objection": "Widerspruchsrecht (Art. 21 DSGVO)",
                     "withdrawal": "Recht auf jederzeitigen Widerruf einer Einwilligung (Art. 7 Abs. 3 DSGVO)"
                 },
-                "complaint": "Außerdem haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO)."
+                "complaint": "Außerdem hast du das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO)."
             },
             "subtitle": "Wie wir personenbezogene Daten bei der Nutzung dieser Anwendung verarbeiten."
         },
@@ -466,7 +460,7 @@
                 "localStorage": "Lokaler Speicher"
             },
             "purposes": {
-                "auth": "Hält Sie angemeldet",
+                "auth": "Hält dich angemeldet",
                 "colorScheme": "Merkt sich hellen oder dunklen Modus",
                 "exportColumns": "Merkt sich die gewählten Export-Spalten",
                 "updateDismissed": "Merkt sich einen ausgeblendeten Update-Hinweis",
@@ -484,68 +478,64 @@
         "title": {
             "settings": "Einstellungen - Verti-Grade",
             "route": "Route - Verti-Grade",
-            "index": "Kletterrouten - Verti-Grade",
-            "comments": "Kommentare - Verti-Grade",
+            "index": "Routen - Verti-Grade",
+            "comments": "Bewertungen - Verti-Grade",
             "users": "Benutzer - Verti-Grade",
-            "dashboard": "Routenverwaltung - Verti-Grade",
+            "dashboard": "Routen verwalten - Verti-Grade",
             "login": "Anmelden - Verti-Grade",
             "resetPassword": "Passwort zurücksetzen - Verti-Grade",
             "notFound": "Seite nicht gefunden - Verti-Grade",
             "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Routen-Inventur - Verti-Grade",
+            "inventory": "Inventur - Verti-Grade",
             "reports": "Inhaltsmeldungen - Verti-Grade",
-            "activity": "Aktivitätsprotokoll",
+            "activity": "Aktivitätsprotokoll - Verti-Grade",
             "verifyEmail": "E-Mail bestätigen - Verti-Grade",
             "emailChange": "E-Mail ändern - Verti-Grade"
         },
         "content": {
             "settings": "Einstellungen",
-            "route": "Bewertung erstellen",
-            "index": "Kletterrouten",
-            "comments": "Kommentare",
-            "users": "Benutzerverwaltung",
-            "dashboard": "Routenverwaltung",
-            "inventory": "Routen-Inventur",
+            "index": "Routen",
+            "comments": "Bewertungen",
+            "users": "Benutzer",
+            "dashboard": "Routen verwalten",
+            "inventory": "Inventur",
             "reports": "Inhaltsmeldungen",
             "activity": "Aufgezeichnete Konto- und Inhaltsaktivitäten einsehen."
         }
     },
     "validation": {
-        "required": "Das Feld ist erforderlich.",
-        "requiredAndNotEmpty": "Das Feld darf nicht leer sein.",
-        "anchorPointRange": "Der Ankerpunkt muss zwischen 1 und 100 liegen, bei Bouldern ist auch 0 erlaubt.",
+        "required": "Pflichtfeld.",
+        "anchorPointRange": "Der Umlenker muss zwischen 1 und 100 liegen (0 für Boulder).",
         "minLength": "Mindestens {n} Zeichen.",
         "maxLength": "Maximal {n} Zeichen.",
         "passwordMismatch": "Passwörter stimmen nicht überein.",
         "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
-        "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+        "email": "Bitte gib eine gültige E-Mail-Adresse ein."
     },
     "captcha": {
         "verifying": "Überprüfung… {progress}%"
     },
     "comments": {
-        "subtitle": "Kletterer-Bewertungen moderieren und verwalten",
         "totalReviews": "Bewertungen gesamt",
-        "avgRating": "Ø Bewertung",
+        "avgRating": "Ø Sterne",
         "thisWeek": "Diese Woche",
         "thisMonth": "Diesen Monat",
         "lowRated": "Schlecht bewertet (≤ 2★)",
         "sortNewest": "Neueste zuerst",
         "sortOldest": "Älteste zuerst",
-        "sortHighest": "Beste Bewertung",
-        "sortLowest": "Schlechteste Bewertung",
+        "sortHighest": "Meiste Sterne",
+        "sortLowest": "Wenigste Sterne",
         "showMore": "Mehr anzeigen",
         "showLess": "Weniger anzeigen",
         "noComments": "Keine Bewertungen gefunden",
-        "noCommentsHint": "Filter oder Suchbegriff anpassen",
+        "noCommentsHint": "Probier andere Filter oder einen anderen Suchbegriff.",
         "editReview": "Bewertung bearbeiten",
         "anonymous": "Anonym",
         "selected": "{n} ausgewählt",
         "deleteSelected": "{n} löschen",
-        "bulkDeleteTitle": "{n} Bewertungen löschen?",
+        "bulkDeleteTitle": "{n} Bewertung löschen? | {n} Bewertungen löschen?",
         "showing": "{n} von {total} Bewertungen",
-        "select": "Auswählen",
-        "deselect": "Abwählen"
+        "select": "Auswählen"
     },
     "nav": {
         "openMenu": "Menü öffnen",
@@ -556,41 +546,39 @@
         "admin": "Administration"
     },
     "users": {
-        "create": "Benutzer erstellen",
-        "createHint": "Der Benutzer erhält eine E-Mail zum Zurücksetzen des Passworts.",
+        "create": "Benutzer hinzufügen",
+        "createHint": "Der Benutzer erhält eine E-Mail, um sein Passwort festzulegen.",
         "edit": "Benutzer bearbeiten",
-        "title": "Benutzerverwaltung",
+        "title": "Benutzer",
         "delete": "Benutzer löschen",
-        "deleteConfirm": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-        "deleteSuccess": "Benutzer erfolgreich gelöscht.",
+        "deleteConfirm": "Diesen Benutzer löschen? Das kann nicht rückgängig gemacht werden.",
+        "deleteSuccess": "Benutzer gelöscht.",
         "deleteError": "Benutzer konnte nicht gelöscht werden.",
         "searchUsers": "Benutzer suchen…",
         "role": "Rolle",
-        "totalUsers": "Benutzer gesamt",
-        "admins": "Admins",
-        "recentlyJoined": "Diese Woche beigetreten",
         "noUsers": "Keine Benutzer gefunden",
-        "noUsersHint": "Suche oder Filter anpassen",
+        "noUsersHint": "Probier eine andere Suche oder andere Filter.",
         "showing": "{n} von {total} Benutzern",
-        "inviteMailNotConfigured": "E-Mail ist nicht konfiguriert, daher kann keine Einladung versendet werden. Der neue Benutzer kann sich nicht anmelden."
+        "inviteMailNotConfigured": "E-Mail ist nicht konfiguriert, daher kann keine Einladung versendet werden. Der neue Benutzer kann sich nicht anmelden.",
+        "emailTaken": "Es gibt bereits einen Benutzer mit dieser E-Mail-Adresse.",
+        "usernameTaken": "Dieser Benutzername ist bereits vergeben."
     },
     "permissions": {
-        "title": "Rollenberechtigungen",
+        "title": "Rollen & Berechtigungen",
         "role": "Rolle",
-        "noPermission": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
         "features": {
             "manage_routes": "Routen verwalten",
             "view_analytics": "Analysen anzeigen",
-            "manage_comments": "Kommentare verwalten",
+            "manage_comments": "Bewertungen moderieren",
             "manage_users": "Benutzer verwalten",
             "manage_settings": "Einstellungen verwalten",
             "run_inventory": "Inventur durchführen",
-            "manage_reports": "Meldungen verwalten",
-            "view_audit_log": "Audit-Protokoll ansehen"
+            "manage_reports": "Inhaltsmeldungen bearbeiten",
+            "view_audit_log": "Aktivitätsprotokoll ansehen"
         },
         "updated": "Berechtigungen aktualisiert.",
         "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
-        "loadError": "Ihre Berechtigungen konnten nicht geladen werden. Einige Funktionen sind möglicherweise nicht verfügbar.",
+        "loadError": "Deine Berechtigungen konnten nicht geladen werden. Einige Funktionen fehlen eventuell.",
         "addRole": "Rolle hinzufügen",
         "editRole": "Rolle bearbeiten",
         "createRole": "Rolle erstellen",
@@ -603,7 +591,7 @@
         "noRoles": "Noch keine Rollen",
         "deleteRole": "Rolle löschen",
         "deleteRoleConfirm": "Die Rolle „{name}“ löschen? Dies kann nicht rückgängig gemacht werden.",
-        "deleteRoleReassign": "{n} Benutzer haben derzeit diese Rolle. Sie werden der unten gewählten Rolle zugewiesen.",
+        "deleteRoleReassign": "{n} Benutzer hat derzeit diese Rolle und wird der unten gewählten Rolle zugewiesen. | {n} Benutzer haben derzeit diese Rolle und werden der unten gewählten Rolle zugewiesen.",
         "reassignTo": "Diese Benutzer verschieben nach",
         "roleCreated": "Rolle erstellt.",
         "roleUpdated": "Rolle aktualisiert.",
@@ -618,7 +606,7 @@
         "justNow": "Gerade eben",
         "minutesAgo": "vor {n} Min.",
         "hoursAgo": "vor {n} Std.",
-        "daysAgo": "vor {n} Tagen"
+        "daysAgo": "vor {n} Tag | vor {n} Tagen"
     },
     "settings": {
         "changed": "Geändert",
@@ -627,7 +615,7 @@
         "replace": "Ersetzen",
         "clickToUpload": "Zum Hochladen klicken",
         "loadError": "Einstellungen konnten nicht geladen werden.",
-        "initError": "Einstellungen konnten nicht initialisiert werden.",
+        "initError": "Einstellungen konnten nicht angelegt werden.",
         "organization": "Organisation",
         "organizationName": "Name der Organisation",
         "organizationNamePlaceholder": "z. B. Bergsportverein",
@@ -637,7 +625,7 @@
         "applicationUrl": "Anwendungs-URL",
         "imprintUrl": "Impressum-URL",
         "privacyUrl": "Datenschutz-URL",
-        "saveSuccess": "Einstellungen erfolgreich gespeichert.",
+        "saveSuccess": "Einstellungen gespeichert.",
         "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.",
         "contactEmail": "Kontakt-E-Mail",
         "contactEmailHint": "Wird als Kontaktstelle veröffentlicht und über neue Inhaltsmeldungen benachrichtigt.",
@@ -649,7 +637,7 @@
         "legalAddress": "Postanschrift",
         "legalPhone": "Telefon",
         "legalRegister": "Registereintrag",
-        "legalUrlHint": "Leer lassen, um die integrierte Seite zu nutzen",
+        "legalUrlHint": "Leer lassen, um die integrierte Seite zu nutzen.",
         "legalIntro": "Wird auf der integrierten Impressums- und Datenschutzseite angezeigt.",
         "legalAddressPlaceholder": "Straße 1\n12345 Stadt",
         "legalRegisterPlaceholder": "Amtsgericht Stadt, VR 12345",
@@ -669,7 +657,12 @@
         "locationAdd": "Hinzufügen",
         "locationDelete": "Standort löschen",
         "locationSaved": "Standort gespeichert.",
-        "locationSaveFailed": "Nicht möglich: Namen müssen eindeutig sein, und ein Standort mit Routen kann nicht gelöscht werden."
+        "locationSaveFailed": "Nicht möglich: Namen müssen eindeutig sein, und ein Standort mit Routen kann nicht gelöscht werden.",
+        "assets": {
+            "logo": "App-Logo",
+            "icon": "Browser-Icon",
+            "sign": "Logo auf Routenschildern"
+        }
     },
     "errors": {
         "notFound": {
@@ -679,11 +672,13 @@
     },
     "export": {
         "title": "Als Excel exportieren",
+        "title_pdf": "QR-Schilder drucken",
+        "language": "Sprache",
+        "logo": "Logo",
         "columns": "Spalten",
         "qr_code": "QR-Code",
         "move_up": "Nach oben",
         "move_down": "Nach unten",
-        "rope": "Seil",
         "fileName": "kletterrouten"
     },
     "importRoutes": {
@@ -694,14 +689,14 @@
         "ratingsFor": "Bewertungen für {name}",
         "noRatings": "Keine Bewertungen für diese Route zu importieren.",
         "noComment": "Kein Kommentar",
-        "ratingLabel": "Bewertung",
-        "difficultyLabel": "Schwierigkeit",
+        "ratingLabel": "Sterne",
+        "difficultyLabel": "Gefühlter Grad",
         "invalidJson": "Ungültige JSON-Datei. Bitte prüfe das Dateiformat.",
         "readFailed": "Datei konnte nicht gelesen werden.",
-        "success": "Import erfolgreich abgeschlossen.",
+        "success": "Import abgeschlossen.",
         "issues": "Import mit Problemen beendet: {details}",
-        "routesFailed": "{count} Route(n) fehlgeschlagen",
-        "commentsFailed": "{count} Kommentar(e) fehlgeschlagen",
+        "routesFailed": "{count} Route fehlgeschlagen | {count} Routen fehlgeschlagen",
+        "commentsFailed": "{count} Bewertung fehlgeschlagen | {count} Bewertungen fehlgeschlagen",
         "failed": "Beim Import ist ein unerwarteter Fehler aufgetreten."
     },
     "reports": {
@@ -709,7 +704,7 @@
         "subtitle": "Meldungen nach Artikel 16 des Gesetzes über digitale Dienste.",
         "reportAction": "Diesen Kommentar melden",
         "dialogTitle": "Inhalt melden",
-        "dialogIntro": "Teilen Sie uns mit, was an diesem Inhalt nicht in Ordnung ist. Jede Meldung wird von einer Person geprüft.",
+        "dialogIntro": "Sag uns, was an diesem Inhalt nicht in Ordnung ist. Jede Meldung wird von einem Menschen geprüft.",
         "reason": "Grund",
         "reasons": {
             "hate_speech": "Hassrede",
@@ -722,14 +717,13 @@
             "other": "Etwas anderes"
         },
         "explanation": "Begründung",
-        "explanationHint": "Erläutern Sie, warum dieser Inhalt rechtswidrig ist oder gegen die Regeln verstößt.",
-        "notifierName": "Ihr Name",
-        "notifierEmail": "Ihre E-Mail-Adresse",
-        "contactNote": "Wir verwenden Ihre E-Mail-Adresse ausschließlich für die Eingangsbestätigung und die Mitteilung der Entscheidung.",
+        "explanationHint": "Erkläre, warum dieser Inhalt rechtswidrig ist oder gegen die Regeln verstößt.",
+        "notifierName": "Dein Name",
+        "notifierEmail": "Deine E-Mail-Adresse",
+        "contactNote": "Wir nutzen deine E-Mail-Adresse nur für die Eingangsbestätigung und die Mitteilung der Entscheidung.",
         "goodFaith": "Ich erkläre nach Treu und Glauben, dass die Angaben in dieser Meldung richtig und vollständig sind.",
         "submit": "Meldung absenden",
-        "submitted": "Meldung übermittelt. Wir haben Ihnen eine Bestätigung per E-Mail gesendet.",
-        "reportedContent": "Gemeldeter Inhalt",
+        "submitted": "Meldung übermittelt. Wir haben dir eine Bestätigung per E-Mail geschickt.",
         "snapshot": "Inhalt zum Zeitpunkt der Meldung",
         "contentUnavailable": "Inhalt nicht mehr verfügbar",
         "notifier": "Gemeldet von",
@@ -757,8 +751,8 @@
         "mailWarningAction": "Einstellungen öffnen"
     },
     "audit": {
-        "title": "Audit-Protokoll",
-        "subtitle": "Alle aufgezeichneten Aktionen auf der Seite.",
+        "title": "Aktivitätsprotokoll",
+        "subtitle": "Alle aufgezeichneten Aktionen in der App.",
         "titleOwn": "Deine Aktivität",
         "subtitleOwn": "Alles, was zu deinem Konto aufgezeichnet wurde.",
         "searchLabel": "Aktivität durchsuchen",
@@ -769,7 +763,7 @@
         "emptyHint": "Aktionen erscheinen hier, sobald sie passieren.",
         "anonymous": "Anonym",
         "superuser": "Administrator (PocketBase)",
-        "retentionNote": "Einträge werden nach {days} Tagen automatisch gelöscht.",
+        "retentionNote": "Einträge werden nach {days} Tag automatisch gelöscht. | Einträge werden nach {days} Tagen automatisch gelöscht.",
         "period": {
             "24h": "Letzte 24 Stunden",
             "7d": "Letzte 7 Tage",

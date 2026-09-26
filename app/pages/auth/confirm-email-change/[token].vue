@@ -12,7 +12,7 @@
         :invalid-subtitle="$t('notifications.error.emailChange')"
         :action="confirmEmailChange"
         :is-token-error="isInvalidToken"
-        :error-message="$t('notifications.error.emailChange')"
+        :error-message="$t('account.wrongOldPassword')"
     >
         <template #default="{ submit, loading }">
             <v-form
