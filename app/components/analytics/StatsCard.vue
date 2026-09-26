@@ -136,7 +136,7 @@ function formatDelta(value: number) {
 }
 
 .card-body {
-    padding: 18px 18px 16px !important;
+    padding: 18px 18px 16px;
 }
 
 .icon-badge {

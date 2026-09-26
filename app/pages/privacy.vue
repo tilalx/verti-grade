@@ -131,7 +131,10 @@ const rights = [
     'withdrawal',
 ]
 
-useHead({ title: () => t('legal.privacy') })
+useSeoMeta({
+    title: () => t('legal.privacy'),
+    ogTitle: () => t('legal.privacy'),
+})
 </script>
 
 <style scoped>

@@ -105,3 +105,30 @@ test.describe('self-service profile', () => {
         ).toHaveValue(original)
     })
 })
+
+test('does not flag unsaved changes on an untouched profile', async ({
+    userPage: page,
+}) => {
+    await gotoSettled(page, '/')
+    await page.getByTestId('user-menu-activator').click()
+    await page.getByTestId('user-menu-profile').click()
+    await expect(page.getByTestId('profile-dialog')).toBeVisible()
+    await page.getByTestId('profile-tab-security').click()
+    await page
+        .locator('input[autocomplete="current-password"]')
+        .fill('autofilled-by-password-manager')
+    await page.getByTestId('profile-tab-profile').click()
+    await expect(page.getByTestId('profile-unsaved')).toHaveCount(0)
+})
+
+test('lists languages by code instead of emoji flags', async ({
+    userPage: page,
+}) => {
+    await gotoSettled(page, '/')
+    await page.getByTestId('user-menu-activator').click()
+    await page.getByTestId('user-menu-profile').click()
+    await page.getByTestId('profile-language').click()
+    const german = page.getByTestId('profile-language-de')
+    await expect(german).toContainText('DE')
+    expect(await german.textContent()).not.toMatch(/[\u{1F1E6}-\u{1F1FF}]/u)
+})

@@ -16,6 +16,7 @@ const stubs = {
     'v-spacer': true,
     'v-btn': { template: '<button><slot /></button>' },
     'v-progress-circular': { template: '<div class="spinner" />' },
+    'v-chip-group': { template: '<div><slot /></div>' },
 }
 
 function createWrapper(props = {}) {
@@ -107,23 +108,45 @@ describe('ReleaseNotesDialog', () => {
         expect(wrapper.text()).not.toContain('old notes')
     })
 
-    it('renders markdown release bodies as plain text', () => {
+    it('renders release bullets as changes without markdown', () => {
         const wrapper = createWrapper({
             tag: 'v1.9.0',
             notes: [
                 '## What changed',
                 '* **Bold** item',
                 '* [A link](https://example.com)',
-                'https://github.com/o/r/pull/42',
+                '* feat(ui): new thing by @tilalx in https://github.com/o/r/pull/42',
             ].join('\n'),
+            repoUrl: 'https://github.com/o/r',
         })
 
         const text = wrapper.text()
-        expect(text).toContain('What changed')
-        expect(text).toContain('• Bold item')
-        expect(text).toContain('• A link')
-        expect(text).toContain('#42')
+        expect(text).toContain('Bold item')
+        expect(text).toContain('A link')
         expect(text).not.toContain('**')
-        expect(text).not.toContain('##')
+        const pr = wrapper.find('a[href="https://github.com/o/r/pull/42"]')
+        expect(pr.exists()).toBe(true)
+        expect(pr.text()).toBe('#42')
+    })
+
+    it('lists commits made since the installed release', () => {
+        const wrapper = createWrapper({
+            tag: 'v1.9.0',
+            notes: '* feat: base',
+            repoUrl: 'https://github.com/o/r',
+            commits: [
+                { sha: 'abc1234', message: 'fix: late fix (#50)', date: null },
+            ],
+        })
+
+        expect(wrapper.text()).toContain('late fix')
+        expect(
+            wrapper
+                .find('a[href="https://github.com/o/r/commit/abc1234"]')
+                .exists(),
+        ).toBe(true)
+        expect(
+            wrapper.find('a[href="https://github.com/o/r/pull/50"]').exists(),
+        ).toBe(true)
     })
 })

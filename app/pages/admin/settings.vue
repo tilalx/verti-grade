@@ -28,7 +28,11 @@
         </v-alert>
 
         <!-- Image Upload Cards -->
-        <v-row class="mb-4" density="comfortable">
+        <v-row
+            id="settings-branding"
+            class="mb-4 scroll-anchor"
+            density="comfortable"
+        >
             <v-col
                 v-for="asset in assetFields"
                 :key="asset.key"
@@ -185,7 +189,12 @@
         </v-row>
 
         <!-- Organization -->
-        <v-card border flat class="mb-6">
+        <v-card
+            id="settings-organization"
+            border
+            flat
+            class="mb-6 scroll-anchor"
+        >
             <v-card-text class="pa-4">
                 <p class="text-title-small font-weight-semibold mb-4">
                     {{ $t('settings.organization') }}
@@ -254,7 +263,7 @@
         <AdminLocationsCard />
 
         <!-- URL Fields -->
-        <v-card border flat class="mb-6">
+        <v-card id="settings-urls" border flat class="mb-6 scroll-anchor">
             <v-card-text class="pa-4">
                 <p class="text-title-small font-weight-semibold mb-4">
                     {{ $t('settings.publicUrls') }}
@@ -301,7 +310,7 @@
             </v-card-text>
         </v-card>
 
-        <v-card border flat class="mb-6">
+        <v-card id="settings-legal" border flat class="mb-6 scroll-anchor">
             <v-card-text class="pa-4">
                 <p class="text-title-small font-weight-semibold mb-1">
                     {{ $t('settings.legalTitle') }}

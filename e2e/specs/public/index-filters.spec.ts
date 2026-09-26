@@ -44,3 +44,35 @@ test('filters by difficulty, and every visible row actually matches', async ({
         )
     }
 })
+
+test('searches by setter name', async ({ page }) => {
+    await gotoSettled(page, '/')
+    await page.getByTestId('filter-search').locator('input').fill('Setter 3')
+    const rows = page.getByTestId('index-table').locator('tbody tr')
+    await expect(rows.first()).toContainText('Setter 3')
+    for (const row of await rows.all())
+        await expect(row).toContainText('Setter 3')
+})
+
+test('combines a route name with a signed grade', async ({ page }) => {
+    const res = await page.request.get(
+        '/api/collections/routes/records?filter=' +
+            encodeURIComponent(
+                'name ~ "e2e-route-" && archived = false && difficulty_sign = true',
+            ) +
+            '&perPage=1',
+    )
+    const route = (await res.json()).items[0]
+
+    await gotoSettled(page, '/')
+    const search = page.getByTestId('filter-search').locator('input')
+    const exactRoute = page
+        .getByTestId('index-table')
+        .getByText(route.name, { exact: true })
+
+    await search.fill(`${route.name} ${route.difficulty}+`)
+    await expect(exactRoute).toBeVisible()
+
+    await search.fill(`${route.name} ${route.difficulty}-`)
+    await expect(exactRoute).toHaveCount(0)
+})

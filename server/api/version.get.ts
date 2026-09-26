@@ -1,5 +1,7 @@
-import { parseAppVersion, decideUpdate } from '../utils/version'
-import type { InstalledVersion, UpdateMode } from '../utils/version'
+import { decideUpdate } from '../utils/version'
+import type { UpdateMode } from '../utils/version'
+import { parseAppVersion } from '#shared/utils/version'
+import type { InstalledVersion } from '#shared/utils/version'
 
 interface GithubRelease {
     tag_name?: string
@@ -12,14 +14,34 @@ interface GithubCommit {
     commit?: { message?: string; author?: { date?: string } }
 }
 
+interface VersionCommit {
+    sha: string
+    message: string
+    date: string | null
+}
+
+const toVersionCommits = (commits: GithubCommit[] = []): VersionCommit[] =>
+    commits
+        .slice()
+        .reverse()
+        .map((commit) => ({
+            sha: (commit.sha ?? '').slice(0, 7),
+            message: (commit.commit?.message ?? '').split('\n')[0]!,
+            date: commit.commit?.author?.date ?? null,
+        }))
+
 interface VersionPayload {
-    installed: InstalledVersion & { notes: string | null }
+    installed: InstalledVersion & {
+        notes: string | null
+        publishedAt: string | null
+    }
     latest: {
         tag: string
         notes: string | null
         publishedAt: string | null
     } | null
-    commits: { sha: string; message: string; date: string | null }[]
+    commits: VersionCommit[]
+    installedCommits: VersionCommit[]
     mode: UpdateMode
     updateAvailable: boolean
     error: 'rate_limited' | 'unavailable' | null
@@ -77,8 +99,19 @@ export default defineCachedEventHandler(
                       )
         }
 
+        const sinceRelease =
+            installed.base && installed.sha && installed.ahead > 0
+                ? await get<{ commits?: GithubCommit[] }>(
+                      `compare/v${installed.base}...${installed.sha}`,
+                  )
+                : null
+
         return {
-            installed: { ...installed, notes: installedRelease?.body ?? null },
+            installed: {
+                ...installed,
+                notes: installedRelease?.body ?? null,
+                publishedAt: installedRelease?.published_at ?? null,
+            },
             latest: latestTag
                 ? {
                       tag: latestTag,
@@ -87,18 +120,8 @@ export default defineCachedEventHandler(
                   }
                 : null,
             commits:
-                mode === 'commit'
-                    ? (comparison?.commits ?? [])
-                          .slice()
-                          .reverse()
-                          .map((commit) => ({
-                              sha: (commit.sha ?? '').slice(0, 7),
-                              message: (commit.commit?.message ?? '').split(
-                                  '\n',
-                              )[0]!,
-                              date: commit.commit?.author?.date ?? null,
-                          }))
-                    : [],
+                mode === 'commit' ? toVersionCommits(comparison?.commits) : [],
+            installedCommits: toVersionCommits(sinceRelease?.commits),
             mode,
             updateAvailable,
             error: failure,

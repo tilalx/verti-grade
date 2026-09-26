@@ -54,7 +54,16 @@
         </FilterBar>
 
         <div class="mt-4">
-            <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+            <template v-if="loading">
+                <v-skeleton-loader
+                    v-for="i in 3"
+                    :key="i"
+                    type="list-item-avatar-three-line, actions"
+                    class="mb-3"
+                    rounded="lg"
+                    data-testid="reports-skeleton"
+                />
+            </template>
 
             <LayoutEmptyState
                 v-if="!loading && !reports.length"
@@ -64,7 +73,7 @@
             />
 
             <ReportsCard
-                v-for="report in reports"
+                v-for="report in loading ? [] : reports"
                 :key="report.id"
                 :report="report"
                 class="mb-3"
@@ -154,7 +163,12 @@ const page = ref(1)
 const totalItems = ref(0)
 const hasMore = computed(() => reports.value.length < totalItems.value)
 
-const search = ref('')
+const pageRoute = useRoute()
+const search = ref(String(pageRoute.query.search ?? ''))
+watch(
+    () => pageRoute.query.search,
+    (value) => (search.value = String(value ?? '')),
+)
 const statusFilter = ref<string | null>(null)
 
 const decisionDialog = ref(false)

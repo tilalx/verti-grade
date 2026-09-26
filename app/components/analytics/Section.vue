@@ -59,8 +59,8 @@ const tint = computed(() => `rgba(var(--v-theme-${props.color}), 0.12)`)
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 16px !important;
-    min-height: unset !important;
+    padding: 14px 16px;
+    min-height: unset;
 }
 
 .section-icon {

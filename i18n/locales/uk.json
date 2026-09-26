@@ -202,6 +202,8 @@
         }
     },
     "climbing": {
+        "searchRouteHint": "Пошук за назвою, автором або категорією (напр. 6+)",
+        "routesFound": "Знайдено маршрутів: {n}",
         "create": "Створити маршрут",
         "color": "Колір",
         "routename": "Назва маршруту",
@@ -358,7 +360,18 @@
             "installedVersion": "Встановлена версія: {0}",
             "installed": "Встановлено",
             "error": "Не вдалося завантажити примітки до випуску.",
-            "notFound": "Приміток до випуску для цієї версії не знайдено."
+            "notFound": "Приміток до випуску для цієї версії не знайдено.",
+            "sinceRelease": "Нове з {0}",
+            "viewOnGithub": "Відкрити на GitHub",
+            "fullChangelog": "Повний список змін",
+            "breaking": "breaking",
+            "filters": {
+                "all": "Усі",
+                "feat": "Функції",
+                "fix": "Виправлення",
+                "deps": "Залежності",
+                "other": "Інше"
+            }
         },
         "commitList": {
             "title": "Нові коміти",
@@ -538,6 +551,19 @@
         "select": "Обрати"
     },
     "nav": {
+        "paletteGroupRoles": "Ролі",
+        "paletteGroupPages": "Сторінки",
+        "paletteGroupRoutes": "Маршрути",
+        "paletteNavigate": "вибрати",
+        "paletteOpen": "відкрити",
+        "paletteClose": "закрити",
+        "commandPalette": "Пошук",
+        "commandPalettePlaceholder": "Назва, автор або категорія (напр. 6+)",
+        "commandPaletteEmpty": "Нічого не знайдено",
+        "themeToggle": "Змінити тему",
+        "themeSystem": "Системна тема",
+        "themeLight": "Світла тема",
+        "themeDark": "Темна тема",
         "openMenu": "Відкрити меню",
         "skipToContent": "Перейти до вмісту",
         "mainNavigation": "Основна навігація",

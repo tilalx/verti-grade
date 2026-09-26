@@ -399,6 +399,18 @@ const formattedScrewDate = computed(() =>
     }),
 )
 
+const seoDescription = () =>
+    [difficulty.value, locationName(metadata.value), formattedScrewDate.value]
+        .filter(Boolean)
+        .join(' · ')
+
+useSeoMeta({
+    description: seoDescription,
+    ogTitle: () => metadata.value?.name || t('page.title.route'),
+    ogDescription: seoDescription,
+    ogType: 'article',
+})
+
 const avgRating = computed(() => {
     const rated = reviews.value.filter((r) => r.rating !== null)
     if (!rated.length) return '—'
@@ -699,6 +711,6 @@ onMounted(async () => {
 .stats-card {
     position: relative;
     z-index: 2;
-    background: rgb(var(--v-theme-surface)) !important;
+    background: rgb(var(--v-theme-surface));
 }
 </style>

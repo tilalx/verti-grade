@@ -203,7 +203,9 @@
         <!-- ── Role Permissions ──────────────────────────────────────────── -->
         <v-divider class="my-8" />
 
-        <AdminRolePermissionsEditor />
+        <div id="roles" class="scroll-anchor">
+            <AdminRolePermissionsEditor />
+        </div>
     </v-container>
 </template>
 
@@ -245,7 +247,12 @@ const PER_PAGE = 48
 const totalItems = ref(0)
 const hasMore = computed(() => users.value.length < totalItems.value)
 
-const search = ref('')
+const pageRoute = useRoute()
+const search = ref(String(pageRoute.query.search ?? ''))
+watch(
+    () => pageRoute.query.search,
+    (value) => (search.value = String(value ?? '')),
+)
 const selectedRole = ref<string | null>(null)
 
 const editingUser = ref<AdminUser | null>(null)

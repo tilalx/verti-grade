@@ -38,7 +38,11 @@ test('shows an error and keeps the form open when save fails', async ({
         .fill(`E2E Fail ${Date.now()}`)
     await page.getByTestId('settings-save').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(
+        page.locator(
+            '[data-testid="global-snackbar-message"][data-color="error"]',
+        ),
+    ).toBeVisible()
     await expect(page.getByTestId('settings-save')).toBeVisible()
 
     await page.unroute('**/api/collections/settings/records/**')

@@ -1,5 +1,7 @@
 <template>
     <VApp class="fontbody">
+        <NuxtLoadingIndicator color="rgb(var(--v-theme-primary))" :height="3" />
+        <NuxtAnnouncer />
         <NuxtLayout>
             <NuxtPage />
         </NuxtLayout>

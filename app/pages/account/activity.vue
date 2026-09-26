@@ -86,7 +86,7 @@
             </div>
 
             <p
-                class="text-caption text-medium-emphasis text-center mt-6"
+                class="text-body-small text-medium-emphasis text-center mt-6"
                 data-testid="audit-retention-note"
             >
                 {{

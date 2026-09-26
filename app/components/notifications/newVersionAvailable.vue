@@ -22,7 +22,8 @@
                     :tag="latest?.tag"
                     :notes="latest?.notes"
                     :published-at="latest?.publishedAt"
-                    :installed-version="appVersion"
+                    :repo-url="repoUrl"
+                    :installed-version="appVersionLabel"
                     :error="error"
                     :loading="loading"
                 >
@@ -51,7 +52,8 @@
                 </span>
                 <NotificationsCommitListDialog
                     :commits="commits"
-                    :installed-sha="appVersion"
+                    :repo-url="repoUrl"
+                    :installed-sha="appVersionLabel"
                 >
                     <template #activator="{ props: activatorProps }">
                         <v-btn
@@ -75,6 +77,8 @@ import { UPDATE_DISMISSED_KEY } from '~/utils/clientStorage'
 
 const {
     appVersion,
+    appVersionLabel,
+    repoUrl,
     mode,
     updateAvailable,
     latest,

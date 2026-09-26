@@ -85,9 +85,9 @@ test('announces a new release and opens its notes', async ({
     const dialog = page.getByTestId('release-notes-dialog')
     await expect(dialog).toBeVisible()
     await expect(dialog).toContainText('v1.10.0')
-    await expect(dialog).toContainText('What changed')
-    await expect(dialog).toContainText('• Bold fix')
+    await expect(dialog).toContainText('Bold fix')
     await expect(dialog).not.toContainText('**')
+    await expect(dialog.locator('a[href$="/pull/42"]')).toHaveText('#42')
 })
 
 test('announces new commits and lists them', async ({ adminPage: page }) => {

@@ -367,7 +367,12 @@ const PER_PAGE = 48
 const totalItems = ref(0)
 const hasMore = computed(() => comments.value.length < totalItems.value)
 
-const search = ref('')
+const pageRoute = useRoute()
+const search = ref(String(pageRoute.query.search ?? ''))
+watch(
+    () => pageRoute.query.search,
+    (value) => (search.value = String(value ?? '')),
+)
 const selectedLocation = ref<string | null>(null)
 const selectedDifficulty = ref<number | null>(null)
 const selectedRating = ref(0)

@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-    compareSemver,
-    decideUpdate,
-    parseAppVersion,
-} from '../../server/utils/version'
+import { compareSemver, decideUpdate } from '../../server/utils/version'
+import { parseAppVersion, versionLabel } from '#shared/utils/version'
 
 describe('parseAppVersion', () => {
     it('parses a clean release tag', () => {
@@ -117,5 +114,20 @@ describe('decideUpdate', () => {
             mode: 'none',
             updateAvailable: false,
         })
+    })
+})
+
+describe('versionLabel', () => {
+    it('shows the plain version for a release build', () => {
+        expect(versionLabel('2.0.0')).toBe('2.0.0')
+    })
+
+    it('appends the commit for a rolling build past the tag', () => {
+        expect(versionLabel('2.0.0-3-gabc1234def')).toBe('2.0.0-abc1234')
+    })
+
+    it('marks dev builds', () => {
+        expect(versionLabel('2.0.0', true)).toBe('2.0.0-dev')
+        expect(versionLabel('dev', true)).toBe('dev')
     })
 })

@@ -22,36 +22,70 @@
         </v-alert>
 
         <div
-            v-for="commit in props.commits"
+            v-for="commit in parsedCommits"
             v-else
             :key="commit.sha"
             class="commit-entry"
         >
             <div class="d-flex align-center flex-wrap ga-2 mb-1">
-                <span class="commit-sha">{{ commit.sha }}</span>
+                <a
+                    v-if="repoUrl"
+                    :href="`${repoUrl}/commit/${commit.sha}`"
+                    target="_blank"
+                    rel="noopener"
+                    class="commit-sha commit-link"
+                    >{{ commit.sha }}</a
+                >
+                <span v-else class="commit-sha">{{ commit.sha }}</span>
                 <span class="commit-date">
                     {{ formatDate(commit.date, { locale }) }}
                 </span>
             </div>
-            <div class="commit-message">{{ commit.message }}</div>
+            <div class="commit-message">
+                {{ commit.text }}
+                <template v-if="commit.pr">
+                    <a
+                        v-if="repoUrl"
+                        :href="`${repoUrl}/pull/${commit.pr}`"
+                        target="_blank"
+                        rel="noopener"
+                        class="commit-link"
+                        data-testid="commit-pr-link"
+                        >#{{ commit.pr }}</a
+                    >
+                    <span v-else>#{{ commit.pr }}</span>
+                </template>
+            </div>
         </div>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
 import { formatDate } from '#shared/utils/formatting'
+import { parseChange } from '#shared/utils/releaseNotes'
 import type { VersionCommit } from '~/composables/useVersionCheck'
 
 const props = withDefaults(
     defineProps<{
         commits?: VersionCommit[]
         installedSha?: string
+        repoUrl?: string | null
     }>(),
-    { commits: () => [], installedSha: '' },
+    { commits: () => [], installedSha: '', repoUrl: null },
 )
 
 const { locale } = useI18n()
 const dialog = ref(false)
+
+const parsedCommits = computed(() =>
+    props.commits.map((commit) => {
+        const change = parseChange(commit.message)
+        const prefix = change.type
+            ? `${change.type}${change.scope ? `(${change.scope})` : ''}: `
+            : ''
+        return { ...commit, text: `${prefix}${change.subject}`, pr: change.pr }
+    }),
+)
 </script>
 
 <style scoped>
@@ -68,6 +102,15 @@ const dialog = ref(false)
     font-family: monospace;
     font-weight: 600;
     font-size: 13px;
+}
+
+.commit-link {
+    color: rgb(var(--v-theme-primary));
+    text-decoration: none;
+}
+
+.commit-link:hover {
+    text-decoration: underline;
 }
 
 .commit-date {
