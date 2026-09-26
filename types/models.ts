@@ -102,6 +102,7 @@ export interface SettingsRecord extends BaseRecord {
     legal_representatives?: LegalPerson[] | null
     route_grade_system?: string | null
     boulder_grade_system?: string | null
+    allow_registration?: boolean
 }
 
 export interface LegalPerson {

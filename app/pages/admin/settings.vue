@@ -256,6 +256,18 @@
                             data-testid="settings-audit-retention"
                         />
                     </v-col>
+                    <v-col cols="12">
+                        <v-switch
+                            v-model="copySettings.allow_registration"
+                            :label="$t('settings.allowRegistration')"
+                            :hint="$t('settings.allowRegistrationHint')"
+                            persistent-hint
+                            color="primary"
+                            density="compact"
+                            inset
+                            data-testid="settings-allow-registration"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card>
@@ -561,6 +573,7 @@ const original = reactive({
     organization_unit_name: '',
     contact_email: '',
     audit_retention_days: 90 as number | null,
+    allow_registration: false,
     route_grade_system: DEFAULT_ROUTE_GRADE_SYSTEM as string,
     boulder_grade_system: DEFAULT_BOULDER_GRADE_SYSTEM as string,
     ...legalFieldsFrom({}),
@@ -612,6 +625,7 @@ function adoptRecord(rec: SettingsRecord | null | undefined) {
     original.organization_unit_name = rec.organization_unit_name ?? ''
     original.contact_email = rec.contact_email ?? ''
     original.audit_retention_days = rec.audit_retention_days ?? 90
+    original.allow_registration = !!rec.allow_registration
     original.route_grade_system =
         rec.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
     original.boulder_grade_system =
@@ -787,6 +801,7 @@ const hasChanges = computed(() => {
             original.organization_unit_name ||
         copySettings.contact_email !== original.contact_email ||
         copySettings.audit_retention_days !== original.audit_retention_days ||
+        copySettings.allow_registration !== original.allow_registration ||
         copySettings.route_grade_system !== original.route_grade_system ||
         copySettings.boulder_grade_system !== original.boulder_grade_system ||
         JSON.stringify(legalFieldsFrom(copySettings)) !==
@@ -812,6 +827,7 @@ async function saveSettings() {
             contact_email: copySettings.contact_email,
             audit_retention_days:
                 Number(copySettings.audit_retention_days) || null,
+            allow_registration: copySettings.allow_registration,
             route_grade_system: copySettings.route_grade_system,
             boulder_grade_system: copySettings.boulder_grade_system,
             ...legalPayload(copySettings),
@@ -841,6 +857,7 @@ async function saveSettings() {
         original.organization_unit_name = updated.organization_unit_name ?? ''
         original.contact_email = updated.contact_email ?? ''
         original.audit_retention_days = updated.audit_retention_days ?? 90
+        original.allow_registration = !!updated.allow_registration
         original.route_grade_system =
             updated.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
         original.boulder_grade_system =
@@ -855,6 +872,7 @@ async function saveSettings() {
             organization_unit_name: updated.organization_unit_name ?? '',
             contact_email: updated.contact_email ?? '',
             audit_retention_days: updated.audit_retention_days ?? 90,
+            allow_registration: original.allow_registration,
             route_grade_system: original.route_grade_system,
             boulder_grade_system: original.boulder_grade_system,
             ...legalFieldsFrom(updated),

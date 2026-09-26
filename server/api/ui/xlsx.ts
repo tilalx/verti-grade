@@ -1,5 +1,5 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server'
+import { requirePermission } from '../../utils/pb-server'
 import {
     resolveRouteIds,
     resolveExportColumns,
@@ -18,7 +18,7 @@ const MAX_COLUMN_WIDTH = 60
 export default eventHandler(async (event) => {
     const { Workbook } = await import('@cj-tech-master/excelts')
 
-    const pb = getAuthenticatedPb(event)
+    const pb = await requirePermission(event, 'manage_routes')
     const res = event.node.res
 
     const ids = await resolveRouteIds(event)

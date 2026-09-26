@@ -6,7 +6,20 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+const defaultRoleName = "user"
+
 func registerUserGuards(app core.App) {
+	app.OnRecordCreateRequest("users").BindFunc(func(e *core.RecordRequestEvent) error {
+		if e.Record.GetString("role") != "" {
+			return e.Next()
+		}
+		role, err := e.App.FindFirstRecordByData("roles", "name", defaultRoleName)
+		if err == nil {
+			e.Record.Set("role", role.Id)
+		}
+		return e.Next()
+	})
+
 	app.OnRecordUpdateRequest("users").BindFunc(func(e *core.RecordRequestEvent) error {
 		if e.HasSuperuserAuth() {
 			return e.Next()

@@ -1,11 +1,11 @@
 import { eventHandler, createError } from 'h3'
-import { getAuthenticatedPb } from '../../utils/pb-server'
+import { requirePermission } from '../../utils/pb-server'
 import { resolveRouteIds, fetchRecordsByIds } from '../../utils/export'
 import { locationName, normalizeCreators } from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
-    const pb = getAuthenticatedPb(event)
+    const pb = await requirePermission(event, 'manage_routes')
     const ids = await resolveRouteIds(event)
 
     if (ids.length === 0) {

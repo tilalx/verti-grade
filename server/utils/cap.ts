@@ -5,6 +5,7 @@ export const CAP_SCOPES = [
     'report',
     'password-reset',
     'login',
+    'register',
 ] as const
 export type CapScope = (typeof CAP_SCOPES)[number]
 

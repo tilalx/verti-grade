@@ -84,6 +84,24 @@
                         :text="$t('account.capsLockOn')"
                     />
 
+                    <v-alert
+                        v-if="unverified"
+                        type="warning"
+                        class="mb-3"
+                        data-testid="login-unverified"
+                        :text="$t('notifications.error.email_not_verified')"
+                    >
+                        <v-btn
+                            variant="text"
+                            size="small"
+                            class="text-none px-0 mt-1"
+                            data-testid="login-resend-verification"
+                            @click="openResendVerification"
+                        >
+                            {{ $t('account.resendVerification') }}
+                        </v-btn>
+                    </v-alert>
+
                     <div class="d-flex align-center justify-space-between mb-5">
                         <v-checkbox
                             v-model="rememberMe"
@@ -116,6 +134,18 @@
                     >
                         <template #loader><CaptchaLoader /></template>
                         {{ $t('account.login') }}
+                    </v-btn>
+
+                    <v-btn
+                        v-if="canRegister"
+                        variant="tonal"
+                        block
+                        class="text-none mb-3"
+                        :disabled="loading"
+                        data-testid="login-goto-register"
+                        @click="view = 'register'"
+                    >
+                        {{ $t('account.createAccount') }}
                     </v-btn>
 
                     <v-btn
@@ -165,22 +195,89 @@
                     </template>
                 </v-form>
 
+                <v-form
+                    v-else-if="view === 'register'"
+                    key="register"
+                    ref="registerForm"
+                    validate-on="submit"
+                    data-testid="register-form"
+                    @submit.prevent="submitRegister"
+                >
+                    <v-text-field
+                        v-model="registerUsername"
+                        :label="$t('account.username')"
+                        prepend-inner-icon="mdi-account-outline"
+                        autocomplete="username"
+                        :rules="usernameRules"
+                        :disabled="loading"
+                        color="success"
+                        class="mb-2"
+                        data-testid="register-username"
+                        autofocus
+                    />
+                    <v-text-field
+                        v-model="registerEmail"
+                        :label="$t('account.email')"
+                        prepend-inner-icon="mdi-email-outline"
+                        type="email"
+                        autocomplete="email"
+                        :rules="emailRules"
+                        :disabled="loading"
+                        color="success"
+                        class="mb-2"
+                        data-testid="register-email"
+                    />
+                    <UserPasswordChangeFields
+                        v-model:password="registerPassword"
+                        v-model:password-confirm="registerPasswordConfirm"
+                        :require-old-password="false"
+                    />
+
+                    <v-btn
+                        type="submit"
+                        color="primary"
+                        block
+                        size="large"
+                        :loading="loading"
+                        :disabled="loading"
+                        class="mt-2 mb-3 font-weight-semibold"
+                        data-testid="register-submit"
+                    >
+                        <template #loader><CaptchaLoader /></template>
+                        {{ $t('account.createAccount') }}
+                    </v-btn>
+
+                    <v-btn
+                        variant="text"
+                        block
+                        :disabled="loading"
+                        class="text-none text-medium-emphasis"
+                        @click="view = 'login'"
+                    >
+                        {{ $t('actions.cancel') }}
+                    </v-btn>
+                </v-form>
+
                 <!-- ─── RESET ─── -->
                 <v-form
-                    v-else-if="view === 'requestReset'"
-                    key="requestReset"
+                    v-else-if="isEmailRequestView"
+                    :key="view"
                     ref="resetForm"
                     v-model="resetValid"
                     validate-on="submit"
                     data-testid="reset-form"
-                    @submit.prevent="submitReset"
+                    @submit.prevent="submitEmailRequest"
                 >
                     <v-alert
                         type="info"
                         color="success"
                         icon="mdi-email-outline"
                         class="mb-6"
-                        :text="$t('account.resetInfo')"
+                        :text="
+                            view === 'requestReset'
+                                ? $t('account.resetInfo')
+                                : $t('account.resendVerificationInfo')
+                        "
                     />
 
                     <v-text-field
@@ -257,7 +354,10 @@ const hasAnyAuth = !!(
     authMethods?.password?.enabled || authMethods?.oauth2?.enabled
 )
 
-const { orgName, orgUnitName } = useOrgSettings()
+const { orgName, orgUnitName, allowRegistration } = useOrgSettings()
+const canRegister = computed(
+    () => allowRegistration.value && !!authMethods?.password?.enabled,
+)
 
 // ── State ──────────────────────────────────────────────────────────
 const { notify, error: notifyError } = useNotification()
@@ -268,12 +368,18 @@ const resetValid = ref(false)
 const identity = ref('')
 const password = ref('')
 const resetEmail = ref('')
+const registerUsername = ref('')
+const registerEmail = ref('')
+const registerPassword = ref('')
+const registerPasswordConfirm = ref('')
 const rememberMe = ref(true)
 const showPassword = ref(false)
 const capsLockOn = ref(false)
+const unverified = ref(false)
 
 const loginForm = useTemplateRef<VForm>('loginForm')
 const resetForm = useTemplateRef<VForm>('resetForm')
+const registerForm = useTemplateRef<VForm>('registerForm')
 
 // ── Identity config ────────────────────────────────────────────────
 const idFields = authMethods?.password?.identityFields ?? []
@@ -305,6 +411,8 @@ const viewEyebrow = computed(
         ({
             login: t('account.eyebrowWelcomeBack'),
             requestReset: t('account.eyebrowAccountRecovery'),
+            register: t('account.eyebrowRegister'),
+            resendVerification: t('account.eyebrowVerifyEmail'),
         })[view.value] ?? '',
 )
 const viewTitle = computed(
@@ -312,6 +420,8 @@ const viewTitle = computed(
         ({
             login: t('account.login'),
             requestReset: t('account.reset_password'),
+            register: t('account.createAccount'),
+            resendVerification: t('account.resendVerification'),
         })[view.value] ?? '',
 )
 const viewSubtitle = computed(
@@ -319,6 +429,8 @@ const viewSubtitle = computed(
         ({
             login: t('account.login_hint'),
             requestReset: t('account.reset_hint'),
+            register: t('account.register_hint'),
+            resendVerification: t('account.reset_hint'),
         })[view.value] ?? '',
 )
 
@@ -330,6 +442,12 @@ const identityRules = computed(() => {
 })
 const passwordRules = [required(t), minLength(t, 6)]
 const emailRules = [required(t), validEmail(t)]
+const usernameRules = [
+    required(t),
+    minLength(t, 3),
+    (value: string) =>
+        /^[\w][\w.-]*$/.test(value) || t('account.usernameInvalid'),
+]
 
 // ── OAuth icons ────────────────────────────────────────────────────
 const PROVIDER_ICONS: Record<string, string> = {
@@ -367,15 +485,30 @@ watch(view, async () => {
     document.querySelector('input')?.focus()
 })
 
-function resolveAuthError(err: unknown) {
+const isEmailRequestView = computed(() =>
+    ['requestReset', 'resendVerification'].includes(view.value),
+)
+
+function authErrorMessage(err: unknown) {
     const { data, message } = (err ?? {}) as {
         data?: { message?: string }
         message?: string
     }
-    const msg = data?.message ?? message ?? ''
+    return data?.message ?? message ?? ''
+}
+
+function isUnverifiedError(err: unknown) {
+    return (
+        (err as { status?: number })?.status === 403 ||
+        /not verified/i.test(authErrorMessage(err))
+    )
+}
+
+function resolveAuthError(err: unknown) {
+    const msg = authErrorMessage(err)
     if (/invalid.+credentials/i.test(msg))
         return t('notifications.error.invalid_credentials')
-    if (/not verified/i.test(msg))
+    if (isUnverifiedError(err))
         return t('notifications.error.email_not_verified')
     if (/too many/i.test(msg)) return t('notifications.error.too_many_attempts')
     if (/captcha/i.test(msg)) return t('notifications.error.captcha')
@@ -393,6 +526,34 @@ async function submitLogin() {
                 headers: await capHeaders('login'),
             })
         await navigateTo('/manage/routes', { replace: true })
+    } catch (err) {
+        unverified.value = isUnverifiedError(err)
+        notifyError(resolveAuthError(err))
+    } finally {
+        loading.value = false
+    }
+}
+
+function openResendVerification() {
+    resetEmail.value = identity.value.includes('@') ? identity.value : ''
+    view.value = 'resendVerification'
+}
+
+function submitEmailRequest() {
+    return view.value === 'requestReset'
+        ? submitReset()
+        : submitResendVerification()
+}
+
+async function submitResendVerification() {
+    if (!(await validate(resetForm))) return
+    loading.value = true
+    try {
+        await pb.collection('users').requestVerification(resetEmail.value)
+        notify(t('notifications.success.verificationSent'))
+        unverified.value = false
+        view.value = 'login'
+        resetEmail.value = ''
     } catch (err) {
         notifyError(resolveAuthError(err))
     } finally {
@@ -412,6 +573,48 @@ async function submitReset() {
         resetEmail.value = ''
     } catch (err) {
         notifyError(resolveAuthError(err))
+    } finally {
+        loading.value = false
+    }
+}
+
+function resolveRegisterError(err: unknown) {
+    const fields = (
+        err as { data?: { data?: Record<string, { code?: string }> } }
+    )?.data?.data
+    if (fields?.username?.code === 'validation_not_unique')
+        return t('users.usernameTaken')
+    if (fields?.email) return t('account.emailTaken')
+    return resolveAuthError(err)
+}
+
+async function submitRegister() {
+    if (!(await validate(registerForm))) return
+    loading.value = true
+    try {
+        await pb.collection('users').create(
+            {
+                username: registerUsername.value,
+                email: registerEmail.value,
+                password: registerPassword.value,
+                passwordConfirm: registerPasswordConfirm.value,
+            },
+            { headers: await capHeaders('register') },
+        )
+        const verificationSent = await pb
+            .collection('users')
+            .requestVerification(registerEmail.value)
+            .then(
+                () => true,
+                () => false,
+            )
+        if (verificationSent) notify(t('notifications.success.registered'))
+        else notifyError(t('notifications.error.verificationMail'))
+        identity.value = registerUsername.value
+        registerPassword.value = registerPasswordConfirm.value = ''
+        view.value = 'login'
+    } catch (err) {
+        notifyError(resolveRegisterError(err))
     } finally {
         loading.value = false
     }
