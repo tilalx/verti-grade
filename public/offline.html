@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#38741C" />
+        <title>Verti-Grade</title>
+        <style>
+            :root {
+                color-scheme: light dark;
+                --bg: #f8faf3;
+                --fg: #1a1c18;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #0d1117;
+                    --fg: #dddddd;
+                }
+            }
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                background: var(--bg);
+                color: var(--fg);
+                font-family: system-ui, sans-serif;
+                text-align: center;
+                padding: 16px;
+                box-sizing: border-box;
+            }
+            img {
+                width: 96px;
+                border-radius: 20px;
+            }
+            button {
+                font: inherit;
+                padding: 10px 20px;
+                border: 0;
+                border-radius: 8px;
+                background: #38741c;
+                color: #fff;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <main data-testid="offline-page">
+            <img src="/icon-192.png" alt="" />
+            <h1 id="offline-title">You are offline</h1>
+            <p id="offline-text">Check your connection and try again.</p>
+            <button id="offline-retry" onclick="location.reload()">
+                Retry
+            </button>
+        </main>
+        <script>
+            const translations = {
+                de: [
+                    'Du bist offline',
+                    'Prüfe deine Verbindung und versuche es erneut.',
+                    'Erneut versuchen',
+                ],
+                ru: [
+                    'Нет подключения',
+                    'Проверьте соединение и попробуйте снова.',
+                    'Повторить',
+                ],
+                tr: [
+                    'Çevrimdışısınız',
+                    'Bağlantınızı kontrol edip tekrar deneyin.',
+                    'Tekrar dene',
+                ],
+                uk: [
+                    'Немає з’єднання',
+                    'Перевірте з’єднання та спробуйте ще раз.',
+                    'Повторити',
+                ],
+            }
+            const language = navigator.language.slice(0, 2)
+            const texts = translations[language]
+            if (texts) {
+                document.documentElement.lang = language
+                document.getElementById('offline-title').textContent = texts[0]
+                document.getElementById('offline-text').textContent = texts[1]
+                document.getElementById('offline-retry').textContent = texts[2]
+            }
+        </script>
+    </body>
+</html>
