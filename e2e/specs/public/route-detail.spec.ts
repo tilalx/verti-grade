@@ -18,7 +18,7 @@ test('shows route details and the review call-to-action', async ({ page }) => {
     await expect(page.getByTestId('review-open-cta')).toBeVisible()
 })
 
-test('redirects to 404 for a nonexistent route id', async ({ page }) => {
+test('shows 404 for a nonexistent route id', async ({ page }) => {
     await gotoSettled(page, '/route?id=nonexistent-e2e-id')
-    await page.waitForURL('**/404')
+    await expect(page.getByTestId('error-status')).toContainText('404')
 })

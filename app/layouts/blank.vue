@@ -1,6 +1,6 @@
 <template>
     <v-main>
-        <NuxtPage />
+        <slot />
     </v-main>
     <GlobalSnackbar />
     <!-- No NavBar here, so gotoSettled() (e2e/support/nav.ts) needs this hydration marker instead -->

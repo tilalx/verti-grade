@@ -667,7 +667,15 @@
     "errors": {
         "notFound": {
             "title": "Seite nicht gefunden",
-            "subtitle": "Die angeforderte Seite konnte nicht gefunden werden."
+            "subtitle": "Die angeforderte Seite konnte nicht gefunden werden.",
+            "accent": "Vom Weg abgekommen"
+        },
+        "eyebrow": "Fehler {code}",
+        "goBack": "Zurück",
+        "retry": "Erneut versuchen",
+        "server": {
+            "title": "Etwas ist schiefgelaufen",
+            "subtitle": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es gleich noch einmal."
         }
     },
     "export": {
