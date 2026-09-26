@@ -4,6 +4,7 @@ const search = defineModel<string>({ default: '' })
 const props = withDefaults(
     defineProps<{
         searchLabel?: string
+        searchPlaceholder?: string
         searchIcon?: string
         activeFilterCount?: number
         inlineFilters?: boolean
@@ -35,6 +36,7 @@ function handleClear() {
                     <v-text-field
                         v-model="search"
                         :label="searchLabel"
+                        :placeholder="searchPlaceholder"
                         :prepend-inner-icon="searchIcon"
                         clearable
                         hide-details

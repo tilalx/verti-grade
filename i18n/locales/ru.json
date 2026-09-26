@@ -202,6 +202,8 @@
         }
     },
     "climbing": {
+        "searchRouteHint": "Поиск по названию, автору или категории (напр. 6+)",
+        "routesFound": "Найдено маршрутов: {n}",
         "create": "Создать маршрут",
         "color": "Цвет",
         "routename": "Название маршрута",
@@ -358,7 +360,18 @@
             "installedVersion": "Установленная версия: {0}",
             "installed": "Установлена",
             "error": "Не удалось загрузить примечания к выпуску.",
-            "notFound": "Примечания к выпуску для этой версии не найдены."
+            "notFound": "Примечания к выпуску для этой версии не найдены.",
+            "sinceRelease": "Новое с {0}",
+            "viewOnGithub": "Открыть на GitHub",
+            "fullChangelog": "Полный список изменений",
+            "breaking": "breaking",
+            "filters": {
+                "all": "Все",
+                "feat": "Функции",
+                "fix": "Исправления",
+                "deps": "Зависимости",
+                "other": "Прочее"
+            }
         },
         "commitList": {
             "title": "Новые коммиты",
@@ -538,6 +551,19 @@
         "select": "Выбрать"
     },
     "nav": {
+        "paletteGroupRoles": "Роли",
+        "paletteGroupPages": "Страницы",
+        "paletteGroupRoutes": "Маршруты",
+        "paletteNavigate": "выбрать",
+        "paletteOpen": "открыть",
+        "paletteClose": "закрыть",
+        "commandPalette": "Поиск",
+        "commandPalettePlaceholder": "Название, автор или категория (напр. 6+)",
+        "commandPaletteEmpty": "Ничего не найдено",
+        "themeToggle": "Сменить тему",
+        "themeSystem": "Системная тема",
+        "themeLight": "Светлая тема",
+        "themeDark": "Тёмная тема",
         "openMenu": "Открыть меню",
         "skipToContent": "Перейти к содержимому",
         "mainNavigation": "Основная навигация",

@@ -1,4 +1,5 @@
 import { DIFFICULTY_LEVELS, ROUTE_TYPES } from '~/utils/routes'
+import { routeSearchFilter } from '~/utils/routeSearch'
 
 export function useRouteFilters() {
     const { t } = useI18n()
@@ -49,10 +50,8 @@ export function useRouteFilters() {
         if (selectedLocation.value)
             parts.push(`location = "${selectedLocation.value}"`)
         if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
-        if (searchRouteName.value.trim()) {
-            const term = searchRouteName.value.trim().replace(/"/g, '\\"')
-            parts.push(`name ~ "${term}"`)
-        }
+        const search = routeSearchFilter(searchRouteName.value)
+        if (search) parts.push(search)
         return parts.join(' && ')
     })
 

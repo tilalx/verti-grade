@@ -2,6 +2,7 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './app/utils/locales'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    compatibilityDate: '2026-09-26',
     future: {
         compatibilityVersion: 5,
     },
@@ -18,6 +19,7 @@ export default defineNuxtConfig({
             branch: process.env.GITHUB_BRANCH || 'main',
         },
         public: {
+            repoUrl: `https://github.com/${process.env.GITHUB_OWNER || 'tilalx'}/${process.env.GITHUB_REPO || 'verti-grade'}`,
             appVersion:
                 process.env.APP_VERSION ||
                 process.env.npm_package_version ||
@@ -44,6 +46,9 @@ export default defineNuxtConfig({
         '/admin/activity': {
             redirect: { to: '/account/activity', statusCode: 301 },
         },
+    },
+    experimental: {
+        viewTransition: true,
     },
     app: {
         head: {
@@ -115,15 +120,17 @@ export default defineNuxtConfig({
                 themes: {
                     light: {
                         colors: {
-                            background: '#FFFFFF',
-                            surface: '#F5F5F5',
-                            primary: '#58ab27',
-                            secondary: '#3F51B5',
-                            accent: '#546E7A',
-                            error: '#F44336',
-                            info: '#2196F3',
-                            success: '#4CAF50',
-                            warning: '#FFC107',
+                            background: '#F8FAF3',
+                            surface: '#FFFFFF',
+                            'surface-bright': '#FFFFFF',
+                            'surface-light': '#EDF1E6',
+                            primary: '#38741C',
+                            secondary: '#38656A',
+                            accent: '#56624C',
+                            error: '#BA1A1A',
+                            info: '#0061A4',
+                            success: '#2E7D32',
+                            warning: '#9A5B00',
                         },
                     },
                     dark: {
@@ -137,7 +144,6 @@ export default defineNuxtConfig({
                             success: '#238636',
                             warning: '#e3b341',
                             'on-surface': '#dddddd',
-                            'on-surface-light': '#a0297dff',
                         },
                     },
                 },

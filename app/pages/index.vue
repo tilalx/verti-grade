@@ -6,6 +6,7 @@
         <FilterBar
             v-model="searchRouteName"
             :search-label="$t('climbing.searchRouteName')"
+            :search-placeholder="$t('climbing.searchRouteHint')"
             :active-filter-count="activeFilterCount"
             @clear="clearFilters"
         >
@@ -184,6 +185,7 @@ const { lgAndUp } = useDisplay()
 
 const isWideLayout = computed(() => lgAndUp.value)
 const { error: notifyError } = useNotification()
+const { polite: announce } = useAnnouncer()
 
 const {
     searchRouteName,
@@ -198,14 +200,12 @@ const {
     clearFilters,
 } = useRouteFilters()
 
-useHead({
-    title: t('page.title.index'),
-    meta: [
-        {
-            name: 'description',
-            content: t('page.content.index'),
-        },
-    ],
+useSeoMeta({
+    title: () => t('page.title.index'),
+    description: () => t('page.content.index'),
+    ogTitle: () => t('page.title.index'),
+    ogDescription: () => t('page.content.index'),
+    ogType: 'website',
 })
 
 interface TableOptions {
@@ -314,6 +314,8 @@ async function loadRoutes(
         }
 
         totalItems.value = res.totalItems
+        if (!meta.append)
+            announce(t('climbing.routesFound', { n: res.totalItems }))
     } catch (error) {
         if (isAbortError(error)) return
         console.error('Failed to load routes:', error)

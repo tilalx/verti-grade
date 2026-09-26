@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
     z-index: 9999;
     padding: 8px 16px;
     background: rgb(var(--v-theme-primary));
-    color: #fff;
+    color: rgb(var(--v-theme-on-primary));
     border-radius: 0 0 8px 8px;
     font-weight: 600;
     font-size: 0.875rem;

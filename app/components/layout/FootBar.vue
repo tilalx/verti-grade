@@ -65,9 +65,12 @@
                 </div>
 
                 <NotificationsReleaseNotesDialog
-                    :tag="installedBase ? `v${installedBase}` : appVersion"
+                    :tag="installedBase ? `v${installedBase}` : appVersionLabel"
                     :notes="installedNotes"
-                    :installed-version="appVersion"
+                    :published-at="installedPublishedAt"
+                    :commits="installedCommits"
+                    :repo-url="repoUrl"
+                    :installed-version="appVersionLabel"
                     :error="error"
                     :loading="loading"
                     installed
@@ -80,7 +83,9 @@
                             data-testid="footer-version"
                         >
                             <v-icon size="11">mdi-tag-outline</v-icon>
-                            <span class="status-label">{{ appVersion }}</span>
+                            <span class="status-label">{{
+                                appVersionLabel
+                            }}</span>
                         </button>
                     </template>
                 </NotificationsReleaseNotesDialog>
@@ -109,8 +114,16 @@ withDefaults(defineProps<{ settings?: Partial<SettingsRecord> }>(), {
 })
 
 const pb = usePocketbase()
-const { appVersion, installedNotes, installedBase, error, loading } =
-    useVersionCheck()
+const {
+    appVersionLabel,
+    installedNotes,
+    installedBase,
+    installedPublishedAt,
+    installedCommits,
+    repoUrl,
+    error,
+    loading,
+} = useVersionCheck()
 const currentYear = computed(() => new Date().getFullYear())
 
 const legalLinkProps = (
@@ -145,10 +158,10 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 
 <style scoped>
 .app-footer {
-    flex: 0 0 auto !important;
-    background: transparent !important;
+    flex: 0 0 auto;
+    background: transparent;
     border-top: 1px solid rgba(var(--v-border-color), 0.08);
-    padding: 0 !important;
+    padding: 0;
 }
 
 .footer-inner {
@@ -182,7 +195,7 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
     gap: 5px;
     padding: 2px 9px;
     border-radius: 999px;
-    background: rgba(var(--v-theme-surface-variant), 0.4);
+    background: rgba(var(--v-theme-on-surface), 0.05);
     border: 1px solid rgba(var(--v-border-color), 0.08);
 }
 
@@ -219,17 +232,17 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 
 /* ── Shared button styles ───────────────────────────────── */
 .footer-link-btn {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    color: rgba(var(--v-theme-on-surface), 0.6) !important;
-    text-transform: none !important;
-    min-width: unset !important;
-    padding: 0 6px !important;
-    letter-spacing: 0 !important;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+    text-transform: none;
+    min-width: unset;
+    padding: 0 6px;
+    letter-spacing: 0;
 }
 
 .footer-link-btn:hover {
-    color: rgba(var(--v-theme-on-surface), 0.9) !important;
+    color: rgba(var(--v-theme-on-surface), 0.9);
 }
 
 .link-sep {
@@ -239,16 +252,16 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 }
 
 .footer-brand-btn {
-    font-size: 11.5px !important;
-    font-weight: 500 !important;
-    color: rgba(var(--v-theme-on-surface), 0.6) !important;
-    text-transform: none !important;
-    min-width: unset !important;
-    letter-spacing: 0 !important;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+    text-transform: none;
+    min-width: unset;
+    letter-spacing: 0;
 }
 
 .footer-brand-btn:hover {
-    color: rgba(var(--v-theme-on-surface), 0.9) !important;
+    color: rgba(var(--v-theme-on-surface), 0.9);
 }
 
 .status-pill--link {
@@ -260,7 +273,7 @@ const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
 }
 
 .status-pill--link:hover {
-    background: rgba(var(--v-theme-surface-variant), 0.7);
+    background: rgba(var(--v-theme-on-surface), 0.09);
     border-color: rgba(var(--v-border-color), 0.18);
 }
 

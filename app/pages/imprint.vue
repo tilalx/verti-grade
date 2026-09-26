@@ -128,7 +128,10 @@ const representatives = computed(() =>
     ),
 )
 
-useHead({ title: () => t('legal.imprint') })
+useSeoMeta({
+    title: () => t('legal.imprint'),
+    ogTitle: () => t('legal.imprint'),
+})
 </script>
 
 <style scoped>

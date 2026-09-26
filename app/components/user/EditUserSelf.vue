@@ -8,7 +8,7 @@
         data-testid="profile-dialog"
     >
         <!-- ── Header ─────────────────────────────────────────── -->
-        <div class="profile-header pa-6 pb-0">
+        <div class="profile-header pa-6 pb-0" data-testid="profile-header">
             <div class="d-flex align-center ga-4">
                 <!-- Avatar with upload overlay -->
                 <div class="avatar-wrapper" @click="openAvatarPicker">
@@ -58,9 +58,7 @@
                             class="flex-shrink-0"
                             data-testid="profile-language"
                         >
-                            <span class="locale-flag mr-1">{{
-                                currentLocale.flag
-                            }}</span>
+                            <v-icon start icon="mdi-translate" size="16" />
                             {{ currentLocale.code.toUpperCase() }}
                             <v-icon end icon="mdi-chevron-down" size="16" />
                         </v-btn>
@@ -82,8 +80,8 @@
                             @click="user.language = loc.code"
                         >
                             <template #prepend>
-                                <span class="locale-flag mr-3">{{
-                                    loc.flag
+                                <span class="locale-code mr-3">{{
+                                    loc.code.toUpperCase()
                                 }}</span>
                             </template>
                         </v-list-item>
@@ -250,6 +248,7 @@
                 variant="tonal"
                 prepend-icon="mdi-pencil-outline"
                 class="mr-2"
+                data-testid="profile-unsaved"
             >
                 {{ $t('account.unsavedChanges') }}
             </v-chip>
@@ -345,7 +344,7 @@ const activeTab = ref('profile')
 
 // ── Password section state ────────────────────────────────────────────────
 const passwordChangeRequested = computed(
-    () => !!(user.oldPassword || user.password || user.passwordConfirm),
+    () => !!(user.password || user.passwordConfirm),
 )
 
 const passwordFieldsValid = ref(false)
@@ -538,16 +537,18 @@ watch(
 /* ── Avatar ──────────────────────────────────────────── */
 /* ── Card header ─────────────────────────────────────── */
 .profile-header {
-    background: linear-gradient(
-        135deg,
-        rgba(var(--v-theme-surface-variant), 0.5) 0%,
-        rgba(var(--v-theme-surface), 1) 100%
-    );
+    background: rgb(var(--v-theme-surface));
 }
 
-/* ── Locale flag ─────────────────────────────────────── */
-.locale-flag {
-    font-size: 1.1em;
-    line-height: 1;
+.locale-code {
+    min-width: 28px;
+    padding: 2px 0;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.2);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: rgba(var(--v-theme-on-surface), 0.7);
 }
 </style>

@@ -122,3 +122,21 @@ test('a user without manage_reports cannot reach the queue or its records', asyn
     const body = await res.json()
     expect(body.totalItems).toBe(0)
 })
+
+test('shows skeleton cards while the queue reloads', async ({
+    adminPage: page,
+}) => {
+    await gotoSettled(page, '/manage/reports')
+    let release!: () => void
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route('**/api/collections/reports/records*', async (route) => {
+        await held
+        await route.continue()
+    })
+
+    await page.getByTestId('filter-search').locator('input').fill('skeleton')
+    await expect(page.getByTestId('reports-skeleton').first()).toBeVisible()
+
+    release()
+    await expect(page.getByTestId('reports-skeleton')).toHaveCount(0)
+})

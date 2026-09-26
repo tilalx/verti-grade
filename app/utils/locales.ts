@@ -1,9 +1,9 @@
 export const SUPPORTED_LOCALES = [
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-    { code: 'uk', name: 'Українська', flag: '🇺🇦' },
+    { code: 'en', name: 'English' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'ru', name: 'Русский' },
+    { code: 'tr', name: 'Türkçe' },
+    { code: 'uk', name: 'Українська' },
 ] as const
 
 export type LocaleCode = (typeof SUPPORTED_LOCALES)[number]['code']

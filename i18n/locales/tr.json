@@ -202,6 +202,8 @@
         }
     },
     "climbing": {
+        "searchRouteHint": "Ad, kurucu veya dereceye göre ara (ör. 6+)",
+        "routesFound": "Bulunan rotalar: {n}",
         "create": "Rota Oluştur",
         "color": "Renk",
         "routename": "Rota Adı",
@@ -358,7 +360,18 @@
             "installedVersion": "Yüklü sürüm: {0}",
             "installed": "Yüklü",
             "error": "Sürüm notları yüklenemedi.",
-            "notFound": "Bu sürüm için sürüm notu bulunamadı."
+            "notFound": "Bu sürüm için sürüm notu bulunamadı.",
+            "sinceRelease": "{0} sürümünden beri yeni",
+            "viewOnGithub": "GitHub'da görüntüle",
+            "fullChangelog": "Tüm değişiklikler",
+            "breaking": "breaking",
+            "filters": {
+                "all": "Tümü",
+                "feat": "Özellikler",
+                "fix": "Düzeltmeler",
+                "deps": "Bağımlılıklar",
+                "other": "Diğer"
+            }
         },
         "commitList": {
             "title": "Yeni commit'ler",
@@ -538,6 +551,19 @@
         "select": "Seç"
     },
     "nav": {
+        "paletteGroupRoles": "Roller",
+        "paletteGroupPages": "Sayfalar",
+        "paletteGroupRoutes": "Rotalar",
+        "paletteNavigate": "gezin",
+        "paletteOpen": "aç",
+        "paletteClose": "kapat",
+        "commandPalette": "Ara",
+        "commandPalettePlaceholder": "Rota adı, kurucu veya derece (ör. 6+)",
+        "commandPaletteEmpty": "Sonuç yok",
+        "themeToggle": "Temayı değiştir",
+        "themeSystem": "Sistem teması",
+        "themeLight": "Açık tema",
+        "themeDark": "Koyu tema",
         "openMenu": "Menüyü aç",
         "skipToContent": "İçeriğe geç",
         "mainNavigation": "Ana gezinme",

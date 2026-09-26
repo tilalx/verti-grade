@@ -202,6 +202,8 @@
         }
     },
     "climbing": {
+        "searchRouteHint": "Name, Schrauber oder Grad suchen (z. B. 6+)",
+        "routesFound": "Gefundene Routen: {n}",
         "create": "Route erstellen",
         "color": "Farbe",
         "routename": "Routenname",
@@ -358,7 +360,18 @@
             "installedVersion": "Installierte Version: {0}",
             "installed": "Installiert",
             "error": "Versionshinweise konnten nicht geladen werden.",
-            "notFound": "Keine Versionshinweise für diese Version gefunden."
+            "notFound": "Keine Versionshinweise für diese Version gefunden.",
+            "sinceRelease": "Neu seit {0}",
+            "viewOnGithub": "Auf GitHub ansehen",
+            "fullChangelog": "Vollständiges Changelog",
+            "breaking": "breaking",
+            "filters": {
+                "all": "Alle",
+                "feat": "Features",
+                "fix": "Fehlerbehebungen",
+                "deps": "Abhängigkeiten",
+                "other": "Sonstiges"
+            }
         },
         "commitList": {
             "title": "Neue Commits",
@@ -538,6 +551,19 @@
         "select": "Auswählen"
     },
     "nav": {
+        "paletteGroupRoles": "Rollen",
+        "paletteGroupPages": "Seiten",
+        "paletteGroupRoutes": "Routen",
+        "paletteNavigate": "auswählen",
+        "paletteOpen": "öffnen",
+        "paletteClose": "schließen",
+        "commandPalette": "Suche",
+        "commandPalettePlaceholder": "Routenname, Schrauber oder Grad (z. B. 6+)",
+        "commandPaletteEmpty": "Keine Ergebnisse",
+        "themeToggle": "Design wechseln",
+        "themeSystem": "Systemdesign",
+        "themeLight": "Helles Design",
+        "themeDark": "Dunkles Design",
         "openMenu": "Menü öffnen",
         "skipToContent": "Zum Inhalt springen",
         "mainNavigation": "Hauptnavigation",

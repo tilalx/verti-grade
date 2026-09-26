@@ -1,10 +1,11 @@
-import { COLOR_SCHEME_COOKIE } from '~/utils/clientStorage'
+import { COLOR_SCHEME_COOKIE, THEME_MODE_COOKIE } from '~/utils/clientStorage'
 
 export default defineNuxtPlugin((nuxtApp) => {
-    const browserTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
+    const chosenMode = useCookie(THEME_MODE_COOKIE).value
+    const osTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
+    const browserTheme = isExplicitThemeMode(chosenMode) ? chosenMode : osTheme
 
     nuxtApp.hook('vuetify:before-create', ({ vuetifyOptions }) => {
         vuetifyOptions.theme =
@@ -12,7 +13,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         vuetifyOptions.theme.defaultTheme = browserTheme
     })
 
-    document.cookie = `${COLOR_SCHEME_COOKIE}=${browserTheme}; Path=/; Max-Age=31536000; SameSite=Lax`
+    document.cookie = `${COLOR_SCHEME_COOKIE}=${osTheme}; Path=/; Max-Age=31536000; SameSite=Lax`
 
     const ssrTheme = browserTheme === 'dark' ? 'light' : 'dark'
     document

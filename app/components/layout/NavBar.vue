@@ -1,7 +1,7 @@
 <template>
     <template v-if="$route.meta.navbar !== false">
         <!-- Main App Bar -->
-        <v-app-bar app flat height="64" color="transparent" class="nav-bar">
+        <v-app-bar app flat height="64" class="nav-bar">
             <div class="nav-inner">
                 <!-- Logo -->
                 <router-link
@@ -51,6 +51,17 @@
 
                 <!-- Right Side -->
                 <div class="nav-actions">
+                    <LayoutCommandPalette :pages="paletteLinks" />
+                    <v-btn
+                        icon
+                        variant="text"
+                        data-testid="nav-theme-toggle"
+                        :data-theme-mode="themeMode"
+                        :aria-label="`${$t('nav.themeToggle')}: ${$t(themeModeLabel)}`"
+                        @click="cycleMode"
+                    >
+                        <v-icon>{{ themeModeIcon }}</v-icon>
+                    </v-btn>
                     <template v-if="isLoggedIn">
                         <NotificationsBell />
                         <div class="d-none d-lg-flex">
@@ -126,6 +137,23 @@
 <script setup lang="ts">
 import type { SettingsRecord } from '~/types/models'
 const theme = useTheme()
+const { mode: themeMode, cycleMode } = useThemeMode()
+const themeModeIcon = computed(
+    () =>
+        ({
+            system: 'mdi-theme-light-dark',
+            light: 'mdi-weather-sunny',
+            dark: 'mdi-weather-night',
+        })[themeMode.value],
+)
+const themeModeLabel = computed(
+    () =>
+        ({
+            system: 'nav.themeSystem',
+            light: 'nav.themeLight',
+            dark: 'nav.themeDark',
+        })[themeMode.value],
+)
 const { lgAndUp } = useDisplay()
 
 const props = defineProps<{
@@ -221,6 +249,17 @@ const visibleNav = computed(() =>
         ),
 )
 
+const paletteLinks = computed(() =>
+    visibleNav.value.flatMap(
+        (item) =>
+            (item.children ?? [item]) as {
+                to: string
+                icon: string
+                label: string
+            }[],
+    ),
+)
+
 watch(lgAndUp, (isDesktop) => {
     if (isDesktop) drawer.value = false
 })
@@ -249,7 +288,7 @@ const drawer = ref(false)
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(var(--v-border-color), 0.08);
-    background: rgba(var(--v-theme-background), 0.82) !important;
+    background: rgba(var(--v-theme-background), 0.82);
 }
 
 .nav-inner {
@@ -290,7 +329,7 @@ const drawer = ref(false)
 }
 
 .mobile-drawer {
-    background: rgb(var(--v-theme-surface)) !important;
+    background: rgb(var(--v-theme-surface));
 }
 
 .drawer-header {
@@ -312,8 +351,8 @@ const drawer = ref(false)
 }
 
 .drawer-item--active {
-    background: rgba(var(--v-theme-primary), 0.12) !important;
-    color: rgb(var(--v-theme-primary)) !important;
+    background: rgba(var(--v-theme-primary), 0.12);
+    color: rgb(var(--v-theme-primary));
 }
 
 .drawer-footer {

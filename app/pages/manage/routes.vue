@@ -34,6 +34,7 @@
                 <FilterBar
                     v-model="searchRouteName"
                     :search-label="$t('climbing.searchRouteName')"
+                    :search-placeholder="$t('climbing.searchRouteHint')"
                     :active-filter-count="activeFilterCount"
                     @clear="clearFilters"
                 >

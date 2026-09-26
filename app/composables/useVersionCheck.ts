@@ -1,3 +1,5 @@
+import { versionLabel } from '#shared/utils/version'
+
 export interface VersionCommit {
     sha: string
     message: string
@@ -11,6 +13,7 @@ export interface VersionPayload {
         ahead: number
         sha: string | null
         notes: string | null
+        publishedAt: string | null
     }
     latest: {
         tag: string
@@ -18,6 +21,7 @@ export interface VersionPayload {
         publishedAt: string | null
     } | null
     commits: VersionCommit[]
+    installedCommits: VersionCommit[]
     mode: 'release' | 'commit' | 'none'
     updateAvailable: boolean
     error: 'rate_limited' | 'unavailable' | null
@@ -30,7 +34,17 @@ export function useVersionCheck() {
         { server: false, lazy: true },
     )
 
-    const appVersion = useRuntimeConfig().public.appVersion as string
+    const { appVersion, repoUrl } = useRuntimeConfig().public as {
+        appVersion: string
+        repoUrl: string
+    }
+    const appVersionLabel = versionLabel(appVersion, import.meta.dev)
+    const installedPublishedAt = computed(
+        () => data.value?.installed.publishedAt ?? null,
+    )
+    const installedCommits = computed<VersionCommit[]>(
+        () => data.value?.installedCommits ?? [],
+    )
     const mode = computed(() => data.value?.mode ?? 'none')
     const updateAvailable = computed(() => data.value?.updateAvailable ?? false)
     const latest = computed(() => data.value?.latest ?? null)
@@ -52,6 +66,10 @@ export function useVersionCheck() {
 
     return {
         appVersion,
+        appVersionLabel,
+        installedPublishedAt,
+        installedCommits,
+        repoUrl,
         mode,
         updateAvailable,
         latest,

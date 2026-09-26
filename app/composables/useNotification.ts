@@ -1,17 +1,15 @@
-type NotificationColor = 'success' | 'error' | 'warning' | 'info'
+export type NotificationColor = 'success' | 'error' | 'warning' | 'info'
+
+export interface NotificationItem {
+    text: string
+    color: NotificationColor
+}
 
 export function useNotification() {
-    const message = useState<string>('notification-message', () => '')
-    const color = useState<NotificationColor>(
-        'notification-color',
-        () => 'success',
-    )
-    const visible = useState<boolean>('notification-visible', () => false)
+    const queue = useState<NotificationItem[]>('snackbar-queue', () => [])
 
-    function notify(msg: string, c: NotificationColor = 'success') {
-        message.value = msg
-        color.value = c
-        visible.value = true
+    function notify(text: string, color: NotificationColor = 'success') {
+        queue.value = [...queue.value, { text, color }]
     }
 
     const success = (msg: string) => notify(msg, 'success')
@@ -19,5 +17,5 @@ export function useNotification() {
     const warning = (msg: string) => notify(msg, 'warning')
     const info = (msg: string) => notify(msg, 'info')
 
-    return { message, color, visible, notify, success, error, warning, info }
+    return { queue, notify, success, error, warning, info }
 }

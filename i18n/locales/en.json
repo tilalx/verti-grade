@@ -202,6 +202,8 @@
         }
     },
     "climbing": {
+        "searchRouteHint": "Search by name, setter or grade (e.g. 6+)",
+        "routesFound": "Routes found: {n}",
         "create": "Create route",
         "color": "Color",
         "routename": "Route name",
@@ -358,7 +360,18 @@
             "installedVersion": "Installed version: {0}",
             "installed": "Installed",
             "error": "Could not load release notes.",
-            "notFound": "No release notes found for this version."
+            "notFound": "No release notes found for this version.",
+            "sinceRelease": "New since {0}",
+            "viewOnGithub": "View on GitHub",
+            "fullChangelog": "Full changelog",
+            "breaking": "breaking",
+            "filters": {
+                "all": "All",
+                "feat": "Features",
+                "fix": "Fixes",
+                "deps": "Dependencies",
+                "other": "Other"
+            }
         },
         "commitList": {
             "title": "New commits",
@@ -538,6 +551,19 @@
         "select": "Select"
     },
     "nav": {
+        "paletteGroupRoles": "Roles",
+        "paletteGroupPages": "Pages",
+        "paletteGroupRoutes": "Routes",
+        "paletteNavigate": "navigate",
+        "paletteOpen": "open",
+        "paletteClose": "close",
+        "commandPalette": "Search",
+        "commandPalettePlaceholder": "Route name, setter or grade (e.g. 6+)",
+        "commandPaletteEmpty": "No results",
+        "themeToggle": "Switch theme",
+        "themeSystem": "System theme",
+        "themeLight": "Light theme",
+        "themeDark": "Dark theme",
         "openMenu": "Open menu",
         "skipToContent": "Skip to content",
         "mainNavigation": "Main navigation",
