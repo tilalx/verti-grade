@@ -73,7 +73,7 @@ pipeline {
                         sh '''
                             docker run --rm -v "$PWD":/work -w /work -v vg-e2e-yarn-cache:/root/.yarn/berry/cache \
                                 node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 \
-                                sh -c "corepack enable && yarn install --immutable --mode=skip-build && yarn test"
+                                sh -c "npm install -g corepack --force && corepack enable && yarn install --immutable --mode=skip-build && yarn test"
                         '''
                     }
                 }
