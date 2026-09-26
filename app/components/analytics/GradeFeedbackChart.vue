@@ -63,7 +63,7 @@ const option = computed(() => {
             const route = data.route as FeedbackRoute
             return `<strong>${escapeHtml(route.name)}</strong><br/>
                 ${t('analytics.labels.setGrade')}: ${route.grade}<br/>
-                ${t('analytics.labels.votedGrade')}: ${route.votedGrade.toFixed(1)}<br/>
+                ${t('analytics.labels.votedGrade')}: ${route.votedGradeLabel || route.votedGrade.toFixed(1)}<br/>
                 ${t('analytics.labels.voteCount', { n: route.votes }, route.votes)}`
         }),
         grid: { ...gridBase, left: 36, bottom: 30, top: 16 },

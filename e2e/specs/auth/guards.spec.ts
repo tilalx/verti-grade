@@ -1,4 +1,5 @@
 import { test, expect } from '../../support/fixtures'
+import { uiaa } from '../../support/seed'
 import { gotoSettled, authHeader } from '../../support/nav'
 
 const ADMIN_PATHS = [
@@ -24,7 +25,7 @@ test.describe('anonymous guard', () => {
         page,
     }) => {
         const res = await page.request.post('/api/collections/routes/records', {
-            data: { name: 'should-not-be-created', difficulty: 1 },
+            data: { name: 'should-not-be-created', ...uiaa('1') },
         })
         expect(res.status()).toBeGreaterThanOrEqual(400)
     })

@@ -14,15 +14,15 @@ export interface BaseRecord {
 }
 
 export type RouteType = (typeof ROUTE_TYPES)[number] | string
-export type DifficultySignValue = '+' | '-' | true | false | '' | null
 
 type JsonArray<T> = T[] | readonly T[]
 type JsonValue<T> = T | JsonArray<T>
 
 export interface RouteRecord extends BaseRecord {
     name: string
-    difficulty: number | string
-    difficulty_sign?: DifficultySignValue
+    grade: string
+    grade_system?: string | null
+    grade_index?: number | null
     anchor_point?: number | null
     location?: RecordId | null
     type?: RouteType | null
@@ -48,8 +48,9 @@ export interface RouteListItem extends Omit<RouteRecord, 'creator'> {
 export interface RatingRecord extends BaseRecord {
     route_id?: RecordId | null
     rating?: number | null
-    difficulty?: number | string | null
-    difficulty_sign?: DifficultySignValue
+    grade?: string | null
+    grade_system?: string | null
+    grade_index?: number | null
     comment?: string | null
 }
 
@@ -99,6 +100,8 @@ export interface SettingsRecord extends BaseRecord {
     legal_vat_id?: string | null
     legal_editorial?: string | null
     legal_representatives?: LegalPerson[] | null
+    route_grade_system?: string | null
+    boulder_grade_system?: string | null
 }
 
 export interface LegalPerson {

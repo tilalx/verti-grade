@@ -1,7 +1,7 @@
 import { Workbook } from '@cj-tech-master/excelts'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('xlsx export formats dates in the requested locale and prints the location name', async ({
     adminPage: page,
@@ -13,7 +13,7 @@ test('xlsx export formats dates in the requested locale and prints the location 
         headers,
         data: {
             name: `${testPrefix}-locale`,
-            difficulty: 5,
+            ...uiaa('5'),
             location: await locationId(page, LOCATIONS[1]),
             type: 'Route',
             creator: ['E2E'],

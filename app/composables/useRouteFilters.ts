@@ -1,9 +1,10 @@
-import { DIFFICULTY_LEVELS, ROUTE_TYPES } from '~/utils/routes'
+import { ROUTE_TYPES } from '~/utils/routes'
 import { routeSearchFilter } from '~/utils/routeSearch'
 
 export function useRouteFilters() {
     const { t } = useI18n()
     const { data: locationRecords } = useLocations()
+    const { gradeFilterItems, gradeFilterClause } = useGradeSystems()
 
     const searchRouteName = ref('')
     const selectedDifficulty = ref('')
@@ -12,10 +13,7 @@ export function useRouteFilters() {
 
     const difficulties = computed(() => [
         { text: t('filter.all'), value: '' },
-        ...DIFFICULTY_LEVELS.map((level) => ({
-            text: String(level),
-            value: String(level),
-        })),
+        ...gradeFilterItems.value,
     ])
 
     const types = computed(() => [
@@ -46,7 +44,7 @@ export function useRouteFilters() {
     const pbFilter = computed(() => {
         const parts: string[] = []
         if (selectedDifficulty.value)
-            parts.push(`difficulty = ${Number(selectedDifficulty.value)}`)
+            parts.push(gradeFilterClause(selectedDifficulty.value))
         if (selectedLocation.value)
             parts.push(`location = "${selectedLocation.value}"`)
         if (selectedType.value) parts.push(`type = "${selectedType.value}"`)

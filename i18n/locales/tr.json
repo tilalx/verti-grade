@@ -688,7 +688,11 @@
             "logo": "Uygulama logosu",
             "icon": "Tarayıcı simgesi",
             "sign": "Rota etiketlerindeki logo"
-        }
+        },
+        "grading": "Zorluk skalaları",
+        "routeGradeSystem": "Rota skalası",
+        "boulderGradeSystem": "Boulder skalası",
+        "gradingHint": "Yeni kurulan rotalara uygulanır. Mevcut rotalar düzenlenene kadar skalalarını korur."
     },
     "errors": {
         "notFound": {
@@ -834,5 +838,41 @@
             "reports": "Şikâyet"
         },
         "changedLabel": "Değişen"
+    },
+    "gradeSystems": {
+        "uiaa": "UIAA",
+        "french": "Fransız",
+        "yds": "YDS",
+        "font": "Fontainebleau",
+        "v": "V-Scale"
+    },
+    "gradeConversion": {
+        "title": "Derece dönüşümü",
+        "source": "{source} temel alınarak yaklaşık karşılıklar.",
+        "open": "Dönüşüm tablosu",
+        "show": "Diğer skalalarla karşılaştır",
+        "columns": {
+            "male": "Tırmanıcı seviyesi (erkek)",
+            "female": "Tırmanıcı seviyesi (kadın)",
+            "britishTech": "British Tech",
+            "ewbank": "Ewbank",
+            "brazilian": "Brezilya (BRZ)",
+            "metricUiaa": "Metrik UIAA",
+            "watts": "Watts"
+        },
+        "levels": {
+            "lower": "Başlangıç (L1)",
+            "intermediate": "Orta (L2)",
+            "advanced": "İleri (L3)",
+            "elite": "Elit (L4)",
+            "higherElite": "Üst elit (L5)"
+        }
+    },
+    "gradeSystemsShort": {
+        "uiaa": "UIAA",
+        "french": "Fr",
+        "yds": "YDS",
+        "font": "Font",
+        "v": "Hueco"
     }
 }

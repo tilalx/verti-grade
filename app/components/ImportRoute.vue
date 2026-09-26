@@ -74,7 +74,10 @@
                                                     )
                                                 }}:</strong
                                             >
-                                            {{ rating.difficulty }}
+                                            {{
+                                                rating.grade ??
+                                                rating.difficulty
+                                            }}
                                         </v-list-item-title>
                                         <v-list-item-subtitle>
                                             {{
@@ -119,20 +122,20 @@
 </template>
 <script setup lang="ts">
 import { normalizeCreators } from '#shared/utils/formatting'
+import {
+    resolveImportedGrading,
+    type ImportedGrading,
+} from '#shared/utils/grades'
 import type { UserRecord } from '~/types/models'
 
-interface ImportedRating {
+interface ImportedRating extends ImportedGrading {
     rating?: unknown
-    difficulty?: unknown
-    difficulty_sign?: unknown
     comment?: unknown
     user?: string
 }
 
-interface ImportedRoute {
+interface ImportedRoute extends ImportedGrading {
     name?: unknown
-    difficulty?: unknown
-    difficulty_sign?: unknown
     anchor_point?: unknown
     location?: unknown
     type?: string | null
@@ -158,11 +161,15 @@ const expanded = ref<string[]>([])
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
 const { data: locationRecords } = useLocations()
+const { gradeSystemFor } = useGradeSystems()
 
 const previewHeaders = computed(() => [
     { title: t('climbing.color'), value: 'color', sortable: false },
     { title: t('routes.name'), value: 'name' },
-    { title: t('climbing.difficulty'), value: 'difficulty' },
+    {
+        title: t('climbing.difficulty'),
+        value: (route: ImportedRoute) => route.grade ?? route.difficulty,
+    },
     { title: t('climbing.anchor_point'), value: 'anchor_point' },
     { title: t('climbing.location'), value: 'location' },
     { title: t('importRoutes.ratingsCount'), value: 'ratings' },
@@ -242,6 +249,7 @@ const confirmImport = async () => {
                             await pb.collection('ratings').create(
                                 sanitizeRatingPayload(rating, {
                                     routeId: createdRoute.id,
+                                    routeType: route.type,
                                     fallbackUserId: currentUser?.id,
                                 }),
                             )
@@ -298,24 +306,16 @@ const confirmImport = async () => {
     }
 }
 
-function normalizeSign(value: unknown): boolean | null {
-    if (value === true || value === false || value === null) return value
-    const sign = typeof value === 'string' ? value.trim() : ''
-    return sign === '+' ? true : sign === '-' ? false : null
-}
-
 function sanitizeRoutePayload(
     route: ImportedRoute,
     fallbackCreator: string,
     locationIdByName: Map<string, string>,
 ) {
-    const numericDifficulty = Number(route.difficulty)
     const normalizedCreators = normalizeCreators(route.creator)
 
     return {
         name: typeof route.name === 'string' ? route.name : '',
-        difficulty: Number.isFinite(numericDifficulty) ? numericDifficulty : 0,
-        difficulty_sign: normalizeSign(route.difficulty_sign),
+        ...resolveImportedGrading(route, gradeSystemFor(route.type)),
         anchor_point: Number.isFinite(Number(route.anchor_point))
             ? Number(route.anchor_point)
             : null,
@@ -340,7 +340,11 @@ function sanitizeRoutePayload(
 
 function sanitizeRatingPayload(
     rating: ImportedRating,
-    meta: { routeId: string; fallbackUserId?: string },
+    meta: {
+        routeId: string
+        routeType?: string | null
+        fallbackUserId?: string
+    },
 ) {
     const userId = rating.user || meta.fallbackUserId
     return {
@@ -348,10 +352,16 @@ function sanitizeRatingPayload(
         rating: Number.isFinite(Number(rating.rating))
             ? Number(rating.rating)
             : null,
-        difficulty: Number.isFinite(Number(rating.difficulty))
-            ? Number(rating.difficulty)
-            : 0,
-        difficulty_sign: normalizeSign(rating.difficulty_sign),
+        ...resolveImportedGrading(
+            {
+                ...rating,
+                difficulty_sign:
+                    rating.difficulty_sign === false
+                        ? null
+                        : rating.difficulty_sign,
+            },
+            gradeSystemFor(meta.routeType),
+        ),
         comment: typeof rating.comment === 'string' ? rating.comment : '',
         ...(userId ? { user: userId } : {}),
     }

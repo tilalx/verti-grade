@@ -49,7 +49,7 @@
                             </v-col>
                             <v-col cols="6" sm="3">
                                 <v-select
-                                    :label="$t('climbing.difficulty')"
+                                    :label="gradeColumnTitle"
                                     :items="difficulties"
                                     v-model="selectedDifficulty"
                                     item-title="text"
@@ -247,7 +247,7 @@
                             </div>
                         </template>
                         <template #item.difficulty="{ item }">
-                            {{ formatDifficulty(item) }}
+                            <GradeLabel :source="item" />
                         </template>
                         <template #item.anchor_point="{ item }">
                             {{ formatAnchorPoint(item.anchor_point) }}
@@ -436,7 +436,6 @@
 import { isAbortError } from '~/utils/errors'
 import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
 import {
-    formatDifficulty,
     formatAnchorPoint,
     formatScore,
     locationName,
@@ -508,11 +507,13 @@ const pageSizeOptions = [10, 25, 50, 100]
 const routeFormRef = useTemplateRef('routeFormRef')
 const importRouteRef = useTemplateRef('importRouteRef')
 
+const { gradeColumnTitle } = useGradeSystems()
+
 const tableHeaders = computed(() => [
     { title: '', key: 'selected', sortable: false, width: 56 },
     { title: t('climbing.color'), key: 'color', sortable: false },
     { title: t('climbing.routename'), key: 'name' },
-    { title: t('climbing.difficulty'), key: 'difficulty' },
+    { title: gradeColumnTitle.value, key: 'difficulty', nowrap: true },
     { title: t('climbing.anchor_point'), key: 'anchor_point' },
     { title: t('climbing.comment'), key: 'comment', sortable: false },
     { title: t('routes.route_setter'), key: 'creator', sortable: false },
@@ -602,6 +603,7 @@ const toPbSortRoutes = (sortByArr: SortOption[]) =>
     toPbSort(sortByArr, '-created', {
         score: 'average_rating',
         location: 'location.name',
+        difficulty: 'grade_index',
     })
 
 const sortItemsMobile = computed(() => [

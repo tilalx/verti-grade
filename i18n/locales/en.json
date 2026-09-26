@@ -688,7 +688,11 @@
             "logo": "App logo",
             "icon": "Browser icon",
             "sign": "Logo on route labels"
-        }
+        },
+        "grading": "Grading scales",
+        "routeGradeSystem": "Route scale",
+        "boulderGradeSystem": "Boulder scale",
+        "gradingHint": "Applies to newly set routes. Existing routes keep their scale until edited."
     },
     "errors": {
         "notFound": {
@@ -834,5 +838,41 @@
             "reports": "Report"
         },
         "changedLabel": "Changed"
+    },
+    "gradeSystems": {
+        "uiaa": "UIAA",
+        "french": "French",
+        "yds": "YDS",
+        "font": "Fontainebleau",
+        "v": "V-Scale"
+    },
+    "gradeConversion": {
+        "title": "Grade conversion",
+        "source": "Approximate equivalents based on the {source}.",
+        "open": "Conversion table",
+        "show": "Compare with other scales",
+        "columns": {
+            "male": "Climber level (male)",
+            "female": "Climber level (female)",
+            "britishTech": "British Tech",
+            "ewbank": "Ewbank",
+            "brazilian": "Brazilian (BRZ)",
+            "metricUiaa": "Metric UIAA",
+            "watts": "Watts"
+        },
+        "levels": {
+            "lower": "Lower grade (L1)",
+            "intermediate": "Intermediate (L2)",
+            "advanced": "Advanced (L3)",
+            "elite": "Elite (L4)",
+            "higherElite": "Higher elite (L5)"
+        }
+    },
+    "gradeSystemsShort": {
+        "uiaa": "UIAA",
+        "french": "Fr",
+        "yds": "YDS",
+        "font": "Font",
+        "v": "Hueco"
     }
 }

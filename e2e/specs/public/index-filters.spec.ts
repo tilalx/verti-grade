@@ -18,18 +18,18 @@ test('filters the route list by search text', async ({ page }) => {
     await expect(page.getByTestId('index-table')).toContainText('e2e-route-1')
 })
 
-test('filters by difficulty, and every visible row actually matches', async ({
+test('filters by grade, and every visible row actually matches', async ({
     page,
 }) => {
     await gotoSettled(page, '/')
     await page.getByTestId('index-filter-difficulty').click()
-    await page.getByRole('option', { name: '5', exact: true }).click()
+    await page.getByRole('option', { name: '5 · UIAA', exact: true }).click()
     await expect(page.getByTestId('index-table')).toBeVisible()
 
     const res = await page.request.get(
         '/api/collections/routes/records?filter=' +
             encodeURIComponent(
-                'name ~ "e2e-route-" && difficulty = 5 && archived = false',
+                'name ~ "e2e-route-" && grade_system = "uiaa" && grade = "5" && archived = false',
             ) +
             '&perPage=1',
     )
@@ -58,7 +58,7 @@ test('combines a route name with a signed grade', async ({ page }) => {
     const res = await page.request.get(
         '/api/collections/routes/records?filter=' +
             encodeURIComponent(
-                'name ~ "e2e-route-" && archived = false && difficulty_sign = true',
+                'name ~ "e2e-route-" && archived = false && grade_system = "uiaa" && grade ~ "%+"',
             ) +
             '&perPage=1',
     )
@@ -70,9 +70,10 @@ test('combines a route name with a signed grade', async ({ page }) => {
         .getByTestId('index-table')
         .getByText(route.name, { exact: true })
 
-    await search.fill(`${route.name} ${route.difficulty}+`)
+    const level = route.grade.slice(0, -1)
+    await search.fill(`${route.name} ${level}+`)
     await expect(exactRoute).toBeVisible()
 
-    await search.fill(`${route.name} ${route.difficulty}-`)
+    await search.fill(`${route.name} ${level}-`)
     await expect(exactRoute).toHaveCount(0)
 })

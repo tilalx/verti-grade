@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('row checkboxes and select-all reflect the selected route ids', async ({
     adminPage: page,
@@ -16,7 +16,7 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
             headers,
             data: {
                 name: `${prefix}-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 anchor_point: 5,
                 location: hallA,
                 type: 'Route',
@@ -64,7 +64,7 @@ test('repeated select-all reuses the loaded id list', async ({
             headers,
             data: {
                 name: `${prefix}-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 anchor_point: 5,
                 location: hallA,
                 type: 'Route',

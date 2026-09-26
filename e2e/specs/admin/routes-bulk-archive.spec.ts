@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
+import { LOCATIONS, locationId, uiaa } from '../../support/seed'
 
 test('selects filtered routes and archives them', async ({
     adminPage: page,
@@ -16,7 +16,7 @@ test('selects filtered routes and archives them', async ({
             headers,
             data: {
                 name: `${prefix}-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 anchor_point: 5,
                 location: hallA,
                 type: 'Route',
@@ -61,7 +61,7 @@ test('shows an error and keeps routes when archiving fails', async ({
             headers,
             data: {
                 name: `${prefix}-${i}`,
-                difficulty: 5,
+                ...uiaa('5'),
                 anchor_point: 5,
                 location: hallA,
                 type: 'Route',

@@ -23,9 +23,9 @@
             <v-row density="comfortable" class="mb-1">
                 <v-col cols="6">
                     <v-select
-                        v-model="form.combinedDifficulty"
-                        :label="$t('climbing.difficulty')"
-                        :items="COMBINED_DIFFICULTIES"
+                        v-model="form.grade"
+                        :label="gradeFieldLabel"
+                        :items="gradeLabels(gradeSystem)"
                         :rules="[requiredRule]"
                         data-testid="route-form-difficulty"
                     />
@@ -200,12 +200,13 @@ import {
     formatDateToYYYYMMDD,
 } from '#shared/utils/formatting'
 import { required, maxLength } from '~/utils/validation'
+import { ROUTE_TYPES } from '~/utils/routes'
 import {
-    COMBINED_DIFFICULTIES,
-    ROUTE_TYPES,
-    parseCombinedDifficulty,
-    toCombinedDifficulty,
-} from '~/utils/routes'
+    gradeIndex,
+    gradeLabels,
+    isGradeSystem,
+    type GradeSystem,
+} from '#shared/utils/grades'
 
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
@@ -300,10 +301,12 @@ const formRef = ref<VFormHandle>(null)
 const setterItems = ref<string[]>([])
 const editRouteId = ref<string | null>(null)
 const originalAnchorPointIsZero = ref(false)
+const originalGrading = ref<{ type: string; system: GradeSystem } | null>(null)
+const { gradeSystemFor } = useGradeSystems()
 
 const form = reactive({
     name: '',
-    combinedDifficulty: null as string | null,
+    grade: null as string | null,
     anchor_point: null as number | null,
     location: '',
     type: '',
@@ -355,9 +358,25 @@ const anchorPointRules = [
 const creatorRule = (v: string[]) =>
     (Array.isArray(v) && v.length > 0) || t('validation.required')
 
+const gradeSystem = computed(() =>
+    originalGrading.value && originalGrading.value.type === form.type
+        ? originalGrading.value.system
+        : gradeSystemFor(form.type),
+)
+
+const gradeFieldLabel = computed(
+    () =>
+        `${t('climbing.difficulty')} (${t(`gradeSystems.${gradeSystem.value}`)})`,
+)
+
+watch(gradeSystem, (system) => {
+    if (form.grade && !gradeLabels(system).includes(form.grade))
+        form.grade = null
+})
+
 const resetForm = () => {
     form.name = ''
-    form.combinedDifficulty = null
+    form.grade = null
     form.anchor_point = null
     form.location = ''
     form.type = ''
@@ -368,6 +387,7 @@ const resetForm = () => {
     form.archived = false
     editRouteId.value = null
     originalAnchorPointIsZero.value = false
+    originalGrading.value = null
 }
 
 const loadFromRoute = (route: RouteRecord) => {
@@ -375,10 +395,10 @@ const loadFromRoute = (route: RouteRecord) => {
     originalAnchorPointIsZero.value = Number(route.anchor_point) === 0
 
     form.name = route.name ?? ''
-    form.combinedDifficulty = toCombinedDifficulty(
-        route.difficulty,
-        route.difficulty_sign,
-    )
+    form.grade = route.grade || null
+    originalGrading.value = isGradeSystem(route.grade_system)
+        ? { type: route.type ?? '', system: route.grade_system }
+        : null
     form.anchor_point = route.anchor_point ?? null
     form.location = route.location ?? ''
     form.type = route.type ?? ''
@@ -444,14 +464,11 @@ async function submit() {
 
     saving.value = true
     try {
-        const { difficulty, difficulty_sign } = parseCombinedDifficulty(
-            form.combinedDifficulty,
-        )
-
         const payload: Partial<RouteRecord> = {
             name: form.name,
-            difficulty: difficulty ?? undefined,
-            difficulty_sign,
+            grade: form.grade ?? '',
+            grade_system: gradeSystem.value,
+            grade_index: gradeIndex(gradeSystem.value, form.grade),
             anchor_point: form.anchor_point,
             location: form.location,
             type: form.type,

@@ -67,24 +67,6 @@ export function timeAgo(
     })
 }
 
-export interface DifficultySource {
-    difficulty?: number | string | null
-    difficulty_sign?: boolean | string | null
-}
-
-export function formatDifficultySign(value: unknown): string {
-    if (typeof value === 'string') return value.trim()
-    if (value === true) return '+'
-    if (value === false) return '-'
-    return ''
-}
-
-export function formatDifficulty(
-    route: DifficultySource | null | undefined,
-): string {
-    return `${route?.difficulty ?? ''}${formatDifficultySign(route?.difficulty_sign)}`.trim()
-}
-
 export function locationName(
     record:
         | {

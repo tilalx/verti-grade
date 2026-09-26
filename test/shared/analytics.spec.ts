@@ -2,11 +2,18 @@ import { describe, expect, it } from 'vitest'
 import {
     buildAnalytics,
     compareGrades,
-    difficultyScore,
+    gradeScore,
     resolveFilters,
     type AnalyticsRating,
     type AnalyticsRoute,
 } from '#shared/utils/analytics'
+import { gradeIndex } from '#shared/utils/grades'
+
+const uiaa = (grade: string) => ({
+    grade,
+    grade_system: 'uiaa',
+    grade_index: gradeIndex('uiaa', grade),
+})
 
 const NOW = new Date('2026-06-30T12:00:00Z')
 const daysAgo = (days: number) =>
@@ -19,8 +26,7 @@ function route(
     return {
         id,
         name: id,
-        difficulty: 6,
-        difficulty_sign: null,
+        ...uiaa('6'),
         type: 'Route',
         location: 'hall-a',
         locationName: 'Hall A',
@@ -41,7 +47,6 @@ function rating(
         id: `rating-${ratingId}`,
         route_id: routeId,
         rating: 4,
-        difficulty: null,
         comment: '',
         created: daysAgo(5),
         ...overrides,
@@ -85,14 +90,10 @@ describe('resolveFilters', () => {
 })
 
 describe('grades', () => {
-    it('scores signs a third of a grade apart', () => {
-        expect(
-            difficultyScore({ difficulty: 6, difficulty_sign: true }),
-        ).toBeCloseTo(6.333, 2)
-        expect(
-            difficultyScore({ difficulty: '6', difficulty_sign: '-' }),
-        ).toBeCloseTo(5.667, 2)
-        expect(difficultyScore({ difficulty: null })).toBeNull()
+    it('scores by stored index and falls back to the scale table', () => {
+        expect(gradeScore({ grade_index: 13 })).toBe(13)
+        expect(gradeScore({ grade: '6a+', grade_system: 'french' })).toBe(12)
+        expect(gradeScore({ grade: '', grade_system: 'uiaa' })).toBeNull()
     })
 
     it('orders minus before plain before plus and unknown last', () => {
@@ -102,6 +103,15 @@ describe('grades', () => {
             '6+',
             '7',
             '?',
+        ])
+    })
+
+    it('orders labels of other scales by difficulty', () => {
+        expect(['7a', '6b+', '6A', '5.10a'].sort(compareGrades)).toEqual([
+            '5.10a',
+            '6A',
+            '6b+',
+            '7a',
         ])
     })
 })
@@ -223,8 +233,8 @@ describe('buildAnalytics', () => {
     })
 
     it('lists routes whose grade votes deviate from the set grade', () => {
-        const votes = (routeId: string, difficulty: number) =>
-            [1, 2, 3].map(() => rating(routeId, { difficulty }))
+        const votes = (routeId: string, grade: string) =>
+            [1, 2, 3].map(() => rating(routeId, uiaa(grade)))
         const routes = [
             route('sandbag'),
             route('soft'),
@@ -232,10 +242,10 @@ describe('buildAnalytics', () => {
             route('few'),
         ]
         const ratings = [
-            ...votes('sandbag', 7),
-            ...votes('soft', 5),
-            ...votes('fair', 6),
-            rating('few', { difficulty: 9 }),
+            ...votes('sandbag', '7'),
+            ...votes('soft', '5'),
+            ...votes('fair', '6'),
+            rating('few', uiaa('9')),
         ]
         const result = buildAnalytics(routes, ratings, allTime, NOW)
 
@@ -249,15 +259,15 @@ describe('buildAnalytics', () => {
                 }),
             ),
         ).toEqual([
-            { id: 'sandbag', setGrade: 6, votedGrade: 7, deviation: 1 },
-            { id: 'soft', setGrade: 6, votedGrade: 5, deviation: -1 },
-            { id: 'fair', setGrade: 6, votedGrade: 6, deviation: 0 },
+            { id: 'sandbag', setGrade: 10.1, votedGrade: 13.4, deviation: 3.3 },
+            { id: 'soft', setGrade: 10.1, votedGrade: 7.4, deviation: -2.7 },
+            { id: 'fair', setGrade: 10.1, votedGrade: 10.1, deviation: 0 },
         ])
         expect(result.setters[0]).toMatchObject({
             setter: 'Alice',
             routes: 4,
             routesInPeriod: 4,
-            averageDeviation: 0,
+            averageDeviation: 0.2,
         })
     })
 
@@ -265,14 +275,31 @@ describe('buildAnalytics', () => {
         const routes = [
             ...[1, 2, 3, 4].map((index) => route(`six-${index}`)),
             ...[1, 2, 3, 4].map((index) =>
-                route(`seven-old-${index}`, { difficulty: 7, archived: true }),
+                route(`seven-old-${index}`, { ...uiaa('7'), archived: true }),
             ),
-            route('seven-active', { difficulty: 7 }),
+            route('seven-active', { ...uiaa('7') }),
         ]
         const result = buildAnalytics(routes, [], allTime, NOW)
         expect(result.gradeDistribution).toEqual([
             { grade: '6', byType: { Route: 4 }, total: 4, expected: 2.2 },
             { grade: '7', byType: { Route: 1 }, total: 1, expected: 2.8 },
+        ])
+    })
+
+    it('keeps equal labels of different scales apart', () => {
+        const routes = [
+            route('uiaa-five', uiaa('5')),
+            route('font-five', {
+                type: 'Boulder',
+                grade: '5',
+                grade_system: 'font',
+                grade_index: gradeIndex('font', '5'),
+            }),
+        ]
+        const result = buildAnalytics(routes, [], allTime, NOW)
+        expect(result.gradeDistribution.map((row) => row.grade)).toEqual([
+            '5 · UIAA',
+            '5 · Font',
         ])
     })
 
@@ -282,7 +309,7 @@ describe('buildAnalytics', () => {
             route('b', {
                 location: 'hall-b',
                 locationName: 'Hall B',
-                difficulty: 7,
+                ...uiaa('7'),
             }),
         ]
         const ratings = [

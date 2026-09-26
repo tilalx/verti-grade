@@ -688,7 +688,11 @@
             "logo": "App-Logo",
             "icon": "Browser-Icon",
             "sign": "Logo auf Routenschildern"
-        }
+        },
+        "grading": "Bewertungsskalen",
+        "routeGradeSystem": "Skala für Routen",
+        "boulderGradeSystem": "Skala für Boulder",
+        "gradingHint": "Gilt für neu geschraubte Routen. Bestehende Routen behalten ihre Skala bis zur Bearbeitung."
     },
     "errors": {
         "notFound": {
@@ -834,5 +838,41 @@
             "reports": "Meldung"
         },
         "changedLabel": "Geändert"
+    },
+    "gradeSystems": {
+        "uiaa": "UIAA",
+        "french": "Französisch",
+        "yds": "YDS",
+        "font": "Fontainebleau",
+        "v": "V-Scale"
+    },
+    "gradeConversion": {
+        "title": "Grad-Umrechnung",
+        "source": "Ungefähre Entsprechungen auf Basis der {source}.",
+        "open": "Umrechnungstabelle",
+        "show": "Mit anderen Skalen vergleichen",
+        "columns": {
+            "male": "Leistungsniveau (Männer)",
+            "female": "Leistungsniveau (Frauen)",
+            "britishTech": "British Tech",
+            "ewbank": "Ewbank",
+            "brazilian": "Brasilianisch (BRZ)",
+            "metricUiaa": "UIAA metrisch",
+            "watts": "Watts"
+        },
+        "levels": {
+            "lower": "Einsteiger (L1)",
+            "intermediate": "Mittelstufe (L2)",
+            "advanced": "Fortgeschritten (L3)",
+            "elite": "Elite (L4)",
+            "higherElite": "Höchste Elite (L5)"
+        }
+    },
+    "gradeSystemsShort": {
+        "uiaa": "UIAA",
+        "french": "Frz.",
+        "yds": "YDS",
+        "font": "Font",
+        "v": "Hueco"
     }
 }

@@ -73,9 +73,9 @@
 
                 <v-col cols="12" sm="6">
                     <v-select
-                        v-model="form.combinedDifficulty"
-                        :label="$t('ratings.difficulty')"
-                        :items="COMBINED_DIFFICULTIES"
+                        v-model="form.grade"
+                        :label="`${$t('ratings.difficulty')} (${$t(`gradeSystems.${gradeSystem}`)})`"
+                        :items="gradeLabels(gradeSystem)"
                         :rules="isEditMode ? [] : [rules.required]"
                         clearable
                         hide-details="auto"
@@ -120,10 +120,11 @@
 <script setup lang="ts">
 import { required, nonBlank } from '~/utils/validation'
 import {
-    COMBINED_DIFFICULTIES,
-    parseCombinedDifficulty,
-    toCombinedDifficulty,
-} from '~/utils/routes'
+    DEFAULT_ROUTE_GRADE_SYSTEM,
+    gradeIndex,
+    gradeLabels,
+    isGradeSystem,
+} from '#shared/utils/grades'
 import type { RatingRecord } from '~/types/models'
 import { avatarColor, nameInitials } from '~/utils/avatar'
 
@@ -133,12 +134,14 @@ const props = withDefaults(
     defineProps<{
         modelValue?: boolean
         routeId?: string | null
+        gradeSystem?: string | null
         review?: EditableReview | null
         callToAction?: boolean
     }>(),
     {
         modelValue: undefined,
         routeId: null,
+        gradeSystem: null,
         review: null,
         callToAction: false,
     },
@@ -155,6 +158,11 @@ const { error: notifyError } = useNotification()
 const { capHeaders } = useCapToken()
 
 const isEditMode = computed(() => !!props.review)
+
+const gradeSystem = computed(() => {
+    const system = props.review?.grade_system || props.gradeSystem
+    return isGradeSystem(system) ? system : DEFAULT_ROUTE_GRADE_SYSTEM
+})
 
 // ── Open state ─────────────────────────────────────────────────────────────
 
@@ -182,7 +190,7 @@ const saving = ref(false)
 
 const form = reactive({
     rating: undefined as number | undefined,
-    combinedDifficulty: null as string | null,
+    grade: null as string | null,
     comment: '',
 })
 
@@ -196,10 +204,7 @@ watch(
     (review) => {
         if (review) {
             form.rating = review.rating ?? undefined
-            form.combinedDifficulty = toCombinedDifficulty(
-                review.difficulty,
-                review.difficulty_sign,
-            )
+            form.grade = review.grade || null
             form.comment = review.comment ?? ''
         }
     },
@@ -210,10 +215,7 @@ watch(sheetOpen, (open) => {
     if (open) {
         if (props.review) {
             form.rating = props.review.rating ?? undefined
-            form.combinedDifficulty = toCombinedDifficulty(
-                props.review.difficulty,
-                props.review.difficulty_sign,
-            )
+            form.grade = props.review.grade || null
             form.comment = props.review.comment ?? ''
         } else {
             resetForm()
@@ -227,7 +229,7 @@ watch(sheetOpen, (open) => {
 
 function resetForm() {
     form.rating = undefined
-    form.combinedDifficulty = null
+    form.grade = null
     form.comment = ''
     isFormValid.value = false
 }
@@ -241,17 +243,18 @@ function close() {
 async function submit() {
     saving.value = true
     try {
-        const { difficulty, difficulty_sign } = parseCombinedDifficulty(
-            form.combinedDifficulty,
-        )
+        const grading = {
+            grade: form.grade ?? '',
+            grade_system: gradeSystem.value,
+            grade_index: gradeIndex(gradeSystem.value, form.grade),
+        }
 
         if (isEditMode.value) {
             const updated = await pb
                 .collection('ratings')
                 .update<RatingRecord>(props.review!.id, {
                     rating: form.rating,
-                    difficulty,
-                    difficulty_sign,
+                    ...grading,
                     comment: form.comment,
                 })
             emit('saved', updated)
@@ -260,8 +263,7 @@ async function submit() {
                 {
                     route_id: props.routeId,
                     rating: form.rating,
-                    difficulty,
-                    difficulty_sign,
+                    ...grading,
                     comment: form.comment?.trim(),
                 },
                 { headers: await capHeaders('rating') },

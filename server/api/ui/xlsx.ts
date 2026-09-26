@@ -94,13 +94,9 @@ export default eventHandler(async (event) => {
                     return
                 }
                 const cell = row.getCell(index + 1)
-                const numFmt = column.numFmt?.(climbingRoute)
-                if (numFmt) {
-                    cell.numFmt = numFmt
-                }
                 widths[index] = Math.max(
                     widths[index] ?? 0,
-                    String(cell.value ?? '').length + (numFmt ? 2 : 0),
+                    String(cell.value ?? '').length,
                 )
             })
 

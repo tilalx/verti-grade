@@ -688,7 +688,11 @@
             "logo": "Логотип приложения",
             "icon": "Значок браузера",
             "sign": "Логотип на табличках маршрутов"
-        }
+        },
+        "grading": "Шкалы сложности",
+        "routeGradeSystem": "Шкала для трасс",
+        "boulderGradeSystem": "Шкала для боулдеринга",
+        "gradingHint": "Применяется к новым трассам. Существующие трассы сохраняют свою шкалу до редактирования."
     },
     "errors": {
         "notFound": {
@@ -834,5 +838,41 @@
             "reports": "Жалоба"
         },
         "changedLabel": "Изменено"
+    },
+    "gradeSystems": {
+        "uiaa": "UIAA",
+        "french": "Французская",
+        "yds": "YDS",
+        "font": "Fontainebleau",
+        "v": "V-Scale"
+    },
+    "gradeConversion": {
+        "title": "Перевод категорий",
+        "source": "Приблизительные соответствия по {source}.",
+        "open": "Таблица перевода",
+        "show": "Сравнить с другими шкалами",
+        "columns": {
+            "male": "Уровень (мужчины)",
+            "female": "Уровень (женщины)",
+            "britishTech": "British Tech",
+            "ewbank": "Ewbank",
+            "brazilian": "Бразильская (BRZ)",
+            "metricUiaa": "UIAA (метрич.)",
+            "watts": "Watts"
+        },
+        "levels": {
+            "lower": "Начальный (L1)",
+            "intermediate": "Средний (L2)",
+            "advanced": "Продвинутый (L3)",
+            "elite": "Элита (L4)",
+            "higherElite": "Высшая элита (L5)"
+        }
+    },
+    "gradeSystemsShort": {
+        "uiaa": "UIAA",
+        "french": "Фр.",
+        "yds": "YDS",
+        "font": "Font",
+        "v": "Hueco"
     }
 }

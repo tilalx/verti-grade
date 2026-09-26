@@ -50,6 +50,10 @@
                     v-if="difficultySplit.sign"
                     class="route-card__difficulty-sign"
                     >{{ difficultySplit.sign }}</span
+                ><span
+                    v-if="isUnexpectedSystem(route)"
+                    class="route-card__difficulty-system"
+                    >{{ $t(`gradeSystemsShort.${route.grade_system}`) }}</span
                 >
             </div>
         </div>
@@ -122,12 +126,12 @@
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
 import {
-    formatDifficulty,
     formatAnchorPoint,
     formatScore,
     formatDate,
     locationName,
 } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 
 const props = withDefaults(
     defineProps<{
@@ -147,7 +151,8 @@ defineEmits<{
 
 const { locale } = useI18n()
 
-const difficulty = computed(() => formatDifficulty(props.route))
+const { isUnexpectedSystem } = useGradeSystems()
+const difficulty = computed(() => formatGrade(props.route))
 const difficultySplit = computed(() => {
     const full = difficulty.value
     const match = full.match(/^(.*?)([+\-]?)$/)
@@ -179,6 +184,12 @@ const score = computed(() => formatScore(props.route))
 
 .route-card__difficulty-sign {
     margin-left: 3px;
+}
+
+.route-card__difficulty-system {
+    margin-left: 4px;
+    font-size: 0.55em;
+    font-weight: 500;
 }
 
 .route-card__badges {

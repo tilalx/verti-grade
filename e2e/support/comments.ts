@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { authHeader } from './nav'
+import { uiaa } from './seed'
 
 export async function firstRouteId(page: Page): Promise<string> {
     const routeRes = await page.request.get(
@@ -22,8 +23,7 @@ export async function createComment(
         data: {
             route_id: routeId,
             rating,
-            difficulty: 5,
-            difficulty_sign: null,
+            ...uiaa('5'),
             comment,
         },
     })

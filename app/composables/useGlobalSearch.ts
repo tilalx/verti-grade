@@ -5,7 +5,8 @@ import type {
     RouteRecord,
     UserRecord,
 } from '~/types/models'
-import { formatDifficulty, normalizeCreators } from '#shared/utils/formatting'
+import { normalizeCreators } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 import { routeSearchFilter } from '~/utils/routeSearch'
 
 export interface SearchResult {
@@ -83,7 +84,7 @@ export function useGlobalSearch() {
             icon: 'mdi-map-marker-path',
             title: route.name,
             subtitle: [
-                formatDifficulty(route),
+                formatGrade(route),
                 normalizeCreators(route.creator).join(', '),
             ]
                 .filter(Boolean)

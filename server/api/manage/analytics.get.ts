@@ -11,9 +11,9 @@ import { locationName } from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 const ROUTE_FIELDS =
-    'id,name,difficulty,difficulty_sign,type,location,creator,archived,archived_at,screw_date,created,expand.location.name'
+    'id,name,grade,grade_system,grade_index,type,location,creator,archived,archived_at,screw_date,created,expand.location.name'
 const RATING_FIELDS =
-    'id,route_id,rating,difficulty,difficulty_sign,comment,created'
+    'id,route_id,rating,grade,grade_system,grade_index,comment,created'
 
 export default eventHandler(async (event) => {
     const pb = await requirePermission(event, 'view_analytics')

@@ -23,7 +23,7 @@
             </v-list-item-title>
             <template #append>
                 <span class="text-body-small text-medium-emphasis mr-2">
-                    {{ formatDifficulty(route) }}
+                    <GradeLabel :source="route" />
                 </span>
                 <v-btn
                     :icon="mode === 'missing' ? 'mdi-check' : 'mdi-undo'"
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatAnchorPoint, formatDifficulty } from '#shared/utils/formatting'
+import { formatAnchorPoint } from '#shared/utils/formatting'
 import type { RouteRecord } from '~/types/models'
 
 const props = defineProps<{

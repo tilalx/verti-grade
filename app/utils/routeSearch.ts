@@ -1,27 +1,36 @@
-const SIGNED_GRADE = /^(\d{1,2})([+-])$/
-const BARE_GRADE = /^\d{1,2}$/
+import { GRADE_SYSTEMS, gradeLabels } from '#shared/utils/grades'
+
+const BARE_NUMBER = /^\d{1,2}$/
 
 const quote = (value: string) =>
     `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
 
-function gradeFilter(level: string, sign?: string) {
-    if (sign === '+')
-        return `(difficulty = ${level} && (difficulty_sign = true || difficulty_sign = "+"))`
-    if (sign === '-')
-        return `(difficulty = ${level} && (difficulty_sign = false || difficulty_sign = "-"))`
-    return `difficulty = ${level}`
+const ALL_GRADES = [...new Set(GRADE_SYSTEMS.flatMap(gradeLabels))]
+
+function matchingGrades(tokens: string[]) {
+    const wanted = tokens.map((token) => token.toLowerCase())
+    return ALL_GRADES.filter((grade) => wanted.includes(grade.toLowerCase()))
 }
+
+function gradeFilter(grades: string[]) {
+    const parts = grades.map((grade) => `grade = ${quote(grade)}`)
+    return parts.length === 1 ? parts[0]! : `(${parts.join(' || ')})`
+}
+
+const isGradeToken = (token: string) =>
+    !BARE_NUMBER.test(token) && matchingGrades([token]).length > 0
 
 export function routeSearchFilter(query: string) {
     const tokens = query.trim().split(/\s+/).filter(Boolean)
-    if (tokens.length === 1 && BARE_GRADE.test(tokens[0]!))
-        return gradeFilter(tokens[0]!)
+    if (tokens.length === 1 && BARE_NUMBER.test(tokens[0]!)) {
+        const level = tokens[0]!
+        return gradeFilter(matchingGrades([`${level}-`, level, `${level}+`]))
+    }
 
-    const grades = tokens.flatMap((token) => {
-        const match = token.match(SIGNED_GRADE)
-        return match ? [gradeFilter(match[1]!, match[2])] : []
-    })
-    const phrase = tokens.filter((token) => !SIGNED_GRADE.test(token)).join(' ')
+    const grades = tokens
+        .filter(isGradeToken)
+        .map((token) => gradeFilter(matchingGrades([token])))
+    const phrase = tokens.filter((token) => !isGradeToken(token)).join(' ')
     const text = phrase
         ? [`(name ~ ${quote(phrase)} || creator ~ ${quote(phrase)})`]
         : []

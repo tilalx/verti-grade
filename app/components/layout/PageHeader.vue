@@ -2,12 +2,18 @@
 defineProps<{
     title: string
     subtitle?: string
+    inlineActions?: boolean
 }>()
 </script>
 
 <template>
     <header
-        class="page-header d-flex flex-column flex-sm-row align-sm-center justify-space-between ga-4 mb-4"
+        class="page-header d-flex justify-space-between ga-4 mb-4"
+        :class="
+            inlineActions
+                ? 'align-center'
+                : 'flex-column flex-sm-row align-sm-center'
+        "
     >
         <div>
             <h1 class="page-header__title">{{ title }}</h1>

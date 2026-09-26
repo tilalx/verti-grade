@@ -93,16 +93,39 @@
                                     </div>
                                 </div>
 
-                                <div
+                                <GradeConversionDialog
                                     v-if="difficulty"
-                                    class="route-hero__difficulty-badge"
-                                    :style="difficultyBadgeStyle"
+                                    :source="metadata"
                                 >
-                                    <span
-                                        class="route-hero__difficulty-text font-weight-black"
-                                        >{{ difficulty }}</span
-                                    >
-                                </div>
+                                    <template #activator="{ props: activator }">
+                                        <button
+                                            v-bind="activator"
+                                            type="button"
+                                            class="route-hero__difficulty-badge"
+                                            :style="difficultyBadgeStyle"
+                                            :aria-label="
+                                                t('gradeConversion.show')
+                                            "
+                                            :title="t('gradeConversion.show')"
+                                            data-testid="route-grade-badge"
+                                        >
+                                            <span
+                                                class="route-hero__difficulty-text font-weight-black"
+                                                >{{ difficulty }}</span
+                                            >
+                                            <span
+                                                v-if="metadata?.grade_system"
+                                                class="route-hero__difficulty-system"
+                                                data-testid="route-grade-system"
+                                                >{{
+                                                    t(
+                                                        `gradeSystemsShort.${metadata.grade_system}`,
+                                                    )
+                                                }}</span
+                                            >
+                                        </button>
+                                    </template>
+                                </GradeConversionDialog>
                             </div>
                         </div>
                     </div>
@@ -234,6 +257,7 @@
                             <ReviewFormDialog
                                 v-if="route_id"
                                 :route-id="route_id"
+                                :grade-system="metadata?.grade_system"
                                 call-to-action
                                 @saved="onReviewSaved"
                             />
@@ -317,10 +341,10 @@ import type PocketBase from 'pocketbase'
 import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import {
     formatDate,
-    formatDifficulty,
     locationName,
     normalizeCreators,
 } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 import { reportContentUrl } from '~/utils/reports'
 
 const { t, locale } = useI18n()
@@ -373,7 +397,7 @@ useHead(
 
 // ── Computed ───────────────────────────────────────────────────────────────
 
-const difficulty = computed(() => formatDifficulty(metadata.value))
+const difficulty = computed(() => formatGrade(metadata.value))
 
 const heroStyle = computed(() => {
     const color = metadata.value?.color || '#6200EA'
@@ -475,7 +499,7 @@ function mapReview(
     return {
         id: r.id,
         rating: typeof r.rating === 'number' ? r.rating : null,
-        difficultyLabel: formatDifficulty(r),
+        difficultyLabel: formatGrade(r),
         comment: r.comment ?? null,
         created: r.created ?? '',
         userName,
@@ -691,6 +715,9 @@ onMounted(async () => {
 }
 
 .route-hero__difficulty-badge {
+    border: 0;
+    cursor: pointer;
+    flex-direction: column;
     flex-shrink: 0;
     min-width: 52px;
     height: 52px;
@@ -706,6 +733,14 @@ onMounted(async () => {
     font-size: 1.25rem;
     line-height: 1;
     white-space: nowrap;
+}
+
+.route-hero__difficulty-system {
+    font-size: 0.65rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 3px;
+    opacity: 0.8;
 }
 
 .stats-card {

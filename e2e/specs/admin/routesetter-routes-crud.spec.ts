@@ -1,5 +1,5 @@
 import { test, expect } from '../../support/fixtures'
-import { LOCATIONS } from '../../support/seed'
+import { LOCATIONS, uiaa } from '../../support/seed'
 import { gotoSettled, authHeader } from '../../support/nav'
 
 test('routesetter can create and delete a route (manage_routes permission)', async ({
@@ -57,7 +57,7 @@ test('a user without manage_routes cannot reach or write to /manage/routes', asy
         headers,
         data: {
             name: 'should-not-be-created-by-user',
-            difficulty: 1,
+            ...uiaa('1'),
         },
     })
     expect(res.status()).toBeGreaterThanOrEqual(400)

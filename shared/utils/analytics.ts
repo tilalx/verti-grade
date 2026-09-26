@@ -1,21 +1,24 @@
+import { normalizeCreators, parseDate } from './formatting'
 import {
-    formatDifficulty,
-    normalizeCreators,
-    parseDate,
-    type DifficultySource,
-} from './formatting'
+    gradeIndex,
+    gradeKey,
+    gradeKeyIndex,
+    isGradeSystem,
+    nearestGrade,
+    type GradeSource,
+} from './grades'
 
 export const ANALYTICS_RANGES = ['30d', '90d', '12m', 'all', 'custom'] as const
 export type AnalyticsRange = (typeof ANALYTICS_RANGES)[number]
 
 export const MIN_VOTES_FOR_FEEDBACK = 3
-export const GRADE_DEVIATION_THRESHOLD = 0.5
+export const GRADE_DEVIATION_THRESHOLD = 1.5
 const LIST_LIMIT = 5
 const OLDEST_LIMIT = 10
 const FEEDBACK_LIMIT = 300
 const DAY_MS = 86_400_000
 
-export interface AnalyticsRoute extends DifficultySource {
+export interface AnalyticsRoute extends GradeSource {
     id: string
     name?: string | null
     type?: string | null
@@ -28,7 +31,7 @@ export interface AnalyticsRoute extends DifficultySource {
     created?: string
 }
 
-export interface AnalyticsRating extends DifficultySource {
+export interface AnalyticsRating extends GradeSource {
     id: string
     route_id?: string | null
     rating?: number | null
@@ -88,6 +91,7 @@ export interface RatedRoute extends RouteSummary {
 export interface FeedbackRoute extends RouteSummary {
     setGrade: number
     votedGrade: number
+    votedGradeLabel: string
     deviation: number
     votes: number
 }
@@ -200,34 +204,16 @@ export function resolveFilters(
     }
 }
 
-export function difficultyScore(source: DifficultySource): number | null {
-    const level = Number(source.difficulty)
-    if (
-        source.difficulty === null ||
-        source.difficulty === '' ||
-        !Number.isFinite(level)
-    ) {
-        return null
-    }
-    const sign = source.difficulty_sign
-    if (sign === true || sign === '+') return level + 1 / 3
-    if (sign === false || sign === '-') return level - 1 / 3
-    return level
+export function gradeScore(source: GradeSource): number | null {
+    const index =
+        source.grade_index ?? gradeIndex(source.grade_system, source.grade)
+    return typeof index === 'number' && Number.isFinite(index) ? index : null
 }
 
 export function compareGrades(left: string, right: string): number {
-    return gradeOrder(left) - gradeOrder(right) || left.localeCompare(right)
-}
-
-function gradeOrder(grade: string): number {
-    const match = grade.trim().match(/^(\d+)([+-]?)$/)
-    if (!match) return Number.MAX_SAFE_INTEGER
-    const sign = match[2] === '+' ? 1 : match[2] === '-' ? -1 : 0
-    return Number(match[1]) * 10 + sign
-}
-
-function gradeLabel(route: AnalyticsRoute): string {
-    return `${route.difficulty ?? ''}`.trim() ? formatDifficulty(route) : '?'
+    return (
+        gradeKeyIndex(left) - gradeKeyIndex(right) || left.localeCompare(right)
+    )
 }
 
 function routeDate(route: AnalyticsRoute): Date | null {
@@ -291,11 +277,11 @@ function toTimeline(map: Map<string, number>): TimelineDatum[] {
         .sort((a, b) => a.period.localeCompare(b.period))
 }
 
-function summarize(route: AnalyticsRoute): RouteSummary {
+function summarize(route: AnalyticsRoute, withSystem: boolean): RouteSummary {
     return {
         id: route.id,
         name: String(route.name ?? ''),
-        grade: gradeLabel(route),
+        grade: gradeKey(route, withSystem),
         type: route.type ?? null,
         location: route.locationName || null,
         creators: normalizeCreators(route.creator),
@@ -309,6 +295,9 @@ export function buildAnalytics(
     filters: AnalyticsFilters,
     now = new Date(),
 ): AnalyticsResponse {
+    const withSystem =
+        new Set(allRoutes.map((route) => route.grade_system).filter(Boolean))
+            .size > 1
     const { from, to } = filters
     const periodMs = from ? to.getTime() - from.getTime() : 0
     const previousFrom = from ? new Date(from.getTime() - periodMs) : null
@@ -373,9 +362,9 @@ export function buildAnalytics(
         })
 
     const deviationOf = (route: AnalyticsRoute) => {
-        const setScore = difficultyScore(route)
+        const setScore = gradeScore(route)
         const votes = (ratingsByRoute.get(route.id) ?? [])
-            .map(difficultyScore)
+            .map(gradeScore)
             .filter((score): score is number => score !== null)
         if (setScore === null || votes.length < MIN_VOTES_FOR_FEEDBACK)
             return null
@@ -419,9 +408,9 @@ export function buildAnalytics(
     const gradeRows = new Map<string, GradeDatum>()
     const historicShare = new Map<string, number>()
     for (const route of matchingRoutes)
-        increase(historicShare, gradeLabel(route))
+        increase(historicShare, gradeKey(route, withSystem))
     for (const route of scopedRoutes) {
-        const grade = gradeLabel(route)
+        const grade = gradeKey(route, withSystem)
         const row = gradeRows.get(grade) ?? {
             grade,
             byType: {},
@@ -481,7 +470,7 @@ export function buildAnalytics(
     const locationGradeCounts = new Map<string, LocationGradeDatum>()
     for (const route of scopedRoutes) {
         const location = route.locationName || '?'
-        const grade = gradeLabel(route)
+        const grade = gradeKey(route, withSystem)
         const key = `${location}\u0000${grade}`
         const cell = locationGradeCounts.get(key) ?? {
             location,
@@ -497,7 +486,7 @@ export function buildAnalytics(
         return stars.length >= MIN_VOTES_FOR_FEEDBACK
             ? [
                   {
-                      ...summarize(route),
+                      ...summarize(route, withSystem),
                       averageRating: round(mean(stars))!,
                       ratings: stars.length,
                   },
@@ -509,9 +498,12 @@ export function buildAnalytics(
         return result
             ? [
                   {
-                      ...summarize(route),
-                      setGrade: round(difficultyScore(route))!,
+                      ...summarize(route, withSystem),
+                      setGrade: round(gradeScore(route))!,
                       votedGrade: round(result.votedGrade)!,
+                      votedGradeLabel: isGradeSystem(route.grade_system)
+                          ? nearestGrade(route.grade_system, result.votedGrade)
+                          : '',
                       deviation: round(result.deviation)!,
                       votes: result.votes,
                   },
@@ -577,7 +569,7 @@ export function buildAnalytics(
             .sort(byRouteDate)
             .slice(0, OLDEST_LIMIT)
             .map((route) => ({
-                ...summarize(route),
+                ...summarize(route, withSystem),
                 ageDays: Math.floor(
                     (now.getTime() -
                         (routeDate(route)?.getTime() ?? now.getTime())) /

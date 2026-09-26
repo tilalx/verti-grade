@@ -1,8 +1,5 @@
-import {
-    formatDate,
-    formatDifficulty,
-    normalizeCreators,
-} from '#shared/utils/formatting'
+import { formatDate, normalizeCreators } from '#shared/utils/formatting'
+import { formatGrade } from '#shared/utils/grades'
 import type { RouteRecord } from '../../types/models'
 
 export const TAG_WIDTH = 280
@@ -88,7 +85,7 @@ export function drawRouteTag(
         minSize: 8,
     })
     drawText(doc, x, {
-        text: formatDifficulty(route),
+        text: formatGrade(route),
         y: y + 46,
         size: 40,
         minSize: 24,
