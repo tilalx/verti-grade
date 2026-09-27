@@ -157,41 +157,18 @@
                 <v-row>
                     <v-col cols="12">
                         <div class="route-manager__actions">
-                            <v-chip
-                                v-if="hasSelection"
-                                color="primary"
-                                variant="tonal"
-                                label
-                                :size="isMobile ? 'default' : 'large'"
-                                prepend-icon="mdi-checkbox-multiple-marked-outline"
-                                class="route-manager__count"
-                                data-testid="routes-selected-count"
-                            >
-                                {{
-                                    $t('routes.selectedCount', {
-                                        n: selectedRouteIds.size,
-                                    })
-                                }}
-                            </v-chip>
                             <v-btn
                                 @click="selectAll"
                                 color="primary"
                                 variant="tonal"
                                 :size="isMobile ? 'small' : undefined"
+                                :aria-label="selectAllLabel"
+                                :title="selectAllAction"
+                                class="route-manager__count"
                                 data-testid="routes-select-all"
                             >
-                                <v-icon start>
-                                    {{
-                                        areAllSelected
-                                            ? 'mdi-checkbox-marked-outline'
-                                            : 'mdi-checkbox-blank-outline'
-                                    }}
-                                </v-icon>
-                                {{
-                                    areAllSelected
-                                        ? $t('actions.deselect_all')
-                                        : $t('actions.select_all')
-                                }}
+                                <v-icon start>{{ selectAllIcon }}</v-icon>
+                                {{ selectAllText }}
                             </v-btn>
                             <v-btn
                                 v-if="hasSelection"
@@ -610,6 +587,25 @@ const {
     toggleAll,
     invalidate: invalidateAllRouteIdsCache,
 } = useRouteSelection(pbFilter, totalItems)
+
+const selectAllAction = computed(() =>
+    areAllSelected.value ? t('actions.deselect_all') : t('actions.select_all'),
+)
+const selectAllText = computed(() =>
+    hasSelection.value
+        ? t('routes.selectedCount', { n: selectedRouteIds.value.size })
+        : t('actions.select_all'),
+)
+const selectAllLabel = computed(() =>
+    hasSelection.value
+        ? `${selectAllText.value}, ${selectAllAction.value}`
+        : selectAllAction.value,
+)
+const selectAllIcon = computed(() => {
+    if (areAllSelected.value) return 'mdi-checkbox-marked-outline'
+    if (hasSelection.value) return 'mdi-minus-box-outline'
+    return 'mdi-checkbox-blank-outline'
+})
 
 const { exportingFormat, exportPdf, exportXlsx, exportJson } = useRouteExport()
 const selectedIds = () => Array.from(selectedRouteIds.value)
