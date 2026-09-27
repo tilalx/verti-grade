@@ -9,6 +9,11 @@ import {
 } from '~/utils/color'
 
 describe('toHex6', () => {
+    it('expands 3-digit hex', () => {
+        expect(toHex6('#f00')).toBe('#FF0000')
+        expect(toHex6('abc')).toBe('#AABBCC')
+    })
+
     it('normalises case and keeps six digits', () => {
         expect(toHex6('#7c4dff')).toBe('#7C4DFF')
         expect(toHex6('7C4DFF')).toBe('#7C4DFF')
@@ -24,7 +29,6 @@ describe('toHex6', () => {
         expect(toHex6('')).toBe('')
         expect(toHex6(null)).toBe('')
         expect(toHex6(undefined)).toBe('')
-        expect(toHex6('#fff')).toBe('')
         expect(toHex6('rebeccapurple')).toBe('')
         expect(toHex6('#12345g')).toBe('')
     })

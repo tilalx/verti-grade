@@ -522,6 +522,7 @@ function scheduleStatsRefresh() {
 }
 
 async function loadMore() {
+    if (loading.value || loadingMore.value || !hasMore.value) return
     await loadNextPage()
     await nextTick()
     if (sentinelRef.value && scrollObserver) {

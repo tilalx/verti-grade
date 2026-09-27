@@ -224,6 +224,20 @@ test('refreshes during a steady stream of route changes', async ({
     }
 })
 
+test('heatmap tooltip hides when the page scrolls', async ({
+    adminPage: page,
+}) => {
+    await page.setViewportSize({ width: 390, height: 600 })
+    await gotoSettled(page, '/manage/analytics?range=all')
+    const heatmap = page.getByTestId('analytics-heatmap')
+    await heatmap.scrollIntoViewIfNeeded()
+    await heatmap.locator('[data-date]').last().click()
+    const tooltip = page.getByTestId('analytics-heatmap-tooltip')
+    await expect(tooltip).toBeVisible()
+    await page.evaluate(() => window.scrollBy(0, 200))
+    await expect(tooltip).toBeHidden()
+})
+
 test('heatmap switches years and shows day counts', async ({
     adminPage: page,
     testPrefix,

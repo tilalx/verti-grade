@@ -24,8 +24,23 @@ test.describe('light theme', () => {
     })
 })
 
+test('the error page still tints the status bar', async ({ page }) => {
+    await gotoSettled(page, '/this-page-does-not-exist')
+    await expect(page.getByTestId('error-page')).toBeVisible()
+    await expect(page.locator(themeColor)).toHaveCount(1)
+})
+
 test.describe('dark theme', () => {
     test.use({ colorScheme: 'dark' })
+
+    test('the offline page tints the status bar dark', async ({ page }) => {
+        await page.goto('/offline.html')
+        await expect(
+            page.locator(
+                'meta[name="theme-color"][media="(prefers-color-scheme: dark)"]',
+            ),
+        ).toHaveAttribute('content', /^#0d1117$/i)
+    })
 
     test('tints the status bar with the dark background', async ({ page }) => {
         await gotoSettled(page, '/map')

@@ -135,8 +135,6 @@ const emit = defineEmits<{
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t } = useI18n()
 
-// ── Visibility toggles ────────────────────────────────────────────────────
-
 // ── Strength logic ────────────────────────────────────────────────────────
 const passwordRequirements = computed(() => [
     { key: 'minLength', met: props.password.length >= 8 },

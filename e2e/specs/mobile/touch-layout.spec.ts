@@ -102,3 +102,38 @@ test('import preview renders as a list on phones', async ({
     await page.getByTestId('import-route-cancel').click()
     await expect(page.getByTestId('import-route-dialog')).toBeHidden()
 })
+
+test('import preview shows ratings when a route is expanded on phones', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const name = `${testPrefix}-import-ratings`
+    const comment = `${testPrefix} imported comment`
+    await gotoSettled(page, '/manage/routes')
+    await page.getByTestId('routes-more').click()
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByTestId('routes-import-open').click()
+    const chooser = await fileChooserPromise
+    await chooser.setFiles({
+        name: `${name}.json`,
+        mimeType: 'application/json',
+        buffer: Buffer.from(
+            JSON.stringify([
+                {
+                    name,
+                    difficulty: 8,
+                    anchor_point: 3,
+                    ratings: [{ rating: 4, difficulty: 8, comment }],
+                },
+            ]),
+        ),
+    })
+
+    const item = page.getByTestId('import-route-list-item').filter({
+        hasText: name,
+    })
+    await expect(item).not.toContainText(comment)
+    await item.getByText(name).click()
+    await expect(item).toContainText(comment)
+    await page.getByTestId('import-route-cancel').click()
+})

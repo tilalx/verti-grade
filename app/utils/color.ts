@@ -1,9 +1,12 @@
 export const FALLBACK_DOT_COLOR = '#9E9E9E'
 
 export function toHex6(value: string | null | undefined): string {
-    const match = /^#?([0-9a-fA-F]{6})(?:[0-9a-fA-F]{2})?$/.exec(
-        (value ?? '').trim(),
-    )
+    const trimmed = (value ?? '').trim()
+    const short = /^#?([0-9a-fA-F]{3})$/.exec(trimmed)?.[1]
+    if (short) {
+        return `#${[...short].map((digit) => digit + digit).join('')}`.toUpperCase()
+    }
+    const match = /^#?([0-9a-fA-F]{6})(?:[0-9a-fA-F]{2})?$/.exec(trimmed)
     return match?.[1] ? `#${match[1].toUpperCase()}` : ''
 }
 

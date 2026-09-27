@@ -104,6 +104,7 @@ const goBack = () =>
         ? clearError().then(() => router.back())
         : clearError({ redirect: '/' })
 
+useThemeColorMeta()
 useHead({
     title: computed(() =>
         isNotFound.value ? t('page.title.notFound') : title.value,

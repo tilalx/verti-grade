@@ -31,14 +31,17 @@ import { BOTTOM_NAV } from '~/utils/navigation'
 <style scoped>
 .bottom-nav {
     left: 0;
-    width: 100%;
+    width: calc(
+        100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)
+    );
     background: rgb(var(--v-theme-surface));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+        env(safe-area-inset-left, 0px);
     box-sizing: content-box;
 }
 
-@media (max-width: 1279.98px) {
+@media (max-width: 1144.98px) {
     :global(.v-main) {
         padding-bottom: calc(
             var(--v-layout-bottom) + env(safe-area-inset-bottom, 0px)
@@ -46,7 +49,7 @@ import { BOTTOM_NAV } from '~/utils/navigation'
     }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1145px) {
     :global(.v-main) {
         --v-layout-bottom: 0px !important;
     }

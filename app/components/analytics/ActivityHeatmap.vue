@@ -105,6 +105,7 @@
             <div
                 v-if="tooltip.visible"
                 class="heatmap-tooltip"
+                data-testid="analytics-heatmap-tooltip"
                 :style="{ left: tooltip.left, top: tooltip.top }"
             >
                 {{ tooltip.text }}
@@ -265,7 +266,15 @@ function scrollToToday() {
         : 0
 }
 
-onMounted(scrollToToday)
+function hideTooltip() {
+    tooltip.visible = false
+}
+
+onMounted(() => {
+    scrollToToday()
+    window.addEventListener('scroll', hideTooltip, { passive: true })
+})
+onBeforeUnmount(() => window.removeEventListener('scroll', hideTooltip))
 watch(selectedYear, () => nextTick(scrollToToday))
 
 function showCellTooltip(event: MouseEvent) {

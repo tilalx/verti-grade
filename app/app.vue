@@ -10,14 +10,6 @@
 
 <script setup lang="ts">
 const { locale } = useI18n()
-const theme = useTheme()
-useHead({
-    htmlAttrs: { lang: locale },
-    meta: [
-        {
-            name: 'theme-color',
-            content: () => theme.current.value.colors.background,
-        },
-    ],
-})
+useHead({ htmlAttrs: { lang: locale } })
+useThemeColorMeta()
 </script>
