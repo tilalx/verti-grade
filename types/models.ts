@@ -2,6 +2,7 @@ import type { AUDIT_ACTIONS } from '../app/utils/audit'
 import type { REPORT_REASONS, REPORT_STATUSES } from '../app/utils/reports'
 import type { ROUTE_TYPES } from '../app/utils/routes'
 import type { TickType } from '../shared/utils/ticks'
+import type { GymMap, MapPoint } from '../shared/utils/mapGeometry'
 
 export type RecordId = string
 
@@ -33,10 +34,23 @@ export interface RouteRecord extends BaseRecord {
     archived_at?: string | null
     color?: string | null
     screw_date?: string | null
+    wall?: RecordId | null
+    wall_position?: number | null
 }
 
 export interface LocationRecord extends BaseRecord {
     name: string
+    map?: GymMap | null
+    map_trace?: string | null
+}
+
+export interface WallRecord extends BaseRecord {
+    location: RecordId
+    name: string
+    outline: MapPoint[]
+    edge: MapPoint[]
+    label?: MapPoint | null
+    sort?: number | null
 }
 
 export interface RouteListItem extends Omit<RouteRecord, 'creator'> {

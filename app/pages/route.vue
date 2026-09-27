@@ -65,6 +65,17 @@
                                 >
                                     {{ locationName(metadata) }}
                                 </v-chip>
+                                <v-chip
+                                    v-if="wallName(metadata)"
+                                    size="small"
+                                    variant="flat"
+                                    :color="heroChipColor"
+                                    class="route-hero__ink"
+                                    prepend-icon="mdi-wall"
+                                    data-testid="route-wall"
+                                >
+                                    {{ wallName(metadata) }}
+                                </v-chip>
                             </div>
 
                             <!-- Name + difficulty badge inline -->
@@ -280,6 +291,23 @@
                             >
                                 {{ t('ratings.createReview') }}
                             </v-btn>
+                            <v-btn
+                                v-if="metadata?.wall && metadata.location"
+                                variant="tonal"
+                                size="large"
+                                class="flex-grow-1"
+                                prepend-icon="mdi-map-marker-outline"
+                                :to="{
+                                    path: '/map',
+                                    query: {
+                                        location: metadata.location,
+                                        route: route_id,
+                                    },
+                                }"
+                                data-testid="route-show-on-map"
+                            >
+                                {{ t('map.showOnMap') }}
+                            </v-btn>
                             <TickDialog
                                 v-if="isLoggedIn"
                                 v-model="tickDialog"
@@ -373,6 +401,7 @@ import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
 import {
     formatDate,
     locationName,
+    wallName,
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
@@ -512,7 +541,7 @@ const getRouteMetadata = async (): Promise<void> => {
     try {
         const record = await pb
             .collection('routes')
-            .getOne<RouteRecord>(route_id.value, { expand: 'location' })
+            .getOne<RouteRecord>(route_id.value, { expand: 'location,wall' })
         metadata.value = {
             ...record,
             creator: normalizeCreators(record.creator),

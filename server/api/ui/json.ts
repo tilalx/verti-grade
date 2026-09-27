@@ -1,7 +1,11 @@
 import { eventHandler, createError } from 'h3'
 import { requirePermission } from '../../utils/pb-server'
 import { resolveRouteIds, fetchRecordsByIds } from '../../utils/export'
-import { locationName, normalizeCreators } from '#shared/utils/formatting'
+import {
+    locationName,
+    normalizeCreators,
+    wallName,
+} from '#shared/utils/formatting'
 import type { RatingRecord, RouteRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -21,7 +25,7 @@ export default eventHandler(async (event) => {
             collection: 'routes',
             ids: uniqueIds,
             field: 'id',
-            expand: 'location',
+            expand: 'location,wall',
             requestKey: 'export-json-routes',
         })
         const ratings = await fetchRecordsByIds<RatingRecord>(pb, {
@@ -80,6 +84,8 @@ function mapRoute(
         grade_system: route.grade_system ?? null,
         anchor_point: normalizeNumber(route.anchor_point),
         location: locationName(route) || null,
+        wall: wallName(route) || null,
+        wall_position: normalizeNumber(route.wall_position),
         type: route.type ?? null,
         comment: route.comment ?? '',
         creator: normalizeCreators(route.creator),

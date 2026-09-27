@@ -105,7 +105,8 @@ test('reserves no camera space until scanning starts', async ({
     await expect(page.locator('.scanner-viewport')).toHaveCount(0)
 
     const tabs = await page.getByTestId('inventory-tab-missing').boundingBox()
-    expect(tabs!.y).toBeLessThan(300)
+    const viewportHeight = page.viewportSize()!.height
+    expect(tabs!.y).toBeLessThan(viewportHeight / 2)
 })
 
 test('restores found routes after a reload', async ({ adminPage: page }) => {

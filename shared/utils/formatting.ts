@@ -67,6 +67,13 @@ export function timeAgo(
     })
 }
 
+export function wallName(
+    record: { expand?: Record<string, unknown> } | null | undefined,
+): string {
+    const wall = record?.expand?.wall as { name?: string } | undefined
+    return wall?.name ?? ''
+}
+
 export function locationName(
     record:
         | {

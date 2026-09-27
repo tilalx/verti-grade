@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
     boundingBoxOf,
+    centeredCode,
     downsampleHalf,
     mapToCover,
     predictBox,
@@ -131,5 +132,23 @@ describe('downsampleHalf', () => {
         expect(result.width).toBe(2)
         expect(result.height).toBe(1)
         expect([...result.data]).toEqual([100, 100, 100, 255, 10, 10, 10, 255])
+    })
+})
+
+describe('centeredCode', () => {
+    const video = { width: 1000, height: 600 }
+    const code = (rawValue: string, x: number, y: number) => ({
+        rawValue,
+        boundingBox: { x, y, width: 100, height: 100 },
+    })
+
+    it('picks the code closest to the middle of the frame', () => {
+        const codes = [code('left', 100, 250), code('middle', 470, 240)]
+        expect(centeredCode(codes, video, 0.25)?.rawValue).toBe('middle')
+    })
+
+    it('ignores codes outside the frame', () => {
+        expect(centeredCode([code('edge', 850, 20)], video, 0.25)).toBeNull()
+        expect(centeredCode([], { width: 0, height: 0 }, 0.25)).toBeNull()
     })
 })

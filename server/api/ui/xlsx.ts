@@ -43,7 +43,7 @@ export default eventHandler(async (event) => {
             collection: 'routes',
             ids: uniqueIds,
             field: 'id',
-            expand: 'location',
+            expand: 'location,wall',
             requestKey: 'export-xlsx-routes',
         })
 

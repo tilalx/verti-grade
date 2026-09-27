@@ -70,6 +70,18 @@
                 </v-col>
             </v-row>
 
+            <v-select
+                v-if="wallItems.length"
+                v-model="form.wall"
+                :label="$t('map.wall')"
+                :items="wallItems"
+                :hint="$t('map.wallHint')"
+                persistent-hint
+                clearable
+                class="mb-3"
+                data-testid="route-form-wall"
+            />
+
             <!-- Route Setter -->
             <v-combobox
                 v-model="form.creator"
@@ -194,7 +206,8 @@
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
-import type { RouteRecord } from '~/types/models'
+import type { RouteRecord, WallRecord } from '~/types/models'
+import { freePosition } from '#shared/utils/mapGeometry'
 import {
     normalizeCreators,
     formatDateToYYYYMMDD,
@@ -315,7 +328,10 @@ const form = reactive({
     screw_date: '',
     color: '#FF5722',
     archived: false,
+    wall: '' as string | null,
 })
+const originalWall = ref({ wall: '', position: null as number | null })
+const locationWalls = ref<WallRecord[]>([])
 
 const openSnapshot = ref('')
 const hasChanges = computed(
@@ -326,6 +342,45 @@ const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
 
 const { data: locationRecords } = useLocations()
+
+const wallItems = computed(() =>
+    locationWalls.value.map((wall) => ({ title: wall.name, value: wall.id })),
+)
+
+async function loadWalls(locationId: string) {
+    locationWalls.value = locationId
+        ? await pb
+              .collection('walls')
+              .getFullList<WallRecord>({
+                  filter: pb.filter('location = {:locationId}', { locationId }),
+                  sort: 'sort,name',
+                  requestKey: 'routeFormWalls',
+              })
+              .catch(() => [])
+        : []
+}
+
+watch(
+    () => form.location,
+    (next, previous) => {
+        if (previous && next !== previous) form.wall = ''
+        void loadWalls(next)
+    },
+    { flush: 'sync' },
+)
+
+async function wallPosition(wallId: string | null) {
+    if (!wallId) return null
+    if (wallId === originalWall.value.wall) return originalWall.value.position
+    const neighbours = await pb.collection('routes').getFullList<RouteRecord>({
+        filter: pb.filter('wall = {:wallId} && archived = false', {
+            wallId,
+        }),
+        fields: 'wall_position',
+        requestKey: null,
+    })
+    return freePosition(neighbours.map((route) => route.wall_position ?? 0.5))
+}
 
 const typeItems = computed(() =>
     ROUTE_TYPES.map((value) => ({
@@ -385,6 +440,8 @@ const resetForm = () => {
     form.screw_date = ''
     form.color = '#FF5722'
     form.archived = false
+    form.wall = ''
+    originalWall.value = { wall: '', position: null }
     editRouteId.value = null
     originalAnchorPointIsZero.value = false
     originalGrading.value = null
@@ -407,6 +464,11 @@ const loadFromRoute = (route: RouteRecord) => {
     form.screw_date = formatDateToYYYYMMDD(route.screw_date ?? null)
     form.color = route.color ?? '#FF5722'
     form.archived = route.archived ?? false
+    form.wall = route.wall ?? ''
+    originalWall.value = {
+        wall: route.wall ?? '',
+        position: route.wall_position ?? null,
+    }
 }
 
 const getSetters = async () => {
@@ -477,6 +539,8 @@ async function submit() {
             screw_date: form.screw_date,
             color: form.color,
             archived: isEditMode.value ? Boolean(form.archived) : false,
+            wall: form.wall || '',
+            wall_position: await wallPosition(form.wall || null),
         }
 
         if (isEditMode.value && editRouteId.value) {

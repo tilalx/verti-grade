@@ -36,6 +36,7 @@ describe('resolveExportColumns', () => {
             'comment',
             'creator',
             'location',
+            'wall',
             'type',
             'screw_date',
         ])
@@ -133,5 +134,16 @@ describe('resolveApplicationUrl', () => {
         expect(resolveApplicationUrl({} as never, {})).toBe(
             'https://request.example',
         )
+    })
+})
+
+describe('wall column', () => {
+    it('reads the expanded wall name', async () => {
+        const columns = await resolveExportColumns(
+            eventWith({ columns: ['wall'] }),
+        )
+        const route = { expand: { wall: { name: 'Cave' } } }
+        expect(columns[0]!.value!(route as never, 'en')).toBe('Cave')
+        expect(columns[0]!.value!({} as never, 'en')).toBe('')
     })
 })

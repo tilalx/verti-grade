@@ -45,6 +45,7 @@ const EXPORT_COLUMNS = [
     { key: 'comment', labelKey: 'climbing.comment' },
     { key: 'creator', labelKey: 'climbing.creators' },
     { key: 'location', labelKey: 'climbing.location' },
+    { key: 'wall', labelKey: 'map.wall' },
     { key: 'type', labelKey: 'climbing.type' },
     { key: 'screw_date', labelKey: 'routes.screwed_at' },
     { key: 'qr', labelKey: 'export.qr_code' },

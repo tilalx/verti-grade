@@ -65,7 +65,7 @@ const image = computed(() =>
 
 const displayName = computed(
     () =>
-        user.value?.name ||
+        [user.value?.firstname, user.value?.name].filter(Boolean).join(' ') ||
         user.value?.username ||
         user.value?.email ||
         t('account.unknownUser'),

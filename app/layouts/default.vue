@@ -8,6 +8,7 @@
         </v-main>
         <LayoutFootBar :settings="settings" />
     </div>
+    <LayoutBottomNav />
     <GlobalSnackbar />
     <ClientOnly>
         <div data-testid="page-hydrated" hidden />

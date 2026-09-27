@@ -124,3 +124,24 @@ export interface DecodeResponse {
     codes: ScannedCode[]
     followed: ScannedCode[]
 }
+
+export function centeredCode<Code extends ScannedCode>(
+    codes: Code[],
+    video: Size,
+    maxDistance: number,
+): Code | null {
+    const shortSide = Math.min(video.width, video.height)
+    if (!shortSide) return null
+    let best: { code: Code; distance: number } | null = null
+    for (const code of codes) {
+        const { x, y, width, height } = code.boundingBox
+        const distance =
+            Math.hypot(
+                x + width / 2 - video.width / 2,
+                y + height / 2 - video.height / 2,
+            ) / shortSide
+        if (distance <= maxDistance && (!best || distance < best.distance))
+            best = { code, distance }
+    }
+    return best?.code ?? null
+}

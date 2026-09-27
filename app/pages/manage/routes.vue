@@ -1,24 +1,69 @@
 <template>
     <v-container class="route-manager">
-        <LayoutPageHeader :title="$t('routes.dashboard')">
+        <LayoutPageHeader :title="$t('routes.dashboard')" inline-actions>
             <template #actions>
+                <template v-if="!isMobile">
+                    <v-btn
+                        color="primary"
+                        prepend-icon="mdi-routes"
+                        data-testid="routes-create-open"
+                        @click="routeFormRef?.open()"
+                    >
+                        {{ $t('climbing.create') }}
+                    </v-btn>
+                    <v-btn
+                        color="primary"
+                        variant="tonal"
+                        prepend-icon="mdi-file-import-outline"
+                        data-testid="routes-import-open"
+                        @click="importRouteRef?.open()"
+                    >
+                        {{ $t('actions.import') }}
+                    </v-btn>
+                    <v-btn
+                        color="primary"
+                        variant="tonal"
+                        prepend-icon="mdi-map-marker-radius-outline"
+                        to="/manage/map"
+                        data-testid="routes-place-on-map"
+                    >
+                        {{ $t('routes.mapPlacement') }}
+                    </v-btn>
+                </template>
                 <v-btn
+                    v-if="isMobile"
+                    icon="mdi-plus"
                     color="primary"
-                    prepend-icon="mdi-routes"
+                    variant="flat"
+                    :aria-label="$t('climbing.create')"
                     data-testid="routes-create-open"
                     @click="routeFormRef?.open()"
-                >
-                    {{ $t('climbing.create') }}
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    variant="tonal"
-                    prepend-icon="mdi-file-import-outline"
-                    data-testid="routes-import-open"
-                    @click="importRouteRef?.open()"
-                >
-                    {{ $t('actions.import') }}
-                </v-btn>
+                />
+                <v-menu v-if="isMobile" location="bottom end">
+                    <template #activator="{ props: menuProps }">
+                        <v-btn
+                            v-bind="menuProps"
+                            icon="mdi-dots-vertical"
+                            variant="text"
+                            :aria-label="$t('routes.moreActions')"
+                            data-testid="routes-more"
+                        />
+                    </template>
+                    <v-list density="compact" nav>
+                        <v-list-item
+                            prepend-icon="mdi-file-import-outline"
+                            :title="$t('actions.import')"
+                            data-testid="routes-import-open"
+                            @click="importRouteRef?.open()"
+                        />
+                        <v-list-item
+                            prepend-icon="mdi-map-marker-radius-outline"
+                            :title="$t('routes.mapPlacement')"
+                            to="/manage/map"
+                            data-testid="routes-place-on-map"
+                        />
+                    </v-list>
+                </v-menu>
             </template>
         </LayoutPageHeader>
 
@@ -112,10 +157,27 @@
                 <v-row>
                     <v-col cols="12">
                         <div class="route-manager__actions">
+                            <v-chip
+                                v-if="hasSelection"
+                                color="primary"
+                                variant="tonal"
+                                label
+                                :size="isMobile ? 'default' : 'large'"
+                                prepend-icon="mdi-checkbox-multiple-marked-outline"
+                                class="route-manager__count"
+                                data-testid="routes-selected-count"
+                            >
+                                {{
+                                    $t('routes.selectedCount', {
+                                        n: selectedRouteIds.size,
+                                    })
+                                }}
+                            </v-chip>
                             <v-btn
                                 @click="selectAll"
                                 color="primary"
                                 variant="tonal"
+                                :size="isMobile ? 'small' : undefined"
                                 data-testid="routes-select-all"
                             >
                                 <v-icon start>
@@ -141,6 +203,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'pdf'
                                 "
+                                :size="isMobile ? 'small' : undefined"
                                 data-testid="routes-export-pdf"
                             >
                                 <v-icon start>mdi-printer</v-icon>
@@ -156,6 +219,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'xlsx'
                                 "
+                                :size="isMobile ? 'small' : undefined"
                                 data-testid="routes-export-xlsx"
                             >
                                 <v-icon start>mdi-file-excel</v-icon>
@@ -171,6 +235,7 @@
                                     !!exportingFormat &&
                                     exportingFormat !== 'json'
                                 "
+                                :size="isMobile ? 'small' : undefined"
                                 data-testid="routes-export-json"
                             >
                                 <v-icon start>mdi-code-json</v-icon>
@@ -181,6 +246,7 @@
                                 @click="handleArchiveClick"
                                 color="warning"
                                 variant="tonal"
+                                :size="isMobile ? 'small' : undefined"
                                 data-testid="routes-archive-selected"
                             >
                                 <v-icon start>mdi-archive-outline</v-icon>
@@ -304,37 +370,28 @@
                         class="mt-4"
                         :title="$t('table.no_data')"
                     />
-                    <v-row v-else ref="mobileListRef" class="mt-2">
-                        <v-col
+                    <div
+                        v-else
+                        ref="mobileListRef"
+                        class="route-manager__rows"
+                        data-testid="routes-rows"
+                    >
+                        <RouteManageRow
                             v-for="route in routes"
                             :key="route.id"
-                            cols="12"
+                            :route="route"
+                            :selected="selectedRouteIds.has(route.id)"
+                            @update:selected="
+                                updateRouteSelection(route, $event)
+                            "
+                            @edit="routeFormRef?.open(route)"
                         >
-                            <RouteCard
-                                :route="route"
-                                selectable
-                                :model-value="selectedRouteIds.has(route.id)"
-                                @update:model-value="
-                                    updateRouteSelection(route, $event)
-                                "
-                            >
-                                <template #actions>
-                                    <RouteViewButton
-                                        :route-id="route.id"
-                                        compact
-                                    />
-                                    <RouteDetails :route_id="route.id" />
-                                    <v-btn
-                                        icon="mdi-pencil-outline"
-                                        variant="text"
-                                        size="small"
-                                        :aria-label="$t('actions.edit')"
-                                        @click="routeFormRef?.open(route)"
-                                    />
-                                </template>
-                            </RouteCard>
-                        </v-col>
-                    </v-row>
+                            <template #actions>
+                                <RouteDetails :route_id="route.id" compact />
+                                <RouteViewButton :route-id="route.id" compact />
+                            </template>
+                        </RouteManageRow>
+                    </div>
 
                     <nav
                         class="route-manager__mobile-pagination"
@@ -864,6 +921,21 @@ useHead(() => ({
     padding-bottom: 64px;
 }
 
+@media (max-width: 1279.98px) {
+    .route-manager {
+        padding-bottom: 0;
+    }
+}
+
+.route-manager__rows {
+    margin-top: 4px;
+    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.route-manager__count {
+    font-weight: 600;
+}
+
 .route-manager__actions {
     display: flex;
     flex-wrap: wrap;
@@ -910,7 +982,6 @@ useHead(() => ({
 .route-manager__mobile-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
 }
 
 .route-manager__mobile-pagination {
@@ -920,7 +991,7 @@ useHead(() => ({
     justify-content: center;
     align-items: center;
     position: sticky;
-    bottom: 0;
+    bottom: var(--v-layout-bottom, 0px);
     z-index: 2;
     padding-block: 8px;
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));

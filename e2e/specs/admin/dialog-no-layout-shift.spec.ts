@@ -17,7 +17,7 @@ test('the route form sheet sits flush and shifts nothing behind it', async ({
     )
 
     const anchors = async () => ({
-        burger: (await page.getByTestId('nav-hamburger').boundingBox())!,
+        logo: (await page.getByTestId('nav-logo').boundingBox())!,
         search: (await page.getByTestId('filter-search').boundingBox())!,
     })
 
@@ -26,7 +26,7 @@ test('the route form sheet sits flush and shifts nothing behind it', async ({
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
     const during = await anchors()
 
-    expect(during.burger.x).toBeCloseTo(before.burger.x, 0)
+    expect(during.logo.x).toBeCloseTo(before.logo.x, 0)
     expect(during.search.x).toBeCloseTo(before.search.x, 0)
     expect(during.search.width).toBeCloseTo(before.search.width, 0)
 

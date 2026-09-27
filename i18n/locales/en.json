@@ -114,7 +114,14 @@
         "reports": "Reports",
         "activity": "Activity",
         "logbook": "Logbook",
-        "view": "View"
+        "view": "View",
+        "map": "Map",
+        "mapEditor": "Map editor",
+        "mapPlacement": "Place routes",
+        "scan": "Scan",
+        "me": "Me",
+        "moreActions": "More actions",
+        "selectedCount": "{n} selected"
     },
     "dashboard": {
         "online": "{0} online"
@@ -271,7 +278,8 @@
         "back_to_home": "Back to home",
         "load_more": "Load more",
         "close": "Close",
-        "export": "Export"
+        "export": "Export",
+        "select_route": "Select {name}"
     },
     "inventory": {
         "title": "Route inventory",
@@ -517,7 +525,12 @@
             "activity": "Activity log - Gripello",
             "verifyEmail": "Verify email - Gripello",
             "emailChange": "Change email - Gripello",
-            "logbook": "Logbook - Gripello"
+            "logbook": "Logbook - Gripello",
+            "map": "Gym map - Gripello",
+            "mapEditor": "Map editor - Gripello",
+            "mapPlacement": "Place routes - Gripello",
+            "scan": "Scan route - Gripello",
+            "me": "My account - Gripello"
         },
         "content": {
             "settings": "Settings",
@@ -583,7 +596,8 @@
         "mainNavigation": "Main navigation",
         "userMenu": "User menu",
         "manage": "Manage",
-        "admin": "Admin"
+        "admin": "Admin",
+        "quickNavigation": "Quick navigation"
     },
     "users": {
         "create": "Add user",
@@ -966,5 +980,139 @@
             "subtitleNew": "The newest routes in the gym",
             "new": "New"
         }
+    },
+    "map": {
+        "title": "Gym map",
+        "description": "Find routes on the gym map and see what you still have to climb.",
+        "label": "Gym map. Drag to move, pinch or use + and − to zoom.",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "fit": "Show whole map",
+        "wallSentLabel": "{name}, {sent} of {total} sent",
+        "wallTotalLabel": "{name}, {total} routes",
+        "noMap": "No map for this location yet.",
+        "openList": "Open route list",
+        "filters": "Filter routes",
+        "clearFilters": "Reset",
+        "showResults": "Show {n} routes",
+        "close": "Close",
+        "allWalls": "All walls",
+        "allRoutes": "All routes",
+        "showOnMap": "Show on map",
+        "showList": "Show list ({n})",
+        "showWallList": "{name} · {n} routes",
+        "notOnMap": "Not on the map",
+        "wall": "Wall",
+        "unsent": "Not sent",
+        "boulders": "Boulders",
+        "routes": "Routes",
+        "wallHint": "Where the route sits on the gym map. Fine-tune it under Place routes."
+    },
+    "mapEditor": {
+        "title": "Map editor",
+        "largerScreen": "The map editor needs a larger screen. Open this page on a tablet or computer.",
+        "noLocations": "Add a location in the settings first.",
+        "setupTitle": "Create a floor plan",
+        "setupIntro": "Enter the size of the hall. You can draw mats, structures and walls afterwards.",
+        "width": "Width",
+        "height": "Depth",
+        "create": "Create",
+        "grid": "Grid",
+        "gridOff": "Off",
+        "undo": "Undo",
+        "redo": "Redo",
+        "preview": "Preview",
+        "backToEditing": "Edit",
+        "save": "Save",
+        "saved": "Map saved.",
+        "saveFailed": "Could not save. Wall names must be unique, and a wall that still has routes cannot be deleted.",
+        "discard": "Discard your unsaved map changes?",
+        "canvasLabel": "Map drawing area",
+        "walls": "Walls",
+        "newWall": "New wall name",
+        "addWall": "Add",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "wallName": "Name",
+        "drawOutline": "Draw outline",
+        "drawEdge": "Draw climbing edge",
+        "placeLabel": "Place label",
+        "deleteWall": "Delete wall",
+        "shapes": "Floor, mats and structures",
+        "shapeKind": "Type",
+        "deleteShape": "Delete shape",
+        "canvas": "Hall size",
+        "apply": "Apply",
+        "resizeTooSmall": "The hall cannot be smaller than what is already drawn (5–500 m).",
+        "trace": "Tracing image",
+        "traceHint": "Upload the technical drawing and trace over it. Climbers never see this image.",
+        "uploadTrace": "Upload drawing",
+        "replaceTrace": "Replace drawing",
+        "removeTrace": "Remove",
+        "traceOpacity": "Opacity",
+        "kinds": {
+            "floor": "Floor",
+            "mat": "Mat",
+            "structure": "Structure"
+        },
+        "missing": {
+            "name": "Name missing",
+            "outline": "Outline missing",
+            "edge": "Climbing edge missing"
+        },
+        "tools": {
+            "select": "Select"
+        },
+        "hints": {
+            "select": "Click a shape or wall to edit it. Drag the empty area to move the view, scroll to zoom.",
+            "selected": "Drag to move it, drag the points to reshape, click a small square to add a point. Delete removes the selected point.",
+            "polygon": "Click to add points. Click the first point, double-click or press Enter to finish. Esc cancels.",
+            "edge": "Now draw the climbing edge of \"{name}\": click along the face climbers stand in front of, left to right. Double-click or press Enter to finish.",
+            "label": "Click where the wall name should appear.",
+            "outline": "Draw the outline of \"{name}\": click the corners, then click the first point, double-click or press Enter.",
+            "incomplete": "\"{name}\" is not finished yet ({missing}). Select it and use the highlighted button before saving."
+        }
+    },
+    "mapPlacement": {
+        "title": "Place routes",
+        "noMap": "This location has no map yet.",
+        "discard": "Discard",
+        "save": "Save ({n})",
+        "saved": "Route positions saved.",
+        "wallRoutes": "{n} routes on this wall",
+        "distribute": "Spread evenly by anchor",
+        "unplaced": "Not placed ({n})",
+        "placed": "On the map ({n})",
+        "remove": "Remove from map",
+        "canvasLabel": "Route placement map",
+        "hints": {
+            "idle": "Drag a route from the list onto a wall, or click a route and then the wall. Drag dots to move them.",
+            "armed": "Click on a wall to place \"{name}\". Esc cancels.",
+            "selected": "Drag the dot of \"{name}\" to its spot on the wall, or onto another wall. Delete removes it from the map."
+        }
+    },
+    "scan": {
+        "title": "Scan a route",
+        "intro": "Point the camera at the QR code on a route sign to open the route and log your ascent.",
+        "start": "Start camera",
+        "aim": "Hold the QR code inside the frame.",
+        "opening": "Opening route…",
+        "notARoute": "This code is not a route of this gym.",
+        "cameraError": "The camera could not be started. Allow camera access in your browser and try again.",
+        "findOnMap": "Find the route on the map instead",
+        "center": "Move the sign you want into the frame.",
+        "unknownRoute": "Not a route here",
+        "starting": "Starting camera… Allow camera access if your browser asks."
+    },
+    "me": {
+        "title": "My account",
+        "guestTitle": "Sign in to log your climbs",
+        "guestIntro": "Track your sends, see what you still have to climb and rate routes.",
+        "register": "Create account",
+        "profileHint": "Name, avatar, language, password",
+        "staff": "Gym team",
+        "info": "Info",
+        "version": "Version & release notes",
+        "status": "Server status"
     }
 }

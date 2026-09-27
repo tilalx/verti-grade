@@ -80,6 +80,19 @@
                             data-testid="index-filter-location"
                         />
                     </v-col>
+                    <v-col v-if="walls.length > 1" cols="12" sm="4">
+                        <v-select
+                            :label="$t('map.wall')"
+                            :items="walls"
+                            v-model="selectedWall"
+                            item-title="text"
+                            item-value="value"
+                            clearable
+                            hide-details
+                            density="compact"
+                            data-testid="index-filter-wall"
+                        />
+                    </v-col>
                 </v-row>
             </template>
         </FilterBar>
@@ -126,6 +139,12 @@
                 </template>
                 <template #item.anchor_point="{ item }">
                     <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
+                    <span
+                        v-if="wallName(item)"
+                        class="route-wall"
+                        data-testid="index-row-wall"
+                        >{{ wallName(item) }}</span
+                    >
                 </template>
                 <template #item.comment="{ item }">
                     <div class="route-comment">{{ item.comment }}</div>
@@ -210,6 +229,7 @@ import {
     formatScore,
     normalizeCreators,
     formatDate,
+    wallName,
 } from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
 
@@ -226,9 +246,11 @@ const {
     selectedDifficulty,
     selectedType,
     selectedLocation,
+    selectedWall,
     difficulties,
     types,
     locations,
+    walls,
     activeFilterCount,
     pbFilter: baseFilter,
     clearFilters,
@@ -331,7 +353,7 @@ async function loadRoutes(
                 {
                     filter: pbFilter.value,
                     sort,
-                    expand: 'location',
+                    expand: 'location,wall',
                 },
             )
 
@@ -432,6 +454,15 @@ onBeforeUnmount(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.route-wall {
+    display: block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 }
 .route-comment {
     min-width: 200px;
