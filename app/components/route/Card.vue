@@ -101,6 +101,14 @@
                     <v-icon size="13">mdi-map-marker-outline</v-icon>
                     {{ locationName(route) }}
                 </span>
+                <span
+                    v-if="wallName(route)"
+                    class="list-card__pill"
+                    data-testid="route-card-wall"
+                >
+                    <v-icon size="13">mdi-wall</v-icon>
+                    {{ wallName(route) }}
+                </span>
                 <span v-if="route.type" class="list-card__pill">
                     <v-icon size="13">mdi-shape</v-icon>
                     {{ route.type }}
@@ -126,6 +134,7 @@ import {
     formatScore,
     formatDate,
     locationName,
+    wallName,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
 

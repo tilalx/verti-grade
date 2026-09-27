@@ -126,7 +126,7 @@ import {
     resolveImportedGrading,
     type ImportedGrading,
 } from '#shared/utils/grades'
-import type { UserRecord } from '~/types/models'
+import type { UserRecord, WallRecord } from '~/types/models'
 
 interface ImportedRating extends ImportedGrading {
     rating?: unknown
@@ -144,6 +144,8 @@ interface ImportedRoute extends ImportedGrading {
     screw_date?: string | null
     color?: string | null
     archived?: unknown
+    wall?: unknown
+    wall_position?: unknown
     ratings?: ImportedRating[]
     ratingsCount?: number
 }
@@ -228,6 +230,12 @@ const confirmImport = async () => {
                 location.id,
             ]),
         )
+        const walls = await pb
+            .collection('walls')
+            .getFullList<WallRecord>({ fields: 'id,name,location' })
+        const wallIdByKey = new Map(
+            walls.map((wall) => [wallKey(wall.location, wall.name), wall.id]),
+        )
         let failedRoutes = 0
         let failedRatings = 0
 
@@ -240,6 +248,7 @@ const confirmImport = async () => {
                             route,
                             fallbackCreator,
                             locationIdByName,
+                            wallIdByKey,
                         ),
                     )
 
@@ -306,12 +315,31 @@ const confirmImport = async () => {
     }
 }
 
+function importedPosition(value: unknown) {
+    const position = Number(value)
+    return value !== null && Number.isFinite(position) ? position : 0.5
+}
+
+function wallKey(locationId: string, name: string) {
+    return `${locationId}:${name.trim().toLowerCase()}`
+}
+
 function sanitizeRoutePayload(
     route: ImportedRoute,
     fallbackCreator: string,
     locationIdByName: Map<string, string>,
+    wallIdByKey: Map<string, string>,
 ) {
     const normalizedCreators = normalizeCreators(route.creator)
+    const location =
+        typeof route.location === 'string'
+            ? (locationIdByName.get(route.location.trim().toLowerCase()) ??
+              null)
+            : null
+    const wall =
+        location && typeof route.wall === 'string'
+            ? (wallIdByKey.get(wallKey(location, route.wall)) ?? '')
+            : ''
 
     return {
         name: typeof route.name === 'string' ? route.name : '',
@@ -319,11 +347,9 @@ function sanitizeRoutePayload(
         anchor_point: Number.isFinite(Number(route.anchor_point))
             ? Number(route.anchor_point)
             : null,
-        location:
-            typeof route.location === 'string'
-                ? (locationIdByName.get(route.location.trim().toLowerCase()) ??
-                  null)
-                : null,
+        location,
+        wall,
+        wall_position: wall ? importedPosition(route.wall_position) : null,
         type: route.type || null,
         comment: typeof route.comment === 'string' ? route.comment : '',
         creator:

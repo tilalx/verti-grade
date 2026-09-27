@@ -114,7 +114,14 @@
         "reports": "Meldungen",
         "activity": "Aktivität",
         "logbook": "Logbuch",
-        "view": "Ansehen"
+        "view": "Ansehen",
+        "map": "Plan",
+        "mapEditor": "Plan-Editor",
+        "mapPlacement": "Routen platzieren",
+        "scan": "Scannen",
+        "me": "Ich",
+        "moreActions": "Weitere Aktionen",
+        "selectedCount": "{n} ausgewählt"
     },
     "dashboard": {
         "online": "{0} online"
@@ -271,7 +278,8 @@
         "back_to_home": "Zurück zur Startseite",
         "load_more": "Mehr laden",
         "close": "Schließen",
-        "export": "Exportieren"
+        "export": "Exportieren",
+        "select_route": "{name} auswählen"
     },
     "inventory": {
         "title": "Routeninventur",
@@ -517,7 +525,12 @@
             "activity": "Aktivitätsprotokoll - Gripello",
             "verifyEmail": "E-Mail bestätigen - Gripello",
             "emailChange": "E-Mail ändern - Gripello",
-            "logbook": "Logbuch - Gripello"
+            "logbook": "Logbuch - Gripello",
+            "map": "Hallenplan - Gripello",
+            "mapEditor": "Plan-Editor - Gripello",
+            "mapPlacement": "Routen platzieren - Gripello",
+            "scan": "Route scannen - Gripello",
+            "me": "Mein Konto - Gripello"
         },
         "content": {
             "settings": "Einstellungen",
@@ -583,7 +596,8 @@
         "mainNavigation": "Hauptnavigation",
         "userMenu": "Benutzermenü",
         "manage": "Verwalten",
-        "admin": "Administration"
+        "admin": "Administration",
+        "quickNavigation": "Schnellnavigation"
     },
     "users": {
         "create": "Benutzer hinzufügen",
@@ -966,5 +980,139 @@
             "subtitleNew": "Die neuesten Routen der Halle",
             "new": "Neu"
         }
+    },
+    "map": {
+        "title": "Hallenplan",
+        "description": "Finde Routen auf dem Hallenplan und sieh, was du noch klettern kannst.",
+        "label": "Hallenplan. Ziehen zum Verschieben, mit zwei Fingern oder + und − zoomen.",
+        "zoomIn": "Vergrößern",
+        "zoomOut": "Verkleinern",
+        "fit": "Ganzen Plan zeigen",
+        "wallSentLabel": "{name}, {sent} von {total} geschafft",
+        "wallTotalLabel": "{name}, {total} Routen",
+        "noMap": "Für diesen Standort gibt es noch keinen Plan.",
+        "openList": "Routenliste öffnen",
+        "filters": "Routen filtern",
+        "clearFilters": "Zurücksetzen",
+        "showResults": "{n} Routen zeigen",
+        "close": "Schließen",
+        "allWalls": "Alle Wände",
+        "allRoutes": "Alle Routen",
+        "showOnMap": "Auf dem Plan zeigen",
+        "showList": "Liste zeigen ({n})",
+        "showWallList": "{name} · {n} Routen",
+        "notOnMap": "Nicht auf dem Plan",
+        "wall": "Wand",
+        "unsent": "Offen",
+        "boulders": "Boulder",
+        "routes": "Routen",
+        "wallHint": "Wo die Route auf dem Hallenplan liegt. Feinjustieren unter „Routen platzieren“."
+    },
+    "mapEditor": {
+        "title": "Plan-Editor",
+        "largerScreen": "Der Plan-Editor braucht einen größeren Bildschirm. Öffne die Seite auf einem Tablet oder Computer.",
+        "noLocations": "Lege zuerst in den Einstellungen einen Standort an.",
+        "setupTitle": "Grundriss anlegen",
+        "setupIntro": "Gib die Größe der Halle ein. Matten, Einbauten und Wände zeichnest du danach.",
+        "width": "Breite",
+        "height": "Tiefe",
+        "create": "Anlegen",
+        "grid": "Raster",
+        "gridOff": "Aus",
+        "undo": "Rückgängig",
+        "redo": "Wiederholen",
+        "preview": "Vorschau",
+        "backToEditing": "Bearbeiten",
+        "save": "Speichern",
+        "saved": "Plan gespeichert.",
+        "saveFailed": "Speichern fehlgeschlagen. Wandnamen müssen eindeutig sein, und eine Wand mit Routen kann nicht gelöscht werden.",
+        "discard": "Ungespeicherte Änderungen am Plan verwerfen?",
+        "canvasLabel": "Zeichenfläche des Plans",
+        "walls": "Wände",
+        "newWall": "Name der neuen Wand",
+        "addWall": "Hinzufügen",
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "wallName": "Name",
+        "drawOutline": "Umriss zeichnen",
+        "drawEdge": "Kletterkante zeichnen",
+        "placeLabel": "Beschriftung setzen",
+        "deleteWall": "Wand löschen",
+        "shapes": "Boden, Matten und Einbauten",
+        "shapeKind": "Art",
+        "deleteShape": "Form löschen",
+        "canvas": "Hallengröße",
+        "apply": "Übernehmen",
+        "resizeTooSmall": "Die Halle kann nicht kleiner sein als das bereits Gezeichnete (5–500 m).",
+        "trace": "Vorlage",
+        "traceHint": "Lade die technische Zeichnung hoch und zeichne darüber. Kletternde sehen dieses Bild nie.",
+        "uploadTrace": "Zeichnung hochladen",
+        "replaceTrace": "Zeichnung ersetzen",
+        "removeTrace": "Entfernen",
+        "traceOpacity": "Deckkraft",
+        "kinds": {
+            "floor": "Boden",
+            "mat": "Matte",
+            "structure": "Einbau"
+        },
+        "missing": {
+            "name": "Name fehlt",
+            "outline": "Umriss fehlt",
+            "edge": "Kletterkante fehlt"
+        },
+        "tools": {
+            "select": "Auswählen"
+        },
+        "hints": {
+            "select": "Klicke eine Form oder Wand an, um sie zu bearbeiten. Ziehe die leere Fläche zum Verschieben, scrolle zum Zoomen.",
+            "selected": "Ziehen zum Verschieben, Punkte ziehen zum Umformen, kleines Quadrat klicken fügt einen Punkt hinzu. Entf löscht den gewählten Punkt.",
+            "polygon": "Klicke, um Punkte zu setzen. Ersten Punkt anklicken, doppelklicken oder Enter drücken zum Abschließen. Esc bricht ab.",
+            "edge": "Zeichne jetzt die Kletterkante von „{name}“: entlang der Fläche klicken, vor der man steht, von links nach rechts. Doppelklick oder Enter zum Abschließen.",
+            "label": "Klicke dorthin, wo der Wandname stehen soll.",
+            "outline": "Zeichne den Umriss von „{name}“: Ecken anklicken, dann den ersten Punkt anklicken, doppelklicken oder Enter drücken.",
+            "incomplete": "„{name}“ ist noch nicht fertig ({missing}). Wähle die Wand und nutze den markierten Knopf, bevor du speicherst."
+        }
+    },
+    "mapPlacement": {
+        "title": "Routen platzieren",
+        "noMap": "Für diesen Standort gibt es noch keinen Plan.",
+        "discard": "Verwerfen",
+        "save": "Speichern ({n})",
+        "saved": "Routenpositionen gespeichert.",
+        "wallRoutes": "{n} Routen an dieser Wand",
+        "distribute": "Gleichmäßig nach Umlenker verteilen",
+        "unplaced": "Nicht platziert ({n})",
+        "placed": "Auf dem Plan ({n})",
+        "remove": "Vom Plan entfernen",
+        "canvasLabel": "Plan zum Platzieren der Routen",
+        "hints": {
+            "idle": "Ziehe eine Route aus der Liste an eine Wand oder klicke erst die Route, dann die Wand. Punkte lassen sich verschieben.",
+            "armed": "Klicke auf eine Wand, um „{name}“ zu platzieren. Esc bricht ab.",
+            "selected": "Ziehe den Punkt von „{name}“ an die richtige Stelle der Wand oder an eine andere Wand. Entf entfernt ihn vom Plan."
+        }
+    },
+    "scan": {
+        "title": "Route scannen",
+        "intro": "Richte die Kamera auf den QR-Code am Routenschild, um die Route zu öffnen und deinen Durchstieg einzutragen.",
+        "start": "Kamera starten",
+        "aim": "Halte den QR-Code in den Rahmen.",
+        "opening": "Route wird geöffnet…",
+        "notARoute": "Dieser Code gehört zu keiner Route dieser Halle.",
+        "cameraError": "Die Kamera konnte nicht gestartet werden. Erlaube den Kamerazugriff im Browser und versuche es erneut.",
+        "findOnMap": "Route stattdessen auf dem Plan suchen",
+        "center": "Bewege das gewünschte Schild in den Rahmen.",
+        "unknownRoute": "Keine Route hier",
+        "starting": "Kamera wird gestartet… Erlaube den Kamerazugriff, falls dein Browser fragt."
+    },
+    "me": {
+        "title": "Mein Konto",
+        "guestTitle": "Melde dich an, um deine Begehungen einzutragen",
+        "guestIntro": "Verfolge deine Durchstiege, sieh was noch fehlt und bewerte Routen.",
+        "register": "Konto erstellen",
+        "profileHint": "Name, Bild, Sprache, Passwort",
+        "staff": "Hallenteam",
+        "info": "Info",
+        "version": "Version & Neuerungen",
+        "status": "Serverstatus"
     }
 }

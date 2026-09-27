@@ -1,5 +1,6 @@
 import { ROUTE_TYPES } from '~/utils/routes'
 import { routeSearchFilter } from '~/utils/routeSearch'
+import type { WallRecord } from '~/types/models'
 
 export function useRouteFilters() {
     const { t } = useI18n()
@@ -10,6 +11,36 @@ export function useRouteFilters() {
     const selectedDifficulty = ref('')
     const selectedType = ref('')
     const selectedLocation = ref('')
+    const selectedWall = ref('')
+    const pb = usePocketbase()
+
+    const { data: wallRecords } = useAsyncData(
+        () => `route-filter-walls-${selectedLocation.value}`,
+        () =>
+            selectedLocation.value
+                ? pb.collection('walls').getFullList<WallRecord>({
+                      filter: pb.filter('location = {:id}', {
+                          id: selectedLocation.value,
+                      }),
+                      sort: 'sort,name',
+                      fields: 'id,name',
+                      requestKey: null,
+                  })
+                : Promise.resolve([]),
+        { default: () => [], server: false },
+    )
+
+    watch(selectedLocation, () => {
+        selectedWall.value = ''
+    })
+
+    const walls = computed(() => [
+        { text: t('filter.all'), value: '' },
+        ...wallRecords.value.map((wall) => ({
+            text: wall.name,
+            value: wall.id,
+        })),
+    ])
 
     const difficulties = computed(() => [
         { text: t('filter.all'), value: '' },
@@ -38,6 +69,7 @@ export function useRouteFilters() {
                 selectedDifficulty.value,
                 selectedType.value,
                 selectedLocation.value,
+                selectedWall.value,
             ].filter(Boolean).length,
     )
 
@@ -47,6 +79,7 @@ export function useRouteFilters() {
             parts.push(gradeFilterClause(selectedDifficulty.value))
         if (selectedLocation.value)
             parts.push(`location = "${selectedLocation.value}"`)
+        if (selectedWall.value) parts.push(`wall = "${selectedWall.value}"`)
         if (selectedType.value) parts.push(`type = "${selectedType.value}"`)
         const search = routeSearchFilter(searchRouteName.value)
         if (search) parts.push(search)
@@ -58,6 +91,7 @@ export function useRouteFilters() {
         selectedDifficulty.value = ''
         selectedType.value = ''
         selectedLocation.value = ''
+        selectedWall.value = ''
     }
 
     return {
@@ -65,9 +99,11 @@ export function useRouteFilters() {
         selectedDifficulty,
         selectedType,
         selectedLocation,
+        selectedWall,
         difficulties,
         types,
         locations,
+        walls,
         activeFilterCount,
         pbFilter,
         clearFilters,

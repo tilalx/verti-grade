@@ -67,16 +67,6 @@
                         <div class="d-none d-lg-flex">
                             <UserIcon />
                         </div>
-                        <v-btn
-                            icon
-                            variant="text"
-                            class="nav-hamburger d-lg-none"
-                            data-testid="nav-hamburger"
-                            @click="drawer = !drawer"
-                            :aria-label="$t('nav.openMenu')"
-                        >
-                            <v-icon>mdi-menu</v-icon>
-                        </v-btn>
                     </template>
                     <v-btn
                         v-else
@@ -91,51 +81,12 @@
                 </div>
             </div>
         </v-app-bar>
-
-        <!-- Mobile Drawer -->
-        <v-navigation-drawer
-            v-model="drawer"
-            location="right"
-            temporary
-            width="260"
-            class="mobile-drawer"
-            data-testid="nav-drawer"
-            :aria-label="$t('nav.mainNavigation')"
-        >
-            <v-list nav density="compact" class="drawer-list">
-                <template v-for="item in visibleNav" :key="item.key">
-                    <v-list-subheader v-if="item.children" class="drawer-group">
-                        {{ $t(item.label) }}
-                    </v-list-subheader>
-                    <v-list-item
-                        v-for="link in item.children ?? [item]"
-                        :key="link.to"
-                        :to="link.to"
-                        :prepend-icon="link.icon"
-                        :title="$t(link.label)"
-                        rounded="lg"
-                        class="drawer-item"
-                        active-class="drawer-item--active"
-                        :data-testid="`nav-drawer-link-${navTestId(link.to)}`"
-                        @click="drawer = false"
-                    />
-                </template>
-            </v-list>
-
-            <template #append>
-                <v-divider class="mx-4 mb-3" />
-                <div class="drawer-footer">
-                    <UserIcon v-if="isLoggedIn && !lgAndUp" />
-                </div>
-            </template>
-        </v-navigation-drawer>
-
-        <v-divider />
     </template>
 </template>
 
 <script setup lang="ts">
 import type { SettingsRecord } from '~/types/models'
+import { visibleNavItems } from '~/utils/navigation'
 const theme = useTheme()
 const { mode: themeMode, cycleMode } = useThemeMode()
 const themeModeIcon = computed(
@@ -154,7 +105,6 @@ const themeModeLabel = computed(
             dark: 'nav.themeDark',
         })[themeMode.value],
 )
-const { lgAndUp } = useDisplay()
 
 const props = defineProps<{
     loggedIn: boolean
@@ -166,92 +116,7 @@ const logoAlt = computed(() => settings.value?.organization_name || 'Gripello')
 
 const { can } = usePermissions()
 
-const navItems = [
-    {
-        key: 'home',
-        to: '/',
-        icon: 'mdi-home-outline',
-        label: 'routes.home',
-    },
-    {
-        key: 'logbook',
-        to: '/logbook',
-        icon: 'mdi-notebook-check-outline',
-        label: 'routes.logbook',
-    },
-    {
-        key: 'routes',
-        to: '/manage/routes',
-        icon: 'mdi-map-marker-path',
-        label: 'routes.dashboard',
-        permission: 'manage_routes',
-    },
-    {
-        key: 'manage',
-        icon: 'mdi-tune-variant',
-        label: 'nav.manage',
-        children: [
-            {
-                to: '/manage/comments',
-                icon: 'mdi-comment-outline',
-                label: 'routes.comments',
-                permission: 'manage_comments',
-            },
-            {
-                to: '/manage/reports',
-                icon: 'mdi-flag-outline',
-                label: 'routes.reports',
-                permission: 'manage_reports',
-            },
-            {
-                to: '/manage/analytics',
-                icon: 'mdi-chart-line',
-                label: 'routes.analytics',
-                permission: 'view_analytics',
-            },
-            {
-                to: '/manage/inventory',
-                icon: 'mdi-package-variant-closed',
-                label: 'routes.inventory',
-                permission: 'run_inventory',
-            },
-        ],
-    },
-    {
-        key: 'admin',
-        icon: 'mdi-shield-account-outline',
-        label: 'nav.admin',
-        children: [
-            {
-                to: '/admin/users',
-                icon: 'mdi-account-group-outline',
-                label: 'routes.users',
-                permission: 'manage_users',
-            },
-            {
-                to: '/admin/settings',
-                icon: 'mdi-cog-outline',
-                label: 'routes.settings',
-                permission: 'manage_settings',
-            },
-        ],
-    },
-]
-
-const allowed = (entry: { permission?: string }) =>
-    !entry.permission || can(entry.permission)
-
-const visibleNav = computed(() =>
-    navItems
-        .map((item) =>
-            item.children
-                ? { ...item, children: item.children.filter(allowed) }
-                : item,
-        )
-        .filter((item) =>
-            item.children ? item.children.length > 0 : allowed(item),
-        ),
-)
+const visibleNav = computed(() => visibleNavItems(can))
 
 const paletteLinks = computed(() =>
     visibleNav.value.flatMap(
@@ -263,10 +128,6 @@ const paletteLinks = computed(() =>
             }[],
     ),
 )
-
-watch(lgAndUp, (isDesktop) => {
-    if (isDesktop) drawer.value = false
-})
 
 const logo_url = computed(() =>
     usePbFileUrl(settings.value, settings.value?.page_logo, { thumb: '0x200' }),
@@ -284,7 +145,6 @@ const defaultLogoStyle = {
 }
 
 const isLoggedIn = computed(() => loggedIn.value)
-const drawer = ref(false)
 </script>
 
 <style scoped>
@@ -322,44 +182,9 @@ const drawer = ref(false)
     gap: 4px;
 }
 
-.nav-hamburger {
-    opacity: 0.8;
-}
-
 .nav-login-btn {
     font-weight: 600;
     letter-spacing: 0.01em;
     font-size: 0.85rem;
-}
-
-.mobile-drawer {
-    background: rgb(var(--v-theme-surface));
-}
-
-.drawer-header {
-    display: flex;
-    align-items: center;
-    padding: 16px 16px 12px;
-}
-
-.drawer-list {
-    padding: 0 8px;
-}
-
-.drawer-item {
-    margin-bottom: 2px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    transition: background 0.15s ease;
-}
-
-.drawer-item--active {
-    background: rgba(var(--v-theme-primary), 0.12);
-    color: rgb(var(--v-theme-primary));
-}
-
-.drawer-footer {
-    padding: 8px 16px 20px;
 }
 </style>

@@ -4,6 +4,7 @@ import type { RouteRecord, SettingsRecord } from '../../types/models'
 import {
     formatDate,
     locationName,
+    wallName,
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
@@ -170,6 +171,7 @@ export const ROUTE_EXPORT_COLUMNS: ExportColumn[] = [
         header: 'Location',
         value: (r) => locationName(r),
     },
+    { key: 'wall', header: 'Wall', value: (r) => wallName(r) },
     { key: 'type', header: 'Type', value: (r) => r.type ?? '' },
     {
         key: 'screw_date',

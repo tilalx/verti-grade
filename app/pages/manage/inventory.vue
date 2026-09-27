@@ -64,7 +64,7 @@
                     <div class="d-flex flex-wrap align-center ga-3">
                         <div
                             v-if="!locationLocked"
-                            class="d-flex ga-1"
+                            class="inventory-locations d-flex ga-1"
                             role="group"
                             :aria-label="$t('inventory.locationLabel')"
                             data-testid="inventory-location"
@@ -1027,6 +1027,16 @@ watch(instructionsDialog, (open) => {
 .progress-group {
     flex: 1 1 140px;
     min-width: 140px;
+}
+
+.inventory-locations {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.inventory-locations > * {
+    flex-shrink: 0;
 }
 
 .scanner-viewport {

@@ -1,6 +1,17 @@
 <template>
     <div class="view-ratings-wrapper">
         <v-btn
+            v-if="compact"
+            icon="mdi-star-outline"
+            variant="text"
+            size="small"
+            :aria-label="$t('ratings.ratings')"
+            :title="$t('ratings.ratings')"
+            data-testid="route-details-open"
+            @click="openSheet"
+        />
+        <v-btn
+            v-else
             color="primary"
             data-testid="route-details-open"
             @click="openSheet"
@@ -70,6 +81,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
     route_id: string
+    compact?: boolean
 }>()
 
 const pb = usePocketbase() as PocketBase

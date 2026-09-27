@@ -21,7 +21,10 @@ defineProps<{
                 {{ subtitle }}
             </p>
         </div>
-        <div v-if="$slots.actions" class="d-flex align-center ga-2">
+        <div
+            v-if="$slots.actions"
+            class="page-header__actions d-flex flex-wrap align-center ga-2"
+        >
             <slot name="actions" />
         </div>
     </header>

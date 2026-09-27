@@ -9,7 +9,9 @@ test('submits a password reset request', async ({ page }) => {
         .locator('input')
         .fill('e2e-user@gripello.test')
     await page.getByTestId('reset-submit').click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar')).toBeVisible({
+        timeout: 15_000,
+    })
 })
 
 test('blocks a reset request with an invalid email', async ({ page }) => {

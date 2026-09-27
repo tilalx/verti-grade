@@ -8,6 +8,7 @@ func Register(app core.App) {
 	registerCaptcha(app)
 	registerUserGuards(app)
 	registerLocationGuards(app)
+	registerMapGuards(app)
 	registerRouteArchiveStamp(app)
 	registerTicks(app)
 	registerReports(app)

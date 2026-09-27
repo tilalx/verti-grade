@@ -114,7 +114,14 @@
         "reports": "Şikâyetler",
         "activity": "Etkinlik",
         "logbook": "Kayıt defteri",
-        "view": "Görüntüle"
+        "view": "Görüntüle",
+        "map": "Harita",
+        "mapEditor": "Harita düzenleyici",
+        "mapPlacement": "Rotaları yerleştir",
+        "scan": "Tara",
+        "me": "Ben",
+        "moreActions": "Diğer işlemler",
+        "selectedCount": "{n} seçildi"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -271,7 +278,8 @@
         "back_to_home": "Ana Sayfaya Dön",
         "load_more": "Daha fazla yükle",
         "close": "Kapat",
-        "export": "Dışa aktar"
+        "export": "Dışa aktar",
+        "select_route": "{name} seç"
     },
     "inventory": {
         "title": "Rota envanteri",
@@ -517,7 +525,12 @@
             "activity": "Etkinlik Günlüğü - Gripello",
             "verifyEmail": "E-posta Doğrulama - Gripello",
             "emailChange": "E-posta Değiştirme - Gripello",
-            "logbook": "Kayıt defteri - Gripello"
+            "logbook": "Kayıt defteri - Gripello",
+            "map": "Salon haritası - Gripello",
+            "mapEditor": "Harita düzenleyici - Gripello",
+            "mapPlacement": "Rotaları yerleştir - Gripello",
+            "scan": "Rota tara - Gripello",
+            "me": "Hesabım - Gripello"
         },
         "content": {
             "settings": "Ayarlar",
@@ -583,7 +596,8 @@
         "mainNavigation": "Ana gezinme",
         "userMenu": "Kullanıcı menüsü",
         "manage": "Yönetim",
-        "admin": "Yönetici"
+        "admin": "Yönetici",
+        "quickNavigation": "Hızlı gezinme"
     },
     "permissions": {
         "title": "Roller ve yetkiler",
@@ -966,5 +980,139 @@
             "subtitleNew": "Salonun en yeni rotaları",
             "new": "Yeni"
         }
+    },
+    "map": {
+        "title": "Salon haritası",
+        "description": "Rotaları salon haritasında bul ve hâlâ tırmanman gerekenleri gör.",
+        "label": "Salon haritası. Kaydırmak için sürükle, iki parmakla ya da + ve − ile yakınlaştır.",
+        "zoomIn": "Yakınlaştır",
+        "zoomOut": "Uzaklaştır",
+        "fit": "Tüm haritayı göster",
+        "wallSentLabel": "{name}, {total} rotadan {sent} tamamlandı",
+        "wallTotalLabel": "{name}, {total} rota",
+        "noMap": "Bu konum için henüz harita yok.",
+        "openList": "Rota listesini aç",
+        "filters": "Rotaları filtrele",
+        "clearFilters": "Sıfırla",
+        "showResults": "{n} rotayı göster",
+        "close": "Kapat",
+        "allWalls": "Tüm duvarlar",
+        "allRoutes": "Tüm rotalar",
+        "showOnMap": "Haritada göster",
+        "showList": "Listeyi göster ({n})",
+        "showWallList": "{name} · {n} rota",
+        "notOnMap": "Haritada değil",
+        "wall": "Duvar",
+        "unsent": "Tamamlanmadı",
+        "boulders": "Boulder",
+        "routes": "Rotalar",
+        "wallHint": "Rotanın salon haritasındaki yeri. Ayrıntılı ayar için \"Rotaları yerleştir\"e git."
+    },
+    "mapEditor": {
+        "title": "Harita düzenleyici",
+        "largerScreen": "Harita düzenleyici daha büyük bir ekran gerektirir. Bu sayfayı tablet veya bilgisayarda aç.",
+        "noLocations": "Önce ayarlardan bir konum ekle.",
+        "setupTitle": "Kat planı oluştur",
+        "setupIntro": "Salonun boyutunu gir. Minderleri, yapıları ve duvarları sonra çizebilirsin.",
+        "width": "Genişlik",
+        "height": "Derinlik",
+        "create": "Oluştur",
+        "grid": "Izgara",
+        "gridOff": "Kapalı",
+        "undo": "Geri al",
+        "redo": "Yinele",
+        "preview": "Önizleme",
+        "backToEditing": "Düzenle",
+        "save": "Kaydet",
+        "saved": "Harita kaydedildi.",
+        "saveFailed": "Kaydedilemedi. Duvar adları benzersiz olmalı ve hâlâ rotası olan bir duvar silinemez.",
+        "discard": "Kaydedilmemiş harita değişiklikleri silinsin mi?",
+        "canvasLabel": "Harita çizim alanı",
+        "walls": "Duvarlar",
+        "newWall": "Yeni duvar adı",
+        "addWall": "Ekle",
+        "moveUp": "Yukarı taşı",
+        "moveDown": "Aşağı taşı",
+        "wallName": "Ad",
+        "drawOutline": "Dış hattı çiz",
+        "drawEdge": "Tırmanış kenarını çiz",
+        "placeLabel": "Etiketi yerleştir",
+        "deleteWall": "Duvarı sil",
+        "shapes": "Zemin, minderler ve yapılar",
+        "shapeKind": "Tür",
+        "deleteShape": "Şekli sil",
+        "canvas": "Salon boyutu",
+        "apply": "Uygula",
+        "resizeTooSmall": "Salon, çizilmiş olanlardan küçük olamaz (5–500 m).",
+        "trace": "Çizim altlığı",
+        "traceHint": "Teknik çizimi yükle ve üzerinden çiz. Tırmanıcılar bu görseli asla görmez.",
+        "uploadTrace": "Çizimi yükle",
+        "replaceTrace": "Çizimi değiştir",
+        "removeTrace": "Kaldır",
+        "traceOpacity": "Opaklık",
+        "kinds": {
+            "floor": "Zemin",
+            "mat": "Minder",
+            "structure": "Yapı"
+        },
+        "missing": {
+            "name": "Ad eksik",
+            "outline": "Dış hat eksik",
+            "edge": "Tırmanış kenarı eksik"
+        },
+        "tools": {
+            "select": "Seç"
+        },
+        "hints": {
+            "select": "Düzenlemek için bir şekle veya duvara tıkla. Görünümü taşımak için boş alanı sürükle, yakınlaştırmak için kaydır.",
+            "selected": "Taşımak için sürükle, şekli değiştirmek için noktaları sürükle, nokta eklemek için küçük kareye tıkla. Delete seçili noktayı siler.",
+            "polygon": "Nokta eklemek için tıkla. Bitirmek için ilk noktaya tıkla, çift tıkla veya Enter’a bas. Esc iptal eder.",
+            "edge": "Şimdi \"{name}\" tırmanış kenarını çiz: tırmanıcıların önünde durduğu yüzey boyunca soldan sağa tıkla. Bitirmek için çift tıkla veya Enter’a bas.",
+            "label": "Duvar adının görüneceği yere tıkla.",
+            "outline": "\"{name}\" dış hattını çiz: köşelere tıkla, sonra ilk noktaya tıkla, çift tıkla veya Enter’a bas.",
+            "incomplete": "\"{name}\" henüz bitmedi ({missing}). Kaydetmeden önce duvarı seç ve vurgulanan düğmeyi kullan."
+        }
+    },
+    "mapPlacement": {
+        "title": "Rotaları yerleştir",
+        "noMap": "Bu konumun henüz haritası yok.",
+        "discard": "Vazgeç",
+        "save": "Kaydet ({n})",
+        "saved": "Rota konumları kaydedildi.",
+        "wallRoutes": "Bu duvarda {n} rota",
+        "distribute": "Ankraja göre eşit dağıt",
+        "unplaced": "Yerleştirilmemiş ({n})",
+        "placed": "Haritada ({n})",
+        "remove": "Haritadan kaldır",
+        "canvasLabel": "Rota yerleştirme haritası",
+        "hints": {
+            "idle": "Listeden bir rotayı duvara sürükle ya da önce rotaya, sonra duvara tıkla. Noktaları sürükleyerek taşıyabilirsin.",
+            "armed": "\"{name}\" rotasını yerleştirmek için bir duvara tıkla. Esc iptal eder.",
+            "selected": "\"{name}\" noktasını duvardaki doğru yere ya da başka bir duvara sürükle. Delete haritadan kaldırır."
+        }
+    },
+    "scan": {
+        "title": "Rota tara",
+        "intro": "Rotayı açmak ve tırmanışını kaydetmek için kamerayı rota tabelasındaki QR koduna tut.",
+        "start": "Kamerayı başlat",
+        "aim": "QR kodunu çerçevenin içinde tut.",
+        "opening": "Rota açılıyor…",
+        "notARoute": "Bu kod bu salonun bir rotası değil.",
+        "cameraError": "Kamera başlatılamadı. Tarayıcıda kamera erişimine izin ver ve tekrar dene.",
+        "findOnMap": "Rotayı haritada bul",
+        "center": "İstediğin tabelayı çerçevenin içine getir.",
+        "unknownRoute": "Buranın rotası değil",
+        "starting": "Kamera başlatılıyor… Tarayıcın sorarsa kamera erişimine izin ver."
+    },
+    "me": {
+        "title": "Hesabım",
+        "guestTitle": "Tırmanışlarını kaydetmek için giriş yap",
+        "guestIntro": "Tırmanışlarını takip et, eksiklerini gör ve rotaları puanla.",
+        "register": "Hesap oluştur",
+        "profileHint": "Ad, avatar, dil, şifre",
+        "staff": "Salon ekibi",
+        "info": "Bilgi",
+        "version": "Sürüm ve yenilikler",
+        "status": "Sunucu durumu"
     }
 }

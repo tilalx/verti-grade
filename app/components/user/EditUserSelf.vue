@@ -3,16 +3,20 @@
         v-model="localDialog"
         max-width="640"
         flush
+        sheet-on-mobile
         :persistent="hasChanges"
         class="profile-card"
         data-testid="profile-dialog"
     >
         <!-- ── Header ─────────────────────────────────────────── -->
-        <div class="profile-header pa-6 pb-0" data-testid="profile-header">
+        <div
+            class="profile-header pa-4 pa-sm-6 pb-0"
+            data-testid="profile-header"
+        >
             <div class="d-flex align-center ga-4">
                 <!-- Avatar with upload overlay -->
                 <div class="avatar-wrapper" @click="openAvatarPicker">
-                    <v-avatar size="72" class="avatar-ring">
+                    <v-avatar :size="xs ? 56 : 72" class="avatar-ring">
                         <v-img
                             v-if="avatarPreview"
                             :src="avatarPreview"
@@ -34,10 +38,8 @@
                     </v-tooltip>
                 </div>
 
-                <div class="flex-grow-1 overflow-hidden ml-3">
-                    <div
-                        class="text-title-large font-weight-bold text-truncate"
-                    >
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="profile-name text-title-large font-weight-bold">
                         {{ fullName || $t('account.userProfile') }}
                     </div>
                     <div
@@ -130,7 +132,7 @@
         <v-window v-model="activeTab">
             <!-- ── Profile tab ────────────────────────────────── -->
             <v-window-item value="profile">
-                <v-card-text class="pa-6">
+                <v-card-text class="pa-4 pa-sm-6">
                     <v-form ref="profileForm" @submit.prevent>
                         <v-row density="comfortable">
                             <v-col cols="12" sm="6">
@@ -142,7 +144,8 @@
                                     "
                                     autocomplete="given-name"
                                     :rules="[rules.required]"
-                                    counter="50"
+                                    :maxlength="50"
+                                    hide-details="auto"
                                     prepend-inner-icon="mdi-account-outline"
                                     data-testid="profile-firstname"
                                 />
@@ -157,7 +160,8 @@
                                     "
                                     autocomplete="family-name"
                                     :rules="[rules.required]"
-                                    counter="50"
+                                    :maxlength="50"
+                                    hide-details="auto"
                                     prepend-inner-icon="mdi-account-outline"
                                     data-testid="profile-lastname"
                                 />
@@ -171,6 +175,7 @@
                                     :rules="[rules.required, rules.email]"
                                     :hint="$t('account.emailChangeConfirmHint')"
                                     :persistent-hint="emailChangeRequested"
+                                    hide-details="auto"
                                     prepend-inner-icon="mdi-email-outline"
                                     data-testid="profile-email"
                                 />
@@ -182,7 +187,7 @@
 
             <!-- ── Security tab ───────────────────────────────── -->
             <v-window-item value="security">
-                <v-card-text class="pa-6">
+                <v-card-text class="pa-4 pa-sm-6">
                     <UserPasswordChangeFields
                         v-model:old-password="user.oldPassword"
                         v-model:password="user.password"
@@ -283,6 +288,7 @@ type EditableSelf = UserRecord & {
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t, locale, setLocale } = useI18n()
+const { xs } = useDisplay()
 
 const currentLocale = computed(
     () =>
@@ -536,6 +542,14 @@ watch(
 <style scoped>
 /* ── Avatar ──────────────────────────────────────────── */
 /* ── Card header ─────────────────────────────────────── */
+.profile-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
 .profile-header {
     background: rgb(var(--v-theme-surface));
 }

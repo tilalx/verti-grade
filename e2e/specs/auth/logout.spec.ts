@@ -9,11 +9,11 @@ test('logs out and redirects to login', async ({ adminPage: page }) => {
     if (await bannerActivator.isVisible()) {
         await bannerActivator.click()
     } else {
-        await page.getByTestId('nav-hamburger').click()
-        await page
-            .getByTestId('nav-drawer')
-            .getByTestId('user-menu-activator')
-            .click()
+        await page.getByTestId('bottom-nav-account').click()
+        await page.getByTestId('me-logout').click()
+        await page.waitForURL('**/auth/login')
+        await expect(page.getByTestId('login-form')).toBeVisible()
+        return
     }
     await page.getByTestId('user-menu-logout').click()
     await page.waitForURL('**/auth/login')

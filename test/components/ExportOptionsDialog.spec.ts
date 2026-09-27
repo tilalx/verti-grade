@@ -72,6 +72,7 @@ describe('ExportOptionsDialog', () => {
             'comment',
             'creator',
             'location',
+            'wall',
             'type',
             'screw_date',
         ])
@@ -103,6 +104,7 @@ describe('ExportOptionsDialog', () => {
             'comment',
             'creator',
             'location',
+            'wall',
             'type',
             'screw_date',
             'difficulty',

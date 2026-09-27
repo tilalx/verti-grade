@@ -25,9 +25,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
     }
 
     await page.getByTestId('filter-search').locator('input').fill(prefix)
-    await expect(
-        page.locator('.route-card[data-testid^="route-card-"]'),
-    ).toHaveCount(12)
+    await expect(page.getByTestId('routes-row')).toHaveCount(12)
     await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
 
     await page.getByTestId('routes-mobile-page-size').click()
@@ -36,9 +34,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
     )
     await page.getByRole('option', { name: '10', exact: true }).click()
     await routesResponse
-    await expect(
-        page.locator('.route-card[data-testid^="route-card-"]'),
-    ).toHaveCount(10)
+    await expect(page.getByTestId('routes-row')).toHaveCount(10)
 
     await expect(page.getByTestId('routes-mobile-goto-1')).toHaveAttribute(
         'aria-current',
@@ -51,9 +47,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
         'aria-current',
         'page',
     )
-    await expect(
-        page.locator('.route-card[data-testid^="route-card-"]'),
-    ).toHaveCount(2)
+    await expect(page.getByTestId('routes-row')).toHaveCount(2)
     await expect(page.getByTestId('routes-mobile-next')).toBeDisabled()
 
     await page.getByTestId('routes-mobile-goto-1').click()
@@ -61,9 +55,7 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
         'aria-current',
         'page',
     )
-    await expect(
-        page.locator('.route-card[data-testid^="route-card-"]'),
-    ).toHaveCount(10)
+    await expect(page.getByTestId('routes-row')).toHaveCount(10)
 })
 
 test('the pager stays under the thumb while stepping', async ({

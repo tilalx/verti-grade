@@ -1,8 +1,9 @@
 <template>
     <v-footer
-        v-if="$route.meta.footer !== false"
+        v-if="$route.meta.footer !== false && lgAndUp"
         class="app-footer"
         elevation="0"
+        data-testid="app-footer"
     >
         <div class="footer-inner">
             <!-- Left: legal links -->
@@ -109,11 +110,12 @@
 
 <script setup lang="ts">
 import type { SettingsRecord } from '~/types/models'
+import { legalLinkProps } from '~/utils/legal'
 withDefaults(defineProps<{ settings?: Partial<SettingsRecord> }>(), {
     settings: () => ({}),
 })
 
-const pb = usePocketbase()
+const { lgAndUp } = useDisplay()
 const {
     appVersionLabel,
     installedNotes,
@@ -126,34 +128,7 @@ const {
 } = useVersionCheck()
 const currentYear = computed(() => new Date().getFullYear())
 
-const legalLinkProps = (
-    externalUrl: string | null | undefined,
-    internalPath: string,
-) =>
-    externalUrl
-        ? { href: externalUrl, target: '_blank', rel: 'noopener noreferrer' }
-        : { to: internalPath }
-
-const { data: health } = await useAsyncData(
-    'footer:health',
-    () => pb.health.check(),
-    {
-        default: () => null,
-        lazy: true,
-    },
-)
-
-const { data: online } = await useAsyncData(
-    'footer:online',
-    () => pb.send('/api/online', { method: 'GET' }),
-    {
-        default: () => ({ clients: 0 }),
-        lazy: true,
-    },
-)
-
-const isHealthy = computed(() => health.value?.code === 200)
-const onlineCount = computed(() => (online.value?.clients ?? 0) + 1)
+const { isHealthy, onlineCount } = useAppStatus()
 </script>
 
 <style scoped>

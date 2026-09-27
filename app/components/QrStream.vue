@@ -71,6 +71,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     detect: [codes: ScannedCode[]]
+    frame: [codes: ScannedCode[], video: Size]
     'camera-on': [capabilities: Partial<MediaTrackCapabilities>]
     error: [error: Error]
 }>()
@@ -256,6 +257,10 @@ const scan = (video: HTMLVideoElement) => {
                 previous: tracked?.latest,
             })
         }
+        emit('frame', codes, {
+            width: video.videoWidth,
+            height: video.videoHeight,
+        })
         if (codes.some((code) => !previousValues.includes(code.rawValue))) {
             previousValues = codes.map((code) => code.rawValue)
             emit('detect', codes)
