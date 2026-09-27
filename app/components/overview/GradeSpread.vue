@@ -57,18 +57,15 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 }
 
 .grade-spread__bars {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto;
-    column-gap: 4px;
+    display: flex;
+    gap: 4px;
     height: 140px;
 }
 
 .grade-spread__bar {
     display: grid;
-    grid-row: 1 / -1;
-    grid-template-rows: subgrid;
+    grid-template-rows: 1rem 1fr 1.75rem;
+    flex: 1;
     align-items: end;
     min-width: 0;
     text-align: center;
