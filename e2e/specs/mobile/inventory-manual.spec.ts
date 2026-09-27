@@ -125,3 +125,13 @@ test('restores found routes after a reload', async ({ adminPage: page }) => {
         0,
     )
 })
+
+test('shows each route in its hold colour', async ({ adminPage: page }) => {
+    await openScopedInventory(page)
+    const routeId = await firstMissingRouteId(page)
+    await expect(
+        page
+            .getByTestId(`inventory-missing-${routeId}`)
+            .getByTestId('route-color-dot'),
+    ).toHaveCSS('background-color', 'rgb(244, 67, 54)')
+})
