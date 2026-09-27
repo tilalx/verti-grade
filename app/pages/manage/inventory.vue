@@ -545,7 +545,7 @@ definePageMeta({
 })
 
 const ROUTE_FIELDS =
-    'id,name,location,type,grade,grade_system,grade_index,anchor_point,archived,expand.location.name'
+    'id,name,color,location,type,grade,grade_system,grade_index,anchor_point,archived,expand.location.name'
 const SCAN_COOLDOWN_MS = 2000
 
 const { t, locale } = useI18n()
