@@ -1,16 +1,34 @@
 <script setup lang="ts">
-import type { RouteRecord, WallRecord } from '~/types/models'
+import type { LocationRecord, RouteRecord, WallRecord } from '~/types/models'
+import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 
 const pb = usePocketbase()
 
 const { data: unplaced, refresh } = useAsyncData(
     'unplaced-routes',
     async () => {
-        const walls = await pb.collection('walls').getFullList<WallRecord>({
-            fields: 'location',
-            requestKey: 'unplacedWalls',
-        })
-        const locationIds = [...new Set(walls.map((wall) => wall.location))]
+        const [walls, locations] = await Promise.all([
+            pb.collection('walls').getFullList<WallRecord>({
+                fields: 'location',
+                requestKey: 'unplacedWalls',
+            }),
+            pb.collection('locations').getFullList<LocationRecord>({
+                fields: 'id,map',
+                requestKey: 'unplacedLocations',
+            }),
+        ])
+        const mapped = new Set(
+            locations
+                .filter((record) => sanitizeGymMap(record.map))
+                .map((record) => record.id),
+        )
+        const locationIds = [
+            ...new Set(
+                walls
+                    .map((wall) => wall.location)
+                    .filter((id) => mapped.has(id)),
+            ),
+        ]
         if (!locationIds.length) return null
         const locationFilter = locationIds
             .map((id, index) =>

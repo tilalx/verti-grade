@@ -362,15 +362,22 @@ interface AnchorRange {
     anchor_to?: number | null
 }
 
+const isAnchor = (value: unknown): value is number =>
+    typeof value === 'number' && value > 0
+
 export function hasAnchorRange(wall: AnchorRange): boolean {
-    return wall.anchor_from != null && wall.anchor_to != null
+    return isAnchor(wall.anchor_from) && isAnchor(wall.anchor_to)
+}
+
+export function isDescendingRange(wall: AnchorRange): boolean {
+    return hasAnchorRange(wall) && wall.anchor_from! > wall.anchor_to!
 }
 
 export function wallForAnchor(
     walls: AnchorRange[],
-    anchor: number | null | undefined,
+    anchor: unknown,
 ): string | null {
-    if (anchor == null) return null
+    if (!isAnchor(anchor)) return null
     const matches = walls.filter(
         (wall) =>
             hasAnchorRange(wall) &&
@@ -383,30 +390,37 @@ export function wallForAnchor(
 export function insertByAnchor(
     placed: AnchoredRoute[],
     incoming: AnchoredRoute[],
+    descending = false,
 ): Map<string, number> {
+    const along = (position: number) => (descending ? 1 - position : position)
     const fences = placed
-        .filter((route) => route.anchor_point != null)
-        .sort((a, b) => (a.wall_position ?? 0) - (b.wall_position ?? 0))
+        .filter((route) => isAnchor(route.anchor_point))
+        .map((route) => ({
+            anchor: route.anchor_point!,
+            position: along(route.wall_position ?? 0.5),
+        }))
+        .sort((a, b) => a.position - b.position)
     const gaps = new Map<number, AnchoredRoute[]>()
     for (const route of [...incoming].sort(compareByAnchor)) {
-        const next = fences.findIndex(
-            (fence) =>
-                route.anchor_point != null &&
-                fence.anchor_point! > route.anchor_point,
-        )
+        const anchor = route.anchor_point
+        const next = isAnchor(anchor)
+            ? fences.findIndex((fence) => fence.anchor > anchor)
+            : -1
         const gap = next === -1 ? fences.length : next
         gaps.set(gap, [...(gaps.get(gap) ?? []), route])
     }
     const positions = new Map<string, number>()
     for (const [gap, routes] of gaps) {
-        const start = gap === 0 ? 0 : (fences[gap - 1]!.wall_position ?? 0)
-        const end =
-            gap === fences.length ? 1 : (fences[gap]!.wall_position ?? 1)
+        const start = gap === 0 ? 0 : fences[gap - 1]!.position
+        const end = gap === fences.length ? 1 : fences[gap]!.position
         routes.forEach((route, index) =>
             positions.set(
                 route.id,
                 roundToCm(
-                    start + ((index + 1) * (end - start)) / (routes.length + 1),
+                    along(
+                        start +
+                            ((index + 1) * (end - start)) / (routes.length + 1),
+                    ),
                 ),
             ),
         )

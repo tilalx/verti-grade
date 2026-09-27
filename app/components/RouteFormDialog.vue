@@ -205,6 +205,7 @@ import type { RouteRecord, WallRecord } from '~/types/models'
 import {
     freePosition,
     insertByAnchor,
+    isDescendingRange,
     wallForAnchor,
 } from '#shared/utils/mapGeometry'
 import {
@@ -385,14 +386,18 @@ async function wallPosition(wallId: string | null) {
         fields: 'id,anchor_point,wall_position',
         requestKey: null,
     })
-    if (form.anchor_point == null)
+    const anchor = Number(form.anchor_point)
+    if (!(anchor > 0))
         return freePosition(
             neighbours.map((route) => route.wall_position ?? 0.5),
         )
+    const wall = locationWalls.value.find((record) => record.id === wallId)
     return (
-        insertByAnchor(neighbours, [
-            { id: '', anchor_point: form.anchor_point },
-        ]).get('') ?? null
+        insertByAnchor(
+            neighbours,
+            [{ id: '', anchor_point: anchor }],
+            !!wall && isDescendingRange(wall),
+        ).get('') ?? null
     )
 }
 

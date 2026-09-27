@@ -4,6 +4,7 @@ import {
     fitViewBox,
     freePosition,
     insertByAnchor,
+    hasAnchorRange,
     wallForAnchor,
     labelPoint,
     nearestWall,
@@ -293,16 +294,63 @@ describe('insertByAnchor', () => {
 
     it('fits new routes between placed neighbours by anchor', () => {
         const placed = [
-            { id: 'p1', anchor_point: 1, wall_position: 0.2 },
-            { id: 'p5', anchor_point: 5, wall_position: 0.6 },
+            { id: 'p1', anchor_point: 2, wall_position: 0.2 },
+            { id: 'p5', anchor_point: 6, wall_position: 0.6 },
         ]
         const positions = insertByAnchor(placed, [
             { id: 'n3', anchor_point: 3 },
             { id: 'n9', anchor_point: 9 },
-            { id: 'n0', anchor_point: 0 },
+            { id: 'n0', anchor_point: 1 },
         ])
         expect(positions.get('n3')).toBe(0.4)
         expect(positions.get('n9')).toBe(0.8)
         expect(positions.get('n0')).toBe(0.1)
+    })
+})
+
+describe('unset anchors', () => {
+    it('treats 0 as no range and no anchor', () => {
+        const walls = [
+            { id: 'unset', anchor_from: 0, anchor_to: 0 },
+            { id: 'ranged', anchor_from: 1, anchor_to: 10 },
+        ]
+        expect(hasAnchorRange(walls[0]!)).toBe(false)
+        expect(wallForAnchor(walls, 0)).toBeNull()
+        expect(wallForAnchor(walls, '')).toBeNull()
+        expect(wallForAnchor(walls, 5)).toBe('ranged')
+    })
+
+    it('ignores anchor 0 routes as neighbours', () => {
+        const positions = insertByAnchor(
+            [{ id: 'boulder', anchor_point: 0, wall_position: 0.9 }],
+            [{ id: 'n', anchor_point: 4 }],
+        )
+        expect(positions.get('n')).toBe(0.5)
+    })
+})
+
+describe('descending ranges', () => {
+    it('mirrors positions when anchors count down the wall', () => {
+        const positions = insertByAnchor(
+            [],
+            [
+                { id: 'low', anchor_point: 11 },
+                { id: 'high', anchor_point: 12 },
+            ],
+            true,
+        )
+        expect(positions.get('low')).toBeGreaterThan(positions.get('high')!)
+    })
+
+    it('fits between neighbours on a descending wall', () => {
+        const positions = insertByAnchor(
+            [
+                { id: 'a18', anchor_point: 18, wall_position: 0.2 },
+                { id: 'a12', anchor_point: 12, wall_position: 0.8 },
+            ],
+            [{ id: 'a15', anchor_point: 15 }],
+            true,
+        )
+        expect(positions.get('a15')).toBe(0.5)
     })
 })

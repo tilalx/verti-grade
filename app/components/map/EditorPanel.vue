@@ -78,7 +78,7 @@
                         :model-value="editor.selectedWall.value.anchorFrom"
                         :label="$t('mapEditor.anchorFrom')"
                         type="number"
-                        min="0"
+                        min="1"
                         density="compact"
                         hide-details
                         data-testid="map-editor-wall-anchor-from"
@@ -88,7 +88,7 @@
                         :model-value="editor.selectedWall.value.anchorTo"
                         :label="$t('mapEditor.anchorTo')"
                         type="number"
-                        min="0"
+                        min="1"
                         density="compact"
                         hide-details
                         data-testid="map-editor-wall-anchor-to"
@@ -413,8 +413,9 @@ function setAnchor(field: 'anchorFrom' | 'anchorTo', event: Event) {
     const wall = editor.selectedWall.value
     if (!wall) return
     const raw = (event.target as HTMLInputElement).value
-    const value = raw === '' ? null : Math.max(0, Math.round(Number(raw)))
-    if (value === wall[field] || Number.isNaN(value)) return
+    const parsed = Math.round(Number(raw))
+    const value = raw === '' || !(parsed > 0) ? null : parsed
+    if (value === wall[field]) return
     commit(updateWall(state.value, wall.key, { [field]: value }))
 }
 

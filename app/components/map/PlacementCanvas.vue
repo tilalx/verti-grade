@@ -266,6 +266,8 @@ function onDotDown(routeId: string, event: PointerEvent) {
         target.removeEventListener('pointerup', end)
         target.removeEventListener('pointercancel', cancel)
         if (moved) place(routeId, endEvent)
+        else if (props.armedRouteId && props.armedRouteId !== routeId)
+            place(props.armedRouteId, endEvent)
         else emit('selectRoute', routeId)
         draggingRouteId.value = null
         ghost.value = null

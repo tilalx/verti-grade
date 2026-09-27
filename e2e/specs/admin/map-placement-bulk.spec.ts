@@ -200,3 +200,39 @@ test('the route form picks the wall from the anchor number', async ({
         `${testPrefix} Island`,
     )
 })
+
+test('auto-place stays hidden while no wall has an anchor range', async ({
+    setterPage: page,
+}) => {
+    await gotoSettled(page, `/manage/map?location=${seeded.locationId}`)
+    await expect(page.getByTestId('placement-route').first()).toBeVisible()
+    await expect(page.getByTestId('placement-auto')).toHaveCount(0)
+})
+
+test('tapping an existing dot places the armed route next to it', async ({
+    setterPage: page,
+}) => {
+    await gotoSettled(page, `/manage/map?location=${seeded.locationId}`)
+    await listItem(page, unplacedIds[0]!).click()
+    await page
+        .locator(
+            `[data-testid="placement-dot"][data-route-id="${seeded.routeIds[0]}"]`,
+        )
+        .click()
+    await expect(
+        page.locator(
+            `[data-testid="placement-dot"][data-route-id="${unplacedIds[0]}"]`,
+        ),
+    ).toBeVisible()
+})
+
+test('archived routes offer no placement from the route page', async ({
+    setterPage: page,
+}) => {
+    await seeded.root
+        .collection('routes')
+        .update(unplacedIds[1]!, { archived: true })
+    await gotoSettled(page, `/route?id=${unplacedIds[1]}`)
+    await expect(page.getByTestId('route-page-name')).toBeVisible()
+    await expect(page.getByTestId('route-place-on-map')).toHaveCount(0)
+})

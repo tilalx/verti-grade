@@ -391,6 +391,7 @@ import {
     clampUnit,
     hasAnchorRange,
     insertByAnchor,
+    isDescendingRange,
     roundToCm,
     sanitizeGymMap,
     wallForAnchor,
@@ -422,6 +423,7 @@ const pb = usePocketbase()
 const route = useRoute()
 const router = useRouter()
 const { can } = usePermissions()
+const { success: notifySuccess } = useNotification()
 
 useSeoMeta({ title: () => t('page.title.mapPlacement') })
 
@@ -576,6 +578,7 @@ const autoPlacements = computed(() => {
         for (const [routeId, position] of insertByAnchor(
             routesOnWall(effectiveRoutes.value, wallId),
             incoming,
+            isDescending(wallId),
         ))
             placements.set(routeId, { wall: wallId, position })
     return placements
@@ -667,10 +670,15 @@ function update(next: Map<string, Placement>) {
     pending.value = next
 }
 
+function isDescending(wallId: string) {
+    const wall = walls.value.find((record) => record.id === wallId)
+    return !!wall && isDescendingRange(wall)
+}
+
 function nextUnplacedAfter(routeId: string) {
     const order = listedUnplaced.value
     const index = order.findIndex((item) => item.id === routeId)
-    return order[index + 1]?.id ?? null
+    return index === -1 ? null : (order[index + 1]?.id ?? null)
 }
 
 function place(routeId: string, wallId: string, position: number) {
@@ -683,7 +691,7 @@ function place(routeId: string, wallId: string, position: number) {
     const next = new Map(pending.value)
     next.set(routeId, { wall: wallId, position })
     update(next)
-    armedRouteId.value = keepGoing.value ? following : null
+    if (wasArmed) armedRouteId.value = keepGoing.value ? following : null
     selectedRouteId.value = routeId
 }
 
@@ -695,7 +703,11 @@ function placeChecked(wallId: string) {
         (item) => !checkedIds.value.has(item.id),
     )
     const next = new Map(pending.value)
-    for (const [routeId, position] of insertByAnchor(placed, incoming))
+    for (const [routeId, position] of insertByAnchor(
+        placed,
+        incoming,
+        isDescending(wallId),
+    ))
         next.set(routeId, { wall: wallId, position })
     update(next)
     checkedIds.value = new Set()
@@ -711,6 +723,8 @@ function toggleChecked(routeId: string) {
 
 function autoPlace() {
     update(new Map([...pending.value, ...autoPlacements.value]))
+    armedRouteId.value = null
+    checkedIds.value = new Set()
 }
 
 function skipArmed() {
@@ -861,20 +875,28 @@ const resetDialogOpen = ref(false)
 const { pending: resetting, run: runReset } = useAsyncAction()
 
 async function resetWall() {
-    const ids = savedWallRouteIds.value
-    if (resetting.value || !ids.length) return
-    await runReset(
-        async () => {
-            for (let start = 0; start < ids.length; start += BATCH_SIZE) {
-                const batch = pb.createBatch()
-                for (const id of ids.slice(start, start + BATCH_SIZE))
-                    batch.collection('routes').update(id, { archived: true })
-                await batch.send()
-            }
-            await Promise.all([refreshRoutes(), refreshLastReset()])
-        },
-        { success: t('mapPlacement.resetDone', { n: ids.length }) },
-    )
+    const wallId = selectedWallId.value
+    if (resetting.value || !wallId) return
+    const archived = await runReset(async () => {
+        const current = await pb.collection('routes').getFullList<RouteRecord>({
+            filter: pb.filter('archived = false && wall = {:wall}', {
+                wall: wallId,
+            }),
+            fields: 'id',
+            requestKey: null,
+        })
+        const ids = current.map((item) => item.id)
+        for (let start = 0; start < ids.length; start += BATCH_SIZE) {
+            const batch = pb.createBatch()
+            for (const id of ids.slice(start, start + BATCH_SIZE))
+                batch.collection('routes').update(id, { archived: true })
+            await batch.send()
+        }
+        await Promise.all([refreshRoutes(), refreshLastReset()])
+        return ids.length
+    })
+    if (archived !== undefined)
+        notifySuccess(t('mapPlacement.resetDone', { n: archived }))
     resetDialogOpen.value = false
 }
 
@@ -890,7 +912,7 @@ watch(
             selectedRouteId.value = linked
         }
     },
-    { once: true },
+    { once: true, immediate: true },
 )
 
 const { discardDialogOpen, confirmDiscard, settleDiscard } = useDiscardConfirm(
