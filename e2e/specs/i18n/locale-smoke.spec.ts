@@ -12,7 +12,7 @@ test('login page renders in the browser Accept-Language locale', async ({
 test('public route list renders in the browser Accept-Language locale', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await expect(
         page
             .getByTestId('index-table')

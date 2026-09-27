@@ -36,3 +36,13 @@ test('on desktop the account page leaves staff links to the top navigation', asy
     await expect(page.locator('[data-testid^="me-section-"]')).toHaveCount(0)
     await expect(page.getByTestId('nav-desktop-links')).toBeVisible()
 })
+
+test('on phones the account tab links to all public pages', async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await gotoSettled(page, '/account')
+    await expect(page.getByTestId('me-page-home')).toBeVisible()
+    await page.getByTestId('me-page-routes').click()
+    await page.waitForURL(/\/routes$/)
+})

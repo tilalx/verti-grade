@@ -95,7 +95,7 @@
         "confirmPassword": "Confirm password"
     },
     "routes": {
-        "home": "Home",
+        "home": "Overview",
         "dashboard": "Manage routes",
         "inventory": "Inventory",
         "login": "Sign in",
@@ -121,7 +121,8 @@
         "scan": "Scan",
         "me": "Me",
         "moreActions": "More actions",
-        "selectedCount": "{n} selected"
+        "selectedCount": "{n} selected",
+        "list": "Routes"
     },
     "dashboard": {
         "online": "{0} online"
@@ -530,7 +531,8 @@
             "mapEditor": "Map editor - Gripello",
             "mapPlacement": "Place routes - Gripello",
             "scan": "Scan route - Gripello",
-            "me": "My account - Gripello"
+            "me": "My account - Gripello",
+            "overview": "Overview - Gripello"
         },
         "content": {
             "settings": "Settings",
@@ -1105,6 +1107,7 @@
         "starting": "Starting camera… Allow camera access if your browser asks."
     },
     "me": {
+        "pages": "Pages",
         "title": "My account",
         "guestTitle": "Sign in to log your climbs",
         "guestIntro": "Track your sends, see what you still have to climb and rate routes.",
@@ -1114,5 +1117,24 @@
         "info": "Info",
         "version": "Version & release notes",
         "status": "Server status"
+    },
+    "overview": {
+        "title": "Climbing gym",
+        "description": "New routes, walls and grades at a glance.",
+        "routesCount": "{n} routes",
+        "newCount": "{n} new this week",
+        "newRoutes": "Newly set",
+        "newRoutesEmpty": "No new routes in the last two weeks.",
+        "allRoutes": "All routes",
+        "walls": "Walls",
+        "openMap": "Open map",
+        "wallRoutes": "{n} routes",
+        "newestSet": "Newest: {date}",
+        "popular": "Popular routes",
+        "popularEmpty": "Not enough reviews yet.",
+        "progressTitle": "Your progress",
+        "progress": "You have sent {sent} of {total} current routes.",
+        "openLogbook": "Open logbook",
+        "gradeSpread": "Grades on the wall"
     }
 }

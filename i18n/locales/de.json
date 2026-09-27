@@ -95,7 +95,7 @@
         "confirmPassword": "Passwort bestätigen"
     },
     "routes": {
-        "home": "Startseite",
+        "home": "Übersicht",
         "dashboard": "Routen verwalten",
         "inventory": "Inventur",
         "login": "Anmelden",
@@ -121,7 +121,8 @@
         "scan": "Scannen",
         "me": "Ich",
         "moreActions": "Weitere Aktionen",
-        "selectedCount": "{n} ausgewählt"
+        "selectedCount": "{n} ausgewählt",
+        "list": "Routen"
     },
     "dashboard": {
         "online": "{0} online"
@@ -530,7 +531,8 @@
             "mapEditor": "Plan-Editor - Gripello",
             "mapPlacement": "Routen platzieren - Gripello",
             "scan": "Route scannen - Gripello",
-            "me": "Mein Konto - Gripello"
+            "me": "Mein Konto - Gripello",
+            "overview": "Übersicht - Gripello"
         },
         "content": {
             "settings": "Einstellungen",
@@ -1105,6 +1107,7 @@
         "starting": "Kamera wird gestartet… Erlaube den Kamerazugriff, falls dein Browser fragt."
     },
     "me": {
+        "pages": "Seiten",
         "title": "Mein Konto",
         "guestTitle": "Melde dich an, um deine Begehungen einzutragen",
         "guestIntro": "Verfolge deine Durchstiege, sieh was noch fehlt und bewerte Routen.",
@@ -1114,5 +1117,24 @@
         "info": "Info",
         "version": "Version & Neuerungen",
         "status": "Serverstatus"
+    },
+    "overview": {
+        "title": "Kletterhalle",
+        "description": "Neue Routen, Wände und Grade auf einen Blick.",
+        "routesCount": "{n} Routen",
+        "newCount": "{n} neu diese Woche",
+        "newRoutes": "Neu geschraubt",
+        "newRoutesEmpty": "In den letzten zwei Wochen wurde nichts Neues geschraubt.",
+        "allRoutes": "Alle Routen",
+        "walls": "Wände",
+        "openMap": "Plan öffnen",
+        "wallRoutes": "{n} Routen",
+        "newestSet": "Neueste: {date}",
+        "popular": "Beliebte Routen",
+        "popularEmpty": "Noch nicht genug Bewertungen.",
+        "progressTitle": "Dein Fortschritt",
+        "progress": "Du hast {sent} von {total} aktuellen Routen geschafft.",
+        "openLogbook": "Logbuch öffnen",
+        "gradeSpread": "Grade an der Wand"
     }
 }

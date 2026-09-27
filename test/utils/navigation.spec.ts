@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { staffSections, visibleNavItems } from '~/utils/navigation'
+import { pageLinks, staffSections, visibleNavItems } from '~/utils/navigation'
 
 const allowing =
     (...permissions: string[]) =>
@@ -9,7 +9,12 @@ const allowing =
 describe('visibleNavItems', () => {
     it('drops links and empty groups the role cannot open', () => {
         const keys = visibleNavItems(allowing()).map((item) => item.key)
-        expect(keys).toEqual(['home', 'map', 'logbook'])
+        expect(keys).toEqual(['home', 'map', 'list', 'logbook'])
+    })
+
+    it('shows guests only the public pages', () => {
+        const keys = visibleNavItems(allowing(), false).map((item) => item.key)
+        expect(keys).toEqual(['home', 'map', 'list'])
     })
 })
 
@@ -38,5 +43,14 @@ describe('staffSections', () => {
 
     it('returns nothing for climbers', () => {
         expect(staffSections(allowing())).toEqual([])
+    })
+})
+
+describe('pageLinks', () => {
+    it('lists public pages that are not in the bottom nav', () => {
+        expect(pageLinks(false).map((link) => link.to)).toEqual([
+            '/',
+            '/routes',
+        ])
     })
 })

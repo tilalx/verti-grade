@@ -1,7 +1,7 @@
 import { test, expect } from '../../support/fixtures'
 
 test('server-renders the public route list', async ({ page }) => {
-    const response = await page.goto('/')
+    const response = await page.goto('/routes')
     expect((await response?.text()) ?? '').toContain('e2e-route-1')
 })
 
@@ -57,5 +57,14 @@ test('redirects a guarded page on the server, without rendering it', async ({
     expect(page.url()).toContain('/auth/login')
     expect((await response?.text()) ?? '').not.toContain(
         'data-testid="routes-table"',
+    )
+})
+
+test('server-renders the notification bell for signed-in users', async ({
+    userPage: page,
+}) => {
+    const response = await page.goto('/')
+    expect((await response?.text()) ?? '').toContain(
+        'data-testid="notification-bell"',
     )
 })

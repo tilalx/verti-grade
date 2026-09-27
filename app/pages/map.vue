@@ -61,7 +61,7 @@
                         :title="$t('map.noMap')"
                     />
                     <v-btn
-                        to="/"
+                        to="/routes"
                         variant="tonal"
                         prepend-icon="mdi-format-list-bulleted"
                     >

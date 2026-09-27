@@ -20,7 +20,7 @@ test('the route list filters by wall and shows the wall column', async ({
     page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('index-filter-location').click()
     await page
         .getByRole('option', { name: `${testPrefix} Map Hall`, exact: true })

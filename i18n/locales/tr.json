@@ -95,7 +95,7 @@
         "confirmPassword": "Şifreyi onayla"
     },
     "routes": {
-        "home": "Ana Sayfa",
+        "home": "Genel bakış",
         "dashboard": "Rota Yönetimi",
         "inventory": "Envanter",
         "login": "Giriş Yap",
@@ -121,7 +121,8 @@
         "scan": "Tara",
         "me": "Ben",
         "moreActions": "Diğer işlemler",
-        "selectedCount": "{n} seçildi"
+        "selectedCount": "{n} seçildi",
+        "list": "Rotalar"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -530,7 +531,8 @@
             "mapEditor": "Harita düzenleyici - Gripello",
             "mapPlacement": "Rotaları yerleştir - Gripello",
             "scan": "Rota tara - Gripello",
-            "me": "Hesabım - Gripello"
+            "me": "Hesabım - Gripello",
+            "overview": "Genel bakış - Gripello"
         },
         "content": {
             "settings": "Ayarlar",
@@ -1105,6 +1107,7 @@
         "starting": "Kamera başlatılıyor… Tarayıcın sorarsa kamera erişimine izin ver."
     },
     "me": {
+        "pages": "Sayfalar",
         "title": "Hesabım",
         "guestTitle": "Tırmanışlarını kaydetmek için giriş yap",
         "guestIntro": "Tırmanışlarını takip et, eksiklerini gör ve rotaları puanla.",
@@ -1114,5 +1117,24 @@
         "info": "Bilgi",
         "version": "Sürüm ve yenilikler",
         "status": "Sunucu durumu"
+    },
+    "overview": {
+        "title": "Tırmanış salonu",
+        "description": "Yeni rotalar, duvarlar ve dereceler bir bakışta.",
+        "routesCount": "{n} rota",
+        "newCount": "bu hafta {n} yeni",
+        "newRoutes": "Yeni kurulanlar",
+        "newRoutesEmpty": "Son iki haftada yeni rota yok.",
+        "allRoutes": "Tüm rotalar",
+        "walls": "Duvarlar",
+        "openMap": "Haritayı aç",
+        "wallRoutes": "{n} rota",
+        "newestSet": "En yeni: {date}",
+        "popular": "Popüler rotalar",
+        "popularEmpty": "Henüz yeterli değerlendirme yok.",
+        "progressTitle": "İlerlemen",
+        "progress": "{total} güncel rotanın {sent} tanesini tamamladın.",
+        "openLogbook": "Günlüğü aç",
+        "gradeSpread": "Duvardaki dereceler"
     }
 }

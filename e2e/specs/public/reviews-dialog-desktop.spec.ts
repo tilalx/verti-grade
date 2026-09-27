@@ -20,7 +20,7 @@ async function openReviewsFor(
     page: import('@playwright/test').Page,
     route: { id: string; name: string },
 ) {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
 
     await page
         .getByTestId('filter-search')

@@ -84,7 +84,28 @@
                     :title="$t('routes.activity')"
                 />
             </v-list>
+        </template>
 
+        <section class="d-lg-none" data-testid="me-pages">
+            <p class="me-section">{{ $t('me.pages') }}</p>
+            <div class="me-tiles">
+                <v-card
+                    v-for="link in pages"
+                    :key="link.to"
+                    :to="link.to"
+                    variant="tonal"
+                    class="me-tile"
+                    :data-testid="`me-page-${navTestId(link.to)}`"
+                >
+                    <v-icon size="26" class="me-tile__icon">{{
+                        link.icon
+                    }}</v-icon>
+                    <span class="me-tile__label">{{ $t(link.label) }}</span>
+                </v-card>
+            </div>
+        </section>
+
+        <template v-if="user">
             <section
                 v-for="section in sections"
                 :key="section.key"
@@ -134,7 +155,7 @@
 
 <script setup lang="ts">
 import type { SettingsRecord } from '~/types/models'
-import { staffSections } from '~/utils/navigation'
+import { pageLinks, staffSections } from '~/utils/navigation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -169,6 +190,7 @@ const avatar = computed(() =>
 )
 
 const sections = computed(() => (lgAndUp.value ? [] : staffSections(can)))
+const pages = computed(() => pageLinks(!!user.value))
 
 async function logout() {
     loggingOut.value = true

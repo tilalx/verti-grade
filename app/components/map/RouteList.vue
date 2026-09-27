@@ -21,10 +21,16 @@
                 data-testid="map-list-route"
                 :data-route-id="route.id"
             >
-                <button
-                    type="button"
+                <component
+                    :is="linkRows ? NuxtLink : 'button'"
+                    v-bind="
+                        linkRows
+                            ? { to: `/route?id=${route.id}` }
+                            : { type: 'button' }
+                    "
                     class="map-route-row__main"
-                    @click="emit('select', route.id)"
+                    :data-testid="linkRows ? 'route-view' : undefined"
+                    @click="linkRows || emit('select', route.id)"
                 >
                     <span
                         class="map-route-row__dot"
@@ -57,8 +63,14 @@
                             }}</small
                         ></span
                     >
-                </button>
+                    <span
+                        v-if="linkRows"
+                        class="map-route-row__chevron mdi mdi-chevron-right"
+                        aria-hidden="true"
+                    />
+                </component>
                 <NuxtLink
+                    v-if="!linkRows"
                     :to="`/route?id=${route.id}`"
                     class="map-route-row__open"
                     :aria-label="$t('routes.view')"
@@ -88,8 +100,10 @@ defineProps<{
     showHeadings: boolean
     tickedIds: ReadonlySet<string>
     selectedRouteId: string | null
+    linkRows?: boolean
 }>()
 
+const NuxtLink = resolveComponent('NuxtLink')
 const emit = defineEmits<{ select: [routeId: string] }>()
 const { t } = useI18n()
 const { isUnexpectedSystem } = useGradeSystems()
@@ -142,8 +156,15 @@ function subtitle(route: RouteListItem) {
     background: none;
     color: inherit;
     text-align: left;
+    text-decoration: none;
     cursor: pointer;
     border-radius: 8px;
+}
+
+.map-route-row__chevron {
+    flex: 0 0 auto;
+    font-size: 20px;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 }
 
 .map-route-row__main:hover {

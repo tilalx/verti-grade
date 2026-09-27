@@ -1,7 +1,7 @@
 <template>
     <v-footer
-        v-if="$route.meta.footer !== false && lgAndUp"
-        class="app-footer"
+        v-if="$route.meta.footer !== false"
+        class="app-footer d-none d-lg-flex"
         elevation="0"
         data-testid="app-footer"
     >
@@ -115,7 +115,6 @@ withDefaults(defineProps<{ settings?: Partial<SettingsRecord> }>(), {
     settings: () => ({}),
 })
 
-const { lgAndUp } = useDisplay()
 const {
     appVersionLabel,
     installedNotes,

@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('conversion table opens compact on phones and columns can be added', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('index-grade-conversion-open').click()
 
     const dialog = page.getByTestId('grade-conversion-dialog')

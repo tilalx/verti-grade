@@ -11,7 +11,6 @@
                 v-bind="menuProps"
                 icon
                 variant="text"
-                class="mr-2"
                 data-testid="user-menu-activator"
                 :aria-label="$t('nav.userMenu')"
             >
