@@ -50,6 +50,7 @@ pipeline {
                         tagName = branchName.replaceAll(/[^a-zA-Z0-9._-]/, '-')
                     }
 
+                    sh 'git fetch --tags --force --quiet || true'
                     def appVersion = sh(script: "git describe --tags --always | sed 's/^v//'", returnStdout: true).trim()
                     if (isReleaseCommit) {
                         appVersion = releaseVersion
