@@ -500,9 +500,9 @@ async function saveUser() {
                 )
             if (!reauthenticated) {
                 pb.authStore.clear()
+                notifyError(t('account.passwordChangedSignInAgain'))
                 localDialog.value = false
                 await navigateTo('/auth/login')
-                notifyError(t('account.passwordChangedSignInAgain'))
                 return
             }
         } else {

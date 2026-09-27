@@ -9,7 +9,6 @@
         <LayoutFootBar :settings="settings" />
     </div>
     <LayoutBottomNav />
-    <GlobalSnackbar />
     <div v-if="hydrated" data-testid="page-hydrated" hidden />
 </template>
 
