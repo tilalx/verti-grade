@@ -20,7 +20,7 @@
         "e2e:down": "./e2e/scripts/app-down.sh"
     },
     "devDependencies": {
-        "@cap.js/wasm": "0.0.7",
+        "@cap.js/wasm": "0.0.8",
         "@cj-tech-master/excelts": "10.2.0",
         "@mdi/font": "7.4.47",
         "@nuxt/image": "2.1.0",
