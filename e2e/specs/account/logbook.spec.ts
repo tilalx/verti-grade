@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { signInAs } from '../../support/auth'
 import PocketBase from 'pocketbase'
 import {
     authAsSuperuser,
@@ -40,17 +41,7 @@ test('a climber logs, edits and deletes an ascent', async ({
         screw_date: '2026-09-01',
     })
 
-    await gotoSettled(page, '/auth/login')
-    await page
-        .getByTestId('login-identity')
-        .locator('input')
-        .fill(climber.email)
-    await page
-        .getByTestId('login-password')
-        .locator('input')
-        .fill(climber.password)
-    await page.getByTestId('login-submit').click()
-    await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
+    await signInAs(page, climber.email, climber.password)
 
     await gotoSettled(page, '/logbook')
     await expect(page.getByTestId('logbook-empty')).toBeVisible()
@@ -144,17 +135,7 @@ test('the dashboard sums up sends and turns a project into a send', async ({
         })
     }
 
-    await gotoSettled(page, '/auth/login')
-    await page
-        .getByTestId('login-identity')
-        .locator('input')
-        .fill(climber.email)
-    await page
-        .getByTestId('login-password')
-        .locator('input')
-        .fill(climber.password)
-    await page.getByTestId('login-submit').click()
-    await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
+    await signInAs(page, climber.email, climber.password)
 
     await gotoSettled(page, '/logbook')
     await page.getByTestId('logbook-kind-route').click()

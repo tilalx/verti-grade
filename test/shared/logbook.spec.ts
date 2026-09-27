@@ -11,7 +11,7 @@ import {
     tickKind,
     type LogbookTick,
 } from '#shared/utils/logbook'
-import type { TickType } from '#shared/utils/ticks'
+import { localDay, type TickType } from '#shared/utils/ticks'
 
 const NOW = new Date('2026-09-26T18:00:00Z')
 
@@ -91,6 +91,27 @@ describe('logbookStats', () => {
             logbookStats([tick('attempt', '6A')], 'boulder', 'all', NOW).current
                 .flashRate,
         ).toBeNull()
+    })
+})
+
+describe('ticks logged for today', () => {
+    it('count before noon UTC', () => {
+        const morning = new Date(2026, 8, 27, 6, 0)
+        const today = `${localDay(morning)} 12:00:00.000Z`
+        const ticks = [tick('flash', '6A', { date: today })]
+        expect(
+            logbookStats(ticks, 'boulder', '30d', morning).current.sends,
+        ).toBe(1)
+        expect(gradePyramid(ticks, 'boulder', '30d', morning)).toHaveLength(1)
+    })
+
+    it('still leave out ascents dated tomorrow', () => {
+        const now = new Date(2026, 8, 27, 20, 0)
+        const tomorrow = new Date(2026, 8, 28, 12, 0)
+        const ticks = [
+            tick('top', '6A', { date: `${localDay(tomorrow)} 12:00:00.000Z` }),
+        ]
+        expect(logbookStats(ticks, 'boulder', '30d', now).current.sends).toBe(0)
     })
 })
 
