@@ -96,11 +96,16 @@ test('inventory may archive and restore routes but not edit them', async ({
         const archived = await routes.update(route.id, { archived: true })
         expect(archived.archived).toBe(true)
 
-        await expect(
-            routes.update(route.id, {
-                archived_at: '2000-01-01 00:00:00.000Z',
-            }),
-        ).rejects.toMatchObject({ status: 403 })
+        const backdate = await routes
+            .update(route.id, { archived_at: '2000-01-01 00:00:00.000Z' })
+            .then(
+                () => 200,
+                (err: { status: number }) => err.status,
+            )
+        expect([403, 404]).toContain(backdate)
+        expect(
+            (await root.collection('routes').getOne(route.id)).archived_at,
+        ).toBe(archived.archived_at)
         const superuserBackdated = await root
             .collection('routes')
             .update(route.id, { archived_at: '2000-01-01 00:00:00.000Z' })

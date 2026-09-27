@@ -77,7 +77,8 @@ const i18nGetter = () => ({
     loadLocaleMessages: async () => {},
 })
 
-const nuxtAppGetter = () => ({ $i18n: { t: (key: string) => key } })
+const nuxtAppMock = { $i18n: { t: (key: string) => key } }
+const nuxtAppGetter = () => nuxtAppMock
 
 const useAsyncDataGetter = <T>(
     _key: string,

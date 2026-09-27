@@ -79,12 +79,13 @@ test('grade bars share one baseline on a phone', async ({ page }) => {
         .first()
         .locator('.grade-spread__fill')
         .evaluateAll((fills) =>
-            fills.map((fill) =>
-                Math.round(fill.getBoundingClientRect().bottom),
-            ),
+            fills.map((fill) => fill.getBoundingClientRect().bottom),
         )
     expect(bottoms.length).toBeGreaterThan(1)
-    expect(new Set(bottoms).size).toBe(1)
+    expect(
+        Math.max(...bottoms) - Math.min(...bottoms),
+        bottoms.join(', '),
+    ).toBeLessThan(1)
 })
 
 test('guests get the public nav and an all-routes link', async ({ page }) => {

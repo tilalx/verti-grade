@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ref as vueRef } from 'vue'
+import { reactive, ref as vueRef, toRef } from 'vue'
 
 // ── Nuxt auto-import stubs ──────────────────────────────────────────────────
-const useStateMocks: Record<string, { value: unknown }> = {}
+const useStateMocks: Record<string, unknown> = reactive({})
 
 vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
-    if (!useStateMocks[key]) {
-        useStateMocks[key] = vueRef(init ? init() : undefined)
+    if (!(key in useStateMocks)) {
+        useStateMocks[key] = init ? init() : undefined
     }
-    return useStateMocks[key]
+    return toRef(useStateMocks, key)
 })
 
 vi.stubGlobal('ref', vueRef)
@@ -352,6 +352,28 @@ describe('usePermissions', () => {
 
         expect(pbMock.cancelRequest).toHaveBeenCalledWith('userPermissions')
         expect(can('manage_routes')).toBe(false)
+    })
+
+    it('separate callers share one in-flight role fetch', async () => {
+        let resolveRole: (value: unknown) => void = () => {}
+        const getOneMock = vi.fn(
+            () => new Promise((resolve) => (resolveRole = resolve)),
+        )
+        pbMock.collection = vi.fn().mockReturnValue({ getOne: getOneMock })
+
+        const mod = await import('~/composables/usePermissions')
+        const plugin = mod.usePermissions()
+        const middleware = mod.usePermissions()
+        const pluginLoad = plugin.ensureLoaded()
+        const middlewareLoad = middleware.ensureLoaded()
+        resolveRole({
+            name: 'routesetter',
+            expand: { permissions: [{ name: 'manage_routes' }] },
+        })
+        await Promise.all([pluginLoad, middlewareLoad])
+
+        expect(getOneMock).toHaveBeenCalledTimes(1)
+        expect(middleware.can('manage_routes')).toBe(true)
     })
 
     it('a superseded ensureLoaded waits for the winning request', async () => {

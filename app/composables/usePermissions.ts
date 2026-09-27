@@ -12,7 +12,8 @@ export function usePermissions() {
     const loading = ref(false)
     const loaded = useState<boolean>('user-permissions-loaded', () => false)
     const loadedForRole = useState<string>('user-permissions-role', () => '')
-    const { $i18n } = useNuxtApp()
+    const nuxtApp = useNuxtApp()
+    const { $i18n } = nuxtApp
     const { error: notifyError } = useNotification()
 
     function isAutoCancelled(err: any) {
@@ -48,17 +49,17 @@ export function usePermissions() {
         const roleFetch: RoleFetch = {
             roleId,
             promise: fetchRole(roleId).finally(() => {
-                if (roleFetches.get(permissions) === roleFetch)
-                    roleFetches.delete(permissions)
+                if (roleFetches.get(nuxtApp) === roleFetch)
+                    roleFetches.delete(nuxtApp)
             }),
         }
-        roleFetches.set(permissions, roleFetch)
+        roleFetches.set(nuxtApp, roleFetch)
     }
 
     async function awaitLatestFetch() {
         loading.value = true
         let pending: RoleFetch | undefined
-        while ((pending = roleFetches.get(permissions))) await pending.promise
+        while ((pending = roleFetches.get(nuxtApp))) await pending.promise
         loading.value = false
     }
 
@@ -66,7 +67,7 @@ export function usePermissions() {
         const roleId = currentRoleId()
         if (!roleId) {
             pb.cancelRequest('userPermissions')
-            roleFetches.delete(permissions)
+            roleFetches.delete(nuxtApp)
             permissions.value = []
             roleName.value = ''
             loadedForRole.value = ''
@@ -79,7 +80,7 @@ export function usePermissions() {
 
     async function ensureLoaded() {
         const roleId = currentRoleId()
-        const pending = roleFetches.get(permissions)
+        const pending = roleFetches.get(nuxtApp)
         if (pending?.roleId === roleId) return awaitLatestFetch()
         if (!pending && loaded.value && loadedForRole.value === roleId) return
         await refreshPermissions()

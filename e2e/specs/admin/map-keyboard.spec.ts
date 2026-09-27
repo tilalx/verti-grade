@@ -163,7 +163,7 @@ test('clicking editor shapes and walls draws no browser focus ring', async ({
 }) => {
     await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
     const shape = page.getByTestId('map-floor-shape').first()
-    await shape.click()
+    await shape.click({ position: { x: 4, y: 4 } })
     await expect(shape).toHaveCSS('outline-style', 'none')
 
     const wall = page.locator(

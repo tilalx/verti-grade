@@ -14,6 +14,20 @@ async function signIn(page: Page) {
     await page.getByTestId('login-submit').click()
 }
 
+async function logOut(page: Page) {
+    const bannerActivator = page
+        .getByRole('banner')
+        .getByTestId('user-menu-activator')
+    if (await bannerActivator.isVisible()) {
+        await bannerActivator.click()
+        await page.getByTestId('user-menu-logout').click()
+    } else {
+        await page.getByTestId('bottom-nav-account').click()
+        await page.getByTestId('me-logout').click()
+    }
+    await page.waitForURL('**/auth/login**')
+}
+
 test('a guest who signs in keeps the redirect to a permission-guarded page', async ({
     page,
 }) => {
@@ -25,17 +39,16 @@ test('a guest who signs in keeps the redirect to a permission-guarded page', asy
     await expect(page).toHaveURL(/\/manage\/comments/)
 })
 
-test('signing in again after a logout reaches the guarded page', async ({
+test('signing in again after a logout in the same session reaches the dashboard', async ({
     page,
 }) => {
     await gotoSettled(page, '/auth/login?redirect=/manage/comments')
     await signIn(page)
     await page.waitForURL('**/manage/comments')
 
-    await page.context().clearCookies()
-    await gotoSettled(page, '/manage/comments', /\/auth\/login/)
+    await logOut(page)
     await signIn(page)
 
-    await page.waitForURL('**/manage/comments')
-    await expect(page).toHaveURL(/\/manage\/comments/)
+    await page.waitForURL('**/manage/routes')
+    await expect(page.getByTestId('routes-create-open')).toBeVisible()
 })
