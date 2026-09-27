@@ -69,3 +69,38 @@ test.describe('theme toggle', () => {
         await expect(page.locator(appRoot)).toHaveClass(/v-theme--dark/)
     })
 })
+
+test.describe('browser bars', () => {
+    test.use({ colorScheme: 'light' })
+
+    for (const path of ['/', '/routes', '/map', '/imprint']) {
+        test(`${path} colours both bars with the app background`, async ({
+            page,
+        }) => {
+            await gotoSettled(page, path)
+            await expect(
+                page.locator('meta[name="theme-color"]'),
+            ).toHaveAttribute('content', /^#F8FAF3$/i)
+            await expect(page.locator('body')).toHaveCSS(
+                'background-color',
+                'rgb(248, 250, 243)',
+            )
+        })
+    }
+
+    test('follows a theme switch', async ({ page }) => {
+        await gotoSettled(page, '/')
+        const toggle = page.getByTestId('nav-theme-toggle')
+        await toggle.click()
+        await toggle.click()
+        await expect(toggle).toHaveAttribute('data-theme-mode', 'dark')
+        await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+            'content',
+            /^#0d1117$/i,
+        )
+        await expect(page.locator('body')).toHaveCSS(
+            'background-color',
+            'rgb(13, 17, 23)',
+        )
+    })
+})
