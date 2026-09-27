@@ -96,3 +96,23 @@ test('dialog sheets keep their actions above the home indicator', async ({
     await expect(sheet).toBeVisible()
     expect(await coveredBySafeAreaPadding(sheet)).toBe(true)
 })
+
+for (const path of ['/scan', '/map']) {
+    test(`${path} fits the screen above the home indicator`, async ({
+        page,
+    }) => {
+        await gotoSettled(page, path)
+        await page.addStyleTag({
+            content: '.v-main { --app-bottom-inset: 34px !important; }',
+        })
+        await expect
+            .poll(() =>
+                page.evaluate(
+                    () =>
+                        document.scrollingElement!.scrollHeight -
+                        window.innerHeight,
+                ),
+            )
+            .toBeLessThanOrEqual(0)
+    })
+}

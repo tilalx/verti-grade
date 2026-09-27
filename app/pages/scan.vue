@@ -213,7 +213,8 @@ onBeforeUnmount(() => clearTimeout(rejectedTimer))
     display: flex;
     flex-direction: column;
     min-height: calc(
-        100dvh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 0px)
+        100dvh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 0px) -
+            var(--app-bottom-inset, 0px)
     );
 }
 
