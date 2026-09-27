@@ -123,7 +123,7 @@
         "title": "Analytics",
         "subtitle": "How your routes are set, climbed and rated.",
         "meta": {
-            "title": "Analytics - Verti-Grade",
+            "title": "Analytics - Gripello",
             "description": "Statistics on route setting, grades and reviews."
         },
         "heatmap": {
@@ -502,22 +502,22 @@
     },
     "page": {
         "title": {
-            "settings": "Settings - Verti-Grade",
-            "route": "Route - Verti-Grade",
-            "index": "Routes - Verti-Grade",
-            "comments": "Reviews - Verti-Grade",
-            "users": "Users - Verti-Grade",
-            "dashboard": "Manage routes - Verti-Grade",
-            "login": "Sign in - Verti-Grade",
-            "resetPassword": "Reset password - Verti-Grade",
-            "notFound": "Page not found - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Route inventory - Verti-Grade",
-            "reports": "Content reports - Verti-Grade",
-            "activity": "Activity log - Verti-Grade",
-            "verifyEmail": "Verify email - Verti-Grade",
-            "emailChange": "Change email - Verti-Grade",
-            "logbook": "Logbook - Verti-Grade"
+            "settings": "Settings - Gripello",
+            "route": "Route - Gripello",
+            "index": "Routes - Gripello",
+            "comments": "Reviews - Gripello",
+            "users": "Users - Gripello",
+            "dashboard": "Manage routes - Gripello",
+            "login": "Sign in - Gripello",
+            "resetPassword": "Reset password - Gripello",
+            "notFound": "Page not found - Gripello",
+            "routeNamed": "{name} - Gripello",
+            "inventory": "Route inventory - Gripello",
+            "reports": "Content reports - Gripello",
+            "activity": "Activity log - Gripello",
+            "verifyEmail": "Verify email - Gripello",
+            "emailChange": "Change email - Gripello",
+            "logbook": "Logbook - Gripello"
         },
         "content": {
             "settings": "Settings",

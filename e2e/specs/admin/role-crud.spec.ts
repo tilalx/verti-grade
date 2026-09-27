@@ -57,7 +57,7 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
 
     const suffix = Date.now()
     const roleName = `e2e-doomed-${suffix}`
-    const email = `e2e-reassign-${suffix}@verti-grade.test`
+    const email = `e2e-reassign-${suffix}@gripello.test`
 
     await page.getByTestId('role-create-open').click()
     await page.getByTestId('role-form-name').locator('input').fill(roleName)

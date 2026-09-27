@@ -14,12 +14,12 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         github: {
-            owner: process.env.GITHUB_OWNER || 'tilalx',
-            repo: process.env.GITHUB_REPO || 'verti-grade',
+            owner: process.env.GITHUB_OWNER || 'gripello',
+            repo: process.env.GITHUB_REPO || 'gripello',
             branch: process.env.GITHUB_BRANCH || 'main',
         },
         public: {
-            repoUrl: `https://github.com/${process.env.GITHUB_OWNER || 'tilalx'}/${process.env.GITHUB_REPO || 'verti-grade'}`,
+            repoUrl: `https://github.com/${process.env.GITHUB_OWNER || 'gripello'}/${process.env.GITHUB_REPO || 'gripello'}`,
             appVersion:
                 process.env.APP_VERSION ||
                 process.env.npm_package_version ||
@@ -56,7 +56,7 @@ export default defineNuxtConfig({
                 { name: 'color-scheme', content: 'light dark' },
                 { name: 'theme-color', content: '#38741C' },
                 { name: 'mobile-web-app-capable', content: 'yes' },
-                { name: 'apple-mobile-web-app-title', content: 'Verti-Grade' },
+                { name: 'apple-mobile-web-app-title', content: 'Gripello' },
             ],
             link: [
                 { rel: 'manifest', href: '/manifest.webmanifest' },

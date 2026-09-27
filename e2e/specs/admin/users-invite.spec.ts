@@ -18,7 +18,7 @@ test('sends an invite mail after creating a user', async ({
     await gotoSettled(page, '/admin/users')
 
     const suffix = Date.now()
-    const email = `e2e-invited-${suffix}@verti-grade.test`
+    const email = `e2e-invited-${suffix}@gripello.test`
 
     await fillCreateForm(page, email, `Invited${suffix}`)
 
@@ -38,7 +38,7 @@ test('keeps the created user when the invite mail fails', async ({
     await gotoSettled(page, '/admin/users')
 
     const suffix = Date.now()
-    const email = `e2e-invitefail-${suffix}@verti-grade.test`
+    const email = `e2e-invitefail-${suffix}@gripello.test`
 
     await page.route(
         '**/api/collections/users/request-password-reset',

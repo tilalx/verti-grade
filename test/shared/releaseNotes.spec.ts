@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { parseChange, parseReleaseNotes } from '#shared/utils/releaseNotes'
 
 const BODY = `## What's Changed
-* feat: introduce playwright testing by @tilalx in https://github.com/tilalx/verti-grade/pull/436
-* fix(reviews): make show more work by @tilalx in https://github.com/tilalx/verti-grade/pull/438
-* chore(deps-dev): bump vue from 3.5.42 to 3.5.43 by @dependabot[bot] in https://github.com/tilalx/verti-grade/pull/460
-* refactor(ui)!: unify look by @tilalx in https://github.com/tilalx/verti-grade/pull/437
+* feat: introduce playwright testing by @tilalx in https://github.com/gripello/gripello/pull/436
+* fix(reviews): make show more work by @tilalx in https://github.com/gripello/gripello/pull/438
+* chore(deps-dev): bump vue from 3.5.42 to 3.5.43 by @dependabot[bot] in https://github.com/gripello/gripello/pull/460
+* refactor(ui)!: unify look by @tilalx in https://github.com/gripello/gripello/pull/437
 
-**Full Changelog**: https://github.com/tilalx/verti-grade/compare/v1.10.3...v2.0.0`
+**Full Changelog**: https://github.com/gripello/gripello/compare/v1.10.3...v2.0.0`
 
 describe('parseReleaseNotes', () => {
     it('parses every bullet into a structured change', () => {

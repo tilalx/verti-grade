@@ -123,7 +123,7 @@
         "title": "Аналітика",
         "subtitle": "Як ваші маршрути накручують, пролазять і оцінюють.",
         "meta": {
-            "title": "Аналітика - Verti-Grade",
+            "title": "Аналітика - Gripello",
             "description": "Статистика з накрутки, категорій і відгуків."
         },
         "heatmap": {
@@ -502,22 +502,22 @@
     },
     "page": {
         "title": {
-            "settings": "Налаштування - Verti-Grade",
-            "route": "Маршрут - Verti-Grade",
-            "index": "Маршрути - Verti-Grade",
-            "comments": "Відгуки - Verti-Grade",
-            "users": "Користувачі - Verti-Grade",
-            "dashboard": "Управління маршрутами - Verti-Grade",
-            "login": "Вхід - Verti-Grade",
-            "resetPassword": "Скидання пароля - Verti-Grade",
-            "notFound": "Сторінку не знайдено - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Інвентаризація маршрутів - Verti-Grade",
-            "reports": "Скарги на вміст - Verti-Grade",
-            "activity": "Журнал активності - Verti-Grade",
-            "verifyEmail": "Підтвердження e-mail - Verti-Grade",
-            "emailChange": "Зміна e-mail - Verti-Grade",
-            "logbook": "Журнал - Verti-Grade"
+            "settings": "Налаштування - Gripello",
+            "route": "Маршрут - Gripello",
+            "index": "Маршрути - Gripello",
+            "comments": "Відгуки - Gripello",
+            "users": "Користувачі - Gripello",
+            "dashboard": "Управління маршрутами - Gripello",
+            "login": "Вхід - Gripello",
+            "resetPassword": "Скидання пароля - Gripello",
+            "notFound": "Сторінку не знайдено - Gripello",
+            "routeNamed": "{name} - Gripello",
+            "inventory": "Інвентаризація маршрутів - Gripello",
+            "reports": "Скарги на вміст - Gripello",
+            "activity": "Журнал активності - Gripello",
+            "verifyEmail": "Підтвердження e-mail - Gripello",
+            "emailChange": "Зміна e-mail - Gripello",
+            "logbook": "Журнал - Gripello"
         },
         "content": {
             "settings": "Налаштування",

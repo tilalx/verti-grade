@@ -7,7 +7,7 @@ test('submits a password reset request', async ({ page }) => {
     await page
         .getByTestId('reset-email')
         .locator('input')
-        .fill('e2e-user@verti-grade.test')
+        .fill('e2e-user@gripello.test')
     await page.getByTestId('reset-submit').click()
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
 })
@@ -34,7 +34,7 @@ test('shows an error when the reset request fails outright', async ({
     await page
         .getByTestId('reset-email')
         .locator('input')
-        .fill('e2e-user@verti-grade.test')
+        .fill('e2e-user@gripello.test')
     await page.getByTestId('reset-submit').click()
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
     await expect(page.getByTestId('reset-form')).toBeVisible()

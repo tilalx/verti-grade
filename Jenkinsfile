@@ -6,7 +6,7 @@ pipeline {
         DOCKER_BUILDKIT = 1
         PIPELINE_NAME = "${JOB_NAME.replaceAll('/', '_')}-${BUILD_NUMBER}"
         DOCKER_CLI_EXPERIMENTAL = 'enabled'
-        E2E_IMAGE = "verti-grade:e2e-${BUILD_NUMBER}"
+        E2E_IMAGE = "gripello:e2e-${BUILD_NUMBER}"
     }
 
     options {
@@ -71,7 +71,7 @@ pipeline {
                 stage('Vitest') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD":/work -w /work -v vg-e2e-yarn-cache:/root/.yarn/berry/cache \
+                            docker run --rm -v "$PWD":/work -w /work -v gripello-e2e-yarn-cache:/root/.yarn/berry/cache \
                                 node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 \
                                 sh -c "npm install -g corepack --force && corepack enable && yarn install --immutable --mode=skip-build && yarn test"
                         '''
@@ -100,18 +100,18 @@ pipeline {
         stage('E2E Tests') {
             steps {
                 sh """
-                    docker volume create vg-e2e-yarn-cache
-                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --attach e2e --abort-on-container-exit --exit-code-from e2e
+                    docker volume create gripello-e2e-yarn-cache
+                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --attach e2e --abort-on-container-exit --exit-code-from e2e
                 """
             }
             post {
                 failure {
-                    sh "E2E_IMAGE=${env.E2E_IMAGE} docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml logs --tail=500 app || true"
+                    sh "E2E_IMAGE=${env.E2E_IMAGE} docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml logs --tail=500 app || true"
                 }
                 always {
                     junit testResults: 'e2e/results/junit.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'e2e/results/html/**, e2e/results/artifacts/**', allowEmptyArchive: true
-                    sh "docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
+                    sh "docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
                 }
             }
         }
@@ -132,7 +132,7 @@ pipeline {
                 def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
                 def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
                 sh "docker buildx rm ${builderName}"
-                sh "docker compose -p vg-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
+                sh "docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
             }
             cleanWs()
         }

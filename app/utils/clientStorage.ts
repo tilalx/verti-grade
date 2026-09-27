@@ -3,8 +3,8 @@ import { INVENTORY_INSTRUCTIONS_KEY, INVENTORY_STORAGE_KEY } from './inventory'
 export const AUTH_COOKIE = 'pb_auth'
 export const COLOR_SCHEME_COOKIE = 'color-scheme'
 export const THEME_MODE_COOKIE = 'theme-mode'
-export const EXPORT_COLUMNS_KEY = 'verti-grade.export-columns'
-export const UPDATE_DISMISSED_KEY = 'verti-grade:update-dismissed'
+export const EXPORT_COLUMNS_KEY = 'gripello.export-columns'
+export const UPDATE_DISMISSED_KEY = 'gripello:update-dismissed'
 
 export type ClientStorageKind = 'cookie' | 'localStorage'
 

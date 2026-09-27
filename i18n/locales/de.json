@@ -123,7 +123,7 @@
         "title": "Analysen",
         "subtitle": "Wie eure Routen geschraubt, geklettert und bewertet werden.",
         "meta": {
-            "title": "Analysen - Verti-Grade",
+            "title": "Analysen - Gripello",
             "description": "Statistiken zu Schrauben, Graden und Bewertungen."
         },
         "heatmap": {
@@ -502,22 +502,22 @@
     },
     "page": {
         "title": {
-            "settings": "Einstellungen - Verti-Grade",
-            "route": "Route - Verti-Grade",
-            "index": "Routen - Verti-Grade",
-            "comments": "Bewertungen - Verti-Grade",
-            "users": "Benutzer - Verti-Grade",
-            "dashboard": "Routen verwalten - Verti-Grade",
-            "login": "Anmelden - Verti-Grade",
-            "resetPassword": "Passwort zurücksetzen - Verti-Grade",
-            "notFound": "Seite nicht gefunden - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Inventur - Verti-Grade",
-            "reports": "Inhaltsmeldungen - Verti-Grade",
-            "activity": "Aktivitätsprotokoll - Verti-Grade",
-            "verifyEmail": "E-Mail bestätigen - Verti-Grade",
-            "emailChange": "E-Mail ändern - Verti-Grade",
-            "logbook": "Logbuch - Verti-Grade"
+            "settings": "Einstellungen - Gripello",
+            "route": "Route - Gripello",
+            "index": "Routen - Gripello",
+            "comments": "Bewertungen - Gripello",
+            "users": "Benutzer - Gripello",
+            "dashboard": "Routen verwalten - Gripello",
+            "login": "Anmelden - Gripello",
+            "resetPassword": "Passwort zurücksetzen - Gripello",
+            "notFound": "Seite nicht gefunden - Gripello",
+            "routeNamed": "{name} - Gripello",
+            "inventory": "Inventur - Gripello",
+            "reports": "Inhaltsmeldungen - Gripello",
+            "activity": "Aktivitätsprotokoll - Gripello",
+            "verifyEmail": "E-Mail bestätigen - Gripello",
+            "emailChange": "E-Mail ändern - Gripello",
+            "logbook": "Logbuch - Gripello"
         },
         "content": {
             "settings": "Einstellungen",

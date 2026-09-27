@@ -20,8 +20,8 @@
                         v-else
                         :src="
                             theme.global.current.value.dark
-                                ? '/verti-grade-dark.svg'
-                                : '/verti-grade-light.svg'
+                                ? '/gripello-dark.svg'
+                                : '/gripello-light.svg'
                         "
                         :alt="logoAlt"
                         :style="defaultLogoStyle"
@@ -162,9 +162,7 @@ const props = defineProps<{
 }>()
 
 const { loggedIn, settings } = toRefs(props)
-const logoAlt = computed(
-    () => settings.value?.organization_name || 'Verti-Grade',
-)
+const logoAlt = computed(() => settings.value?.organization_name || 'Gripello')
 
 const { can } = usePermissions()
 

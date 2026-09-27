@@ -1,4 +1,4 @@
-const CACHE = `verti-grade-${new URL(self.location.href).searchParams.get('build')}`
+const CACHE = `gripello-${new URL(self.location.href).searchParams.get('build')}`
 const OFFLINE_URL = '/offline.html'
 
 self.addEventListener('install', (event) => {

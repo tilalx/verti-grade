@@ -49,7 +49,7 @@ interface VersionPayload {
 
 const GITHUB_HEADERS = {
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'verti-grade',
+    'User-Agent': 'gripello',
 }
 
 export default defineCachedEventHandler(

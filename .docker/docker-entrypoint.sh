@@ -49,7 +49,7 @@ if [ ! -f "$SSL_CERT" ] || [ ! -f "$SSL_KEY" ]; then
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
         -keyout "$SSL_KEY" \
         -out "$SSL_CERT" \
-        -subj "/CN=verti-grade/O=Verti-Grade/C=DE" \
+        -subj "/CN=gripello/O=Gripello/C=DE" \
         -addext "subjectAltName=$SAN" \
         -addext "basicConstraints=critical,CA:TRUE" \
         2>/dev/null
@@ -58,7 +58,7 @@ fi
 
 echo ""
 echo "========================================"
-echo "  Verti-Grade ${APP_VER}"
+echo "  Gripello ${APP_VER}"
 echo "  ──────────────────────────────────────"
 echo "  HTTP   →  http://0.0.0.0:80   (→ 443)"
 echo "  HTTPS  →  https://0.0.0.0:443"
