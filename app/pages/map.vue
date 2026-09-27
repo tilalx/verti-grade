@@ -650,7 +650,8 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     height: calc(
-        100dvh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 0px)
+        100dvh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 0px) -
+            var(--app-bottom-inset, 0px)
     );
     min-height: 420px;
 }

@@ -43,9 +43,8 @@ import { BOTTOM_NAV } from '~/utils/navigation'
 
 @media (max-width: 1144.98px) {
     :global(.v-main) {
-        padding-bottom: calc(
-            var(--v-layout-bottom) + env(safe-area-inset-bottom, 0px)
-        );
+        --app-bottom-inset: env(safe-area-inset-bottom, 0px);
+        padding-bottom: calc(var(--v-layout-bottom) + var(--app-bottom-inset));
     }
 }
 
