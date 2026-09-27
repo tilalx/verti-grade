@@ -10,14 +10,14 @@
     </div>
     <LayoutBottomNav />
     <GlobalSnackbar />
-    <ClientOnly>
-        <div data-testid="page-hydrated" hidden />
-    </ClientOnly>
+    <div v-if="hydrated" data-testid="page-hydrated" hidden />
 </template>
 
 <script setup lang="ts">
 import type { ClientResponseError, UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
+
+const hydrated = useHydrated()
 
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
@@ -62,9 +62,10 @@ const refreshSession = async () => {
         await pb.collection('users').authRefresh()
         isLoggedIn.value = pb.authStore.isValid
     } catch (error) {
+        const status = (error as ClientResponseError)?.status
+        if (status !== 401 && status !== 403) return
         pb.authStore.clear()
         isLoggedIn.value = false
-        console.error('Error refreshing session:', error)
     }
 }
 

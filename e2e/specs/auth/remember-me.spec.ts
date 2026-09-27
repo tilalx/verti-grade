@@ -31,7 +31,7 @@ test('an unchecked remember me keeps the session only until the browser closes',
     expect(cookie?.expires).toBe(-1)
 
     await gotoSettled(page, '/account')
-    expect((await authCookie(page))?.expires).toBe(-1)
+    await expect.poll(async () => (await authCookie(page))?.expires).toBe(-1)
 })
 
 test('a checked remember me keeps a persistent session', async ({ page }) => {

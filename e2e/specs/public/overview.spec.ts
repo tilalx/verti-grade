@@ -127,8 +127,16 @@ test('new routes appear on the overview without a reload', async ({
     ).toBeVisible()
 })
 
-test('the route page leads back to where it was opened', async ({ page }) => {
+test('the route page leads back to where it was opened', async ({
+    page,
+    testPrefix,
+}) => {
     await gotoSettled(page, '/routes')
+    await page
+        .getByTestId('filter-search')
+        .locator('input')
+        .fill(`${testPrefix}-fresh`)
+    await expect(page.getByTestId('route-view')).toHaveCount(1)
     await page.getByTestId('route-view').first().click()
     await page.waitForURL(/\/route\?id=/)
     await page.getByTestId('route-back').click()
