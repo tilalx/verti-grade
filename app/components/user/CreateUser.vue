@@ -42,7 +42,16 @@
             <v-form ref="form" v-model="valid" @submit.prevent="submit">
                 <!-- Avatar upload -->
                 <div class="d-flex justify-center mb-6">
-                    <div class="avatar-wrapper" @click="avatarInput?.click()">
+                    <div
+                        class="avatar-wrapper"
+                        role="button"
+                        tabindex="0"
+                        :aria-label="$t('account.changeAvatar')"
+                        data-testid="user-create-avatar-upload"
+                        @click="avatarInput?.click()"
+                        @keydown.enter.prevent="avatarInput?.click()"
+                        @keydown.space.prevent="avatarInput?.click()"
+                    >
                         <v-avatar size="80" class="avatar-ring">
                             <v-img
                                 v-if="avatarPreview"
@@ -229,8 +238,15 @@ async function submit() {
         await pb.collection('users').create(formData)
 
         try {
-            await pb.collection('users').requestPasswordReset(user.email)
-            notify(t('notifications.success.userInvited'))
+            if (mailConfigured.value) {
+                await pb.collection('users').requestPasswordReset(user.email)
+                notify(t('notifications.success.userInvited'))
+            } else {
+                notify(
+                    t('notifications.success.userCreatedNoInvite'),
+                    'warning',
+                )
+            }
         } catch (mailError) {
             console.error('Error sending invite email:', mailError)
             notifyError(t('notifications.error.userInviteMail'))

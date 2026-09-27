@@ -255,6 +255,11 @@
                                 color="primary"
                                 hide-details
                                 density="compact"
+                                :aria-label="
+                                    $t('actions.select_route', {
+                                        name: item.name,
+                                    })
+                                "
                                 data-testid="routes-row-checkbox"
                                 @update:modelValue="
                                     updateRouteSelection(item, !!$event)
@@ -317,7 +322,7 @@
                             {{ locationName(item) }}
                         </template>
                         <template #item.score="{ item }">
-                            {{ formatScore(item) }}
+                            {{ formatScore(item, locale) }}
                         </template>
                         <template #item.actions="{ item }">
                             <div class="route-manager__row-actions">
@@ -475,6 +480,7 @@
 
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
+import { sendInBatches } from '~/utils/batch'
 import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
 import {
     formatAnchorPoint,
@@ -795,15 +801,25 @@ const archiveSelected = async () => {
 
     await runAction(
         async () => {
-            const batch = pb.createBatch()
-            ids.forEach((id) => {
-                batch.collection('routes').update(id, { archived: true })
-            })
-            await batch.send()
-            invalidateAllRouteIdsCache()
-            removeSelectedIds(ids)
-            showArchiveConfirmation.value = false
-            await reloadRoutes()
+            const archivedIds: string[] = []
+            try {
+                await sendInBatches(
+                    pb,
+                    ids,
+                    (batch, id) =>
+                        batch
+                            .collection('routes')
+                            .update(id, { archived: true }),
+                    (chunk) => archivedIds.push(...chunk),
+                )
+                showArchiveConfirmation.value = false
+            } finally {
+                if (archivedIds.length) {
+                    invalidateAllRouteIdsCache()
+                    removeSelectedIds(archivedIds)
+                    await reloadRoutes()
+                }
+            }
         },
         { success: t('notifications.success.edit') },
     )

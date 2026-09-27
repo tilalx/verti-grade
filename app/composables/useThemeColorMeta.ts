@@ -1,9 +1,17 @@
 export function useThemeColorMeta() {
     const theme = useTheme()
     const background = () => String(theme.current.value.colors.background)
+    const colorScheme = () => (theme.current.value.dark ? 'dark' : 'light')
 
     useHead({
-        meta: [{ name: 'theme-color', content: background }],
+        meta: [
+            { name: 'theme-color', content: background },
+            { name: 'color-scheme', content: colorScheme },
+        ],
+        htmlAttrs: {
+            style: () =>
+                `color-scheme: ${colorScheme()}; background-color: ${background()}`,
+        },
         bodyAttrs: { style: () => `background-color: ${background()}` },
     })
 

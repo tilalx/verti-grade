@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatNumber } from '#shared/utils/number'
 import {
     GRADE_DEVIATION_THRESHOLD,
     type FeedbackRoute,
@@ -19,7 +20,7 @@ import { escapeHtml, gridBase, itemTooltip, yAxisBase } from '~/utils/echarts'
 
 const props = defineProps<{ routes: FeedbackRoute[] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { colors, palette } = useChartTheme()
 
 function colorFor(deviation: number) {
@@ -63,7 +64,7 @@ const option = computed(() => {
             const route = data.route as FeedbackRoute
             return `<strong>${escapeHtml(route.name)}</strong><br/>
                 ${t('analytics.labels.setGrade')}: ${route.grade}<br/>
-                ${t('analytics.labels.votedGrade')}: ${route.votedGradeLabel || route.votedGrade.toFixed(1)}<br/>
+                ${t('analytics.labels.votedGrade')}: ${route.votedGradeLabel || formatNumber(route.votedGrade, locale.value)}<br/>
                 ${t('analytics.labels.voteCount', { n: route.votes }, route.votes)}`
         }),
         grid: { ...gridBase, left: 36, bottom: 30, top: 16 },

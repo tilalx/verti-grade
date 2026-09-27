@@ -1,4 +1,21 @@
 {
+    "colors": {
+        "red": "Red",
+        "orange": "Orange",
+        "yellow": "Yellow",
+        "green": "Green",
+        "blue": "Blue",
+        "purple": "Purple",
+        "pink": "Pink",
+        "brown": "Brown",
+        "black": "Black",
+        "white": "White",
+        "grey": "Grey",
+        "turquoise": "Turquoise"
+    },
+    "common": {
+        "selectItem": "Select {name}"
+    },
     "account": {
         "profile": "Profile",
         "login": "Sign In",
@@ -23,6 +40,7 @@
         "passwordHint": "Leave the password fields empty to keep your current password.",
         "unsavedChanges": "Unsaved changes",
         "wrongOldPassword": "Current password is incorrect",
+        "passwordChangedSignInAgain": "Password changed. Please sign in again with your new password.",
         "unknownUser": "Unknown User",
         "tabs": {
             "profile": "Profile",
@@ -346,6 +364,7 @@
             "verifyEmail": "Your email address has been verified. You can sign in now.",
             "emailChange": "Your email address has been changed. Please sign in again.",
             "userInvited": "User created. An invitation email has been sent.",
+            "userCreatedNoInvite": "User created, but no invitation email was sent because email is not configured.",
             "passwordChanged": "Your password has been set. You can sign in now.",
             "registered": "Account created. Check your email to verify your address, then sign in.",
             "verificationSent": "If an unverified account exists, a new verification link is on its way."
@@ -771,6 +790,7 @@
         "issues": "Import finished with issues: {details}",
         "routesFailed": "{count} route failed | {count} routes failed",
         "commentsFailed": "{count} review failed | {count} reviews failed",
+        "importedSetter": "Imported",
         "failed": "The import failed unexpectedly."
     },
     "reports": {
@@ -816,6 +836,7 @@
         "decisionReason": "Reason for the decision",
         "decisionReasonHint": "Kept as the internal record of why this decision was made.",
         "removeContent": "Remove content",
+        "removeNotAllowed": "You are not allowed to remove this content, or it could not be removed.",
         "keepContent": "Keep content",
         "decided": "Decision recorded. The reporter has been notified.",
         "receiptPending": "Receipt not delivered",
@@ -1034,6 +1055,8 @@
         "saveFailed": "Could not save. Wall names must be unique, and a wall that still has routes cannot be deleted.",
         "discard": "Discard your unsaved map changes?",
         "canvasLabel": "Map drawing area",
+        "pointLabel": "Point {n}",
+        "addPointLabel": "Add point",
         "walls": "Walls",
         "newWall": "New wall name",
         "addWall": "Add",

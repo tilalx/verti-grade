@@ -1,6 +1,9 @@
 package hooks
 
 import (
+	"slices"
+
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
@@ -10,13 +13,29 @@ func registerRouteArchiveStamp(app core.App) {
 		e.Record.Set("archived_at", archivedAt(
 			e.Record.Original().GetBool("archived"),
 			e.Record.GetBool("archived"),
-			e.Record.GetDateTime("archived_at"),
+			e.Record.Original().GetDateTime("archived_at"),
 			types.NowDateTime(),
 		))
 		return e.Next()
 	}
 	app.OnRecordCreate("routes").BindFunc(stamp)
 	app.OnRecordUpdate("routes").BindFunc(stamp)
+
+	app.OnRecordUpdateRequest("routes").BindFunc(func(e *core.RecordRequestEvent) error {
+		if e.HasSuperuserAuth() || (e.Auth != nil && hasPermission(e.App, e.Auth.Id, "manage_routes")) {
+			return e.Next()
+		}
+		if !onlyArchiveChanged(changedFieldNames(e.Record.Original().FieldsData(), e.Record.FieldsData())) {
+			return apis.NewForbiddenError("Inventory may only archive or restore routes.", nil)
+		}
+		return e.Next()
+	})
+}
+
+func onlyArchiveChanged(changedFields []string) bool {
+	return !slices.ContainsFunc(changedFields, func(field string) bool {
+		return field != "archived"
+	})
 }
 
 func archivedAt(wasArchived, isArchived bool, current, now types.DateTime) types.DateTime {

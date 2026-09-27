@@ -538,6 +538,7 @@ import {
     sortByAnchor,
 } from '~/utils/inventory'
 import type { RouteRecord } from '~/types/models'
+import { sendInBatches } from '~/utils/batch'
 
 definePageMeta({
     middleware: 'auth',
@@ -982,11 +983,9 @@ const confirmFinish = async () => {
 
     await runArchive(
         async () => {
-            const batch = pb.createBatch()
-            ids.forEach((id) => {
-                batch.collection('routes').update(id, { archived: true })
-            })
-            await batch.send()
+            await sendInBatches(pb, ids, (batch, id) =>
+                batch.collection('routes').update(id, { archived: true }),
+            )
             resetInventory()
             await loadRoutes()
         },

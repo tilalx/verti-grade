@@ -25,7 +25,13 @@
                 }"
                 data-testid="placement-wall"
                 :data-name="wall.name"
+                role="button"
+                tabindex="0"
+                :aria-pressed="wall.id === selectedWallId"
+                :aria-label="wall.name"
                 @click.stop="onWallClick(wall.id, $event)"
+                @keydown.enter.prevent="onWallKey(wall.id)"
+                @keydown.space.prevent="onWallKey(wall.id)"
             >
                 <path
                     :d="svgPath(wall.outline)"
@@ -58,8 +64,14 @@
                 data-draggable
                 data-testid="placement-dot"
                 :data-route-id="dot.routeId"
+                role="button"
+                tabindex="0"
+                :aria-pressed="dot.routeId === selectedRouteId"
+                :aria-label="dotLabel(dot.routeId)"
                 @pointerdown.stop="onDotDown(dot.routeId, $event)"
                 @click.stop
+                @keydown.enter.prevent="onDotKey(dot)"
+                @keydown.space.prevent="onDotKey(dot)"
             >
                 <circle
                     :cx="dot.point[0]"
@@ -130,7 +142,13 @@ import {
     type GymMap,
     type MapBounds,
 } from '#shared/utils/mapGeometry'
-import { placeRoutes, type MapRoute, type MapWall } from '~/utils/gymMap'
+import { translatedColorName } from '~/utils/colorName'
+import {
+    placeRoutes,
+    type MapRoute,
+    type MapWall,
+    type RouteDot,
+} from '~/utils/gymMap'
 import { svgPath } from '~/utils/mapSvg'
 
 const props = defineProps<{
@@ -148,6 +166,7 @@ const emit = defineEmits<{
     selectWall: [wallId: string | null]
 }>()
 
+const { t } = useI18n()
 const DOT_RADIUS_PX = { fine: 6, coarse: 8 }
 const HIT_RADIUS_PX = { fine: 12, coarse: 22 }
 const SNAP_RADIUS_PX = 60
@@ -182,6 +201,16 @@ const draggingRouteId = ref<string | null>(null)
 const ghost = ref<(EdgeProjection & { wall: MapWall }) | null>(null)
 
 const dots = computed(() => placeRoutes(props.walls, props.routes))
+const routesById = computed(
+    () => new Map(props.routes.map((route) => [route.id, route])),
+)
+
+function dotLabel(routeId: string) {
+    const route = routesById.value.get(routeId)
+    return [route?.name, translatedColorName(t, route?.color)]
+        .filter(Boolean)
+        .join(', ')
+}
 
 function snapAt(client: { clientX: number; clientY: number }) {
     const point = toMap({ x: client.clientX, y: client.clientY })
@@ -239,6 +268,23 @@ function onWallClick(wallId: string, event: MouseEvent) {
         return
     }
     emit('selectWall', wallId)
+}
+
+function onWallKey(wallId: string) {
+    if (props.armedRouteId) emit('place', props.armedRouteId, wallId, 0.5)
+    else emit('selectWall', wallId)
+}
+
+function onDotKey(dot: RouteDot) {
+    const route = routesById.value.get(dot.routeId)
+    if (props.armedRouteId && props.armedRouteId !== dot.routeId)
+        emit(
+            'place',
+            props.armedRouteId,
+            dot.wallId,
+            route?.wall_position ?? 0.5,
+        )
+    else emit('selectRoute', dot.routeId)
 }
 
 function onDotDown(routeId: string, event: PointerEvent) {
@@ -332,6 +378,18 @@ function onDotDown(routeId: string, event: PointerEvent) {
     fill: rgba(var(--v-theme-on-surface), 0.2);
     stroke: rgba(var(--v-theme-on-surface), 0.3);
     stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.placement-wall:focus,
+.placement-dot:focus {
+    outline: none;
+}
+
+.placement-wall:focus-visible .placement-wall-outline,
+.placement-dot:focus-visible .placement-dot-hit {
+    stroke: rgb(var(--v-theme-primary));
+    stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
 

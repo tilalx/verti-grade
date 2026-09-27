@@ -79,53 +79,63 @@
                             </div>
                         </div>
 
-                        <!-- Preview + Upload combined area -->
                         <div
-                            class="asset-drop-zone d-flex flex-column align-center justify-center rounded-lg position-relative"
-                            :data-testid="`settings-asset-${asset.key}`"
-                            @click="() => asset.triggerInput()"
+                            class="asset-drop-zone rounded-lg position-relative"
                         >
-                            <!-- Preview image when available -->
-                            <img
-                                v-if="asset.preview.value"
-                                :src="asset.preview.value"
-                                :alt="asset.label"
-                                class="asset-preview"
-                            />
-
-                            <!-- Empty state -->
-                            <template v-else>
-                                <v-icon
-                                    size="28"
-                                    class="mb-2 text-medium-emphasis"
-                                    >mdi-image-plus-outline</v-icon
-                                >
-                                <span
-                                    class="text-body-small text-medium-emphasis"
-                                    >{{ $t('settings.clickToUpload') }}</span
-                                >
-                            </template>
+                            <button
+                                type="button"
+                                class="asset-drop-trigger d-flex flex-column align-center justify-center"
+                                :data-testid="`settings-asset-${asset.key}`"
+                                :aria-label="`${asset.label}: ${asset.preview.value ? $t('settings.replace') : $t('settings.clickToUpload')}`"
+                                @click="asset.triggerInput()"
+                            >
+                                <img
+                                    v-if="asset.preview.value"
+                                    :src="asset.preview.value"
+                                    :alt="asset.label"
+                                    class="asset-preview"
+                                />
+                                <template v-else>
+                                    <v-icon
+                                        size="28"
+                                        class="mb-2 text-medium-emphasis"
+                                        >mdi-image-plus-outline</v-icon
+                                    >
+                                    <span
+                                        class="text-body-small text-medium-emphasis"
+                                        >{{
+                                            $t('settings.clickToUpload')
+                                        }}</span
+                                    >
+                                </template>
+                            </button>
 
                             <div
+                                v-if="asset.preview.value"
                                 class="asset-overlay rounded-lg"
                                 :data-testid="`settings-asset-actions-${asset.key}`"
                             >
-                                <div class="asset-overlay__action">
+                                <button
+                                    type="button"
+                                    class="asset-overlay__action asset-overlay__replace"
+                                    :data-testid="`settings-asset-replace-${asset.key}`"
+                                    @click="asset.triggerInput()"
+                                >
                                     <v-icon size="24"
-                                        >mdi-upload-outline</v-icon
+                                        >mdi-image-edit-outline</v-icon
                                     >
                                     <span class="text-body-small">{{
                                         $t('settings.replace')
                                     }}</span>
-                                </div>
+                                </button>
                                 <button
-                                    v-if="asset.preview.value && !asset.isDirty"
+                                    v-if="!asset.isDirty"
                                     type="button"
-                                    class="asset-overlay__action"
+                                    class="asset-overlay__action asset-overlay__delete"
                                     :data-testid="`settings-asset-delete-${asset.key}`"
-                                    @click.stop="asset.onDelete()"
+                                    @click="asset.onDelete()"
                                 >
-                                    <v-icon color="error" size="24"
+                                    <v-icon size="24"
                                         >mdi-delete-outline</v-icon
                                     >
                                     <span class="text-body-small">{{
@@ -899,6 +909,13 @@ async function saveSettings() {
     border-color: rgba(var(--v-border-color), 0.6);
 }
 
+.asset-drop-trigger {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    cursor: pointer;
+}
+
 .asset-preview {
     display: block;
     max-width: 100%;
@@ -913,13 +930,35 @@ async function saveSettings() {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    background: rgba(var(--v-theme-surface-variant), 0.85);
-    color: rgb(var(--v-theme-on-surface-variant));
+    background: rgba(var(--v-theme-surface), 0.88);
+    color: rgb(var(--v-theme-on-surface));
     opacity: 0;
     transition: opacity 0.18s;
+    pointer-events: none;
+}
+
+.asset-overlay__replace,
+.asset-overlay__delete {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.asset-overlay__replace:hover,
+.asset-overlay__replace:focus-visible {
+    background: rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.asset-overlay__delete {
+    color: rgb(var(--v-theme-error));
+}
+
+.asset-overlay__delete:hover,
+.asset-overlay__delete:focus-visible {
+    background: rgba(var(--v-theme-error), 0.12);
 }
 
 .asset-drop-zone:hover .asset-overlay,
+.asset-drop-trigger:focus-visible + .asset-overlay,
 .asset-overlay:focus-within {
     opacity: 1;
 }
@@ -929,10 +968,14 @@ async function saveSettings() {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 88px;
+    min-height: 64px;
     justify-content: center;
-    color: inherit;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    font: inherit;
 }
 
 @media (hover: none) {
@@ -944,6 +987,8 @@ async function saveSettings() {
 
     .asset-overlay__action {
         flex-direction: row;
+        min-height: 40px;
+        padding: 4px 8px;
     }
 }
 </style>

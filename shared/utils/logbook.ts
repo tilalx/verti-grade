@@ -1,5 +1,5 @@
 import { BOULDER_GRADE_SYSTEMS, gradeKey, type GradeSystem } from './grades'
-import { compareGrades } from './analytics'
+import { compareGrades, gradeScore } from './analytics'
 import { localDay, tickDay, type TickType } from './ticks'
 
 export type LogbookKind = 'boulder' | 'route'
@@ -77,20 +77,18 @@ function windowStart(range: LogbookRange, now: Date, periodsBack = 0) {
 }
 
 function hardestOf(ticks: LogbookTick[]): HardestSend | null {
-    let best: LogbookTick | null = null
+    let best: HardestSend | null = null
     for (const tick of ticks) {
-        if (!isSend(tick) || typeof tick.grade_index !== 'number') continue
-        if (!best || tick.grade_index > (best.grade_index as number)) {
-            best = tick
+        const score = isSend(tick) ? gradeScore(tick) : null
+        if (score !== null && (!best || score > best.grade_index)) {
+            best = {
+                grade: tick.grade ?? '',
+                grade_system: tick.grade_system ?? null,
+                grade_index: score,
+            }
         }
     }
     return best
-        ? {
-              grade: best.grade ?? '',
-              grade_system: best.grade_system ?? null,
-              grade_index: best.grade_index as number,
-          }
-        : null
 }
 
 function statsOf(ticks: LogbookTick[]): LogbookStats {
@@ -183,11 +181,12 @@ export function progression(
         const point = points.get(tickDay(tick.date).slice(0, 7))
         if (!point) continue
         point.sends += 1
+        const score = gradeScore(tick)
         if (
-            typeof tick.grade_index === 'number' &&
-            (point.maxIndex === null || tick.grade_index > point.maxIndex)
+            score !== null &&
+            (point.maxIndex === null || score > point.maxIndex)
         ) {
-            point.maxIndex = tick.grade_index
+            point.maxIndex = score
         }
     }
     return [...points.values()]
@@ -243,8 +242,8 @@ export function medianSendIndex(
 ): number | null {
     const values = ticks
         .filter((tick) => isSend(tick) && tickKind(tick) === kind)
-        .map((tick) => tick.grade_index)
-        .filter((value): value is number => typeof value === 'number')
+        .map(gradeScore)
+        .filter((value): value is number => value !== null)
         .sort((a, b) => a - b)
     return values.length ? values[Math.floor(values.length / 2)]! : null
 }

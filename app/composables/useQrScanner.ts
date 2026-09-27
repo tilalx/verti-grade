@@ -116,7 +116,8 @@ export function useQrScanner(
 
     const start = () => {
         if (!import.meta.client) return
-        ensureAudio()
+        if (navigator.userActivation?.isActive) ensureAudio()
+        else window.addEventListener('pointerdown', ensureAudio, { once: true })
         scannerError.value = ''
         cameraActive.value = true
     }
@@ -131,6 +132,7 @@ export function useQrScanner(
 
     onBeforeUnmount(() => {
         document.removeEventListener('visibilitychange', onVisibilityChange)
+        window.removeEventListener('pointerdown', ensureAudio)
         stop()
         void audioContext?.close()
         audioContext = null

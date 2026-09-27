@@ -5,6 +5,7 @@ import {
     onMounted as vueOnMounted,
     onBeforeUnmount as vueOnBeforeUnmount,
     watch as vueWatch,
+    useId as vueUseId,
 } from 'vue'
 import { config } from '@vue/test-utils'
 import { useVersionCheck } from '~/composables/useVersionCheck'
@@ -76,7 +77,8 @@ const i18nGetter = () => ({
     loadLocaleMessages: async () => {},
 })
 
-const nuxtAppGetter = () => ({ $i18n: { t: (key: string) => key } })
+const nuxtAppMock = { $i18n: { t: (key: string) => key } }
+const nuxtAppGetter = () => nuxtAppMock
 
 const useAsyncDataGetter = <T>(
     _key: string,
@@ -122,6 +124,7 @@ vi.stubGlobal('useNuxtApp', nuxtAppGetter)
 vi.stubGlobal('useState', useStateGetter)
 vi.stubGlobal('useAsyncData', useAsyncDataGetter)
 vi.stubGlobal('useVersionCheck', useVersionCheck)
+vi.stubGlobal('useId', vueUseId)
 vi.stubGlobal('useDisplay', () => ({
     smAndDown: vueComputed(() => false),
     smAndUp: vueComputed(() => true),

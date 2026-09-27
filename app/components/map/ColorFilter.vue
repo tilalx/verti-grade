@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { translatedColorName } from '~/utils/colorName'
+
 const selected = defineModel<string | null>({ default: null })
 defineProps<{ colors: string[] }>()
+
+const { t } = useI18n()
 
 function toggle(color: string) {
     selected.value = selected.value === color ? null : color
@@ -21,7 +25,8 @@ function toggle(color: string) {
             class="color-filter__swatch"
             :class="{ 'color-filter__swatch--active': selected === color }"
             :style="{ background: color }"
-            :aria-label="color"
+            :aria-label="translatedColorName(t, color) || color"
+            :title="translatedColorName(t, color) || color"
             :aria-pressed="selected === color"
             :data-color="color"
             data-testid="color-filter-swatch"

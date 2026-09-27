@@ -1,5 +1,6 @@
 import { formatDate, normalizeCreators } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
+import { normalizeHexColor } from '#shared/utils/color'
 import type { RouteRecord } from '../../types/models'
 
 export const TAG_WIDTH = 280
@@ -118,7 +119,7 @@ export function drawRouteTag(
     doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER + 1).fill('#FFFFFF')
     doc.circle(cx, cy, CIRCLE_RADIUS + CIRCLE_BORDER).fill('#333333')
     doc.circle(cx, cy, CIRCLE_RADIUS + 0.5).fill('#FFFFFF')
-    doc.circle(cx, cy, CIRCLE_RADIUS).fill(route.color as string)
+    doc.circle(cx, cy, CIRCLE_RADIUS).fill(normalizeHexColor(route.color))
     doc.fillColor('black')
 
     if (options.show.logo && options.logo) {

@@ -26,7 +26,7 @@ test('server-renders the logged-in navbar', async ({ adminPage: page }) => {
 test('the navbar logo actually loads', async ({ page }) => {
     await page.goto('/')
 
-    const logo = page.getByTestId('nav-logo').locator('img')
+    const logo = page.getByTestId('nav-logo').locator('img:visible')
     await expect(logo).toBeVisible()
 
     await expect

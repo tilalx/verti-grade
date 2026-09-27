@@ -9,15 +9,14 @@
         <LayoutFootBar :settings="settings" />
     </div>
     <LayoutBottomNav />
-    <GlobalSnackbar />
-    <ClientOnly>
-        <div data-testid="page-hydrated" hidden />
-    </ClientOnly>
+    <div v-if="hydrated" data-testid="page-hydrated" hidden />
 </template>
 
 <script setup lang="ts">
 import type { ClientResponseError, UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
+
+const hydrated = useHydrated()
 
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
@@ -62,9 +61,10 @@ const refreshSession = async () => {
         await pb.collection('users').authRefresh()
         isLoggedIn.value = pb.authStore.isValid
     } catch (error) {
+        const status = (error as ClientResponseError)?.status
+        if (status !== 401 && status !== 403) return
         pb.authStore.clear()
         isLoggedIn.value = false
-        console.error('Error refreshing session:', error)
     }
 }
 
@@ -85,30 +85,41 @@ let unsubAuthChange: (() => void) | null = null
 let unsubUser: UnsubscribeFunc | null = null
 let unsubSettings: UnsubscribeFunc | null = null
 let unsubRole: UnsubscribeFunc | null = null
+let unmounted = false
+
+function releaseIfUnmounted(unsub: UnsubscribeFunc): UnsubscribeFunc | null {
+    if (!unmounted) return unsub
+    unsub().catch(() => {})
+    return null
+}
 
 async function subscribeToRole(roleId: string | null | undefined) {
     unsubRole?.()?.catch?.(() => {})
+    unsubRole = null
     if (!roleId) return
-    unsubRole = await pb.collection('roles').subscribe(roleId, (e) => {
-        if (e.action === 'update' || e.action === 'delete') refreshPermissions()
-    })
+    unsubRole = releaseIfUnmounted(
+        await pb.collection('roles').subscribe(roleId, (e) => {
+            if (e.action === 'update' || e.action === 'delete')
+                refreshPermissions()
+        }),
+    )
 }
 
 async function subscribeToUser(userId: string) {
-    unsubUser?.()
-    unsubUser = await pb.collection('users').subscribe(userId, (e) => {
-        if (e.action === 'delete') {
-            pb.authStore.clear()
-        } else {
-            const oldRole = pb.authStore.record?.role
-            pb.authStore.save(pb.authStore.token, e.record)
-            isLoggedIn.value = true
-            if (e.record.role !== oldRole) {
-                refreshPermissions()
-                subscribeToRole(e.record.role)
+    unsubUser?.()?.catch?.(() => {})
+    unsubUser = null
+    unsubUser = releaseIfUnmounted(
+        await pb.collection('users').subscribe(userId, (e) => {
+            if (e.action === 'delete') {
+                pb.authStore.clear()
+            } else {
+                const oldRole = pb.authStore.record?.role
+                pb.authStore.save(pb.authStore.token, e.record)
+                isLoggedIn.value = true
+                if (e.record.role !== oldRole) subscribeToRole(e.record.role)
             }
-        }
-    })
+        }),
+    )
 }
 
 onMounted(async () => {
@@ -122,11 +133,9 @@ onMounted(async () => {
             isLoggedIn.value = !!token
             if (token && record?.id) {
                 subscribeToUser(record.id)
-                refreshPermissions()
             } else {
-                unsubUser?.()
+                unsubUser?.()?.catch?.(() => {})
                 unsubUser = null
-                refreshPermissions()
             }
         })
 
@@ -138,17 +147,20 @@ onMounted(async () => {
             await subscribeToRole(pb.authStore.record.role)
         }
 
-        unsubSettings = await pb
-            .collection('settings')
-            .subscribe('settings_123456', (e) => {
-                settings.value = e.record as SettingsRecord
-            })
+        unsubSettings = releaseIfUnmounted(
+            await pb
+                .collection('settings')
+                .subscribe('settings_123456', (e) => {
+                    settings.value = e.record as SettingsRecord
+                }),
+        )
     } catch (error) {
         console.error('Error during initialization:', error)
     }
 })
 
 onBeforeUnmount(() => {
+    unmounted = true
     unsubAuthChange?.()
     unsubUser?.()?.catch?.(() => {})
     unsubRole?.()?.catch?.(() => {})

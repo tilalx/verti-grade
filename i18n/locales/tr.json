@@ -1,4 +1,21 @@
 {
+    "colors": {
+        "red": "Kırmızı",
+        "orange": "Turuncu",
+        "yellow": "Sarı",
+        "green": "Yeşil",
+        "blue": "Mavi",
+        "purple": "Mor",
+        "pink": "Pembe",
+        "brown": "Kahverengi",
+        "black": "Siyah",
+        "white": "Beyaz",
+        "grey": "Gri",
+        "turquoise": "Turkuaz"
+    },
+    "common": {
+        "selectItem": "{name} öğesini seç"
+    },
     "account": {
         "profile": "Profil",
         "login": "Giriş Yap",
@@ -23,6 +40,7 @@
         "passwordHint": "Mevcut şifrenizi korumak için şifre alanlarını boş bırakın.",
         "unsavedChanges": "Kaydedilmemiş değişiklikler",
         "wrongOldPassword": "Mevcut şifre yanlış",
+        "passwordChangedSignInAgain": "Şifre değiştirildi. Lütfen yeni şifrenle tekrar giriş yap.",
         "unknownUser": "Bilinmeyen Kullanıcı",
         "tabs": {
             "profile": "Profil",
@@ -346,6 +364,7 @@
             "verifyEmail": "E-posta adresiniz doğrulandı. Şimdi giriş yapabilirsiniz.",
             "emailChange": "E-posta adresiniz değiştirildi. Lütfen tekrar giriş yapın.",
             "userInvited": "Kullanıcı oluşturuldu. Bir davet e-postası gönderildi.",
+            "userCreatedNoInvite": "Kullanıcı oluşturuldu, ancak e-posta yapılandırılmadığı için davet e-postası gönderilmedi.",
             "passwordChanged": "Şifreniz belirlendi. Şimdi giriş yapabilirsiniz.",
             "registered": "Hesap oluşturuldu. E-postandaki bağlantıyla adresini doğrula, ardından giriş yap.",
             "verificationSent": "Doğrulanmamış bir hesap varsa yeni bir doğrulama bağlantısı gönderildi."
@@ -388,7 +407,7 @@
             "sinceRelease": "{0} sürümünden beri yeni",
             "viewOnGithub": "GitHub'da görüntüle",
             "fullChangelog": "Tüm değişiklikler",
-            "breaking": "breaking",
+            "breaking": "uyumsuz değişiklik",
             "filters": {
                 "all": "Tümü",
                 "feat": "Özellikler",
@@ -771,6 +790,7 @@
         "issues": "İçe aktarma sorunlarla tamamlandı: {details}",
         "routesFailed": "{count} rota başarısız",
         "commentsFailed": "{count} değerlendirme başarısız",
+        "importedSetter": "İçe aktarıldı",
         "failed": "İçe aktarma sırasında beklenmeyen bir hata oluştu."
     },
     "reports": {
@@ -816,6 +836,7 @@
         "decisionReason": "Karar gerekçesi",
         "decisionReasonHint": "Kararın gerekçesine ilişkin dahili kayıt olarak saklanır.",
         "removeContent": "İçeriği kaldır",
+        "removeNotAllowed": "Bu içeriği kaldırma yetkin yok veya içerik kaldırılamadı.",
         "keepContent": "İçeriği koru",
         "decided": "Karar kaydedildi. Şikâyet eden kişi bilgilendirildi.",
         "receiptPending": "Onay iletilmedi",
@@ -1034,6 +1055,8 @@
         "saveFailed": "Kaydedilemedi. Duvar adları benzersiz olmalı ve hâlâ rotası olan bir duvar silinemez.",
         "discard": "Kaydedilmemiş harita değişiklikleri silinsin mi?",
         "canvasLabel": "Harita çizim alanı",
+        "pointLabel": "Nokta {n}",
+        "addPointLabel": "Nokta ekle",
         "walls": "Duvarlar",
         "newWall": "Yeni duvar adı",
         "addWall": "Ekle",

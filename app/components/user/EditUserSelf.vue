@@ -15,7 +15,16 @@
         >
             <div class="d-flex align-center ga-4">
                 <!-- Avatar with upload overlay -->
-                <div class="avatar-wrapper" @click="openAvatarPicker">
+                <div
+                    class="avatar-wrapper"
+                    role="button"
+                    tabindex="0"
+                    :aria-label="$t('account.changeAvatar')"
+                    data-testid="profile-avatar-upload"
+                    @click="openAvatarPicker"
+                    @keydown.enter.prevent="openAvatarPicker"
+                    @keydown.space.prevent="openAvatarPicker"
+                >
                     <v-avatar :size="xs ? 56 : 72" class="avatar-ring">
                         <v-img
                             v-if="avatarPreview"
@@ -423,6 +432,7 @@ const canSave = computed(() => {
 })
 
 const { notify, error: notifyError } = useNotification()
+const { capHeaders } = useCapToken()
 
 // ── Save ──────────────────────────────────────────────────────────────────
 const saving = ref(false)
@@ -467,12 +477,37 @@ async function saveUser() {
             ? usePbFileUrl(updated, updated.avatar, { thumb: '100x100' })
             : null
 
+        const newPassword = user.password
         user.oldPassword = ''
         user.password = ''
         user.passwordConfirm = ''
         avatarFile.value = null
 
-        pb.authStore.save(pb.authStore.token, updated)
+        if (newPassword) {
+            const reauthenticated = await capHeaders('login')
+                .then((headers) =>
+                    pb
+                        .collection('users')
+                        .authWithPassword(
+                            updated.email || original.email,
+                            newPassword,
+                            { headers },
+                        ),
+                )
+                .then(
+                    () => true,
+                    () => false,
+                )
+            if (!reauthenticated) {
+                pb.authStore.clear()
+                notifyError(t('account.passwordChangedSignInAgain'))
+                localDialog.value = false
+                await navigateTo('/auth/login')
+                return
+            }
+        } else {
+            pb.authStore.save(pb.authStore.token, updated)
+        }
 
         original.firstname = updated.firstname
         original.name = updated.name

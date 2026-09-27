@@ -94,6 +94,9 @@ describe('grades', () => {
         expect(gradeScore({ grade_index: 13 })).toBe(13)
         expect(gradeScore({ grade: '6a+', grade_system: 'french' })).toBe(12)
         expect(gradeScore({ grade: '', grade_system: 'uiaa' })).toBeNull()
+        expect(
+            gradeScore({ grade: '', grade_system: 'uiaa', grade_index: 0 }),
+        ).toBeNull()
     })
 
     it('orders minus before plain before plus and unknown last', () => {
@@ -107,9 +110,9 @@ describe('grades', () => {
     })
 
     it('orders labels of other scales by difficulty', () => {
-        expect(['7a', '6b+', '6A', '5.10a'].sort(compareGrades)).toEqual([
+        expect(['7a', '6b+', '6a', '5.10a'].sort(compareGrades)).toEqual([
             '5.10a',
-            '6A',
+            '6a',
             '6b+',
             '7a',
         ])
@@ -148,6 +151,43 @@ describe('buildAnalytics', () => {
         expect(result.latestComments.map((entry) => entry.routeName)).toEqual([
             'new',
         ])
+    })
+
+    it('ignores star-only ratings when averaging voted grades', () => {
+        const graded = { ...uiaa('7'), rating: 4 }
+        const starOnly = { grade: '', grade_system: 'uiaa', grade_index: 0 }
+        const result = buildAnalytics(
+            [route('a')],
+            [
+                rating('a', graded),
+                rating('a', graded),
+                rating('a', graded),
+                rating('a', starOnly),
+                rating('a', starOnly),
+            ],
+            allTime,
+            NOW,
+        )
+        expect(result.gradeFeedback[0]).toMatchObject({
+            votes: 3,
+            votedGrade: 13.4,
+            votedGradeLabel: '7',
+        })
+    })
+
+    it('counts an item at the period start only in the current period', () => {
+        const start = '2026-06-01 00:00:00.000Z'
+        const result = buildAnalytics(
+            [route('a', { screw_date: start })],
+            [rating('a', { created: start })],
+            resolveFilters(
+                { range: 'custom', from: '2026-06-01', to: '2026-06-10' },
+                NOW,
+            ),
+            NOW,
+        )
+        expect(result.summary.routesSet).toEqual({ value: 1, previous: 0 })
+        expect(result.summary.ratings).toEqual({ value: 1, previous: 0 })
     })
 
     it('has no previous values for all time', () => {

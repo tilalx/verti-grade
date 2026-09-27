@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useRouteSelection } from '~/composables/useRouteSelection'
 
 const getFullList = vi.fn()
@@ -54,5 +54,34 @@ describe('useRouteSelection', () => {
         selection.invalidate()
         await selection.toggleAll()
         expect(getFullList).toHaveBeenCalledTimes(2)
+    })
+
+    it('clears the selection when the filter changes', async () => {
+        getFullList.mockResolvedValue([{ id: 'a' }, { id: 'b' }])
+        const filter = ref('archived = false')
+        const totalItems = ref(2)
+        const selection = useRouteSelection(filter, totalItems)
+        await selection.toggleAll()
+        expect(selection.areAllSelected.value).toBe(true)
+
+        filter.value = 'archived = true'
+        totalItems.value = 1
+        await nextTick()
+        expect(selection.hasSelection.value).toBe(false)
+        expect(selection.areAllSelected.value).toBe(false)
+    })
+
+    it('drops a select-all result that resolves after the filter changed', async () => {
+        let resolveIds: (ids: { id: string }[]) => void = () => {}
+        getFullList.mockReturnValue(
+            new Promise((resolve) => (resolveIds = resolve)),
+        )
+        const filter = ref('')
+        const selection = useRouteSelection(filter, ref(2))
+        const pending = selection.toggleAll()
+        filter.value = 'archived = true'
+        resolveIds([{ id: 'a' }, { id: 'b' }])
+        await pending
+        expect(selection.hasSelection.value).toBe(false)
     })
 })

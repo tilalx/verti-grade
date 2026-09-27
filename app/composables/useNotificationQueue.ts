@@ -1,4 +1,5 @@
 import type { NotificationRecord } from '~/types/models'
+import { sendInBatches } from '~/utils/batch'
 
 export function useNotificationQueue() {
     const pb = usePocketbase()
@@ -53,16 +54,21 @@ export function useNotificationQueue() {
         if (!unread.length) return
 
         unread.forEach((item) => (item.read = true))
+        const committed = new Set<NotificationRecord>()
         try {
-            const batch = pb.createBatch()
-            for (const item of unread) {
-                batch
-                    .collection('notifications')
-                    .update(item.id, { read: true })
-            }
-            await batch.send()
+            await sendInBatches(
+                pb,
+                unread,
+                (batch, item) =>
+                    batch
+                        .collection('notifications')
+                        .update(item.id, { read: true }),
+                (chunk) => chunk.forEach((item) => committed.add(item)),
+            )
         } catch (err) {
-            unread.forEach((item) => (item.read = false))
+            unread
+                .filter((item) => !committed.has(item))
+                .forEach((item) => (item.read = false))
             console.error('Failed to mark notifications read:', err)
         }
     }

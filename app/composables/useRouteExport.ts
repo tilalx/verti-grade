@@ -1,4 +1,5 @@
 import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
+import { ROUTE_TYPES } from '~/utils/routes'
 
 type ExportFormat = 'pdf' | 'xlsx' | 'json'
 
@@ -56,7 +57,17 @@ export function useRouteExport() {
             const response = await fetch(`/api/ui/${format}`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ ids, locale: locale.value, ...payload }),
+                body: JSON.stringify({
+                    ids,
+                    locale: locale.value,
+                    typeLabels: Object.fromEntries(
+                        ROUTE_TYPES.map((type) => [
+                            type,
+                            t(`routes.types.${type.toLowerCase()}`),
+                        ]),
+                    ),
+                    ...payload,
+                }),
             })
             if (!response.ok) {
                 throw new Error(`Export failed with status ${response.status}`)

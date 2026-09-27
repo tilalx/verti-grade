@@ -1,6 +1,7 @@
 import { INVENTORY_INSTRUCTIONS_KEY, INVENTORY_STORAGE_KEY } from './inventory'
 
 export const AUTH_COOKIE = 'pb_auth'
+export const SESSION_ONLY_AUTH_COOKIE = 'pb_auth_session'
 export const COLOR_SCHEME_COOKIE = 'color-scheme'
 export const THEME_MODE_COOKIE = 'theme-mode'
 export const EXPORT_COLUMNS_KEY = 'gripello.export-columns'
@@ -17,6 +18,12 @@ export interface ClientStorageEntry {
 
 export const CLIENT_STORAGE: ClientStorageEntry[] = [
     { name: AUTH_COOKIE, kind: 'cookie', purpose: 'auth', duration: 'session' },
+    {
+        name: SESSION_ONLY_AUTH_COOKIE,
+        kind: 'cookie',
+        purpose: 'auth',
+        duration: 'session',
+    },
     {
         name: COLOR_SCHEME_COOKIE,
         kind: 'cookie',

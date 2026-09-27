@@ -146,6 +146,34 @@ describe('useNotificationQueue', () => {
         expect(unreadCount.value).toBe(0)
     })
 
+    it('only restores items from chunks that failed to send', async () => {
+        const send = vi
+            .fn()
+            .mockResolvedValueOnce([])
+            .mockRejectedValueOnce(new Error('offline'))
+        pbMock.createBatch = vi.fn().mockReturnValue({
+            collection: () => ({ update: vi.fn() }),
+            send,
+        })
+        pbMock.collection = vi.fn().mockReturnValue({
+            getFullList: vi
+                .fn()
+                .mockResolvedValue(
+                    Array.from({ length: 152 }, (_, i) => record(`n${i}`)),
+                ),
+        })
+
+        const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+        const { refresh, markAllRead, unreadCount } = await loadComposable()
+        await refresh()
+        await markAllRead()
+
+        expect(unreadCount.value).toBe(2)
+        consoleError.mockRestore()
+    })
+
     it('keeps the list when a refresh is auto-cancelled', async () => {
         pbMock.collection = vi.fn().mockReturnValue({
             getFullList: vi

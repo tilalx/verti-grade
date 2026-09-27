@@ -40,6 +40,15 @@ func registerReports(app core.App) {
 		return e.Next()
 	})
 
+	app.OnRecordUpdateRequest("reports").BindFunc(func(e *core.RecordRequestEvent) error {
+		removing := e.Record.GetString("decision") == "content_removed" &&
+			e.Record.Original().GetString("decision") != "content_removed"
+		if removing && reportedContentExists(e.App, e.Record) {
+			return apis.NewBadRequestError("The reported content still exists. Delete it before recording its removal.", nil)
+		}
+		return e.Next()
+	})
+
 	app.OnRecordAfterCreateSuccess("reports").BindFunc(func(e *core.RecordEvent) error {
 		pushNotification(e.App, notification{
 			Users:  usersByPermission(e.App, "manage_reports"),
@@ -69,6 +78,18 @@ func registerReports(app core.App) {
 		}).Bind(apis.RequireAuth())
 		return se.Next()
 	})
+}
+
+func reportedContentCollection(report *core.Record) string {
+	if report.GetString("content_type") == "route" {
+		return "routes"
+	}
+	return "ratings"
+}
+
+func reportedContentExists(app core.App, report *core.Record) bool {
+	_, err := app.FindRecordById(reportedContentCollection(report), report.GetString("content_id"))
+	return err == nil
 }
 
 func reportedContentSnapshot(app core.App, report *core.Record) string {
@@ -104,9 +125,7 @@ func reportedContentURL(app core.App, report *core.Record) string {
 }
 
 func notifyReportDecided(app core.App, report *core.Record) {
-	status := report.GetString("status")
-	wasOpen := report.Original().GetString("status") == "open"
-	if !wasOpen || status == "" || status == "open" || !report.GetDateTime("notified_at").IsZero() {
+	if !isReportDecisionTransition(report) {
 		return
 	}
 
@@ -144,8 +163,14 @@ func sendReportReceipt(app core.App, report *core.Record) error {
 	if err != nil {
 		return err
 	}
+	if receiptSent {
+		report.Set("receipt_sent", true)
+		if err := app.Save(report); err != nil {
+			return err
+		}
+	}
 
-	if _, err := sendMail(
+	_, err = sendMail(
 		app,
 		reportAlertRecipients(app),
 		"New content report - "+appName,
@@ -159,15 +184,8 @@ func sendReportReceipt(app core.App, report *core.Record) error {
 			html.EscapeString(report.GetString("notifier_email")),
 			html.EscapeString(appURL(app)),
 		),
-	); err != nil {
-		return err
-	}
-
-	if !receiptSent {
-		return nil
-	}
-	report.Set("receipt_sent", true)
-	return app.Save(report)
+	)
+	return err
 }
 
 func reportReceiptHTML(report *core.Record) string {
@@ -182,7 +200,7 @@ func reportReceiptHTML(report *core.Record) string {
 }
 
 func sendReportDecision(app core.App, report *core.Record) error {
-	if report.GetString("status") == "open" || !report.GetDateTime("notified_at").IsZero() {
+	if !isReportDecisionMailPending(report) {
 		return nil
 	}
 	if !app.Settings().SMTP.Enabled {
@@ -220,6 +238,15 @@ func sendReportDecision(app core.App, report *core.Record) error {
 
 	report.Set("notified_at", types.NowDateTime())
 	return app.Save(report)
+}
+
+func isReportDecisionMailPending(report *core.Record) bool {
+	status := report.GetString("status")
+	return status != "" && status != "open" && report.GetDateTime("notified_at").IsZero()
+}
+
+func isReportDecisionTransition(report *core.Record) bool {
+	return report.Original().GetString("status") == "open" && isReportDecisionMailPending(report)
 }
 
 func sendMail(app core.App, recipients []string, subject string, body string) (bool, error) {

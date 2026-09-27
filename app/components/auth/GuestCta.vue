@@ -30,7 +30,10 @@ const { allowRegistration } = useOrgSettings()
                     v-if="allowRegistration"
                     variant="tonal"
                     size="large"
-                    to="/auth/register"
+                    :to="{
+                        path: '/auth/login',
+                        query: { view: 'register', redirect },
+                    }"
                     :data-testid="`${testIdPrefix}-register`"
                 >
                     {{ $t('me.register') }}

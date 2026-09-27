@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatNumber } from '#shared/utils/number'
 import type { RatedRoute } from '#shared/utils/analytics'
 import { escapeHtml, gridBase, itemTooltip, yAxisBase } from '~/utils/echarts'
 
@@ -17,7 +18,7 @@ const props = defineProps<{
     baseline: number
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { colors, palette } = useChartTheme()
 
 const rows = computed(() =>
@@ -31,7 +32,7 @@ const option = computed(() => ({
     tooltip: itemTooltip(colors.value, ({ data }) => {
         const route = data.route as RatedRoute
         return `<strong>${escapeHtml(route.name)}</strong> · ${route.grade}<br/>
-            ★ ${route.averageRating.toFixed(2)} · ${t('analytics.labels.ratingCount', { n: route.ratings }, route.ratings)}`
+            ★ ${formatNumber(route.averageRating, locale.value, 2)} · ${t('analytics.labels.ratingCount', { n: route.ratings }, route.ratings)}`
     }),
     grid: { ...gridBase, left: 12, top: 28, right: 48 },
     xAxis: {
@@ -39,7 +40,8 @@ const option = computed(() => ({
         axisLabel: {
             color: colors.value.labelColor,
             fontSize: 11,
-            formatter: (value: number) => (value + props.baseline).toFixed(1),
+            formatter: (value: number) =>
+                formatNumber(value + props.baseline, locale.value),
         },
     },
     yAxis: {
@@ -65,7 +67,7 @@ const option = computed(() => ({
                 color: colors.value.tooltipText,
                 fontSize: 11,
                 formatter: ({ data }: { data: { route: RatedRoute } }) =>
-                    `★ ${data.route.averageRating.toFixed(1)}`,
+                    `★ ${formatNumber(data.route.averageRating, locale.value)}`,
             },
             data: rows.value.map((route) => {
                 const delta = Number(
@@ -90,7 +92,7 @@ const option = computed(() => ({
                 lineStyle: { color: colors.value.labelColor, width: 1 },
                 label: {
                     position: 'end',
-                    formatter: `Ø ${props.baseline.toFixed(2)}`,
+                    formatter: `Ø ${formatNumber(props.baseline, locale.value, 2)}`,
                     color: colors.value.labelColor,
                     fontSize: 11,
                 },

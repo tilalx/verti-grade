@@ -392,7 +392,7 @@ function sanitizeRatingPayload(
 
 function buildFallbackCreator(user: UserRecord | null) {
     if (!user) {
-        return 'Imported'
+        return t('importRoutes.importedSetter')
     }
 
     const candidates = [
@@ -402,6 +402,6 @@ function buildFallbackCreator(user: UserRecord | null) {
         user.email,
     ].filter((value) => typeof value === 'string' && value.trim())
 
-    return candidates[0] || 'Imported'
+    return candidates[0] || t('importRoutes.importedSetter')
 }
 </script>

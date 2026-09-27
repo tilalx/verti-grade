@@ -73,7 +73,7 @@
                                 />
                                 <span
                                     v-else
-                                    class="text-body-small font-weight-bold text-white"
+                                    class="text-body-small font-weight-bold"
                                 >
                                     {{ initials(user.firstname, user.name) }}
                                 </span>
@@ -164,7 +164,10 @@
 
         <!-- Result count + load more -->
         <div v-if="!loading && users.length" class="text-center mt-4">
-            <p class="text-body-small text-medium-emphasis mb-3">
+            <p
+                class="text-body-small text-medium-emphasis mb-3"
+                data-testid="users-showing"
+            >
                 {{ t('users.showing', { n: users.length, total: totalItems }) }}
             </p>
             <v-btn
@@ -341,8 +344,7 @@ async function deleteUser() {
     await runDelete(
         async () => {
             await pb.collection('users').delete(target.id)
-            users.value = users.value.filter((u) => u.id !== target.id)
-            totalItems.value = Math.max(0, totalItems.value - 1)
+            removeUser(target.id)
             deleteDialog.value = false
             deletingUser.value = null
         },
@@ -351,6 +353,13 @@ async function deleteUser() {
             error: t('users.deleteError'),
         },
     )
+}
+
+function removeUser(id: string) {
+    const remaining = users.value.filter((u) => u.id !== id)
+    if (remaining.length === users.value.length) return
+    users.value = remaining
+    totalItems.value = Math.max(0, totalItems.value - 1)
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -383,17 +392,25 @@ await prefetch('admin-users')
 onMounted(async () => {
     await subscribe('users', async (e) => {
         if (e.action === 'delete') {
-            users.value = users.value.filter((u) => u.id !== e.record.id)
-            totalItems.value = Math.max(0, totalItems.value - 1)
+            removeUser(e.record.id)
         } else if (e.action === 'create') {
-            totalItems.value++
             try {
-                const rec = await pb
+                const filter = buildFilter()
+                const idClause = pb.filter('id = {:id}', { id: e.record.id })
+                const { items } = await pb
                     .collection('users')
-                    .getOne<UserRecord>(e.record.id, {
+                    .getList<UserRecord>(1, 1, {
+                        filter: filter
+                            ? `${idClause} && (${filter})`
+                            : idClause,
                         expand: 'role',
+                        skipTotal: true,
                         requestKey: null,
                     })
+                const rec = items[0]
+                if (filter !== buildFilter()) return
+                if (!rec || users.value.some((u) => u.id === rec.id)) return
+                totalItems.value++
                 users.value = [mapUser(rec), ...users.value]
             } catch (err) {
                 console.error('Realtime user create refresh failed:', err)

@@ -111,6 +111,7 @@
                     {{ t('reports.keepContent') }}
                 </v-btn>
                 <v-btn
+                    v-if="canRemove"
                     variant="flat"
                     size="small"
                     color="error"
@@ -129,7 +130,7 @@ import { statusColor } from '~/utils/reports'
 import { formatDate } from '#shared/utils/formatting'
 import type { ReportDecision, ReportRecord } from '~/types/models'
 
-defineProps<{ report: ReportRecord }>()
+defineProps<{ report: ReportRecord; canRemove: boolean }>()
 
 defineEmits<{ decide: [report: ReportRecord, decision: ReportDecision] }>()
 

@@ -270,9 +270,11 @@
                     >
                         <span class="text-body-medium">
                             {{
-                                $t('mapPlacement.checked', {
-                                    n: checkedIds.size,
-                                })
+                                $t(
+                                    'mapPlacement.checked',
+                                    { n: checkedIds.size },
+                                    checkedIds.size,
+                                )
                             }}
                         </span>
                         <v-btn
@@ -642,7 +644,11 @@ const { data: lastReset, refresh: refreshLastReset } = useAsyncData(
 
 const hint = computed(() => {
     if (checkedIds.value.size && !armedRouteId.value)
-        return t('mapPlacement.hints.checked', { n: checkedIds.value.size })
+        return t(
+            'mapPlacement.hints.checked',
+            { n: checkedIds.value.size },
+            checkedIds.value.size,
+        )
     if (armedRouteId.value) {
         const armed = effectiveRoutes.value.find(
             (item) => item.id === armedRouteId.value,
@@ -896,7 +902,7 @@ async function resetWall() {
         return ids.length
     })
     if (archived !== undefined)
-        notifySuccess(t('mapPlacement.resetDone', { n: archived }))
+        notifySuccess(t('mapPlacement.resetDone', { n: archived }, archived))
     resetDialogOpen.value = false
 }
 

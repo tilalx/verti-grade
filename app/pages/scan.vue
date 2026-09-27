@@ -92,6 +92,7 @@ const REJECT_COOLDOWN_MS = 1500
 const FRAME_RADIUS = 0.25
 const PENDING_COLOR = '#FFFFFF'
 const REJECT_MESSAGE_MS = 2500
+const LOOKUP_RETRY_MS = 2000
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -135,8 +136,12 @@ const hint = computed(() => {
     return scanning.value ? t('scan.aim') : ''
 })
 
+const failedLookupAt = new Map<string, number>()
+
 function lookup(routeId: string) {
     if (routes.has(routeId)) return
+    if (Date.now() - (failedLookupAt.get(routeId) ?? 0) < LOOKUP_RETRY_MS)
+        return
     routes.set(routeId, null)
     pb.collection('routes')
         .getOne<RouteRecord>(routeId, {
@@ -144,7 +149,14 @@ function lookup(routeId: string) {
             requestKey: null,
         })
         .then((route) => routes.set(routeId, route))
-        .catch(() => routes.set(routeId, { id: '', name: '', grade: '' }))
+        .catch((error: { status?: number }) => {
+            if (error?.status === 404)
+                routes.set(routeId, { id: '', name: '', grade: '' })
+            else {
+                failedLookupAt.set(routeId, Date.now())
+                routes.delete(routeId)
+            }
+        })
 }
 
 function knownRoute(routeId: string | null) {

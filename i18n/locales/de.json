@@ -1,4 +1,21 @@
 {
+    "colors": {
+        "red": "Rot",
+        "orange": "Orange",
+        "yellow": "Gelb",
+        "green": "Grün",
+        "blue": "Blau",
+        "purple": "Lila",
+        "pink": "Pink",
+        "brown": "Braun",
+        "black": "Schwarz",
+        "white": "Weiß",
+        "grey": "Grau",
+        "turquoise": "Türkis"
+    },
+    "common": {
+        "selectItem": "{name} auswählen"
+    },
     "account": {
         "profile": "Profil",
         "login": "Anmelden",
@@ -23,6 +40,7 @@
         "passwordHint": "Lass die Passwortfelder leer, um dein aktuelles Passwort zu behalten.",
         "unsavedChanges": "Ungespeicherte Änderungen",
         "wrongOldPassword": "Aktuelles Passwort ist falsch",
+        "passwordChangedSignInAgain": "Passwort geändert. Bitte melde dich mit dem neuen Passwort erneut an.",
         "unknownUser": "Unbekannter Benutzer",
         "tabs": {
             "profile": "Profil",
@@ -346,6 +364,7 @@
             "verifyEmail": "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt anmelden.",
             "emailChange": "Deine E-Mail-Adresse wurde geändert. Bitte melde dich erneut an.",
             "userInvited": "Benutzer erstellt. Eine Einladungs-E-Mail wurde versendet.",
+            "userCreatedNoInvite": "Benutzer erstellt, aber keine Einladungs-E-Mail versendet, da kein E-Mail-Versand eingerichtet ist.",
             "passwordChanged": "Dein Passwort wurde gesetzt. Du kannst dich jetzt anmelden.",
             "registered": "Konto erstellt. Bestätige deine E-Mail-Adresse über den Link in deinem Postfach und melde dich dann an.",
             "verificationSent": "Falls ein unbestätigtes Konto existiert, ist ein neuer Bestätigungslink unterwegs."
@@ -388,7 +407,7 @@
             "sinceRelease": "Neu seit {0}",
             "viewOnGithub": "Auf GitHub ansehen",
             "fullChangelog": "Vollständiges Changelog",
-            "breaking": "breaking",
+            "breaking": "Breaking Change",
             "filters": {
                 "all": "Alle",
                 "feat": "Features",
@@ -771,6 +790,7 @@
         "issues": "Import mit Problemen beendet: {details}",
         "routesFailed": "{count} Route fehlgeschlagen | {count} Routen fehlgeschlagen",
         "commentsFailed": "{count} Bewertung fehlgeschlagen | {count} Bewertungen fehlgeschlagen",
+        "importedSetter": "Importiert",
         "failed": "Beim Import ist ein unerwarteter Fehler aufgetreten."
     },
     "reports": {
@@ -816,6 +836,7 @@
         "decisionReason": "Begründung der Entscheidung",
         "decisionReasonHint": "Wird als interner Nachweis der Entscheidungsgründe gespeichert.",
         "removeContent": "Inhalt entfernen",
+        "removeNotAllowed": "Du darfst diesen Inhalt nicht entfernen oder er konnte nicht entfernt werden.",
         "keepContent": "Inhalt behalten",
         "decided": "Entscheidung gespeichert. Die meldende Person wurde benachrichtigt.",
         "receiptPending": "Bestätigung nicht zugestellt",
@@ -1034,6 +1055,8 @@
         "saveFailed": "Speichern fehlgeschlagen. Wandnamen müssen eindeutig sein, und eine Wand mit Routen kann nicht gelöscht werden.",
         "discard": "Ungespeicherte Änderungen am Plan verwerfen?",
         "canvasLabel": "Zeichenfläche des Plans",
+        "pointLabel": "Punkt {n}",
+        "addPointLabel": "Punkt hinzufügen",
         "walls": "Wände",
         "newWall": "Name der neuen Wand",
         "addWall": "Hinzufügen",

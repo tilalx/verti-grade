@@ -228,15 +228,37 @@ export function gradeKey(source: GradeSource, withSystem: boolean): string {
         : grade
 }
 
-export function gradeKeyIndex(key: string): number {
+function gradeKeyIndexes(key: string): Map<GradeSystem, number> {
     const [grade, short] = key.split(SYSTEM_SUFFIX)
     const systems = short
         ? GRADE_SYSTEMS.filter((system) => GRADE_SYSTEM_SHORT[system] === short)
         : GRADE_SYSTEMS
-    const indexes = systems
-        .map((system) => gradeIndex(system, grade))
-        .filter((index): index is number => index !== null)
-    return indexes.length ? Math.min(...indexes) : Number.MAX_SAFE_INTEGER
+    const indexesBy = (
+        match: (system: GradeSystem) => GradeTable[number] | undefined,
+    ) =>
+        new Map(
+            systems.flatMap((system) => {
+                const entry = match(system)
+                return entry ? [[system, entry[1]] as const] : []
+            }),
+        )
+    const exact = indexesBy((system) =>
+        GRADE_TABLES[system].find(([label]) => label === grade),
+    )
+    return exact.size ? exact : indexesBy((system) => findGrade(system, grade))
+}
+
+export function compareGradeKeys(left: string, right: string): number {
+    const leftIndexes = gradeKeyIndexes(left)
+    const rightIndexes = gradeKeyIndexes(right)
+    const sharedSystem = GRADE_SYSTEMS.find(
+        (system) => leftIndexes.has(system) && rightIndexes.has(system),
+    )
+    if (sharedSystem)
+        return leftIndexes.get(sharedSystem)! - rightIndexes.get(sharedSystem)!
+    const lowest = (indexes: Map<GradeSystem, number>) =>
+        indexes.size ? Math.min(...indexes.values()) : Number.MAX_SAFE_INTEGER
+    return lowest(leftIndexes) - lowest(rightIndexes)
 }
 
 export function nearestGrade(system: GradeSystem, index: number): string {

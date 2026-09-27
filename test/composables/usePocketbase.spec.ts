@@ -12,7 +12,7 @@ const PocketBaseMock = vi.fn(function (url: string, authStore: unknown) {
 
 class BaseAuthStoreMock {
     loadFromCookie = vi.fn()
-    exportToCookie = vi.fn(() => 'pb_auth=serialized')
+    exportToCookie = vi.fn((_options?: unknown) => 'pb_auth=serialized')
     save() {}
     clear() {}
 }
@@ -97,6 +97,29 @@ describe('usePocketbase', () => {
 
         store.save('token', { id: 'u1' })
         expect(document.cookie).toContain('pb_auth=')
+    })
+
+    it('writes a session cookie when remember me is off', async () => {
+        const { usePocketbase, setAuthPersistent } =
+            await import('~/composables/pocketbase')
+        const store = usePocketbase().authStore as BaseAuthStoreMock
+        Object.defineProperty(store, 'isValid', { value: true })
+
+        setAuthPersistent(false)
+        store.save('token', { id: 'u1' })
+
+        const cookieOptions = store.exportToCookie.mock.calls.at(-1)?.[0] as
+            Record<string, unknown> | undefined
+        expect(cookieOptions).toHaveProperty('expires', undefined)
+        expect(document.cookie).toContain('pb_auth_session=1')
+
+        setAuthPersistent(true)
+        store.save('token', { id: 'u1' })
+
+        expect(store.exportToCookie.mock.calls.at(-1)?.[0]).not.toHaveProperty(
+            'expires',
+        )
+        expect(document.cookie).not.toContain('pb_auth_session=1')
     })
 
     it('uses the public root url on the client in production builds', async () => {

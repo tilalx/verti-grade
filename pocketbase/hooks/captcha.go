@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"os"
+	"slices"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -12,7 +13,15 @@ import (
 
 const captchaHeader = "x_cap_token"
 
-var captchaRateLimits = map[string]int{"ratings:create": 240, "reports:create": 20}
+type captchaRateLimit struct {
+	base   int
+	raised int
+}
+
+var captchaRateLimits = map[string]captchaRateLimit{
+	"ratings:create": {base: 60, raised: 240},
+	"reports:create": {base: 5, raised: 20},
+}
 
 func registerCaptcha(app core.App) {
 	app.OnRecordCreateRequest("ratings").BindFunc(func(e *core.RecordRequestEvent) error {
@@ -68,29 +77,48 @@ func registerCaptcha(app core.App) {
 		if err := e.Next(); err != nil {
 			return err
 		}
-		if os.Getenv("CAP_SECRET") == "" {
-			return nil
-		}
-
 		settings := e.App.Settings()
-		changed := false
-		for i, rule := range settings.RateLimits.Rules {
-			target, ok := captchaRateLimits[rule.Label]
-			if ok && rule.MaxRequests != target {
-				settings.RateLimits.Rules[i].MaxRequests = target
-				changed = true
-			}
-		}
-		if !changed {
+		reconciled := reconcileCaptchaRateLimits(settings.RateLimits.Rules, os.Getenv("CAP_SECRET") != "")
+		if slices.Equal(reconciled, settings.RateLimits.Rules) {
 			return nil
 		}
+		settings.RateLimits.Rules = reconciled
 		if err := e.App.Save(settings); err != nil {
 			e.App.Logger().Error("cap: could not adjust rate limits", "error", err)
 			return nil
 		}
-		e.App.Logger().Info("cap: raised captcha-gated rate limits")
+		e.App.Logger().Info("cap: reconciled captcha-gated rate limits")
 		return nil
 	})
+}
+
+func reconcileCaptchaRateLimits(rules []core.RateLimitRule, captchaEnabled bool) []core.RateLimitRule {
+	hasGuestRule := map[string]bool{}
+	for _, rule := range rules {
+		if rule.Audience == core.RateLimitRuleAudienceGuest {
+			hasGuestRule[rule.Label] = true
+		}
+	}
+	reconciled := []core.RateLimitRule{}
+	for _, rule := range rules {
+		limit, gated := captchaRateLimits[rule.Label]
+		if gated && rule.Audience == core.RateLimitRuleAudienceGuest && !captchaEnabled && rule.MaxRequests == limit.raised {
+			continue
+		}
+		if gated && rule.Audience == core.RateLimitRuleAudienceAll {
+			if rule.MaxRequests == limit.raised {
+				rule.MaxRequests = limit.base
+			}
+			if captchaEnabled && !hasGuestRule[rule.Label] {
+				guestRule := rule
+				guestRule.Audience = core.RateLimitRuleAudienceGuest
+				guestRule.MaxRequests = limit.raised
+				reconciled = append(reconciled, guestRule)
+			}
+		}
+		reconciled = append(reconciled, rule)
+	}
+	return reconciled
 }
 
 func enforceCaptcha(e *core.RequestEvent, scope string) error {

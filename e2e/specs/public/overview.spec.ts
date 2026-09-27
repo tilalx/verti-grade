@@ -71,6 +71,23 @@ test('hovering a grade bar shows its route count', async ({ page }) => {
     await expect(page.getByRole('tooltip', { name: /routes/ })).toBeVisible()
 })
 
+test('grade bars share one baseline on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 })
+    await gotoSettled(page, '/')
+    const bottoms = await page
+        .getByTestId('overview-grades')
+        .first()
+        .locator('.grade-spread__fill')
+        .evaluateAll((fills) =>
+            fills.map((fill) => fill.getBoundingClientRect().bottom),
+        )
+    expect(bottoms.length).toBeGreaterThan(1)
+    expect(
+        Math.max(...bottoms) - Math.min(...bottoms),
+        bottoms.join(', '),
+    ).toBeLessThan(1)
+})
+
 test('guests get the public nav and an all-routes link', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await gotoSettled(page, '/')
@@ -110,8 +127,16 @@ test('new routes appear on the overview without a reload', async ({
     ).toBeVisible()
 })
 
-test('the route page leads back to where it was opened', async ({ page }) => {
+test('the route page leads back to where it was opened', async ({
+    page,
+    testPrefix,
+}) => {
     await gotoSettled(page, '/routes')
+    await page
+        .getByTestId('filter-search')
+        .locator('input')
+        .fill(`${testPrefix}-fresh`)
+    await expect(page.getByTestId('route-view')).toHaveCount(1)
     await page.getByTestId('route-view').first().click()
     await page.waitForURL(/\/route\?id=/)
     await page.getByTestId('route-back').click()

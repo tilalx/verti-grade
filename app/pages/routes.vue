@@ -161,7 +161,7 @@
                     </div>
                 </template>
                 <template #item.score="{ item }">
-                    {{ formatScore(item) }}
+                    {{ formatScore(item, locale) }}
                 </template>
                 <template #item.screw_date="{ item }">
                     {{ formatDate(item.screw_date, { locale }) }}

@@ -164,3 +164,47 @@ describe('route tag pdf layout', () => {
         },
     )
 })
+
+describe('route tag colour dot', () => {
+    it('fills the dot with the RGB part of an 8-digit hex colour', async () => {
+        const doc = new PDFDocument()
+        doc.registerFont(
+            'Sans',
+            readFileSync('server/assets/fonts/Roboto-Regular.ttf'),
+        )
+        doc.registerFont(
+            'Sans-Bold',
+            readFileSync('server/assets/fonts/Roboto-Bold.ttf'),
+        )
+        const fills: unknown[] = []
+        const fill = doc.fill.bind(doc)
+        doc.fill = ((color: string) => {
+            fills.push(color)
+            return fill(color)
+        }) as typeof doc.fill
+        const png = await QRCode.toBuffer('https://example.com/route?id=abc')
+
+        drawRouteTag(
+            doc,
+            {
+                id: 'abc',
+                name: 'Orange',
+                grade: '6',
+                grade_system: 'uiaa',
+                color: '#DA5307F6',
+            } as unknown as RouteRecord,
+            TAG_X,
+            TAG_Y,
+            {
+                anchorLabel: 'Anchor',
+                locale: 'en',
+                qrCode: png,
+                logo: null,
+                show: { creators: false, date: false, logo: false },
+            },
+        )
+        doc.end()
+
+        expect(fills).toContain('#DA5307')
+    })
+})

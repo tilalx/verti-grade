@@ -13,6 +13,7 @@
                 hide-details
                 density="compact"
                 class="list-card__checkbox"
+                :aria-label="$t('common.selectItem', { name: route.name })"
                 data-testid="route-card-checkbox"
                 @update:modelValue="$emit('update:modelValue', !!$event)"
             />
@@ -102,9 +103,13 @@
                     <v-icon size="13">mdi-wall</v-icon>
                     {{ wallName(route) }}
                 </span>
-                <span v-if="route.type" class="list-card__pill">
+                <span
+                    v-if="route.type"
+                    class="list-card__pill"
+                    data-testid="route-card-type"
+                >
                     <v-icon size="13">mdi-shape</v-icon>
-                    {{ route.type }}
+                    {{ $t(`routes.types.${route.type.toLowerCase()}`) }}
                 </span>
                 <span v-if="hasScore" class="list-card__pill">
                     <v-icon size="13">mdi-star</v-icon>
@@ -163,7 +168,7 @@ const hasScore = computed(
         typeof props.route.score === 'number' &&
         Number.isFinite(props.route.score),
 )
-const score = computed(() => formatScore(props.route))
+const score = computed(() => formatScore(props.route, locale.value))
 </script>
 
 <style scoped>

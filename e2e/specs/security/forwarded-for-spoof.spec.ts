@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { test, expect } from '@playwright/test'
 import PocketBase from 'pocketbase'
 import { authAsSuperuser } from '../../support/seed'
@@ -9,6 +10,7 @@ test('a client cannot pick its own IP through X-Forwarded-For', async ({
 }, info) => {
     const identity = `spoof-w${info.workerIndex}-${Date.now()}@gripello.test`
     const spoofedIp = '127.0.0.1'
+    const maskedIdentity = `unknown:${createHash('sha256').update(identity).digest('hex').slice(0, 8)}`
 
     const login = await request.post(
         '/api/collections/users/auth-with-password',
@@ -27,7 +29,7 @@ test('a client cannot pick its own IP through X-Forwarded-For', async ({
             .getFirstListItem(
                 root.filter(
                     'action = "login_failed" && actor_label = {:identity}',
-                    { identity },
+                    { identity: maskedIdentity },
                 ),
                 { requestKey: null },
             )

@@ -83,7 +83,7 @@
 import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 
 const status = computed(() => props.error.status ?? 500)
@@ -106,6 +106,7 @@ const goBack = () =>
 
 useThemeColorMeta()
 useHead({
+    htmlAttrs: { lang: locale },
     title: computed(() =>
         isNotFound.value ? t('page.title.notFound') : title.value,
     ),

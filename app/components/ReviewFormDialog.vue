@@ -37,7 +37,7 @@
             class="d-flex align-center ga-3 mb-4 pa-3 rounded-lg review-form__context"
         >
             <v-avatar size="30" :color="avatarColor(review.userName)">
-                <span class="text-body-small font-weight-bold text-white">{{
+                <span class="text-body-small font-weight-bold">{{
                     nameInitials(review.userName)
                 }}</span>
             </v-avatar>

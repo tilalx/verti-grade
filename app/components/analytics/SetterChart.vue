@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatNumber } from '#shared/utils/number'
 import type { SetterStats } from '#shared/utils/analytics'
 import { escapeHtml, gridBase, itemTooltip, yAxisBase } from '~/utils/echarts'
 
@@ -14,7 +15,7 @@ const SETTER_LIMIT = 15
 
 const props = defineProps<{ setters: SetterStats[] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { colors, palette } = useChartTheme()
 
 const total = computed(() =>
@@ -46,7 +47,9 @@ const rows = computed(() => {
 })
 
 const formatSigned = (value: number | null) =>
-    value === null ? '—' : `${value > 0 ? '+' : ''}${value.toFixed(2)}`
+    value === null
+        ? '—'
+        : `${value > 0 ? '+' : ''}${formatNumber(value, locale.value, 2)}`
 
 const share = (routes: number) =>
     total.value ? Math.round((routes / total.value) * 100) : 0
@@ -64,7 +67,7 @@ const option = computed(() => {
             return `<strong>${escapeHtml(setter.setter)}</strong><br/>
                 ${t('analytics.labels.routeCount', { n: setter.routes }, setter.routes)} (${share(setter.routes)}%)<br/>
                 ${t('analytics.labels.setInPeriod')}: ${setter.routesInPeriod}<br/>
-                ${t('analytics.columns.averageRating')}: ${setter.averageRating?.toFixed(2) ?? '—'}<br/>
+                ${t('analytics.columns.averageRating')}: ${formatNumber(setter.averageRating, locale.value, 2) || '—'}<br/>
                 ${t('analytics.columns.averageDeviation')}: ${formatSigned(setter.averageDeviation)}`
         }),
         legend: {

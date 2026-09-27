@@ -73,9 +73,25 @@ test('settings asset actions are visible without hover', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/admin/settings')
+    await expect(page.getByTestId('settings-asset-actions-icon')).toHaveCount(0)
+    await page
+        .locator('.asset-card')
+        .first()
+        .locator('input[type="file"]')
+        .setInputFiles({
+            name: 'logo.png',
+            mimeType: 'image/png',
+            buffer: Buffer.from(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                'base64',
+            ),
+        })
     const actions = page.getByTestId('settings-asset-actions-logo')
     await expect(actions).toBeVisible()
     await expect(actions).toHaveCSS('opacity', '1')
+    await expect(
+        actions.getByTestId('settings-asset-replace-logo'),
+    ).toHaveJSProperty('tagName', 'BUTTON')
 })
 
 test('import preview renders as a list on phones', async ({

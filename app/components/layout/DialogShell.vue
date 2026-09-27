@@ -17,6 +17,7 @@ const props = withDefaults(
     { maxWidth: 520, scrollable: true },
 )
 
+const titleId = useId()
 const { smAndUp } = useDisplay()
 const asSheet = computed(() => props.sheetOnMobile && !smAndUp.value)
 
@@ -38,6 +39,7 @@ const sheetProps = computed(() =>
         v-bind="sheetProps"
         :persistent="persistent"
         :scrollable="scrollable"
+        :aria-labelledby="title || $slots.title ? titleId : undefined"
     >
         <template v-if="$slots.activator" #activator="activatorScope">
             <slot name="activator" v-bind="activatorScope" />
@@ -46,6 +48,7 @@ const sheetProps = computed(() =>
         <v-card rounded="xl" v-bind="$attrs">
             <v-card-title
                 v-if="title || $slots.title"
+                :id="titleId"
                 class="dialog-shell__title d-flex align-center ga-2 pa-5 pb-2 text-body-large font-weight-semibold"
             >
                 <slot name="title">{{ title }}</slot>

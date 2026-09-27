@@ -3,6 +3,7 @@ type UnsubFn = () => void | Promise<void>
 export function usePbSubscription() {
     const pb = usePocketbase()
     const subscriptions = new Map<string, UnsubFn>()
+    let unmounted = false
 
     async function subscribe(
         collection: string,
@@ -20,6 +21,12 @@ export function usePbSubscription() {
         const unsub: UnsubFn = await pb
             .collection(collection)
             .subscribe(topic, callback)
+        if (unmounted) {
+            try {
+                await unsub()
+            } catch {}
+            return
+        }
         subscriptions.set(key, unsub)
     }
 
@@ -38,6 +45,7 @@ export function usePbSubscription() {
     }
 
     onBeforeUnmount(() => {
+        unmounted = true
         subscriptions.forEach((fn) => {
             try {
                 fn()

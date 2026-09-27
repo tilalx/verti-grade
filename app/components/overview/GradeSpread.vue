@@ -58,16 +58,15 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 
 .grade-spread__bars {
     display: flex;
-    align-items: stretch;
     gap: 4px;
     height: 140px;
 }
 
 .grade-spread__bar {
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    align-items: end;
+    grid-template-rows: 1rem 1fr 1.75rem;
     flex: 1;
+    align-items: end;
     min-width: 0;
     text-align: center;
     border-radius: 4px;
@@ -106,6 +105,7 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 }
 
 .grade-spread__label {
+    align-self: start;
     margin-top: 4px;
     font-size: 0.7rem;
     white-space: nowrap;

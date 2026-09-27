@@ -55,12 +55,16 @@ export function useRouteSelection(
         selectedRouteIds.value = next
     }
 
+    watch(pbFilter, clear)
+
     const toggleAll = async () => {
         if (areAllSelected.value) {
             clear()
             return
         }
-        selectedRouteIds.value = new Set(await loadAllRouteIds())
+        const filter = pbFilter.value
+        const ids = await loadAllRouteIds()
+        if (filter === pbFilter.value) selectedRouteIds.value = new Set(ids)
     }
 
     return {
