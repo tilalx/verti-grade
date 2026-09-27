@@ -9,6 +9,11 @@ export function tickDate(day: string): string {
     return `${day} 12:00:00.000Z`
 }
 
+export function localDay(date: Date): string {
+    const pad = (value: number) => String(value).padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
 export function groupTicksByDay<T extends { date: string }>(
     ticks: T[],
 ): { day: string; ticks: T[] }[] {

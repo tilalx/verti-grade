@@ -1,6 +1,6 @@
 import { BOULDER_GRADE_SYSTEMS, gradeKey, type GradeSystem } from './grades'
 import { compareGrades } from './analytics'
-import { tickDay, type TickType } from './ticks'
+import { localDay, tickDay, type TickType } from './ticks'
 
 export type LogbookKind = 'boulder' | 'route'
 export type LogbookRange = '30d' | '12m' | 'all'
@@ -66,6 +66,10 @@ function inWindow(tick: LogbookTick, start: number | null, end: number) {
     return (start === null || time > start) && time <= end
 }
 
+function windowEnd(now: Date): number {
+    return new Date(`${localDay(now)}T12:00:00Z`).getTime()
+}
+
 function windowStart(range: LogbookRange, now: Date, periodsBack = 0) {
     const days = RANGE_DAYS[range]
     if (days === null) return null
@@ -108,7 +112,7 @@ export function logbookStats(
     now = new Date(),
 ): { current: LogbookStats; previous: LogbookStats | null } {
     const ofKind = ticks.filter((tick) => tickKind(tick) === kind)
-    const end = now.getTime()
+    const end = windowEnd(now)
     const start = windowStart(range, now)
     const current = statsOf(ofKind.filter((tick) => inWindow(tick, start, end)))
     if (start === null) return { current, previous: null }
@@ -139,7 +143,7 @@ export function gradePyramid(
             isSend(tick) &&
             tick.grade &&
             tickKind(tick) === kind &&
-            inWindow(tick, start, now.getTime()),
+            inWindow(tick, start, windowEnd(now)),
     )
     const withSystem =
         new Set(sends.map((tick) => tick.grade_system).filter(Boolean)).size > 1
