@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect } from 'vitest'
 import {
     formatAnchorPoint,
     formatScore,
@@ -40,6 +40,10 @@ describe('formatAnchorPoint', () => {
 describe('formatScore', () => {
     it('formats a finite number to two decimal places', () => {
         expect(formatScore({ score: 4.5 })).toBe('4.50/5')
+    })
+
+    it('uses the locale decimal separator', () => {
+        expect(formatScore({ score: 4.5 }, 'de')).toBe('4,50/5')
     })
 
     it('formats an integer score', () => {
@@ -146,6 +150,45 @@ describe('formatDateToYYYYMMDD', () => {
     it('zero-pads single-digit month and day', () => {
         const result = formatDateToYYYYMMDD('2024-01-05')
         expect(result).toMatch(/^\d{4}-01-\d{2}$/)
+    })
+})
+
+describe('dates west of UTC', () => {
+    const originalTimeZone = process.env.TZ
+    beforeEach(() => {
+        process.env.TZ = 'America/New_York'
+    })
+    afterEach(() => {
+        process.env.TZ = originalTimeZone
+    })
+
+    it('keeps the stored PocketBase day when editing', () => {
+        expect(formatDateToYYYYMMDD('2024-06-15 00:00:00.000Z')).toBe(
+            '2024-06-15',
+        )
+        expect(
+            formatDateToYYYYMMDD(
+                formatDateToYYYYMMDD('2024-06-15 00:00:00.000Z'),
+            ),
+        ).toBe('2024-06-15')
+    })
+
+    it('displays a date-only value on its own day', () => {
+        expect(
+            formatDate('2024-06-15 00:00:00.000Z', {
+                locale: 'en-US',
+                dateStyle: 'medium',
+            }),
+        ).toBe('Jun 15, 2024')
+    })
+
+    it('still shows timestamps in local time', () => {
+        expect(
+            formatDate('2024-06-15 02:00:00.000Z', {
+                locale: 'en-US',
+                dateStyle: 'medium',
+            }),
+        ).toBe('Jun 14, 2024')
     })
 })
 

@@ -1,8 +1,11 @@
 package hooks
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"slices"
+	"strings"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
@@ -58,6 +61,9 @@ func registerAudit(app core.App) {
 		}
 		entry := requestAuditEntry(e.RequestEvent, "delete", e.Collection.Name)
 		entry.RecordID = e.Record.Id
+		if e.Collection.Name == "users" && entry.Actor == e.Record.Id {
+			entry.Actor = ""
+		}
 		if err := e.Next(); err != nil {
 			return err
 		}
@@ -67,7 +73,7 @@ func registerAudit(app core.App) {
 
 	app.OnRecordAuthWithPasswordRequest().BindFunc(func(e *core.RecordAuthWithPasswordRequestEvent) error {
 		if err := e.Next(); err != nil {
-			writeAuthEvent(e.RequestEvent, e.Collection, e.Record, "login_failed", e.Identity)
+			writeAuthEvent(e.RequestEvent, e.Collection, e.Record, "login_failed", maskedIdentity(e.Identity))
 			return err
 		}
 		writeAuthEvent(e.RequestEvent, e.Collection, e.Record, "login", e.Identity)
@@ -226,6 +232,11 @@ func auditRetentionDays(app core.App) int {
 		return defaultAuditRetentionDays
 	}
 	return int(retention)
+}
+
+func maskedIdentity(identity string) string {
+	digest := sha256.Sum256([]byte(strings.ToLower(strings.TrimSpace(identity))))
+	return "unknown:" + hex.EncodeToString(digest[:4])
 }
 
 func firstNonEmpty(values ...string) string {

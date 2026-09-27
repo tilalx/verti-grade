@@ -1,0 +1,178 @@
+import PocketBase from 'pocketbase'
+import { test, expect } from '../../support/fixtures'
+import {
+    LOCATIONS,
+    authAsSuperuser,
+    ensureLocations,
+    uiaa,
+} from '../../support/seed'
+import { PB_URL } from '../../support/map'
+
+async function clientWithPermission(
+    root: PocketBase,
+    prefix: string,
+    permissionName: string,
+) {
+    const permission = await root
+        .collection('permissions')
+        .getFirstListItem(
+            root.filter('name = {:name}', { name: permissionName }),
+            { requestKey: null },
+        )
+    const role = await root.collection('roles').create({
+        name: `${prefix}-${permissionName}`,
+        permissions: [permission.id],
+    })
+    const email = `${prefix}-${permissionName}@gripello.test`
+    const password = 'E2ePassw0rd!'
+    const user = await root.collection('users').create({
+        email,
+        password,
+        passwordConfirm: password,
+        verified: true,
+        name: permissionName,
+        role: role.id,
+    })
+    const client = new PocketBase(PB_URL)
+    await client.collection('users').authWithPassword(email, password)
+    return {
+        client,
+        cleanup: async () => {
+            await root.collection('users').delete(user.id)
+            await root.collection('roles').delete(role.id)
+        },
+    }
+}
+
+test('a user manager cannot rename the admin role or strip its permissions', async ({
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const admin = await root
+        .collection('roles')
+        .getFirstListItem('name = "admin"', { requestKey: null })
+    const manager = await clientWithPermission(root, testPrefix, 'manage_users')
+    try {
+        const roles = manager.client.collection('roles')
+        await expect(
+            roles.update(admin.id, { name: `${testPrefix}-owned` }),
+        ).rejects.toMatchObject({ status: 403 })
+        await expect(
+            roles.update(admin.id, { permissions: [] }),
+        ).rejects.toMatchObject({ status: 403 })
+        await expect(
+            roles.update(admin.id, { 'permissions-': admin.permissions[0] }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const unchanged = await root.collection('roles').getOne(admin.id)
+        expect(unchanged.name).toBe('admin')
+        expect(unchanged.permissions).toEqual(admin.permissions)
+    } finally {
+        await manager.cleanup()
+    }
+})
+
+test('inventory may archive and restore routes but not edit them', async ({
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const locations = await ensureLocations(root)
+    const route = await root.collection('routes').create({
+        name: `${testPrefix}-inventory`,
+        ...uiaa('5'),
+        location: locations[LOCATIONS[0]],
+        type: 'Boulder',
+        creator: ['E2E'],
+    })
+    const inventory = await clientWithPermission(
+        root,
+        testPrefix,
+        'run_inventory',
+    )
+    try {
+        const routes = inventory.client.collection('routes')
+        const archived = await routes.update(route.id, { archived: true })
+        expect(archived.archived).toBe(true)
+
+        await expect(
+            routes.update(route.id, {
+                archived_at: '2000-01-01 00:00:00.000Z',
+            }),
+        ).rejects.toMatchObject({ status: 403 })
+        const superuserBackdated = await root
+            .collection('routes')
+            .update(route.id, { archived_at: '2000-01-01 00:00:00.000Z' })
+        expect(superuserBackdated.archived_at).toBe(archived.archived_at)
+
+        await expect(
+            routes.update(route.id, { archived: false, name: 'renamed' }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const restored = await routes.update(route.id, { archived: false })
+        expect(restored.archived).toBe(false)
+        expect(restored.name).toBe(`${testPrefix}-inventory`)
+    } finally {
+        await inventory.cleanup()
+        await root.collection('routes').delete(route.id)
+    }
+})
+
+test('a report cannot be marked removed while its content still exists', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const locations = await ensureLocations(root)
+    const route = await root.collection('routes').create({
+        name: `${testPrefix}-reported`,
+        ...uiaa('5'),
+        location: locations[LOCATIONS[0]],
+        type: 'Boulder',
+        creator: ['E2E'],
+    })
+    const reportResponse = await page.request.post(
+        '/api/collections/reports/records',
+        {
+            data: {
+                content_type: 'route',
+                content_id: route.id,
+                reason: 'other',
+                explanation: `${testPrefix}-removal-guard`,
+                notifier_name: 'E2E Reporter',
+                notifier_email: 'e2e-reporter@example.com',
+                good_faith: true,
+            },
+        },
+    )
+    const reportId = (await reportResponse.json()).id as string
+    const moderator = await clientWithPermission(
+        root,
+        testPrefix,
+        'manage_reports',
+    )
+    const decision = { status: 'actioned', decision: 'content_removed' }
+    try {
+        await expect(
+            moderator.client.collection('routes').delete(route.id),
+        ).rejects.toMatchObject({ status: 404 })
+        await expect(
+            moderator.client.collection('reports').update(reportId, decision),
+        ).rejects.toMatchObject({ status: 400 })
+
+        await root.collection('routes').delete(route.id)
+        const decided = await moderator.client
+            .collection('reports')
+            .update(reportId, decision)
+        expect(decided.decision).toBe('content_removed')
+    } finally {
+        await moderator.cleanup()
+        await root.collection('reports').delete(reportId)
+        await root
+            .collection('routes')
+            .delete(route.id)
+            .catch(() => {})
+    }
+})

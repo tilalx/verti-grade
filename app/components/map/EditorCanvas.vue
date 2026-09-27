@@ -59,6 +59,7 @@
         <MapFloorLayer
             :shapes="map.shapes"
             :selected-index="selectedShapeIndex"
+            selectable
             @shape-pointer-down="onShapePointerDown"
             @shape-click="onShapeClick"
         />
@@ -71,8 +72,16 @@
             :data-draggable="wall.key === selectedWallKey ? '' : undefined"
             data-testid="map-editor-wall"
             :data-name="wall.name"
+            :role="isSelectTool ? 'button' : undefined"
+            :tabindex="isSelectTool ? 0 : -1"
+            :aria-pressed="
+                isSelectTool ? wall.key === selectedWallKey : undefined
+            "
+            :aria-label="wall.name || $t('mapEditor.missing.name')"
             @pointerdown="onWallPointerDown(wall, $event)"
             @click="onWallClick(wall, $event)"
+            @keydown.enter.prevent="onWallClick(wall, $event)"
+            @keydown.space.prevent="onWallClick(wall, $event)"
         >
             <path
                 v-if="wall.outline.length >= 3"
@@ -110,6 +119,9 @@
                 class="editor-midpoint"
                 data-draggable
                 data-testid="map-editor-midpoint"
+                role="button"
+                tabindex="0"
+                :aria-label="$t('mapEditor.addPointLabel')"
                 :x="midpoint.point[0] - handleSize / 2"
                 :y="midpoint.point[1] - handleSize / 2"
                 :width="handleSize"
@@ -118,6 +130,12 @@
                     onMidpointDown(handleSet.path, midpoint, $event)
                 "
                 @click.stop
+                @keydown.enter.stop.prevent="
+                    insertMidpoint(handleSet.path, midpoint)
+                "
+                @keydown.space.stop.prevent="
+                    insertMidpoint(handleSet.path, midpoint)
+                "
             />
             <circle
                 v-for="(point, index) in handleSet.points"
@@ -133,11 +151,21 @@
                 data-draggable
                 data-testid="map-editor-vertex"
                 :data-path="handleSet.path.type"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isSelectedVertex(handleSet.path, index)"
+                :aria-label="$t('mapEditor.pointLabel', { n: index + 1 })"
                 :cx="point[0]"
                 :cy="point[1]"
                 :r="handleSize / 1.6"
                 @pointerdown.stop="onVertexDown(handleSet.path, index, $event)"
                 @click.stop
+                @keydown.enter.stop.prevent="
+                    selectVertex(handleSet.path, index)
+                "
+                @keydown.space.stop.prevent="
+                    selectVertex(handleSet.path, index)
+                "
             />
         </g>
 
@@ -228,6 +256,7 @@ const { viewBoxAttr, pixelsPerUnit, isPanning, toMap, fitAll, zoomBy } =
 
 const hoverPoint = ref<MapPoint | null>(null)
 const handleSize = computed(() => HANDLE_PX / pixelsPerUnit.value)
+const isSelectTool = computed(() => editor.tool.value === 'select')
 const isDrawing = computed(() =>
     ['shape', 'outline', 'edge'].includes(editor.tool.value),
 )
@@ -337,9 +366,13 @@ function trackDrag(event: PointerEvent, onMove: (move: PointerEvent) => void) {
     target.addEventListener('pointercancel', end)
 }
 
+function selectVertex(path: EditorPath, index: number) {
+    editor.selectedVertex.value = { path, index }
+}
+
 function onVertexDown(path: EditorPath, index: number, event: PointerEvent) {
     if (event.button !== 0) return
-    editor.selectedVertex.value = { path, index }
+    selectVertex(path, index)
     trackDrag(event, (move) => {
         const point = snapped(move, { path, index })
         const state = editor.state.value
@@ -353,12 +386,10 @@ function onVertexDown(path: EditorPath, index: number, event: PointerEvent) {
     })
 }
 
-function onMidpointDown(
+function insertMidpoint(
     path: EditorPath,
     midpoint: { afterIndex: number; point: MapPoint },
-    event: PointerEvent,
 ) {
-    if (event.button !== 0) return
     const state = editor.state.value
     editor.commit(
         writePath(
@@ -371,6 +402,16 @@ function onMidpointDown(
             ),
         ),
     )
+    selectVertex(path, midpoint.afterIndex + 1)
+}
+
+function onMidpointDown(
+    path: EditorPath,
+    midpoint: { afterIndex: number; point: MapPoint },
+    event: PointerEvent,
+) {
+    if (event.button !== 0) return
+    insertMidpoint(path, midpoint)
     onVertexDown(path, midpoint.afterIndex + 1, event)
 }
 
@@ -401,7 +442,7 @@ function onShapePointerDown(index: number, event: PointerEvent) {
     )
 }
 
-function onShapeClick(index: number, event: MouseEvent) {
+function onShapeClick(index: number, event: Event) {
     if (editor.tool.value !== 'select') return
     event.stopPropagation()
     editor.selection.value = { kind: 'shape', index }
@@ -448,7 +489,7 @@ function onLabelDown(wall: EditorWall, event: PointerEvent) {
     })
 }
 
-function onWallClick(wall: EditorWall, event: MouseEvent) {
+function onWallClick(wall: EditorWall, event: Event) {
     if (editor.tool.value !== 'select') return
     event.stopPropagation()
     editor.selection.value = { kind: 'wall', key: wall.key }
@@ -584,6 +625,15 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 
 .editor-wall--selected {
     cursor: move;
+}
+
+.editor-wall:focus-visible .editor-wall-outline,
+.editor-vertex:focus-visible,
+.editor-midpoint:focus-visible {
+    outline: none;
+    stroke: rgb(var(--v-theme-secondary));
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
 }
 
 .editor-wall-edge {

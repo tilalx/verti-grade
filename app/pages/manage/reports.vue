@@ -71,6 +71,7 @@
                 v-for="report in loading ? [] : reports"
                 :key="report.id"
                 :report="report"
+                :can-remove="can(removalTarget(report).permission)"
                 class="mb-3"
                 @decide="openDecision"
             />
@@ -146,6 +147,25 @@ import { REPORT_STATUSES } from '~/utils/reports'
 const { t } = useI18n()
 const pb = usePocketbase()
 const { pending: deciding, run: runDecision } = useAsyncAction()
+const { can } = usePermissions()
+const { error: notifyError } = useNotification()
+const contentNotRemoved = new Error('content_not_removed')
+
+function removalTarget(report: ReportRecord) {
+    return report.content_type === 'route'
+        ? { collection: 'routes', permission: 'manage_routes' }
+        : { collection: 'ratings', permission: 'manage_comments' }
+}
+
+async function contentStillExists(collection: string, id: string) {
+    return pb
+        .collection(collection)
+        .getOne(id, { fields: 'id', requestKey: null })
+        .then(
+            () => true,
+            (err: { status?: number }) => err?.status !== 404,
+        )
+}
 
 const pageRoute = useRoute()
 const search = ref(String(pageRoute.query.search ?? ''))
@@ -225,6 +245,13 @@ function clearFilters() {
 }
 
 function openDecision(report: ReportRecord, decision: ReportDecision) {
+    if (
+        decision === 'content_removed' &&
+        !can(removalTarget(report).permission)
+    ) {
+        notifyError(t('reports.removeNotAllowed'))
+        return
+    }
     pendingReport.value = report
     pendingDecision.value = decision
     decisionReason.value = ''
@@ -239,12 +266,14 @@ async function confirmDecision() {
     await runDecision(
         async () => {
             if (decision === 'content_removed') {
-                const collection =
-                    report.content_type === 'route' ? 'routes' : 'ratings'
+                const { collection, permission } = removalTarget(report)
+                if (!can(permission)) throw contentNotRemoved
                 try {
                     await pb.collection(collection).delete(report.content_id)
                 } catch (err) {
                     if ((err as { status?: number })?.status !== 404) throw err
+                    if (await contentStillExists(collection, report.content_id))
+                        throw contentNotRemoved
                 }
             }
 
@@ -266,7 +295,13 @@ async function confirmDecision() {
 
             decisionDialog.value = false
         },
-        { success: t('reports.decided') },
+        {
+            success: t('reports.decided'),
+            error: (err) =>
+                err === contentNotRemoved
+                    ? t('reports.removeNotAllowed')
+                    : t('notifications.error.generic'),
+        },
     )
 }
 </script>

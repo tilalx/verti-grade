@@ -93,7 +93,7 @@ import {
     tickDay,
     type TickType,
 } from '#shared/utils/ticks'
-import { formatDateToYYYYMMDD } from '#shared/utils/formatting'
+import { localDay } from '#shared/utils/ticks'
 import { TICK_TYPE_ICONS } from '~/utils/ticks'
 
 const open = defineModel<boolean>({ default: false })
@@ -128,7 +128,7 @@ const attemptsRule = (value: number) =>
     t('ticks.attemptsInvalid')
 
 function localToday() {
-    return formatDateToYYYYMMDD(new Date().toISOString())
+    return localDay(new Date())
 }
 
 watch(open, (isOpen) => {

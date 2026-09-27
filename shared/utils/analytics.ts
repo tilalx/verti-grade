@@ -1,8 +1,8 @@
 import { normalizeCreators, parseDate } from './formatting'
 import {
     gradeIndex,
+    compareGradeKeys,
     gradeKey,
-    gradeKeyIndex,
     isGradeSystem,
     nearestGrade,
     type GradeSource,
@@ -205,15 +205,16 @@ export function resolveFilters(
 }
 
 export function gradeScore(source: GradeSource): number | null {
+    const storedIndex = source.grade_index
     const index =
-        source.grade_index ?? gradeIndex(source.grade_system, source.grade)
+        typeof storedIndex === 'number' && storedIndex > 0
+            ? storedIndex
+            : gradeIndex(source.grade_system, source.grade)
     return typeof index === 'number' && Number.isFinite(index) ? index : null
 }
 
 export function compareGrades(left: string, right: string): number {
-    return (
-        gradeKeyIndex(left) - gradeKeyIndex(right) || left.localeCompare(right)
-    )
+    return compareGradeKeys(left, right) || left.localeCompare(right)
 }
 
 function routeDate(route: AnalyticsRoute): Date | null {
@@ -301,6 +302,7 @@ export function buildAnalytics(
     const { from, to } = filters
     const periodMs = from ? to.getTime() - from.getTime() : 0
     const previousFrom = from ? new Date(from.getTime() - periodMs) : null
+    const previousTo = new Date((from?.getTime() ?? 0) - 1)
 
     const matchingRoutes = allRoutes.filter(
         (route) =>
@@ -341,9 +343,11 @@ export function buildAnalytics(
     const routesSet = routesSetIn(from, to)
     const periodRatings = ratingsIn(from, to)
     const previousRoutesSet = previousFrom
-        ? routesSetIn(previousFrom, from!)
+        ? routesSetIn(previousFrom, previousTo)
         : null
-    const previousRatings = previousFrom ? ratingsIn(previousFrom, from!) : null
+    const previousRatings = previousFrom
+        ? ratingsIn(previousFrom, previousTo)
+        : null
 
     const trend = (
         current: number,

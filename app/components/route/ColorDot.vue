@@ -7,8 +7,8 @@
             height: `${size}px`,
             background: routeDotColor(color),
         }"
-        :role="ticked ? 'img' : undefined"
-        :aria-label="ticked ? $t('ticks.sent') : undefined"
+        :role="label ? 'img' : undefined"
+        :aria-label="label || undefined"
         :data-ticked="ticked || undefined"
     >
         <span
@@ -21,14 +21,22 @@
 
 <script setup lang="ts">
 import { routeDotColor } from '~/utils/color'
+import { translatedColorName } from '~/utils/colorName'
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         color?: string | null
         ticked?: boolean
         size?: number
     }>(),
     { color: null, ticked: false, size: 32 },
+)
+
+const { t } = useI18n()
+const label = computed(() =>
+    [translatedColorName(t, props.color), props.ticked && t('ticks.sent')]
+        .filter(Boolean)
+        .join(', '),
 )
 </script>
 

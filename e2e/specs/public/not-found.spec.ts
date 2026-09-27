@@ -22,3 +22,11 @@ test('go back returns to the previous page', async ({ page }) => {
     await page.waitForURL((url) => url.pathname === '/imprint')
     await expect(page.getByTestId('error-page')).toHaveCount(0)
 })
+
+test('sets the html lang on the 404 page', async ({ page }) => {
+    const response = await page.goto('/this-page-does-not-exist')
+    const html = (await response?.text()) ?? ''
+    expect(html).toMatch(/<html[^>]+lang="[a-z]{2}"/)
+    await gotoSettled(page, '/this-page-does-not-exist')
+    await expect(page.locator('html')).toHaveAttribute('lang', /^[a-z]{2}$/)
+})

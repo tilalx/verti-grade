@@ -13,6 +13,7 @@ interface ExportBody {
     ids?: unknown[]
     locale?: unknown
     labels?: Record<string, unknown>
+    typeLabels?: Record<string, unknown>
     columns?: unknown[]
     show?: Record<string, unknown>
 }
@@ -209,11 +210,22 @@ export async function resolveExportColumns(
         : DEFAULT_EXPORT_COLUMNS
     const labels: Record<string, unknown> =
         body?.labels && typeof body.labels === 'object' ? body.labels : {}
+    const typeLabels: Record<string, unknown> =
+        body?.typeLabels && typeof body.typeLabels === 'object'
+            ? body.typeLabels
+            : {}
     const locale = await resolveExportLocale(event)
+    const translatedType = (route: RouteRecord) => {
+        const typeLabel = typeLabels[route.type ?? '']
+        return typeof typeLabel === 'string' && typeLabel.trim()
+            ? typeLabel.trim()
+            : (route.type ?? '')
+    }
 
     return chosen.map((column) => {
         const label = labels[column.key]
-        const columnValue = column.value
+        const columnValue =
+            column.key === 'type' ? translatedType : column.value
         return {
             ...column,
             value:

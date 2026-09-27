@@ -15,10 +15,10 @@ interface PbListOptions<TRecord, TItem> {
     map?: (record: TRecord) => TItem
 }
 
-export function usePbList<TRecord, TItem = TRecord>(
-    collection: string,
-    options: PbListOptions<TRecord, TItem>,
-) {
+export function usePbList<
+    TRecord,
+    TItem extends { id: string } = TRecord & { id: string },
+>(collection: string, options: PbListOptions<TRecord, TItem>) {
     const pb = usePocketbase()
     const { t } = useI18n()
     const { error: notifyError } = useNotification()
@@ -45,7 +45,14 @@ export function usePbList<TRecord, TItem = TRecord>(
                     requestKey: options.requestKey,
                 })
             const mapped = result.items.map(toItem)
-            items.value = target === 1 ? mapped : [...items.value, ...mapped]
+            const loadedIds = new Set(items.value.map((item) => item.id))
+            items.value =
+                target === 1
+                    ? mapped
+                    : [
+                          ...items.value,
+                          ...mapped.filter((item) => !loadedIds.has(item.id)),
+                      ]
             totalItems.value = result.totalItems
             page.value = target
         } catch (err) {

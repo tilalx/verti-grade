@@ -57,17 +57,19 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 }
 
 .grade-spread__bars {
-    display: flex;
-    align-items: stretch;
-    gap: 4px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    column-gap: 4px;
     height: 140px;
 }
 
 .grade-spread__bar {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
     align-items: end;
-    flex: 1;
     min-width: 0;
     text-align: center;
     border-radius: 4px;
@@ -106,6 +108,7 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 }
 
 .grade-spread__label {
+    align-self: start;
     margin-top: 4px;
     font-size: 0.7rem;
     white-space: nowrap;

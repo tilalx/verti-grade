@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import { useQrScanner } from '~/composables/useQrScanner'
@@ -56,5 +56,18 @@ describe('useQrScanner', () => {
             value: 'visible',
             configurable: true,
         })
+    })
+
+    it('drops the pending audio unlock listener on unmount', () => {
+        window.dispatchEvent(new Event('pointerdown'))
+        const originalAudioContext = window.AudioContext
+        const audioContextCtor = vi.fn()
+        window.AudioContext = audioContextCtor as unknown as typeof AudioContext
+        const { wrapper, scanner } = mountScanner()
+        scanner.start()
+        wrapper.unmount()
+        window.dispatchEvent(new Event('pointerdown'))
+        expect(audioContextCtor).not.toHaveBeenCalled()
+        window.AudioContext = originalAudioContext
     })
 })

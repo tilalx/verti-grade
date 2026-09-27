@@ -66,7 +66,11 @@ onMounted(() => subscribe('routes', () => void refresh()).catch(() => {}))
     >
         <div class="d-flex flex-wrap align-center ga-2">
             <span>{{
-                $t('mapPlacement.unplacedBanner', { n: unplaced.count })
+                $t(
+                    'mapPlacement.unplacedBanner',
+                    { n: unplaced.count },
+                    unplaced.count,
+                )
             }}</span>
             <v-spacer />
             <v-btn

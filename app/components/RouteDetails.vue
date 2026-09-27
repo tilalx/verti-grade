@@ -123,7 +123,7 @@ const fetchClimbingRatings = async () => {
     isLoading.value = true
     try {
         const data = await pb.collection('ratings').getFullList<RatingRecord>({
-            filter: `route_id = "${props.route_id}"`,
+            filter: pb.filter('route_id = {:id}', { id: props.route_id }),
             sort: '-created',
             expand: 'user',
         })

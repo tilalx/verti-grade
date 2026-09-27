@@ -134,6 +134,16 @@ describe('gradePyramid', () => {
         ])
     })
 
+    it('orders Font grades by the Font scale', () => {
+        const rows = gradePyramid(
+            [tick('top', '3'), tick('top', '<2'), tick('top', '6A')],
+            'boulder',
+            'all',
+            NOW,
+        )
+        expect(rows.map((row) => row.grade)).toEqual(['6A', '3', '<2'])
+    })
+
     it('keeps scales apart when several are mixed', () => {
         const rows = gradePyramid(
             [
@@ -223,5 +233,22 @@ describe('medianSendIndex', () => {
             ),
         ).toBe(gradeIndex('font', '6C'))
         expect(medianSendIndex([], 'route')).toBeNull()
+    })
+})
+
+describe('ungraded sends', () => {
+    const ungraded = (): LogbookTick => tick('top', '', { grade_index: 0 })
+
+    it('never count as the hardest send', () => {
+        expect(sessionSummary([ungraded()]).hardest).toBeNull()
+    })
+
+    it('do not pull the median grade down', () => {
+        expect(
+            medianSendIndex(
+                [ungraded(), ungraded(), tick('top', '6A')],
+                'boulder',
+            ),
+        ).toBe(15.7)
     })
 })

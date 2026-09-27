@@ -19,7 +19,8 @@ describe('RouteColorDot', () => {
         expect(style).toContain('height: 26px')
         expect(style).toMatch(/background: (#E53935|rgb\(229, 57, 53\))/)
         expect(wrapper.find('.route-color-dot__tick').exists()).toBe(false)
-        expect(wrapper.attributes('role')).toBeUndefined()
+        expect(wrapper.attributes('role')).toBe('img')
+        expect(wrapper.attributes('aria-label')).toBe('colors.red')
     })
 
     it('falls back to grey without a usable color', () => {
@@ -28,6 +29,7 @@ describe('RouteColorDot', () => {
         expect(wrapper.attributes('style')).toMatch(
             /background: (#9E9E9E|rgb\(158, 158, 158\))/,
         )
+        expect(wrapper.attributes('role')).toBeUndefined()
     })
 
     it('marks sent routes with an accessible tick', () => {
@@ -35,7 +37,7 @@ describe('RouteColorDot', () => {
 
         expect(wrapper.find('.route-color-dot__tick').exists()).toBe(true)
         expect(wrapper.attributes('role')).toBe('img')
-        expect(wrapper.attributes('aria-label')).toBe('ticks.sent')
+        expect(wrapper.attributes('aria-label')).toBe('colors.red, ticks.sent')
         expect(wrapper.attributes('data-ticked')).toBe('true')
     })
 })

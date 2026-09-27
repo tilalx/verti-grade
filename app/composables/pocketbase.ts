@@ -1,7 +1,11 @@
 import PocketBase, { BaseAuthStore, type AuthRecord } from 'pocketbase'
-import { AUTH_COOKIE } from '~/utils/clientStorage'
+import { AUTH_COOKIE, SESSION_ONLY_AUTH_COOKIE } from '~/utils/clientStorage'
 
 class CookieAuthStore extends BaseAuthStore {
+    persistent = !document.cookie
+        .split('; ')
+        .includes(`${SESSION_ONLY_AUTH_COOKIE}=1`)
+
     constructor() {
         super()
         this.loadFromCookie(document.cookie, AUTH_COOKIE)
@@ -14,19 +18,23 @@ class CookieAuthStore extends BaseAuthStore {
 
     override clear() {
         super.clear()
+        this.persistent = true
         this.#persist()
     }
 
     #persist() {
+        const sessionOnly = !this.persistent && this.isValid
         document.cookie = this.exportToCookie(
             {
                 httpOnly: false,
                 secure: location.protocol === 'https:',
                 sameSite: 'Lax',
                 path: '/',
+                ...(sessionOnly ? { expires: undefined } : {}),
             },
             AUTH_COOKIE,
         )
+        document.cookie = `${SESSION_ONLY_AUTH_COOKIE}=1; Path=/; SameSite=Lax${sessionOnly ? '' : '; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT'}`
     }
 }
 
@@ -53,6 +61,11 @@ export const usePocketbase = (): PocketBase => {
     }
 
     return globalThis._pb
+}
+
+export const setAuthPersistent = (persistent: boolean) => {
+    const { authStore } = usePocketbase()
+    if (authStore instanceof CookieAuthStore) authStore.persistent = persistent
 }
 
 export const usePbFileUrl = (

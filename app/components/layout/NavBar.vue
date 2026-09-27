@@ -14,20 +14,25 @@
                         v-if="logo_url"
                         :src="logo_url"
                         :alt="logoAlt"
-                        :style="logoStyle"
+                        class="nav-logo__custom"
+                        data-testid="nav-logo-custom"
                     />
-                    <NuxtImg
-                        v-else
-                        :src="
-                            theme.global.current.value.dark
-                                ? '/gripello-dark.svg'
-                                : '/gripello-light.svg'
-                        "
-                        :alt="logoAlt"
-                        :style="defaultLogoStyle"
-                        height="36"
-                        densities="x1 x2"
-                    />
+                    <template v-else>
+                        <NuxtImg
+                            src="/gripello-light.svg"
+                            :alt="logoAlt"
+                            class="nav-logo__default nav-logo__default--light"
+                            height="36"
+                            densities="x1 x2"
+                        />
+                        <NuxtImg
+                            src="/gripello-dark.svg"
+                            :alt="logoAlt"
+                            class="nav-logo__default nav-logo__default--dark"
+                            height="36"
+                            densities="x1 x2"
+                        />
+                    </template>
                 </router-link>
 
                 <nav
@@ -132,17 +137,6 @@ const logo_url = computed(() =>
     usePbFileUrl(settings.value, settings.value?.page_logo, { thumb: '0x200' }),
 )
 
-const logoStyle = computed(() => ({
-    maxWidth: '90px',
-    filter: `brightness(0) invert(${theme.global.current.value.dark ? 1 : 0})`,
-    transition: 'filter 0.3s ease',
-}))
-
-const defaultLogoStyle = {
-    maxWidth: '120px',
-    height: '36px',
-}
-
 const isLoggedIn = computed(() => loggedIn.value)
 </script>
 
@@ -169,6 +163,30 @@ const isLoggedIn = computed(() => loggedIn.value)
     text-decoration: none;
     flex-shrink: 0;
     margin-right: 8px;
+}
+
+.nav-logo__custom {
+    max-width: 90px;
+    filter: brightness(0);
+    transition: filter 0.3s ease;
+}
+
+.v-theme--dark .nav-logo__custom {
+    filter: brightness(0) invert(1);
+}
+
+.nav-logo__default {
+    max-width: 120px;
+    height: 36px;
+}
+
+.nav-logo__default--dark,
+.v-theme--dark .nav-logo__default--light {
+    display: none;
+}
+
+.v-theme--dark .nav-logo__default--dark {
+    display: inline;
 }
 
 .nav-links {

@@ -6,6 +6,7 @@ import {
     resolveApplicationUrl,
     fetchRecordsByIds,
 } from '../../utils/export'
+import { normalizeHexColor } from '#shared/utils/color'
 import type { SettingsRecord } from '../../../types/models'
 
 const QR_PX = 240 // generated QR bitmap size
@@ -101,13 +102,12 @@ export default eventHandler(async (event) => {
             })
 
             if (colorIndex !== -1) {
-                const argb = toArgb(climbingRoute.color)
-                if (argb) {
-                    row.getCell(colorIndex + 1).fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb },
-                    }
+                row.getCell(colorIndex + 1).fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: {
+                        argb: `FF${normalizeHexColor(climbingRoute.color).slice(1)}`,
+                    },
                 }
             }
 
@@ -160,11 +160,3 @@ export default eventHandler(async (event) => {
         throw createError({ statusCode: 500, statusMessage: 'Server error' })
     }
 })
-
-function toArgb(color: unknown) {
-    if (typeof color !== 'string') {
-        return null
-    }
-    const hex = color.trim().replace(/^#/, '')
-    return /^[0-9a-fA-F]{6}$/.test(hex) ? `FF${hex.toUpperCase()}` : null
-}

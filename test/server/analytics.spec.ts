@@ -43,11 +43,11 @@ describe('requirePermission', () => {
         ).resolves.toBeDefined()
     })
 
-    it('allows admins without explicit permission', async () => {
+    it('rejects a role named admin without the permission', async () => {
         authRefresh = async () => userWithRole('admin')
         await expect(
             requirePermission({} as never, 'view_analytics'),
-        ).resolves.toBeDefined()
+        ).rejects.toMatchObject({ statusCode: 403 })
     })
 
     it('rejects a role without the permission with 403', async () => {
@@ -61,12 +61,23 @@ describe('requirePermission', () => {
 
     it('rejects a token PocketBase does not accept with 401', async () => {
         authRefresh = async () => {
-            throw new Error('invalid')
+            throw Object.assign(new Error('invalid'), { status: 401 })
         }
         const caught = await requirePermission(
             {} as never,
             'view_analytics',
         ).catch((e) => e)
         expect(caught).toMatchObject({ statusCode: 401 })
+    })
+
+    it('reports an unreachable PocketBase as 503', async () => {
+        authRefresh = async () => {
+            throw Object.assign(new Error('fetch failed'), { status: 0 })
+        }
+        const caught = await requirePermission(
+            {} as never,
+            'view_analytics',
+        ).catch((e) => e)
+        expect(caught).toMatchObject({ statusCode: 503 })
     })
 })

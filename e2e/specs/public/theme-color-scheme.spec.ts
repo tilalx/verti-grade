@@ -103,4 +103,26 @@ test.describe('browser bars', () => {
             'rgb(13, 17, 23)',
         )
     })
+
+    test('color-scheme follows an explicit light choice on a dark OS', async ({
+        browser,
+        baseURL,
+    }) => {
+        const context = await browser.newContext({ colorScheme: 'dark' })
+        await context.addCookies([
+            { name: 'theme-mode', value: 'light', url: baseURL! },
+        ])
+        const page = await context.newPage()
+        await gotoSettled(page, '/')
+        await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute(
+            'content',
+            'light',
+        )
+        await expect(page.locator('html')).toHaveCSS('color-scheme', 'light')
+        await expect(page.locator('html')).toHaveCSS(
+            'background-color',
+            'rgb(248, 250, 243)',
+        )
+        await context.close()
+    })
 })

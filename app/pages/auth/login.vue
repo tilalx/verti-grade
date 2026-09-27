@@ -101,6 +101,7 @@
                             color="success"
                             density="compact"
                             hide-details
+                            data-testid="login-remember-me"
                         />
                         <v-btn
                             variant="text"
@@ -326,8 +327,8 @@ defineOptions({ name: 'LoginPage' })
 const { t } = useI18n()
 const pb = usePocketbase()
 const { capHeaders } = useCapToken()
-const afterLoginPath =
-    safeRedirect(useRoute().query.redirect) ?? '/manage/routes'
+const route = useRoute()
+const afterLoginPath = safeRedirect(route.query.redirect) ?? '/manage/routes'
 
 definePageMeta({ layout: 'blank', auth: false })
 
@@ -356,7 +357,7 @@ const canRegister = computed(
 
 // ── State ──────────────────────────────────────────────────────────
 const { notify, error: notifyError } = useNotification()
-const view = ref('login')
+const view = ref(route.query.view === 'register' ? 'register' : 'login')
 const loading = ref(false)
 const loginValid = ref(false)
 const resetValid = ref(false)
@@ -513,6 +514,7 @@ function resolveAuthError(err: unknown) {
 async function submitLogin() {
     if (!(await validate(loginForm))) return
     loading.value = true
+    setAuthPersistent(rememberMe.value)
     try {
         await pb
             .collection('users')
@@ -616,6 +618,7 @@ async function submitRegister() {
 
 async function loginWithOAuth(provider: string) {
     loading.value = true
+    setAuthPersistent(rememberMe.value)
     try {
         await pb.collection('users').authWithOAuth2({ provider })
         await navigateTo(afterLoginPath, { replace: true })

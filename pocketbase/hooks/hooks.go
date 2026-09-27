@@ -7,6 +7,7 @@ func Register(app core.App) {
 	registerBatchHeaderGuard(app)
 	registerCaptcha(app)
 	registerUserGuards(app)
+	registerAdminRoleGuard(app)
 	registerLocationGuards(app)
 	registerMapGuards(app)
 	registerRouteArchiveStamp(app)

@@ -5,7 +5,7 @@ import {
     canonicalGrade,
     formatGrade,
     gradeKey,
-    gradeKeyIndex,
+    compareGradeKeys,
     gradeIndex,
     gradeLabels,
     nearestGrade,
@@ -76,9 +76,32 @@ describe('gradeKey', () => {
     })
 
     it('orders keys by the scale they name', () => {
-        expect(gradeKeyIndex('5 · Font')).toBe(14.2)
-        expect(gradeKeyIndex('5 · UIAA')).toBe(7.4)
-        expect(gradeKeyIndex('?')).toBe(Number.MAX_SAFE_INTEGER)
+        expect(compareGradeKeys('5 · Font', '6 · UIAA')).toBeGreaterThan(0)
+        expect(compareGradeKeys('5 · UIAA', '6 · UIAA')).toBeLessThan(0)
+        expect(compareGradeKeys('?', '12 · UIAA')).toBeGreaterThan(0)
+    })
+
+    it.each(GRADE_SYSTEMS)(
+        'orders every %s label by that scale without a suffix',
+        (system) => {
+            const labels = gradeLabels(system)
+            expect([...labels].reverse().sort(compareGradeKeys)).toEqual(labels)
+        },
+    )
+
+    it('tells Font 6A and French 6a apart by case', () => {
+        expect(compareGradeKeys('6A', '6B')).toBeLessThan(0)
+        expect(compareGradeKeys('6a', '5+')).toBeGreaterThan(0)
+        expect(compareGradeKeys('6A', '<2')).toBeGreaterThan(0)
+    })
+
+    it('orders non-canonical stored grades like their canonical label', () => {
+        expect(compareGradeKeys('6A · Fr', '5+ · Fr')).toBeGreaterThan(0)
+        expect(compareGradeKeys('6A · Fr', '6b · Fr')).toBeLessThan(0)
+        expect(compareGradeKeys('v3', 'V4')).toBeLessThan(0)
+        expect(compareGradeKeys('6a +', '6b')).toBeLessThan(0)
+        expect(compareGradeKeys('6a +', '6a')).toBeGreaterThan(0)
+        expect(compareGradeKeys('v3', '?')).toBeLessThan(0)
     })
 })
 

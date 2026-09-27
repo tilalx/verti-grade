@@ -87,7 +87,13 @@
     border-color: rgba(var(--v-theme-primary), 0.8);
 }
 
-.avatar-wrapper:hover .avatar-overlay {
+.avatar-wrapper:focus-visible {
+    outline: 2px solid rgb(var(--v-theme-primary));
+    outline-offset: 2px;
+}
+
+.avatar-wrapper:hover .avatar-overlay,
+.avatar-wrapper:focus-visible .avatar-overlay {
     opacity: 1;
 }
 
@@ -379,4 +385,8 @@
 .v-bottom-sheet > .v-bottom-sheet__content > .v-card,
 .v-overlay__content.dialog-shell--sheet > .v-card {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+svg [tabindex]:focus {
+    outline: none;
 }

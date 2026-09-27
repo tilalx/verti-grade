@@ -1,11 +1,10 @@
+import { formatNumber } from './number'
+
 export function formatDateToYYYYMMDD(date: string | null | undefined): string {
-    if (!date) return ''
-    const parsed = new Date(date)
-    if (Number.isNaN(parsed.getTime())) return ''
-    const month = String(parsed.getMonth() + 1).padStart(2, '0')
-    const day = String(parsed.getDate()).padStart(2, '0')
-    return `${parsed.getFullYear()}-${month}-${day}`
+    return parseDate(date)?.toISOString().slice(0, 10) ?? ''
 }
+
+const DAY_MS = 86_400_000
 
 export interface FormatDateOptions extends Intl.DateTimeFormatOptions {
     locale?: string | null
@@ -36,6 +35,8 @@ export function formatDate(
     const parsed = parseDate(value)
     if (!parsed) return fallback
     const resolvedLocale = locale || undefined
+    const isDateOnly = parsed.getTime() % DAY_MS === 0
+    if (!withTime && !intl.timeZone && isDateOnly) intl.timeZone = 'UTC'
     return withTime
         ? parsed.toLocaleString(resolvedLocale, intl)
         : parsed.toLocaleDateString(resolvedLocale, intl)
@@ -98,12 +99,13 @@ export function formatAnchorPoint(value: unknown): unknown {
 
 export function formatScore(
     route: { score?: unknown } | null | undefined,
+    locale = 'en',
 ): string {
     const score =
         typeof route?.score === 'number' && Number.isFinite(route.score)
             ? route.score
             : null
-    return score !== null ? `${score.toFixed(2)}/5` : '—'
+    return score !== null ? `${formatNumber(score, locale, 2)}/5` : '—'
 }
 
 export function normalizeCreators(raw: unknown): string[] {

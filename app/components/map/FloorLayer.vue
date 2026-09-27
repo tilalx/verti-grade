@@ -12,8 +12,20 @@
             :data-draggable="index === selectedIndex ? '' : undefined"
             data-testid="map-floor-shape"
             :data-kind="shape.kind"
+            :role="selectable ? 'button' : undefined"
+            :tabindex="selectable ? 0 : undefined"
+            :aria-pressed="selectable ? index === selectedIndex : undefined"
+            :aria-label="
+                selectable ? $t(`mapEditor.kinds.${shape.kind}`) : undefined
+            "
             @pointerdown="emit('shapePointerDown', index, $event)"
             @click="emit('shapeClick', index, $event)"
+            @keydown.enter.prevent="
+                selectable && emit('shapeClick', index, $event)
+            "
+            @keydown.space.prevent="
+                selectable && emit('shapeClick', index, $event)
+            "
         />
     </g>
 </template>
@@ -25,11 +37,12 @@ import { svgPath } from '~/utils/mapSvg'
 defineProps<{
     shapes: MapShape[]
     selectedIndex?: number | null
+    selectable?: boolean
 }>()
 
 const emit = defineEmits<{
     shapePointerDown: [index: number, event: PointerEvent]
-    shapeClick: [index: number, event: MouseEvent]
+    shapeClick: [index: number, event: Event]
 }>()
 </script>
 
@@ -51,6 +64,12 @@ const emit = defineEmits<{
 
 .floor-shape--structure {
     fill: rgba(var(--v-theme-on-surface), 0.22);
+}
+
+.floor-shape:focus-visible {
+    stroke: rgb(var(--v-theme-primary));
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
 }
 
 .floor-shape--selected {

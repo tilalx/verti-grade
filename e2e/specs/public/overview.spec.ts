@@ -71,6 +71,22 @@ test('hovering a grade bar shows its route count', async ({ page }) => {
     await expect(page.getByRole('tooltip', { name: /routes/ })).toBeVisible()
 })
 
+test('grade bars share one baseline on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 })
+    await gotoSettled(page, '/')
+    const bottoms = await page
+        .getByTestId('overview-grades')
+        .first()
+        .locator('.grade-spread__fill')
+        .evaluateAll((fills) =>
+            fills.map((fill) =>
+                Math.round(fill.getBoundingClientRect().bottom),
+            ),
+        )
+    expect(bottoms.length).toBeGreaterThan(1)
+    expect(new Set(bottoms).size).toBe(1)
+})
+
 test('guests get the public nav and an all-routes link', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await gotoSettled(page, '/')

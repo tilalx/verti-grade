@@ -148,6 +148,17 @@ test('the dashboard sums up sends and turns a project into a send', async ({
 
     await page.getByTestId('logbook-tab-stats').click()
     await expect(page.getByTestId('logbook-pyramid')).toBeVisible()
+    await expect
+        .poll(() =>
+            page.getByTestId('logbook-pyramid').evaluate((chart) => {
+                const svg = chart.querySelector('svg')
+                return (
+                    (svg?.getBoundingClientRect().width ?? 0) >=
+                    chart.getBoundingClientRect().width - 1
+                )
+            }),
+        )
+        .toBe(true)
     await expect(page.getByTestId('logbook-progression')).toBeVisible()
 
     await page.getByTestId('logbook-tab-projects').click()

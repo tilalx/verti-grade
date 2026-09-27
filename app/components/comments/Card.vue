@@ -14,6 +14,9 @@
                 hide-details
                 density="compact"
                 class="list-card__checkbox"
+                :aria-label="
+                    $t('common.selectItem', { name: comment.userName })
+                "
                 data-testid="comment-card-checkbox"
                 @update:modelValue="$emit('toggle-select')"
             />
@@ -32,10 +35,7 @@
                     :alt="comment.userName"
                     cover
                 />
-                <span
-                    v-else
-                    class="text-body-small font-weight-bold text-white"
-                >
+                <span v-else class="text-body-small font-weight-bold">
                     {{ nameInitials(comment.userName) }}
                 </span>
             </v-avatar>

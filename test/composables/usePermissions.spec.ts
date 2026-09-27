@@ -34,6 +34,7 @@ describe('usePermissions', () => {
                 record: { role: 'role123' },
             },
             collection: vi.fn(),
+            cancelRequest: vi.fn(),
         }
     })
 
@@ -79,7 +80,7 @@ describe('usePermissions', () => {
         expect(can('manage_settings')).toBe(false)
     })
 
-    it('admin role always has all permissions', async () => {
+    it('grants the admin role only its assigned permissions', async () => {
         pbMock.collection = vi.fn().mockReturnValue({
             getOne: vi.fn().mockResolvedValue({
                 name: 'admin',
@@ -93,9 +94,7 @@ describe('usePermissions', () => {
         await refreshPermissions()
 
         expect(can('manage_routes')).toBe(true)
-        expect(can('manage_users')).toBe(true)
-        expect(can('manage_settings')).toBe(true)
-        expect(can('some_future_feature')).toBe(true)
+        expect(can('manage_users')).toBe(false)
     })
 
     it('user role with no permissions has no access', async () => {
@@ -267,6 +266,128 @@ describe('usePermissions', () => {
         await ensureLoaded()
 
         expect(getOneMock).toHaveBeenCalledTimes(1)
+        expect(can('manage_routes')).toBe(true)
+    })
+
+    it('ensureLoaded reloads after a guest visit once the user signs in', async () => {
+        const getOneMock = vi.fn().mockResolvedValue({
+            name: 'routesetter',
+            expand: { permissions: [{ name: 'manage_routes' }] },
+        })
+        pbMock.collection = vi.fn().mockReturnValue({ getOne: getOneMock })
+        pbMock.authStore = { isValid: false, record: null }
+
+        const { ensureLoaded, can } = await loadComposable()
+        await ensureLoaded()
+        expect(can('manage_routes')).toBe(false)
+
+        pbMock.authStore = { isValid: true, record: { role: 'role123' } }
+        await ensureLoaded()
+
+        expect(getOneMock).toHaveBeenCalledTimes(1)
+        expect(can('manage_routes')).toBe(true)
+    })
+
+    it('ensureLoaded clears permissions after logout', async () => {
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi.fn().mockResolvedValue({
+                name: 'routesetter',
+                expand: { permissions: [{ name: 'manage_routes' }] },
+            }),
+        })
+
+        const { ensureLoaded, can } = await loadComposable()
+        await ensureLoaded()
+        expect(can('manage_routes')).toBe(true)
+
+        pbMock.authStore = { isValid: false, record: null }
+        await ensureLoaded()
+
+        expect(can('manage_routes')).toBe(false)
+    })
+
+    it('ensureLoaded reloads when the role changes', async () => {
+        const getOneMock = vi
+            .fn()
+            .mockResolvedValueOnce({
+                name: 'user',
+                expand: { permissions: [] },
+            })
+            .mockResolvedValueOnce({
+                name: 'routesetter',
+                expand: { permissions: [{ name: 'manage_routes' }] },
+            })
+        pbMock.collection = vi.fn().mockReturnValue({ getOne: getOneMock })
+
+        const { ensureLoaded, can } = await loadComposable()
+        await ensureLoaded()
+        pbMock.authStore.record = { role: 'role456' }
+        await ensureLoaded()
+
+        expect(getOneMock).toHaveBeenLastCalledWith(
+            'role456',
+            expect.anything(),
+        )
+        expect(can('manage_routes')).toBe(true)
+    })
+
+    it('drops an in-flight role fetch when the user signs out', async () => {
+        let resolveRole: (value: unknown) => void = () => {}
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi.fn(
+                () => new Promise((resolve) => (resolveRole = resolve)),
+            ),
+        })
+
+        const { ensureLoaded, refreshPermissions, can } = await loadComposable()
+        const inFlight = ensureLoaded()
+
+        pbMock.authStore = { isValid: false, record: null }
+        await refreshPermissions()
+        resolveRole({
+            name: 'routesetter',
+            expand: { permissions: [{ name: 'manage_routes' }] },
+        })
+        await inFlight
+
+        expect(pbMock.cancelRequest).toHaveBeenCalledWith('userPermissions')
+        expect(can('manage_routes')).toBe(false)
+    })
+
+    it('a superseded ensureLoaded waits for the winning request', async () => {
+        const autoCancel = Object.assign(new Error('autocancelled'), {
+            isAbort: true,
+            status: 0,
+        })
+        let rejectFirst: (err: unknown) => void = () => {}
+        let resolveSecond: (value: unknown) => void = () => {}
+        pbMock.collection = vi.fn().mockReturnValue({
+            getOne: vi
+                .fn()
+                .mockImplementationOnce(
+                    () => new Promise((_, reject) => (rejectFirst = reject)),
+                )
+                .mockImplementationOnce(
+                    () => new Promise((resolve) => (resolveSecond = resolve)),
+                ),
+        })
+
+        const { ensureLoaded, refreshPermissions, can } = await loadComposable()
+        let firstSettled = false
+        const first = ensureLoaded().then(() => (firstSettled = true))
+
+        pbMock.authStore.record = { role: 'role456' }
+        const second = refreshPermissions()
+        rejectFirst(autoCancel)
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(firstSettled).toBe(false)
+
+        resolveSecond({
+            name: 'routesetter',
+            expand: { permissions: [{ name: 'manage_routes' }] },
+        })
+        await Promise.all([first, second])
+
         expect(can('manage_routes')).toBe(true)
     })
 

@@ -245,6 +245,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatNumber } from '#shared/utils/number'
 import type { TimelineDatum } from '#shared/utils/analytics'
 
 definePageMeta({
@@ -336,7 +337,7 @@ const summaryCards = computed(() => {
             previous: summary?.averageRating.previous ?? null,
             icon: 'mdi-star-half-full',
             color: 'warning',
-            format: (value: number) => value.toFixed(2),
+            format: (value: number) => formatNumber(value, locale.value, 2),
             spark: [],
             meter: summary?.ratings.value
                 ? summary.averageRating.value / 5

@@ -67,6 +67,7 @@
                             hide-details
                             density="compact"
                             prepend-inner-icon="mdi-sort"
+                            :aria-label="t('table.sort_by')"
                             data-testid="comments-sort"
                         />
                     </v-col>
@@ -228,7 +229,10 @@
 
         <!-- Result count + infinite-scroll sentinel -->
         <div v-if="!loading && comments.length" class="text-center mt-4">
-            <p class="text-body-small text-medium-emphasis mb-3">
+            <p
+                class="text-body-small text-medium-emphasis mb-3"
+                data-testid="comments-showing"
+            >
                 {{
                     t('comments.showing', {
                         n: comments.length,
@@ -282,6 +286,9 @@
 
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
+import { pbDateString } from '~/utils/audit'
+import { sendInBatches } from '~/utils/batch'
+import { formatNumber } from '#shared/utils/number'
 import { locationName } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
 import type { RatingRecord, RouteRecord, UserRecord } from '~/types/models'
@@ -296,7 +303,7 @@ type ManagedComment = RatingRecord & {
     userAvatar: string | null
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const pb = usePocketbase()
 
 useHead({
@@ -438,12 +445,12 @@ function buildFilter(searchTerm: string) {
         parts.push(`route_id.location = "${selectedLocation.value}"`)
     if (selectedDifficulty.value !== null)
         parts.push(gradeFilterClause(selectedDifficulty.value))
-    if (dateFilter.value === 'week') {
-        const d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-        parts.push(`created >= "${d}"`)
-    } else if (dateFilter.value === 'month') {
-        const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-        parts.push(`created >= "${d}"`)
+    const days = ({ week: 7, month: 30 } as Record<string, number>)[
+        dateFilter.value
+    ]
+    if (days) {
+        const cutoff = pbDateString(new Date(Date.now() - days * 86_400_000))
+        parts.push(`created >= "${cutoff}"`)
     }
     if (searchTerm) {
         const s = searchTerm.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
@@ -506,7 +513,9 @@ const fetchStats = async () => {
         stats.value = {
             totalReviews: Number(rec.totalReviews) || 0,
             avgRating:
-                rec.avgRating != null ? Number(rec.avgRating).toFixed(1) : '—',
+                rec.avgRating != null
+                    ? formatNumber(Number(rec.avgRating), locale.value)
+                    : '—',
             thisWeek: Number(rec.thisWeek) || 0,
             lowRated: Number(rec.lowRated) || 0,
         }
@@ -555,6 +564,7 @@ watch(sentinelRef, (el) => {
 let searchDebounce: ReturnType<typeof setTimeout> | undefined
 watch(search, () => {
     clearTimeout(searchDebounce)
+    clearSelection()
     searchDebounce = setTimeout(() => fetchList(), 300)
 })
 
@@ -566,7 +576,10 @@ watch(
         dateFilter,
         sortOrder,
     ],
-    () => fetchList(),
+    () => {
+        clearSelection()
+        fetchList()
+    },
 )
 
 // ── Edit ───────────────────────────────────────────────────────────────────
@@ -608,8 +621,7 @@ async function confirmDelete() {
     await runDelete(
         async () => {
             await pb.collection('ratings').delete(id)
-            comments.value = comments.value.filter((c) => c.id !== id)
-            totalItems.value = Math.max(0, totalItems.value - 1)
+            removeComments([id])
             deleteDialog.value = false
             deleteTarget.value = null
             scheduleStatsRefresh()
@@ -624,17 +636,45 @@ async function bulkDelete() {
     const ids = Object.keys(selectedMap)
     await runBulkDelete(
         async () => {
-            const batch = pb.createBatch()
-            ids.forEach((id) => batch.collection('ratings').delete(id))
-            await batch.send()
-            comments.value = comments.value.filter((c) => !ids.includes(c.id))
-            totalItems.value = Math.max(0, totalItems.value - ids.length)
-            clearSelection()
-            bulkDeleteDialog.value = false
-            scheduleStatsRefresh()
+            const deletedIds: string[] = []
+            try {
+                await sendInBatches(
+                    pb,
+                    ids,
+                    (batch, id) => batch.collection('ratings').delete(id),
+                    (chunk) => deletedIds.push(...chunk),
+                )
+                bulkDeleteDialog.value = false
+            } finally {
+                if (deletedIds.length) {
+                    removeComments(deletedIds)
+                    scheduleStatsRefresh()
+                }
+            }
         },
         { success: t('notifications.success.delete') },
     )
+}
+
+function removeComments(ids: string[]) {
+    ids.forEach((id) => delete selectedMap[id])
+    const remaining = comments.value.filter((c) => !ids.includes(c.id))
+    const removedCount = comments.value.length - remaining.length
+    comments.value = remaining
+    totalItems.value = Math.max(0, totalItems.value - removedCount)
+}
+
+async function fetchCommentIfVisible(id: string) {
+    const filter = buildFilter(search.value.trim())
+    const idClause = pb.filter('id = {:id}', { id })
+    const result = await pb.collection('ratings').getList<RatingRecord>(1, 1, {
+        filter: filter ? `${idClause} && (${filter})` : idClause,
+        expand: 'route_id.location,user',
+        fields: LIST_FIELDS,
+        skipTotal: true,
+        requestKey: null,
+    })
+    return result.items[0] ?? null
 }
 
 // ── Selection helpers ──────────────────────────────────────────────────────
@@ -664,24 +704,23 @@ if (initialStats.value) stats.value = initialStats.value
 onMounted(async () => {
     await subscribe('ratings', async (e) => {
         if (e.action === 'delete') {
-            comments.value = comments.value.filter((c) => c.id !== e.record.id)
-            totalItems.value = Math.max(0, totalItems.value - 1)
+            removeComments([e.record.id])
             scheduleStatsRefresh()
         } else if (e.action === 'create') {
-            totalItems.value++
-            if (sortOrder.value === 'newest' && !hasMore.value) {
-                try {
-                    const rec = await pb
-                        .collection('ratings')
-                        .getOne<RatingRecord>(e.record.id, {
-                            expand: 'route_id.location,user',
-                            fields: LIST_FIELDS,
-                            requestKey: null,
-                        })
-                    comments.value = [mapComment(rec), ...comments.value]
-                } catch {}
-            }
             scheduleStatsRefresh()
+            try {
+                const rec = await fetchCommentIfVisible(e.record.id)
+                if (!rec || comments.value.some((c) => c.id === rec.id)) return
+                if (sortOrder.value === 'newest') {
+                    comments.value = [mapComment(rec), ...comments.value]
+                    totalItems.value++
+                } else if (sortOrder.value === 'oldest' && !hasMore.value) {
+                    comments.value = [...comments.value, mapComment(rec)]
+                    totalItems.value++
+                } else {
+                    await fetchList()
+                }
+            } catch {}
         } else if (e.action === 'update') {
             const idx = comments.value.findIndex((c) => c.id === e.record.id)
             if (idx !== -1) {

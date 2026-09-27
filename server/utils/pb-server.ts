@@ -38,20 +38,26 @@ export async function requirePermission(event: H3Event, permission: string) {
     const auth = await pb
         .collection('users')
         .authRefresh({ expand: 'role.permissions', requestKey: null })
-        .catch(() => null)
-    if (!auth) {
-        throw createError({
-            statusCode: 401,
-            statusMessage: 'Invalid or expired session.',
+        .catch((error: { status?: number }) => {
+            const isAuthError = error?.status === 401 || error?.status === 403
+            throw createError(
+                isAuthError
+                    ? {
+                          statusCode: 401,
+                          statusMessage: 'Invalid or expired session.',
+                      }
+                    : {
+                          statusCode: 503,
+                          statusMessage: 'Service unavailable.',
+                      },
+            )
         })
-    }
 
     const role = auth.record.expand?.role as
-        | { name?: string; expand?: { permissions?: { name: string }[] } }
-        | undefined
-    const permitted =
-        role?.name === 'admin' ||
-        !!role?.expand?.permissions?.some((entry) => entry.name === permission)
+        { expand?: { permissions?: { name: string }[] } } | undefined
+    const permitted = !!role?.expand?.permissions?.some(
+        (entry) => entry.name === permission,
+    )
     if (!permitted) {
         throw createError({ statusCode: 403, statusMessage: 'Forbidden.' })
     }

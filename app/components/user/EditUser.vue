@@ -5,7 +5,16 @@
         data-testid="user-edit-dialog"
     >
         <template #title>
-            <div class="avatar-wrapper" @click="avatarInput?.click()">
+            <div
+                class="avatar-wrapper"
+                role="button"
+                tabindex="0"
+                :aria-label="$t('account.changeAvatar')"
+                data-testid="user-edit-avatar-upload"
+                @click="avatarInput?.click()"
+                @keydown.enter.prevent="avatarInput?.click()"
+                @keydown.space.prevent="avatarInput?.click()"
+            >
                 <v-avatar size="64" class="avatar-ring">
                     <v-img
                         v-if="avatarPreview"

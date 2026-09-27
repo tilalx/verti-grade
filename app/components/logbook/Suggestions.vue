@@ -28,7 +28,13 @@
                             {{ route.name }}
                         </div>
                         <div class="text-body-small text-medium-emphasis">
-                            {{ locationName(route) || route.type }}
+                            {{
+                                locationName(route) ||
+                                (route.type &&
+                                    $t(
+                                        `routes.types.${route.type.toLowerCase()}`,
+                                    ))
+                            }}
                         </div>
                     </div>
                     <v-chip

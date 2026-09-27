@@ -29,13 +29,18 @@
                                     size="small"
                                     variant="flat"
                                     class="route-hero__tint"
+                                    data-testid="route-type-chip"
                                     :prepend-icon="
                                         metadata.type === 'Boulder'
                                             ? 'mdi-image-filter-hdr'
                                             : 'mdi-routes'
                                     "
                                 >
-                                    {{ metadata.type }}
+                                    {{
+                                        t(
+                                            `routes.types.${metadata.type?.toLowerCase()}`,
+                                        )
+                                    }}
                                 </v-chip>
                                 <v-chip
                                     v-if="
@@ -369,9 +374,12 @@ import {
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
+import { formatNumber } from '#shared/utils/number'
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { reportContentUrl } from '~/utils/reports'
 import { isLightColor, shadeColor } from '~/utils/color'
+
+definePageMeta({ key: (route) => String(route.query.id ?? '') })
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -509,7 +517,7 @@ const avgRating = computed(() => {
     const rated = reviews.value.filter((r) => r.rating !== null)
     if (!rated.length) return '—'
     const sum = rated.reduce((acc, r) => acc + (r.rating ?? 0), 0)
-    return (sum / rated.length).toFixed(1)
+    return formatNumber(sum / rated.length, locale.value)
 })
 
 const avgPerceivedDifficulty = computed(() => {
@@ -543,7 +551,7 @@ const getAllRouteRatings = async (): Promise<void> => {
     if (!route_id.value) return
     try {
         const data = await pb.collection('ratings').getFullList<RatingRecord>({
-            filter: `route_id = "${route_id.value}"`,
+            filter: pb.filter('route_id = {:id}', { id: route_id.value }),
             sort: '-created',
             expand: 'user',
             requestKey: 'routeRatings',
@@ -583,11 +591,14 @@ function onReviewSaved() {
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-const { data: initial } = await useAsyncData('route-detail', async () => {
-    if (!route_id.value) return null
-    await Promise.all([getRouteMetadata(), getAllRouteRatings()])
-    return { metadata: metadata.value, reviews: reviews.value }
-})
+const { data: initial } = await useAsyncData(
+    `route-detail:${route_id.value}`,
+    async () => {
+        if (!route_id.value) return null
+        await Promise.all([getRouteMetadata(), getAllRouteRatings()])
+        return { metadata: metadata.value, reviews: reviews.value }
+    },
+)
 
 if (initial.value) {
     metadata.value = initial.value.metadata

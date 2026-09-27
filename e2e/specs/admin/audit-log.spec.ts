@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
 import { LOCATIONS, locationId, uiaa } from '../../support/seed'
@@ -81,12 +82,14 @@ test('a failed sign-in is recorded without the attempted password', async ({
     )
     expect(res.ok()).toBeFalsy()
 
+    const maskedIdentity = `unknown:${createHash('sha256').update(identity).digest('hex').slice(0, 8)}`
     const rows = await waitForAuditRow(
         page,
-        `action = "login_failed" && actor_label = "${identity}"`,
+        `action = "login_failed" && actor_label = "${maskedIdentity}"`,
     )
     expect(rows).toHaveLength(1)
     expect(JSON.stringify(rows[0])).not.toContain(badPassword)
+    expect(JSON.stringify(rows[0])).not.toContain(identity)
 })
 
 test('nobody can forge or erase an entry through the API', async ({

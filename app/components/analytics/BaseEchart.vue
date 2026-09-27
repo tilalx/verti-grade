@@ -30,12 +30,18 @@ const props = withDefaults(defineProps<ChartProps>(), {
 const chartEl = ref<HTMLElement | null>(null)
 let chartInstance: any = null
 let echartsModule: typeof import('echarts') | null = null
+let resizeObserver: ResizeObserver | null = null
 
 const containerStyle = computed(() => ({
     width: '100%',
     height:
         typeof props.height === 'number' ? `${props.height}px` : props.height,
 }))
+
+const withAria = (option: Record<string, unknown>) => ({
+    aria: { enabled: true },
+    ...option,
+})
 
 const resizeChart = () => {
     if (chartInstance) {
@@ -44,9 +50,8 @@ const resizeChart = () => {
 }
 
 const destroyChart = () => {
-    if (props.responsive) {
-        window.removeEventListener('resize', resizeChart)
-    }
+    resizeObserver?.disconnect()
+    resizeObserver = null
     if (chartInstance) {
         chartInstance.dispose()
         chartInstance = null
@@ -70,11 +75,12 @@ const renderChart = async () => {
             emit('click', params),
         )
         if (props.responsive) {
-            window.addEventListener('resize', resizeChart)
+            resizeObserver = new ResizeObserver(resizeChart)
+            resizeObserver.observe(chartEl.value)
         }
     }
 
-    chartInstance.setOption(props.option, true)
+    chartInstance.setOption(withAria(props.option), true)
 }
 
 onMounted(async () => {
@@ -97,7 +103,7 @@ watch(
             await renderChart()
             return
         }
-        chartInstance.setOption(next, true)
+        chartInstance.setOption(withAria(next), true)
     },
 )
 

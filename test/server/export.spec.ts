@@ -88,6 +88,17 @@ describe('resolveExportColumns', () => {
         expect(columns[0].header).toBe('Name')
     })
 
+    it('writes the translated route type', async () => {
+        const [type] = await resolveExportColumns(
+            eventWith({
+                columns: ['type'],
+                typeLabels: { Boulder: 'Bouldern', Route: 'Route' },
+            }) as never,
+        )
+        expect(type!.value!({ type: 'Boulder' } as never)).toBe('Bouldern')
+        expect(type!.value!({ type: 'Other' } as never)).toBe('Other')
+    })
+
     it('renders creator values regardless of the stored shape', async () => {
         const columns = await resolveExportColumns(
             eventWith({ columns: ['creator'] }),

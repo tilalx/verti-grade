@@ -13,7 +13,7 @@ import { gridBase, tooltipBase, yAxisBase } from '~/utils/echarts'
 const props = defineProps<{ rows: PyramidRow[] }>()
 
 const { t } = useI18n()
-const { colors } = useChartTheme()
+const { colors, palette } = useChartTheme()
 const theme = useTheme()
 
 const option = computed(() => {
@@ -40,7 +40,7 @@ const option = computed(() => {
                 type: 'bar',
                 stack: 'sends',
                 barMaxWidth: 22,
-                itemStyle: { color: '#FFA000' },
+                itemStyle: { color: palette.value.categorical[3] },
                 data: bottomUp.map((row) => row.flash),
             },
             {

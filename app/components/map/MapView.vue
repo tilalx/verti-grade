@@ -46,7 +46,13 @@
                     :data-color="dot.fill"
                     :data-sent="sentIds?.has(dot.routeId) || undefined"
                     :data-dimmed="isDimmed(dot.routeId) || undefined"
+                    role="button"
+                    tabindex="0"
+                    :aria-pressed="dot.routeId === selectedRouteId"
+                    :aria-label="dotLabel(dot.routeId)"
                     @click.stop="emit('selectRoute', dot.routeId)"
+                    @keydown.enter.prevent="emit('selectRoute', dot.routeId)"
+                    @keydown.space.prevent="emit('selectRoute', dot.routeId)"
                 >
                     <circle
                         v-if="dot.isNew"
@@ -154,6 +160,7 @@ import {
     type MapRoute,
     type MapWall,
 } from '~/utils/gymMap'
+import { translatedColorName } from '~/utils/colorName'
 import { mapToScreen } from '~/utils/panZoom'
 import { svgPath } from '~/utils/mapSvg'
 
@@ -253,6 +260,21 @@ function wallAriaLabel(wall: MapWall) {
               total: count.total,
           })
         : t('map.wallTotalLabel', { name: wall.name, total: count.total })
+}
+
+const routesById = computed(
+    () => new Map(props.routes.map((route) => [route.id, route])),
+)
+
+function dotLabel(routeId: string) {
+    const route = routesById.value.get(routeId)
+    return [
+        route?.name,
+        translatedColorName(t, route?.color),
+        props.sentIds?.has(routeId) && t('ticks.sent'),
+    ]
+        .filter(Boolean)
+        .join(', ')
 }
 
 function checkPath([x, y]: MapPoint) {
@@ -390,6 +412,16 @@ defineExpose({ focusWall, focusRoute, fitAll })
 .map-dot {
     cursor: pointer;
     transition: opacity 0.2s;
+}
+
+.map-dot:focus {
+    outline: none;
+}
+
+.map-dot:focus-visible .map-dot-hit {
+    stroke: rgb(var(--v-theme-primary));
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
 }
 
 .map-dot--dimmed {
