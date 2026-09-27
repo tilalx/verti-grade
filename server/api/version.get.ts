@@ -127,5 +127,5 @@ export default defineCachedEventHandler(
             error: failure,
         }
     },
-    { maxAge: 3600, name: 'version', getKey: () => 'current' },
+    { maxAge: 600, name: 'version', getKey: () => 'current' },
 )
