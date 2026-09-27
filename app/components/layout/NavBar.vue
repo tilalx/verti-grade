@@ -62,7 +62,7 @@
                         data-testid="nav-theme-toggle"
                         :data-theme-mode="themeMode"
                         :aria-label="`${$t('nav.themeToggle')}: ${$t(themeModeLabel)}`"
-                        @click="cycleMode"
+                        @click="cycleMode($event)"
                     >
                         <v-icon>{{ themeModeIcon }}</v-icon>
                     </v-btn>

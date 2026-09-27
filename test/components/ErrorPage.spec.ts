@@ -11,7 +11,7 @@ const reloadNuxtApp = vi.fn()
 
 function createWrapper(status: number) {
     vi.stubGlobal('useHead', vi.fn())
-    vi.stubGlobal('useThemeColorMeta', vi.fn())
+    vi.stubGlobal('useBrowserChrome', vi.fn())
     vi.stubGlobal('useRouter', () => ({ back: vi.fn() }))
     vi.stubGlobal('clearError', clearError)
     vi.stubGlobal('reloadNuxtApp', reloadNuxtApp)
