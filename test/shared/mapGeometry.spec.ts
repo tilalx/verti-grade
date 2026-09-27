@@ -3,6 +3,8 @@ import {
     autoDistribute,
     fitViewBox,
     freePosition,
+    insertByAnchor,
+    wallForAnchor,
     labelPoint,
     nearestWall,
     pointAt,
@@ -247,5 +249,60 @@ describe('freePosition', () => {
         expect(freePosition([])).toBe(0.5)
         expect(freePosition([0.5])).toBe(0.25)
         expect(freePosition([0.1, 0.2, 0.9])).toBe(0.55)
+    })
+})
+
+describe('wallForAnchor', () => {
+    const walls = [
+        { id: 'a', anchor_from: 1, anchor_to: 10 },
+        { id: 'b', anchor_from: 20, anchor_to: 11 },
+        { id: 'c', anchor_from: null, anchor_to: null },
+    ]
+
+    it('finds the wall whose range covers the anchor', () => {
+        expect(wallForAnchor(walls, 1)).toBe('a')
+        expect(wallForAnchor(walls, 15)).toBe('b')
+    })
+
+    it('returns null without an anchor, a match or with overlaps', () => {
+        expect(wallForAnchor(walls, null)).toBeNull()
+        expect(wallForAnchor(walls, 99)).toBeNull()
+        expect(
+            wallForAnchor(
+                [...walls, { id: 'd', anchor_from: 5, anchor_to: 6 }],
+                5,
+            ),
+        ).toBeNull()
+    })
+})
+
+describe('insertByAnchor', () => {
+    it('spreads routes evenly on an empty wall in anchor order', () => {
+        const positions = insertByAnchor(
+            [],
+            [
+                { id: 'y', anchor_point: 2 },
+                { id: 'x', anchor_point: 1 },
+                { id: 'z', anchor_point: 3 },
+            ],
+        )
+        expect(positions.get('x')).toBe(0.25)
+        expect(positions.get('y')).toBe(0.5)
+        expect(positions.get('z')).toBe(0.75)
+    })
+
+    it('fits new routes between placed neighbours by anchor', () => {
+        const placed = [
+            { id: 'p1', anchor_point: 1, wall_position: 0.2 },
+            { id: 'p5', anchor_point: 5, wall_position: 0.6 },
+        ]
+        const positions = insertByAnchor(placed, [
+            { id: 'n3', anchor_point: 3 },
+            { id: 'n9', anchor_point: 9 },
+            { id: 'n0', anchor_point: 0 },
+        ])
+        expect(positions.get('n3')).toBe(0.4)
+        expect(positions.get('n9')).toBe(0.8)
+        expect(positions.get('n0')).toBe(0.1)
     })
 })

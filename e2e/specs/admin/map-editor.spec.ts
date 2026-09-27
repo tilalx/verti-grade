@@ -245,6 +245,44 @@ test('the name of a selected wall can be dragged', async ({
     }
 })
 
+test('a wall stores the anchor range used for auto-placement', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const seeded = await seedMap(root, testPrefix, { routes: 1 })
+    try {
+        await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
+        await page
+            .locator(
+                `[data-testid="map-editor-wall-item"][data-name="${testPrefix} Island"]`,
+            )
+            .click()
+        const from = page
+            .getByTestId('map-editor-wall-anchor-from')
+            .locator('input')
+        await from.fill('10')
+        await from.press('Tab')
+        const to = page
+            .getByTestId('map-editor-wall-anchor-to')
+            .locator('input')
+        await to.fill('20')
+        await to.press('Tab')
+        await page.getByTestId('map-editor-save').click()
+        await expect
+            .poll(async () => {
+                const wall = await root
+                    .collection('walls')
+                    .getOne(seeded.islandWallId)
+                return [wall.anchor_from, wall.anchor_to]
+            })
+            .toEqual([10, 20])
+    } finally {
+        await seeded.cleanup()
+    }
+})
+
 test('the preview shows the climber view of unsaved changes', async ({
     adminPage: page,
     testPrefix,

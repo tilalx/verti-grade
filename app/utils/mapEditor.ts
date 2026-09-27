@@ -18,6 +18,8 @@ export interface EditorWall {
     edge: MapPoint[]
     label: MapPoint | null
     sort: number
+    anchorFrom: number | null
+    anchorTo: number | null
 }
 
 export interface EditorState {
@@ -139,7 +141,16 @@ export function addWall(
         ...state,
         walls: [
             ...state.walls,
-            { key, name, outline: [], edge: [], label: null, sort },
+            {
+                key,
+                name,
+                outline: [],
+                edge: [],
+                label: null,
+                sort,
+                anchorFrom: null,
+                anchorTo: null,
+            },
         ],
     }
 }

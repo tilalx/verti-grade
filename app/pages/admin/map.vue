@@ -310,6 +310,8 @@ function toEditorState(
                     id: wall.id,
                     name: wall.name,
                     sort: wall.sort ?? 0,
+                    anchorFrom: wall.anchor_from || null,
+                    anchorTo: wall.anchor_to || null,
                     outline: geometry?.outline ?? [],
                     edge: geometry?.edge ?? [],
                     label: geometry?.label ?? null,
@@ -451,6 +453,8 @@ const previewWalls = computed<WallRecord[]>(() =>
             edge: wall.edge,
             label: wall.label,
             sort: wall.sort,
+            anchor_from: wall.anchorFrom,
+            anchor_to: wall.anchorTo,
         })),
 )
 const previewRoutes = computed(() => locationRoutes.value)
@@ -505,6 +509,8 @@ function wallPayload(wall: EditorWall) {
         edge: wall.edge,
         label: wall.label,
         sort: wall.sort,
+        anchor_from: wall.anchorFrom,
+        anchor_to: wall.anchorTo,
     }
 }
 

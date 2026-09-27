@@ -73,6 +73,31 @@
                     data-testid="map-editor-wall-name"
                     @change="renameWall"
                 />
+                <div class="d-flex ga-2">
+                    <v-text-field
+                        :model-value="editor.selectedWall.value.anchorFrom"
+                        :label="$t('mapEditor.anchorFrom')"
+                        type="number"
+                        min="0"
+                        density="compact"
+                        hide-details
+                        data-testid="map-editor-wall-anchor-from"
+                        @change="setAnchor('anchorFrom', $event)"
+                    />
+                    <v-text-field
+                        :model-value="editor.selectedWall.value.anchorTo"
+                        :label="$t('mapEditor.anchorTo')"
+                        type="number"
+                        min="0"
+                        density="compact"
+                        hide-details
+                        data-testid="map-editor-wall-anchor-to"
+                        @change="setAnchor('anchorTo', $event)"
+                    />
+                </div>
+                <p class="text-body-small text-medium-emphasis">
+                    {{ $t('mapEditor.anchorHint') }}
+                </p>
                 <div class="panel-actions">
                     <v-btn
                         size="small"
@@ -382,6 +407,15 @@ function renameWall(event: Event) {
     const name = (event.target as HTMLInputElement).value.trim()
     if (!wall || !name || name === wall.name) return
     commit(updateWall(state.value, wall.key, { name }))
+}
+
+function setAnchor(field: 'anchorFrom' | 'anchorTo', event: Event) {
+    const wall = editor.selectedWall.value
+    if (!wall) return
+    const raw = (event.target as HTMLInputElement).value
+    const value = raw === '' ? null : Math.max(0, Math.round(Number(raw)))
+    if (value === wall[field] || Number.isNaN(value)) return
+    commit(updateWall(state.value, wall.key, { [field]: value }))
 }
 
 function deleteWall() {

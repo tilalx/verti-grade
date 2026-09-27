@@ -202,7 +202,11 @@
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
 import type { RouteRecord, WallRecord } from '~/types/models'
-import { freePosition } from '#shared/utils/mapGeometry'
+import {
+    freePosition,
+    insertByAnchor,
+    wallForAnchor,
+} from '#shared/utils/mapGeometry'
 import {
     normalizeCreators,
     formatDateToYYYYMMDD,
@@ -364,6 +368,13 @@ watch(
     { flush: 'sync' },
 )
 
+let autoWall = ''
+watch([() => form.anchor_point, locationWalls], ([anchor, walls]) => {
+    if (isEditMode.value || (form.wall && form.wall !== autoWall)) return
+    autoWall = wallForAnchor(walls, anchor) ?? ''
+    form.wall = autoWall
+})
+
 async function wallPosition(wallId: string | null) {
     if (!wallId) return null
     if (wallId === originalWall.value.wall) return originalWall.value.position
@@ -371,10 +382,18 @@ async function wallPosition(wallId: string | null) {
         filter: pb.filter('wall = {:wallId} && archived = false', {
             wallId,
         }),
-        fields: 'wall_position',
+        fields: 'id,anchor_point,wall_position',
         requestKey: null,
     })
-    return freePosition(neighbours.map((route) => route.wall_position ?? 0.5))
+    if (form.anchor_point == null)
+        return freePosition(
+            neighbours.map((route) => route.wall_position ?? 0.5),
+        )
+    return (
+        insertByAnchor(neighbours, [
+            { id: '', anchor_point: form.anchor_point },
+        ]).get('') ?? null
+    )
 }
 
 const typeItems = computed(() =>
@@ -436,6 +455,7 @@ const resetForm = () => {
     form.color = '#FF5722'
     form.archived = false
     form.wall = ''
+    autoWall = ''
     originalWall.value = { wall: '', position: null }
     editRouteId.value = null
     originalAnchorPointIsZero.value = false

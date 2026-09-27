@@ -1077,7 +1077,10 @@
             "label": "Click where the wall name should appear.",
             "outline": "Draw the outline of \"{name}\": click the corners, then click the first point, double-click or press Enter.",
             "incomplete": "\"{name}\" is not finished yet ({missing}). Select it and use the highlighted button before saving."
-        }
+        },
+        "anchorFrom": "Anchors from",
+        "anchorTo": "to",
+        "anchorHint": "Routes with these anchor numbers are placed on this wall automatically."
     },
     "mapPlacement": {
         "title": "Place routes",
@@ -1092,10 +1095,25 @@
         "remove": "Remove from map",
         "canvasLabel": "Route placement map",
         "hints": {
-            "idle": "Drag a route from the list onto a wall, or click a route and then the wall. Drag dots to move them.",
+            "idle": "Tap a route, then its spot on the wall — the next route follows automatically. Tick several routes to put them on one wall at once. Drag dots to move them.",
             "armed": "Click on a wall to place \"{name}\". Esc cancels.",
-            "selected": "Drag the dot of \"{name}\" to its spot on the wall, or onto another wall. Delete removes it from the map."
-        }
+            "selected": "Drag the dot of \"{name}\" to its spot on the wall, or onto another wall. Delete removes it from the map.",
+            "checked": "Tap a wall to place {n} route there, ordered by anchor. | Tap a wall to place {n} routes there, ordered by anchor."
+        },
+        "skip": "Skip",
+        "nudgeBack": "Move back along the wall",
+        "nudgeForward": "Move forward along the wall",
+        "auto": "Auto-place ({n})",
+        "keepGoing": "Continue with next route",
+        "checked": "{n} route selected | {n} routes selected",
+        "wallAge": "Oldest {oldest} d · avg. {average} d",
+        "lastReset": "last reset {date}",
+        "resetWall": "Reset wall",
+        "resetNeedsSave": "Save or discard your changes first.",
+        "resetConfirm": "Archive all {n} routes on {wall}? They disappear from the map and the route list.",
+        "resetDone": "{n} route archived. | {n} routes archived.",
+        "unplacedBanner": "{n} route is not on the map yet. | {n} routes are not on the map yet.",
+        "placeThis": "Place on map"
     },
     "scan": {
         "title": "Scan a route",

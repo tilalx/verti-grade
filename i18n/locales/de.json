@@ -1077,7 +1077,10 @@
             "label": "Klicke dorthin, wo der Wandname stehen soll.",
             "outline": "Zeichne den Umriss von „{name}“: Ecken anklicken, dann den ersten Punkt anklicken, doppelklicken oder Enter drücken.",
             "incomplete": "„{name}“ ist noch nicht fertig ({missing}). Wähle die Wand und nutze den markierten Knopf, bevor du speicherst."
-        }
+        },
+        "anchorFrom": "Umlenker von",
+        "anchorTo": "bis",
+        "anchorHint": "Routen mit diesen Umlenker-Nummern werden automatisch an dieser Wand platziert."
     },
     "mapPlacement": {
         "title": "Routen platzieren",
@@ -1092,10 +1095,25 @@
         "remove": "Vom Plan entfernen",
         "canvasLabel": "Plan zum Platzieren der Routen",
         "hints": {
-            "idle": "Ziehe eine Route aus der Liste an eine Wand oder klicke erst die Route, dann die Wand. Punkte lassen sich verschieben.",
+            "idle": "Tippe eine Route an und dann ihre Stelle an der Wand – die nächste Route folgt automatisch. Hake mehrere Routen an, um sie gemeinsam an eine Wand zu setzen. Punkte lassen sich verschieben.",
             "armed": "Klicke auf eine Wand, um „{name}“ zu platzieren. Esc bricht ab.",
-            "selected": "Ziehe den Punkt von „{name}“ an die richtige Stelle der Wand oder an eine andere Wand. Entf entfernt ihn vom Plan."
-        }
+            "selected": "Ziehe den Punkt von „{name}“ an die richtige Stelle der Wand oder an eine andere Wand. Entf entfernt ihn vom Plan.",
+            "checked": "Tippe auf eine Wand, um {n} Route dort nach Umlenker zu platzieren. | Tippe auf eine Wand, um {n} Routen dort nach Umlenker zu platzieren."
+        },
+        "skip": "Überspringen",
+        "nudgeBack": "An der Wand zurück",
+        "nudgeForward": "An der Wand vor",
+        "auto": "Automatisch platzieren ({n})",
+        "keepGoing": "Mit nächster Route weitermachen",
+        "checked": "{n} Route ausgewählt | {n} Routen ausgewählt",
+        "wallAge": "Älteste {oldest} T · Ø {average} T",
+        "lastReset": "zuletzt umgeschraubt {date}",
+        "resetWall": "Wand umschrauben",
+        "resetNeedsSave": "Speichere oder verwirf zuerst deine Änderungen.",
+        "resetConfirm": "Alle {n} Routen an {wall} archivieren? Sie verschwinden von der Karte und aus der Routenliste.",
+        "resetDone": "{n} Route archiviert. | {n} Routen archiviert.",
+        "unplacedBanner": "{n} Route ist noch nicht auf der Karte. | {n} Routen sind noch nicht auf der Karte.",
+        "placeThis": "Auf Karte platzieren"
     },
     "scan": {
         "title": "Route scannen",

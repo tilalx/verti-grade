@@ -44,6 +44,8 @@ const wall = (patch: Partial<EditorWall> = {}): EditorWall => ({
     ],
     label: null,
     sort: 1,
+    anchorFrom: null,
+    anchorTo: null,
     ...patch,
 })
 
