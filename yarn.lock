@@ -382,10 +382,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cap.js/wasm@npm:0.0.7":
-  version: 0.0.7
-  resolution: "@cap.js/wasm@npm:0.0.7"
-  checksum: 10c0/0c7ec11ba1e6a2f57274a0d3e9058a70808c963d0feca1d301fea7ee9653992538b44bd4f18c4f730c1a6934f2c370bdefef62d95716eb7033d97fa10f3678b1
+"@cap.js/wasm@npm:0.0.8":
+  version: 0.0.8
+  resolution: "@cap.js/wasm@npm:0.0.8"
+  checksum: 10c0/11dd931e6e0ccaa5ef53b4168b2629297a5becaf6b4098c4936efb99efdd3d0678d354bbe81071ef2819e43067a0977a4a2f59561516985399fcfa54cadede57
   languageName: node
   linkType: hard
 
@@ -7049,7 +7049,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "gripello@workspace:."
   dependencies:
-    "@cap.js/wasm": "npm:0.0.7"
+    "@cap.js/wasm": "npm:0.0.8"
     "@cj-tech-master/excelts": "npm:10.2.0"
     "@mdi/font": "npm:7.4.47"
     "@nuxt/image": "npm:2.1.0"
