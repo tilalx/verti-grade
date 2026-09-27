@@ -1,6 +1,6 @@
 services:
-    verti-grade:
-        container_name: verti-grade
+    gripello:
+        container_name: gripello
         image: tilalx/verti-grade:rolling
         ports:
             - '80:80'
@@ -16,9 +16,9 @@ services:
             #PB_SMTP_PASSWORD: change-me
             #PB_SMTP_TLS: "true"
             #PB_APP_URL: https://climbing.example.com
-            #PB_APP_NAME: Verti-Grade
+            #PB_APP_NAME: Gripello
             #PB_SENDER_ADDRESS: no-reply@example.com
-            #PB_SENDER_NAME: Verti-Grade
+            #PB_SENDER_NAME: Gripello
             # Proof-of-work captcha (Cap). Unset = off.
             #CAP_SECRET: change-me-to-a-long-random-string
             # Reverse proxies in front of this container whose X-Forwarded-For is trusted.

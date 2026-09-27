@@ -2,7 +2,7 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 import type { Page } from '@playwright/test'
 
-const DISMISS_KEY = 'verti-grade:update-dismissed'
+const DISMISS_KEY = 'gripello:update-dismissed'
 
 const RELEASE_PAYLOAD = {
     installed: {

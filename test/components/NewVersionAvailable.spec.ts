@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import NewVersionAvailable from '~/components/notifications/newVersionAvailable.vue'
 
-const DISMISS_KEY = 'verti-grade:update-dismissed'
+const DISMISS_KEY = 'gripello:update-dismissed'
 
 const alertStub = {
     props: ['closable', 'closeLabel'],

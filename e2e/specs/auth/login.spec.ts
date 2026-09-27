@@ -9,7 +9,7 @@ test.describe('login', () => {
         await page
             .getByTestId('login-identity')
             .locator('input')
-            .fill('e2e-admin@verti-grade.test')
+            .fill('e2e-admin@gripello.test')
         await page
             .getByTestId('login-password')
             .locator('input')
@@ -26,7 +26,7 @@ test.describe('login', () => {
         await page
             .getByTestId('login-identity')
             .locator('input')
-            .fill('e2e-admin@verti-grade.test')
+            .fill('e2e-admin@gripello.test')
         await page
             .getByTestId('login-password')
             .locator('input')
@@ -51,7 +51,7 @@ test.describe('login', () => {
         await page
             .getByTestId('login-identity')
             .locator('input')
-            .fill('e2e-admin@verti-grade.test')
+            .fill('e2e-admin@gripello.test')
         await page
             .getByTestId('login-password')
             .locator('input')

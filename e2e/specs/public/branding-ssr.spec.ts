@@ -11,6 +11,7 @@ test('server-renders the favicon, logo and logged-out navbar', async ({
         /data-testid="nav-logo"[^>]*>[\s\S]{0,120}?<img[^>]+alt="(?!Logo")[^"]+"/,
     )
     expect(html).toContain('data-testid="nav-login"')
+    expect(html).not.toMatch(/verti-grade/i)
 })
 
 test('server-renders the logged-in navbar', async ({ adminPage: page }) => {

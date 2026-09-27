@@ -94,13 +94,13 @@
             <!-- Right: copyright -->
             <div class="footer-right">
                 <v-btn
-                    href="https://github.com/tilalx/verti-grade"
+                    href="https://github.com/gripello/gripello"
                     target="_blank"
                     variant="plain"
                     density="compact"
                     class="footer-brand-btn"
                 >
-                    © {{ currentYear }} verti-grade
+                    © {{ currentYear }} Gripello
                 </v-btn>
             </div>
         </div>

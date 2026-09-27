@@ -19,7 +19,7 @@ function api(page: Page | APIRequestContext): APIRequestContext {
 }
 
 export function mailbox(prefix: string, label: string): string {
-    return `${prefix}-${label}@verti-grade.test`
+    return `${prefix}-${label}@gripello.test`
 }
 
 export async function waitForMail(

@@ -5,7 +5,7 @@ test('creates and edits a user', async ({ adminPage: page }) => {
     await gotoSettled(page, '/admin/users')
 
     const suffix = Date.now()
-    const email = `e2e-created-${suffix}@verti-grade.test`
+    const email = `e2e-created-${suffix}@gripello.test`
 
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
@@ -49,7 +49,7 @@ test('rejects creating a user with a duplicate email', async ({
     await page
         .getByTestId('user-create-email')
         .locator('input')
-        .fill('e2e-admin@verti-grade.test')
+        .fill('e2e-admin@gripello.test')
     await page.getByTestId('user-create-submit').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()

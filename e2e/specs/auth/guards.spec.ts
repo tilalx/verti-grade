@@ -59,7 +59,7 @@ test.describe('routesetter guard', () => {
         const res = await page.request.post('/api/collections/users/records', {
             headers: await authHeader(page),
             data: {
-                email: 'should-not-be-created@verti-grade.test',
+                email: 'should-not-be-created@gripello.test',
                 password: 'Whatever123!',
                 passwordConfirm: 'Whatever123!',
             },

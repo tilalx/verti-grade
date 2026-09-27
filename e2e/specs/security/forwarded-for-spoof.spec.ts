@@ -7,7 +7,7 @@ const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 test('a client cannot pick its own IP through X-Forwarded-For', async ({
     request,
 }, info) => {
-    const identity = `spoof-w${info.workerIndex}-${Date.now()}@verti-grade.test`
+    const identity = `spoof-w${info.workerIndex}-${Date.now()}@gripello.test`
     const spoofedIp = '127.0.0.1'
 
     const login = await request.post(

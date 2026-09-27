@@ -14,7 +14,7 @@ test('requests an email change instead of writing the address', async ({
 }) => {
     await openProfileDialog(page)
 
-    const newEmail = `e2e-newaddr-${Date.now()}@verti-grade.test`
+    const newEmail = `e2e-newaddr-${Date.now()}@gripello.test`
     await page.getByTestId('profile-email').locator('input').fill(newEmail)
 
     const changeRequest = page.waitForRequest((req) =>
@@ -46,7 +46,7 @@ test('reports a failed confirmation mail without claiming the change', async ({
     await page
         .getByTestId('profile-email')
         .locator('input')
-        .fill(`e2e-failaddr-${Date.now()}@verti-grade.test`)
+        .fill(`e2e-failaddr-${Date.now()}@gripello.test`)
     await page.getByTestId('profile-save').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()

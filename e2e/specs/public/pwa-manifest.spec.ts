@@ -15,6 +15,7 @@ test('links an installable web app manifest', async ({ page, request }) => {
     expect(manifestResponse.ok()).toBe(true)
     const manifest = await manifestResponse.json()
 
+    expect(manifest.name).toBe('Gripello')
     expect(manifest.display).toBe('standalone')
     expect(manifest.start_url).toBe('/')
     const iconSizes = manifest.icons.map(

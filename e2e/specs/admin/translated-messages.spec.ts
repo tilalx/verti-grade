@@ -16,7 +16,7 @@ test('duplicate email on user creation shows a readable message', async ({
     await page
         .getByTestId('user-create-email')
         .locator('input')
-        .fill('e2e-admin@verti-grade.test')
+        .fill('e2e-admin@gripello.test')
     await page.getByTestId('user-create-submit').click()
 
     await expect(page.getByTestId('global-snackbar')).toContainText(

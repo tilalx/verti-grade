@@ -17,7 +17,7 @@ export interface SeededUser {
 }
 
 export async function authAsSuperuser(pb: PocketBase) {
-    const email = process.env.PB_SUPERUSER_EMAIL || 'e2e-super@verti-grade.test'
+    const email = process.env.PB_SUPERUSER_EMAIL || 'e2e-super@gripello.test'
     const password = process.env.PB_SUPERUSER_PASSWORD || 'e2e-superuser-pw-123'
     await pb.collection('_superusers').authWithPassword(email, password)
 }
@@ -35,7 +35,7 @@ export async function ensureUser(
     role: SeededUser['role'],
     prefix: string,
 ): Promise<SeededUser> {
-    const email = `${prefix}-${role}@verti-grade.test`
+    const email = `${prefix}-${role}@gripello.test`
     const password = 'E2ePassw0rd!'
 
     const existing = await pb

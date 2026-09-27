@@ -10,7 +10,7 @@ async function createDisposableUser(prefix: string) {
     const pb = new PocketBase(PB_URL)
     await authAsSuperuser(pb)
     const roleIds = await getRoleIds(pb)
-    const email = `${prefix}-selfdelete@verti-grade.test`
+    const email = `${prefix}-selfdelete@gripello.test`
     const record = await pb.collection('users').create({
         email,
         emailVisibility: true,

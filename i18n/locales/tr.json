@@ -123,7 +123,7 @@
         "title": "Analitik",
         "subtitle": "Rotalarınızın nasıl kurulduğu, tırmanıldığı ve değerlendirildiği.",
         "meta": {
-            "title": "Analitik - Verti-Grade",
+            "title": "Analitik - Gripello",
             "description": "Rota kurulumu, dereceler ve değerlendirmeler hakkında istatistikler."
         },
         "heatmap": {
@@ -502,22 +502,22 @@
     },
     "page": {
         "title": {
-            "settings": "Ayarlar - Verti-Grade",
-            "route": "Rota - Verti-Grade",
-            "index": "Rotalar - Verti-Grade",
-            "comments": "Değerlendirmeler - Verti-Grade",
-            "users": "Kullanıcılar - Verti-Grade",
-            "dashboard": "Rota Yönetimi - Verti-Grade",
-            "login": "Giriş Yap - Verti-Grade",
-            "resetPassword": "Şifreyi Sıfırla - Verti-Grade",
-            "notFound": "Sayfa Bulunamadı - Verti-Grade",
-            "routeNamed": "{name} - Verti-Grade",
-            "inventory": "Rota envanteri - Verti-Grade",
-            "reports": "İçerik Şikâyetleri - Verti-Grade",
-            "activity": "Etkinlik Günlüğü - Verti-Grade",
-            "verifyEmail": "E-posta Doğrulama - Verti-Grade",
-            "emailChange": "E-posta Değiştirme - Verti-Grade",
-            "logbook": "Kayıt defteri - Verti-Grade"
+            "settings": "Ayarlar - Gripello",
+            "route": "Rota - Gripello",
+            "index": "Rotalar - Gripello",
+            "comments": "Değerlendirmeler - Gripello",
+            "users": "Kullanıcılar - Gripello",
+            "dashboard": "Rota Yönetimi - Gripello",
+            "login": "Giriş Yap - Gripello",
+            "resetPassword": "Şifreyi Sıfırla - Gripello",
+            "notFound": "Sayfa Bulunamadı - Gripello",
+            "routeNamed": "{name} - Gripello",
+            "inventory": "Rota envanteri - Gripello",
+            "reports": "İçerik Şikâyetleri - Gripello",
+            "activity": "Etkinlik Günlüğü - Gripello",
+            "verifyEmail": "E-posta Doğrulama - Gripello",
+            "emailChange": "E-posta Değiştirme - Gripello",
+            "logbook": "Kayıt defteri - Gripello"
         },
         "content": {
             "settings": "Ayarlar",

@@ -76,18 +76,18 @@ test.describe('admin search across the app', () => {
     test('finds users and opens them on the users page', async ({
         adminPage: page,
     }) => {
-        await paletteSearch(page, 'e2e-user@verti-grade.test')
+        await paletteSearch(page, 'e2e-user@gripello.test')
         const group = page.getByTestId('command-palette-group-users')
         await expect(group).toBeVisible()
         await page
             .getByTestId('command-palette-result')
-            .filter({ hasText: 'e2e-user@verti-grade.test' })
+            .filter({ hasText: 'e2e-user@gripello.test' })
             .first()
             .click()
         await page.waitForURL(/\/admin\/users\?search=/)
         await expect(
             page.getByTestId('filter-search').locator('input'),
-        ).toHaveValue('e2e-user@verti-grade.test')
+        ).toHaveValue('e2e-user@gripello.test')
     })
 
     test('finds roles', async ({ adminPage: page }) => {

@@ -1,6 +1,6 @@
-# Verti-Grade
+# Gripello
 
-A climbing route management system for gyms and outdoor venues.
+A climbing route management system for gyms and outdoor venues — [gripello.app](https://gripello.app).
 
 - [Setup Docker Compose](#setup-docker-compose)
 - [Getting Started](#getting-started)
@@ -19,15 +19,15 @@ A climbing route management system for gyms and outdoor venues.
 ### Download Docker Compose File
 
 ```sh
-wget https://raw.githubusercontent.com/tilalx/verti-grade/main/docker-compose.yml
+wget https://raw.githubusercontent.com/gripello/gripello/main/docker-compose.yml
 ```
 
 ### Docker Compose Configuration
 
 ```yaml
 services:
-    verti-grade:
-        container_name: verti-grade-app
+    gripello:
+        container_name: gripello-app
         image: tilalx/verti-grade:latest
         ports:
             - '80:80'
@@ -102,7 +102,7 @@ panel instead.
 
 ### 5. Configure Application Settings
 
-Go to **Admin → Settings** in the Verti-Grade UI to configure:
+Go to **Admin → Settings** in the Gripello UI to configure:
 
 - Organisation name and logo
 - Privacy policy / imprint URL
@@ -192,7 +192,7 @@ Data is persisted in `./pb_data` and survives restarts.
 
 ## Usage
 
-Verti-Grade is designed to be simple and straightforward. Once set up, manage and evaluate climbing routes through the web interface. For detailed usage instructions refer to the [documentation](https://github.com/tilalx/verti-grade/wiki).
+Gripello is designed to be simple and straightforward. Once set up, manage and evaluate climbing routes through the web interface. For detailed usage instructions refer to the [documentation](https://github.com/gripello/gripello/wiki).
 
 ## Contributing
 
@@ -205,4 +205,4 @@ Verti-Grade is designed to be simple and straightforward. Once set up, manage an
 
 ## License
 
-Verti-Grade is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more details.
+Gripello is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more details.

@@ -6,7 +6,7 @@ test('stacks snackbars instead of replacing them', async ({ page }) => {
     await page
         .getByTestId('login-identity')
         .locator('input')
-        .fill('e2e-admin@verti-grade.test')
+        .fill('e2e-admin@gripello.test')
     await page
         .getByTestId('login-password')
         .locator('input')
