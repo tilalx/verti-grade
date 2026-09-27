@@ -92,6 +92,19 @@ test('a filter dims the routes that do not match', async ({
     await expect(page.getByTestId('map-list')).toContainText('1')
 })
 
+test('the colour filter dims routes in other colours', async ({ page }) => {
+    await gotoSettled(page, `/map?location=${seeded.locationId}`)
+    await page.getByTestId('map-filter-open').click()
+    await page
+        .getByTestId('map-filter-color')
+        .locator('[data-color="#E53935"]')
+        .click()
+    await page.getByTestId('map-filter-apply').click()
+    await expect(
+        page.locator('[data-testid="map-route-dot"][data-dimmed]'),
+    ).toHaveCount(2)
+})
+
 test('a location without a floor plan points to the list', async ({
     page,
     testPrefix,

@@ -252,6 +252,11 @@
                     clearable
                     data-testid="map-filter-grade"
                 />
+                <MapColorFilter
+                    v-model="colorFilter"
+                    :colors="colorOptions"
+                    data-testid="map-filter-color"
+                />
                 <v-select
                     :model-value="selectedWallId"
                     :items="wallItems"
@@ -311,6 +316,7 @@ import type {
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { normalizeCreators } from '#shared/utils/formatting'
 import { routesOnWall, toMapWalls } from '~/utils/gymMap'
+import { toHex6 } from '~/utils/color'
 
 definePageMeta({ footer: false })
 
@@ -427,6 +433,10 @@ const routes = computed(() =>
 )
 
 const sentFilter = ref<'all' | 'sent' | 'unsent'>('all')
+const colorFilter = ref<string | null>(null)
+const colorOptions = computed(() => [
+    ...new Set(routes.value.map((item) => toHex6(item.color)).filter(Boolean)),
+])
 
 const { data: serverMatches } = useAsyncData(
     'map-matching',
@@ -444,13 +454,18 @@ const { data: serverMatches } = useAsyncData(
 const matchingIds = computed<Set<string> | null>(() => {
     const hasServerFilter = !!pbFilter.value
     const hasSentFilter = isLoggedIn.value && sentFilter.value !== 'all'
-    if (!hasServerFilter && !hasSentFilter) return null
+    if (!hasServerFilter && !hasSentFilter && !colorFilter.value) return null
     const serverIds = hasServerFilter
         ? new Set((serverMatches.value ?? []).map((match) => match.id))
         : null
     return new Set(
         routes.value
             .filter((item) => !serverIds || serverIds.has(item.id))
+            .filter(
+                (item) =>
+                    !colorFilter.value ||
+                    toHex6(item.color) === colorFilter.value,
+            )
             .filter(
                 (item) =>
                     !hasSentFilter ||
@@ -473,6 +488,7 @@ const activeCount = computed(
             searchRouteName.value,
             selectedDifficulty.value,
             isLoggedIn.value && sentFilter.value !== 'all',
+            colorFilter.value,
         ].filter(Boolean).length,
 )
 
@@ -596,6 +612,7 @@ watch(mapType, (type) => {
 function resetFilters() {
     clearFilters()
     sentFilter.value = 'all'
+    colorFilter.value = null
 }
 
 const tickOpen = ref(false)

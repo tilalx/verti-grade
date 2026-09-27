@@ -67,6 +67,8 @@
             </template>
         </LayoutPageHeader>
 
+        <MapUnplacedBanner />
+
         <RouteFormDialog
             ref="routeFormRef"
             @saved="onRouteSaved"

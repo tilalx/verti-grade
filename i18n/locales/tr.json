@@ -1077,7 +1077,10 @@
             "label": "Duvar adının görüneceği yere tıkla.",
             "outline": "\"{name}\" dış hattını çiz: köşelere tıkla, sonra ilk noktaya tıkla, çift tıkla veya Enter’a bas.",
             "incomplete": "\"{name}\" henüz bitmedi ({missing}). Kaydetmeden önce duvarı seç ve vurgulanan düğmeyi kullan."
-        }
+        },
+        "anchorFrom": "Ankraj başlangıcı",
+        "anchorTo": "bitişi",
+        "anchorHint": "Bu ankraj numaralarına sahip rotalar otomatik olarak bu duvara yerleştirilir."
     },
     "mapPlacement": {
         "title": "Rotaları yerleştir",
@@ -1092,10 +1095,25 @@
         "remove": "Haritadan kaldır",
         "canvasLabel": "Rota yerleştirme haritası",
         "hints": {
-            "idle": "Listeden bir rotayı duvara sürükle ya da önce rotaya, sonra duvara tıkla. Noktaları sürükleyerek taşıyabilirsin.",
+            "idle": "Bir rotaya, sonra duvardaki yerine dokun — sonraki rota otomatik gelir. Birkaç rotayı tek duvara koymak için işaretle. Noktaları sürükleyerek taşı.",
             "armed": "\"{name}\" rotasını yerleştirmek için bir duvara tıkla. Esc iptal eder.",
-            "selected": "\"{name}\" noktasını duvardaki doğru yere ya da başka bir duvara sürükle. Delete haritadan kaldırır."
-        }
+            "selected": "\"{name}\" noktasını duvardaki doğru yere ya da başka bir duvara sürükle. Delete haritadan kaldırır.",
+            "checked": "{n} rotayı ankraja göre sıralı yerleştirmek için bir duvara dokun."
+        },
+        "skip": "Atla",
+        "nudgeBack": "Duvar boyunca geri taşı",
+        "nudgeForward": "Duvar boyunca ileri taşı",
+        "auto": "Otomatik yerleştir ({n})",
+        "keepGoing": "Sonraki rotayla devam et",
+        "checked": "{n} rota seçildi",
+        "wallAge": "En eski {oldest} g · ort. {average} g",
+        "lastReset": "son yenileme {date}",
+        "resetWall": "Duvarı yenile",
+        "resetNeedsSave": "Önce değişikliklerini kaydet veya at.",
+        "resetConfirm": "{wall} üzerindeki {n} rotanın tümü arşivlensin mi? Haritadan ve rota listesinden kaybolurlar.",
+        "resetDone": "{n} rota arşivlendi.",
+        "unplacedBanner": "{n} rota henüz haritada değil.",
+        "placeThis": "Haritaya yerleştir"
     },
     "scan": {
         "title": "Rota tara",

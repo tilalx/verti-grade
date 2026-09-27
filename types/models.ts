@@ -51,6 +51,8 @@ export interface WallRecord extends BaseRecord {
     edge: MapPoint[]
     label?: MapPoint | null
     sort?: number | null
+    anchor_from?: number | null
+    anchor_to?: number | null
 }
 
 export interface RouteListItem extends Omit<RouteRecord, 'creator'> {

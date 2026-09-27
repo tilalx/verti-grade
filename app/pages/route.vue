@@ -255,6 +255,23 @@
                             >
                                 {{ t('map.showOnMap') }}
                             </v-btn>
+                            <v-btn
+                                v-else-if="canPlaceOnMap"
+                                variant="tonal"
+                                size="large"
+                                class="flex-grow-1"
+                                prepend-icon="mdi-map-marker-plus-outline"
+                                :to="{
+                                    path: '/manage/map',
+                                    query: {
+                                        location: metadata?.location,
+                                        route: route_id,
+                                    },
+                                }"
+                                data-testid="route-place-on-map"
+                            >
+                                {{ t('mapPlacement.placeThis') }}
+                            </v-btn>
                             <TickDialog
                                 v-if="isLoggedIn"
                                 v-model="tickDialog"
@@ -352,11 +369,25 @@ import {
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
+import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { reportContentUrl } from '~/utils/reports'
 import { isLightColor, shadeColor } from '~/utils/color'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
+const { can } = usePermissions()
+const { data: locationRecords } = useLocations()
+const canPlaceOnMap = computed(
+    () =>
+        !!metadata.value &&
+        !metadata.value.archived &&
+        can('manage_routes') &&
+        !!sanitizeGymMap(
+            locationRecords.value.find(
+                (record) => record.id === metadata.value?.location,
+            )?.map,
+        ),
+)
 const nuxtRoute = useRoute()
 
 const route_id = ref<string | null>((nuxtRoute.query.id as string) || null)
