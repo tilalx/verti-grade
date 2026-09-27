@@ -3,142 +3,190 @@
         <LayoutPageHeader
             :title="t('ticks.logbook')"
             :subtitle="t('ticks.logbookSubtitle')"
-        />
-
-        <LayoutEmptyState
-            v-if="!sessions.length"
-            icon="mdi-notebook-outline"
-            :title="t('ticks.empty')"
-            :hint="t('ticks.emptyHint')"
-            data-testid="logbook-empty"
-        />
-
-        <section
-            v-for="session in sessions"
-            :key="session.day"
-            class="mb-6"
-            :data-testid="`logbook-day-${session.day}`"
         >
-            <div class="d-flex align-baseline justify-space-between mb-2">
-                <h2 class="text-title-medium font-weight-bold">
-                    {{ formatSessionDay(session.day) }}
-                </h2>
-                <span class="text-body-small text-medium-emphasis">
-                    {{
-                        t('ticks.sendCount', {
-                            count: sendCount(session.ticks),
-                        })
-                    }}
-                </span>
-            </div>
-
-            <v-row density="comfortable">
-                <v-col
-                    v-for="tick in session.ticks"
-                    :key="tick.id"
-                    cols="12"
-                    md="6"
-                    xl="4"
-                >
-                    <v-card
-                        variant="tonal"
-                        class="h-100"
-                        data-testid="logbook-tick"
-                        :data-tick-id="tick.id"
+            <template v-if="ticks.length" #actions>
+                <div class="d-flex flex-wrap ga-2">
+                    <v-btn-toggle
+                        v-model="kind"
+                        mandatory
+                        density="compact"
+                        variant="outlined"
+                        color="primary"
+                        divided
+                        data-testid="logbook-kind"
                     >
-                        <div class="d-flex align-center ga-3 pa-3">
-                            <RouteColorDot
-                                :color="routeOf(tick)?.color"
-                                :size="32"
-                            />
-                            <div class="flex-grow-1 logbook-tick__body">
-                                <NuxtLink
-                                    v-if="routeOf(tick)"
-                                    :to="`/route?id=${tick.route}`"
-                                    class="logbook-tick__name"
-                                    data-testid="logbook-tick-route"
-                                >
-                                    {{ routeOf(tick)?.name }}
-                                </NuxtLink>
-                                <span v-else class="text-medium-emphasis">
-                                    {{ t('ticks.removedRoute') }}
-                                </span>
-                                <div
-                                    class="d-flex align-center ga-2 mt-1 flex-wrap"
-                                >
-                                    <v-chip
-                                        size="x-small"
-                                        variant="flat"
-                                        :color="TYPE_COLORS[tick.type]"
-                                        data-testid="logbook-tick-type"
-                                    >
-                                        {{ t(`ticks.types.${tick.type}`) }}
-                                    </v-chip>
-                                    <span
-                                        v-if="
-                                            tick.type !== 'flash' &&
-                                            tick.attempts > 1
-                                        "
-                                        class="text-body-small text-medium-emphasis"
-                                        data-testid="logbook-tick-attempts"
-                                    >
-                                        {{
-                                            t('ticks.attemptCount', {
-                                                count: tick.attempts,
-                                            })
-                                        }}
-                                    </span>
-                                    <v-chip
-                                        v-if="routeOf(tick)?.archived"
-                                        size="x-small"
-                                        variant="outlined"
-                                    >
-                                        {{ t('filter.archived') }}
-                                    </v-chip>
-                                </div>
-                                <p
-                                    v-if="tick.note"
-                                    class="text-body-small mt-1 mb-0"
-                                    data-testid="logbook-tick-note"
-                                >
-                                    {{ tick.note }}
-                                </p>
-                            </div>
-                            <GradeLabel :source="tick" />
-                            <v-menu location="bottom end">
-                                <template #activator="{ props: menu }">
-                                    <v-btn
-                                        v-bind="menu"
-                                        icon="mdi-dots-vertical"
-                                        variant="text"
-                                        size="small"
-                                        :aria-label="t('ticks.moreActions')"
-                                        data-testid="logbook-tick-menu"
-                                    />
-                                </template>
-                                <v-list density="compact">
-                                    <v-list-item
-                                        prepend-icon="mdi-pencil-outline"
-                                        :title="t('actions.edit')"
-                                        data-testid="logbook-tick-edit"
-                                        @click="openEdit(tick)"
-                                    />
-                                    <v-list-item
-                                        prepend-icon="mdi-delete-outline"
-                                        :title="t('actions.delete')"
-                                        base-color="error"
-                                        data-testid="logbook-tick-delete"
-                                        @click="deleteTarget = tick"
-                                    />
-                                </v-list>
-                            </v-menu>
-                        </div>
-                    </v-card>
+                        <v-btn
+                            v-for="option in LOGBOOK_KINDS"
+                            :key="option"
+                            :value="option"
+                            :data-testid="`logbook-kind-${option}`"
+                        >
+                            {{ t(`ticks.kind.${option}`) }}
+                        </v-btn>
+                    </v-btn-toggle>
+                    <v-btn-toggle
+                        v-model="range"
+                        mandatory
+                        density="compact"
+                        variant="outlined"
+                        color="primary"
+                        divided
+                        data-testid="logbook-range"
+                    >
+                        <v-btn
+                            v-for="option in LOGBOOK_RANGES"
+                            :key="option"
+                            :value="option"
+                            :data-testid="`logbook-range-${option}`"
+                        >
+                            {{ t(`ticks.range.${option}`) }}
+                        </v-btn>
+                    </v-btn-toggle>
+                </div>
+            </template>
+        </LayoutPageHeader>
+
+        <template v-if="!ticks.length">
+            <LayoutEmptyState
+                icon="mdi-notebook-outline"
+                :title="t('ticks.empty')"
+                :hint="t('ticks.emptyHint')"
+                class="mb-6"
+                data-testid="logbook-empty"
+            />
+            <LogbookSuggestions :kind="null" :target-index="null" />
+        </template>
+
+        <template v-else>
+            <v-row density="comfortable" class="mb-2">
+                <v-col
+                    v-for="tile in tiles"
+                    :key="tile.key"
+                    cols="6"
+                    md="3"
+                    class="d-flex"
+                    :data-testid="`logbook-stat-${tile.key}`"
+                >
+                    <AnalyticsStatsCard
+                        class="w-100"
+                        :title="tile.title"
+                        :value="tile.value"
+                        :previous="tile.previous"
+                        :icon="tile.icon"
+                        :color="tile.color"
+                        :format="tile.format"
+                        :meter="tile.meter"
+                        :subtitle="tile.subtitle"
+                    />
                 </v-col>
             </v-row>
-        </section>
 
-        <TickDialog v-model="editOpen" :tick="editing" @saved="reload" />
+            <v-tabs
+                v-model="tab"
+                color="primary"
+                class="mb-4"
+                data-testid="logbook-tabs"
+            >
+                <v-tab value="sessions" data-testid="logbook-tab-sessions">
+                    {{ t('ticks.tabs.sessions') }}
+                </v-tab>
+                <v-tab value="stats" data-testid="logbook-tab-stats">
+                    {{ t('ticks.tabs.stats') }}
+                </v-tab>
+                <v-tab value="projects" data-testid="logbook-tab-projects">
+                    {{ t('ticks.tabs.projects') }}
+                    <v-chip
+                        v-if="projects.length"
+                        size="x-small"
+                        class="ml-2"
+                        data-testid="logbook-projects-count"
+                    >
+                        {{ projects.length }}
+                    </v-chip>
+                </v-tab>
+            </v-tabs>
+
+            <v-tabs-window v-model="tab">
+                <v-tabs-window-item value="sessions">
+                    <v-row density="comfortable">
+                        <v-col
+                            v-for="(session, index) in sessions"
+                            :key="session.day"
+                            cols="12"
+                            lg="6"
+                        >
+                            <LogbookSessionCard
+                                :day="session.day"
+                                :ticks="session.ticks"
+                                :initially-open="index < 2"
+                                @edit="openEdit"
+                                @delete="deleteTarget = $event"
+                            />
+                        </v-col>
+                    </v-row>
+                </v-tabs-window-item>
+
+                <v-tabs-window-item value="stats">
+                    <v-row density="comfortable">
+                        <v-col cols="12" md="6">
+                            <AnalyticsSection
+                                :title="t('ticks.pyramid.title')"
+                                :subtitle="t('ticks.pyramid.subtitle')"
+                                icon="mdi-triangle-outline"
+                                :empty="!pyramid.length"
+                                :empty-text="t('ticks.chartEmpty')"
+                                testid="logbook-section-pyramid"
+                            >
+                                <LogbookPyramidChart :rows="pyramid" />
+                            </AnalyticsSection>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <AnalyticsSection
+                                :title="t('ticks.progression.title')"
+                                :subtitle="t('ticks.progression.subtitle')"
+                                icon="mdi-chart-line"
+                                :empty="!progressionPoints.some((p) => p.sends)"
+                                :empty-text="t('ticks.chartEmpty')"
+                                testid="logbook-section-progression"
+                            >
+                                <LogbookProgressionChart
+                                    :points="progressionPoints"
+                                    :system="gradeSystemFor(routeType)"
+                                />
+                            </AnalyticsSection>
+                        </v-col>
+                    </v-row>
+                </v-tabs-window-item>
+
+                <v-tabs-window-item value="projects">
+                    <LogbookProjects
+                        v-if="projects.length"
+                        :projects="projects"
+                        @log="openLog"
+                    />
+                    <LayoutEmptyState
+                        v-else
+                        icon="mdi-target"
+                        :title="t('ticks.projects.empty')"
+                        :hint="t('ticks.projects.emptyHint')"
+                        class="mb-6"
+                        data-testid="logbook-projects-empty"
+                    />
+                    <LogbookSuggestions
+                        v-if="!projects.length"
+                        :kind="kind"
+                        :target-index="targetIndex"
+                    />
+                </v-tabs-window-item>
+            </v-tabs-window>
+        </template>
+
+        <TickDialog
+            v-model="editOpen"
+            :tick="editing"
+            :route-id="logRouteId"
+            @saved="reload"
+        />
 
         <ConfirmDialog
             :model-value="!!deleteTarget"
@@ -153,22 +201,29 @@
 
 <script setup lang="ts">
 import type { RouteRecord, TickRecord } from '~/types/models'
-import type { TickType } from '#shared/utils/ticks'
-import { groupTicksByDay, tickDate } from '#shared/utils/ticks'
-import { formatDate } from '#shared/utils/formatting'
+import { groupTicksByDay } from '#shared/utils/ticks'
+import {
+    gradePyramid,
+    logbookStats,
+    medianSendIndex,
+    openProjects,
+    preferredKind,
+    progression,
+    type LogbookKind,
+    type LogbookRange,
+    type LogbookTick,
+} from '#shared/utils/logbook'
 
-type LogbookTick = TickRecord & { expand?: { route?: RouteRecord } }
+type LoggedTick = TickRecord & { expand?: { route?: RouteRecord } }
 
-const TYPE_COLORS: Record<TickType, string> = {
-    flash: 'amber-darken-2',
-    top: 'success',
-    attempt: 'blue-grey-darken-1',
-}
+const LOGBOOK_KINDS: LogbookKind[] = ['boulder', 'route']
+const LOGBOOK_RANGES: LogbookRange[] = ['30d', '12m', 'all']
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const pb = usePocketbase()
 const { notify, error: notifyError } = useNotification()
 const { refreshTickedRoutes } = useTickedRoutes()
+const { gradeSystemFor } = useGradeSystems()
 
 useHead({ title: t('page.title.logbook') })
 
@@ -180,7 +235,7 @@ definePageMeta({
 const { data: ticks, refresh } = await useAsyncData(
     'logbook',
     () =>
-        pb.collection('ticks').getFullList<LogbookTick>({
+        pb.collection('ticks').getFullList<LoggedTick>({
             sort: '-date,-created',
             expand: 'route',
             requestKey: null,
@@ -188,37 +243,125 @@ const { data: ticks, refresh } = await useAsyncData(
     { default: () => [] },
 )
 
+const logbookTicks = computed<LogbookTick[]>(() =>
+    ticks.value.map((tick) => ({
+        ...tick,
+        routeArchived: !!tick.expand?.route?.archived,
+    })),
+)
+
+const kind = ref<LogbookKind>(preferredKind(logbookTicks.value))
+const range = ref<LogbookRange>('12m')
+const tab = ref('sessions')
+const routeType = computed(() =>
+    kind.value === 'boulder' ? 'Boulder' : 'Route',
+)
+
 const sessions = computed(() => groupTicksByDay(ticks.value))
+const stats = computed(() =>
+    logbookStats(logbookTicks.value, kind.value, range.value),
+)
+const pyramid = computed(() =>
+    gradePyramid(logbookTicks.value, kind.value, range.value),
+)
+const progressionPoints = computed(() =>
+    progression(logbookTicks.value, kind.value),
+)
+const targetIndex = computed(() =>
+    medianSendIndex(logbookTicks.value, kind.value),
+)
+
+const routesById = computed(
+    () =>
+        new Map(
+            ticks.value
+                .map((tick) => tick.expand?.route)
+                .filter((route): route is RouteRecord => !!route)
+                .map((route) => [route.id, route]),
+        ),
+)
+const projects = computed(() =>
+    openProjects(logbookTicks.value).map((project) => ({
+        ...project,
+        record: routesById.value.get(project.route),
+    })),
+)
+
+const tiles = computed(() => {
+    const { current, previous } = stats.value
+    const percent = (value: number | null) =>
+        value === null ? null : Math.round(value * 100)
+    return [
+        {
+            key: 'sends',
+            title: t('ticks.stats.sends'),
+            value: current.sends,
+            previous: previous?.sends ?? null,
+            icon: 'mdi-flag-checkered',
+            color: 'success',
+            format: undefined,
+            meter: undefined,
+            subtitle: undefined,
+        },
+        {
+            key: 'hardest',
+            title: t('ticks.stats.hardest'),
+            value: current.hardest?.grade_index ?? null,
+            previous: null,
+            icon: 'mdi-trending-up',
+            color: 'primary',
+            format: () => current.hardest?.grade ?? '—',
+            meter: undefined,
+            subtitle: previous?.hardest
+                ? t('ticks.stats.previousHardest', {
+                      grade: previous.hardest.grade,
+                  })
+                : undefined,
+        },
+        {
+            key: 'flashRate',
+            title: t('ticks.stats.flashRate'),
+            value: percent(current.flashRate),
+            previous: percent(previous?.flashRate ?? null),
+            icon: 'mdi-lightning-bolt',
+            color: 'amber-darken-2',
+            format: (value: number) => `${value}%`,
+            meter: current.flashRate ?? undefined,
+            subtitle: undefined,
+        },
+        {
+            key: 'sessions',
+            title: t('ticks.stats.sessions'),
+            value: current.sessions,
+            previous: previous?.sessions ?? null,
+            icon: 'mdi-calendar-check-outline',
+            color: 'info',
+            format: undefined,
+            meter: undefined,
+            subtitle: undefined,
+        },
+    ]
+})
 
 const editOpen = ref(false)
 const editing = ref<TickRecord | null>(null)
+const logRouteId = ref<string | null>(null)
 const deleteTarget = ref<TickRecord | null>(null)
 const deleting = ref(false)
-
-function routeOf(tick: LogbookTick) {
-    return tick.expand?.route
-}
-
-function sendCount(dayTicks: TickRecord[]) {
-    return dayTicks.filter((tick) => tick.type !== 'attempt').length
-}
-
-function formatSessionDay(day: string) {
-    return formatDate(tickDate(day), {
-        locale: locale.value,
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    })
-}
 
 function reload() {
     return Promise.all([refresh(), refreshTickedRoutes()])
 }
 
 function openEdit(tick: TickRecord) {
+    logRouteId.value = null
     editing.value = tick
+    editOpen.value = true
+}
+
+function openLog(routeId: string) {
+    editing.value = null
+    logRouteId.value = routeId
     editOpen.value = true
 }
 
@@ -238,23 +381,3 @@ async function confirmDelete() {
     }
 }
 </script>
-
-<style scoped>
-.logbook-tick__body {
-    min-width: 0;
-}
-
-.logbook-tick__name {
-    display: block;
-    font-weight: 500;
-    color: inherit;
-    text-decoration: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.logbook-tick__name:hover {
-    text-decoration: underline;
-}
-</style>

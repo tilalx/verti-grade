@@ -33,8 +33,8 @@
                                     v-if="metadata.type"
                                     size="small"
                                     variant="flat"
-                                    color="rgba(255,255,255,0.2)"
-                                    class="text-white"
+                                    :color="heroChipColor"
+                                    class="route-hero__ink"
                                     :prepend-icon="
                                         metadata.type === 'Boulder'
                                             ? 'mdi-image-filter-hdr'
@@ -59,8 +59,8 @@
                                     v-if="locationName(metadata)"
                                     size="small"
                                     variant="flat"
-                                    color="rgba(255,255,255,0.2)"
-                                    class="text-white"
+                                    :color="heroChipColor"
+                                    class="route-hero__ink"
                                     prepend-icon="mdi-map-marker-outline"
                                 >
                                     {{ locationName(metadata) }}
@@ -73,12 +73,7 @@
                             >
                                 <div>
                                     <h1
-                                        class="text-headline-small font-weight-bold text-white mb-1"
-                                        style="
-                                            line-height: 1.2;
-                                            text-shadow: 0 1px 3px
-                                                rgba(0, 0, 0, 0.3);
-                                        "
+                                        class="text-headline-small font-weight-bold mb-1 route-hero__ink route-hero__title"
                                         data-testid="route-page-name"
                                     >
                                         {{ metadata.name }}
@@ -90,14 +85,11 @@
                                     >
                                         <v-icon
                                             size="14"
-                                            color="rgba(255,255,255,0.7)"
+                                            class="route-hero__ink-muted"
                                             >mdi-account-hard-hat-outline</v-icon
                                         >
                                         <span
-                                            class="text-body-medium"
-                                            style="
-                                                color: rgba(255, 255, 255, 0.8);
-                                            "
+                                            class="text-body-medium route-hero__ink-muted"
                                             >{{
                                                 metadata.creator.join(', ')
                                             }}</span
@@ -442,10 +434,28 @@ useHead(
 
 const difficulty = computed(() => formatGrade(metadata.value))
 
+const heroIsLight = computed(() =>
+    isLightColor(metadata.value?.color || '#6200EA'),
+)
+
+const heroChipColor = computed(() =>
+    heroIsLight.value ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)',
+)
+
 const heroStyle = computed(() => {
     const color = metadata.value?.color || '#6200EA'
     return {
         background: `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`,
+        '--hero-ink': heroIsLight.value ? '#1a1a1a' : '#ffffff',
+        '--hero-ink-muted': heroIsLight.value
+            ? 'rgba(0, 0, 0, 0.72)'
+            : 'rgba(255, 255, 255, 0.8)',
+        '--hero-shade': heroIsLight.value
+            ? 'rgba(255, 255, 255, 0.35)'
+            : 'rgba(0, 0, 0, 0.45)',
+        '--hero-title-shadow': heroIsLight.value
+            ? 'none'
+            : '0 1px 3px rgba(0, 0, 0, 0.3)',
     }
 })
 
@@ -745,7 +755,7 @@ onMounted(async () => {
     inset: 0;
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, 0.45) 0%,
+        var(--hero-shade) 0%,
         rgba(0, 0, 0, 0.05) 60%,
         transparent 100%
     );
@@ -755,6 +765,19 @@ onMounted(async () => {
 .route-hero__content {
     position: relative;
     z-index: 1;
+}
+
+.route-hero__ink {
+    color: var(--hero-ink) !important;
+}
+
+.route-hero__ink-muted {
+    color: var(--hero-ink-muted) !important;
+}
+
+.route-hero__title {
+    line-height: 1.2;
+    text-shadow: var(--hero-title-shadow);
 }
 
 .route-hero__difficulty-badge {
