@@ -72,11 +72,14 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
     text-align: center;
     border-radius: 4px;
     cursor: default;
+    container-type: inline-size;
     transition: opacity 0.15s ease;
 }
 
-.grade-spread__bars:hover .grade-spread__bar:not(:hover) {
-    opacity: 0.45;
+@media (hover: hover) {
+    .grade-spread__bars:hover .grade-spread__bar:not(:hover) {
+        opacity: 0.45;
+    }
 }
 
 .grade-spread__bar:hover .grade-spread__label,
@@ -107,5 +110,13 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
     font-size: 0.7rem;
     white-space: nowrap;
     overflow: hidden;
+}
+
+@container (max-width: 22px) {
+    .grade-spread__label {
+        justify-self: center;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+    }
 }
 </style>

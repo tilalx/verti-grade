@@ -124,7 +124,7 @@
             type="file"
             ref="avatarInput"
             accept="image/jpeg,image/png,image/svg+xml,image/webp"
-            style="display: none"
+            class="d-none"
             @change="onAvatarNative"
         />
 

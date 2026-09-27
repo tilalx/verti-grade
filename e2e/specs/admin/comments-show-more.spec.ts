@@ -48,3 +48,35 @@ test('short comments have no show more button', async ({
 
     await deleteComment(page, id)
 })
+
+test('infinite scroll goes idle once every comment is loaded', async ({
+    adminPage: page,
+}) => {
+    await page.addInitScript(() => {
+        const observe = IntersectionObserver.prototype.observe
+        IntersectionObserver.prototype.observe = function (target) {
+            const counted = window as unknown as { observeCalls?: number }
+            counted.observeCalls = (counted.observeCalls ?? 0) + 1
+            return observe.call(this, target)
+        }
+    })
+    await page.setViewportSize({ width: 1280, height: 4000 })
+    await gotoSettled(page, '/manage/comments')
+
+    const observeCalls = () =>
+        page.evaluate(
+            () =>
+                (window as unknown as { observeCalls?: number }).observeCalls ??
+                0,
+        )
+    await expect
+        .poll(
+            async () => {
+                const before = await observeCalls()
+                await page.waitForTimeout(1_000)
+                return (await observeCalls()) - before
+            },
+            { timeout: 15_000 },
+        )
+        .toBeLessThan(3)
+})

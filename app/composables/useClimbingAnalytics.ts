@@ -55,8 +55,9 @@ export function useClimbingAnalytics() {
     let staleWhileHidden = false
 
     function scheduleRefresh() {
-        clearTimeout(refreshTimer)
+        if (refreshTimer) return
         refreshTimer = setTimeout(() => {
+            refreshTimer = undefined
             if (document.visibilityState === 'hidden') {
                 staleWhileHidden = true
                 return

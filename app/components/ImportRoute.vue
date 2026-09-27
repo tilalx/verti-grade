@@ -4,7 +4,7 @@
         <input
             ref="fileInput"
             type="file"
-            style="display: none"
+            class="d-none"
             accept="application/json"
             data-testid="import-route-file-input"
             @change="handleFileChange"
@@ -22,7 +22,42 @@
                 {{ $t('importRoutes.intro') }}
             </p>
 
+            <v-expansion-panels
+                v-if="smAndDown"
+                variant="accordion"
+                data-testid="import-route-list"
+            >
+                <v-expansion-panel
+                    v-for="(item, index) in routesToImport"
+                    :key="index"
+                    data-testid="import-route-list-item"
+                >
+                    <v-expansion-panel-title>
+                        <v-avatar
+                            :color="item.color ?? undefined"
+                            size="24"
+                            class="mr-3 flex-shrink-0"
+                        />
+                        <div>
+                            <div class="text-body-large">
+                                {{ String(item.name ?? '') }}
+                            </div>
+                            <div class="text-body-small text-medium-emphasis">
+                                {{ previewSummary(item) }}
+                            </div>
+                        </div>
+                    </v-expansion-panel-title>
+                    <v-expansion-panel-text>
+                        <ImportRouteRatings
+                            :name="item.name"
+                            :ratings="item.ratings"
+                        />
+                    </v-expansion-panel-text>
+                </v-expansion-panel>
+            </v-expansion-panels>
+
             <v-data-table
+                v-else
                 v-model:expanded="expanded"
                 :headers="previewHeaders"
                 :items="routesToImport"
@@ -40,60 +75,10 @@
                 <template #expanded-row="{ columns, item }">
                     <tr>
                         <td :colspan="columns.length">
-                            <v-card
-                                v-if="item.ratings?.length"
-                                class="my-4"
-                                border
-                                flat
-                            >
-                                <v-card-title class="text-body-large">
-                                    {{
-                                        $t('importRoutes.ratingsFor', {
-                                            name: item.name,
-                                        })
-                                    }}
-                                </v-card-title>
-                                <v-list density="compact">
-                                    <v-list-item
-                                        v-for="(rating, i) in item.ratings"
-                                        :key="i"
-                                    >
-                                        <v-list-item-title>
-                                            <strong
-                                                >{{
-                                                    $t(
-                                                        'importRoutes.ratingLabel',
-                                                    )
-                                                }}:</strong
-                                            >
-                                            {{ rating.rating }}/5,
-                                            <strong
-                                                >{{
-                                                    $t(
-                                                        'importRoutes.difficultyLabel',
-                                                    )
-                                                }}:</strong
-                                            >
-                                            {{
-                                                rating.grade ??
-                                                rating.difficulty
-                                            }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle>
-                                            {{
-                                                rating.comment ||
-                                                $t('importRoutes.noComment')
-                                            }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item>
-                                </v-list>
-                            </v-card>
-                            <p
-                                v-else
-                                class="text-center pa-4 text-body-medium text-medium-emphasis"
-                            >
-                                {{ $t('importRoutes.noRatings') }}
-                            </p>
+                            <ImportRouteRatings
+                                :name="item.name"
+                                :ratings="item.ratings"
+                            />
                         </td>
                     </tr>
                 </template>
@@ -164,6 +149,18 @@ const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
 const { data: locationRecords } = useLocations()
 const { gradeSystemFor } = useGradeSystems()
+
+const { smAndDown } = useDisplay()
+
+const previewSummary = (route: ImportedRoute) =>
+    [
+        route.grade ?? route.difficulty,
+        route.anchor_point,
+        route.location,
+        `${t('importRoutes.ratingsCount')}: ${route.ratings?.length || 0}`,
+    ]
+        .filter((part) => part !== undefined && part !== null && part !== '')
+        .join(' · ')
 
 const previewHeaders = computed(() => [
     { title: t('climbing.color'), value: 'color', sortable: false },

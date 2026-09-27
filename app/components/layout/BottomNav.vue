@@ -31,14 +31,25 @@ import { BOTTOM_NAV } from '~/utils/navigation'
 <style scoped>
 .bottom-nav {
     left: 0;
-    width: 100%;
-    background: rgb(var(--v-theme-surface)) !important;
+    width: calc(
+        100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)
+    );
+    background: rgb(var(--v-theme-surface));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+        env(safe-area-inset-left, 0px);
     box-sizing: content-box;
 }
 
-@media (min-width: 1280px) {
+@media (max-width: 1144.98px) {
+    :global(.v-main) {
+        padding-bottom: calc(
+            var(--v-layout-bottom) + env(safe-area-inset-bottom, 0px)
+        );
+    }
+}
+
+@media (min-width: 1145px) {
     :global(.v-main) {
         --v-layout-bottom: 0px !important;
     }

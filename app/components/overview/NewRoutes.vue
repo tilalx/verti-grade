@@ -8,12 +8,13 @@
             data-testid="overview-new-route"
             :data-route-id="route.id"
         >
-            <span
+            <RouteColorDot
+                :color="route.color"
+                :size="28"
                 class="new-route__dot"
-                :style="{ background: dotColors(route.color).fill }"
             />
             <span class="new-route__name">{{ route.name }}</span>
-            <span class="new-route__grade">{{ formatGrade(route) }}</span>
+            <GradeLabel :source="route" class="new-route__grade" />
             <span class="new-route__meta">{{ metaFor(route) }}</span>
         </NuxtLink>
     </div>
@@ -26,8 +27,6 @@
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
 import { formatDate } from '#shared/utils/formatting'
-import { formatGrade } from '#shared/utils/grades'
-import { dotColors } from '~/utils/gymMap'
 
 const props = defineProps<{
     routes: RouteListItem[]
@@ -99,10 +98,6 @@ function metaFor(route: RouteListItem) {
 
 .new-route__dot {
     grid-row: span 2;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-on-surface), 0.24);
 }
 
 .new-route__name {

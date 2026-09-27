@@ -32,15 +32,11 @@
             </template>
         </FilterBar>
 
-        <!-- ── Loading skeletons ─────────────────────────────────────────── -->
-        <v-row v-if="loading && !users.length">
-            <v-col v-for="i in 6" :key="i" cols="12" sm="6" lg="4">
-                <v-skeleton-loader
-                    type="list-item-avatar-two-line"
-                    rounded="lg"
-                />
-            </v-col>
-        </v-row>
+        <LayoutLoadingState
+            v-if="loading && !users.length"
+            variant="cards"
+            type="list-item-avatar-two-line"
+        />
 
         <!-- ── Empty state ───────────────────────────────────────────────── -->
         <LayoutEmptyState
@@ -85,8 +81,7 @@
                         </template>
 
                         <v-card-title
-                            class="text-body-medium font-weight-semibold px-0 py-0"
-                            style="line-height: 1.3"
+                            class="text-body-medium font-weight-semibold px-0 py-0 card-title-tight"
                         >
                             {{
                                 [user.firstname, user.name]
@@ -95,8 +90,7 @@
                             }}
                         </v-card-title>
                         <v-card-subtitle
-                            class="text-body-small px-0 py-0"
-                            style="opacity: 0.7"
+                            class="text-body-small px-0 py-0 card-subtitle-muted"
                         >
                             {{ user.username }}
                         </v-card-subtitle>
@@ -210,8 +204,7 @@
 </template>
 
 <script setup lang="ts">
-import { isAbortError } from '~/utils/errors'
-import { readableTextOn } from '~/utils/roles'
+import { readableTextOn } from '~/utils/color'
 import { avatarColor } from '~/utils/avatar'
 import { formatDate } from '#shared/utils/formatting'
 import type { RoleRecord, UserRecord } from '~/types/models'
@@ -237,15 +230,7 @@ definePageMeta({
 
 // ── State ──────────────────────────────────────────────────────────────────
 
-const loading = ref(true)
-const loadingMore = ref(false)
-const deleting = ref(false)
-
-const users = ref<AdminUser[]>([])
-const page = ref(1)
-const PER_PAGE = 48
-const totalItems = ref(0)
-const hasMore = computed(() => users.value.length < totalItems.value)
+const { pending: deleting, run: runDelete } = useAsyncAction()
 
 const pageRoute = useRoute()
 const search = ref(String(pageRoute.query.search ?? ''))
@@ -259,7 +244,7 @@ const editingUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
 const deleteDialog = ref(false)
 
-const { notify, error: notifyError } = useNotification()
+const { notify } = useNotification()
 
 const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
@@ -302,45 +287,21 @@ function buildFilter() {
     return parts.join(' && ')
 }
 
-async function fetchList(append = false) {
-    if (append) {
-        loadingMore.value = true
-    } else {
-        loading.value = true
-        page.value = 1
-        users.value = []
-    }
-
-    try {
-        const result = await pb
-            .collection('users')
-            .getList<UserRecord>(page.value, PER_PAGE, {
-                sort: '-created',
-                filter: buildFilter(),
-                expand: 'role',
-                requestKey: 'usersList',
-            })
-        totalItems.value = result.totalItems
-        const mapped = result.items.map(mapUser)
-        users.value = append ? [...users.value, ...mapped] : mapped
-    } catch (err) {
-        if (isAbortError(err)) return
-        console.error('Failed to fetch users:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        loading.value = false
-        loadingMore.value = false
-    }
-}
-
-async function loadMore() {
-    page.value++
-    await fetchList(true)
-}
-
-function reloadUsers() {
-    fetchList()
-}
+const {
+    items: users,
+    totalItems,
+    loading,
+    loadingMore,
+    hasMore,
+    refresh: reloadUsers,
+    loadMore,
+    prefetch,
+} = usePbList<UserRecord, AdminUser>('users', {
+    perPage: 48,
+    requestKey: 'usersList',
+    query: () => ({ sort: '-created', filter: buildFilter(), expand: 'role' }),
+    map: mapUser,
+})
 
 // ── Watchers ───────────────────────────────────────────────────────────────
 
@@ -351,10 +312,10 @@ function clearFilters() {
 let searchDebounce: ReturnType<typeof setTimeout> | undefined
 watch(search, () => {
     clearTimeout(searchDebounce)
-    searchDebounce = setTimeout(() => fetchList(), 300)
+    searchDebounce = setTimeout(() => reloadUsers(), 300)
 })
 
-watch(selectedRole, () => fetchList())
+watch(selectedRole, () => reloadUsers())
 
 // ── Edit ───────────────────────────────────────────────────────────────────
 
@@ -377,20 +338,19 @@ function confirmDelete(user: AdminUser) {
 async function deleteUser() {
     const target = deletingUser.value
     if (!target) return
-    deleting.value = true
-    try {
-        await pb.collection('users').delete(target.id)
-        users.value = users.value.filter((u) => u.id !== target.id)
-        totalItems.value = Math.max(0, totalItems.value - 1)
-        notify(t('users.deleteSuccess'))
-        deleteDialog.value = false
-        deletingUser.value = null
-    } catch (err) {
-        console.error('Error deleting user:', err)
-        notifyError(t('users.deleteError'))
-    } finally {
-        deleting.value = false
-    }
+    await runDelete(
+        async () => {
+            await pb.collection('users').delete(target.id)
+            users.value = users.value.filter((u) => u.id !== target.id)
+            totalItems.value = Math.max(0, totalItems.value - 1)
+            deleteDialog.value = false
+            deletingUser.value = null
+        },
+        {
+            success: t('users.deleteSuccess'),
+            error: t('users.deleteError'),
+        },
+    )
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -418,16 +378,7 @@ function formatCreatedDate(date: string | undefined) {
 
 const { subscribe } = usePbSubscription()
 
-const { data: initial } = await useAsyncData('admin-users', async () => {
-    await fetchList()
-    return { users: users.value, totalItems: totalItems.value }
-})
-
-if (initial.value) {
-    users.value = initial.value.users
-    totalItems.value = initial.value.totalItems
-}
-loading.value = false
+await prefetch('admin-users')
 
 onMounted(async () => {
     await subscribe('users', async (e) => {

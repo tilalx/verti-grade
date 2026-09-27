@@ -14,7 +14,7 @@
             data-testid="reports-mail-warning"
         >
             <div class="d-flex flex-wrap align-center ga-2">
-                <span style="flex: 1 1 16rem">{{
+                <span class="alert-message">{{
                     t('reports.mailWarning')
                 }}</span>
                 <v-btn
@@ -54,16 +54,11 @@
         </FilterBar>
 
         <div class="mt-4">
-            <template v-if="loading">
-                <v-skeleton-loader
-                    v-for="i in 3"
-                    :key="i"
-                    type="list-item-avatar-three-line, actions"
-                    class="mb-3"
-                    rounded="lg"
-                    data-testid="reports-skeleton"
-                />
-            </template>
+            <LayoutLoadingState
+                v-if="loading"
+                type="list-item-avatar-three-line, actions"
+                data-testid="reports-skeleton"
+            />
 
             <LayoutEmptyState
                 v-if="!loading && !reports.length"
@@ -145,23 +140,12 @@
 </template>
 
 <script setup lang="ts">
-import type { ListResult, ReportDecision, ReportRecord } from '~/types/models'
+import type { ReportDecision, ReportRecord } from '~/types/models'
 import { REPORT_STATUSES } from '~/utils/reports'
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const { notify, error: notifyError } = useNotification()
-
-const PER_PAGE = 48
-
-const loading = ref(true)
-const loadingMore = ref(false)
-const deciding = ref(false)
-
-const reports = ref<ReportRecord[]>([])
-const page = ref(1)
-const totalItems = ref(0)
-const hasMore = computed(() => reports.value.length < totalItems.value)
+const { pending: deciding, run: runDecision } = useAsyncAction()
 
 const pageRoute = useRoute()
 const search = ref(String(pageRoute.query.search ?? ''))
@@ -196,34 +180,24 @@ function buildFilter() {
     return parts.join(' && ')
 }
 
-async function fetchList(target = 1) {
-    const result = (await pb
-        .collection('reports')
-        .getList<ReportRecord>(target, PER_PAGE, {
-            sort: '-created',
-            filter: buildFilter(),
-            requestKey: 'reportsList',
-        })) as ListResult<ReportRecord>
-
-    totalItems.value = result.totalItems
-    reports.value =
-        target === 1 ? result.items : [...reports.value, ...result.items]
-    page.value = target
-    return result
-}
+const {
+    items: reports,
+    loading,
+    loadingMore,
+    hasMore,
+    refresh: reload,
+    loadMore,
+    prefetch,
+} = usePbList<ReportRecord>('reports', {
+    perPage: 48,
+    requestKey: 'reportsList',
+    query: () => ({ sort: '-created', filter: buildFilter() }),
+})
 
 const { data: mailStatus } = useMailStatus()
 const mailConfigured = computed(() => mailStatus.value?.configured !== false)
 
-const { data: initial } = await useAsyncData('admin-reports', async () => {
-    await fetchList(1)
-    return { reports: reports.value, totalItems: totalItems.value }
-})
-if (initial.value) {
-    reports.value = initial.value.reports
-    totalItems.value = initial.value.totalItems
-}
-loading.value = false
+await prefetch('admin-reports')
 
 useHead({
     title: t('page.title.reports'),
@@ -246,30 +220,6 @@ watch(statusFilter, () => void reload())
 
 onBeforeUnmount(() => clearTimeout(searchDebounce))
 
-async function reload() {
-    loading.value = true
-    try {
-        await fetchList(1)
-    } catch (err) {
-        console.error('Failed to load reports:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        loading.value = false
-    }
-}
-
-async function loadMore() {
-    loadingMore.value = true
-    try {
-        await fetchList(page.value + 1)
-    } catch (err) {
-        console.error('Failed to load more reports:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        loadingMore.value = false
-    }
-}
-
 function clearFilters() {
     statusFilter.value = null
 }
@@ -286,39 +236,37 @@ async function confirmDecision() {
     const decision = pendingDecision.value
     if (!report || !decision) return
 
-    deciding.value = true
-    try {
-        if (decision === 'content_removed') {
-            const collection =
-                report.content_type === 'route' ? 'routes' : 'ratings'
-            try {
-                await pb.collection(collection).delete(report.content_id)
-            } catch (err) {
-                if ((err as { status?: number })?.status !== 404) throw err
+    await runDecision(
+        async () => {
+            if (decision === 'content_removed') {
+                const collection =
+                    report.content_type === 'route' ? 'routes' : 'ratings'
+                try {
+                    await pb.collection(collection).delete(report.content_id)
+                } catch (err) {
+                    if ((err as { status?: number })?.status !== 404) throw err
+                }
             }
-        }
 
-        const updated = await pb
-            .collection('reports')
-            .update<ReportRecord>(report.id, {
-                status:
-                    decision === 'content_removed' ? 'actioned' : 'rejected',
-                decision,
-                decision_reason: decisionReason.value.trim(),
-                decided_at: new Date().toISOString(),
-                decided_by: pb.authStore.record?.id ?? null,
-            })
+            const updated = await pb
+                .collection('reports')
+                .update<ReportRecord>(report.id, {
+                    status:
+                        decision === 'content_removed'
+                            ? 'actioned'
+                            : 'rejected',
+                    decision,
+                    decision_reason: decisionReason.value.trim(),
+                    decided_at: new Date().toISOString(),
+                    decided_by: pb.authStore.record?.id ?? null,
+                })
 
-        const index = reports.value.findIndex((r) => r.id === report.id)
-        if (index !== -1) reports.value[index] = updated
+            const index = reports.value.findIndex((r) => r.id === report.id)
+            if (index !== -1) reports.value[index] = updated
 
-        decisionDialog.value = false
-        notify(t('reports.decided'))
-    } catch (err) {
-        console.error('Failed to record report decision:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        deciding.value = false
-    }
+            decisionDialog.value = false
+        },
+        { success: t('reports.decided') },
+    )
 }
 </script>

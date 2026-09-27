@@ -34,32 +34,31 @@
                 </div>
 
                 <div class="px-4 pt-3">
-                    <div class="d-flex align-center ga-2">
-                        <h1 class="inventory-title text-truncate">
-                            {{ $t('inventory.title') }}
-                        </h1>
-
-                        <v-spacer />
-
-                        <v-btn
-                            icon="mdi-refresh"
-                            variant="text"
-                            size="small"
-                            :disabled="
-                                scannedRouteIds.length === 0 && !scanning
-                            "
-                            :aria-label="$t('inventory.reset')"
-                            data-testid="inventory-reset"
-                            @click="resetDialog = true"
-                        />
-                        <v-btn
-                            icon="mdi-information-outline"
-                            variant="text"
-                            size="small"
-                            :aria-label="$t('inventory.showInstructions')"
-                            @click="instructionsDialog = true"
-                        />
-                    </div>
+                    <LayoutPageHeader
+                        :title="$t('inventory.title')"
+                        inline-actions
+                    >
+                        <template #actions>
+                            <v-btn
+                                icon="mdi-refresh"
+                                variant="text"
+                                size="small"
+                                :disabled="
+                                    scannedRouteIds.length === 0 && !scanning
+                                "
+                                :aria-label="$t('inventory.reset')"
+                                data-testid="inventory-reset"
+                                @click="resetDialog = true"
+                            />
+                            <v-btn
+                                icon="mdi-information-outline"
+                                variant="text"
+                                size="small"
+                                :aria-label="$t('inventory.showInstructions')"
+                                @click="instructionsDialog = true"
+                            />
+                        </template>
+                    </LayoutPageHeader>
 
                     <div class="d-flex flex-wrap align-center ga-3">
                         <div
@@ -590,7 +589,7 @@ const manualSearch = ref('')
 const finishDialog = ref(false)
 const resetDialog = ref(false)
 const activeTab = ref<'missing' | 'found'>('missing')
-const archiving = ref(false)
+const { pending: archiving, run: runArchive } = useAsyncAction()
 const archiveSelection = ref(new Set<string>())
 
 const cameraConstraints = {
@@ -796,21 +795,33 @@ watch(
     { immediate: true },
 )
 
+const theme = useTheme()
+
 const codeTag = (rawValue: string) => {
     const id = extractRouteId(rawValue)
     const info = id ? routeInfoById.get(id) : undefined
 
-    if (!id || !info) return { color: '#EF4444', label: tagUnknown }
+    if (!id || !info)
+        return {
+            color: String(theme.current.value.colors.error),
+            label: tagUnknown,
+        }
     if (info.location !== activeLocation) {
         return {
-            color: '#EF4444',
+            color: String(theme.current.value.colors.error),
             label: `${info.name} · ${info.locationName || '—'}`,
         }
     }
     if (scannedIdSet.has(id)) {
-        return { color: '#0EA5E9', label: `${tagCounted} · ${info.name}` }
+        return {
+            color: String(theme.current.value.colors.info),
+            label: `${tagCounted} · ${info.name}`,
+        }
     }
-    return { color: '#1D9E75', label: info.name }
+    return {
+        color: String(theme.current.value.colors.success),
+        label: info.name,
+    }
 }
 
 const onDetect = (detectedCodes: { rawValue: string }[]) => {
@@ -969,24 +980,25 @@ const confirmFinish = async () => {
         return
     }
 
-    archiving.value = true
-    try {
-        const batch = pb.createBatch()
-        ids.forEach((id) => {
-            batch.collection('routes').update(id, { archived: true })
-        })
-        await batch.send()
-        resetInventory()
-        notifySuccess(
-            t('inventory.archiveSuccess', { count: ids.length }, ids.length),
-        )
-        await loadRoutes()
-    } catch (error) {
-        console.error('Failed to archive routes:', error)
-        notifyError(t('inventory.archiveError'))
-    } finally {
-        archiving.value = false
-    }
+    await runArchive(
+        async () => {
+            const batch = pb.createBatch()
+            ids.forEach((id) => {
+                batch.collection('routes').update(id, { archived: true })
+            })
+            await batch.send()
+            resetInventory()
+            await loadRoutes()
+        },
+        {
+            success: t(
+                'inventory.archiveSuccess',
+                { count: ids.length },
+                ids.length,
+            ),
+            error: t('inventory.archiveError'),
+        },
+    )
 }
 
 const { data: initial } = await useAsyncData('inventory-routes', async () => {
@@ -1013,15 +1025,6 @@ watch(instructionsDialog, (open) => {
 .inventory-page {
     max-width: 600px;
     margin: 0 auto;
-    padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.inventory-title {
-    margin: 0;
-    min-width: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.5;
 }
 
 .progress-group {

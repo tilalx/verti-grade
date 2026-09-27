@@ -1,27 +1,20 @@
 <template>
     <div class="pcf-root">
-        <v-text-field
+        <UserPasswordField
             v-if="requireOldPassword"
             :model-value="oldPassword"
             :label="$t('account.oldPassword')"
             :placeholder="$t('account.placeholders.oldPassword')"
-            :type="showOld ? 'text' : 'password'"
-            autocomplete="current-password"
             :rules="[rules.required]"
             prepend-inner-icon="mdi-lock-check-outline"
-            :append-inner-icon="
-                showOld ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
-            "
             data-testid="password-old"
             @update:model-value="emit('update:oldPassword', $event)"
-            @click:append-inner="showOld = !showOld"
         />
 
-        <v-text-field
+        <UserPasswordField
             :model-value="password"
             :label="$t('account.password')"
             :placeholder="$t('account.placeholders.newPassword')"
-            :type="showNew ? 'text' : 'password'"
             autocomplete="new-password"
             validate-on="blur"
             :rules="[
@@ -31,12 +24,8 @@
                 rules.strength,
             ]"
             prepend-inner-icon="mdi-lock-plus-outline"
-            :append-inner-icon="
-                showNew ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
-            "
             data-testid="password-new"
             @update:model-value="emit('update:password', $event)"
-            @click:append-inner="showNew = !showNew"
         />
 
         <Transition name="pcf-slide-down">
@@ -90,12 +79,12 @@
             </div>
         </Transition>
 
-        <v-text-field
+        <UserPasswordField
             :model-value="passwordConfirm"
             :label="$t('account.confirmPassword')"
             :placeholder="$t('account.placeholders.confirmPassword')"
-            :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"
+            :hide-toggle="passwordsMatch"
             validate-on="blur"
             :rules="[rules.required, rules.matchPassword]"
             prepend-inner-icon="mdi-lock-check-outline"
@@ -109,16 +98,8 @@
                     color="success"
                     size="20"
                 />
-                <v-icon
-                    v-else
-                    :icon="
-                        showConfirm ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
-                    "
-                    size="20"
-                    @click="showConfirm = !showConfirm"
-                />
             </template>
-        </v-text-field>
+        </UserPasswordField>
     </div>
 </template>
 
@@ -153,11 +134,6 @@ const emit = defineEmits<{
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 const { t } = useI18n()
-
-// ── Visibility toggles ────────────────────────────────────────────────────
-const showOld = ref(false)
-const showNew = ref(false)
-const showConfirm = ref(false)
 
 // ── Strength logic ────────────────────────────────────────────────────────
 const passwordRequirements = computed(() => [

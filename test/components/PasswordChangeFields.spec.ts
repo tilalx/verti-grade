@@ -22,6 +22,7 @@ function createWrapper(props: Record<string, unknown> = {}) {
             mocks: { $t: (key: string) => key },
             stubs: {
                 'v-text-field': simpleStub,
+                UserPasswordField: simpleStub,
                 'v-icon': simpleStub,
                 Transition: false,
             },

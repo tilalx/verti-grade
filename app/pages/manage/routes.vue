@@ -157,41 +157,18 @@
                 <v-row>
                     <v-col cols="12">
                         <div class="route-manager__actions">
-                            <v-chip
-                                v-if="hasSelection"
-                                color="primary"
-                                variant="tonal"
-                                label
-                                :size="isMobile ? 'default' : 'large'"
-                                prepend-icon="mdi-checkbox-multiple-marked-outline"
-                                class="route-manager__count"
-                                data-testid="routes-selected-count"
-                            >
-                                {{
-                                    $t('routes.selectedCount', {
-                                        n: selectedRouteIds.size,
-                                    })
-                                }}
-                            </v-chip>
                             <v-btn
                                 @click="selectAll"
                                 color="primary"
                                 variant="tonal"
                                 :size="isMobile ? 'small' : undefined"
+                                :aria-label="selectAllLabel"
+                                :title="selectAllAction"
+                                class="route-manager__count"
                                 data-testid="routes-select-all"
                             >
-                                <v-icon start>
-                                    {{
-                                        areAllSelected
-                                            ? 'mdi-checkbox-marked-outline'
-                                            : 'mdi-checkbox-blank-outline'
-                                    }}
-                                </v-icon>
-                                {{
-                                    areAllSelected
-                                        ? $t('actions.deselect_all')
-                                        : $t('actions.select_all')
-                                }}
+                                <v-icon start>{{ selectAllIcon }}</v-icon>
+                                {{ selectAllText }}
                             </v-btn>
                             <v-btn
                                 v-if="hasSelection"
@@ -521,6 +498,7 @@ const pb = usePocketbase()
 const { t, locale } = useI18n()
 const { mdAndDown, width: displayWidth } = useDisplay()
 const { notify, error: notifyError } = useNotification()
+const { run: runAction } = useAsyncAction()
 
 const isMobile = computed(() => mdAndDown.value)
 
@@ -609,6 +587,25 @@ const {
     toggleAll,
     invalidate: invalidateAllRouteIdsCache,
 } = useRouteSelection(pbFilter, totalItems)
+
+const selectAllAction = computed(() =>
+    areAllSelected.value ? t('actions.deselect_all') : t('actions.select_all'),
+)
+const selectAllText = computed(() =>
+    hasSelection.value
+        ? t('routes.selectedCount', { n: selectedRouteIds.value.size })
+        : t('actions.select_all'),
+)
+const selectAllLabel = computed(() =>
+    hasSelection.value
+        ? `${selectAllText.value}, ${selectAllAction.value}`
+        : selectAllAction.value,
+)
+const selectAllIcon = computed(() => {
+    if (areAllSelected.value) return 'mdi-checkbox-marked-outline'
+    if (hasSelection.value) return 'mdi-minus-box-outline'
+    return 'mdi-checkbox-blank-outline'
+})
 
 const { exportingFormat, exportPdf, exportXlsx, exportJson } = useRouteExport()
 const selectedIds = () => Array.from(selectedRouteIds.value)
@@ -794,21 +791,20 @@ const archiveSelected = async () => {
         return
     }
 
-    try {
-        const batch = pb.createBatch()
-        ids.forEach((id) => {
-            batch.collection('routes').update(id, { archived: true })
-        })
-        await batch.send()
-        invalidateAllRouteIdsCache()
-        removeSelectedIds(ids)
-        showArchiveConfirmation.value = false
-        notify(t('notifications.success.edit'))
-        await reloadRoutes()
-    } catch (error) {
-        console.error('Exception in archiveSelected:', error)
-        notifyError(t('notifications.error.generic'))
-    }
+    await runAction(
+        async () => {
+            const batch = pb.createBatch()
+            ids.forEach((id) => {
+                batch.collection('routes').update(id, { archived: true })
+            })
+            await batch.send()
+            invalidateAllRouteIdsCache()
+            removeSelectedIds(ids)
+            showArchiveConfirmation.value = false
+            await reloadRoutes()
+        },
+        { success: t('notifications.success.edit') },
+    )
 }
 
 const exportFormat = ref<'pdf' | 'xlsx'>('xlsx')
@@ -991,10 +987,11 @@ useHead(() => ({
     justify-content: center;
     align-items: center;
     position: sticky;
-    bottom: var(--v-layout-bottom, 0px);
+    bottom: calc(
+        var(--v-layout-bottom, 0px) + env(safe-area-inset-bottom, 0px)
+    );
     z-index: 2;
     padding-block: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     background: rgb(var(--v-theme-background));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }

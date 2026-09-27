@@ -92,7 +92,9 @@
         "emailTaken": "Bu e-posta adresi kullanılamaz.",
         "resendVerification": "Doğrulama e-postasını yeniden gönder",
         "resendVerificationInfo": "E-posta adresine yeni bir doğrulama bağlantısı göndereceğiz.",
-        "confirmPassword": "Şifreyi onayla"
+        "confirmPassword": "Şifreyi onayla",
+        "showPassword": "Şifreyi göster",
+        "hidePassword": "Şifreyi gizle"
     },
     "routes": {
         "home": "Genel bakış",
@@ -599,7 +601,8 @@
         "userMenu": "Kullanıcı menüsü",
         "manage": "Yönetim",
         "admin": "Yönetici",
-        "quickNavigation": "Hızlı gezinme"
+        "quickNavigation": "Hızlı gezinme",
+        "desktopHint": "Tam düzenleyici masaüstünde kullanılabilir."
     },
     "permissions": {
         "title": "Roller ve yetkiler",
@@ -738,7 +741,8 @@
         "server": {
             "title": "Bir şeyler ters gitti",
             "subtitle": "Beklenmeyen bir hata oluştu. Lütfen birazdan tekrar deneyin."
-        }
+        },
+        "loadFailed": "İçerik yüklenemedi."
     },
     "export": {
         "title": "Excel olarak dışa aktar",

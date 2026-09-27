@@ -1,20 +1,6 @@
 <template>
     <v-container class="route-page pa-0">
-        <!-- ── Loading state ──────────────────────────────────────────────── -->
-        <template v-if="loading">
-            <v-skeleton-loader type="image" height="180" />
-            <div class="px-4 pt-4">
-                <v-skeleton-loader type="heading" class="mb-3" />
-                <v-skeleton-loader type="text" class="mb-2" />
-                <v-skeleton-loader type="text" class="mb-6" />
-                <v-skeleton-loader
-                    v-for="i in 3"
-                    :key="i"
-                    type="list-item-avatar-two-line"
-                    class="mb-3"
-                />
-            </div>
-        </template>
+        <LayoutLoadingState v-if="loading" variant="page" />
 
         <template v-else-if="metadata">
             <div class="route-layout">
@@ -30,21 +16,19 @@
                             icon="mdi-arrow-left"
                             variant="flat"
                             size="small"
-                            :color="heroChipColor"
-                            class="route-hero__back route-hero__ink"
+                            class="route-hero__back route-hero__tint"
                             :aria-label="t('errors.goBack')"
                             data-testid="route-back"
                             @click="goBack"
                         />
                         <div class="route-hero__content">
                             <!-- Type + location -->
-                            <div class="d-flex align-center ga-2 mb-2">
+                            <div class="route-hero__chips">
                                 <v-chip
                                     v-if="metadata.type"
                                     size="small"
                                     variant="flat"
-                                    :color="heroChipColor"
-                                    class="route-hero__ink"
+                                    class="route-hero__tint"
                                     :prepend-icon="
                                         metadata.type === 'Boulder'
                                             ? 'mdi-image-filter-hdr'
@@ -69,8 +53,7 @@
                                     v-if="locationName(metadata)"
                                     size="small"
                                     variant="flat"
-                                    :color="heroChipColor"
-                                    class="route-hero__ink"
+                                    class="route-hero__tint"
                                     prepend-icon="mdi-map-marker-outline"
                                 >
                                     {{ locationName(metadata) }}
@@ -79,8 +62,7 @@
                                     v-if="wallName(metadata)"
                                     size="small"
                                     variant="flat"
-                                    :color="heroChipColor"
-                                    class="route-hero__ink"
+                                    class="route-hero__tint"
                                     prepend-icon="mdi-wall"
                                     data-testid="route-wall"
                                 >
@@ -89,10 +71,8 @@
                             </div>
 
                             <!-- Name + difficulty badge inline -->
-                            <div
-                                class="d-flex align-end justify-space-between ga-3"
-                            >
-                                <div>
+                            <div class="route-hero__headline">
+                                <div class="route-hero__name">
                                     <h1
                                         class="text-headline-small font-weight-bold mb-1 route-hero__ink route-hero__title"
                                         data-testid="route-page-name"
@@ -160,73 +140,30 @@
                         <div
                             class="d-flex align-center justify-space-around py-3"
                         >
-                            <!-- Average rating -->
-                            <div class="text-center">
-                                <div
-                                    class="d-flex align-center justify-center ga-1"
-                                >
-                                    <v-icon color="yellow-darken-2" size="22"
-                                        >mdi-star</v-icon
-                                    >
-                                    <span
-                                        class="text-title-large font-weight-bold"
-                                        data-testid="route-avg-rating"
-                                        >{{ avgRating }}</span
-                                    >
-                                </div>
-                                <div
-                                    class="text-body-small text-medium-emphasis"
-                                >
-                                    {{ t('ratings.score') }}
-                                </div>
-                            </div>
-
+                            <LayoutStatTile
+                                :label="t('ratings.score')"
+                                :value="avgRating"
+                                icon="mdi-star"
+                                icon-color="yellow-darken-2"
+                                data-testid="route-avg-rating"
+                            />
                             <v-divider vertical class="my-1" />
-
-                            <!-- Review count -->
-                            <div class="text-center">
-                                <span
-                                    class="text-title-large font-weight-bold"
-                                    >{{ reviews.length }}</span
-                                >
-                                <div
-                                    class="text-body-small text-medium-emphasis"
-                                >
-                                    {{ t('ratings.climber_reviews') }}
-                                </div>
-                            </div>
-
+                            <LayoutStatTile
+                                :label="t('ratings.climber_reviews')"
+                                :value="reviews.length"
+                            />
                             <v-divider vertical class="my-1" />
-
-                            <!-- Perceived difficulty -->
-                            <div class="text-center">
-                                <div
-                                    class="d-flex align-center justify-center ga-1"
-                                >
-                                    <v-icon size="18" color="primary"
-                                        >mdi-trending-up</v-icon
-                                    >
-                                    <span
-                                        class="text-title-large font-weight-bold"
-                                        >{{
-                                            avgPerceivedDifficulty || '—'
-                                        }}</span
-                                    >
-                                </div>
-                                <div
-                                    class="text-body-small text-medium-emphasis"
-                                >
-                                    {{ t('ratings.difficulty') }}
-                                </div>
-                            </div>
+                            <LayoutStatTile
+                                :label="t('ratings.difficulty')"
+                                :value="avgPerceivedDifficulty || '—'"
+                                icon="mdi-trending-up"
+                                icon-color="primary"
+                            />
                         </div>
                     </v-card>
 
                     <!-- ── Route details ──────────────────────────────────────────── -->
-                    <div
-                        class="route-details px-4 pt-4"
-                        data-testid="route-details"
-                    >
+                    <div class="route-details" data-testid="route-details">
                         <!-- Date + comment -->
                         <div
                             v-if="formattedScrewDate || metadata.comment"
@@ -397,7 +334,7 @@
                     />
 
                     <!-- Bottom spacer for mobile -->
-                    <div style="height: 24px" />
+                    <div class="route-page__bottom-spacer" />
                 </div>
             </div>
         </template>
@@ -416,6 +353,7 @@ import {
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
 import { reportContentUrl } from '~/utils/reports'
+import { isLightColor, shadeColor } from '~/utils/color'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -473,13 +411,12 @@ useHead(
 
 const difficulty = computed(() => formatGrade(metadata.value))
 
-const heroIsLight = computed(() =>
-    isLightColor(metadata.value?.color || '#6200EA'),
+const theme = useTheme()
+const heroColor = computed(
+    () => metadata.value?.color || String(theme.current.value.colors.primary),
 )
 
-const heroChipColor = computed(() =>
-    heroIsLight.value ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)',
-)
+const heroIsLight = computed(() => isLightColor(heroColor.value))
 
 const router = useRouter()
 
@@ -489,10 +426,13 @@ function goBack() {
 }
 
 const heroStyle = computed(() => {
-    const color = metadata.value?.color || '#6200EA'
+    const color = heroColor.value
     return {
-        background: `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`,
+        background: `linear-gradient(135deg, ${color} 0%, ${shadeColor(color, -30)} 100%)`,
         '--hero-ink': heroIsLight.value ? '#1a1a1a' : '#ffffff',
+        '--hero-tint': heroIsLight.value
+            ? 'rgba(0, 0, 0, 0.12)'
+            : 'rgba(255, 255, 255, 0.2)',
         '--hero-ink-muted': heroIsLight.value
             ? 'rgba(0, 0, 0, 0.72)'
             : 'rgba(255, 255, 255, 0.8)',
@@ -506,7 +446,7 @@ const heroStyle = computed(() => {
 })
 
 const difficultyBadgeStyle = computed(() => {
-    const color = metadata.value?.color || '#6200EA'
+    const color = heroColor.value
     return {
         background: color,
         color: isLightColor(color) ? '#1a1a1a' : '#ffffff',
@@ -610,30 +550,6 @@ function onReviewSaved() {
     void getAllRouteRatings()
 }
 
-function isLightColor(hex: string): boolean {
-    let color = hex.replace('#', '')
-    if (color.length === 3) {
-        color = [...color].map((digit) => digit + digit).join('')
-    }
-    const num = parseInt(color, 16)
-    const r = (num >> 16) & 0xff
-    const g = (num >> 8) & 0xff
-    const b = num & 0xff
-    return r * 0.299 + g * 0.587 + b * 0.114 > 160
-}
-
-function adjustColor(hex: string, amount: number): string {
-    let color = hex.replace('#', '')
-    if (color.length === 3) {
-        color = [...color].map((digit) => digit + digit).join('')
-    }
-    const num = parseInt(color, 16)
-    const r = Math.min(255, Math.max(0, ((num >> 16) & 0xff) + amount))
-    const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + amount))
-    const b = Math.min(255, Math.max(0, (num & 0xff) + amount))
-    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
-}
-
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
 const { data: initial } = await useAsyncData('route-detail', async () => {
@@ -697,10 +613,16 @@ onMounted(async () => {
 .route-page {
     max-width: 600px;
     margin: 0 auto;
-    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* ── Hero header ─────────────────────────────────────────────────────────── */
+.route-page__bottom-spacer {
+    height: 24px;
+}
+
+.route-details {
+    padding: 16px 16px 0;
+}
+
 .route-hero {
     position: relative;
     min-height: 180px;
@@ -753,9 +675,9 @@ onMounted(async () => {
         font-size: 2.5rem;
     }
 
-    .route-hero__content > .d-flex.align-end {
-        justify-content: flex-start !important;
-        align-items: center !important;
+    .route-hero__headline {
+        justify-content: flex-start;
+        align-items: center;
         gap: 20px;
     }
 
@@ -779,7 +701,7 @@ onMounted(async () => {
 
     .route-details {
         grid-area: details;
-        padding-top: 24px !important;
+        padding-top: 24px;
     }
 
     .route-layout__reviews {
@@ -821,12 +743,36 @@ onMounted(async () => {
     z-index: 1;
 }
 
-.route-hero__ink {
-    color: var(--hero-ink) !important;
+.route-hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.route-hero__headline {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.route-hero__name {
+    min-width: 0;
+}
+
+.route-hero__ink,
+.route-hero__tint {
+    color: var(--hero-ink);
+}
+
+.route-hero__tint {
+    background: var(--hero-tint);
 }
 
 .route-hero__ink-muted {
-    color: var(--hero-ink-muted) !important;
+    color: var(--hero-ink-muted);
 }
 
 .route-hero__title {

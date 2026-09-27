@@ -39,8 +39,27 @@
 
         <div class="map-body">
             <div class="map-stage">
+                <div v-if="loadFailed" class="map-empty">
+                    <LayoutEmptyState
+                        variant="error"
+                        :card="false"
+                        :title="$t('errors.loadFailed')"
+                        data-testid="load-error"
+                    >
+                        <template #actions>
+                            <v-btn
+                                variant="tonal"
+                                prepend-icon="mdi-refresh"
+                                data-testid="load-error-retry"
+                                @click="retryLoad"
+                            >
+                                {{ $t('errors.retry') }}
+                            </v-btn>
+                        </template>
+                    </LayoutEmptyState>
+                </div>
                 <MapView
-                    v-if="map"
+                    v-else-if="map"
                     ref="mapViewRef"
                     :map="map"
                     :walls="walls"
@@ -344,7 +363,11 @@ const location = computed(() =>
 )
 const map = computed(() => sanitizeGymMap(location.value?.map))
 
-const { data: walls, refresh: refreshWalls } = await useAsyncData(
+const {
+    data: walls,
+    error: wallsError,
+    refresh: refreshWalls,
+} = await useAsyncData(
     'map-walls',
     () =>
         locationId.value
@@ -359,7 +382,11 @@ const { data: walls, refresh: refreshWalls } = await useAsyncData(
     { watch: [locationId], default: () => [] },
 )
 
-const { data: routeRecords, refresh: refreshRoutes } = await useAsyncData(
+const {
+    data: routeRecords,
+    error: routesError,
+    refresh: refreshRoutes,
+} = await useAsyncData(
     'map-routes',
     () =>
         locationId.value
@@ -373,6 +400,12 @@ const { data: routeRecords, refresh: refreshRoutes } = await useAsyncData(
             : Promise.resolve([]),
     { watch: [locationId], default: () => [] },
 )
+
+const loadFailed = computed(() => !!routesError.value || !!wallsError.value)
+
+function retryLoad() {
+    return Promise.all([refreshRoutes(), refreshWalls()])
+}
 
 const allRoutes = computed<RouteListItem[]>(() =>
     routeRecords.value.map((record) => {
@@ -607,6 +640,7 @@ onMounted(async () => {
 
 .map-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     padding: 8px 16px;
@@ -625,8 +659,8 @@ onMounted(async () => {
 }
 
 .map-location {
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 1 1 160px;
+    min-width: 160px;
     max-width: 240px;
 }
 

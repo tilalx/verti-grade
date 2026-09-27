@@ -58,7 +58,7 @@
         </FilterBar>
 
         <div class="mt-4">
-            <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+            <LayoutLoadingState v-if="loading" />
 
             <LayoutEmptyState
                 v-if="!loading && !entries.length"
@@ -68,7 +68,7 @@
             />
 
             <AuditCard
-                v-for="entry in entries"
+                v-for="entry in loading ? [] : entries"
                 :key="entry.id"
                 :entry="entry"
                 class="mb-2"
@@ -268,14 +268,3 @@ function clearFilters() {
     periodFilter.value = '30d'
 }
 </script>
-
-<style scoped>
-.audit-action-chip {
-    min-width: 6.5rem;
-    justify-content: center;
-}
-
-.audit-target {
-    color: inherit;
-}
-</style>

@@ -44,11 +44,11 @@ describe('usePermissions', () => {
 
     // ── can() before loading ─────────────────────────────────────────────
 
-    it('returns true for any feature before permissions are loaded', async () => {
+    it('denies every feature before permissions are loaded', async () => {
         const { can } = await loadComposable()
 
-        expect(can('manage_routes')).toBe(true)
-        expect(can('anything')).toBe(true)
+        expect(can('manage_routes')).toBe(false)
+        expect(can('anything')).toBe(false)
     })
 
     // ── refreshPermissions ───────────────────────────────────────────────

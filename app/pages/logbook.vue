@@ -46,7 +46,25 @@
             </template>
         </LayoutPageHeader>
 
-        <template v-if="!ticks.length">
+        <LayoutEmptyState
+            v-if="ticksError"
+            variant="error"
+            :title="t('errors.loadFailed')"
+            data-testid="load-error"
+        >
+            <template #actions>
+                <v-btn
+                    variant="tonal"
+                    prepend-icon="mdi-refresh"
+                    data-testid="load-error-retry"
+                    @click="refresh()"
+                >
+                    {{ t('errors.retry') }}
+                </v-btn>
+            </template>
+        </LayoutEmptyState>
+
+        <template v-else-if="!ticks.length">
             <LayoutEmptyState
                 icon="mdi-notebook-outline"
                 :title="t('ticks.empty')"
@@ -232,7 +250,11 @@ definePageMeta({
 })
 
 // ponytail: loads the whole logbook at once, paginate by session once logbooks grow into the thousands
-const { data: ticks, refresh } = await useAsyncData(
+const {
+    data: ticks,
+    error: ticksError,
+    refresh,
+} = await useAsyncData(
     'logbook',
     () =>
         pb.collection('ticks').getFullList<LoggedTick>({

@@ -53,7 +53,7 @@ export function usePermissions() {
     }
 
     function can(featureName: string): boolean {
-        if (!loaded.value) return true
+        if (!loaded.value) return false
         if (roleName.value === 'admin') return true
         return permissions.value.includes(featureName)
     }

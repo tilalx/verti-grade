@@ -169,9 +169,15 @@ test('updates live when a route is created elsewhere', async ({
 }) => {
     const pb = await superuserPb()
     await gotoSubscribed(page, '/manage/analytics?range=30d', 'routes/*')
-    const routesBefore = await statValue(page, 'routesSet')
 
     const setter = `${testPrefix}-live-setter`
+    const liveRefresh = page.waitForResponse(async (response) => {
+        if (!response.url().includes('/api/manage/analytics')) return false
+        const body = await response.json().catch(() => null)
+        return !!body?.setters?.some(
+            (entry: { setter: string }) => entry.setter === setter,
+        )
+    })
     const route = await pb.collection('routes').create({
         name: `${testPrefix}-live-route`,
         ...uiaa('5'),
@@ -180,20 +186,56 @@ test('updates live when a route is created elsewhere', async ({
         screw_date: new Date().toISOString(),
     })
     try {
-        await expect
-            .poll(() => statValue(page, 'routesSet'), { timeout: 15_000 })
-            .toBeGreaterThan(routesBefore)
-        const response = await page.request.get(
-            '/api/manage/analytics?range=30d',
-            { headers: await authHeader(page) },
-        )
-        const { setters } = await response.json()
-        expect(
-            setters.map((entry: { setter: string }) => entry.setter),
-        ).toContain(setter)
+        await liveRefresh
     } finally {
         await pb.collection('routes').delete(route.id)
     }
+})
+
+test('refreshes during a steady stream of route changes', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const pb = await superuserPb()
+    await gotoSubscribed(page, '/manage/analytics?range=30d', 'routes/*')
+
+    let refreshed = false
+    page.on('response', (response) => {
+        if (response.url().includes('/api/manage/analytics')) refreshed = true
+    })
+    const createdIds: string[] = []
+    try {
+        for (let index = 0; index < 8 && !refreshed; index++) {
+            const route = await pb.collection('routes').create({
+                name: `${testPrefix}-stream-route-${index}`,
+                ...uiaa('5'),
+                type: 'Route',
+                creator: [`${testPrefix}-stream-setter`],
+                screw_date: new Date().toISOString(),
+            })
+            createdIds.push(route.id)
+            await page.waitForTimeout(500)
+        }
+        expect(refreshed).toBe(true)
+    } finally {
+        await Promise.all(
+            createdIds.map((id) => pb.collection('routes').delete(id)),
+        )
+    }
+})
+
+test('heatmap tooltip hides when the page scrolls', async ({
+    adminPage: page,
+}) => {
+    await page.setViewportSize({ width: 390, height: 600 })
+    await gotoSettled(page, '/manage/analytics?range=all')
+    const heatmap = page.getByTestId('analytics-heatmap')
+    await heatmap.scrollIntoViewIfNeeded()
+    await heatmap.locator('[data-date]').last().click()
+    const tooltip = page.getByTestId('analytics-heatmap-tooltip')
+    await expect(tooltip).toBeVisible()
+    await page.evaluate(() => window.scrollBy(0, 200))
+    await expect(tooltip).toBeHidden()
 })
 
 test('heatmap switches years and shows day counts', async ({

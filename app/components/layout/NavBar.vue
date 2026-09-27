@@ -158,7 +158,8 @@ const isLoggedIn = computed(() => loggedIn.value)
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 0 16px;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0
+        max(16px, env(safe-area-inset-left, 0px));
     gap: 8px;
 }
 

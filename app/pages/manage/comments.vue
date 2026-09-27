@@ -5,62 +5,20 @@
         <div class="stats-scroll mb-3">
             <div class="stats-scroll__inner">
                 <v-card
+                    v-for="tile in statTiles"
+                    :key="tile.key"
                     border
                     flat
-                    class="stat-chip pa-2 px-3 text-center"
-                    data-testid="comments-stat-total"
+                    class="stat-chip pa-2 px-3"
+                    :data-testid="`comments-stat-${tile.key}`"
                 >
-                    <div class="text-title-large font-weight-bold text-primary">
-                        {{ stats.totalReviews }}
-                    </div>
-                    <div class="text-body-small text-medium-emphasis">
-                        {{ t('comments.totalReviews') }}
-                    </div>
-                </v-card>
-                <v-card
-                    border
-                    flat
-                    class="stat-chip pa-2 px-3 text-center"
-                    data-testid="comments-stat-avg-rating"
-                >
-                    <div class="d-flex align-center justify-center ga-1">
-                        <span
-                            class="text-title-large font-weight-bold text-warning"
-                            >{{ stats.avgRating }}</span
-                        >
-                        <v-icon color="yellow-darken-2" size="16"
-                            >mdi-star</v-icon
-                        >
-                    </div>
-                    <div class="text-body-small text-medium-emphasis">
-                        {{ t('comments.avgRating') }}
-                    </div>
-                </v-card>
-                <v-card
-                    border
-                    flat
-                    class="stat-chip pa-2 px-3 text-center"
-                    data-testid="comments-stat-this-week"
-                >
-                    <div class="text-title-large font-weight-bold text-success">
-                        {{ stats.thisWeek }}
-                    </div>
-                    <div class="text-body-small text-medium-emphasis">
-                        {{ t('comments.thisWeek') }}
-                    </div>
-                </v-card>
-                <v-card
-                    border
-                    flat
-                    class="stat-chip pa-2 px-3 text-center"
-                    data-testid="comments-stat-low-rated"
-                >
-                    <div class="text-title-large font-weight-bold text-error">
-                        {{ stats.lowRated }}
-                    </div>
-                    <div class="text-body-small text-medium-emphasis">
-                        {{ t('comments.lowRated') }}
-                    </div>
+                    <LayoutStatTile
+                        :label="tile.label"
+                        :value="tile.value"
+                        :color="tile.color"
+                        :icon="tile.icon"
+                        :icon-color="tile.iconColor"
+                    />
                 </v-card>
             </div>
         </div>
@@ -209,12 +167,10 @@
             </template>
         </FilterBar>
 
-        <!-- ── Loading skeletons ───────────────────────────────────────────── -->
-        <v-row v-if="loading && !comments.length">
-            <v-col v-for="i in 6" :key="i" cols="12" sm="6" lg="4">
-                <v-skeleton-loader type="card-avatar" rounded="lg" />
-            </v-col>
-        </v-row>
+        <LayoutLoadingState
+            v-if="loading && !comments.length"
+            variant="cards"
+        />
 
         <!-- ── Empty state ─────────────────────────────────────────────────── -->
         <LayoutEmptyState
@@ -355,17 +311,58 @@ definePageMeta({
 
 // ── State ──────────────────────────────────────────────────────────────────
 
-const loading = ref(true)
-const loadingMore = ref(false)
-const bulkDeleting = ref(false)
+const { pending: bulkDeleting, run: runBulkDelete } = useAsyncAction()
 
-const comments = ref<ManagedComment[]>([])
+const {
+    items: comments,
+    totalItems,
+    loading,
+    loadingMore,
+    hasMore,
+    refresh: fetchList,
+    loadMore: loadNextPage,
+    prefetch,
+} = usePbList<RatingRecord, ManagedComment>('ratings', {
+    perPage: 48,
+    requestKey: 'commentsList',
+    query: () => ({
+        sort: buildSort(),
+        filter: buildFilter(search.value.trim()),
+        expand: 'route_id.location,user',
+        fields: LIST_FIELDS,
+    }),
+    map: mapComment,
+})
+
 const stats = ref({ totalReviews: 0, avgRating: '—', thisWeek: 0, lowRated: 0 })
-
-const page = ref(1)
-const PER_PAGE = 48
-const totalItems = ref(0)
-const hasMore = computed(() => comments.value.length < totalItems.value)
+const statTiles = computed(() => [
+    {
+        key: 'total',
+        label: t('comments.totalReviews'),
+        value: stats.value.totalReviews,
+        color: 'primary',
+    },
+    {
+        key: 'avg-rating',
+        label: t('comments.avgRating'),
+        value: stats.value.avgRating,
+        color: 'warning',
+        icon: 'mdi-star',
+        iconColor: 'yellow-darken-2',
+    },
+    {
+        key: 'this-week',
+        label: t('comments.thisWeek'),
+        value: stats.value.thisWeek,
+        color: 'success',
+    },
+    {
+        key: 'low-rated',
+        label: t('comments.lowRated'),
+        value: stats.value.lowRated,
+        color: 'error',
+    },
+])
 
 const pageRoute = useRoute()
 const search = ref(String(pageRoute.query.search ?? ''))
@@ -387,7 +384,7 @@ const editingReview = ref<ManagedComment | null>(null)
 
 const bulkDeleteDialog = ref(false)
 
-const { notify, error: notifyError } = useNotification()
+const { notify } = useNotification()
 
 const activeFilterCount = computed(
     () =>
@@ -524,41 +521,9 @@ function scheduleStatsRefresh() {
     statsDebounce = setTimeout(() => fetchStats(), 500)
 }
 
-const fetchList = async (append = false) => {
-    if (append) {
-        loadingMore.value = true
-    } else {
-        loading.value = true
-        page.value = 1
-        comments.value = []
-    }
-
-    try {
-        const result = await pb
-            .collection('ratings')
-            .getList<RatingRecord>(page.value, PER_PAGE, {
-                sort: buildSort(),
-                filter: buildFilter(search.value.trim()),
-                expand: 'route_id.location,user',
-                fields: LIST_FIELDS,
-                requestKey: 'commentsList',
-            })
-        totalItems.value = result.totalItems
-        const mapped = result.items.map(mapComment)
-        comments.value = append ? [...comments.value, ...mapped] : mapped
-    } catch (err) {
-        if (isAbortError(err)) return
-        console.error('Failed to fetch comments:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        loading.value = false
-        loadingMore.value = false
-    }
-}
-
 async function loadMore() {
-    page.value++
-    await fetchList(true)
+    if (loading.value || loadingMore.value || !hasMore.value) return
+    await loadNextPage()
     await nextTick()
     if (sentinelRef.value && scrollObserver) {
         scrollObserver.unobserve(sentinelRef.value)
@@ -571,18 +536,13 @@ async function loadMore() {
 const sentinelRef = ref<HTMLElement | null>(null)
 let scrollObserver: IntersectionObserver | null = null
 
-function maybeLoadMore() {
-    if (loading.value || loadingMore.value || !hasMore.value) return
-    loadMore()
-}
-
 watch(sentinelRef, (el) => {
     scrollObserver?.disconnect()
     if (!el || typeof IntersectionObserver === 'undefined') return
     if (!scrollObserver) {
         scrollObserver = new IntersectionObserver(
             (entries) => {
-                if (entries[0]?.isIntersecting) maybeLoadMore()
+                if (entries[0]?.isIntersecting) loadMore()
             },
             { rootMargin: '400px 0px' },
         )
@@ -634,7 +594,7 @@ function onReviewSaved(updated: RatingRecord | null) {
 // ── Single delete (one shared ConfirmDialog for all cards) ─────────────────
 
 const deleteDialog = ref(false)
-const deleting = ref(false)
+const { pending: deleting, run: runDelete } = useAsyncAction()
 const deleteTarget = ref<ManagedComment | null>(null)
 
 function openDelete(comment: ManagedComment) {
@@ -644,45 +604,37 @@ function openDelete(comment: ManagedComment) {
 
 async function confirmDelete() {
     if (!deleteTarget.value) return
-    deleting.value = true
-    try {
-        const id = deleteTarget.value.id
-        await pb.collection('ratings').delete(id)
-        comments.value = comments.value.filter((c) => c.id !== id)
-        totalItems.value = Math.max(0, totalItems.value - 1)
-        deleteDialog.value = false
-        deleteTarget.value = null
-        notify(t('notifications.success.delete'))
-        scheduleStatsRefresh()
-    } catch (err) {
-        console.error('Error deleting comment:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        deleting.value = false
-    }
+    const id = deleteTarget.value.id
+    await runDelete(
+        async () => {
+            await pb.collection('ratings').delete(id)
+            comments.value = comments.value.filter((c) => c.id !== id)
+            totalItems.value = Math.max(0, totalItems.value - 1)
+            deleteDialog.value = false
+            deleteTarget.value = null
+            scheduleStatsRefresh()
+        },
+        { success: t('notifications.success.delete') },
+    )
 }
 
 // ── Bulk delete ────────────────────────────────────────────────────────────
 
 async function bulkDelete() {
-    bulkDeleting.value = true
-    try {
-        const ids = Object.keys(selectedMap)
-        const batch = pb.createBatch()
-        ids.forEach((id) => batch.collection('ratings').delete(id))
-        await batch.send()
-        comments.value = comments.value.filter((c) => !ids.includes(c.id))
-        totalItems.value = Math.max(0, totalItems.value - ids.length)
-        notify(t('notifications.success.delete'))
-        clearSelection()
-        bulkDeleteDialog.value = false
-        scheduleStatsRefresh()
-    } catch (err) {
-        console.error('Error bulk deleting:', err)
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        bulkDeleting.value = false
-    }
+    const ids = Object.keys(selectedMap)
+    await runBulkDelete(
+        async () => {
+            const batch = pb.createBatch()
+            ids.forEach((id) => batch.collection('ratings').delete(id))
+            await batch.send()
+            comments.value = comments.value.filter((c) => !ids.includes(c.id))
+            totalItems.value = Math.max(0, totalItems.value - ids.length)
+            clearSelection()
+            bulkDeleteDialog.value = false
+            scheduleStatsRefresh()
+        },
+        { success: t('notifications.success.delete') },
+    )
 }
 
 // ── Selection helpers ──────────────────────────────────────────────────────
@@ -700,21 +652,14 @@ function clearSelection() {
 
 const { subscribe } = usePbSubscription()
 
-const { data: initial } = await useAsyncData('admin-comments', async () => {
-    await Promise.all([fetchList(), fetchStats()])
-    return {
-        comments: comments.value,
-        totalItems: totalItems.value,
-        stats: stats.value,
-    }
-})
-
-if (initial.value) {
-    comments.value = initial.value.comments
-    totalItems.value = initial.value.totalItems
-    stats.value = initial.value.stats
-}
-loading.value = false
+const [, { data: initialStats }] = await Promise.all([
+    prefetch('admin-comments'),
+    useAsyncData('admin-comments-stats', async () => {
+        await fetchStats()
+        return stats.value
+    }),
+])
+if (initialStats.value) stats.value = initialStats.value
 
 onMounted(async () => {
     await subscribe('ratings', async (e) => {

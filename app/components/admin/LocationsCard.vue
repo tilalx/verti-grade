@@ -70,7 +70,7 @@ import type { LocationRecord } from '~/types/models'
 
 const pb = usePocketbase()
 const { t } = useI18n()
-const { success: notifySuccess, error: notifyError } = useNotification()
+const { run: runAction } = useAsyncAction()
 const { data: locations, refresh } = useLocations()
 
 const newName = ref('')
@@ -87,24 +87,24 @@ watch(
 
 async function run(id: string, action: () => Promise<unknown>) {
     busyId.value = id
-    try {
-        await action()
-        await refresh()
-        notifySuccess(t('settings.locationSaved'))
-        return true
-    } catch (error) {
-        const inUse = (error as { status?: number }).status === 400
-        notifyError(
-            t(
-                inUse
-                    ? 'settings.locationSaveFailed'
-                    : 'notifications.error.generic',
-            ),
-        )
-        return false
-    } finally {
-        busyId.value = null
-    }
+    const saved = await runAction(
+        async () => {
+            await action()
+            await refresh()
+            return true
+        },
+        {
+            success: t('settings.locationSaved'),
+            error: (error) =>
+                t(
+                    (error as { status?: number }).status === 400
+                        ? 'settings.locationSaveFailed'
+                        : 'notifications.error.generic',
+                ),
+        },
+    )
+    busyId.value = null
+    return saved ?? false
 }
 
 async function add() {

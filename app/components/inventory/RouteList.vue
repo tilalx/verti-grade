@@ -17,6 +17,7 @@
                 <v-icon v-else size="16" color="success" class="mr-3">
                     mdi-check-circle-outline
                 </v-icon>
+                <RouteColorDot :color="route.color" :size="20" class="mr-3" />
             </template>
             <v-list-item-title class="text-body-medium">
                 {{ route.name }}

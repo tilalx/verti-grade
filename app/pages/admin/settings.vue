@@ -11,7 +11,7 @@
             data-testid="settings-mail-warning"
         >
             <div class="d-flex flex-wrap align-center ga-2">
-                <span style="flex: 1 1 16rem">{{
+                <span class="alert-message">{{
                     $t('settings.mailNotConfigured')
                 }}</span>
                 <v-btn
@@ -43,8 +43,8 @@
                     border
                     flat
                     height="100%"
+                    class="asset-card"
                     :class="{ 'border-primary': asset.isDirty }"
-                    style="transition: border-color 0.2s"
                 >
                     <v-card-text class="pa-4">
                         <div
@@ -82,7 +82,6 @@
                         <!-- Preview + Upload combined area -->
                         <div
                             class="asset-drop-zone d-flex flex-column align-center justify-center rounded-lg position-relative"
-                            style="height: 160px"
                             :data-testid="`settings-asset-${asset.key}`"
                             @click="() => asset.triggerInput()"
                         >
@@ -91,12 +90,7 @@
                                 v-if="asset.preview.value"
                                 :src="asset.preview.value"
                                 :alt="asset.label"
-                                style="
-                                    max-height: 130px;
-                                    max-width: 100%;
-                                    object-fit: contain;
-                                    display: block;
-                                "
+                                class="asset-preview"
                             />
 
                             <!-- Empty state -->
@@ -112,57 +106,32 @@
                                 >
                             </template>
 
-                            <!-- Hover overlay: replace + optional delete -->
                             <div
-                                class="asset-hover-overlay rounded-lg"
-                                style="
-                                    position: absolute;
-                                    inset: 0;
-                                    background: rgba(0, 0, 0, 0.55);
-                                    opacity: 0;
-                                    transition: opacity 0.18s;
-                                "
+                                class="asset-overlay rounded-lg"
+                                :data-testid="`settings-asset-actions-${asset.key}`"
                             >
-                                <div
-                                    class="d-flex align-center justify-center"
-                                    style="height: 100%; gap: 16px"
-                                >
-                                    <div
-                                        class="d-flex flex-column align-center"
+                                <div class="asset-overlay__action">
+                                    <v-icon size="24"
+                                        >mdi-upload-outline</v-icon
                                     >
-                                        <v-icon
-                                            color="white"
-                                            size="24"
-                                            class="mb-1"
-                                            >mdi-upload-outline</v-icon
-                                        >
-                                        <span
-                                            class="text-body-small text-white"
-                                            >{{ $t('settings.replace') }}</span
-                                        >
-                                    </div>
-                                    <div
-                                        v-if="
-                                            asset.preview.value &&
-                                            !asset.isDirty
-                                        "
-                                        class="d-flex flex-column align-center"
-                                        @click.stop="asset.onDelete()"
-                                    >
-                                        <v-icon
-                                            color="error"
-                                            size="24"
-                                            class="mb-1"
-                                            >mdi-delete-outline</v-icon
-                                        >
-                                        <span
-                                            class="text-body-small text-white"
-                                            >{{
-                                                $t('settings.removeImage')
-                                            }}</span
-                                        >
-                                    </div>
+                                    <span class="text-body-small">{{
+                                        $t('settings.replace')
+                                    }}</span>
                                 </div>
+                                <button
+                                    v-if="asset.preview.value && !asset.isDirty"
+                                    type="button"
+                                    class="asset-overlay__action"
+                                    :data-testid="`settings-asset-delete-${asset.key}`"
+                                    @click.stop="asset.onDelete()"
+                                >
+                                    <v-icon color="error" size="24"
+                                        >mdi-delete-outline</v-icon
+                                    >
+                                    <span class="text-body-small">{{
+                                        $t('settings.removeImage')
+                                    }}</span>
+                                </button>
                             </div>
                         </div>
 
@@ -180,7 +149,7 @@
                                         Array.isArray(f) ? (f[0] ?? null) : f,
                                     )
                             "
-                            style="display: none"
+                            class="d-none"
                             hide-details
                         />
                     </v-card-text>
@@ -654,8 +623,7 @@ const logoPreview = ref<string | null>(null)
 const iconPreview = ref<string | null>(null)
 const signPreview = ref<string | null>(null)
 
-const saving = ref(false)
-const { notify, error: notifyError } = useNotification()
+const { pending: saving, run: runSave } = useAsyncAction()
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -815,77 +783,75 @@ watch(settings, adoptRecord, { immediate: true })
 
 async function saveSettings() {
     if (!hasChanges.value || saving.value) return
-    saving.value = true
+    await runSave(
+        async () => {
+            const payload: Record<string, unknown> = {
+                application_url: copySettings.application_url,
+                imprint_url: copySettings.imprint_url,
+                privacy_url: copySettings.privacy_url,
+                organization_name: copySettings.organization_name,
+                organization_unit_name: copySettings.organization_unit_name,
+                contact_email: copySettings.contact_email,
+                audit_retention_days:
+                    Number(copySettings.audit_retention_days) || null,
+                allow_registration: copySettings.allow_registration,
+                route_grade_system: copySettings.route_grade_system,
+                boulder_grade_system: copySettings.boulder_grade_system,
+                ...legalPayload(copySettings),
+            }
+            if (logoFile.value) payload.page_logo = logoFile.value
+            else if (logoClear.value) payload.page_logo = null
+            if (iconFile.value) payload.page_icon = iconFile.value
+            else if (iconClear.value) payload.page_icon = null
+            if (signFile.value) payload.sign_image = signFile.value
+            else if (signClear.value) payload.sign_image = null
 
-    try {
-        const payload: Record<string, unknown> = {
-            application_url: copySettings.application_url,
-            imprint_url: copySettings.imprint_url,
-            privacy_url: copySettings.privacy_url,
-            organization_name: copySettings.organization_name,
-            organization_unit_name: copySettings.organization_unit_name,
-            contact_email: copySettings.contact_email,
-            audit_retention_days:
-                Number(copySettings.audit_retention_days) || null,
-            allow_registration: copySettings.allow_registration,
-            route_grade_system: copySettings.route_grade_system,
-            boulder_grade_system: copySettings.boulder_grade_system,
-            ...legalPayload(copySettings),
-        }
-        if (logoFile.value) payload.page_logo = logoFile.value
-        else if (logoClear.value) payload.page_logo = null
-        if (iconFile.value) payload.page_icon = iconFile.value
-        else if (iconClear.value) payload.page_icon = null
-        if (signFile.value) payload.sign_image = signFile.value
-        else if (signClear.value) payload.sign_image = null
+            const updated = await pb
+                .collection('settings')
+                .update<SettingsRecord>(settings.value!.id, payload)
 
-        const updated = await pb
-            .collection('settings')
-            .update<SettingsRecord>(settings.value!.id, payload)
+            logoPreview.value = pbFileUrl(updated, updated.page_logo)
+            iconPreview.value = pbFileUrl(updated, updated.page_icon)
+            signPreview.value = pbFileUrl(updated, updated.sign_image)
 
-        logoPreview.value = pbFileUrl(updated, updated.page_logo)
-        iconPreview.value = pbFileUrl(updated, updated.page_icon)
-        signPreview.value = pbFileUrl(updated, updated.sign_image)
+            logoFile.value = iconFile.value = signFile.value = null
+            logoClear.value = iconClear.value = signClear.value = false
 
-        logoFile.value = iconFile.value = signFile.value = null
-        logoClear.value = iconClear.value = signClear.value = false
+            original.application_url = updated.application_url ?? ''
+            original.imprint_url = updated.imprint_url ?? ''
+            original.privacy_url = updated.privacy_url ?? ''
+            original.organization_name = updated.organization_name ?? ''
+            original.organization_unit_name =
+                updated.organization_unit_name ?? ''
+            original.contact_email = updated.contact_email ?? ''
+            original.audit_retention_days = updated.audit_retention_days ?? 90
+            original.allow_registration = !!updated.allow_registration
+            original.route_grade_system =
+                updated.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
+            original.boulder_grade_system =
+                updated.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
+            Object.assign(original, legalFieldsFrom(updated))
 
-        original.application_url = updated.application_url ?? ''
-        original.imprint_url = updated.imprint_url ?? ''
-        original.privacy_url = updated.privacy_url ?? ''
-        original.organization_name = updated.organization_name ?? ''
-        original.organization_unit_name = updated.organization_unit_name ?? ''
-        original.contact_email = updated.contact_email ?? ''
-        original.audit_retention_days = updated.audit_retention_days ?? 90
-        original.allow_registration = !!updated.allow_registration
-        original.route_grade_system =
-            updated.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
-        original.boulder_grade_system =
-            updated.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
-        Object.assign(original, legalFieldsFrom(updated))
-
-        Object.assign(copySettings, {
-            application_url: updated.application_url ?? '',
-            imprint_url: updated.imprint_url ?? '',
-            privacy_url: updated.privacy_url ?? '',
-            organization_name: updated.organization_name ?? '',
-            organization_unit_name: updated.organization_unit_name ?? '',
-            contact_email: updated.contact_email ?? '',
-            audit_retention_days: updated.audit_retention_days ?? 90,
-            allow_registration: original.allow_registration,
-            route_grade_system: original.route_grade_system,
-            boulder_grade_system: original.boulder_grade_system,
-            ...legalFieldsFrom(updated),
-        })
-        settings.value = updated
-
-        notify(t('settings.saveSuccess'))
-    } catch (err) {
-        console.error('Save failed:', err)
-        notifyError(t('settings.saveError'))
-    } finally {
-        saving.value = false
-    }
+            Object.assign(copySettings, {
+                application_url: updated.application_url ?? '',
+                imprint_url: updated.imprint_url ?? '',
+                privacy_url: updated.privacy_url ?? '',
+                organization_name: updated.organization_name ?? '',
+                organization_unit_name: updated.organization_unit_name ?? '',
+                contact_email: updated.contact_email ?? '',
+                audit_retention_days: updated.audit_retention_days ?? 90,
+                allow_registration: original.allow_registration,
+                route_grade_system: original.route_grade_system,
+                boulder_grade_system: original.boulder_grade_system,
+                ...legalFieldsFrom(updated),
+            })
+            settings.value = updated
+        },
+        {
+            success: t('settings.saveSuccess'),
+            error: t('settings.saveError'),
+        },
+    )
 }
 </script>
 
@@ -917,16 +883,67 @@ async function saveSettings() {
     }
 }
 
+.asset-card {
+    transition: border-color 0.2s;
+}
+
 .asset-drop-zone {
+    height: 160px;
     border: 1.5px dashed rgba(var(--v-border-color), 0.28);
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.18s;
 }
+
 .asset-drop-zone:hover {
     border-color: rgba(var(--v-border-color), 0.6);
 }
-.asset-drop-zone:hover .asset-hover-overlay {
-    opacity: 1 !important;
+
+.asset-preview {
+    display: block;
+    max-width: 100%;
+    max-height: 130px;
+    object-fit: contain;
+}
+
+.asset-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(var(--v-theme-surface-variant), 0.85);
+    color: rgb(var(--v-theme-on-surface-variant));
+    opacity: 0;
+    transition: opacity 0.18s;
+}
+
+.asset-drop-zone:hover .asset-overlay,
+.asset-overlay:focus-within {
+    opacity: 1;
+}
+
+.asset-overlay__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    color: inherit;
+}
+
+@media (hover: none) {
+    .asset-overlay {
+        inset: auto 0 0;
+        padding: 4px 8px;
+        opacity: 1;
+    }
+
+    .asset-overlay__action {
+        flex-direction: row;
+    }
 }
 </style>

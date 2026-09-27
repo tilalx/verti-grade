@@ -52,9 +52,9 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
+            viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
             meta: [
                 { name: 'color-scheme', content: 'light dark' },
-                { name: 'theme-color', content: '#38741C' },
                 { name: 'mobile-web-app-capable', content: 'yes' },
                 { name: 'apple-mobile-web-app-title', content: 'Gripello' },
             ],

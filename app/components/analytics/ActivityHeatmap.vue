@@ -17,11 +17,16 @@
                 }}
             </div>
             <div class="heatmap-box">
-                <div ref="scrollRef" class="heatmap-scroll">
+                <div
+                    ref="scrollRef"
+                    class="heatmap-scroll"
+                    @scroll.passive="tooltip.visible = false"
+                >
                     <div
                         class="heatmap-grid"
                         :style="{ '--weeks': weeks.length }"
-                        @mouseover="onCellHover"
+                        @mouseover="showCellTooltip"
+                        @click="showCellTooltip"
                         @mouseleave="tooltip.visible = false"
                     >
                         <span
@@ -100,6 +105,7 @@
             <div
                 v-if="tooltip.visible"
                 class="heatmap-tooltip"
+                data-testid="analytics-heatmap-tooltip"
                 :style="{ left: tooltip.left, top: tooltip.top }"
             >
                 {{ tooltip.text }}
@@ -260,10 +266,18 @@ function scrollToToday() {
         : 0
 }
 
-onMounted(scrollToToday)
+function hideTooltip() {
+    tooltip.visible = false
+}
+
+onMounted(() => {
+    scrollToToday()
+    window.addEventListener('scroll', hideTooltip, { passive: true })
+})
+onBeforeUnmount(() => window.removeEventListener('scroll', hideTooltip))
 watch(selectedYear, () => nextTick(scrollToToday))
 
-function onCellHover(event: MouseEvent) {
+function showCellTooltip(event: MouseEvent) {
     const target = event.target as HTMLElement | null
     const label = target?.getAttribute('aria-label')
     if (!target || !label) {
