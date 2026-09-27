@@ -13,7 +13,7 @@ test('public route table headers use the climbing terms of the active locale', a
     page,
 }, testInfo) => {
     const locale = testInfo.project.use.locale as string
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
 
     const table = page.getByTestId('index-table')
     await expect(table).toBeVisible()

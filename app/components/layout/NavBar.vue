@@ -31,7 +31,6 @@
                 </router-link>
 
                 <nav
-                    v-if="isLoggedIn"
                     class="nav-links d-none d-lg-flex"
                     data-testid="nav-desktop-links"
                     :aria-label="$t('nav.mainNavigation')"
@@ -116,7 +115,7 @@ const logoAlt = computed(() => settings.value?.organization_name || 'Gripello')
 
 const { can } = usePermissions()
 
-const visibleNav = computed(() => visibleNavItems(can))
+const visibleNav = computed(() => visibleNavItems(can, isLoggedIn.value))
 
 const paletteLinks = computed(() =>
     visibleNav.value.flatMap(

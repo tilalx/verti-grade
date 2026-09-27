@@ -4,6 +4,7 @@ import { gotoSettled } from '../../support/nav'
 const TOP_LEVEL = [
     'nav-link-home',
     'nav-link-map',
+    'nav-link-routes',
     'nav-link-logbook',
     'nav-link-manage-routes',
 ]

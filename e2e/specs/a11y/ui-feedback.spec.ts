@@ -23,7 +23,7 @@ test('stacks snackbars instead of replacing them', async ({ page }) => {
 test('announces the number of routes found after searching', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page
         .getByTestId('filter-search')
         .locator('input')
@@ -32,7 +32,7 @@ test('announces the number of routes found after searching', async ({
 })
 
 test('shows a visible focus ring for keyboard focus', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.keyboard.press('Tab')
     const outline = await page.evaluate(
         () => getComputedStyle(document.activeElement!).outlineStyle,
@@ -41,12 +41,12 @@ test('shows a visible focus ring for keyboard focus', async ({ page }) => {
 })
 
 test('renders the navigation loading indicator', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await expect(page.locator('.nuxt-loading-indicator')).toBeAttached()
 })
 
 test('keeps the focus ring off text inputs', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     const search = page.getByTestId('filter-search').locator('input')
     await search.focus()
     await expect(search).toHaveCSS('outline-style', 'none')

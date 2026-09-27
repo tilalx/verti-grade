@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test.use({ viewport: { width: 1160, height: 900 } })
 
 test('the route table fits without sideways scrolling', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await expect(page.getByTestId('index-table')).toBeVisible()
 
     const overflow = await page
@@ -16,7 +16,7 @@ test('the route table fits without sideways scrolling', async ({ page }) => {
 test('stacked setter chips keep clear of the row dividers', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await expect(page.getByTestId('index-table')).toBeVisible()
 
     const gaps = await page.locator('tbody tr').evaluateAll((rows) => {

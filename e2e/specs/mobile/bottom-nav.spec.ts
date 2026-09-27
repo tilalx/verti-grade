@@ -46,13 +46,18 @@ test('the footer links stay above the bottom bar', async ({ page }) => {
     await gotoSettled(page, '/account')
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     const bar = (await page.getByTestId('bottom-nav').boundingBox())!
-    const links = (await page.getByTestId('footer-privacy').boundingBox())!
+    const links = (await page
+        .getByTestId('me-info')
+        .getByTestId('footer-privacy')
+        .boundingBox())!
     expect(links.y + links.height).toBeLessThanOrEqual(bar.y)
 })
 
 test('on phones the footer lives on the account tab only', async ({ page }) => {
     await gotoSettled(page, '/scan')
-    await expect(page.getByTestId('app-footer')).toHaveCount(0)
+    await expect(page.getByTestId('app-footer')).toBeHidden()
     await gotoSettled(page, '/account')
-    await expect(page.getByTestId('footer-privacy')).toBeVisible()
+    await expect(
+        page.getByTestId('me-info').getByTestId('footer-privacy'),
+    ).toBeVisible()
 })

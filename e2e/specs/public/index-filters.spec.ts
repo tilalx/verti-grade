@@ -2,7 +2,7 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
 test('shows no rows for a search with no matches', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page
         .getByTestId('filter-search')
         .locator('input')
@@ -13,7 +13,7 @@ test('shows no rows for a search with no matches', async ({ page }) => {
 })
 
 test('filters the route list by search text', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('filter-search').locator('input').fill('e2e-route-1')
     await expect(page.getByTestId('index-table')).toContainText('e2e-route-1')
 })
@@ -21,7 +21,7 @@ test('filters the route list by search text', async ({ page }) => {
 test('filters by grade, and every visible row actually matches', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('index-filter-difficulty').click()
     await page.getByRole('option', { name: '5 · UIAA', exact: true }).click()
     await expect(page.getByTestId('index-table')).toBeVisible()
@@ -46,7 +46,7 @@ test('filters by grade, and every visible row actually matches', async ({
 })
 
 test('searches by setter name', async ({ page }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('filter-search').locator('input').fill('Setter 3')
     const rows = page.getByTestId('index-table').locator('tbody tr')
     await expect(rows.first()).toContainText('Setter 3')
@@ -64,7 +64,7 @@ test('combines a route name with a signed grade', async ({ page }) => {
     )
     const route = (await res.json()).items[0]
 
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     const search = page.getByTestId('filter-search').locator('input')
     const exactRoute = page
         .getByTestId('index-table')

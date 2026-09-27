@@ -7,12 +7,24 @@ export interface NavLink {
 
 export interface NavItem extends Partial<NavLink> {
     key: string
+    signedIn?: boolean
     icon: string
     label: string
     children?: NavLink[]
 }
 
 type Can = (permission: string) => boolean
+
+export const BOTTOM_NAV: NavLink[] = [
+    { to: '/map', icon: 'mdi-map-outline', label: 'routes.map' },
+    { to: '/scan', icon: 'mdi-qrcode-scan', label: 'routes.scan' },
+    {
+        to: '/logbook',
+        icon: 'mdi-notebook-check-outline',
+        label: 'routes.logbook',
+    },
+    { to: '/account', icon: 'mdi-account-circle-outline', label: 'routes.me' },
+]
 
 export const NAV_ITEMS: NavItem[] = [
     {
@@ -28,7 +40,14 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'routes.map',
     },
     {
+        key: 'list',
+        to: '/routes',
+        icon: 'mdi-format-list-bulleted',
+        label: 'routes.list',
+    },
+    {
         key: 'logbook',
+        signedIn: true,
         to: '/logbook',
         icon: 'mdi-notebook-check-outline',
         label: 'routes.logbook',
@@ -107,14 +126,16 @@ export const NAV_ITEMS: NavItem[] = [
 const allowed = (can: Can) => (link: { permission?: string }) =>
     !link.permission || can(link.permission)
 
-export function visibleNavItems(can: Can): NavItem[] {
-    return NAV_ITEMS.map((item) =>
-        item.children
-            ? { ...item, children: item.children.filter(allowed(can)) }
-            : item,
-    ).filter((item) =>
-        item.children ? item.children.length > 0 : allowed(can)(item),
-    )
+export function visibleNavItems(can: Can, signedIn = true): NavItem[] {
+    return NAV_ITEMS.filter((item) => signedIn || !item.signedIn)
+        .map((item) =>
+            item.children
+                ? { ...item, children: item.children.filter(allowed(can)) }
+                : item,
+        )
+        .filter((item) =>
+            item.children ? item.children.length > 0 : allowed(can)(item),
+        )
 }
 
 export function staffSections(
@@ -133,4 +154,16 @@ export function staffSections(
             ].filter(allowed(can)),
         }))
         .filter((section) => section.links.length > 0)
+}
+
+export function pageLinks(signedIn: boolean): NavLink[] {
+    const inBottomNav = new Set(BOTTOM_NAV.map((link) => link.to))
+    return NAV_ITEMS.filter(
+        (item) =>
+            item.to &&
+            !item.children &&
+            !item.permission &&
+            (signedIn || !item.signedIn) &&
+            !inBottomNav.has(item.to),
+    ) as NavLink[]
 }

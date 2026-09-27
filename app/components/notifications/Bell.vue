@@ -1,6 +1,5 @@
 <template>
     <v-menu
-        v-if="isLoggedIn"
         v-model="open"
         :close-on-content-click="false"
         location="bottom end"
@@ -130,7 +129,6 @@ const { items, unreadCount, refresh, markRead, markAllRead, dismiss } =
     useNotificationQueue()
 
 const open = ref(false)
-const isLoggedIn = ref(false)
 
 function label(item: NotificationRecord) {
     return t(`notifications.center.types.${item.type}`, item.params ?? {})
@@ -145,8 +143,7 @@ async function openItem(item: NotificationRecord) {
 }
 
 onMounted(async () => {
-    isLoggedIn.value = pb.authStore.isValid
-    if (!isLoggedIn.value) return
+    if (!pb.authStore.isValid) return
 
     await refresh()
     await subscribe('notifications', () => void refresh())

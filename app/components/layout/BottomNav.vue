@@ -1,15 +1,14 @@
 <template>
     <v-bottom-navigation
-        :active="!lgAndUp"
         :height="64"
         grow
         tag="nav"
-        class="bottom-nav"
+        class="bottom-nav d-lg-none"
         :aria-label="$t('nav.quickNavigation')"
         data-testid="bottom-nav"
     >
         <v-btn
-            v-for="item in items"
+            v-for="item in BOTTOM_NAV"
             :key="item.to"
             :to="item.to"
             :exact="item.to === '/account'"
@@ -26,26 +25,23 @@
 </template>
 
 <script setup lang="ts">
-const { lgAndUp } = useDisplay()
-
-const items = [
-    { to: '/map', icon: 'mdi-map-outline', label: 'routes.map' },
-    { to: '/scan', icon: 'mdi-qrcode-scan', label: 'routes.scan' },
-    {
-        to: '/logbook',
-        icon: 'mdi-notebook-check-outline',
-        label: 'routes.logbook',
-    },
-    { to: '/account', icon: 'mdi-account-circle-outline', label: 'routes.me' },
-]
+import { BOTTOM_NAV } from '~/utils/navigation'
 </script>
 
 <style scoped>
 .bottom-nav {
+    left: 0;
+    width: 100%;
     background: rgb(var(--v-theme-surface)) !important;
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     box-sizing: content-box;
+}
+
+@media (min-width: 1280px) {
+    :global(.v-main) {
+        --v-layout-bottom: 0px !important;
+    }
 }
 
 .bottom-nav__item {

@@ -1,0 +1,87 @@
+<template>
+    <div class="wall-tiles">
+        <NuxtLink
+            v-for="wall in walls"
+            :key="wall.id"
+            :to="{
+                path: '/map',
+                query: { location: wall.location, wall: wall.id },
+            }"
+            class="wall-tile"
+            data-testid="overview-wall"
+            :data-name="wall.name"
+        >
+            <span class="wall-tile__name">{{ wall.name }}</span>
+            <span class="wall-tile__count">{{
+                $t('overview.wallRoutes', { n: wall.count })
+            }}</span>
+            <span v-if="wall.easiest" class="wall-tile__meta">
+                {{
+                    wall.easiest === wall.hardest
+                        ? wall.easiest
+                        : `${wall.easiest} – ${wall.hardest}`
+                }}
+            </span>
+            <span v-if="wall.newest" class="wall-tile__meta">
+                {{
+                    $t('overview.newestSet', {
+                        date: formatDate(wall.newest, { locale }),
+                    })
+                }}
+            </span>
+        </NuxtLink>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { formatDate } from '#shared/utils/formatting'
+import type { WallSummary } from '~/utils/overview'
+
+defineProps<{ walls: WallSummary[] }>()
+
+const { locale } = useI18n()
+</script>
+
+<style scoped>
+.wall-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.wall-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    color: inherit;
+    text-decoration: none;
+    transition:
+        border-color 0.15s,
+        background-color 0.15s;
+}
+
+.wall-tile:hover,
+.wall-tile:focus-visible {
+    border-color: rgb(var(--v-theme-primary));
+    background: rgba(var(--v-theme-primary), 0.06);
+    outline: none;
+}
+
+.wall-tile__name {
+    font-weight: 700;
+}
+
+.wall-tile__count {
+    color: rgb(var(--v-theme-primary));
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.wall-tile__meta {
+    font-size: 0.75rem;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+</style>

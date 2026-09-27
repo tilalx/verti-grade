@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('sorting the desktop table by name header actually reorders rows', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     const names = () => page.locator('.route-name').allTextContents()
 
     const beforeAsc = await names()

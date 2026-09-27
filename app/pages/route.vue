@@ -26,6 +26,16 @@
                         :style="heroStyle"
                     >
                         <div class="route-hero__overlay" />
+                        <v-btn
+                            icon="mdi-arrow-left"
+                            variant="flat"
+                            size="small"
+                            :color="heroChipColor"
+                            class="route-hero__back route-hero__ink"
+                            :aria-label="t('errors.goBack')"
+                            data-testid="route-back"
+                            @click="goBack"
+                        />
                         <div class="route-hero__content">
                             <!-- Type + location -->
                             <div class="d-flex align-center ga-2 mb-2">
@@ -471,6 +481,13 @@ const heroChipColor = computed(() =>
     heroIsLight.value ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)',
 )
 
+const router = useRouter()
+
+function goBack() {
+    if (window.history.state?.back) router.back()
+    else void navigateTo('/routes')
+}
+
 const heroStyle = computed(() => {
     const color = metadata.value?.color || '#6200EA'
     return {
@@ -691,6 +708,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    gap: 8px;
     overflow: hidden;
 }
 
@@ -777,6 +795,13 @@ onMounted(async () => {
         column-gap: 16px;
         align-items: start;
     }
+}
+
+.route-hero__back {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    margin: -8px 0 auto;
 }
 
 .route-hero__overlay {

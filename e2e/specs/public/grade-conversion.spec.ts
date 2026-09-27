@@ -4,7 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('visitors find the conversion table on the routes page', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
+    await gotoSettled(page, '/routes')
     await page.getByTestId('index-grade-conversion-open').click()
     const dialog = page.getByTestId('grade-conversion-dialog')
     await expect(dialog).toBeVisible()
