@@ -14,14 +14,12 @@
             </template>
         </LayoutPageHeader>
 
-        <v-alert
+        <LayoutDesktopHint
             v-if="!mdAndUp"
-            type="info"
-            variant="tonal"
             data-testid="map-editor-small-screen"
         >
             {{ $t('mapEditor.largerScreen') }}
-        </v-alert>
+        </LayoutDesktopHint>
 
         <LayoutEmptyState
             v-else-if="!locations.length"
@@ -77,7 +75,7 @@
             </v-card-text>
         </v-card>
 
-        <v-card v-else border flat class="editor-shell">
+        <v-card v-else border flat class="map-workspace editor-shell">
             <div class="editor-toolbar" data-testid="map-editor-toolbar">
                 <v-btn-toggle
                     :model-value="activeToolKey"
@@ -171,8 +169,8 @@
                 {{ hint }}
             </p>
 
-            <div class="editor-body">
-                <div class="editor-stage">
+            <div class="map-workspace__body">
+                <div class="map-workspace__stage">
                     <MapView
                         v-if="preview"
                         :map="editor.state.value.map"
@@ -188,7 +186,7 @@
                     />
                 </div>
                 <MapEditorPanel
-                    class="editor-side"
+                    class="map-workspace__side"
                     :editor="editor"
                     :has-trace="!!location?.map_trace"
                     :trace-busy="traceBusy"
@@ -197,6 +195,14 @@
                 />
             </div>
         </v-card>
+
+        <ConfirmDialog
+            v-model="discardDialogOpen"
+            :title="$t('account.unsavedChanges')"
+            :message="$t('mapEditor.discard')"
+            :confirm-text="$t('mapPlacement.discard')"
+            @confirm="settleDiscard(true)"
+        />
     </v-container>
 </template>
 
@@ -232,7 +238,6 @@ const pb = usePocketbase()
 const route = useRoute()
 const router = useRouter()
 const { mdAndUp } = useDisplay()
-const { success: notifySuccess, error: notifyError } = useNotification()
 const editor = useMapEditor()
 
 useSeoMeta({ title: () => t('page.title.mapEditor') })
@@ -241,8 +246,11 @@ const { data: locations, refresh: refreshLocations } = await useLocations()
 const locationId = computed({
     get: () => (route.query.location as string) || locations.value[0]?.id || '',
     set: (id: string) => {
-        if (id !== locationId.value && !confirmDiscard()) return
-        void router.replace({ query: { ...route.query, location: id } })
+        if (id === locationId.value) return
+        void confirmDiscard().then((confirmed) => {
+            if (confirmed)
+                void router.replace({ query: { ...route.query, location: id } })
+        })
     },
 })
 const location = computed(() =>
@@ -447,7 +455,7 @@ const previewWalls = computed<WallRecord[]>(() =>
 )
 const previewRoutes = computed(() => locationRoutes.value)
 
-const traceBusy = ref(false)
+const { pending: traceBusy, run: runTrace } = useAsyncAction()
 const traceUrl = computed(() =>
     location.value?.map_trace
         ? usePbFileUrl(location.value, location.value.map_trace)
@@ -456,11 +464,11 @@ const traceUrl = computed(() =>
 
 async function uploadTrace(file: File) {
     if (!location.value) return
-    traceBusy.value = true
-    try {
+    const locationRecordId = location.value.id
+    await runTrace(async () => {
         await pb
             .collection('locations')
-            .update(location.value.id, { map_trace: file })
+            .update(locationRecordId, { map_trace: file })
         await refreshLocations()
         const map = editor.state.value.map
         if (!map.trace)
@@ -471,31 +479,23 @@ async function uploadTrace(file: File) {
                     trace: { x: 0, y: 0, width: map.width, opacity: 0.5 },
                 },
             })
-    } catch {
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        traceBusy.value = false
-    }
+    })
 }
 
 async function removeTrace() {
     if (!location.value) return
-    traceBusy.value = true
-    try {
+    const locationRecordId = location.value.id
+    await runTrace(async () => {
         await pb
             .collection('locations')
-            .update(location.value.id, { map_trace: null })
+            .update(locationRecordId, { map_trace: null })
         await refreshLocations()
         const { trace: _removed, ...map } = editor.state.value.map
         editor.commit({ ...editor.state.value, map })
-    } catch {
-        notifyError(t('notifications.error.generic'))
-    } finally {
-        traceBusy.value = false
-    }
+    })
 }
 
-const saving = ref(false)
+const { pending: saving, run: runSave } = useAsyncAction()
 
 function wallPayload(wall: EditorWall) {
     return {
@@ -527,41 +527,44 @@ async function save() {
         batch.collection('walls').update(wall.id!, wallPayload(wall))
     for (const id of changes.remove) batch.collection('walls').delete(id)
 
-    saving.value = true
-    try {
-        const results = await batch.send()
-        const createdIds = results
-            .slice(1, 1 + changes.create.length)
-            .map((result) => (result.body as { id: string }).id)
-        const idByKey = new Map(
-            changes.create.map((wall, index) => [wall.key, createdIds[index]!]),
-        )
-        const next: EditorState = {
-            ...state,
-            walls: state.walls.map((wall) => {
-                const id = idByKey.get(wall.key)
-                return id ? { ...wall, id, key: id } : wall
-            }),
-        }
-        const selected = editor.selection.value
-        editor.markSaved(next)
-        if (selected?.kind === 'wall' && idByKey.has(selected.key))
-            editor.selection.value = {
-                kind: 'wall',
-                key: idByKey.get(selected.key)!,
+    await runSave(
+        async () => {
+            const results = await batch.send()
+            const createdIds = results
+                .slice(1, 1 + changes.create.length)
+                .map((result) => (result.body as { id: string }).id)
+            const idByKey = new Map(
+                changes.create.map((wall, index) => [
+                    wall.key,
+                    createdIds[index]!,
+                ]),
+            )
+            const next: EditorState = {
+                ...state,
+                walls: state.walls.map((wall) => {
+                    const id = idByKey.get(wall.key)
+                    return id ? { ...wall, id, key: id } : wall
+                }),
             }
-        notifySuccess(t('mapEditor.saved'))
-        await Promise.all([refreshLocations(), refreshWalls()])
-    } catch {
-        notifyError(t('mapEditor.saveFailed'))
-    } finally {
-        saving.value = false
-    }
+            const selected = editor.selection.value
+            editor.markSaved(next)
+            if (selected?.kind === 'wall' && idByKey.has(selected.key))
+                editor.selection.value = {
+                    kind: 'wall',
+                    key: idByKey.get(selected.key)!,
+                }
+            await Promise.all([refreshLocations(), refreshWalls()])
+        },
+        {
+            success: t('mapEditor.saved'),
+            error: t('mapEditor.saveFailed'),
+        },
+    )
 }
 
-function confirmDiscard() {
-    return !editor.isDirty.value || window.confirm(t('mapEditor.discard'))
-}
+const { discardDialogOpen, confirmDiscard, settleDiscard } = useDiscardConfirm(
+    () => editor.isDirty.value,
+)
 
 onBeforeRouteLeave(() => confirmDiscard())
 
@@ -623,9 +626,6 @@ onBeforeUnmount(() => {
 }
 
 .editor-shell {
-    display: flex;
-    flex-direction: column;
-    height: calc(100dvh - 200px);
     min-height: 520px;
 }
 
@@ -647,23 +647,5 @@ onBeforeUnmount(() => {
     padding: 6px 12px;
     margin: 0;
     min-height: 30px;
-}
-
-.editor-body {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    flex: 1;
-    min-height: 0;
-}
-
-.editor-stage {
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.editor-side {
-    border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    min-height: 0;
 }
 </style>

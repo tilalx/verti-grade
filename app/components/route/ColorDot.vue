@@ -1,25 +1,27 @@
 <template>
-    <v-badge
-        :model-value="ticked"
-        color="success"
-        icon="mdi-check-bold"
-        location="bottom end"
-        bordered
-        class="flex-shrink-0"
+    <span
+        class="route-color-dot"
         data-testid="route-color-dot"
+        :style="{
+            width: `${size}px`,
+            height: `${size}px`,
+            background: routeDotColor(color),
+        }"
+        :role="ticked ? 'img' : undefined"
+        :aria-label="ticked ? $t('ticks.sent') : undefined"
+        :data-ticked="ticked || undefined"
     >
-        <v-avatar
-            :color="color || 'grey'"
-            :size="size"
-            class="route-color-dot"
-            :role="ticked ? 'img' : undefined"
-            :aria-label="ticked ? $t('ticks.sent') : undefined"
-            :data-ticked="ticked || undefined"
+        <span
+            v-if="ticked"
+            class="route-color-dot__tick mdi mdi-check-bold"
+            aria-hidden="true"
         />
-    </v-badge>
+    </span>
 </template>
 
 <script setup lang="ts">
+import { routeDotColor } from '~/utils/color'
+
 withDefaults(
     defineProps<{
         color?: string | null
@@ -32,6 +34,26 @@ withDefaults(
 
 <style scoped>
 .route-color-dot {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 50%;
     box-shadow: inset 0 0 0 1px rgba(var(--v-theme-on-surface), 0.24);
+}
+
+.route-color-dot__tick {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 11px;
+    background: rgb(var(--v-theme-success));
+    color: rgb(var(--v-theme-on-success));
+    box-shadow: 0 0 0 2px rgb(var(--v-theme-surface));
 }
 </style>

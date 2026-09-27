@@ -15,6 +15,8 @@
             </template>
         </LayoutPageHeader>
 
+        <LayoutDesktopHint class="mb-4" />
+
         <div v-if="!map" class="placement-empty" data-testid="placement-empty">
             <LayoutEmptyState
                 icon="mdi-map-outline"
@@ -31,7 +33,7 @@
             </v-btn>
         </div>
 
-        <v-card v-else border flat class="placement-shell">
+        <v-card v-else border flat class="map-workspace">
             <div class="placement-toolbar">
                 <span
                     class="placement-hint text-body-small text-medium-emphasis"
@@ -69,8 +71,8 @@
                 </v-btn>
             </div>
 
-            <div class="placement-body">
-                <div class="placement-stage">
+            <div class="map-workspace__body">
+                <div class="map-workspace__stage">
                     <MapPlacementCanvas
                         ref="canvasRef"
                         :map="map"
@@ -85,7 +87,10 @@
                     />
                 </div>
 
-                <aside class="placement-side" data-testid="placement-panel">
+                <aside
+                    class="map-workspace__side placement-side"
+                    data-testid="placement-panel"
+                >
                     <div
                         v-if="selectedWall"
                         class="placement-wall-box"
@@ -216,6 +221,14 @@
                 <span>{{ dragging.name }}</span>
             </div>
         </Teleport>
+
+        <ConfirmDialog
+            v-model="discardDialogOpen"
+            :title="$t('account.unsavedChanges')"
+            :message="$t('mapEditor.discard')"
+            :confirm-text="$t('mapPlacement.discard')"
+            @confirm="settleDiscard(true)"
+        />
     </v-container>
 </template>
 
@@ -246,7 +259,6 @@ const pb = usePocketbase()
 const route = useRoute()
 const router = useRouter()
 const { can } = usePermissions()
-const { success: notifySuccess, error: notifyError } = useNotification()
 
 useSeoMeta({ title: () => t('page.title.mapPlacement') })
 
@@ -268,10 +280,13 @@ const locationId = computed({
             ? (route.query.location as string)
             : (mappedLocations.value[0]?.id ?? ''),
     set: (id: string) => {
-        if (id === locationId.value || !confirmDiscard()) return
-        pending.value = new Map()
-        history.value = []
-        void router.replace({ query: { location: id } })
+        if (id === locationId.value) return
+        void confirmDiscard().then((confirmed) => {
+            if (!confirmed) return
+            pending.value = new Map()
+            history.value = []
+            void router.replace({ query: { location: id } })
+        })
     },
 })
 const map = computed(() =>
@@ -412,8 +427,8 @@ function undo() {
     history.value = history.value.slice(0, -1)
 }
 
-function discard() {
-    if (!confirmDiscard()) return
+async function discard() {
+    if (!(await confirmDiscard())) return
     pending.value = new Map()
     history.value = []
 }
@@ -481,36 +496,41 @@ function onListClick(routeId: string) {
     selectedRouteId.value = routeId
 }
 
-const saving = ref(false)
+const { pending: saving, run: runSave } = useAsyncAction()
 
 async function save() {
     if (saving.value || !changes.value.length) return
-    saving.value = true
-    try {
-        for (let start = 0; start < changes.value.length; start += BATCH_SIZE) {
-            const batch = pb.createBatch()
-            for (const change of changes.value.slice(start, start + BATCH_SIZE))
-                batch.collection('routes').update(change.id, {
-                    wall: change.wall,
-                    wall_position: change.wall_position,
-                })
-            await batch.send()
-        }
-        await refreshRoutes()
-        pending.value = new Map()
-        history.value = []
-        notifySuccess(t('mapPlacement.saved'))
-    } catch {
-        notifyError(t('notifications.error.generic'))
-        await refreshRoutes()
-    } finally {
-        saving.value = false
-    }
+    const saved = await runSave(
+        async () => {
+            for (
+                let start = 0;
+                start < changes.value.length;
+                start += BATCH_SIZE
+            ) {
+                const batch = pb.createBatch()
+                for (const change of changes.value.slice(
+                    start,
+                    start + BATCH_SIZE,
+                ))
+                    batch.collection('routes').update(change.id, {
+                        wall: change.wall,
+                        wall_position: change.wall_position,
+                    })
+                await batch.send()
+            }
+            await refreshRoutes()
+            pending.value = new Map()
+            history.value = []
+            return true
+        },
+        { success: t('mapPlacement.saved') },
+    )
+    if (!saved) await refreshRoutes()
 }
 
-function confirmDiscard() {
-    return !changes.value.length || window.confirm(t('mapEditor.discard'))
-}
+const { discardDialogOpen, confirmDiscard, settleDiscard } = useDiscardConfirm(
+    () => changes.value.length > 0,
+)
 
 onBeforeRouteLeave(() => confirmDiscard())
 
@@ -562,13 +582,6 @@ onBeforeUnmount(() => {
     align-items: center;
 }
 
-.placement-shell {
-    display: flex;
-    flex-direction: column;
-    height: calc(100dvh - 200px);
-    min-height: 480px;
-}
-
 .placement-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -583,24 +596,9 @@ onBeforeUnmount(() => {
     flex: 1 1 280px;
 }
 
-.placement-body {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    flex: 1;
-    min-height: 0;
-}
-
-.placement-stage {
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-}
-
 .placement-side {
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .placement-wall-box {
@@ -634,26 +632,5 @@ onBeforeUnmount(() => {
     font-size: 0.8125rem;
     pointer-events: none;
     transform: translate(12px, 12px);
-}
-
-@media (max-width: 959.98px) {
-    .placement-shell {
-        height: auto;
-    }
-
-    .placement-body {
-        grid-template-columns: 1fr;
-    }
-
-    .placement-stage {
-        height: 60dvh;
-    }
-
-    .placement-side {
-        border-left: 0;
-        border-top: 1px solid
-            rgba(var(--v-border-color), var(--v-border-opacity));
-        max-height: 50dvh;
-    }
 }
 </style>

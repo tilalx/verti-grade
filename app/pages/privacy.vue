@@ -1,5 +1,5 @@
 <template>
-    <v-container class="legal-page" data-testid="privacy-page">
+    <v-container class="page--prose" data-testid="privacy-page">
         <LayoutPageHeader
             :title="$t('legal.privacy')"
             :subtitle="$t('legal.privacyPage.subtitle')"
@@ -138,10 +138,6 @@ useSeoMeta({
 </script>
 
 <style scoped>
-.legal-page {
-    max-width: 860px;
-}
-
 .table-scroll {
     overflow-x: auto;
 }

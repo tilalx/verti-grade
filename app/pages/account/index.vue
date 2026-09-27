@@ -1,46 +1,8 @@
 <template>
-    <v-container class="me-page" data-testid="me-page">
+    <v-container class="page--narrow" data-testid="me-page">
         <h1 class="d-sr-only">{{ $t('me.title') }}</h1>
 
-        <v-card
-            v-if="!user"
-            border
-            flat
-            class="me-guest"
-            data-testid="me-guest"
-        >
-            <v-card-text class="text-center pa-6">
-                <v-icon size="56" class="me-guest__icon mb-3"
-                    >mdi-account-circle-outline</v-icon
-                >
-                <p class="text-title-medium mb-1">{{ $t('me.guestTitle') }}</p>
-                <p class="text-body-medium text-medium-emphasis mb-5">
-                    {{ $t('me.guestIntro') }}
-                </p>
-                <div class="d-flex flex-column ga-2">
-                    <v-btn
-                        color="primary"
-                        size="large"
-                        :to="{
-                            path: '/auth/login',
-                            query: { redirect: '/account' },
-                        }"
-                        data-testid="me-login"
-                    >
-                        {{ $t('routes.login') }}
-                    </v-btn>
-                    <v-btn
-                        v-if="allowRegistration"
-                        variant="tonal"
-                        size="large"
-                        to="/auth/register"
-                        data-testid="me-register"
-                    >
-                        {{ $t('me.register') }}
-                    </v-btn>
-                </div>
-            </v-card-text>
-        </v-card>
+        <AuthGuestCta v-if="!user" redirect="/account" test-id-prefix="me" />
 
         <template v-else>
             <div class="me-header">
@@ -161,7 +123,6 @@ const { t } = useI18n()
 const pb = usePocketbase()
 const router = useRouter()
 const { can } = usePermissions()
-const { allowRegistration } = useOrgSettings()
 const { lgAndUp } = useDisplay()
 const { data: settings } = useNuxtData<SettingsRecord>('settings')
 
@@ -204,14 +165,6 @@ async function logout() {
 </script>
 
 <style scoped>
-.me-page {
-    max-width: 560px;
-}
-
-.me-guest__icon {
-    color: rgba(var(--v-theme-on-surface), 0.3);
-}
-
 .me-header {
     display: flex;
     align-items: center;

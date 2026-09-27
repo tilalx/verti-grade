@@ -25,7 +25,7 @@
             </p>
         </div>
 
-        <div v-else style="position: relative">
+        <div v-else class="position-relative">
             <Transition name="form-swap" mode="out-in">
                 <!-- ─── LOGIN ─── -->
                 <v-form
@@ -54,25 +54,17 @@
                         @keydown.enter.prevent="submitLogin"
                     />
 
-                    <v-text-field
+                    <UserPasswordField
                         v-if="authMethods.password?.enabled"
                         v-model="password"
                         :label="$t('account.password')"
-                        :type="showPassword ? 'text' : 'password'"
-                        :append-inner-icon="
-                            showPassword
-                                ? 'mdi-eye-off-outline'
-                                : 'mdi-eye-outline'
-                        "
                         prepend-inner-icon="mdi-lock-outline"
-                        autocomplete="current-password"
                         name="password"
                         data-testid="login-password"
                         :rules="passwordRules"
                         :disabled="loading"
                         color="success"
                         class="mb-1"
-                        @click:append-inner="showPassword = !showPassword"
                         @keydown="detectCapsLock"
                         @keydown.enter.prevent="submitLogin"
                     />
@@ -376,7 +368,6 @@ const registerEmail = ref('')
 const registerPassword = ref('')
 const registerPasswordConfirm = ref('')
 const rememberMe = ref(true)
-const showPassword = ref(false)
 const capsLockOn = ref(false)
 const unverified = ref(false)
 

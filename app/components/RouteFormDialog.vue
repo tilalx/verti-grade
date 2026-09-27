@@ -109,12 +109,7 @@
                 <v-col
                     v-if="isEditMode"
                     cols="6"
-                    style="
-                        align-self: stretch;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    "
+                    class="d-flex align-center justify-center align-self-stretch"
                 >
                     <v-switch
                         v-model="form.archived"

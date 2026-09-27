@@ -21,19 +21,13 @@
                 data-testid="email-change-form"
                 @submit.prevent="validateAndSubmit(submit)"
             >
-                <v-text-field
+                <UserPasswordField
                     v-model="password"
                     :rules="passwordRules"
                     :label="$t('account.password')"
-                    :type="showPassword ? 'text' : 'password'"
-                    autocomplete="current-password"
                     prepend-inner-icon="mdi-lock-outline"
-                    :append-inner-icon="
-                        showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
-                    "
                     class="mb-2"
                     data-testid="email-change-password"
-                    @click:append-inner="showPassword = !showPassword"
                 />
             </v-form>
 
@@ -69,7 +63,6 @@ const form = useTemplateRef<{ validate: () => Promise<{ valid: boolean }> }>(
 )
 const valid = ref(false)
 const password = ref('')
-const showPassword = ref(false)
 const passwordRules = [required(t)]
 
 async function validateAndSubmit(submit: () => Promise<void>) {

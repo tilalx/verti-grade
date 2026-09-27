@@ -118,7 +118,8 @@ import type { ClientResponseError } from 'pocketbase'
 import type { VForm } from 'vuetify/components'
 import { required, maxLength } from '~/utils/validation'
 import type { RoleRecord } from '~/types/models'
-import { toHex6, isProtectedRole, readableTextOn } from '~/utils/roles'
+import { isProtectedRole } from '~/utils/roles'
+import { toHex6, readableTextOn } from '~/utils/color'
 
 const ROLE_COLORS = [
     '#EF5350',

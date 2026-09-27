@@ -20,136 +20,134 @@
             </div>
         </header>
 
-        <section class="overview-section">
-            <div class="overview-section__head">
-                <h2>{{ $t('overview.newRoutes') }}</h2>
-            </div>
-            <OverviewNewRoutes :routes="freshRoutes" :wall-names="wallNames" />
-        </section>
-
-        <div class="overview-grid">
-            <div class="overview-main">
-                <section v-if="walls.length" class="overview-section">
-                    <div class="overview-section__head">
-                        <h2>{{ $t('overview.walls') }}</h2>
-                        <v-btn
-                            to="/map"
-                            variant="text"
-                            append-icon="mdi-map-outline"
-                            data-testid="overview-open-map"
-                        >
-                            {{ $t('overview.openMap') }}
-                        </v-btn>
-                    </div>
-                    <OverviewWallTiles :walls="walls" />
-                </section>
-
-                <section class="overview-section">
-                    <div class="overview-section__head">
-                        <h2>{{ $t('overview.popular') }}</h2>
-                    </div>
-                    <MapRouteList
-                        v-if="popular.length"
-                        class="overview-popular"
-                        :groups="[{ id: 'popular', name: '', routes: popular }]"
-                        :show-headings="false"
-                        :ticked-ids="tickedRouteIds"
-                        :selected-route-id="null"
-                        link-rows
-                        data-testid="overview-popular"
-                    />
-                    <p v-else class="text-body-medium text-medium-emphasis">
-                        {{ $t('overview.popularEmpty') }}
-                    </p>
-                </section>
-            </div>
-
-            <aside class="overview-side">
-                <section
-                    v-if="isLoggedIn"
-                    class="overview-card"
-                    data-testid="overview-progress"
+        <LayoutEmptyState
+            v-if="loadFailed"
+            variant="error"
+            :title="$t('errors.loadFailed')"
+            data-testid="load-error"
+        >
+            <template #actions>
+                <v-btn
+                    variant="tonal"
+                    prepend-icon="mdi-refresh"
+                    data-testid="load-error-retry"
+                    @click="retryLoad"
                 >
-                    <p class="overview-card__title">
-                        {{ $t('overview.progressTitle') }}
-                    </p>
-                    <p class="overview-card__value">
-                        {{
-                            $t('overview.progress', {
-                                sent: progress.sent,
-                                total: progress.total,
-                            })
-                        }}
-                    </p>
-                    <v-progress-linear
-                        :model-value="progressPercent"
-                        color="primary"
-                        height="8"
-                        rounded
-                        class="my-3"
-                    />
-                    <v-btn
-                        to="/logbook"
-                        variant="tonal"
-                        block
-                        prepend-icon="mdi-notebook-check-outline"
+                    {{ $t('errors.retry') }}
+                </v-btn>
+            </template>
+        </LayoutEmptyState>
+
+        <template v-else>
+            <section class="overview-section">
+                <div class="overview-section__head">
+                    <h2>{{ $t('overview.newRoutes') }}</h2>
+                </div>
+                <OverviewNewRoutes
+                    :routes="freshRoutes"
+                    :wall-names="wallNames"
+                />
+            </section>
+
+            <div class="overview-grid">
+                <div class="overview-main">
+                    <section v-if="walls.length" class="overview-section">
+                        <div class="overview-section__head">
+                            <h2>{{ $t('overview.walls') }}</h2>
+                            <v-btn
+                                to="/map"
+                                variant="text"
+                                append-icon="mdi-map-outline"
+                                data-testid="overview-open-map"
+                            >
+                                {{ $t('overview.openMap') }}
+                            </v-btn>
+                        </div>
+                        <OverviewWallTiles :walls="walls" />
+                    </section>
+
+                    <section class="overview-section">
+                        <div class="overview-section__head">
+                            <h2>{{ $t('overview.popular') }}</h2>
+                        </div>
+                        <MapRouteList
+                            v-if="popular.length"
+                            class="overview-popular"
+                            :groups="[
+                                { id: 'popular', name: '', routes: popular },
+                            ]"
+                            :show-headings="false"
+                            :ticked-ids="tickedRouteIds"
+                            :selected-route-id="null"
+                            link-rows
+                            data-testid="overview-popular"
+                        />
+                        <p v-else class="text-body-medium text-medium-emphasis">
+                            {{ $t('overview.popularEmpty') }}
+                        </p>
+                    </section>
+                </div>
+
+                <aside class="overview-side">
+                    <section
+                        v-if="isLoggedIn"
+                        class="overview-card"
+                        data-testid="overview-progress"
                     >
-                        {{ $t('overview.openLogbook') }}
-                    </v-btn>
-                </section>
-                <section
-                    v-else
-                    class="overview-card"
-                    data-testid="overview-guest"
-                >
-                    <p class="overview-card__title">
-                        {{ $t('me.guestTitle') }}
-                    </p>
-                    <p class="overview-card__value text-medium-emphasis">
-                        {{ $t('me.guestIntro') }}
-                    </p>
-                    <div class="d-flex flex-column ga-2 mt-4">
-                        <v-btn
+                        <p class="overview-card__title">
+                            {{ $t('overview.progressTitle') }}
+                        </p>
+                        <p class="overview-card__value">
+                            {{
+                                $t('overview.progress', {
+                                    sent: progress.sent,
+                                    total: progress.total,
+                                })
+                            }}
+                        </p>
+                        <v-progress-linear
+                            :model-value="progressPercent"
                             color="primary"
-                            :to="{
-                                path: '/auth/login',
-                                query: { redirect: '/logbook' },
-                            }"
-                            data-testid="overview-login"
-                        >
-                            {{ $t('routes.login') }}
-                        </v-btn>
+                            height="8"
+                            rounded
+                            class="my-3"
+                        />
                         <v-btn
-                            v-if="allowRegistration"
+                            to="/logbook"
                             variant="tonal"
-                            to="/auth/register"
-                            data-testid="overview-register"
+                            block
+                            prepend-icon="mdi-notebook-check-outline"
                         >
-                            {{ $t('me.register') }}
+                            {{ $t('overview.openLogbook') }}
                         </v-btn>
-                    </div>
-                </section>
+                    </section>
+                    <AuthGuestCta
+                        v-else
+                        redirect="/logbook"
+                        test-id-prefix="overview"
+                    />
 
-                <section
-                    v-if="routeBars.length || boulderBars.length"
-                    class="overview-card"
-                >
-                    <p class="overview-card__title">
-                        {{ $t('overview.gradeSpread') }}
-                    </p>
-                    <div class="d-flex flex-column ga-5">
-                        <OverviewGradeSpread
-                            :title="$t('map.routes')"
-                            :bars="routeBars"
-                        />
-                        <OverviewGradeSpread
-                            :title="$t('map.boulders')"
-                            :bars="boulderBars"
-                        />
-                    </div>
-                </section>
-            </aside>
-        </div>
+                    <section
+                        v-if="routeBars.length || boulderBars.length"
+                        class="overview-card"
+                    >
+                        <p class="overview-card__title">
+                            {{ $t('overview.gradeSpread') }}
+                        </p>
+                        <div class="d-flex flex-column ga-5">
+                            <OverviewGradeSpread
+                                :title="$t('map.routes')"
+                                :bars="routeBars"
+                            />
+                            <OverviewGradeSpread
+                                :title="$t('map.boulders')"
+                                :bars="boulderBars"
+                            />
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        </template>
     </v-container>
 </template>
 
@@ -175,7 +173,7 @@ const POPULAR_LIMIT = 6
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const { orgName, allowRegistration } = useOrgSettings()
+const { orgName } = useOrgSettings()
 const { tickedRouteIds } = useTickedRoutes()
 const { routeGradeSystem, boulderGradeSystem } = useGradeSystems()
 const isLoggedIn = computed(() => pb.authStore.isValid)
@@ -188,7 +186,11 @@ useSeoMeta({
     ogType: 'website',
 })
 
-const { data: routeRecords, refresh: refreshRoutes } = await useAsyncData(
+const {
+    data: routeRecords,
+    error: routesError,
+    refresh: refreshRoutes,
+} = await useAsyncData(
     'overview-routes',
     () =>
         pb.collection('averageRating').getFullList<RouteScoreRecord>({
@@ -199,7 +201,11 @@ const { data: routeRecords, refresh: refreshRoutes } = await useAsyncData(
     { default: () => [] },
 )
 
-const { data: wallRecords, refresh: refreshWalls } = await useAsyncData(
+const {
+    data: wallRecords,
+    error: wallsError,
+    refresh: refreshWalls,
+} = await useAsyncData(
     'overview-walls',
     () =>
         pb.collection('walls').getFullList<WallRecord>({
@@ -209,6 +215,12 @@ const { data: wallRecords, refresh: refreshWalls } = await useAsyncData(
         }),
     { default: () => [] },
 )
+
+const loadFailed = computed(() => !!routesError.value || !!wallsError.value)
+
+function retryLoad() {
+    return Promise.all([refreshRoutes(), refreshWalls()])
+}
 
 const routes = computed<RouteListItem[]>(() =>
     routeRecords.value.map((record) => ({

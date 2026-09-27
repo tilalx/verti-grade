@@ -54,14 +54,12 @@
                         </template>
 
                         <v-card-title
-                            class="text-body-medium font-weight-semibold px-0 py-0"
-                            style="line-height: 1.3"
+                            class="text-body-medium font-weight-semibold px-0 py-0 card-title-tight"
                         >
                             {{ role.name }}
                         </v-card-title>
                         <v-card-subtitle
-                            class="text-body-small px-0 py-0"
-                            style="opacity: 0.7; white-space: normal"
+                            class="text-body-small px-0 py-0 card-subtitle-muted text-wrap"
                         >
                             {{
                                 role.description ||
@@ -230,8 +228,8 @@ import {
     isProtectedRole,
     reassignTargets,
     defaultReassignTarget,
-    readableTextOn,
 } from '~/utils/roles'
+import { readableTextOn } from '~/utils/color'
 import type { PermissionRecord, RoleRecord } from '~/types/models'
 
 const { t } = useI18n()
@@ -240,7 +238,7 @@ const pb = usePocketbase()
 const REASSIGN_BATCH_SIZE = 200
 
 const loading = ref(true)
-const saving = ref(false)
+const { pending: saving, run: runSave } = useAsyncAction()
 const roles = ref<RoleRecord[]>([])
 const allPermissions = ref<PermissionRecord[]>([])
 const { notify, error: notifyError } = useNotification()
@@ -252,7 +250,7 @@ const deletingRole = ref<RoleRecord | null>(null)
 const holderCount = ref(0)
 const countingHolders = ref(false)
 const reassignTo = ref<string | null>(null)
-const deleting = ref(false)
+const { pending: deleting, run: runDelete } = useAsyncAction()
 
 const reassignOptions = computed(() =>
     deletingRole.value
@@ -280,19 +278,19 @@ async function togglePermission(role: RoleRecord, perm: PermissionRecord) {
     }
 
     role.permissions = currentPerms
-    saving.value = true
-    try {
-        await pb.collection('roles').update(role.id, {
-            permissions: currentPerms,
-        })
-        notify(t('permissions.updated'), 'success')
-    } catch (err) {
-        console.error('Failed to update role permissions:', err)
-        role.permissions = previousPerms
-        notifyError(t('permissions.updateError'))
-    } finally {
-        saving.value = false
-    }
+    const saved = await runSave(
+        async () => {
+            await pb.collection('roles').update(role.id, {
+                permissions: currentPerms,
+            })
+            return true
+        },
+        {
+            success: t('permissions.updated'),
+            error: t('permissions.updateError'),
+        },
+    )
+    if (!saved) role.permissions = previousPerms
 }
 
 // ── Create / edit ──────────────────────────────────────────────────────────
@@ -352,36 +350,35 @@ async function deleteRole() {
     const role = deletingRole.value
     if (!role) return
 
-    deleting.value = true
-    try {
-        if (holderCount.value > 0) {
-            const holders = await pb.collection('users').getFullList({
-                filter: pb.filter('role = {:id}', { id: role.id }),
-                fields: 'id',
-                requestKey: 'roleHolders',
-            })
-            for (let i = 0; i < holders.length; i += REASSIGN_BATCH_SIZE) {
-                const batch = pb.createBatch()
-                for (const u of holders.slice(i, i + REASSIGN_BATCH_SIZE)) {
-                    batch.collection('users').update(u.id, {
-                        role: reassignTo.value,
-                    })
+    await runDelete(
+        async () => {
+            if (holderCount.value > 0) {
+                const holders = await pb.collection('users').getFullList({
+                    filter: pb.filter('role = {:id}', { id: role.id }),
+                    fields: 'id',
+                    requestKey: 'roleHolders',
+                })
+                for (let i = 0; i < holders.length; i += REASSIGN_BATCH_SIZE) {
+                    const batch = pb.createBatch()
+                    for (const u of holders.slice(i, i + REASSIGN_BATCH_SIZE)) {
+                        batch.collection('users').update(u.id, {
+                            role: reassignTo.value,
+                        })
+                    }
+                    await batch.send()
                 }
-                await batch.send()
             }
-        }
 
-        await pb.collection('roles').delete(role.id)
-        deleteDialog.value = false
-        deletingRole.value = null
-        notify(t('permissions.roleDeleted'), 'success')
-        await refreshRoles()
-    } catch (err) {
-        console.error('Failed to delete role:', err)
-        notifyError(t('permissions.roleDeleteError'))
-    } finally {
-        deleting.value = false
-    }
+            await pb.collection('roles').delete(role.id)
+            deleteDialog.value = false
+            deletingRole.value = null
+            await refreshRoles()
+        },
+        {
+            success: t('permissions.roleDeleted'),
+            error: t('permissions.roleDeleteError'),
+        },
+    )
 }
 
 // ── Data ───────────────────────────────────────────────────────────────────

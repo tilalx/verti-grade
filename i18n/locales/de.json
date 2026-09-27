@@ -92,7 +92,9 @@
         "emailTaken": "Diese E-Mail-Adresse kann nicht verwendet werden.",
         "resendVerification": "Bestätigungs-E-Mail erneut senden",
         "resendVerificationInfo": "Wir senden dir einen neuen Bestätigungslink an deine E-Mail-Adresse.",
-        "confirmPassword": "Passwort bestätigen"
+        "confirmPassword": "Passwort bestätigen",
+        "showPassword": "Passwort anzeigen",
+        "hidePassword": "Passwort verbergen"
     },
     "routes": {
         "home": "Übersicht",
@@ -599,7 +601,8 @@
         "userMenu": "Benutzermenü",
         "manage": "Verwalten",
         "admin": "Administration",
-        "quickNavigation": "Schnellnavigation"
+        "quickNavigation": "Schnellnavigation",
+        "desktopHint": "Der vollständige Editor ist am Desktop verfügbar."
     },
     "users": {
         "create": "Benutzer hinzufügen",
@@ -738,7 +741,8 @@
         "server": {
             "title": "Etwas ist schiefgelaufen",
             "subtitle": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es gleich noch einmal."
-        }
+        },
+        "loadFailed": "Die Inhalte konnten nicht geladen werden."
     },
     "export": {
         "title": "Als Excel exportieren",

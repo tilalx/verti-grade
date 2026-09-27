@@ -32,10 +32,18 @@ import { BOTTOM_NAV } from '~/utils/navigation'
 .bottom-nav {
     left: 0;
     width: 100%;
-    background: rgb(var(--v-theme-surface)) !important;
+    background: rgb(var(--v-theme-surface));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     box-sizing: content-box;
+}
+
+@media (max-width: 1279.98px) {
+    :global(.v-main) {
+        padding-bottom: calc(
+            var(--v-layout-bottom) + env(safe-area-inset-bottom, 0px)
+        );
+    }
 }
 
 @media (min-width: 1280px) {

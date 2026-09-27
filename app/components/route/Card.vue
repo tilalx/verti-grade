@@ -40,18 +40,11 @@
                     >
                 </span>
             </div>
-            <div v-if="difficulty" class="route-card__difficulty">
-                <span>{{ difficultySplit.base }}</span
-                ><span
-                    v-if="difficultySplit.sign"
-                    class="route-card__difficulty-sign"
-                    >{{ difficultySplit.sign }}</span
-                ><span
-                    v-if="isUnexpectedSystem(route)"
-                    class="route-card__difficulty-system"
-                    >{{ $t(`gradeSystemsShort.${route.grade_system}`) }}</span
-                >
-            </div>
+            <GradeLabel
+                v-if="difficulty"
+                :source="route"
+                class="route-card__difficulty"
+            />
         </div>
 
         <v-divider />
@@ -77,7 +70,7 @@
                 <v-icon size="15" class="list-card__meta-icon"
                     >mdi-account-hard-hat-outline</v-icon
                 >
-                <div class="d-flex flex-wrap" style="gap: 4px 4px">
+                <div class="d-flex flex-wrap ga-1">
                     <v-chip
                         v-for="c in route.creator"
                         :key="c"
@@ -158,13 +151,7 @@ defineEmits<{
 
 const { locale } = useI18n()
 
-const { isUnexpectedSystem } = useGradeSystems()
 const difficulty = computed(() => formatGrade(props.route))
-const difficultySplit = computed(() => {
-    const full = difficulty.value
-    const match = full.match(/^(.*?)([+\-]?)$/)
-    return { base: match?.[1] ?? full, sign: match?.[2] ?? '' }
-})
 const anchorPoint = computed(() =>
     String(formatAnchorPoint(props.route.anchor_point)),
 )
@@ -187,16 +174,6 @@ const score = computed(() => formatScore(props.route))
     line-height: 1;
     color: rgba(var(--v-theme-on-surface), 0.55);
     flex-shrink: 0;
-}
-
-.route-card__difficulty-sign {
-    margin-left: 3px;
-}
-
-.route-card__difficulty-system {
-    margin-left: 4px;
-    font-size: 0.55em;
-    font-weight: 500;
 }
 
 .route-card__badges {

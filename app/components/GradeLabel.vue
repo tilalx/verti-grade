@@ -1,8 +1,8 @@
 <template>
     <span class="grade-label">
-        <span>{{ formatGrade(source) }}</span>
+        <span>{{ grade }}</span>
         <span
-            v-if="system && formatGrade(source) && isUnexpectedSystem(source!)"
+            v-if="system"
             class="grade-label__system"
             :title="$t(`gradeSystems.${system}`)"
             >{{ $t(`gradeSystemsShort.${system}`) }}</span
@@ -17,17 +17,25 @@ import {
     type GradeSource,
 } from '#shared/utils/grades'
 
-const props = defineProps<{
-    source: (GradeSource & { type?: string | null }) | null | undefined
-}>()
-
-const { isUnexpectedSystem } = useGradeSystems()
-
-const system = computed(() =>
-    isGradeSystem(props.source?.grade_system)
-        ? props.source.grade_system
-        : null,
+const props = withDefaults(
+    defineProps<{
+        source: (GradeSource & { type?: string | null }) | null | undefined
+        showSystem?: boolean
+    }>(),
+    { showSystem: undefined },
 )
+
+const gradeSystems = props.showSystem === undefined ? useGradeSystems() : null
+
+const grade = computed(() => formatGrade(props.source))
+
+const system = computed(() => {
+    const value = props.source?.grade_system
+    if (!grade.value || !isGradeSystem(value)) return null
+    const visible =
+        props.showSystem ?? gradeSystems?.isUnexpectedSystem(props.source!)
+    return visible ? value : null
+})
 </script>
 
 <style scoped>

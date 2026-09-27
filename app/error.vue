@@ -19,8 +19,7 @@
                     </div>
 
                     <div
-                        class="text-label-medium text-medium-emphasis mb-2"
-                        style="letter-spacing: 0.2em"
+                        class="text-label-medium text-medium-emphasis mb-2 text-eyebrow"
                         data-testid="error-status"
                     >
                         {{ $t('errors.eyebrow', { code: status }) }}

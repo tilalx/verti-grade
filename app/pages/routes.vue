@@ -205,12 +205,11 @@
             </div>
         </div>
 
-        <!-- Empty State / Skeleton Loader on Mobile -->
-        <v-skeleton-loader
+        <LayoutLoadingState
             v-if="loading && routes.length === 0 && !isWideLayout"
             type="card"
+            :count="1"
             class="mt-4"
-            :elevation="0"
         />
         <LayoutEmptyState
             v-if="!loading && routes.length === 0 && !isWideLayout"

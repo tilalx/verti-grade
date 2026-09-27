@@ -37,8 +37,7 @@
 
                             <div class="brand-headline">
                                 <div
-                                    class="text-label-medium text-success mb-3"
-                                    style="letter-spacing: 0.2em"
+                                    class="text-label-medium text-success mb-3 text-eyebrow"
                                     data-testid="auth-brand-eyebrow"
                                 >
                                     {{ $t('account.eyebrowBrand') }}
@@ -91,8 +90,7 @@
                             <Transition name="txt-swap" mode="out-in">
                                 <div :key="headingKey" class="mb-8">
                                     <div
-                                        class="text-label-medium text-medium-emphasis mb-1"
-                                        style="letter-spacing: 0.18em"
+                                        class="text-label-medium text-medium-emphasis mb-1 text-eyebrow"
                                     >
                                         {{ eyebrow }}
                                     </div>

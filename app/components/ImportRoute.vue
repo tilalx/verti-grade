@@ -4,7 +4,7 @@
         <input
             ref="fileInput"
             type="file"
-            style="display: none"
+            class="d-none"
             accept="application/json"
             data-testid="import-route-file-input"
             @change="handleFileChange"
@@ -22,7 +22,29 @@
                 {{ $t('importRoutes.intro') }}
             </p>
 
+            <v-list
+                v-if="smAndDown"
+                density="compact"
+                data-testid="import-route-list"
+            >
+                <v-list-item
+                    v-for="(item, index) in routesToImport"
+                    :key="index"
+                    :title="String(item.name ?? '')"
+                    :subtitle="previewSummary(item)"
+                >
+                    <template #prepend>
+                        <v-avatar
+                            :color="item.color ?? undefined"
+                            size="24"
+                            class="mr-3"
+                        />
+                    </template>
+                </v-list-item>
+            </v-list>
+
             <v-data-table
+                v-else
                 v-model:expanded="expanded"
                 :headers="previewHeaders"
                 :items="routesToImport"
@@ -164,6 +186,18 @@ const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
 const { data: locationRecords } = useLocations()
 const { gradeSystemFor } = useGradeSystems()
+
+const { smAndDown } = useDisplay()
+
+const previewSummary = (route: ImportedRoute) =>
+    [
+        route.grade ?? route.difficulty,
+        route.anchor_point,
+        route.location,
+        `${t('importRoutes.ratingsCount')}: ${route.ratings?.length || 0}`,
+    ]
+        .filter((part) => part !== undefined && part !== null && part !== '')
+        .join(' · ')
 
 const previewHeaders = computed(() => [
     { title: t('climbing.color'), value: 'color', sortable: false },

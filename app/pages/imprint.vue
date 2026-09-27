@@ -1,5 +1,5 @@
 <template>
-    <v-container class="legal-page" data-testid="imprint-page">
+    <v-container class="page--prose" data-testid="imprint-page">
         <LayoutPageHeader
             :title="$t('legal.imprint')"
             :subtitle="$t('legal.imprintPage.subtitle')"
@@ -133,9 +133,3 @@ useSeoMeta({
     ogTitle: () => t('legal.imprint'),
 })
 </script>
-
-<style scoped>
-.legal-page {
-    max-width: 860px;
-}
-</style>

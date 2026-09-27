@@ -90,13 +90,12 @@ definePageMeta({ footer: false })
 
 const REJECT_COOLDOWN_MS = 1500
 const FRAME_RADIUS = 0.25
-const KNOWN_COLOR = '#43A047'
-const UNKNOWN_COLOR = '#E53935'
 const PENDING_COLOR = '#FFFFFF'
 const REJECT_MESSAGE_MS = 2500
 
 const { t } = useI18n()
 const pb = usePocketbase()
+const theme = useTheme()
 
 useSeoMeta({ title: () => t('page.title.scan') })
 
@@ -157,10 +156,14 @@ function knownRoute(routeId: string | null) {
 function tagFor(rawValue: string) {
     const route = knownRoute(extractRouteId(rawValue))
     if (route === undefined) return { color: PENDING_COLOR, label: '…' }
-    if (!route) return { color: UNKNOWN_COLOR, label: t('scan.unknownRoute') }
+    if (!route)
+        return {
+            color: String(theme.current.value.colors.error),
+            label: t('scan.unknownRoute'),
+        }
     const grade = formatGrade(route)
     return {
-        color: KNOWN_COLOR,
+        color: String(theme.current.value.colors.success),
         label: grade ? `${route.name} · ${grade}` : route.name,
     }
 }

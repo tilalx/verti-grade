@@ -17,11 +17,16 @@
                 }}
             </div>
             <div class="heatmap-box">
-                <div ref="scrollRef" class="heatmap-scroll">
+                <div
+                    ref="scrollRef"
+                    class="heatmap-scroll"
+                    @scroll.passive="tooltip.visible = false"
+                >
                     <div
                         class="heatmap-grid"
                         :style="{ '--weeks': weeks.length }"
-                        @mouseover="onCellHover"
+                        @mouseover="showCellTooltip"
+                        @click="showCellTooltip"
                         @mouseleave="tooltip.visible = false"
                     >
                         <span
@@ -263,7 +268,7 @@ function scrollToToday() {
 onMounted(scrollToToday)
 watch(selectedYear, () => nextTick(scrollToToday))
 
-function onCellHover(event: MouseEvent) {
+function showCellTooltip(event: MouseEvent) {
     const target = event.target as HTMLElement | null
     const label = target?.getAttribute('aria-label')
     if (!target || !label) {

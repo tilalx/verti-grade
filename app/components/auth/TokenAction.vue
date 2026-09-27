@@ -16,7 +16,7 @@
             }}</span>
         </template>
 
-        <div style="position: relative">
+        <div class="position-relative">
             <Transition name="form-swap" mode="out-in">
                 <div
                     v-if="step === 'form' && auto"

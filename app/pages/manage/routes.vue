@@ -521,6 +521,7 @@ const pb = usePocketbase()
 const { t, locale } = useI18n()
 const { mdAndDown, width: displayWidth } = useDisplay()
 const { notify, error: notifyError } = useNotification()
+const { run: runAction } = useAsyncAction()
 
 const isMobile = computed(() => mdAndDown.value)
 
@@ -794,21 +795,20 @@ const archiveSelected = async () => {
         return
     }
 
-    try {
-        const batch = pb.createBatch()
-        ids.forEach((id) => {
-            batch.collection('routes').update(id, { archived: true })
-        })
-        await batch.send()
-        invalidateAllRouteIdsCache()
-        removeSelectedIds(ids)
-        showArchiveConfirmation.value = false
-        notify(t('notifications.success.edit'))
-        await reloadRoutes()
-    } catch (error) {
-        console.error('Exception in archiveSelected:', error)
-        notifyError(t('notifications.error.generic'))
-    }
+    await runAction(
+        async () => {
+            const batch = pb.createBatch()
+            ids.forEach((id) => {
+                batch.collection('routes').update(id, { archived: true })
+            })
+            await batch.send()
+            invalidateAllRouteIdsCache()
+            removeSelectedIds(ids)
+            showArchiveConfirmation.value = false
+            await reloadRoutes()
+        },
+        { success: t('notifications.success.edit') },
+    )
 }
 
 const exportFormat = ref<'pdf' | 'xlsx'>('xlsx')
@@ -991,10 +991,11 @@ useHead(() => ({
     justify-content: center;
     align-items: center;
     position: sticky;
-    bottom: var(--v-layout-bottom, 0px);
+    bottom: calc(
+        var(--v-layout-bottom, 0px) + env(safe-area-inset-bottom, 0px)
+    );
     z-index: 2;
     padding-block: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     background: rgb(var(--v-theme-background));
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }

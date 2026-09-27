@@ -92,7 +92,9 @@
         "emailTaken": "This email address can't be used.",
         "resendVerification": "Resend verification email",
         "resendVerificationInfo": "We'll send a new verification link to your email address.",
-        "confirmPassword": "Confirm password"
+        "confirmPassword": "Confirm password",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
     },
     "routes": {
         "home": "Overview",
@@ -599,7 +601,8 @@
         "userMenu": "User menu",
         "manage": "Manage",
         "admin": "Admin",
-        "quickNavigation": "Quick navigation"
+        "quickNavigation": "Quick navigation",
+        "desktopHint": "The full editor is available on desktop."
     },
     "users": {
         "create": "Add user",
@@ -738,7 +741,8 @@
         "server": {
             "title": "Something went wrong",
             "subtitle": "An unexpected error occurred. Please try again in a moment."
-        }
+        },
+        "loadFailed": "Could not load this content."
     },
     "export": {
         "title": "Export as Excel",

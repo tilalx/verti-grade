@@ -271,7 +271,7 @@ function timeAgo(dateStr: string): string {
 }
 
 .comment-card__route-link:hover {
-    text-decoration: underline !important;
+    text-decoration: underline;
 }
 
 .comment-card__pill--primary {

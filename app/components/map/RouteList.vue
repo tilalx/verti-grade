@@ -32,17 +32,11 @@
                     :data-testid="linkRows ? 'route-view' : undefined"
                     @click="linkRows || emit('select', route.id)"
                 >
-                    <span
-                        class="map-route-row__dot"
-                        :style="{ background: dotColor(route.color) }"
-                    >
-                        <span
-                            v-if="tickedIds.has(route.id)"
-                            class="map-route-row__tick mdi mdi-check-bold"
-                            role="img"
-                            :aria-label="$t('ticks.sent')"
-                        />
-                    </span>
+                    <RouteColorDot
+                        :color="route.color"
+                        :ticked="tickedIds.has(route.id)"
+                        :size="26"
+                    />
                     <span class="map-route-row__text">
                         <span class="map-route-row__name">{{
                             route.name
@@ -51,18 +45,11 @@
                             subtitle(route)
                         }}</span>
                     </span>
-                    <span class="map-route-row__grade"
-                        >{{ formatGrade(route)
-                        }}<small
-                            v-if="
-                                route.grade_system && isUnexpectedSystem(route)
-                            "
-                            class="map-route-row__system"
-                            >{{
-                                $t(`gradeSystemsShort.${route.grade_system}`)
-                            }}</small
-                        ></span
-                    >
+                    <GradeLabel
+                        :source="route"
+                        :show-system="isUnexpectedSystem(route)"
+                        class="map-route-row__grade"
+                    />
                     <span
                         v-if="linkRows"
                         class="map-route-row__chevron mdi mdi-chevron-right"
@@ -92,8 +79,6 @@
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
 import { formatAnchorPoint } from '#shared/utils/formatting'
-import { formatGrade } from '#shared/utils/grades'
-import { dotColors } from '~/utils/gymMap'
 
 defineProps<{
     groups: { id: string; name: string; routes: RouteListItem[] }[]
@@ -107,8 +92,6 @@ const NuxtLink = resolveComponent('NuxtLink')
 const emit = defineEmits<{ select: [routeId: string] }>()
 const { t } = useI18n()
 const { isUnexpectedSystem } = useGradeSystems()
-
-const dotColor = (color: string | null | undefined) => dotColors(color).fill
 
 function subtitle(route: RouteListItem) {
     const anchor = formatAnchorPoint(route.anchor_point)
@@ -177,30 +160,6 @@ function subtitle(route: RouteListItem) {
     outline-offset: -2px;
 }
 
-.map-route-row__dot {
-    position: relative;
-    flex: 0 0 26px;
-    height: 26px;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-on-surface), 0.24);
-}
-
-.map-route-row__tick {
-    position: absolute;
-    right: -4px;
-    bottom: -4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    font-size: 11px;
-    background: rgb(var(--v-theme-success));
-    color: rgb(var(--v-theme-on-success));
-    box-shadow: 0 0 0 2px rgb(var(--v-theme-surface));
-}
-
 .map-route-row__text {
     display: flex;
     flex-direction: column;
@@ -224,13 +183,6 @@ function subtitle(route: RouteListItem) {
     flex: 0 0 auto;
     font-weight: 700;
     font-size: 1rem;
-}
-
-.map-route-row__system {
-    margin-left: 3px;
-    font-size: 0.65rem;
-    font-weight: 500;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 }
 
 .map-route-row__open {

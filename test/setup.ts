@@ -11,6 +11,7 @@ import { useVersionCheck } from '~/composables/useVersionCheck'
 import LayoutDialogShell from '~/components/layout/DialogShell.vue'
 import LayoutPageHeader from '~/components/layout/PageHeader.vue'
 import LayoutEmptyState from '~/components/layout/EmptyState.vue'
+import LayoutLoadingState from '~/components/layout/LoadingState.vue'
 
 type VitestMock = ReturnType<typeof vi.fn>
 type RuntimeConfig = { public?: Record<string, unknown> }
@@ -173,4 +174,5 @@ config.global.components = {
     LayoutDialogShell,
     LayoutPageHeader,
     LayoutEmptyState,
+    LayoutLoadingState,
 }

@@ -6,9 +6,8 @@ import {
     type MapPoint,
     type WallGeometry,
 } from '#shared/utils/mapGeometry'
-import { readableTextOn, toHex6 } from '~/utils/roles'
+import { readableTextOn, routeDotColor } from '~/utils/color'
 
-export const FALLBACK_DOT_COLOR = '#9E9E9E'
 export const NEW_ROUTE_DAYS = 7
 
 export interface MapWall extends WallGeometry {
@@ -79,7 +78,7 @@ export function toMapWalls(
 }
 
 export function dotColors(color: string | null | undefined) {
-    const fill = toHex6(color) || FALLBACK_DOT_COLOR
+    const fill = routeDotColor(color)
     return {
         fill,
         stroke: readableTextOn(fill) === '#FFFFFF' ? '#FFFFFF' : '#1A1A1A',
