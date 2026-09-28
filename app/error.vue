@@ -104,7 +104,7 @@ const goBack = () =>
         ? clearError().then(() => router.back())
         : clearError({ redirect: '/' })
 
-useThemeColorMeta()
+useBrowserChrome()
 useHead({
     htmlAttrs: { lang: locale },
     title: computed(() =>

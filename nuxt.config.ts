@@ -56,6 +56,10 @@ export default defineNuxtConfig({
             meta: [
                 { name: 'mobile-web-app-capable', content: 'yes' },
                 { name: 'apple-mobile-web-app-title', content: 'Gripello' },
+                {
+                    name: 'apple-mobile-web-app-status-bar-style',
+                    content: 'black-translucent',
+                },
             ],
             link: [
                 { rel: 'manifest', href: '/manifest.webmanifest' },
@@ -77,7 +81,7 @@ export default defineNuxtConfig({
                     cookie: {
                         name: 'color-scheme', // Stores user's preferred color scheme
                     },
-                    useBrowserThemeOnly: true,
+                    useBrowserThemeOnly: false,
                 },
                 prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
             },

@@ -390,3 +390,53 @@
 svg [tabindex]:focus {
     outline: none;
 }
+
+html,
+body {
+    transition: background-color 0.32s ease;
+}
+
+.theme-reveal::view-transition-old(root),
+.theme-reveal::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html,
+    body {
+        transition: none;
+    }
+}
+
+@media (display-mode: standalone) {
+    :root {
+        --app-top-inset: env(safe-area-inset-top, 0px);
+    }
+
+    .v-app-bar.nav-bar {
+        top: var(--app-top-inset) !important;
+    }
+
+    .v-main {
+        padding-top: calc(var(--v-layout-top) + var(--app-top-inset));
+    }
+
+    .v-application::before {
+        content: '';
+        position: fixed;
+        inset: 0 0 auto;
+        height: var(--app-top-inset);
+        background: rgb(var(--v-theme-surface));
+        z-index: 1010;
+        transition: background-color 0.32s ease;
+    }
+
+    .v-application.v-theme--light::before {
+        background: rgb(var(--v-theme-primary));
+    }
+
+    .v-dialog--fullscreen > .v-overlay__content {
+        padding-top: var(--app-top-inset);
+    }
+}
