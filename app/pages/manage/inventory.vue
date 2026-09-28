@@ -983,9 +983,14 @@ const confirmFinish = async () => {
 
     await runArchive(
         async () => {
-            await sendInBatches(pb, ids, (batch, id) =>
-                batch.collection('routes').update(id, { archived: true }),
-            )
+            try {
+                await sendInBatches(pb, ids, (batch, id) =>
+                    batch.collection('routes').update(id, { archived: true }),
+                )
+            } catch (error) {
+                await loadRoutes()
+                throw error
+            }
             resetInventory()
             await loadRoutes()
         },

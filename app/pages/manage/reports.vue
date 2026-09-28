@@ -286,8 +286,6 @@ async function confirmDecision() {
                             : 'rejected',
                     decision,
                     decision_reason: decisionReason.value.trim(),
-                    decided_at: new Date().toISOString(),
-                    decided_by: pb.authStore.record?.id ?? null,
                 })
 
             const index = reports.value.findIndex((r) => r.id === report.id)

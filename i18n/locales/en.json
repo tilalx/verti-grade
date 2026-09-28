@@ -572,6 +572,7 @@
         "minLength": "Minimum {n} character. | Minimum {n} characters.",
         "maxLength": "Maximum {n} character. | Maximum {n} characters.",
         "passwordMismatch": "Passwords do not match.",
+        "integerRange": "Enter a whole number from {min} to {max}.",
         "passwordTooWeak": "Password must be at least “Good”.",
         "email": "Please enter a valid email address."
     },
@@ -1067,6 +1068,7 @@
         "drawEdge": "Draw climbing edge",
         "placeLabel": "Place label",
         "deleteWall": "Delete wall",
+        "wallHasRoutes": "Move or archive the routes on this wall before deleting it.",
         "shapes": "Floor, mats and structures",
         "shapeKind": "Type",
         "deleteShape": "Delete shape",

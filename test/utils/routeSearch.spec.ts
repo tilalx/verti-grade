@@ -24,6 +24,10 @@ describe('routeSearchFilter', () => {
         )
     })
 
+    it('searches text for a lone number that is no grade', () => {
+        expect(routeSearchFilter('99')).toBe('(name ~ "99" || creator ~ "99")')
+    })
+
     it('treats signed grades as grade filters', () => {
         expect(routeSearchFilter('Funk 7+')).toBe(
             '(name ~ "Funk" || creator ~ "Funk") && grade = "7+"',

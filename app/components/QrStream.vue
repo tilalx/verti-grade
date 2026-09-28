@@ -261,10 +261,11 @@ const scan = (video: HTMLVideoElement) => {
             width: video.videoWidth,
             height: video.videoHeight,
         })
-        if (codes.some((code) => !previousValues.includes(code.rawValue))) {
-            previousValues = codes.map((code) => code.rawValue)
-            emit('detect', codes)
-        }
+        const hasNewCode = codes.some(
+            (code) => !previousValues.includes(code.rawValue),
+        )
+        previousValues = [...codes, ...followed].map((code) => code.rawValue)
+        if (hasNewCode) emit('detect', codes)
         nextVideoFrame(video, requestDecode)
     }
 

@@ -59,7 +59,6 @@
                         <span class="v-label">{{ $t('ratings.stars') }}</span>
                         <v-rating
                             v-model="form.rating"
-                            :rules="isEditMode ? [] : [rules.required]"
                             hover
                             active-color="yellow-darken-2"
                             color="grey-lighten-1"
@@ -104,7 +103,7 @@
             >
             <v-spacer />
             <v-btn
-                :disabled="!isEditMode && !isFormValid"
+                :disabled="!isEditMode && (!isFormValid || !form.rating)"
                 :loading="saving"
                 color="primary"
                 data-testid="review-form-submit"

@@ -130,12 +130,20 @@
                         variant="text"
                         color="error"
                         prepend-icon="mdi-delete-outline"
+                        :disabled="selectedWallHasRoutes"
                         data-testid="map-editor-delete-wall"
                         @click="deleteWall"
                     >
                         {{ $t('mapEditor.deleteWall') }}
                     </v-btn>
                 </div>
+                <p
+                    v-if="selectedWallHasRoutes"
+                    class="text-body-small text-medium-emphasis mt-2"
+                    data-testid="map-editor-wall-has-routes"
+                >
+                    {{ $t('mapEditor.wallHasRoutes') }}
+                </p>
             </div>
         </section>
 
@@ -321,6 +329,7 @@ const props = defineProps<{
     editor: ReturnType<typeof useMapEditor>
     hasTrace: boolean
     traceBusy: boolean
+    wallsWithRoutes: Set<string>
 }>()
 
 const emit = defineEmits<{
@@ -419,9 +428,14 @@ function setAnchor(field: 'anchorFrom' | 'anchorTo', event: Event) {
     commit(updateWall(state.value, wall.key, { [field]: value }))
 }
 
+const selectedWallHasRoutes = computed(() => {
+    const wallId = editor.selectedWall.value?.id
+    return !!wallId && props.wallsWithRoutes.has(wallId)
+})
+
 function deleteWall() {
     const wall = editor.selectedWall.value
-    if (!wall) return
+    if (!wall || selectedWallHasRoutes.value) return
     commit(removeWall(state.value, wall.key))
     editor.selection.value = null
 }

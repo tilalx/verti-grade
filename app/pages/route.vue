@@ -514,7 +514,7 @@ useSeoMeta({
 })
 
 const avgRating = computed(() => {
-    const rated = reviews.value.filter((r) => r.rating !== null)
+    const rated = reviews.value.filter((r) => (r.rating ?? 0) > 0)
     if (!rated.length) return '—'
     const sum = rated.reduce((acc, r) => acc + (r.rating ?? 0), 0)
     return formatNumber(sum / rated.length, locale.value)

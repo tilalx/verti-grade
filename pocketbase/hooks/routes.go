@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"net/http"
 	"slices"
 
 	"github.com/pocketbase/pocketbase/apis"
@@ -46,4 +47,35 @@ func archivedAt(wasArchived, isArchived bool, current, now types.DateTime) types
 		return now
 	}
 	return current
+}
+
+func registerRatingImport(app core.App) {
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		se.Router.POST("/api/import/ratings", func(e *core.RequestEvent) error {
+			if !hasPermission(e.App, e.Auth.Id, "manage_routes") {
+				return e.ForbiddenError("Importing ratings requires manage_routes.", nil)
+			}
+			var body struct {
+				Ratings []map[string]any `json:"ratings"`
+			}
+			if err := e.BindBody(&body); err != nil {
+				return e.BadRequestError("Invalid import payload.", err)
+			}
+			collection, err := e.App.FindCachedCollectionByNameOrId("ratings")
+			if err != nil {
+				return err
+			}
+			failed := 0
+			for _, data := range body.Ratings {
+				delete(data, "id")
+				record := core.NewRecord(collection)
+				record.Load(data)
+				if err := e.App.Save(record); err != nil {
+					failed++
+				}
+			}
+			return e.JSON(http.StatusOK, map[string]int{"failed": failed})
+		}).Bind(apis.RequireAuth("users"))
+		return se.Next()
+	})
 }

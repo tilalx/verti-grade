@@ -36,3 +36,9 @@ export const nonBlank =
     (t: TranslateFn): Rule =>
     (v) =>
         (typeof v === 'string' && v.trim() !== '') || t('validation.required')
+
+export const integerBetween =
+    (t: TranslateFn, min: number, max: number): Rule =>
+    (v) =>
+        (Number.isInteger(v) && (v as number) >= min && (v as number) <= max) ||
+        t('validation.integerRange', { min, max })

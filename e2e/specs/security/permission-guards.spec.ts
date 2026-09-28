@@ -37,6 +37,7 @@ async function clientWithPermission(
     await client.collection('users').authWithPassword(email, password)
     return {
         client,
+        userId: user.id,
         cleanup: async () => {
             await root.collection('users').delete(user.id)
             await root.collection('roles').delete(role.id)
@@ -179,5 +180,54 @@ test('a report cannot be marked removed while its content still exists', async (
             .collection('routes')
             .delete(route.id)
             .catch(() => {})
+    }
+})
+
+test('a decided report keeps its decision and server-owned fields', async ({
+    testPrefix,
+}) => {
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+    const { id: reportId } = await root.collection('reports').create({
+        content_type: 'rating',
+        content_id: `${Date.now()}`.padEnd(15, '0'),
+        reason: 'other',
+        explanation: `${testPrefix}-decided-once`,
+        notifier_name: 'E2E Reporter',
+        notifier_email: 'e2e-reporter@example.com',
+        good_faith: true,
+    })
+    const moderator = await clientWithPermission(
+        root,
+        testPrefix,
+        'manage_reports',
+    )
+    try {
+        const reports = moderator.client.collection('reports')
+        const kept = await reports.update(reportId, {
+            status: 'rejected',
+            decision: 'content_kept',
+            decided_by: '',
+            decided_at: '2000-01-01 00:00:00.000Z',
+            notifier_email: 'someone-else@example.com',
+            content_snapshot: 'rewritten',
+        })
+        expect(kept.decided_by).toBe(moderator.userId)
+        expect(kept.decided_at).not.toContain('2000-01-01')
+
+        await expect(
+            reports.update(reportId, {
+                status: 'actioned',
+                decision: 'content_removed',
+            }),
+        ).rejects.toMatchObject({ status: 400 })
+
+        const stored = await root.collection('reports').getOne(reportId)
+        expect(stored.decision).toBe('content_kept')
+        expect(stored.notifier_email).toBe('e2e-reporter@example.com')
+        expect(stored.content_snapshot).not.toBe('rewritten')
+    } finally {
+        await moderator.cleanup()
+        await root.collection('reports').delete(reportId)
     }
 })

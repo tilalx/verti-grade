@@ -89,3 +89,137 @@ test.describe('role escalation guard', () => {
         expect(moved.role).toBe(setterRole)
     })
 })
+
+test.describe('user manager without admin role', () => {
+    let root: PocketBase
+
+    test.beforeAll(async () => {
+        root = await superuser()
+    })
+
+    async function permissionIds(names: string[]) {
+        const records = await root
+            .collection('permissions')
+            .getFullList({ requestKey: null })
+        return records
+            .filter((record) => names.includes(record.name))
+            .map((record) => record.id)
+    }
+
+    async function managerSetup(prefix: string) {
+        const managerRole = await root.collection('roles').create({
+            name: `${prefix}-mgr-role`,
+            permissions: await permissionIds(['manage_users']),
+        })
+        const narrowRole = await root.collection('roles').create({
+            name: `${prefix}-narrow-role`,
+            permissions: [],
+        })
+        const manager = await ensureUser(
+            root,
+            managerRole.id,
+            'user',
+            `${prefix}-mgr`,
+        )
+        const target = await ensureUser(
+            root,
+            narrowRole.id,
+            'user',
+            `${prefix}-tgt`,
+        )
+        const pb = new PocketBase(PB_URL)
+        await pb
+            .collection('users')
+            .authWithPassword(manager.email, manager.password)
+        return { pb, managerRole, narrowRole, manager, target }
+    }
+
+    async function teardown(setup: Awaited<ReturnType<typeof managerSetup>>) {
+        for (const id of [setup.manager.id, setup.target.id]) {
+            await root
+                .collection('users')
+                .delete(id, { requestKey: null })
+                .catch(() => {})
+        }
+        for (const id of [setup.managerRole.id, setup.narrowRole.id]) {
+            await root
+                .collection('roles')
+                .delete(id, { requestKey: null })
+                .catch(() => {})
+        }
+    }
+
+    test('cannot give the admin role to anyone', async ({}, info) => {
+        const setup = await managerSetup(
+            `guard-noadm-w${info.workerIndex}-${Date.now()}`,
+        )
+        try {
+            const adminRole = (await getRoleIds(root)).admin
+
+            await expect(
+                setup.pb
+                    .collection('users')
+                    .update(setup.manager.id, { role: adminRole }),
+            ).rejects.toMatchObject({ status: 403 })
+            await expect(
+                setup.pb
+                    .collection('users')
+                    .update(setup.target.id, { role: adminRole }),
+            ).rejects.toMatchObject({ status: 403 })
+            await expect(
+                setup.pb.collection('users').create({
+                    email: `${setup.managerRole.name}-new@gripello.test`,
+                    password: 'E2ePassw0rd!',
+                    passwordConfirm: 'E2ePassw0rd!',
+                    role: adminRole,
+                }),
+            ).rejects.toMatchObject({ status: 403 })
+
+            const target = await root
+                .collection('users')
+                .getOne(setup.target.id)
+            expect(target.role).toBe(setup.narrowRole.id)
+        } finally {
+            await teardown(setup)
+        }
+    })
+
+    test('cannot add a permission it does not hold to its own role', async ({}, info) => {
+        const setup = await managerSetup(
+            `guard-perm-w${info.workerIndex}-${Date.now()}`,
+        )
+        try {
+            const [settingsPermission] = await permissionIds([
+                'manage_settings',
+            ])
+
+            await expect(
+                setup.pb.collection('roles').update(setup.managerRole.id, {
+                    'permissions+': settingsPermission,
+                }),
+            ).rejects.toMatchObject({ status: 403 })
+
+            const role = await root
+                .collection('roles')
+                .getOne(setup.managerRole.id)
+            expect(role.permissions).not.toContain(settingsPermission)
+        } finally {
+            await teardown(setup)
+        }
+    })
+
+    test('can assign a role within its own permissions', async ({}, info) => {
+        const setup = await managerSetup(
+            `guard-sub-w${info.workerIndex}-${Date.now()}`,
+        )
+        try {
+            const moved = await setup.pb
+                .collection('users')
+                .update(setup.target.id, { role: setup.managerRole.id })
+
+            expect(moved.role).toBe(setup.managerRole.id)
+        } finally {
+            await teardown(setup)
+        }
+    })
+})

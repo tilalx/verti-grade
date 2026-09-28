@@ -25,11 +25,13 @@ export function usePbList<
 
     const items = ref([]) as Ref<TItem[]>
     const totalItems = ref(0)
-    const page = ref(1)
     const loading = ref(false)
     const loadingMore = ref(false)
     const error = ref<unknown>(null)
-    const hasMore = computed(() => items.value.length < totalItems.value)
+    const exhausted = ref(false)
+    const hasMore = computed(
+        () => !exhausted.value && items.value.length < totalItems.value,
+    )
 
     const toItem = (record: TRecord) =>
         options.map ? options.map(record) : (record as unknown as TItem)
@@ -46,15 +48,10 @@ export function usePbList<
                 })
             const mapped = result.items.map(toItem)
             const loadedIds = new Set(items.value.map((item) => item.id))
-            items.value =
-                target === 1
-                    ? mapped
-                    : [
-                          ...items.value,
-                          ...mapped.filter((item) => !loadedIds.has(item.id)),
-                      ]
+            const unseen = mapped.filter((item) => !loadedIds.has(item.id))
+            items.value = target === 1 ? mapped : [...items.value, ...unseen]
+            exhausted.value = target !== 1 && unseen.length === 0
             totalItems.value = result.totalItems
-            page.value = target
         } catch (err) {
             if (isAbortError(err)) return
             error.value = err
@@ -72,7 +69,8 @@ export function usePbList<
 
     async function loadMore() {
         if (loading.value || loadingMore.value || !hasMore.value) return
-        await fetchPage(page.value + 1, loadingMore)
+        const nextPage = Math.floor(items.value.length / options.perPage) + 1
+        await fetchPage(nextPage, loadingMore)
     }
 
     async function prefetch(key: string) {
