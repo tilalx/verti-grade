@@ -1,17 +1,7 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 import { signInAs } from '../../support/auth'
-import PocketBase from 'pocketbase'
-import {
-    authAsSuperuser,
-    ensureLocations,
-    ensureUser,
-    getRoleIds,
-    LOCATIONS,
-    uiaa,
-} from '../../support/seed'
-
-const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
+import { ensureUser, getRoleIds, uiaa } from '../../support/seed'
 
 test('the logbook sends guests to sign in and back', async ({ page }) => {
     await page.goto('/logbook')
@@ -24,17 +14,16 @@ test('the logbook sends guests to sign in and back', async ({ page }) => {
 
 test('a climber logs, edits and deletes an ascent', async ({
     page,
+    root,
     testPrefix,
+    workerLocation,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const roleIds = await getRoleIds(root)
     const climber = await ensureUser(root, roleIds.user, 'user', testPrefix)
-    const locations = await ensureLocations(root)
     const route = await root.collection('routes').create({
         name: `${testPrefix}-tick-route`,
         ...uiaa('6+'),
-        location: locations[LOCATIONS[0]],
+        location: workerLocation.id,
         type: 'Route',
         color: '#2196F3',
         creator: ['E2E'],
@@ -89,17 +78,14 @@ test('a climber logs, edits and deletes an ascent', async ({
     await page.getByTestId('logbook-tick-delete').click()
     await page.getByTestId('confirm-dialog-confirm').click()
     await expect(page.getByTestId('logbook-empty')).toBeVisible()
-
-    await root.collection('routes').delete(route.id)
-    await root.collection('users').delete(climber.id)
 })
 
 test('the dashboard sums up sends and turns a project into a send', async ({
     page,
+    root,
     testPrefix,
+    workerLocation,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const roleIds = await getRoleIds(root)
     const climber = await ensureUser(
         root,
@@ -107,12 +93,11 @@ test('the dashboard sums up sends and turns a project into a send', async ({
         'user',
         `${testPrefix}-dash`,
     )
-    const locations = await ensureLocations(root)
     const createRoute = (name: string, grade: string) =>
         root.collection('routes').create({
             name: `${testPrefix}-${name}`,
             ...uiaa(grade),
-            location: locations[LOCATIONS[0]],
+            location: workerLocation.id,
             type: 'Route',
             creator: ['E2E'],
             screw_date: '2026-09-01',
@@ -169,9 +154,4 @@ test('the dashboard sums up sends and turns a project into a send', async ({
     await page.getByTestId('tick-submit').click()
     await expect(page.getByTestId('logbook-projects-empty')).toBeVisible()
     await expect(value('sends')).toHaveText('3')
-
-    await root.collection('users').delete(climber.id)
-    for (const route of [easy, hard, project]) {
-        await root.collection('routes').delete(route.id)
-    }
 })

@@ -7,30 +7,42 @@ test('the route form sheet sits flush and shifts nothing behind it', async ({
     await page.setViewportSize({ width: 393, height: 852 })
     await gotoSettled(page, '/manage/routes')
 
-    const scrollable = await page.evaluate(
-        () =>
-            document.documentElement.scrollHeight >
-            document.documentElement.clientHeight,
-    )
-    expect(scrollable, 'the list must scroll for this to be a real test').toBe(
-        true,
-    )
+    await expect
+        .poll(
+            () =>
+                page.evaluate(
+                    () =>
+                        document.documentElement.scrollHeight >
+                        document.documentElement.clientHeight,
+                ),
+            { message: 'the list must scroll for this to be a real test' },
+        )
+        .toBe(true)
 
-    const anchors = async () => ({
-        logo: (await page.getByTestId('nav-logo').boundingBox())!,
-        search: (await page.getByTestId('filter-search').boundingBox())!,
-    })
+    const anchors = async () => {
+        const logo = (await page.getByTestId('nav-logo').boundingBox())!
+        const search = (await page.getByTestId('filter-search').boundingBox())!
+        return [logo.x, search.x, search.width]
+    }
 
     const before = await anchors()
     await page.getByTestId('routes-create-open').click()
-    await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-    const during = await anchors()
+    const sheet = page.getByTestId('route-form-dialog')
+    await expect(sheet).toBeVisible()
+    await expect
+        .poll(async () =>
+            Math.max(
+                ...(await anchors()).map((value, index) =>
+                    Math.abs(value - before[index]!),
+                ),
+            ),
+        )
+        .toBeLessThan(0.5)
 
-    expect(during.logo.x).toBeCloseTo(before.logo.x, 0)
-    expect(during.search.x).toBeCloseTo(before.search.x, 0)
-    expect(during.search.width).toBeCloseTo(before.search.width, 0)
-
-    const sheet = (await page.locator('.dialog-shell--sheet').boundingBox())!
-    expect(sheet.x).toBe(0)
-    expect(sheet.width).toBe(393)
+    await expect
+        .poll(async () => {
+            const box = await sheet.boundingBox()
+            return box && { x: box.x, width: box.width }
+        })
+        .toEqual({ x: 0, width: 393 })
 })

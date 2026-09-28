@@ -1,4 +1,5 @@
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 
 test.describe('login', () => {
@@ -6,14 +7,7 @@ test.describe('login', () => {
         page,
     }) => {
         await gotoSettled(page, '/auth/login')
-        await page
-            .getByTestId('login-identity')
-            .locator('input')
-            .fill('e2e-admin@gripello.test')
-        await page
-            .getByTestId('login-password')
-            .locator('input')
-            .fill('E2ePassw0rd!')
+        await fillLogin(page, 'e2e-admin@gripello.test', 'E2ePassw0rd!')
         await page.getByTestId('login-submit').click()
         await page.waitForURL('**/manage/routes')
         await expect(page.getByTestId('routes-create-open')).toBeVisible()
@@ -23,14 +17,7 @@ test.describe('login', () => {
 
     test('shows an error for invalid credentials', async ({ page }) => {
         await gotoSettled(page, '/auth/login')
-        await page
-            .getByTestId('login-identity')
-            .locator('input')
-            .fill('e2e-admin@gripello.test')
-        await page
-            .getByTestId('login-password')
-            .locator('input')
-            .fill('wrong-password')
+        await fillLogin(page, 'e2e-admin@gripello.test', 'wrong-password')
         await page.getByTestId('login-submit').click()
         await expect(page.getByTestId('global-snackbar')).toBeVisible()
         await expect(page).toHaveURL(/\/auth\/login/)
@@ -48,14 +35,7 @@ test.describe('login', () => {
                 return route.abort('failed')
             },
         )
-        await page
-            .getByTestId('login-identity')
-            .locator('input')
-            .fill('e2e-admin@gripello.test')
-        await page
-            .getByTestId('login-password')
-            .locator('input')
-            .fill('E2ePassw0rd!')
+        await fillLogin(page, 'e2e-admin@gripello.test', 'E2ePassw0rd!')
         await page.getByTestId('login-submit').click()
         await expect(page.getByTestId('global-snackbar')).toBeVisible()
         await expect(page).toHaveURL(/\/auth\/login/)

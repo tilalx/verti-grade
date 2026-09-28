@@ -1,4 +1,4 @@
-import type { APIRequestContext, Page } from '@playwright/test'
+import { expect, type APIRequestContext, type Page } from '@playwright/test'
 
 const MAILPIT = process.env.MAILPIT_URL || 'http://mailpit:8025'
 
@@ -32,60 +32,44 @@ export async function waitForMail(
     } = {},
 ): Promise<MailMessage> {
     const request = api(page)
-    const deadline = Date.now() + (options.timeoutMs ?? 15_000)
+    let found: MailMessage | undefined
 
-    let lastSeen: string[] = []
-    while (Date.now() < deadline) {
-        const res = await request.get(
-            `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`,
-        )
-        if (res.ok()) {
-            const items: MailSummary[] = (await res.json()).messages ?? []
-            lastSeen = items.map((item) => item.Subject)
+    await expect
+        .poll(
+            async () => {
+                const res = await request.get(
+                    `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`,
+                )
+                if (!res.ok()) return []
+                const items: MailSummary[] = (await res.json()).messages ?? []
+                const candidates = options.subject
+                    ? items.filter((item) =>
+                          options.subject!.test(item.Subject),
+                      )
+                    : items
 
-            const candidates = options.subject
-                ? items.filter((item) => options.subject!.test(item.Subject))
-                : items
-
-            for (const candidate of candidates) {
-                const message = await readMail(page, candidate.ID)
-                if (
-                    !options.bodyIncludes ||
-                    `${message.HTML || ''}${message.Text || ''}`.includes(
-                        options.bodyIncludes,
-                    )
-                ) {
-                    return message
+                for (const candidate of candidates) {
+                    const message = await readMail(page, candidate.ID)
+                    if (
+                        !options.bodyIncludes ||
+                        `${message.HTML || ''}${message.Text || ''}`.includes(
+                            options.bodyIncludes,
+                        )
+                    ) {
+                        found = message
+                        return 'found'
+                    }
                 }
-            }
-        }
-        await new Promise((resolve) => setTimeout(resolve, 400))
-    }
-
-    throw new Error(
-        `No mail to ${to}${
-            options.subject ? ` matching ${options.subject}` : ''
-        } within the timeout. Subjects seen: ${JSON.stringify(lastSeen)}`,
-    )
-}
-
-export async function expectNoMail(
-    page: Page | APIRequestContext,
-    to: string,
-    windowMs = 3000,
-): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, windowMs))
-    const res = await api(page).get(
-        `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`,
-    )
-    const items: MailSummary[] = (await res.json()).messages ?? []
-    if (items.length) {
-        throw new Error(
-            `Expected no mail to ${to}, got: ${JSON.stringify(
-                items.map((i) => i.Subject),
-            )}`,
+                return items.map((item) => item.Subject)
+            },
+            {
+                message: `mail to ${to}${options.subject ? ` matching ${options.subject}` : ''}`,
+                timeout: options.timeoutMs ?? 15_000,
+            },
         )
-    }
+        .toBe('found')
+
+    return found!
 }
 
 export async function readMail(
@@ -115,8 +99,4 @@ export function linkPath(message: MailMessage, pattern: RegExp): string {
         )
     }
     return match[0].replace(/^https?:\/\/[^/]+/, '').replace(/&amp;/g, '&')
-}
-
-export async function clearMailbox(page: Page | APIRequestContext) {
-    await api(page).delete(`${MAILPIT}/api/v1/messages`)
 }

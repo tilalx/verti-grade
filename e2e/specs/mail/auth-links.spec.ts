@@ -1,4 +1,5 @@
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 import { waitForMail, linkPath, mailbox } from '../../support/mail'
 import PocketBase from 'pocketbase'
@@ -67,8 +68,7 @@ test('an email change confirms from the new address and then signs in', async ({
     const newEmail = mailbox(testPrefix, 'changed')
 
     await gotoSettled(page, '/auth/login')
-    await page.getByTestId('login-identity').locator('input').fill(email)
-    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
+    await fillLogin(page, email, PASSWORD)
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 
@@ -93,8 +93,7 @@ test('an email change confirms from the new address and then signs in', async ({
     await expect(page.getByTestId('email-change-done')).toBeVisible()
 
     await gotoSettled(page, '/auth/login')
-    await page.getByTestId('login-identity').locator('input').fill(newEmail)
-    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
+    await fillLogin(page, newEmail, PASSWORD)
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 

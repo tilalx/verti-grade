@@ -35,22 +35,28 @@ test('the route manager pager stays above the bottom bar', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes')
-    const bar = (await page.getByTestId('bottom-nav').boundingBox())!
-    const pager = page.locator('.route-manager__mobile-pagination')
+    const pager = page.getByTestId('routes-mobile-pagination')
     await expect(pager).toBeVisible()
-    const pagerBox = (await pager.boundingBox())!
-    expect(pagerBox.y + pagerBox.height).toBeLessThanOrEqual(bar.y + 1)
+    await expect(async () => {
+        const bar = (await page.getByTestId('bottom-nav').boundingBox())!
+        const pagerBox = (await pager.boundingBox())!
+        expect(pagerBox.y + pagerBox.height).toBeLessThanOrEqual(bar.y + 1)
+    }).toPass()
 })
 
 test('the footer links stay above the bottom bar', async ({ page }) => {
     await gotoSettled(page, '/account')
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    const bar = (await page.getByTestId('bottom-nav').boundingBox())!
-    const links = (await page
-        .getByTestId('me-info')
-        .getByTestId('footer-privacy')
-        .boundingBox())!
-    expect(links.y + links.height).toBeLessThanOrEqual(bar.y)
+    await expect(async () => {
+        await page.evaluate(() =>
+            window.scrollTo(0, document.body.scrollHeight),
+        )
+        const bar = (await page.getByTestId('bottom-nav').boundingBox())!
+        const links = (await page
+            .getByTestId('me-info')
+            .getByTestId('footer-privacy')
+            .boundingBox())!
+        expect(links.y + links.height).toBeLessThanOrEqual(bar.y)
+    }).toPass()
 })
 
 test('on phones the footer lives on the account tab only', async ({ page }) => {

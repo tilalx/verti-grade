@@ -1,18 +1,19 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import {
-    createComment,
-    deleteComment,
-    firstRouteId,
-} from '../../support/comments'
+import { createComment } from '../../support/comments'
 
 test('scrolls to and highlights the comment a report links to', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
-    const routeId = await firstRouteId(page)
-    const commentId = await createComment(page, `${testPrefix}-anchored`)
+    const routeId = route.id
+    const commentId = await createComment(
+        page,
+        routeId,
+        `${testPrefix}-anchored`,
+    )
 
     await gotoSettled(page, `/route?id=${routeId}#comment-${commentId}`)
 
@@ -20,23 +21,24 @@ test('scrolls to and highlights the comment a report links to', async ({
     await expect(card).toBeVisible()
     await expect(card).toHaveClass(/comment-card--target/)
     await expect(card).toBeInViewport()
-
-    await deleteComment(page, commentId)
 })
 
 test('leaves the list alone when there is no anchor', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
-    const routeId = await firstRouteId(page)
-    const commentId = await createComment(page, `${testPrefix}-unanchored`)
+    const routeId = route.id
+    const commentId = await createComment(
+        page,
+        routeId,
+        `${testPrefix}-unanchored`,
+    )
 
     await gotoSettled(page, `/route?id=${routeId}`)
 
     await expect(page.locator(`#comment-${commentId}`)).not.toHaveClass(
         /comment-card--target/,
     )
-
-    await deleteComment(page, commentId)
 })

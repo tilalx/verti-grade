@@ -1,15 +1,12 @@
 import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { authAsSuperuser, ensureUser, getRoleIds } from '../../support/seed'
 import { PB_URL } from '../../support/map'
 
 test('deleting an account keeps its audit trail and records the deletion', async ({
-    testPrefix,
+    root,
+    createUser,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const roleIds = await getRoleIds(root)
-    const leaver = await ensureUser(root, roleIds.user!, 'user', testPrefix)
+    const leaver = await createUser()
 
     const client = new PocketBase(PB_URL)
     await client

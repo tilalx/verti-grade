@@ -19,6 +19,7 @@
                             :key="option"
                             :value="option"
                             :variant="option === range ? 'tonal' : 'outlined'"
+                            :aria-pressed="option === range"
                             :data-testid="`analytics-range-${option}`"
                         >
                             {{ $t(`analytics.filters.ranges.${option}`) }}
@@ -96,6 +97,7 @@
                             :color="includeArchived ? 'warning' : undefined"
                             :variant="includeArchived ? 'tonal' : 'outlined'"
                             prepend-icon="mdi-archive-outline"
+                            :aria-pressed="includeArchived"
                             data-testid="analytics-filter-archived"
                             @click="
                                 emit('update', {

@@ -3,9 +3,11 @@ import { gotoSettled } from '../../support/nav'
 
 test.describe('self-service profile', () => {
     test('edits own name and sees it reflected after save', async ({
-        userPage: page,
+        createUser,
+        pageAs,
         testPrefix,
     }) => {
+        const page = await pageAs(await createUser())
         await gotoSettled(page, '/')
         await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-profile').click()
@@ -16,12 +18,17 @@ test.describe('self-service profile', () => {
             .getByTestId('profile-lastname')
             .locator('input')
             .fill(newLastname)
+        const saved = page.waitForResponse(
+            (res) =>
+                res.request().method() === 'PATCH' &&
+                res.url().includes('/api/collections/users/records/'),
+        )
         await page.getByTestId('profile-save').click()
+        expect((await saved).ok()).toBe(true)
 
         await expect(page.getByTestId('global-snackbar-message')).toBeVisible()
         await expect(page.getByTestId('profile-dialog')).toBeHidden()
 
-        // Reopen to confirm the change was persisted, not just local state.
         await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-profile').click()
         await expect(
@@ -55,7 +62,6 @@ test.describe('self-service profile', () => {
         await expect(page.getByTestId('global-snackbar-message')).toContainText(
             /incorrect/i,
         )
-        // Dialog stays open on failure — nothing was saved.
         await expect(page.getByTestId('profile-dialog')).toBeVisible()
     })
 
@@ -130,5 +136,5 @@ test('lists languages by code instead of emoji flags', async ({
     await page.getByTestId('profile-language').click()
     const german = page.getByTestId('profile-language-de')
     await expect(german).toContainText('DE')
-    expect(await german.textContent()).not.toMatch(/[\u{1F1E6}-\u{1F1FF}]/u)
+    await expect(german).not.toHaveText(/[\u{1F1E6}-\u{1F1FF}]/u)
 })

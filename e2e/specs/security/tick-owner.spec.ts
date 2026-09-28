@@ -1,13 +1,6 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
 import PocketBase from 'pocketbase'
-import {
-    authAsSuperuser,
-    ensureLocations,
-    ensureUser,
-    getRoleIds,
-    LOCATIONS,
-    uiaa,
-} from '../../support/seed'
+import { ensureUser, getRoleIds, uiaa } from '../../support/seed'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 const DAY = '2026-09-26 12:00:00.000Z'
@@ -18,18 +11,19 @@ async function signIn(email: string, password: string) {
     return client
 }
 
-test('ticks stay private to their owner and keep the grade they were logged at', async ({}, info) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
+test('ticks stay private to their owner and keep the grade they were logged at', async ({
+    root,
+    testPrefix,
+    workerLocation,
+}) => {
     const roleIds = await getRoleIds(root)
-    const prefix = `tick-owner-w${info.workerIndex}`
+    const prefix = testPrefix
     const owner = await ensureUser(root, roleIds.user, 'user', `${prefix}-a`)
     const other = await ensureUser(root, roleIds.user, 'user', `${prefix}-b`)
-    const locations = await ensureLocations(root)
     const route = await root.collection('routes').create({
         name: `${prefix}-route`,
         ...uiaa('7-'),
-        location: locations[LOCATIONS[0]],
+        location: workerLocation.id,
         type: 'Route',
         creator: ['E2E'],
         screw_date: '2026-09-01',

@@ -1,28 +1,26 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { authAsSuperuser } from '../../support/seed'
 import { gotoSettled } from '../../support/nav'
-import { PB_URL, seedMap } from '../../support/map'
+import { seedMap } from '../../support/map'
 
 test.use({ viewport: { width: 360, height: 740 } })
 
 test('route hero chips wrap instead of being clipped', async ({
     page,
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, `${testPrefix}-long-location-name`, {
         routes: 1,
     })
-    try {
-        await gotoSettled(page, `/route?id=${seeded.routeIds[0]}`)
-        const hero = page.getByTestId('route-hero')
-        await expect(page.getByTestId('route-wall')).toBeVisible()
+    await gotoSettled(page, `/route?id=${seeded.routeIds[0]}`)
+    const hero = page.getByTestId('route-hero')
+    await expect(page.getByTestId('route-wall')).toBeVisible()
 
+    await expect(async () => {
         const heroBox = (await hero.boundingBox())!
-        const chipBoxes = await hero
-            .locator('.route-hero__chips .v-chip')
+        const chipBoxes = await page
+            .getByTestId('route-hero-chips')
+            .locator(':scope > *')
             .evaluateAll((chips) =>
                 chips.map((chip) => chip.getBoundingClientRect().toJSON()),
             )
@@ -31,42 +29,36 @@ test('route hero chips wrap instead of being clipped', async ({
             expect(box.right).toBeLessThanOrEqual(heroBox.x + heroBox.width)
         const rows = new Set(chipBoxes.map((box) => Math.round(box.top)))
         expect(rows.size).toBeGreaterThan(1)
-    } finally {
-        await seeded.cleanup()
-    }
+    }).toPass()
 })
 
-test('icon buttons have a 44px touch target', async ({ page, testPrefix }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const seeded = await seedMap(root, testPrefix, { routes: 1 })
-    try {
-        await gotoSettled(page, `/route?id=${seeded.routeIds[0]}`)
-        const back = page.getByTestId('route-back')
-        await expect(back).toBeVisible()
-        const box = (await back.boundingBox())!
+test('icon buttons have a 44px touch target', async ({ page, route }) => {
+    await gotoSettled(page, `/route?id=${route.id}`)
+    const back = page.getByTestId('route-back')
+    await expect(back).toBeVisible()
 
-        const centerX = box.x + box.width / 2
-        const centerY = box.y + box.height / 2
-        const hits = await page.evaluate(
-            (points) =>
-                points.map(
-                    ([x, y]) =>
-                        !!document
-                            .elementFromPoint(x!, y!)
-                            ?.closest('[data-testid="route-back"]'),
-                ),
-            [
-                [centerX - 21, centerY],
-                [centerX + 21, centerY],
-                [centerX, centerY - 21],
-                [centerX, centerY + 21],
-            ],
-        )
-        expect(hits).toEqual([true, true, true, true])
-    } finally {
-        await seeded.cleanup()
-    }
+    await expect
+        .poll(async () => {
+            const box = (await back.boundingBox())!
+            const centerX = box.x + box.width / 2
+            const centerY = box.y + box.height / 2
+            return page.evaluate(
+                (points) =>
+                    points.map(
+                        ([x, y]) =>
+                            !!document
+                                .elementFromPoint(x!, y!)
+                                ?.closest('[data-testid="route-back"]'),
+                    ),
+                [
+                    [centerX - 21, centerY],
+                    [centerX + 21, centerY],
+                    [centerX, centerY - 21],
+                    [centerX, centerY + 21],
+                ],
+            )
+        })
+        .toEqual([true, true, true, true])
 })
 
 test('settings asset actions are visible without hover', async ({
@@ -74,18 +66,18 @@ test('settings asset actions are visible without hover', async ({
 }) => {
     await gotoSettled(page, '/admin/settings')
     await expect(page.getByTestId('settings-asset-actions-icon')).toHaveCount(0)
-    await page
-        .locator('.asset-card')
-        .first()
-        .locator('input[type="file"]')
-        .setInputFiles({
-            name: 'logo.png',
-            mimeType: 'image/png',
-            buffer: Buffer.from(
-                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                'base64',
-            ),
-        })
+    const chooser = page.waitForEvent('filechooser')
+    await page.getByTestId('settings-asset-logo').click()
+    await (
+        await chooser
+    ).setFiles({
+        name: 'logo.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            'base64',
+        ),
+    })
     const actions = page.getByTestId('settings-asset-actions-logo')
     await expect(actions).toBeVisible()
     await expect(actions).toHaveCSS('opacity', '1')

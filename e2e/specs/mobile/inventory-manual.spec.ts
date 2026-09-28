@@ -1,41 +1,27 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
 
-async function openScopedInventory(page: Page) {
+async function openScopedInventory(page: Page, locationId: string) {
     await gotoSettled(page, '/manage/inventory')
-    const hallA = await locationId(page, LOCATIONS[0])
     await page.evaluate((location) => {
         localStorage.setItem('inventory-instructions-seen', '1')
         localStorage.setItem(
             'inventory-scanned-route-ids',
             JSON.stringify({ v: 3, location, ids: [] }),
         )
-    }, hallA)
-    await page.reload()
-    await page
-        .locator('[data-testid="inventory-progress"]')
-        .waitFor({ state: 'visible' })
-}
-
-async function firstMissingRouteId(page: Page) {
-    const res = await page.request.get(
-        '/api/collections/routes/records?' +
-            new URLSearchParams({
-                filter: `name ~ "e2e-route-" && archived = false && location.name = "${LOCATIONS[0]}"`,
-                perPage: '1',
-                sort: 'anchor_point,name',
-            }),
-    )
-    return (await res.json()).items[0].id as string
+    }, locationId)
+    await gotoSettled(page, '/manage/inventory')
+    await expect(page.getByTestId('inventory-progress')).toBeVisible()
 }
 
 test('marks a route found from the still-to-find list and undoes it', async ({
     adminPage: page,
+    route,
+    workerLocation,
 }) => {
-    await openScopedInventory(page)
-    const routeId = await firstMissingRouteId(page)
+    await openScopedInventory(page, workerLocation.id)
+    const routeId = route.id
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
     await expect(page.getByTestId(`inventory-missing-${routeId}`)).toBeVisible()
@@ -57,13 +43,11 @@ test('marks a route found from the still-to-find list and undoes it', async ({
 
 test('marks a route found through the manual search dialog', async ({
     adminPage: page,
+    route,
+    workerLocation,
 }) => {
-    await openScopedInventory(page)
-    const routeId = await firstMissingRouteId(page)
-    const routeName = await page
-        .getByTestId(`inventory-missing-${routeId}`)
-        .locator('.v-list-item-title')
-        .innerText()
+    await openScopedInventory(page, workerLocation.id)
+    const routeId = route.id
 
     await page.getByTestId('inventory-manual-open').click()
     const dialog = page.getByTestId('inventory-manual-dialog')
@@ -72,7 +56,7 @@ test('marks a route found through the manual search dialog', async ({
     await page
         .getByTestId('inventory-manual-search')
         .locator('input')
-        .fill(routeName)
+        .fill(route.name)
     await page.getByTestId(`inventory-manual-item-${routeId}`).click()
 
     await expect(dialog).toBeHidden()
@@ -81,9 +65,11 @@ test('marks a route found through the manual search dialog', async ({
 
 test('reset clears progress only after confirmation', async ({
     adminPage: page,
+    route,
+    workerLocation,
 }) => {
-    await openScopedInventory(page)
-    const routeId = await firstMissingRouteId(page)
+    await openScopedInventory(page, workerLocation.id)
+    const routeId = route.id
     await page.getByTestId(`inventory-mark-${routeId}`).click()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
 
@@ -99,36 +85,49 @@ test('reset clears progress only after confirmation', async ({
 
 test('reserves no camera space until scanning starts', async ({
     adminPage: page,
+    workerLocation,
 }) => {
-    await openScopedInventory(page)
+    await openScopedInventory(page, workerLocation.id)
 
-    await expect(page.locator('.scanner-viewport')).toHaveCount(0)
+    await expect(page.getByTestId('scanner-viewport')).toHaveCount(0)
 
-    const tabs = await page.getByTestId('inventory-tab-missing').boundingBox()
     const viewportHeight = page.viewportSize()!.height
-    expect(tabs!.y).toBeLessThan(viewportHeight / 2)
+    await expect
+        .poll(
+            async () =>
+                (await page.getByTestId('inventory-tab-missing').boundingBox())!
+                    .y,
+        )
+        .toBeLessThan(viewportHeight / 2)
 })
 
-test('restores found routes after a reload', async ({ adminPage: page }) => {
-    await openScopedInventory(page)
-    const routeId = await firstMissingRouteId(page)
+test('restores found routes after a reload', async ({
+    adminPage: page,
+    route,
+    workerLocation,
+}) => {
+    await openScopedInventory(page, workerLocation.id)
+    const routeId = route.id
 
     await page.getByTestId(`inventory-mark-${routeId}`).click()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
 
     await page.reload()
-    await page
-        .locator('[data-testid="inventory-progress"]')
-        .waitFor({ state: 'visible' })
+    await page.getByTestId('page-hydrated').waitFor({ state: 'attached' })
+    await expect(page.getByTestId('inventory-progress')).toBeVisible()
     await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
     await expect(page.getByTestId(`inventory-missing-${routeId}`)).toHaveCount(
         0,
     )
 })
 
-test('shows each route in its hold colour', async ({ adminPage: page }) => {
-    await openScopedInventory(page)
-    const routeId = await firstMissingRouteId(page)
+test('shows each route in its hold colour', async ({
+    adminPage: page,
+    route,
+    workerLocation,
+}) => {
+    await openScopedInventory(page, workerLocation.id)
+    const routeId = route.id
     await expect(
         page
             .getByTestId(`inventory-missing-${routeId}`)

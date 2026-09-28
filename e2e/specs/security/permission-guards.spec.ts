@@ -1,11 +1,6 @@
 import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import {
-    LOCATIONS,
-    authAsSuperuser,
-    ensureLocations,
-    uiaa,
-} from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { PB_URL } from '../../support/map'
 
 async function clientWithPermission(
@@ -46,10 +41,9 @@ async function clientWithPermission(
 }
 
 test('a user manager cannot rename the admin role or strip its permissions', async ({
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const admin = await root
         .collection('roles')
         .getFirstListItem('name = "admin"', { requestKey: null })
@@ -75,15 +69,14 @@ test('a user manager cannot rename the admin role or strip its permissions', asy
 })
 
 test('inventory may archive and restore routes but not edit them', async ({
+    root,
     testPrefix,
+    workerLocation,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const locations = await ensureLocations(root)
     const route = await root.collection('routes').create({
         name: `${testPrefix}-inventory`,
         ...uiaa('5'),
-        location: locations[LOCATIONS[0]],
+        location: workerLocation.id,
         type: 'Boulder',
         creator: ['E2E'],
     })
@@ -127,15 +120,14 @@ test('inventory may archive and restore routes but not edit them', async ({
 
 test('a report cannot be marked removed while its content still exists', async ({
     adminPage: page,
+    root,
     testPrefix,
+    workerLocation,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const locations = await ensureLocations(root)
     const route = await root.collection('routes').create({
         name: `${testPrefix}-reported`,
         ...uiaa('5'),
-        location: locations[LOCATIONS[0]],
+        location: workerLocation.id,
         type: 'Boulder',
         creator: ['E2E'],
     })
@@ -184,10 +176,9 @@ test('a report cannot be marked removed while its content still exists', async (
 })
 
 test('a decided report keeps its decision and server-owned fields', async ({
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const { id: reportId } = await root.collection('reports').create({
         content_type: 'rating',
         content_id: `${Date.now()}`.padEnd(15, '0'),

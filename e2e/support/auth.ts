@@ -1,5 +1,5 @@
 import PocketBase from 'pocketbase'
-import { test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
@@ -15,4 +15,19 @@ export async function signInAs(page: Page, email: string, password: string) {
             url: baseURL,
         },
     ])
+}
+
+export async function fillLogin(
+    page: Page,
+    identity: string,
+    password: string,
+) {
+    const identityInput = page.getByTestId('login-identity').locator('input')
+    const passwordInput = page.getByTestId('login-password').locator('input')
+    await expect(async () => {
+        await identityInput.fill(identity)
+        await passwordInput.fill(password)
+        await expect(identityInput).toHaveValue(identity, { timeout: 500 })
+        await expect(passwordInput).toHaveValue(password, { timeout: 500 })
+    }).toPass()
 }

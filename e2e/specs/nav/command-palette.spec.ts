@@ -60,7 +60,8 @@ test('moves the selection with the arrow keys', async ({ page }) => {
     const results = page.getByTestId('command-palette-result')
     await expect(results.nth(1)).toBeVisible()
     await input.press('ArrowDown')
-    await expect(results.nth(1)).toHaveClass(/v-list-item--active/)
+    await expect(results.nth(1)).toHaveAttribute('aria-current', 'true')
+    await expect(results.first()).not.toHaveAttribute('aria-current', 'true')
 })
 
 async function paletteSearch(
@@ -124,7 +125,7 @@ test('never queries admin data without permission', async ({
     const forbidden: string[] = []
     page.on('request', (request) => {
         if (
-            /\/api\/collections\/(users|roles|ratings|reports)\/records/.test(
+            /\/api\/collections\/(users|roles|ratings|reports)\/records(\?|$)/.test(
                 request.url(),
             )
         )

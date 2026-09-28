@@ -105,10 +105,9 @@ test('announces new commits and lists them', async ({ adminPage: page }) => {
     await expect(dialog).toContainText('bbbbbbb')
     await expect(dialog).toContainText('second commit')
 
-    const deployed = (
-        await page.getByTestId('footer-version').innerText()
-    ).trim()
-    await expect(dialog).toContainText(deployed)
+    const footerVersion = page.getByTestId('footer-version')
+    await expect(footerVersion).toHaveText(/\S/)
+    await expect(dialog).toContainText((await footerVersion.innerText()).trim())
 })
 
 test('stays hidden when the deployment is current', async ({
@@ -135,9 +134,9 @@ test('a dismissal survives a reload but a newer release reappears', async ({
 
     await gotoSettled(page, '/')
     await expect(page.getByTestId('update-banner')).toBeHidden()
-    expect(
-        await page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY),
-    ).toBe('v1.10.0')
+    await expect
+        .poll(() => page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY))
+        .toBe('v1.10.0')
 
     await stubVersion(page, {
         ...RELEASE_PAYLOAD,

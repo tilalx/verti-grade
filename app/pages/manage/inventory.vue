@@ -9,6 +9,7 @@
                     v-if="cameraActive"
                     ref="viewportRef"
                     class="scanner-viewport"
+                    data-testid="scanner-viewport"
                 >
                     <QrStream
                         :formats="['QRCode']"

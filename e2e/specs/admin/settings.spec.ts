@@ -1,7 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-
-test.describe.configure({ mode: 'serial' })
+import { SETTINGS_ID } from '../../support/state-snapshot'
 
 test('updates organization settings', async ({ adminPage: page }) => {
     await gotoSettled(page, '/admin/settings')
@@ -134,22 +133,31 @@ test('external legal URLs override the built-in pages', async ({
 
 test('removing a representative marks the form dirty and saves', async ({
     adminPage: page,
+    root,
 }) => {
+    await root.collection('settings').update(SETTINGS_ID, {
+        legal_representatives: [
+            { name: 'E2E Keep', role: 'Chair' },
+            { name: 'E2E Drop', role: 'Treasurer' },
+        ],
+    })
     await gotoSettled(page, '/admin/settings')
 
     const rows = page.getByTestId('settings-legal-representative')
-    const before = await rows.count()
-    expect(before).toBeGreaterThan(0)
+    await expect(rows).toHaveCount(2)
 
     await page
         .getByTestId('settings-legal-remove-representative')
-        .first()
+        .last()
         .click()
-    await expect(rows).toHaveCount(before - 1)
+    await expect(rows).toHaveCount(1)
     await expect(page.getByTestId('settings-save')).toBeVisible()
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
     await gotoSettled(page, '/admin/settings')
-    await expect(rows).toHaveCount(before - 1)
+    await expect(rows).toHaveCount(1)
+    await expect(
+        rows.getByTestId('settings-legal-representative-name').locator('input'),
+    ).toHaveValue('E2E Keep')
 })

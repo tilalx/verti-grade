@@ -1,28 +1,31 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { createComment, deleteComment } from '../../support/comments'
+import { createComment } from '../../support/comments'
 
 const LONG_COMMENT = 'Sehr schoene Route, wirklich lang. '.repeat(20)
 
 test('show more expands a clipped comment', async ({
     adminPage: page,
     testPrefix,
+    route,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    const id = await createComment(page, `${testPrefix} ${LONG_COMMENT}`)
+    const id = await createComment(
+        page,
+        route.id,
+        `${testPrefix} ${LONG_COMMENT}`,
+    )
     await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toBeVisible()
-    const text = card.locator('.comment-card__comment')
+    const text = card.getByTestId('comment-card-comment')
     const toggle = card.getByTestId('comment-card-toggle')
 
     await expect(toggle).toBeVisible()
-    const clipped = await text.evaluate((el) => ({
-        client: el.clientHeight,
-        scroll: el.scrollHeight,
-    }))
-    expect(clipped.scroll).toBeGreaterThan(clipped.client)
+    await expect
+        .poll(() => text.evaluate((el) => el.scrollHeight - el.clientHeight))
+        .toBeGreaterThan(0)
 
     await toggle.click()
     await expect
@@ -30,23 +33,20 @@ test('show more expands a clipped comment', async ({
             text.evaluate((el) => el.scrollHeight - el.clientHeight),
         )
         .toBeLessThanOrEqual(1)
-
-    await deleteComment(page, id)
 })
 
 test('short comments have no show more button', async ({
     adminPage: page,
     testPrefix,
+    route,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    const id = await createComment(page, `${testPrefix} kurz`)
+    const id = await createComment(page, route.id, `${testPrefix} kurz`)
     await gotoSettled(page, '/manage/comments')
 
     const card = page.getByTestId(`comment-card-${id}`)
     await expect(card).toContainText('kurz')
     await expect(card.getByTestId('comment-card-toggle')).toHaveCount(0)
-
-    await deleteComment(page, id)
 })
 
 test('infinite scroll goes idle once every comment is loaded', async ({

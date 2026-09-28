@@ -1,16 +1,10 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 
 async function signIn(page: Page) {
-    await page
-        .getByTestId('login-identity')
-        .locator('input')
-        .fill('e2e-routesetter@gripello.test')
-    await page
-        .getByTestId('login-password')
-        .locator('input')
-        .fill('E2ePassw0rd!')
+    await fillLogin(page, 'e2e-routesetter@gripello.test', 'E2ePassw0rd!')
     await page.getByTestId('login-submit').click()
 }
 

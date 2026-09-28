@@ -5,7 +5,7 @@ test('sorting the desktop table by name header actually reorders rows', async ({
     page,
 }) => {
     await gotoSettled(page, '/routes')
-    const names = () => page.locator('.route-name').allTextContents()
+    const names = () => page.getByTestId('index-row-name').allTextContents()
 
     const beforeAsc = await names()
     await page.getByRole('columnheader', { name: /name/i }).click()

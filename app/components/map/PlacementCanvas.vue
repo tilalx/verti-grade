@@ -36,6 +36,7 @@
                 <path
                     :d="svgPath(wall.outline)"
                     class="placement-wall-outline"
+                    data-testid="placement-wall-outline"
                 />
                 <path
                     :d="svgPath(wall.edge, false)"

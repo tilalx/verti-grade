@@ -8,7 +8,9 @@ import {
     getRoleIds,
     seedRatings,
     seedRoutes,
+    sweepTestData,
 } from './seed'
+import { takeSnapshot } from './state-snapshot'
 
 const AUTH_DIR = path.join(__dirname, '..', '.auth')
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
@@ -71,8 +73,11 @@ async function relaxRateLimits(pb: PocketBase) {
 
 export default async function globalSetup(config: FullConfig) {
     const pb = new PocketBase(PB_URL)
+    pb.autoCancellation(false)
     await withRetry(() => authAsSuperuser(pb))
+    await takeSnapshot(pb)
     await relaxRateLimits(pb)
+    await sweepTestData(pb, 'e2e-w')
 
     const roleIds = await getRoleIds(pb)
     const seededUsers = {

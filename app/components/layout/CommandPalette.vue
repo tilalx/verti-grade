@@ -55,6 +55,9 @@
                         v-for="result in group.items"
                         :key="result.key"
                         :active="result.index === activeIndex"
+                        :aria-current="
+                            result.index === activeIndex ? 'true' : undefined
+                        "
                         :prepend-icon="result.icon"
                         :title="result.title"
                         :subtitle="result.subtitle"

@@ -84,6 +84,7 @@
                     <span
                         ref="commentEl"
                         class="comment-card__comment"
+                        data-testid="comment-card-comment"
                         :class="{
                             'comment-card__comment--collapsed':
                                 collapsible && !expanded,

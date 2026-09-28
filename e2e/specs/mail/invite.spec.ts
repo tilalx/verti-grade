@@ -1,12 +1,13 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled, authHeader } from '../../support/nav'
+import { fillLogin } from '../../support/auth'
+import { gotoSettled } from '../../support/nav'
 import { waitForMail, linkPath, mailbox } from '../../support/mail'
 
 const NEW_PASSWORD = 'E2eInvited!123'
 
 test('an invited user can set a password from the mail and sign in', async ({
     adminPage: page,
-    browser,
+    page: invited,
     testPrefix,
 }) => {
     const email = mailbox(testPrefix, 'invite')
@@ -17,7 +18,7 @@ test('an invited user can set a password from the mail and sign in', async ({
     await page
         .getByTestId('user-create-lastname')
         .locator('input')
-        .fill(`Invited${Date.now()}`)
+        .fill('Invited')
     await page.getByTestId('user-create-email').locator('input').fill(email)
     await page.getByTestId('user-create-submit').click()
     await expect(page.getByTestId('user-create-dialog')).toBeHidden()
@@ -28,12 +29,6 @@ test('an invited user can set a password from the mail and sign in', async ({
         mail,
         /https?:\/\/[^"'\s]*\/auth\/confirm-password-reset\/[^"'\s]+/,
     )
-
-    const context = await browser.newContext({
-        baseURL: process.env.E2E_BASE_URL || 'https://vg.test',
-        ignoreHTTPSErrors: true,
-    })
-    const invited = await context.newPage()
 
     await gotoSettled(invited, path)
     await invited
@@ -48,26 +43,7 @@ test('an invited user can set a password from the mail and sign in', async ({
     await expect(invited.getByTestId('reset-done')).toBeVisible()
 
     await gotoSettled(invited, '/auth/login')
-    await invited.getByTestId('login-identity').locator('input').fill(email)
-    await invited
-        .getByTestId('login-password')
-        .locator('input')
-        .fill(NEW_PASSWORD)
+    await fillLogin(invited, email, NEW_PASSWORD)
     await invited.getByTestId('login-submit').click()
     await invited.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
-
-    await context.close()
-
-    const headers = await authHeader(page)
-    const found = await page.request.get(
-        '/api/collections/users/records?filter=' +
-            encodeURIComponent(`email = "${email}"`),
-        { headers },
-    )
-    const id = (await found.json()).items?.[0]?.id
-    if (id) {
-        await page.request.delete(`/api/collections/users/records/${id}`, {
-            headers,
-        })
-    }
 })

@@ -1,27 +1,15 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-async function firstSeededRouteId(page: import('@playwright/test').Page) {
-    const res = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=1',
-    )
-    const body = await res.json()
-    return body.items[0].id as string
-}
-
-test('an anonymous visitor can submit a review', async ({ page }) => {
-    const id = await firstSeededRouteId(page)
-    await gotoSettled(page, `/route?id=${id}`)
+test('an anonymous visitor can submit a review', async ({ page, route }) => {
+    await gotoSettled(page, `/route?id=${route.id}`)
 
     await page.getByTestId('review-open-cta').click()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 
     await page
         .getByTestId('review-form-rating')
-        .locator('button, [role="radio"]')
-        .last()
+        .getByRole('button', { name: 'Rating 5 of 5' })
         .click()
     await page.getByTestId('review-form-difficulty').click()
     await page.getByRole('option').first().click()
@@ -38,9 +26,11 @@ test('an anonymous visitor can submit a review', async ({ page }) => {
     await expect(page.getByTestId('empty-state')).toBeHidden()
 })
 
-test('keeps the dialog open when the review submit fails', async ({ page }) => {
-    const id = await firstSeededRouteId(page)
-    await gotoSettled(page, `/route?id=${id}`)
+test('keeps the dialog open when the review submit fails', async ({
+    page,
+    route,
+}) => {
+    await gotoSettled(page, `/route?id=${route.id}`)
 
     await page.getByTestId('review-open-cta').click()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
@@ -51,8 +41,7 @@ test('keeps the dialog open when the review submit fails', async ({ page }) => {
 
     await page
         .getByTestId('review-form-rating')
-        .locator('button, [role="radio"]')
-        .last()
+        .getByRole('button', { name: 'Rating 5 of 5' })
         .click()
     await page.getByTestId('review-form-difficulty').click()
     await page.getByRole('option').first().click()
@@ -67,9 +56,8 @@ test('keeps the dialog open when the review submit fails', async ({ page }) => {
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 })
 
-test('blocks submit when no rating is selected', async ({ page }) => {
-    const id = await firstSeededRouteId(page)
-    await gotoSettled(page, `/route?id=${id}`)
+test('blocks submit when no rating is selected', async ({ page, route }) => {
+    await gotoSettled(page, `/route?id=${route.id}`)
 
     await page.getByTestId('review-open-cta').click()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()

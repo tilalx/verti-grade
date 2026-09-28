@@ -1,19 +1,15 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 
 async function signIn(page: Page, rememberMe: boolean) {
     await gotoSettled(page, '/auth/login')
+    await fillLogin(page, 'e2e-user@gripello.test', 'E2ePassw0rd!')
     await page
-        .getByTestId('login-identity')
+        .getByTestId('login-remember-me')
         .locator('input')
-        .fill('e2e-user@gripello.test')
-    await page
-        .getByTestId('login-password')
-        .locator('input')
-        .fill('E2ePassw0rd!')
-    const checkbox = page.getByTestId('login-remember-me').locator('input')
-    if ((await checkbox.isChecked()) !== rememberMe) await checkbox.click()
+        .setChecked(rememberMe)
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 }

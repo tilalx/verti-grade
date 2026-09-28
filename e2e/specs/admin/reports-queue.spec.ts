@@ -1,14 +1,19 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { createComment, deleteComment } from '../../support/comments'
-import { createReport, deleteReport } from '../../support/reports'
+import { createComment } from '../../support/comments'
+import { createReport } from '../../support/reports'
 
 test('a report appears in the queue with its notice details', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
-    const commentId = await createComment(page, `${testPrefix}-reported`)
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-reported`,
+    )
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-explanation`,
@@ -21,17 +26,19 @@ test('a report appears in the queue with its notice details', async ({
     await expect(card).toContainText(`${testPrefix}-explanation`)
     await expect(card).toContainText(`${testPrefix}-reported`)
     await expect(card.getByTestId('report-card-status')).toContainText(/open/i)
-
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
 })
 
 test('removing content deletes the comment and records the decision', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
-    const commentId = await createComment(page, `${testPrefix}-remove-me`)
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-remove-me`,
+    )
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-remove`,
@@ -59,16 +66,19 @@ test('removing content deletes the comment and records the decision', async ({
         { headers },
     )
     expect(res.status()).toBe(404)
-
-    await deleteReport(page, reportId)
 })
 
 test('keeping content records a rejection and leaves the comment in place', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
-    const commentId = await createComment(page, `${testPrefix}-keep-me`)
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-keep-me`,
+    )
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-keep`,
@@ -96,9 +106,6 @@ test('keeping content records a rejection and leaves the comment in place', asyn
         { headers },
     )
     expect(res.status()).toBe(200)
-
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
 })
 
 test('the queue shows no mail warning once SMTP is configured', async ({

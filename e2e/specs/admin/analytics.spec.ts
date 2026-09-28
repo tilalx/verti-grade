@@ -1,16 +1,7 @@
-import PocketBase from 'pocketbase'
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { authAsSuperuser, uiaa } from '../../support/seed'
-
-const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
-
-async function superuserPb() {
-    const pb = new PocketBase(PB_URL)
-    await authAsSuperuser(pb)
-    return pb
-}
+import { uiaa } from '../../support/seed'
 
 function stat(page: Page, key: string) {
     return page
@@ -19,6 +10,7 @@ function stat(page: Page, key: string) {
 }
 
 async function statValue(page: Page, key: string) {
+    await expect(stat(page, key)).not.toBeEmpty()
     return Number((await stat(page, key).textContent())?.trim())
 }
 
@@ -37,6 +29,17 @@ async function gotoSubscribed(page: Page, path: string, topic: string) {
     )
     await gotoSettled(page, path)
     await subscribed
+}
+
+async function analyticsListsSetter(
+    response: { url(): string; json(): Promise<unknown> },
+    setter: string,
+) {
+    if (!response.url().includes('/api/manage/analytics')) return false
+    const body = (await response.json().catch(() => null)) as {
+        setters?: { setter: string }[]
+    } | null
+    return !!body?.setters?.some((entry) => entry.setter === setter)
 }
 
 test('renders kpis with trends, sparklines, meters and charts', async ({
@@ -72,9 +75,7 @@ test('renders kpis with trends, sparklines, meters and charts', async ({
         'analytics-chart-location-grades',
         'analytics-chart-age',
     ]) {
-        const box = await page.getByTestId(chart).boundingBox()
-        expect(box?.width, chart).toBeGreaterThan(0)
-        expect(box?.height, chart).toBeGreaterThan(0)
+        await expect(page.getByTestId(chart)).toBeVisible()
     }
 })
 
@@ -104,15 +105,18 @@ test('filters live in the url and survive a reload', async ({
     await expect(trend(page, 'routesSet')).toBeVisible()
 
     await gotoSettled(page, page.url())
-    await expect(page.getByTestId('analytics-range-30d')).toHaveClass(
-        /text-primary/,
+    await expect(page.getByTestId('analytics-range-30d')).toHaveAttribute(
+        'aria-pressed',
+        'true',
     )
 
     await gotoSettled(page, '/manage/analytics?range=all&type=Boulder')
     await expect(page.getByTestId('analytics-filter-type')).toContainText(
         'Boulder',
     )
-    expect(await statValue(page, 'activeRoutes')).toBeLessThan(allRoutes)
+    await expect
+        .poll(() => statValue(page, 'activeRoutes'))
+        .toBeLessThan(allRoutes)
 })
 
 test('archived chip matches the routes page and toggles the url', async ({
@@ -120,14 +124,15 @@ test('archived chip matches the routes page and toggles the url', async ({
 }) => {
     await gotoSettled(page, '/manage/analytics?range=all')
     const chip = page.getByTestId('analytics-filter-archived')
-    await expect(chip.locator('.mdi-archive-outline')).toBeVisible()
+    await expect(chip).toHaveAttribute('aria-pressed', 'false')
 
     await chip.click()
     await expect(page).toHaveURL(/archived=true/)
-    await expect(chip).toHaveClass(/text-warning/)
+    await expect(chip).toHaveAttribute('aria-pressed', 'true')
 
     await chip.click()
     await expect(page).not.toHaveURL(/archived=true/)
+    await expect(chip).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('filters share one row with the ranges on wide screens', async ({
@@ -140,14 +145,22 @@ test('filters share one row with the ranges on wide screens', async ({
 
     await page.setViewportSize({ width: 1920, height: 900 })
     await gotoSettled(page, '/manage/analytics?range=all')
-    expect(await rowOf('analytics-filter-location')).toBe(
-        await rowOf('analytics-range-all'),
-    )
+    await expect
+        .poll(
+            async () =>
+                (await rowOf('analytics-filter-location')) -
+                (await rowOf('analytics-range-all')),
+        )
+        .toBe(0)
 
     await page.setViewportSize({ width: 1024, height: 900 })
     await expect
-        .poll(() => rowOf('analytics-filter-location'))
-        .toBeGreaterThan(await rowOf('analytics-range-all'))
+        .poll(
+            async () =>
+                (await rowOf('analytics-filter-location')) -
+                (await rowOf('analytics-range-all')),
+        )
+        .toBeGreaterThan(0)
 })
 
 test('custom range writes the dates into the url', async ({
@@ -165,63 +178,55 @@ test('custom range writes the dates into the url', async ({
 
 test('updates live when a route is created elsewhere', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
     await gotoSubscribed(page, '/manage/analytics?range=30d', 'routes/*')
 
     const setter = `${testPrefix}-live-setter`
-    const liveRefresh = page.waitForResponse(async (response) => {
-        if (!response.url().includes('/api/manage/analytics')) return false
-        const body = await response.json().catch(() => null)
-        return !!body?.setters?.some(
-            (entry: { setter: string }) => entry.setter === setter,
-        )
-    })
-    const route = await pb.collection('routes').create({
+    const liveRefresh = page.waitForResponse((response) =>
+        analyticsListsSetter(response, setter),
+    )
+    await root.collection('routes').create({
         name: `${testPrefix}-live-route`,
         ...uiaa('5'),
         type: 'Route',
         creator: [setter],
         screw_date: new Date().toISOString(),
     })
-    try {
-        await liveRefresh
-    } finally {
-        await pb.collection('routes').delete(route.id)
-    }
+    await liveRefresh
 })
 
 test('refreshes during a steady stream of route changes', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
     await gotoSubscribed(page, '/manage/analytics?range=30d', 'routes/*')
 
+    const setter = `${testPrefix}-stream-setter`
     let refreshed = false
-    page.on('response', (response) => {
-        if (response.url().includes('/api/manage/analytics')) refreshed = true
+    page.on('response', async (response) => {
+        if (await analyticsListsSetter(response, setter)) refreshed = true
     })
-    const createdIds: string[] = []
-    try {
-        for (let index = 0; index < 8 && !refreshed; index++) {
-            const route = await pb.collection('routes').create({
-                name: `${testPrefix}-stream-route-${index}`,
-                ...uiaa('5'),
-                type: 'Route',
-                creator: [`${testPrefix}-stream-setter`],
-                screw_date: new Date().toISOString(),
-            })
-            createdIds.push(route.id)
-            await page.waitForTimeout(500)
-        }
-        expect(refreshed).toBe(true)
-    } finally {
-        await Promise.all(
-            createdIds.map((id) => pb.collection('routes').delete(id)),
+    let index = 0
+    await expect
+        .poll(
+            async () => {
+                if (!refreshed) {
+                    await root.collection('routes').create({
+                        name: `${testPrefix}-stream-route-${index++}`,
+                        ...uiaa('5'),
+                        type: 'Route',
+                        creator: [setter],
+                        screw_date: new Date().toISOString(),
+                    })
+                }
+                return refreshed
+            },
+            { intervals: [500], timeout: 8_000 },
         )
-    }
+        .toBe(true)
 })
 
 test('heatmap tooltip hides when the page scrolls', async ({
@@ -234,161 +239,147 @@ test('heatmap tooltip hides when the page scrolls', async ({
     await heatmap.locator('[data-date]').last().click()
     const tooltip = page.getByTestId('analytics-heatmap-tooltip')
     await expect(tooltip).toBeVisible()
-    await page.evaluate(() => window.scrollBy(0, 200))
+    await expect
+        .poll(() => page.evaluate(() => window.scrollY))
+        .toBeGreaterThan(0)
+    await page.evaluate(() => window.scrollTo(0, 0))
     await expect(tooltip).toBeHidden()
 })
 
 test('heatmap switches years and shows day counts', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
-    const route = await pb.collection('routes').create({
+    await root.collection('routes').create({
         name: `${testPrefix}-heatmap-route`,
         ...uiaa('5'),
         type: 'Route',
         creator: [`${testPrefix}-heatmap-setter`],
         screw_date: '2011-06-15 12:00:00.000Z',
     })
-    try {
-        await gotoSettled(page, '/manage/analytics?range=all')
-        const heatmap = page.getByTestId('analytics-heatmap')
-        const rollingDays = await heatmap.locator('[data-date]').count()
-        expect(rollingDays).toBeGreaterThanOrEqual(365)
-        expect(rollingDays).toBeLessThanOrEqual(366)
+    await gotoSettled(page, '/manage/analytics?range=all')
+    const heatmap = page.getByTestId('analytics-heatmap')
+    const days = heatmap.locator('[data-date]')
+    await expect.poll(() => days.count()).toBeGreaterThanOrEqual(365)
+    expect(await days.count()).toBeLessThanOrEqual(366)
 
-        await heatmap.getByTestId('analytics-heatmap-year-2011').click()
-        await expect(
-            heatmap.getByTestId('analytics-heatmap-total'),
-        ).toContainText('2011')
+    await heatmap.getByTestId('analytics-heatmap-year-2011').click()
+    await expect(heatmap.getByTestId('analytics-heatmap-total')).toContainText(
+        '2011',
+    )
 
-        const cell = heatmap.locator('[data-date="2011-06-15"]')
-        await expect(cell).toHaveAttribute('data-count', /[1-9]/)
-        await expect(cell).not.toHaveClass(/heatmap-level-0/)
-        await expect(heatmap.locator('[data-date]')).toHaveCount(365)
+    const cell = heatmap.locator('[data-date="2011-06-15"]')
+    await expect(cell).toHaveAttribute('data-count', /[1-9]/)
+    await expect(cell).not.toHaveClass(/heatmap-level-0/)
+    await expect(days).toHaveCount(365)
 
-        await cell.hover()
-        await expect(page.locator('.heatmap-tooltip')).toBeVisible()
-    } finally {
-        await pb.collection('routes').delete(route.id)
-    }
+    await cell.hover()
+    await expect(page.getByTestId('analytics-heatmap-tooltip')).toBeVisible()
 })
 
 test('reports routes whose grade votes are harder than the set grade', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
-    const route = await pb.collection('routes').create({
+    const route = await root.collection('routes').create({
         name: `${testPrefix}-sandbag`,
         ...uiaa('1'),
         type: 'Route',
         creator: ['Sandbagger'],
         screw_date: new Date().toISOString(),
     })
-    try {
-        for (let vote = 0; vote < 3; vote++) {
-            await pb.collection('ratings').create({
-                route_id: route.id,
-                rating: 4,
-                ...uiaa('10'),
-            })
-        }
-        await gotoSettled(page, '/manage/analytics?range=all')
-        await expect(
-            page.getByTestId('analytics-chart-grade-feedback'),
-        ).toBeVisible()
-
-        const response = await page.request.get(
-            '/api/manage/analytics?range=all',
-            { headers: await authHeader(page) },
-        )
-        const { gradeFeedback } = await response.json()
-        const sandbag = gradeFeedback.find(
-            (entry: { id: string }) => entry.id === route.id,
-        )
-        expect(sandbag).toMatchObject({ setGrade: 1, grade: '1 · UIAA' })
-        expect(sandbag.deviation).toBeGreaterThan(8)
-    } finally {
-        await pb.collection('routes').delete(route.id)
+    for (let vote = 0; vote < 3; vote++) {
+        await root.collection('ratings').create({
+            route_id: route.id,
+            rating: 4,
+            ...uiaa('10'),
+        })
     }
+    await gotoSettled(page, '/manage/analytics?range=all')
+    await expect(
+        page.getByTestId('analytics-chart-grade-feedback'),
+    ).toBeVisible()
+
+    const response = await page.request.get('/api/manage/analytics?range=all', {
+        headers: await authHeader(page),
+    })
+    const { gradeFeedback } = await response.json()
+    const sandbag = gradeFeedback.find(
+        (entry: { id: string }) => entry.id === route.id,
+    )
+    expect(sandbag).toMatchObject({ setGrade: 1, grade: '1 · UIAA' })
+    expect(sandbag.deviation).toBeGreaterThan(8)
 })
 
 test('archiving a route stamps archived_at and restoring clears it', async ({
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
-    const route = await pb.collection('routes').create({
+    const routes = root.collection('routes')
+    const route = await routes.create({
         name: `${testPrefix}-archive`,
         ...uiaa('4'),
         type: 'Boulder',
         creator: [`${testPrefix}-archive-setter`],
     })
-    try {
-        expect(route.archived_at).toBe('')
+    expect(route.archived_at).toBe('')
 
-        const archived = await pb
-            .collection('routes')
-            .update(route.id, { archived: true })
-        expect(archived.archived_at).not.toBe('')
+    const archived = await routes.update(route.id, { archived: true })
+    expect(archived.archived_at).not.toBe('')
 
-        const edited = await pb
-            .collection('routes')
-            .update(route.id, { name: `${testPrefix}-archive-renamed` })
-        expect(edited.archived_at).toBe(archived.archived_at)
+    const edited = await routes.update(route.id, {
+        name: `${testPrefix}-archive-renamed`,
+    })
+    expect(edited.archived_at).toBe(archived.archived_at)
 
-        const restored = await pb
-            .collection('routes')
-            .update(route.id, { archived: false })
-        expect(restored.archived_at).toBe('')
-    } finally {
-        await pb.collection('routes').delete(route.id)
-    }
+    const restored = await routes.update(route.id, { archived: false })
+    expect(restored.archived_at).toBe('')
 })
 
 test('archived routes are left out like on the routes page unless included', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const pb = await superuserPb()
     const setter = `${testPrefix}-archived-setter`
-    const route = await pb.collection('routes').create({
+    await root.collection('routes').create({
         name: `${testPrefix}-archived-analytics`,
         ...uiaa('5'),
         type: 'Boulder',
         creator: [setter],
         archived: true,
     })
-    try {
-        await gotoSettled(page, '/manage/analytics')
-        const settersFor = async (query: string) => {
-            const response = await page.request.get(
-                `/api/manage/analytics?range=all${query}`,
-                { headers: await authHeader(page) },
-            )
-            const body = (await response.json()) as {
-                setters: { setter: string }[]
-            }
-            return body.setters.map((entry) => entry.setter)
+    await gotoSettled(page, '/manage/analytics')
+    const settersFor = async (query: string) => {
+        const response = await page.request.get(
+            `/api/manage/analytics?range=all${query}`,
+            { headers: await authHeader(page) },
+        )
+        const body = (await response.json()) as {
+            setters: { setter: string }[]
         }
-
-        expect(await settersFor('')).not.toContain(setter)
-        expect(await settersFor('&archived=true')).toContain(setter)
-    } finally {
-        await pb.collection('routes').delete(route.id)
+        return body.setters.map((entry) => entry.setter)
     }
+
+    expect(await settersFor('')).not.toContain(setter)
+    expect(await settersFor('&archived=true')).toContain(setter)
 })
 
 test('has no horizontal scroll on phones', async ({ adminPage: page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await gotoSettled(page, '/manage/analytics')
     await expect(page.getByTestId('analytics-filters')).toBeVisible()
-    const overflow = await page.evaluate(
-        () =>
-            document.documentElement.scrollWidth -
-            document.documentElement.clientWidth,
-    )
-    expect(overflow).toBeLessThanOrEqual(0)
+    await expect
+        .poll(() =>
+            page.evaluate(
+                () =>
+                    document.documentElement.scrollWidth -
+                    document.documentElement.clientWidth,
+            ),
+        )
+        .toBeLessThanOrEqual(0)
 })
 
 test('shows an error notification when the analytics fetch fails', async ({

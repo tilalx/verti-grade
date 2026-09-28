@@ -2,24 +2,14 @@ import type { Page } from '@playwright/test'
 import { authHeader } from './nav'
 import { uiaa } from './seed'
 
-export async function firstRouteId(page: Page): Promise<string> {
-    const routeRes = await page.request.get(
-        '/api/collections/routes/records?perPage=1&filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false'),
-    )
-    return (await routeRes.json()).items[0].id as string
-}
-
 export async function createComment(
     page: Page,
+    routeId: string,
     comment: string,
     rating = 5,
 ): Promise<string> {
-    const headers = await authHeader(page)
-    const routeId = await firstRouteId(page)
-
     const res = await page.request.post('/api/collections/ratings/records', {
-        headers,
+        headers: await authHeader(page),
         data: {
             route_id: routeId,
             rating,

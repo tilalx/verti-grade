@@ -1,21 +1,16 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
 import PocketBase from 'pocketbase'
-import { authAsSuperuser, ensureUser, getRoleIds } from '../../support/seed'
+import { ensureUser, getRoleIds } from '../../support/seed'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
 test('a climber without manage_routes cannot generate exports', async ({
     request,
-}, info) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
+    root,
+    testPrefix,
+}) => {
     const roleIds = await getRoleIds(root)
-    const climber = await ensureUser(
-        root,
-        roleIds.user,
-        'user',
-        `export-guard-w${info.workerIndex}`,
-    )
+    const climber = await ensureUser(root, roleIds.user, 'user', testPrefix)
 
     const client = new PocketBase(PB_URL)
     await client

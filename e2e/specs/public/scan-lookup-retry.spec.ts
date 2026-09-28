@@ -1,4 +1,5 @@
-import { test, expect, chromium, devices, request } from '@playwright/test'
+import { chromium, devices } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
 import os from 'node:os'
 import path from 'node:path'
 import { generateRouteQrY4m } from '../../support/qr'
@@ -6,16 +7,10 @@ import { gotoSettled } from '../../support/nav'
 
 test('a failed route lookup is retried instead of marking the sign unknown', async ({
     baseURL,
+    route,
 }) => {
     test.setTimeout(120_000)
-    const api = await request.newContext({ baseURL, ignoreHTTPSErrors: true })
-    const response = await api.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=1',
-    )
-    const routeId = (await response.json()).items[0].id as string
-    await api.dispose()
+    const routeId = route.id
 
     const y4mPath = path.join(os.tmpdir(), `e2e-scan-retry-${routeId}.y4m`)
     generateRouteQrY4m(routeId, y4mPath)

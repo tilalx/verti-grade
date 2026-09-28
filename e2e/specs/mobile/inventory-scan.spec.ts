@@ -1,21 +1,6 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { authHeader, gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId } from '../../support/seed'
-
-const [HALL_A, HALL_B] = LOCATIONS
-
-async function activeRoutesAt(page: Page, location: string) {
-    const res = await page.request.get(
-        '/api/collections/routes/records?' +
-            new URLSearchParams({
-                filter: `name ~ "e2e-route-" && archived = false && location.name = "${location}"`,
-                perPage: '200',
-                sort: 'name',
-            }),
-    )
-    return (await res.json()).items as { id: string; name: string }[]
-}
+import { gotoSettled } from '../../support/nav'
 
 async function isArchived(page: Page, id: string) {
     const res = await page.request.get(`/api/collections/routes/records/${id}`)
@@ -34,29 +19,31 @@ async function seedSession(page: Page, location: string, ids: string[]) {
         { location, ids },
     )
     await gotoSettled(page, '/manage/inventory')
-    await page
-        .locator('[data-testid="inventory-progress"]')
-        .waitFor({ state: 'visible' })
+    await expect(page.getByTestId('inventory-progress')).toBeVisible()
 }
 
 test('archives only the checked routes at the scanned location', async ({
     adminPage: page,
+    root,
+    createRoute,
+    workerLocation,
+    testPrefix,
 }) => {
-    await gotoSettled(page, '/manage/inventory')
-
-    const hallA = await activeRoutesAt(page, HALL_A)
-    const hallB = await activeRoutesAt(page, HALL_B)
-    expect(hallA.length).toBeGreaterThan(2)
-    expect(hallB.length).toBeGreaterThan(0)
+    const hallA = []
+    for (let index = 0; index < 4; index++) hallA.push(await createRoute())
+    const otherHall = await root
+        .collection('locations')
+        .create({ name: `${testPrefix} Other Hall` })
+    const hallB = [await createRoute({ location: otherHall.id })]
 
     const missing = hallA.slice(-2)
     const scanned = hallA.slice(0, -2)
+    await gotoSettled(page, '/manage/inventory')
     await seedSession(
         page,
-        await locationId(page, HALL_A),
+        workerLocation.id,
         scanned.map((route) => route.id),
     )
-
     await expect(page.getByTestId('inventory-found-count')).toHaveText(
         String(scanned.length),
     )
@@ -78,14 +65,10 @@ test('archives only the checked routes at the scanned location', async ({
         ).toHaveCount(0)
     }
 
-    for (const toggle of await page
-        .locator('[data-testid^="inventory-archive-toggle-"]')
-        .all()) {
-        const id = (await toggle.getAttribute('data-testid'))!.slice(
-            'inventory-archive-toggle-'.length,
-        )
-        if (id !== toArchive.id) await toggle.click()
-    }
+    await expect(
+        page.locator('[data-testid^="inventory-archive-toggle-"]'),
+    ).toHaveCount(2)
+    await page.getByTestId(`inventory-archive-toggle-${toKeep.id}`).click()
     await expect(page.getByTestId('inventory-finish-confirm')).toHaveText(
         /Archive\s+1\b/,
     )
@@ -93,19 +76,14 @@ test('archives only the checked routes at the scanned location', async ({
     await page.getByTestId('inventory-finish-confirm').click()
     await expect(dialog).toBeHidden()
 
-    expect(await isArchived(page, toArchive.id)).toBe(true)
+    await expect.poll(() => isArchived(page, toArchive.id)).toBe(true)
     expect(await isArchived(page, toKeep.id)).toBe(false)
-
-    expect((await activeRoutesAt(page, HALL_B)).length).toBe(hallB.length)
-
-    await page.request.patch(
-        `/api/collections/routes/records/${toArchive.id}`,
-        { data: { archived: false }, headers: await authHeader(page) },
-    )
+    expect(await isArchived(page, hallB[0]!.id)).toBe(false)
 })
 
 test('requires a location before scanning can start', async ({
     adminPage: page,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/inventory')
     await page.evaluate(() => {
@@ -115,16 +93,17 @@ test('requires a location before scanning can start', async ({
     await gotoSettled(page, '/manage/inventory')
 
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
-    await page.getByTestId(`inventory-location-${HALL_A}`).click()
+    await page.getByTestId(`inventory-location-${workerLocation.name}`).click()
     await expect(page.getByTestId('inventory-start')).toBeEnabled()
 })
 
 test('restores a legacy session and asks which location it belongs to', async ({
     adminPage: page,
+    createRoute,
+    workerLocation,
 }) => {
+    const hallA = [await createRoute(), await createRoute()]
     await gotoSettled(page, '/manage/inventory')
-
-    const hallA = await activeRoutesAt(page, HALL_A)
     await page.evaluate(
         (ids) => {
             localStorage.setItem(
@@ -133,18 +112,16 @@ test('restores a legacy session and asks which location it belongs to', async ({
             )
             localStorage.setItem('inventory-instructions-seen', '1')
         },
-        [hallA[0].id, hallA[1].id],
+        hallA.map((route) => route.id),
     )
     await gotoSettled(page, '/manage/inventory')
-    await page
-        .locator('[data-testid="inventory-progress"]')
-        .waitFor({ state: 'visible' })
+    await expect(page.getByTestId('inventory-progress')).toBeVisible()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-missing-count')).toHaveText('0')
     await expect(page.getByTestId('inventory-start')).toBeDisabled()
 
-    await page.getByTestId(`inventory-location-${HALL_A}`).click()
+    await page.getByTestId(`inventory-location-${workerLocation.name}`).click()
 
     await expect(page.getByTestId('inventory-found-count')).toHaveText('2')
     await expect
@@ -155,5 +132,5 @@ test('restores a legacy session and asks which location it belongs to', async ({
                 ),
             ),
         )
-        .toMatchObject({ v: 3, location: await locationId(page, HALL_A) })
+        .toMatchObject({ v: 3, location: workerLocation.id })
 })

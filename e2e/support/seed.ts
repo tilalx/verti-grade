@@ -124,10 +124,14 @@ export async function seedRoutes(pb: PocketBase, prefix: string, count = 60) {
     })
     for (const route of existing) {
         const index = Number(route.name.split('-').pop())
-        if (route.location !== locationFor(index)) {
+        const archived = index % 10 === 0
+        if (
+            route.location !== locationFor(index) ||
+            route.archived !== archived
+        ) {
             await pb
                 .collection('routes')
-                .update(route.id, { location: locationFor(index) })
+                .update(route.id, { location: locationFor(index), archived })
         }
     }
     if (existing.length >= count) return existing
@@ -177,4 +181,81 @@ export async function seedRatings(
         created.push(rating)
     }
     return created
+}
+
+export function adminClient() {
+    const pb = new PocketBase(process.env.E2E_PB_URL || 'https://localhost')
+    pb.autoCancellation(false)
+    return pb
+}
+
+export async function createRole(
+    pb: PocketBase,
+    name: string,
+    permissionNames: string[] = [],
+) {
+    const permissions = permissionNames.length
+        ? await pb.collection('permissions').getFullList({
+              filter: permissionNames
+                  .map((permission) =>
+                      pb.filter('name = {:permission}', { permission }),
+                  )
+                  .join(' || '),
+          })
+        : []
+    return pb.collection('roles').create({
+        name,
+        permissions: permissions.map((permission) => permission.id),
+    })
+}
+
+async function deleteMatching(
+    pb: PocketBase,
+    collection: string,
+    filter: string,
+) {
+    const records = await pb
+        .collection(collection)
+        .getFullList({ filter, fields: 'id' })
+    for (const record of records) {
+        await pb
+            .collection(collection)
+            .delete(record.id)
+            .catch(() => {})
+    }
+}
+
+export async function sweepTestData(
+    pb: PocketBase,
+    prefix: string,
+    locationId?: string,
+) {
+    const name = pb.filter('{:prefix}', { prefix })
+    const username = pb.filter('{:username}', {
+        username: prefix.replace(/-/g, ''),
+    })
+    const location = pb.filter('{:locationId}', {
+        locationId: locationId ?? '',
+    })
+    const inLocation = locationId ? ` || location = ${location}` : ''
+    const routeInLocation = locationId ? ` || route.location = ${location}` : ''
+    const owned = `name ~ ${name} || location.name ~ ${name}${inLocation}`
+
+    await deleteMatching(pb, 'notifications', `params ~ ${name}`)
+    await deleteMatching(pb, 'reports', `explanation ~ ${name}`)
+    await deleteMatching(
+        pb,
+        'ticks',
+        `route.name ~ ${name} || route.location.name ~ ${name} || user.email ~ ${name}${routeInLocation}`,
+    )
+    await deleteMatching(pb, 'ratings', `comment ~ ${name}`)
+    await deleteMatching(pb, 'routes', owned)
+    await deleteMatching(pb, 'walls', owned)
+    await deleteMatching(pb, 'locations', `name ~ ${name}`)
+    await deleteMatching(
+        pb,
+        'users',
+        `email ~ ${name} || username ~ ${username}`,
+    )
+    await deleteMatching(pb, 'roles', `name ~ ${name}`)
 }

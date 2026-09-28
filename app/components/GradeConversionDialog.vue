@@ -41,7 +41,7 @@
             </v-chip>
         </v-chip-group>
 
-        <div class="grade-conversion">
+        <div class="grade-conversion" data-testid="grade-conversion-table">
             <div
                 class="grade-conversion__grid grade-conversion__header"
                 :style="gridStyle"

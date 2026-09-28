@@ -5,36 +5,44 @@ test.use({ viewport: { width: 1160, height: 900 } })
 
 test('the route table fits without sideways scrolling', async ({ page }) => {
     await gotoSettled(page, '/routes')
-    await expect(page.getByTestId('index-table')).toBeVisible()
+    const container = page.getByTestId('index-table')
+    const table = container.getByRole('table')
+    await expect(table).toBeVisible()
 
-    const overflow = await page
-        .locator('.v-table__wrapper')
-        .evaluate((el) => el.scrollWidth - el.clientWidth)
-    expect(overflow).toBeLessThanOrEqual(1)
+    const containerWidth = (await container.boundingBox())!.width
+    await expect
+        .poll(async () => (await table.boundingBox())!.width)
+        .toBeLessThanOrEqual(containerWidth + 1)
 })
 
 test('stacked setter chips keep clear of the row dividers', async ({
     page,
+    createRoute,
 }) => {
+    const route = await createRoute({
+        creator: ['E2E Setter With A Long Name', 'Second Long Setter Name'],
+    })
     await gotoSettled(page, '/routes')
-    await expect(page.getByTestId('index-table')).toBeVisible()
+    await page.getByTestId('filter-search').locator('input').fill(route.name)
 
-    const gaps = await page.locator('tbody tr').evaluateAll((rows) => {
-        const row = rows.find(
-            (tr) => tr.querySelectorAll('.creator-chips .v-chip').length > 1,
-        )
-        if (!row) return null
-        const chips = [...row.querySelectorAll('.creator-chips .v-chip')]
-        const rect = row.getBoundingClientRect()
+    const row = page
+        .getByRole('row')
+        .filter({ has: page.getByTestId(`index-row-${route.id}`) })
+    const chips = row.getByTestId('index-row-creators')
+    await expect(chips).toBeVisible()
+
+    await expect(chips.getByText(/Setter/)).toHaveCount(2)
+
+    const gaps = await row.evaluate((tr) => {
+        const chipBoxes = [
+            ...tr.querySelector('[data-testid="index-row-creators"]')!.children,
+        ].map((chip) => chip.getBoundingClientRect())
+        const rect = tr.getBoundingClientRect()
         return {
-            top: chips[0].getBoundingClientRect().top - rect.top,
-            bottom:
-                rect.bottom -
-                chips[chips.length - 1].getBoundingClientRect().bottom,
+            top: chipBoxes[0]!.top - rect.top,
+            bottom: rect.bottom - chipBoxes[chipBoxes.length - 1]!.bottom,
         }
     })
-
-    test.skip(gaps === null, 'no seeded route has two setters')
-    expect(gaps!.top).toBeGreaterThanOrEqual(4)
-    expect(gaps!.bottom).toBeGreaterThanOrEqual(4)
+    expect(gaps.top).toBeGreaterThanOrEqual(4)
+    expect(gaps.bottom).toBeGreaterThanOrEqual(4)
 })

@@ -77,7 +77,7 @@ test('grade bars share one baseline on a phone', async ({ page }) => {
     const bottoms = await page
         .getByTestId('overview-grades')
         .first()
-        .locator('.grade-spread__fill')
+        .getByTestId('overview-grade-fill')
         .evaluateAll((fills) =>
             fills.map((fill) => fill.getBoundingClientRect().bottom),
         )

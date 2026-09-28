@@ -1,19 +1,18 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { uiaa } from '../../support/seed'
 
-async function routeWithComment(page: import('@playwright/test').Page) {
-    const res = await page.request.get(
-        '/api/collections/ratings/records?filter=' +
-            encodeURIComponent(
-                'comment ~ "e2e-rating-" && route_id.archived = false',
-            ) +
-            '&perPage=1',
-    )
-    return (await res.json()).items[0].route_id as string
-}
+test.beforeEach(async ({ root, route, testPrefix }) => {
+    await root.collection('ratings').create({
+        route_id: route.id,
+        rating: 2,
+        ...uiaa('5'),
+        comment: `${testPrefix}-reportable`,
+    })
+})
 
-async function openReportDialog(page: import('@playwright/test').Page) {
-    const routeId = await routeWithComment(page)
+async function openReportDialog(page: Page, routeId: string) {
     await gotoSettled(page, `/route?id=${routeId}`)
 
     const reportButton = page.getByTestId('comment-card-report').first()
@@ -22,14 +21,14 @@ async function openReportDialog(page: import('@playwright/test').Page) {
     await expect(page.getByTestId('report-form-dialog')).toBeVisible()
 }
 
-async function fillValidReport(page: import('@playwright/test').Page) {
+async function fillValidReport(page: Page, testPrefix: string) {
     await page.getByTestId('report-form-reason').click()
     await page.getByRole('option').first().click()
     await page
         .getByTestId('report-form-explanation')
         .locator('textarea')
         .first()
-        .fill('This comment is abusive, e2e report')
+        .fill(`${testPrefix} this comment is abusive`)
     await page
         .getByTestId('report-form-name')
         .locator('input')
@@ -42,9 +41,13 @@ async function fillValidReport(page: import('@playwright/test').Page) {
         .fill('e2e-reporter@example.com')
 }
 
-test('an anonymous visitor can report a comment', async ({ page }) => {
-    await openReportDialog(page)
-    await fillValidReport(page)
+test('an anonymous visitor can report a comment', async ({
+    page,
+    route,
+    testPrefix,
+}) => {
+    await openReportDialog(page, route.id)
+    await fillValidReport(page, testPrefix)
     await page.getByTestId('report-form-goodfaith').locator('input').check()
 
     await page.getByTestId('report-form-submit').click()
@@ -55,9 +58,11 @@ test('an anonymous visitor can report a comment', async ({ page }) => {
 
 test('submit stays disabled until the good-faith declaration is accepted', async ({
     page,
+    route,
+    testPrefix,
 }) => {
-    await openReportDialog(page)
-    await fillValidReport(page)
+    await openReportDialog(page, route.id)
+    await fillValidReport(page, testPrefix)
 
     await expect(page.getByTestId('report-form-submit')).toBeDisabled()
 
@@ -67,9 +72,11 @@ test('submit stays disabled until the good-faith declaration is accepted', async
 
 test('submit stays disabled for a malformed notifier email', async ({
     page,
+    route,
+    testPrefix,
 }) => {
-    await openReportDialog(page)
-    await fillValidReport(page)
+    await openReportDialog(page, route.id)
+    await fillValidReport(page, testPrefix)
     await page.getByTestId('report-form-goodfaith').locator('input').check()
     await expect(page.getByTestId('report-form-submit')).toBeEnabled()
 
@@ -84,9 +91,11 @@ test('submit stays disabled for a malformed notifier email', async ({
 
 test('a failed submit surfaces an error and keeps the dialog open', async ({
     page,
+    route,
+    testPrefix,
 }) => {
-    await openReportDialog(page)
-    await fillValidReport(page)
+    await openReportDialog(page, route.id)
+    await fillValidReport(page, testPrefix)
     await page.getByTestId('report-form-goodfaith').locator('input').check()
 
     const endpoint = '**/api/collections/reports/records'

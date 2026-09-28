@@ -1,27 +1,24 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 import { waitForMail, linkPath, mailbox, mailCount } from '../../support/mail'
 import PocketBase from 'pocketbase'
-import { authAsSuperuser, getRoleIds } from '../../support/seed'
+import { getRoleIds } from '../../support/seed'
+import { SETTINGS_ID } from '../../support/state-snapshot'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
-const SETTINGS_ID = 'settings_123456'
 const PASSWORD = 'E2eSignup!123'
 const VERIFY_LINK = /https?:\/\/[^"'\s]*\/auth\/confirm-verification\/[^"'\s]+/
 
-test.describe.configure({ mode: 'serial' })
-
-let root: PocketBase
-
-async function registrationAllowed() {
+async function registrationAllowed(root: PocketBase) {
     const settings = await root
         .collection('settings')
         .getOne(SETTINGS_ID, { requestKey: null })
     return settings.allow_registration
 }
 
-async function setRegistration(allowed: boolean) {
+async function setRegistration(root: PocketBase, allowed: boolean) {
     await root
         .collection('settings')
         .update(SETTINGS_ID, { allow_registration: allowed })
@@ -38,8 +35,7 @@ function signup(email: string, username: string, extra = {}) {
 }
 
 async function signIn(page: Page, email: string) {
-    await page.getByTestId('login-identity').locator('input').fill(email)
-    await page.getByTestId('login-password').locator('input').fill(PASSWORD)
+    await fillLogin(page, email, PASSWORD)
     await page.getByTestId('login-submit').click()
 }
 
@@ -49,17 +45,12 @@ async function expectRejected(request: Promise<unknown>) {
     expect(error.status).toBeLessThan(500)
 }
 
-test.beforeAll(async () => {
-    root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-})
-
-test.afterAll(async () => {
-    await setRegistration(false)
-})
-
-test('registration is closed by default', async ({ page, testPrefix }) => {
-    expect(await registrationAllowed()).toBe(false)
+test('closed registration hides the link and rejects sign-ups', async ({
+    page,
+    root,
+    testPrefix,
+}) => {
+    await setRegistration(root, false)
 
     await gotoSettled(page, '/auth/login')
     await expect(page.getByTestId('login-form')).toBeVisible()
@@ -76,23 +67,26 @@ test('registration is closed by default', async ({ page, testPrefix }) => {
 test('an admin opens registration from the settings page', async ({
     adminPage,
     page,
+    root,
 }) => {
+    await setRegistration(root, false)
     await gotoSettled(adminPage, '/admin/settings')
     await adminPage
         .getByTestId('settings-allow-registration')
         .locator('input')
         .check()
     await adminPage.getByTestId('settings-save').click()
-    await expect.poll(registrationAllowed).toBe(true)
+    await expect.poll(() => registrationAllowed(root)).toBe(true)
 
     await gotoSettled(page, '/auth/login')
     await expect(page.getByTestId('login-goto-register')).toBeVisible()
 })
 
 test('a guest cannot pick their own role when signing up', async ({
+    root,
     testPrefix,
 }) => {
-    await setRegistration(true)
+    await setRegistration(root, true)
     const { admin } = await getRoleIds(root)
 
     await expectRejected(
@@ -106,9 +100,10 @@ test('a guest cannot pick their own role when signing up', async ({
 
 test('a climber signs up, verifies the email and signs in', async ({
     page,
+    root,
     testPrefix,
 }) => {
-    await setRegistration(true)
+    await setRegistration(root, true)
     const email = mailbox(testPrefix, 'signup')
     const username = `${testPrefix}signup`.replace(/-/g, '')
 
@@ -118,7 +113,17 @@ test('a climber signs up, verifies the email and signs in', async ({
     await page.getByTestId('register-email').locator('input').fill(email)
     await page.getByTestId('password-new').locator('input').fill(PASSWORD)
     await page.getByTestId('password-confirm').locator('input').fill(PASSWORD)
+    const signup = page.waitForResponse(
+        (response) =>
+            response.url().includes('/api/collections/users/records') &&
+            response.request().method() === 'POST',
+    )
+    const verification = page.waitForResponse((response) =>
+        response.url().includes('/request-verification'),
+    )
     await page.getByTestId('register-submit').click()
+    expect((await signup).ok()).toBe(true)
+    expect((await verification).ok()).toBe(true)
     await expect(page.getByTestId('login-form')).toBeVisible()
 
     const created = await root
@@ -134,16 +139,15 @@ test('a climber signs up, verifies the email and signs in', async ({
     await gotoSettled(page, '/auth/login')
     await signIn(page, email)
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
-
-    await root.collection('users').delete(created.id)
 })
 
 test('an unverified climber resends the verification mail from the sign-in page', async ({
     page,
+    root,
     testPrefix,
 }) => {
     const email = mailbox(testPrefix, 'resend')
-    const created = await root.collection('users').create({
+    await root.collection('users').create({
         email,
         username: `${testPrefix}resend`.replace(/-/g, ''),
         password: PASSWORD,
@@ -165,6 +169,4 @@ test('an unverified climber resends the verification mail from the sign-in page'
     const mail = await waitForMail(page, email, { subject: /verify/i })
     await gotoSettled(page, linkPath(mail, VERIFY_LINK))
     await expect(page.getByTestId('verify-done')).toBeVisible()
-
-    await root.collection('users').delete(created.id)
 })

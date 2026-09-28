@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { uiaa } from '../../support/seed'
 
 test('shows no rows for a search with no matches', async ({ page }) => {
     await gotoSettled(page, '/routes')
@@ -20,49 +21,40 @@ test('filters the route list by search text', async ({ page }) => {
 
 test('filters by grade, and every visible row actually matches', async ({
     page,
+    createRoute,
 }) => {
+    const five = await createRoute(uiaa('5'))
+    const six = await createRoute(uiaa('6'))
     await gotoSettled(page, '/routes')
     await page.getByTestId('index-filter-difficulty').click()
     await page.getByRole('option', { name: '5 · UIAA', exact: true }).click()
-    await expect(page.getByTestId('index-table')).toBeVisible()
 
-    const res = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent(
-                'name ~ "e2e-route-" && grade_system = "uiaa" && grade = "5" && archived = false',
-            ) +
-            '&perPage=1',
-    )
-    const body = await res.json()
-    if (body.items.length > 0) {
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(body.items[0].name)
-        await expect(page.getByTestId('index-table')).toContainText(
-            body.items[0].name,
-        )
-    }
+    const table = page.getByTestId('index-table')
+    await page
+        .getByTestId('filter-search')
+        .locator('input')
+        .fill(five.name.replace(/-\d+$/, '-'))
+    await expect(table.getByTestId(`index-row-${five.id}`)).toBeVisible()
+    await expect(table.getByTestId(`index-row-${six.id}`)).toHaveCount(0)
 })
 
 test('searches by setter name', async ({ page }) => {
     await gotoSettled(page, '/routes')
     await page.getByTestId('filter-search').locator('input').fill('Setter 3')
-    const rows = page.getByTestId('index-table').locator('tbody tr')
+    const rows = page
+        .getByTestId('index-table')
+        .getByRole('row')
+        .filter({ has: page.getByTestId('index-row-name') })
     await expect(rows.first()).toContainText('Setter 3')
     for (const row of await rows.all())
         await expect(row).toContainText('Setter 3')
 })
 
-test('combines a route name with a signed grade', async ({ page }) => {
-    const res = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent(
-                'name ~ "e2e-route-" && archived = false && grade_system = "uiaa" && grade ~ "%+"',
-            ) +
-            '&perPage=1',
-    )
-    const route = (await res.json()).items[0]
+test('combines a route name with a signed grade', async ({
+    page,
+    createRoute,
+}) => {
+    const route = await createRoute(uiaa('6+'))
 
     await gotoSettled(page, '/routes')
     const search = page.getByTestId('filter-search').locator('input')

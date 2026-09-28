@@ -1,16 +1,10 @@
 import { test, expect } from '../../support/fixtures'
+import { fillLogin } from '../../support/auth'
 import { gotoSettled } from '../../support/nav'
 
 test('stacks snackbars instead of replacing them', async ({ page }) => {
     await gotoSettled(page, '/auth/login')
-    await page
-        .getByTestId('login-identity')
-        .locator('input')
-        .fill('e2e-admin@gripello.test')
-    await page
-        .getByTestId('login-password')
-        .locator('input')
-        .fill('wrong-password')
+    await fillLogin(page, 'nobody@gripello.test', 'wrong-password')
 
     const submit = page.getByTestId('login-submit')
     const messages = page.getByTestId('global-snackbar-message')
@@ -34,10 +28,7 @@ test('announces the number of routes found after searching', async ({
 test('shows a visible focus ring for keyboard focus', async ({ page }) => {
     await gotoSettled(page, '/routes')
     await page.keyboard.press('Tab')
-    const outline = await page.evaluate(
-        () => getComputedStyle(document.activeElement!).outlineStyle,
-    )
-    expect(outline).toBe('solid')
+    await expect(page.locator(':focus')).toHaveCSS('outline-style', 'solid')
 })
 
 test('renders the navigation loading indicator', async ({ page }) => {

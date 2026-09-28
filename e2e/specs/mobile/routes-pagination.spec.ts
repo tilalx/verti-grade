@@ -1,30 +1,15 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { gotoSettled } from '../../support/nav'
 
-test('paginates the mobile route card list', async ({ adminPage: page }) => {
-    const prefix = `e2e-pg-${Date.now()}`
+test('paginates the mobile route card list', async ({
+    adminPage: page,
+    createRoute,
+    testPrefix,
+}) => {
+    await Promise.all(Array.from({ length: 12 }, () => createRoute()))
 
     await gotoSettled(page, '/manage/routes')
-    const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
-    for (let i = 0; i < 12; i++) {
-        await page.request.post('/api/collections/routes/records', {
-            headers,
-            data: {
-                name: `${prefix}-${i}`,
-                ...uiaa('5'),
-                anchor_point: 5,
-                location: hallA,
-                type: 'Route',
-                creator: ['E2E'],
-                screw_date: '2026-01-01',
-                archived: false,
-            },
-        })
-    }
-
-    await page.getByTestId('filter-search').locator('input').fill(prefix)
+    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
     await expect(page.getByTestId('routes-row')).toHaveCount(12)
     await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
 
@@ -60,9 +45,16 @@ test('paginates the mobile route card list', async ({ adminPage: page }) => {
 
 test('the pager stays under the thumb while stepping', async ({
     adminPage: page,
+    createRoute,
+    testPrefix,
 }) => {
+    await Promise.all(Array.from({ length: 30 }, () => createRoute()))
+
     await gotoSettled(page, '/manage/routes')
-    await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
+    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('routes-mobile-page-size').click()
+    await page.getByRole('option', { name: '10', exact: true }).click()
+    await expect(page.getByTestId('routes-mobile-goto-3')).toBeVisible()
 
     const next = page.getByTestId('routes-mobile-next')
     await next.click()
@@ -77,8 +69,10 @@ test('the pager stays under the thumb while stepping', async ({
         'aria-current',
         'page',
     )
-    const afterSecond = (await next.boundingBox())!
-
-    expect(afterSecond.y).toBeCloseTo(afterFirst.y, 0)
-    expect(afterSecond.x).toBeCloseTo(afterFirst.x, 0)
+    await expect
+        .poll(async () => {
+            const box = (await next.boundingBox())!
+            return [Math.round(box.x), Math.round(box.y)]
+        })
+        .toEqual([Math.round(afterFirst.x), Math.round(afterFirst.y)])
 })

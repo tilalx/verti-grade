@@ -1,5 +1,5 @@
 <template>
-    <span class="grade-label">
+    <span class="grade-label" data-testid="grade-label">
         <span>{{ grade }}</span>
         <span
             v-if="system"

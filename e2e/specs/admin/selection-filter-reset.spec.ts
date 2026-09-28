@@ -1,48 +1,31 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { gotoSettled } from '../../support/nav'
 import { createComment, deleteComment } from '../../support/comments'
 
 test('changing the route filter clears the selection', async ({
     adminPage: page,
+    createRoute,
+    testPrefix,
 }) => {
-    const prefix = `e2e-select-reset-${Date.now()}`
-
-    await gotoSettled(page, '/manage/routes')
-    const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
-
-    for (const name of [`${prefix}-a-0`, `${prefix}-a-1`, `${prefix}-b-0`]) {
-        await page.request.post('/api/collections/routes/records', {
-            headers,
-            data: {
-                name,
-                ...uiaa('5'),
-                anchor_point: 5,
-                location: hallA,
-                type: 'Route',
-                creator: ['E2E'],
-                screw_date: '2026-01-01',
-                archived: false,
-            },
-        })
+    for (const name of [
+        `${testPrefix}-a-0`,
+        `${testPrefix}-a-1`,
+        `${testPrefix}-b-0`,
+    ]) {
+        await createRoute({ name })
     }
 
     await gotoSettled(page, '/manage/routes')
     const search = page.getByTestId('filter-search').locator('input')
     const selectAll = page.getByTestId('routes-select-all')
 
-    await search.fill(`${prefix}-a`)
-    await expect(page.getByTestId('routes-table')).toContainText(
-        `${prefix}-a-1`,
-    )
+    await search.fill(`${testPrefix}-a`)
+    await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
     await selectAll.click()
     await expect(selectAll).toHaveText('2 selected')
 
-    await search.fill(`${prefix}-b`)
-    await expect(page.getByTestId('routes-table')).toContainText(
-        `${prefix}-b-0`,
-    )
+    await search.fill(`${testPrefix}-b`)
+    await expect(page.getByTestId('routes-row-name')).toHaveCount(1)
     await expect(selectAll).toHaveText('Select all')
     await expect(page.getByTestId('routes-archive-selected')).toHaveCount(0)
 
@@ -53,11 +36,12 @@ test('changing the route filter clears the selection', async ({
 
 test('changing a comment filter clears the selection', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    const id = await createComment(page, `${testPrefix}-selected`, 5)
-    await gotoSettled(page, '/manage/comments')
+    const id = await createComment(page, route.id, `${testPrefix}-selected`, 5)
+    await gotoSettled(page, `/manage/comments?search=${testPrefix}`)
 
     const card = page.getByTestId(`comment-card-${id}`)
     await card.getByTestId('comment-card-checkbox').locator('input').click()
@@ -65,17 +49,16 @@ test('changing a comment filter clears the selection', async ({
 
     await page.getByTestId('comments-filter-rating-1').click()
     await expect(page.getByTestId('comments-bulk-delete')).toHaveCount(0)
-
-    await deleteComment(page, id)
 })
 
 test('a comment deleted elsewhere drops out of the selection', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    const id = await createComment(page, `${testPrefix}-gone`, 5)
-    await gotoSettled(page, '/manage/comments')
+    const id = await createComment(page, route.id, `${testPrefix}-gone`, 5)
+    await gotoSettled(page, `/manage/comments?search=${testPrefix}`)
 
     const card = page.getByTestId(`comment-card-${id}`)
     await card.getByTestId('comment-card-checkbox').locator('input').click()

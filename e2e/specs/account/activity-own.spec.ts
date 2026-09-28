@@ -1,12 +1,14 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { fetchAuditRows } from '../../support/audit'
 
 test('a user sees their own entries and nobody else’s', async ({
-    userPage: page,
+    createUser,
+    pageAs,
     testPrefix,
 }) => {
+    const page = await pageAs(await createUser())
     await gotoSettled(page, '/', /\//)
 
     const headers = await authHeader(page)
@@ -51,17 +53,17 @@ test('a plain user reaches their activity from the user menu', async ({
 test('an admin sees entries from other actors too', async ({
     adminPage: page,
     testPrefix,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/account/activity', /\/account\/activity/)
 
     const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
     const res = await page.request.post('/api/collections/routes/records', {
         headers,
         data: {
             name: `${testPrefix}-admin-visible`,
             ...uiaa('5'),
-            location: hallA,
+            location: workerLocation.id,
             type: 'Boulder',
             creator: [testPrefix],
         },
@@ -74,8 +76,4 @@ test('an admin sees entries from other actors too', async ({
     const all = await fetchAuditRows(page, '')
     const actors = new Set(all.map((r) => r.actor))
     expect(actors.size).toBeGreaterThan(0)
-
-    await page.request.delete(`/api/collections/routes/records/${routeId}`, {
-        headers,
-    })
 })

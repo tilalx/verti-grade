@@ -32,6 +32,7 @@ const resolvedIcon = computed(
             :icon="resolvedIcon"
             size="56"
             class="empty-state__icon mb-4"
+            data-testid="empty-state-icon"
             :class="{ 'empty-state__icon--error': isError }"
         />
         <div v-if="eyebrow" class="text-headline-large font-weight-bold mb-1">

@@ -1,9 +1,6 @@
-import { test, expect, chromium } from '@playwright/test'
-import path from 'node:path'
+import { chromium } from '@playwright/test'
+import { test, expect, authFile } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { LOCATIONS } from '../../support/seed'
-
-const AUTH_FILE = path.join(__dirname, '..', '..', '.auth', 'admin.json')
 
 for (const viewport of [
     { name: 'desktop', width: 2000, height: 1200, minWidth: 700 },
@@ -11,6 +8,7 @@ for (const viewport of [
 ]) {
     test(`${viewport.name} camera fills the controls column`, async ({
         baseURL,
+        workerLocation,
     }) => {
         const browser = await chromium.launch({
             args: [
@@ -18,28 +16,38 @@ for (const viewport of [
                 '--use-fake-ui-for-media-stream',
             ],
         })
-        const context = await browser.newContext({
-            viewport: { width: viewport.width, height: viewport.height },
-            baseURL,
-            ignoreHTTPSErrors: true,
-            storageState: AUTH_FILE,
-            permissions: ['camera'],
-        })
-        const page = await context.newPage()
-        await page.addInitScript(() =>
-            localStorage.setItem('inventory-instructions-seen', '1'),
-        )
-        await gotoSettled(page, '/manage/inventory')
-        await page.getByTestId(`inventory-location-${LOCATIONS[0]}`).click()
-        await page.getByTestId('inventory-start').click()
+        try {
+            const context = await browser.newContext({
+                viewport: { width: viewport.width, height: viewport.height },
+                baseURL,
+                ignoreHTTPSErrors: true,
+                storageState: authFile('admin'),
+                permissions: ['camera'],
+            })
+            const page = await context.newPage()
+            await page.addInitScript(() =>
+                localStorage.setItem('inventory-instructions-seen', '1'),
+            )
+            await gotoSettled(page, '/manage/inventory')
+            await page
+                .getByTestId(`inventory-location-${workerLocation.name}`)
+                .click()
+            await page.getByTestId('inventory-start').click()
 
-        const camera = page.locator('.scanner-viewport')
-        await expect(camera).toBeVisible()
-        const box = (await camera.boundingBox())!
-        expect(box.width).toBeGreaterThan(viewport.minWidth)
-        expect(box.height).toBeGreaterThan(viewport.height * 0.4)
-        expect(box.y + box.height).toBeLessThanOrEqual(viewport.height)
-
-        await browser.close()
+            const camera = page.getByTestId('scanner-viewport')
+            await expect(camera).toBeVisible()
+            await expect
+                .poll(async () => {
+                    const box = (await camera.boundingBox())!
+                    return (
+                        box.width > viewport.minWidth &&
+                        box.height > viewport.height * 0.4 &&
+                        box.y + box.height <= viewport.height
+                    )
+                })
+                .toBe(true)
+        } finally {
+            await browser.close()
+        }
     })
 }

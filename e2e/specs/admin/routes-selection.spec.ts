@@ -1,35 +1,17 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { gotoSettled } from '../../support/nav'
 
 test('row checkboxes and select-all reflect the selected route ids', async ({
     adminPage: page,
+    createRoute,
+    testPrefix,
 }) => {
-    const prefix = `e2e-select-${Date.now()}`
+    await createRoute()
+    await createRoute()
 
     await gotoSettled(page, '/manage/routes')
-    const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
-
-    for (let i = 0; i < 2; i++) {
-        await page.request.post('/api/collections/routes/records', {
-            headers,
-            data: {
-                name: `${prefix}-${i}`,
-                ...uiaa('5'),
-                anchor_point: 5,
-                location: hallA,
-                type: 'Route',
-                creator: ['E2E'],
-                screw_date: '2026-01-01',
-                archived: false,
-            },
-        })
-    }
-
-    await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(prefix)
-    await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
+    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
     const boxes = page.getByTestId('routes-row-checkbox').locator('input')
     await expect(boxes).toHaveCount(2)
@@ -58,33 +40,16 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
 
 test('repeated select-all reuses the loaded id list', async ({
     adminPage: page,
+    createRoute,
+    testPrefix,
 }) => {
-    const prefix = `e2e-select-cache-${Date.now()}`
-
-    await gotoSettled(page, '/manage/routes')
-    const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
-
-    for (let i = 0; i < 2; i++) {
-        await page.request.post('/api/collections/routes/records', {
-            headers,
-            data: {
-                name: `${prefix}-${i}`,
-                ...uiaa('5'),
-                anchor_point: 5,
-                location: hallA,
-                type: 'Route',
-                creator: ['E2E'],
-                screw_date: '2026-01-01',
-                archived: false,
-            },
-        })
-    }
+    await createRoute()
+    await createRoute()
 
     await page.route('**/api/realtime**', (route) => route.abort())
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(prefix)
-    await expect(page.getByTestId('routes-table')).toContainText(`${prefix}-0`)
+    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
     let idListRequests = 0
     page.on('request', (request) => {

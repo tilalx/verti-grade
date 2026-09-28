@@ -15,12 +15,8 @@ test.describe('light OS preference', () => {
 
         const logo = page.getByTestId('nav-logo').locator('img:visible')
         await expect(logo).toHaveCount(1)
-        const customLogo = page.getByTestId('nav-logo-custom')
-        if (await customLogo.count()) {
-            await expect(customLogo).toHaveCSS('filter', 'brightness(0)')
-        } else {
-            await expect(logo).toHaveAttribute('src', /gripello-light/)
-        }
+        await expect(page.getByTestId('nav-logo-custom')).toHaveCount(0)
+        await expect(logo).toHaveAttribute('src', /gripello-light/)
         expect(warnings).toEqual([])
     })
 })
@@ -33,14 +29,7 @@ test.describe('dark OS preference', () => {
 
         const logo = page.getByTestId('nav-logo').locator('img:visible')
         await expect(logo).toHaveCount(1)
-        const customLogo = page.getByTestId('nav-logo-custom')
-        if (await customLogo.count()) {
-            await expect(customLogo).toHaveCSS(
-                'filter',
-                'brightness(0) invert(1)',
-            )
-        } else {
-            await expect(logo).toHaveAttribute('src', /gripello-dark/)
-        }
+        await expect(page.getByTestId('nav-logo-custom')).toHaveCount(0)
+        await expect(logo).toHaveAttribute('src', /gripello-dark/)
     })
 })

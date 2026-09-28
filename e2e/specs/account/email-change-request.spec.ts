@@ -1,7 +1,8 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-async function openProfileDialog(page) {
+async function openProfileDialog(page: Page) {
     await gotoSettled(page, '/')
     await page.getByTestId('user-menu-activator').click()
     await page.getByTestId('user-menu-profile').click()
@@ -10,11 +11,14 @@ async function openProfileDialog(page) {
 }
 
 test('requests an email change instead of writing the address', async ({
-    userPage: page,
+    createUser,
+    pageAs,
+    testPrefix,
 }) => {
+    const page = await pageAs(await createUser())
     await openProfileDialog(page)
 
-    const newEmail = `e2e-newaddr-${Date.now()}@gripello.test`
+    const newEmail = `${testPrefix}-newaddr@gripello.test`
     await page.getByTestId('profile-email').locator('input').fill(newEmail)
 
     const changeRequest = page.waitForRequest((req) =>
@@ -37,6 +41,7 @@ test('requests an email change instead of writing the address', async ({
 
 test('reports a failed confirmation mail without claiming the change', async ({
     userPage: page,
+    testPrefix,
 }) => {
     await page.route('**/api/collections/users/request-email-change', (route) =>
         route.abort('failed'),
@@ -46,7 +51,7 @@ test('reports a failed confirmation mail without claiming the change', async ({
     await page
         .getByTestId('profile-email')
         .locator('input')
-        .fill(`e2e-failaddr-${Date.now()}@gripello.test`)
+        .fill(`${testPrefix}-failaddr@gripello.test`)
     await page.getByTestId('profile-save').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()

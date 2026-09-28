@@ -1,8 +1,7 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { authAsSuperuser, uiaa } from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { PB_URL, seedMap } from '../../support/map'
+import { seedMap } from '../../support/map'
 
 const outline = [
     [1, 1],
@@ -16,10 +15,9 @@ const edge = [
 
 test('only settings managers may draw walls', async ({
     setterPage: page,
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, testPrefix, { routes: 1 })
     try {
         await gotoSettled(page, '/manage/routes')
@@ -49,10 +47,9 @@ test('only settings managers may draw walls', async ({
 })
 
 test('walls must fit the floor plan and routes must stay in their location', async ({
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, testPrefix, { routes: 1 })
     const otherLocation = await root
         .collection('locations')
@@ -103,10 +100,9 @@ test('walls must fit the floor plan and routes must stay in their location', asy
 
 test('a wall with active routes cannot be deleted', async ({
     adminPage: page,
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, testPrefix, { routes: 2 })
     try {
         await gotoSettled(page, '/admin/settings')

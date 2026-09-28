@@ -1,13 +1,15 @@
 import { test, expect } from '../../support/fixtures'
-import { LOCATIONS, uiaa } from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { gotoSettled, authHeader } from '../../support/nav'
 
 test('routesetter can create and delete a route (manage_routes permission)', async ({
     setterPage: page,
+    testPrefix,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/routes')
 
-    const name = `e2e-setter-${Date.now()}`
+    const name = `${testPrefix}-setter`
 
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
@@ -21,7 +23,9 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
         .locator('input')
         .fill('10')
     await page.getByTestId('route-form-location').click()
-    await page.getByRole('option', { name: LOCATIONS[0], exact: true }).click()
+    await page
+        .getByRole('option', { name: workerLocation.name, exact: true })
+        .click()
     await page
         .getByTestId('route-form-creator')
         .locator('input')
@@ -35,7 +39,7 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 
     await page.getByTestId('filter-search').locator('input').fill(name)
-    await expect(page.getByTestId('routes-table')).toContainText(name)
+    await expect(page.getByTestId('routes-row-name')).toHaveText([name])
 
     await page.getByTestId('routes-row-edit').first().click()
     await page.getByTestId('route-form-delete').click()

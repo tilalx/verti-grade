@@ -3,6 +3,7 @@ import { gotoSettled } from '../../support/nav'
 
 test('tells the admin no invite was sent when mail is not configured', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await page.route('**/api/mail-status', (route) =>
         route.fulfill({ json: { configured: false } }),
@@ -22,18 +23,17 @@ test('tells the admin no invite was sent when mail is not configured', async ({
     await page.getByTestId('command-palette-result').first().click()
     await page.waitForURL('**/admin/users')
 
-    const suffix = Date.now()
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-mail-warning')).toBeVisible()
     await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
     await page
         .getByTestId('user-create-lastname')
         .locator('input')
-        .fill(`NoMail${suffix}`)
+        .fill('NoMail')
     await page
         .getByTestId('user-create-email')
         .locator('input')
-        .fill(`e2e-nomail-${suffix}@gripello.test`)
+        .fill(`${testPrefix}-nomail@gripello.test`)
     await page.getByTestId('user-create-submit').click()
 
     await expect(page.getByTestId('global-snackbar-message')).toContainText(

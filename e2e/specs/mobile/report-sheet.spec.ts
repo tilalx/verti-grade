@@ -1,17 +1,21 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { uiaa } from '../../support/seed'
 
-test('report form opens as a bottom sheet on mobile', async ({ page }) => {
-    const res = await page.request.get(
-        '/api/collections/ratings/records?filter=' +
-            encodeURIComponent(
-                'comment ~ "e2e-rating-" && route_id.archived = false',
-            ) +
-            '&perPage=1',
-    )
-    const routeId = (await res.json()).items[0].route_id as string
+test('report form opens as a bottom sheet on mobile', async ({
+    page,
+    root,
+    route,
+    testPrefix,
+}) => {
+    await root.collection('ratings').create({
+        route_id: route.id,
+        rating: 4,
+        ...uiaa('5'),
+        comment: `${testPrefix}-report-me`,
+    })
 
-    await gotoSettled(page, `/route?id=${routeId}`)
+    await gotoSettled(page, `/route?id=${route.id}`)
     await page.getByTestId('comment-card-report').first().click()
 
     const dialog = page.getByTestId('report-form-dialog')
@@ -25,6 +29,7 @@ test('report form opens as a bottom sheet on mobile', async ({ page }) => {
         })
         .toBeLessThanOrEqual(1)
 
-    const box = (await dialog.boundingBox())!
-    expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1)
+    await expect
+        .poll(async () => (await dialog.boundingBox())!.width)
+        .toBeGreaterThanOrEqual(viewport.width - 1)
 })
