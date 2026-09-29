@@ -1,12 +1,12 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
+import { gotoSettled, searchRoutes } from '../../support/nav'
 
 test('combines filter, sort, and pagination on the admin routes table', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes')
 
-    await page.getByTestId('filter-search').locator('input').fill('e2e-route-')
+    await searchRoutes(page, 'e2e-route-')
     await expect(page.getByTestId('routes-table')).toBeVisible()
 
     await page.getByRole('columnheader', { name: /name/i }).click()

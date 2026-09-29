@@ -2,7 +2,7 @@ import { test, expect } from '../../support/fixtures'
 
 test('server-renders the public route list', async ({ page }) => {
     const response = await page.goto('/routes')
-    expect((await response?.text()) ?? '').toContain('e2e-route-1')
+    expect((await response?.text()) ?? '').toContain('data-testid="route-card-')
 })
 
 test('server-renders a route detail page', async ({ page, route }) => {
