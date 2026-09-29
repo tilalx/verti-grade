@@ -1,14 +1,12 @@
 import { createHash } from 'node:crypto'
-import { test, expect } from '@playwright/test'
-import PocketBase from 'pocketbase'
-import { authAsSuperuser } from '../../support/seed'
-
-const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
+import { test, expect } from '../../support/fixtures'
 
 test('a client cannot pick its own IP through X-Forwarded-For', async ({
     request,
-}, info) => {
-    const identity = `spoof-w${info.workerIndex}-${Date.now()}@gripello.test`
+    root,
+    testPrefix,
+}) => {
+    const identity = `${testPrefix}-spoof@gripello.test`
     const spoofedIp = '127.0.0.1'
     const maskedIdentity = `unknown:${createHash('sha256').update(identity).digest('hex').slice(0, 8)}`
 
@@ -21,8 +19,6 @@ test('a client cannot pick its own IP through X-Forwarded-For', async ({
     )
     expect(login.status()).toBe(400)
 
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const recordedIp = () =>
         root
             .collection('audit_logs')

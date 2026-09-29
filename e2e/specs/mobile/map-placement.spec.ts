@@ -1,15 +1,12 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { authAsSuperuser, uiaa } from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { gotoSettled } from '../../support/nav'
-import { PB_URL, seedMap, type SeededMap } from '../../support/map'
+import { seedMap, type SeededMap } from '../../support/map'
 
 let seeded: SeededMap
 let unplacedIds: string[]
 
-test.beforeEach(async ({ testPrefix }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
+test.beforeEach(async ({ root, testPrefix }) => {
     seeded = await seedMap(root, testPrefix, { routes: 1 })
     unplacedIds = []
     for (const index of [1, 2]) {
@@ -23,11 +20,6 @@ test.beforeEach(async ({ testPrefix }) => {
         })
         unplacedIds.push(route.id)
     }
-    seeded.routeIds.push(...unplacedIds)
-})
-
-test.afterEach(async () => {
-    await seeded.cleanup()
 })
 
 test('on a phone routes are placed one after another by tapping walls', async ({
@@ -42,11 +34,10 @@ test('on a phone routes are placed one after another by tapping walls', async ({
             `[data-testid="placement-route"][data-route-id="${unplacedIds[0]}"]`,
         )
         .tap()
-    const north = page
-        .locator(
-            `[data-testid="placement-wall"][data-name="${testPrefix} North"]`,
-        )
-        .locator('.placement-wall-outline')
+    const north = page.getByRole('button', {
+        name: `${testPrefix} North`,
+        exact: true,
+    })
     await north.tap()
     await expect(page.getByTestId('placement-hint')).toContainText(
         `${testPrefix}-phone-2`,

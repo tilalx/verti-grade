@@ -33,7 +33,7 @@ const wall = (page: Page, name: string) =>
     page.locator(`[data-testid="placement-wall"][data-name="${name}"]`)
 
 async function clickInside(target: Locator) {
-    await target.locator('.placement-wall-outline').click()
+    await target.getByTestId('placement-wall-outline').click()
 }
 
 test('setters place an unplaced route by clicking it and then a wall', async ({

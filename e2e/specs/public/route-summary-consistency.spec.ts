@@ -35,7 +35,7 @@ async function expectDotAndGrade(row: Locator) {
     const dot = row.getByTestId('route-color-dot')
     await expect(dot).toBeVisible()
     await expect(dot).toHaveCSS('background-color', 'rgb(30, 136, 229)')
-    await expect(row.locator('.grade-label')).toContainText('7')
+    await expect(row.getByTestId('grade-label')).toContainText('7')
 }
 
 test('the route list shows the color dot and grade', async ({
@@ -48,7 +48,7 @@ test('the route list shows the color dot and grade', async ({
         .locator('input')
         .fill(`${testPrefix}-summary`)
     const row = page
-        .locator('tr')
+        .getByRole('row')
         .filter({ has: page.getByTestId(`index-row-${routeId}`) })
     await expectDotAndGrade(row)
 })

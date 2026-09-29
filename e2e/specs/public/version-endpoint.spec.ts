@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
 
 test('/api/version is served by Nuxt through the proxy', async ({
     request,

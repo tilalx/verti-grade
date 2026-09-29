@@ -1,42 +1,28 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { PB_URL } from '../../support/map'
-import { authAsSuperuser, ensureLocations, uiaa } from '../../support/seed'
 
 test('a route change elsewhere keeps the visitor on their page', async ({
     page,
     testPrefix,
+    createRoute,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const locations = await ensureLocations(root)
+    for (let index = 0; index < 25; index++) await createRoute()
 
     await gotoSettled(page, '/routes')
     const range = page
         .getByTestId('index-table')
         .locator('.v-data-table-footer__info')
-    await page.getByTestId('filter-search').locator('input').fill('e2e-route-')
-    await expect(range).toContainText(/^\s*1\D/)
+    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await expect(range).toContainText(/^\s*1\D.*\b25\s*$/)
     await page.getByRole('button', { name: /next page/i }).click()
-    await expect(range).toContainText(/^\s*21\D/)
+    await expect(range).toContainText(/^\s*21\D.*\b25\s*$/)
 
     const reload = page.waitForResponse(
         (response) =>
             response.url().includes('/api/collections/averageRating/records') &&
             response.request().method() === 'GET',
     )
-    const route = await root.collection('routes').create({
-        name: `${testPrefix}-realtime`,
-        ...uiaa('5'),
-        location: locations['Hall A'],
-        type: 'Route',
-        creator: ['E2E'],
-    })
-    try {
-        await reload
-        await expect(range).toContainText(/^\s*21\D/)
-    } finally {
-        await root.collection('routes').delete(route.id)
-    }
+    await createRoute()
+    await reload
+    await expect(range).toContainText(/^\s*21\D.*\b26\s*$/)
 })

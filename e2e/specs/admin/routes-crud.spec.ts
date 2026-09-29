@@ -1,11 +1,14 @@
 import { test, expect } from '../../support/fixtures'
-import { LOCATIONS } from '../../support/seed'
 import { gotoSettled } from '../../support/nav'
 
-test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
+test('creates, edits, and deletes a route', async ({
+    adminPage: page,
+    testPrefix,
+    workerLocation,
+}) => {
     await gotoSettled(page, '/manage/routes')
 
-    const name = `e2e-crud-${Date.now()}`
+    const name = `${testPrefix}-crud`
 
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
@@ -19,7 +22,9 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
         .locator('input')
         .fill('10')
     await page.getByTestId('route-form-location').click()
-    await page.getByRole('option', { name: LOCATIONS[0], exact: true }).click()
+    await page
+        .getByRole('option', { name: workerLocation.name, exact: true })
+        .click()
     await page
         .getByTestId('route-form-creator')
         .locator('input')
@@ -33,7 +38,7 @@ test('creates, edits, and deletes a route', async ({ adminPage: page }) => {
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 
     await page.getByTestId('filter-search').locator('input').fill(name)
-    await expect(page.getByTestId('routes-table')).toContainText(name)
+    await expect(page.getByTestId('routes-row-name')).toHaveText([name])
 
     await page.getByTestId('routes-row-edit').first().click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
@@ -60,6 +65,5 @@ test('blocks route creation when required fields are empty', async ({
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
     await page.getByTestId('route-form-submit').click()
 
-    // Client-side validation blocks it — the dialog stays open.
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
 })

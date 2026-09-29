@@ -1,7 +1,8 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-async function fillCreateForm(page, email: string, lastname: string) {
+async function fillCreateForm(page: Page, email: string, lastname: string) {
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
     await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
@@ -14,13 +15,13 @@ async function fillCreateForm(page, email: string, lastname: string) {
 
 test('sends an invite mail after creating a user', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/users')
 
-    const suffix = Date.now()
-    const email = `e2e-invited-${suffix}@gripello.test`
+    const email = `${testPrefix}-invited@gripello.test`
 
-    await fillCreateForm(page, email, `Invited${suffix}`)
+    await fillCreateForm(page, email, 'Invited')
 
     const resetRequest = page.waitForRequest((req) =>
         req.url().includes('/api/collections/users/request-password-reset'),
@@ -34,18 +35,18 @@ test('sends an invite mail after creating a user', async ({
 
 test('keeps the created user when the invite mail fails', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/users')
 
-    const suffix = Date.now()
-    const email = `e2e-invitefail-${suffix}@gripello.test`
+    const email = `${testPrefix}-invitefail@gripello.test`
 
     await page.route(
         '**/api/collections/users/request-password-reset',
         (route) => route.abort('failed'),
     )
 
-    await fillCreateForm(page, email, `InviteFail${suffix}`)
+    await fillCreateForm(page, email, 'InviteFail')
     await page.getByTestId('user-create-submit').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()

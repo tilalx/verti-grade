@@ -2,14 +2,11 @@ import { test, expect } from '../../support/fixtures'
 
 test('server-renders the public route list', async ({ page }) => {
     const response = await page.goto('/routes')
-    expect((await response?.text()) ?? '').toContain('e2e-route-1')
+    expect((await response?.text()) ?? '').toContain('data-testid="route-card-')
 })
 
-test('server-renders a route detail page', async ({ page, request }) => {
-    const list = await request.get(
-        '/api/collections/averageRating/records?perPage=1',
-    )
-    const { id, name } = (await list.json()).items[0]
+test('server-renders a route detail page', async ({ page, route }) => {
+    const { id, name } = route
 
     const response = await page.goto(`/route?id=${id}`)
     const html = (await response?.text()) ?? ''

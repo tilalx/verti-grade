@@ -1,6 +1,5 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { LOCATIONS } from '../../support/seed'
 
 test.beforeEach(async ({ adminPage: page }) => {
     await page.addInitScript(() =>
@@ -64,44 +63,49 @@ for (const viewport of [
 
 test('runs an inventory without a camera: pick a site, mark a route found', async ({
     adminPage: page,
+    route,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/inventory')
 
-    await page.getByTestId(`inventory-location-${LOCATIONS[0]}`).click()
+    await page.getByTestId(`inventory-location-${workerLocation.name}`).click()
 
-    const firstMissing = page
-        .locator('[data-testid^="inventory-mark-"]')
-        .first()
-    await expect(firstMissing).toBeVisible()
-    const routeId = (await firstMissing.getAttribute('data-testid'))!.replace(
-        'inventory-mark-',
-        '',
-    )
+    await expect(
+        page.getByTestId(`inventory-missing-${route.id}`),
+    ).toBeVisible()
+    await page.getByTestId(`inventory-mark-${route.id}`).click()
 
-    await firstMissing.click()
-
-    await expect(page.getByTestId(`inventory-scanned-${routeId}`)).toBeVisible()
-    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toHaveCount(
+    await expect(
+        page.getByTestId(`inventory-scanned-${route.id}`),
+    ).toBeVisible()
+    await expect(page.getByTestId(`inventory-missing-${route.id}`)).toHaveCount(
         0,
     )
-    await expect(page.getByTestId('inventory-progress')).toContainText('1/')
+    await expect(page.getByTestId('inventory-progress')).toContainText('1/1')
     await expect(page.getByTestId('inventory-change-location')).toContainText(
-        LOCATIONS[0],
+        workerLocation.name,
     )
 
     await expect(
         page.getByTestId('inventory-change-location').getByLabel(/./),
     ).toHaveAttribute('aria-label', 'Change location')
 
-    await page.getByTestId(`inventory-undo-${routeId}`).click()
-    await expect(page.getByTestId(`inventory-missing-${routeId}`)).toBeVisible()
+    await page.getByTestId(`inventory-undo-${route.id}`).click()
+    await expect(
+        page.getByTestId(`inventory-missing-${route.id}`),
+    ).toBeVisible()
 })
 
 test('manual add dialog opens from the missing column', async ({
     adminPage: page,
+    route,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/inventory')
-    await page.getByTestId(`inventory-location-${LOCATIONS[0]}`).click()
+    await page.getByTestId(`inventory-location-${workerLocation.name}`).click()
+    await expect(
+        page.getByTestId(`inventory-missing-${route.id}`),
+    ).toBeVisible()
 
     await page.getByTestId('inventory-manual-open').click()
     await expect(page.getByTestId('inventory-manual-dialog')).toBeVisible()

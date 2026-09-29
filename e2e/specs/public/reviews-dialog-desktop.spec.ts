@@ -1,25 +1,19 @@
+import type { Page } from '@playwright/test'
+import type { RecordModel } from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+import { uiaa } from '../../support/seed'
 
-async function routeWithComment(page: import('@playwright/test').Page) {
-    const res = await page.request.get(
-        '/api/collections/ratings/records?filter=' +
-            encodeURIComponent(
-                'comment ~ "e2e-rating-" && route_id.archived = false',
-            ) +
-            '&perPage=1&expand=route_id',
-    )
-    const rating = (await res.json()).items[0]
-    return {
-        id: rating.route_id as string,
-        name: rating.expand.route_id.name as string,
-    }
-}
+test.beforeEach(async ({ root, route, testPrefix }) => {
+    await root.collection('ratings').create({
+        route_id: route.id,
+        rating: 4,
+        ...uiaa('5'),
+        comment: `${testPrefix}-review`,
+    })
+})
 
-async function openReviewsFor(
-    page: import('@playwright/test').Page,
-    route: { id: string; name: string },
-) {
+async function openReviewsFor(page: Page, route: RecordModel) {
     await gotoSettled(page, '/routes')
 
     await page
@@ -28,9 +22,9 @@ async function openReviewsFor(
         .first()
         .fill(route.name)
 
-    const marker = page.getByTestId(`index-row-${route.id}`)
-    await marker.waitFor()
-    const row = page.locator('tr', { has: marker })
+    const row = page
+        .getByRole('row')
+        .filter({ has: page.getByTestId(`index-row-${route.id}`) })
     await row.getByTestId('route-details-open').click()
 
     const dialog = page.getByTestId('route-details-sheet')
@@ -40,19 +34,23 @@ async function openReviewsFor(
 
 test('the reviews dialog is centered on desktop, not pinned to the floor', async ({
     page,
+    route,
 }) => {
-    const route = await routeWithComment(page)
     const dialog = await openReviewsFor(page, route)
 
     const viewport = page.viewportSize()!
-    const box = (await dialog.boundingBox())!
-
-    expect(viewport.height - (box.y + box.height)).toBeGreaterThan(24)
-    expect(box.width).toBeLessThan(viewport.width)
+    await expect
+        .poll(async () => {
+            const box = (await dialog.boundingBox())!
+            return {
+                floats: viewport.height - (box.y + box.height) > 24,
+                narrower: box.width < viewport.width,
+            }
+        })
+        .toEqual({ floats: true, narrower: true })
 })
 
-test('reviews in the dialog can be reported', async ({ page }) => {
-    const route = await routeWithComment(page)
+test('reviews in the dialog can be reported', async ({ page, route }) => {
     const dialog = await openReviewsFor(page, route)
 
     const reportButton = dialog.getByTestId('comment-card-report').first()
@@ -64,8 +62,8 @@ test('reviews in the dialog can be reported', async ({ page }) => {
 
 test('the reviews dialog close button has an accessible name', async ({
     page,
+    route,
 }) => {
-    const route = await routeWithComment(page)
     const dialog = await openReviewsFor(page, route)
 
     await expect(dialog.getByTestId('dialog-close')).toBeVisible()

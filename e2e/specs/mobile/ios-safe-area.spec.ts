@@ -81,23 +81,18 @@ test('the filter sheet keeps its actions above the home indicator', async ({
     await page.getByTestId('filter-open-sheet').click()
     const sheet = page.getByTestId('filter-sheet')
     await expect(sheet).toBeVisible()
-    expect(await coveredBySafeAreaPadding(sheet)).toBe(true)
+    await expect.poll(() => coveredBySafeAreaPadding(sheet)).toBe(true)
 })
 
 test('dialog sheets keep their actions above the home indicator', async ({
     page,
+    route,
 }) => {
-    const response = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=1',
-    )
-    const id = (await response.json()).items[0].id as string
-    await gotoSettled(page, `/route?id=${id}`)
+    await gotoSettled(page, `/route?id=${route.id}`)
     await page.getByTestId('review-open-cta').click()
     const sheet = page.getByTestId('review-form-dialog')
     await expect(sheet).toBeVisible()
-    expect(await coveredBySafeAreaPadding(sheet)).toBe(true)
+    await expect.poll(() => coveredBySafeAreaPadding(sheet)).toBe(true)
 })
 
 for (const path of ['/scan', '/map']) {

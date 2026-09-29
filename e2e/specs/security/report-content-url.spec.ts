@@ -1,8 +1,4 @@
-import { test, expect } from '@playwright/test'
-import PocketBase from 'pocketbase'
-import { authAsSuperuser } from '../../support/seed'
-
-const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
+import { test, expect } from '../../support/fixtures'
 
 for (const contentUrl of [
     'javascript:alert(document.domain)',
@@ -10,20 +6,17 @@ for (const contentUrl of [
 ]) {
     test(`a report cannot choose its own content link: ${contentUrl}`, async ({
         request,
+        root,
+        route,
+        testPrefix,
     }) => {
-        const root = new PocketBase(PB_URL)
-        await authAsSuperuser(root)
-        const [route] = (
-            await root.collection('routes').getList(1, 1, { requestKey: null })
-        ).items
-
         const created = await request.post('/api/collections/reports/records', {
             data: {
                 content_type: 'route',
-                content_id: route!.id,
+                content_id: route.id,
                 content_url: contentUrl,
                 reason: 'other',
-                explanation: 'e2e content url check',
+                explanation: `${testPrefix} content url check`,
                 notifier_name: 'E2E Reporter',
                 notifier_email: 'e2e-reporter@example.com',
                 good_faith: true,
@@ -35,8 +28,6 @@ for (const contentUrl of [
         const stored = await root
             .collection('reports')
             .getOne(id, { requestKey: null })
-        expect(stored.content_url).toBe(`/route?id=${route!.id}`)
-
-        await root.collection('reports').delete(id, { requestKey: null })
+        expect(stored.content_url).toBe(`/route?id=${route.id}`)
     })
 }

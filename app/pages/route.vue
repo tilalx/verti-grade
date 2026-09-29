@@ -23,7 +23,10 @@
                         />
                         <div class="route-hero__content">
                             <!-- Type + location -->
-                            <div class="route-hero__chips">
+                            <div
+                                class="route-hero__chips"
+                                data-testid="route-hero-chips"
+                            >
                                 <v-chip
                                     v-if="metadata.type"
                                     size="small"

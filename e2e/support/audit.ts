@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { authHeader } from './nav'
 
 export interface AuditRow {
@@ -35,14 +35,12 @@ export async function fetchAuditRowsAnonymously(page: Page) {
 export async function waitForAuditRow(
     page: Page,
     filter: string,
-    timeoutMs = 10000,
 ): Promise<AuditRow[]> {
-    const deadline = Date.now() + timeoutMs
     let rows: AuditRow[] = []
-    while (Date.now() < deadline) {
-        rows = await fetchAuditRows(page, filter)
-        if (rows.length) return rows
-        await page.waitForTimeout(250)
-    }
+    await expect
+        .poll(async () => (rows = await fetchAuditRows(page, filter)).length, {
+            message: `audit row matching ${filter}`,
+        })
+        .toBeGreaterThan(0)
     return rows
 }

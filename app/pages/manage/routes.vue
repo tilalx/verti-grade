@@ -278,9 +278,11 @@
                                 class="route-manager__name"
                                 :data-testid="`routes-row-${item.id}`"
                             >
-                                <span class="route-manager__name-text">{{
-                                    item.name
-                                }}</span>
+                                <span
+                                    class="route-manager__name-text"
+                                    data-testid="routes-row-name"
+                                    >{{ item.name }}</span
+                                >
                                 <v-icon
                                     v-if="item.has_ratings"
                                     color="yellow-darken-2"
@@ -402,6 +404,7 @@
                                 <span
                                     v-if="page === ELLIPSIS"
                                     class="route-manager__page-gap"
+                                    data-testid="routes-mobile-page-gap"
                                     aria-hidden="true"
                                     >{{ page }}</span
                                 >

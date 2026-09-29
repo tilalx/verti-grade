@@ -1,14 +1,15 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../../support/fixtures'
 import PocketBase from 'pocketbase'
-import { authAsSuperuser, ensureUser, getRoleIds } from '../../support/seed'
+import { ensureUser, getRoleIds } from '../../support/seed'
 
 const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
 
-test('a user can mark a notification read but not hand it to someone else', async ({}, info) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
+test('a user can mark a notification read but not hand it to someone else', async ({
+    root,
+    testPrefix,
+}) => {
     const roleIds = await getRoleIds(root)
-    const prefix = `notif-owner-w${info.workerIndex}`
+    const prefix = testPrefix
     const owner = await ensureUser(root, roleIds.user, 'user', `${prefix}-a`)
     const victim = await ensureUser(root, roleIds.user, 'user', `${prefix}-b`)
 
@@ -49,11 +50,12 @@ test('a user can mark a notification read but not hand it to someone else', asyn
     await root.collection('notifications').delete(notification.id)
 })
 
-test('only the recipient can see or touch a notification', async ({}, info) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
+test('only the recipient can see or touch a notification', async ({
+    root,
+    testPrefix,
+}) => {
     const roleIds = await getRoleIds(root)
-    const prefix = `notif-read-w${info.workerIndex}`
+    const prefix = testPrefix
     const owner = await ensureUser(root, roleIds.user, 'user', `${prefix}-a`)
     const other = await ensureUser(root, roleIds.admin, 'admin', `${prefix}-b`)
 

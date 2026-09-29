@@ -1,47 +1,67 @@
+import type { Page } from '@playwright/test'
+import type PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { createComment, deleteComment } from '../../support/comments'
-import { createReport, deleteReport } from '../../support/reports'
+import { createComment } from '../../support/comments'
+import { createReport } from '../../support/reports'
+import { createRole } from '../../support/seed'
 
-async function dropNotification(page, id: string) {
-    await page.request.delete(`/api/collections/notifications/records/${id}`, {
-        headers: await authHeader(page),
-    })
+async function waitForNotification(page: Page, marker: string) {
+    const headers = await authHeader(page)
+    let match: { id: string } | undefined
+    await expect
+        .poll(
+            async () => {
+                const res = await page.request.get(
+                    '/api/collections/notifications/records?perPage=200&sort=-created',
+                    { headers },
+                )
+                match = ((await res.json()).items ?? []).find(
+                    (item: { params?: unknown }) =>
+                        JSON.stringify(item.params ?? {}).includes(marker),
+                )
+                return !!match
+            },
+            { message: `notification carrying ${marker}` },
+        )
+        .toBe(true)
+    return match!
 }
 
-async function waitForNotification(page, marker: string, timeoutMs = 15_000) {
-    const headers = await authHeader(page)
-    const deadline = Date.now() + timeoutMs
+const pbTime = () => new Date().toISOString().replace('T', ' ')
 
-    while (Date.now() < deadline) {
-        const res = await page.request.get(
-            '/api/collections/notifications/records?perPage=200&sort=-created',
-            { headers },
-        )
-        const items = (await res.json()).items ?? []
-        const match = items.find((item: any) =>
-            JSON.stringify(item.params ?? {}).includes(marker),
-        )
-        if (match) return match
-        await new Promise((resolve) => setTimeout(resolve, 300))
-    }
-
-    throw new Error(`No notification carrying "${marker}" within the timeout`)
+function decidedBetween(
+    root: PocketBase,
+    userId: string,
+    from: string,
+    to: string,
+) {
+    return root.collection('notifications').getFullList({
+        filter: root.filter(
+            'user = {:userId} && type ~ "report_decided" && created >= {:from} && created <= {:to}',
+            { userId, from, to },
+        ),
+    })
 }
 
 test('a filed report raises a notification linking to the queue', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const commentId = await createComment(page, `${testPrefix}-belled`)
-    const reportId = await createReport(page, {
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-belled`,
+    )
+    await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-bell`,
     })
 
-    const queued = await waitForNotification(page, `${testPrefix}-belled`)
+    await waitForNotification(page, `${testPrefix}-belled`)
 
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
     await expect(page.getByTestId('notification-bell')).toBeVisible()
@@ -50,20 +70,21 @@ test('a filed report raises a notification linking to the queue', async ({
     const menu = page.getByTestId('notification-menu')
     await expect(menu).toBeVisible()
     await expect(menu).toContainText(`${testPrefix}-belled`)
-
-    await dropNotification(page, queued.id)
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
 })
 
 test('opening a notification marks it read and clears the badge', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const commentId = await createComment(page, `${testPrefix}-readme`)
-    const reportId = await createReport(page, {
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-readme`,
+    )
+    await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-read`,
     })
@@ -77,25 +98,30 @@ test('opening a notification marks it read and clears the badge', async ({
     await page.waitForURL(/\/manage\/reports/)
 
     const headers = await authHeader(page)
-    const after = await page.request.get(
-        `/api/collections/notifications/records/${queued.id}`,
-        { headers },
-    )
-    expect((await after.json()).read).toBe(true)
-
-    await dropNotification(page, queued.id)
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
+    await expect
+        .poll(async () => {
+            const after = await page.request.get(
+                `/api/collections/notifications/records/${queued.id}`,
+                { headers },
+            )
+            return (await after.json()).read
+        })
+        .toBe(true)
 })
 
 test('dismissing a notification removes it from the list', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const commentId = await createComment(page, `${testPrefix}-dismissme`)
-    const reportId = await createReport(page, {
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-dismissme`,
+    )
+    await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-dismiss`,
     })
@@ -113,24 +139,34 @@ test('dismissing a notification removes it from the list', async ({
     await expect(page.getByTestId('notification-bell')).toBeVisible()
 
     const headers = await authHeader(page)
-    const after = await page.request.get(
-        `/api/collections/notifications/records/${queued.id}`,
-        { headers },
-    )
-    expect(after.status()).toBe(404)
-
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
+    await expect
+        .poll(async () =>
+            (
+                await page.request.get(
+                    `/api/collections/notifications/records/${queued.id}`,
+                    { headers },
+                )
+            ).status(),
+        )
+        .toBe(404)
 })
 
 test('deciding a report notifies the other moderators exactly once', async ({
-    adminPage: page,
-    setterPage: other,
+    root,
+    route,
     testPrefix,
+    createUser,
+    pageAs,
 }) => {
-    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
+    const role = await createRole(root, `${testPrefix}-moderators`, [
+        'manage_reports',
+    ])
+    const decider = await createUser(role.id, 'decider')
+    const other = await createUser(role.id, 'other')
+    const page = await pageAs(decider)
 
-    const commentId = await createComment(page, `${testPrefix}-once`)
+    await gotoSettled(page, '/manage/reports', /\/manage\/reports/)
+    const commentId = await createComment(page, route.id, `${testPrefix}-once`)
     const reportId = await createReport(page, {
         contentId: commentId,
         explanation: `${testPrefix}-once`,
@@ -144,23 +180,20 @@ test('deciding a report notifies the other moderators exactly once', async ({
         .locator('textarea')
         .first()
         .fill('Reviewed, no rule broken.')
+
+    const decided = page.waitForResponse(
+        (res) =>
+            res.request().method() === 'PATCH' &&
+            res.url().includes(`/api/collections/reports/records/${reportId}`),
+    )
+    const from = pbTime()
     await page.getByTestId('report-decision-confirm').click()
+    expect((await decided).ok()).toBe(true)
+    const to = pbTime()
     await expect(page.getByTestId('report-decision-dialog')).toBeHidden()
 
-    const headers = await authHeader(page)
-    const res = await page.request.get(
-        '/api/collections/notifications/records?perPage=200',
-        { headers },
-    )
-    const decided = ((await res.json()).items ?? [])
-        .map((i: any) => i.type)
-        .filter((t: string) => t.startsWith('report_decided'))
-
-    expect(decided.length).toBeLessThanOrEqual(1)
-    expect(decided).toEqual([])
-
-    await deleteReport(page, reportId)
-    await deleteComment(page, commentId)
+    expect(await decidedBetween(root, decider.id, from, to)).toHaveLength(0)
+    expect(await decidedBetween(root, other.id, from, to)).toHaveLength(1)
 })
 
 test('a plain user with no notifications still gets a bell', async ({

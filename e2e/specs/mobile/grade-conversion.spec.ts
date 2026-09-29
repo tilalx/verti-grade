@@ -15,10 +15,13 @@ test('conversion table opens compact on phones and columns can be added', async 
         dialog.getByTestId('grade-conversion-column-ewbank'),
     ).toHaveCount(0)
 
-    const overflow = await dialog
-        .locator('.grade-conversion')
-        .evaluate((el) => el.scrollWidth - el.clientWidth)
-    expect(overflow).toBeLessThanOrEqual(0)
+    await expect
+        .poll(() =>
+            dialog
+                .getByTestId('grade-conversion-table')
+                .evaluate((el) => el.scrollWidth - el.clientWidth),
+        )
+        .toBeLessThanOrEqual(0)
 
     await dialog.getByTestId('grade-conversion-toggle-ewbank').click()
     await expect(dialog.getByTestId('grade-conversion-ewbank-23')).toBeVisible()

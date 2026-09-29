@@ -1,26 +1,18 @@
 import { Workbook } from '@cj-tech-master/excelts'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { LOCATIONS } from '../../support/seed'
 
 test('xlsx export formats dates in the requested locale and prints the location name', async ({
     adminPage: page,
-    testPrefix,
+    createRoute,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/routes')
     const headers = await authHeader(page)
-    const created = await page.request.post('/api/collections/routes/records', {
-        headers,
-        data: {
-            name: `${testPrefix}-locale`,
-            ...uiaa('5'),
-            location: await locationId(page, LOCATIONS[1]),
-            type: 'Route',
-            creator: ['E2E'],
-            screw_date: '2026-03-14 12:00:00.000Z',
-        },
+    const { id: routeId } = await createRoute({
+        screw_date: '2026-03-14 12:00:00.000Z',
     })
-    const routeId = (await created.json()).id as string
 
     const response = await page.request.post('/api/ui/xlsx', {
         headers,
@@ -39,13 +31,9 @@ test('xlsx export formats dates in the requested locale and prints the location 
     expect(sheet.getRow(1).values).toEqual([undefined, 'Standort', 'Set on'])
     expect(sheet.getRow(2).values).toEqual([
         undefined,
-        LOCATIONS[1],
+        workerLocation.name,
         '14.3.2026',
     ])
-
-    await page.request.delete(`/api/collections/routes/records/${routeId}`, {
-        headers,
-    })
 })
 
 test('json download is named in the ui language and carries location names', async ({

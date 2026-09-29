@@ -1,31 +1,18 @@
-import { test, expect, chromium, devices, request } from '@playwright/test'
+import { chromium, devices } from '@playwright/test'
 import path from 'node:path'
 import os from 'node:os'
+import { test, expect, authFile } from '../../support/fixtures'
 import { generateRouteQrY4m } from '../../support/qr'
 import { gotoSettled } from '../../support/nav'
-import { LOCATIONS } from '../../support/seed'
 
-const AUTH_FILE = path.join(__dirname, '..', '..', '.auth', 'admin.json')
-
-test('detects a route QR code via a fake video device', async ({ baseURL }) => {
+test('detects a route QR code via a fake video device', async ({
+    baseURL,
+    route,
+    workerLocation,
+}) => {
     test.setTimeout(120_000)
-    const routeRes = await request.newContext({
-        baseURL,
-        ignoreHTTPSErrors: true,
-    })
-    const res = await routeRes.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent(
-                `name ~ "e2e-route-" && archived = false && location.name = "${LOCATIONS[0]}"`,
-            ) +
-            '&perPage=1',
-    )
-    const body = await res.json()
-    const routeId = body.items[0].id as string
-    await routeRes.dispose()
-
-    const y4mPath = path.join(os.tmpdir(), `e2e-route-qr-${routeId}.y4m`)
-    generateRouteQrY4m(routeId, y4mPath)
+    const y4mPath = path.join(os.tmpdir(), `e2e-route-qr-${route.id}.y4m`)
+    generateRouteQrY4m(route.id, y4mPath)
 
     const browser = await chromium.launch({
         args: [
@@ -34,67 +21,64 @@ test('detects a route QR code via a fake video device', async ({ baseURL }) => {
             '--use-fake-ui-for-media-stream',
         ],
     })
-    const context = await browser.newContext({
-        ...devices['Pixel 7'],
-        baseURL,
-        ignoreHTTPSErrors: true,
-        storageState: AUTH_FILE,
-        permissions: ['camera'],
-    })
-    const page = await context.newPage()
-
-    await gotoSettled(page, '/manage/inventory')
-    await page.evaluate(() => {
-        localStorage.setItem('inventory-instructions-seen', '1')
-        localStorage.removeItem('inventory-scanned-route-ids')
-    })
-    await gotoSettled(page, '/manage/inventory')
-
-    const hallButton = page.getByTestId(`inventory-location-${LOCATIONS[0]}`)
-    await expect(hallButton).toBeVisible()
-    await hallButton.click()
-
-    await expect(page.getByTestId('inventory-start')).toBeEnabled({
-        timeout: 30_000,
-    })
-    await page.getByTestId('inventory-start').click()
-
-    await expect(page.locator('.scanner-viewport')).toBeVisible()
-    await expect(page.getByTestId('inventory-found-count')).toHaveText('1', {
-        timeout: 30_000,
-    })
-
-    const overlay = page.getByTestId('qr-tracking-layer')
-    await expect(overlay.locator('rect').first()).toBeAttached()
-    const overlayBox = (await overlay.boundingBox())!
-    const videoBox = (await page
-        .locator('.scanner-viewport video')
-        .boundingBox())!
-    expect(overlayBox).toEqual(videoBox)
-    expect(await overlay.getAttribute('viewBox')).toBe(
-        `0 0 ${Math.round(videoBox.width)} ${Math.round(videoBox.height)}`,
-    )
-
-    const torch = page.getByTestId('inventory-torch')
-    if (await torch.isVisible()) {
-        const button = (await torch.boundingBox())!
-        const frame = (await page.locator('.scanner-viewport').boundingBox())!
-        expect(button.y).toBeGreaterThan(frame.y + frame.height / 2)
-        expect(button.x).toBeGreaterThan(frame.x + frame.width / 2)
-    }
-
-    await page.evaluate(() => {
-        Object.defineProperty(document, 'visibilityState', {
-            configurable: true,
-            get: () => 'hidden',
+    try {
+        const context = await browser.newContext({
+            ...devices['Pixel 7'],
+            baseURL,
+            ignoreHTTPSErrors: true,
+            storageState: authFile('admin'),
+            permissions: ['camera'],
         })
-        document.dispatchEvent(new Event('visibilitychange'))
-    })
+        const page = await context.newPage()
 
-    await expect(page.locator('.scanner-viewport')).toHaveCount(0)
-    await expect(page.getByTestId('inventory-start')).toBeVisible()
-    await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+        await gotoSettled(page, '/manage/inventory')
+        await page.evaluate(() => {
+            localStorage.setItem('inventory-instructions-seen', '1')
+            localStorage.removeItem('inventory-scanned-route-ids')
+        })
+        await gotoSettled(page, '/manage/inventory')
 
-    await context.close()
-    await browser.close()
+        await page
+            .getByTestId(`inventory-location-${workerLocation.name}`)
+            .click()
+
+        await expect(page.getByTestId('inventory-start')).toBeEnabled({
+            timeout: 30_000,
+        })
+        await page.getByTestId('inventory-start').click()
+
+        const viewport = page.getByTestId('scanner-viewport')
+        await expect(viewport).toBeVisible()
+        await expect(page.getByTestId('inventory-found-count')).toHaveText(
+            '1',
+            { timeout: 30_000 },
+        )
+
+        const overlay = page.getByTestId('qr-tracking-layer')
+        await expect(overlay.locator('rect').first()).toBeAttached()
+        await expect(async () => {
+            const overlayBox = (await overlay.boundingBox())!
+            const videoBox = (await viewport.locator('video').boundingBox())!
+            expect(overlayBox).toEqual(videoBox)
+            await expect(overlay).toHaveAttribute(
+                'viewBox',
+                `0 0 ${Math.round(videoBox.width)} ${Math.round(videoBox.height)}`,
+                { timeout: 0 },
+            )
+        }).toPass()
+
+        await page.evaluate(() => {
+            Object.defineProperty(document, 'visibilityState', {
+                configurable: true,
+                get: () => 'hidden',
+            })
+            document.dispatchEvent(new Event('visibilitychange'))
+        })
+
+        await expect(viewport).toHaveCount(0)
+        await expect(page.getByTestId('inventory-start')).toBeVisible()
+        await expect(page.getByTestId('inventory-found-count')).toHaveText('1')
+    } finally {
+        await browser.close()
+    }
 })

@@ -1,6 +1,6 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { createComment, deleteComment } from '../../support/comments'
+import { createComment } from '../../support/comments'
 
 test('command palette dialog and search field are named', async ({ page }) => {
     await gotoSettled(page, '/')
@@ -23,21 +23,18 @@ test('dialog shell is named by its title', async ({ adminPage: page }) => {
 
 test('comment selection checkboxes name the reviewer', async ({
     adminPage: page,
+    route,
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    const id = await createComment(page, `${testPrefix}-named`, 5)
-    try {
-        await gotoSettled(page, '/manage/comments')
-        await expect(
-            page
-                .getByTestId(`comment-card-${id}`)
-                .getByTestId('comment-card-checkbox')
-                .locator('input'),
-        ).toHaveAttribute('aria-label', /^Select .+/)
-    } finally {
-        await deleteComment(page, id)
-    }
+    const id = await createComment(page, route.id, `${testPrefix}-named`, 5)
+    await gotoSettled(page, '/manage/comments')
+    await expect(
+        page
+            .getByTestId(`comment-card-${id}`)
+            .getByTestId('comment-card-checkbox')
+            .locator('input'),
+    ).toHaveAttribute('aria-label', /^Select .+/)
 })
 
 test('settings asset upload zone opens the file picker from the keyboard', async ({

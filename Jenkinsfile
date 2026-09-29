@@ -109,6 +109,14 @@ pipeline {
                 failure {
                     sh "E2E_IMAGE=${env.E2E_IMAGE} docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml logs --tail=500 app || true"
                 }
+                success {
+                    script {
+                        def flaky = fileExists('e2e/results/flaky.txt') ? readFile('e2e/results/flaky.txt').trim() : ''
+                        if (flaky) {
+                            unstable("Flaky e2e tests (passed only on retry):\n${flaky}")
+                        }
+                    }
+                }
                 always {
                     junit testResults: 'e2e/results/junit.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'e2e/results/html/**, e2e/results/artifacts/**', allowEmptyArchive: true

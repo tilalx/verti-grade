@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { uiaa } from '../../support/seed'
 import { authHeader, gotoSettled } from '../../support/nav'
 
 const locationRow = (page: Page, name: string) =>
@@ -18,11 +17,17 @@ test('admins add, rename and delete locations used by the route form', async ({
     await page.getByTestId('settings-location-add').click()
     await expect(locationRow(page, name)).toHaveCount(1)
 
+    const renameSaved = page.waitForResponse(
+        (response) =>
+            response.request().method() === 'PATCH' &&
+            response.url().includes('/api/collections/locations/records/'),
+    )
     await locationRow(page, name)
         .getByTestId('settings-location-name')
         .locator('input')
         .fill(renamed)
     await page.keyboard.press('Enter')
+    expect((await renameSaved).ok()).toBe(true)
     await expect(locationRow(page, renamed)).toHaveCount(1)
 
     await gotoSettled(page, '/manage/routes')
@@ -41,30 +46,13 @@ test('admins add, rename and delete locations used by the route form', async ({
 
 test('a location that still has routes cannot be deleted', async ({
     adminPage: page,
+    root,
     testPrefix,
+    createRoute,
 }) => {
-    await gotoSettled(page, '/admin/settings')
-    const headers = await authHeader(page)
     const name = `${testPrefix} Busy`
-
-    const location = await (
-        await page.request.post('/api/collections/locations/records', {
-            headers,
-            data: { name },
-        })
-    ).json()
-    const route = await (
-        await page.request.post('/api/collections/routes/records', {
-            headers,
-            data: {
-                name: `${testPrefix}-busy-route`,
-                ...uiaa('4'),
-                location: location.id,
-                type: 'Boulder',
-                creator: ['E2E'],
-            },
-        })
-    ).json()
+    const location = await root.collection('locations').create({ name })
+    const route = await createRoute({ location: location.id })
 
     await gotoSettled(page, '/admin/settings')
     const row = locationRow(page, name)
@@ -74,9 +62,7 @@ test('a location that still has routes cannot be deleted', async ({
     )
     await expect(row).toHaveCount(1)
 
-    await page.request.delete(`/api/collections/routes/records/${route.id}`, {
-        headers,
-    })
+    await root.collection('routes').delete(route.id)
     await row.getByTestId('settings-location-delete').click()
     await expect(row).toHaveCount(0)
 })

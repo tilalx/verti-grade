@@ -1,11 +1,10 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-test('creates and edits a user', async ({ adminPage: page }) => {
+test('creates and edits a user', async ({ adminPage: page, testPrefix }) => {
     await gotoSettled(page, '/admin/users')
 
-    const suffix = Date.now()
-    const email = `e2e-created-${suffix}@gripello.test`
+    const email = `${testPrefix}-created@gripello.test`
 
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
@@ -13,7 +12,7 @@ test('creates and edits a user', async ({ adminPage: page }) => {
     await page
         .getByTestId('user-create-lastname')
         .locator('input')
-        .fill(`Created${suffix}`)
+        .fill('Created')
     await page.getByTestId('user-create-email').locator('input').fill(email)
     await page.getByTestId('user-create-submit').click()
     await expect(page.getByTestId('user-create-dialog')).toBeHidden()
@@ -53,7 +52,6 @@ test('rejects creating a user with a duplicate email', async ({
     await page.getByTestId('user-create-submit').click()
 
     await expect(page.getByTestId('global-snackbar')).toBeVisible()
-    // Failed create — dialog stays open, nothing was submitted successfully.
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
 })
 
@@ -65,7 +63,6 @@ test('blocks submit when required fields are empty', async ({
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
 
-    // Required fields empty — submit stays disabled, never clickable.
     await expect(page.getByTestId('user-create-submit')).toBeDisabled()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
 })

@@ -26,6 +26,7 @@
                         }}</span>
                         <span
                             class="grade-spread__fill"
+                            data-testid="overview-grade-fill"
                             :style="{ height: `${(bar.count / max) * 100}%` }"
                         />
                         <span class="grade-spread__label">{{ bar.grade }}</span>

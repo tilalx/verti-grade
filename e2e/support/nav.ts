@@ -34,3 +34,13 @@ export async function authHeader(
     })
     return { Authorization: token }
 }
+
+export async function searchRoutes(page: Page, text: string) {
+    const filtered = page.waitForResponse(
+        (response) =>
+            response.url().includes('/api/collections/averageRating/records') &&
+            decodeURIComponent(response.url()).includes(`name ~ "${text}"`),
+    )
+    await page.getByTestId('filter-search').locator('input').fill(text)
+    await filtered
+}

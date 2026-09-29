@@ -1,15 +1,12 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { authAsSuperuser } from '../../support/seed'
 import { gotoSettled } from '../../support/nav'
-import { PB_URL, seedMap } from '../../support/map'
+import { seedMap } from '../../support/map'
 
 test('the map fills the phone screen and the list opens as a sheet', async ({
     page,
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, testPrefix, { routes: 2 })
     try {
         await gotoSettled(page, `/map?location=${seeded.locationId}`)
@@ -38,10 +35,9 @@ test('the map fills the phone screen and the list opens as a sheet', async ({
 
 test('zooming in keeps labels of off-screen walls hidden and the header intact', async ({
     page,
+    root,
     testPrefix,
 }) => {
-    const root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
     const seeded = await seedMap(root, testPrefix, { routes: 2 })
     try {
         await gotoSettled(page, `/map?location=${seeded.locationId}`)

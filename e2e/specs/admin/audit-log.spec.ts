@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled, authHeader } from '../../support/nav'
-import { LOCATIONS, locationId, uiaa } from '../../support/seed'
+import { uiaa } from '../../support/seed'
 import { createComment, deleteComment } from '../../support/comments'
 import {
     fetchAuditRows,
@@ -12,10 +12,15 @@ import {
 test('a create, an update and a delete each leave an entry', async ({
     adminPage: page,
     testPrefix,
+    route,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const commentId = await createComment(page, `${testPrefix}-audited`)
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-audited`,
+    )
     const created = await waitForAuditRow(
         page,
         `record_id = "${commentId}" && action = "create"`,
@@ -42,10 +47,15 @@ test('a create, an update and a delete each leave an entry', async ({
 test('an update records the changed field names and none of the values', async ({
     adminPage: page,
     testPrefix,
+    route,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const commentId = await createComment(page, `${testPrefix}-before`)
+    const commentId = await createComment(
+        page,
+        route.id,
+        `${testPrefix}-before`,
+    )
     const secret = `${testPrefix}-SECRET-VALUE`
     const res = await page.request.patch(
         `/api/collections/ratings/records/${commentId}`,
@@ -64,8 +74,6 @@ test('an update records the changed field names and none of the values', async (
     expect(rows[0].changed_fields).toContain('comment')
 
     expect(JSON.stringify(rows[0])).not.toContain(secret)
-
-    await deleteComment(page, commentId)
 })
 
 test('a failed sign-in is recorded without the attempted password', async ({
@@ -123,10 +131,10 @@ test('nobody can forge or erase an entry through the API', async ({
 test('a bulk archive leaves one entry per route', async ({
     adminPage: page,
     testPrefix,
+    workerLocation,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
     const headers = await authHeader(page)
-    const hallA = await locationId(page, LOCATIONS[0])
 
     const ids: string[] = []
     for (let i = 0; i < 2; i++) {
@@ -135,7 +143,7 @@ test('a bulk archive leaves one entry per route', async ({
             data: {
                 name: `${testPrefix}-bulk-${i}`,
                 ...uiaa('5'),
-                location: hallA,
+                location: workerLocation.id,
                 type: 'Boulder',
                 creator: [testPrefix],
             },
@@ -162,12 +170,6 @@ test('a bulk archive leaves one entry per route', async ({
         )
         expect(rows).toHaveLength(1)
         expect(rows[0].changed_fields).toContain('archived')
-    }
-
-    for (const id of ids) {
-        await page.request.delete(`/api/collections/routes/records/${id}`, {
-            headers,
-        })
     }
 })
 

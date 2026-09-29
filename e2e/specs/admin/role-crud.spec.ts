@@ -3,11 +3,12 @@ import { gotoSettled } from '../../support/nav'
 
 test('creates a role with a color, toggles a permission, then deletes it', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/users')
     await expect(page.getByTestId('role-permissions-table')).toBeVisible()
 
-    const name = `e2e-role-${Date.now()}`
+    const name = `${testPrefix}-role`
 
     await page.getByTestId('role-create-open').click()
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
@@ -24,14 +25,20 @@ test('creates a role with a color, toggles a permission, then deletes it', async
     await expect(card).toBeVisible()
     await expect(card).toContainText('created by e2e')
 
-    const avatarBg = await page
-        .getByTestId(`role-color-${name}`)
-        .evaluate((el) => getComputedStyle(el).backgroundColor)
-    expect(avatarBg).toBe('rgb(66, 165, 245)')
+    await expect(page.getByTestId(`role-color-${name}`)).toHaveCSS(
+        'background-color',
+        'rgb(66, 165, 245)',
+    )
 
     const checkbox = page.getByTestId(`role-permissions-${name}-view_analytics`)
     await expect(checkbox.locator('input')).not.toBeChecked()
+    const saved = page.waitForResponse(
+        (res) =>
+            res.request().method() === 'PATCH' &&
+            res.url().includes('/api/collections/roles/records/'),
+    )
     await checkbox.click()
+    expect((await saved).ok()).toBe(true)
     await expect(checkbox.locator('input')).toBeChecked()
 
     await gotoSettled(page, '/admin/users')
@@ -52,12 +59,12 @@ test('creates a role with a color, toggles a permission, then deletes it', async
 
 test('moves the holders of a deleted role to the role picked in the dialog', async ({
     adminPage: page,
+    testPrefix,
 }) => {
     await gotoSettled(page, '/admin/users')
 
-    const suffix = Date.now()
-    const roleName = `e2e-doomed-${suffix}`
-    const email = `e2e-reassign-${suffix}@gripello.test`
+    const roleName = `${testPrefix}-doomed`
+    const email = `${testPrefix}-reassign@gripello.test`
 
     await page.getByTestId('role-create-open').click()
     await page.getByTestId('role-form-name').locator('input').fill(roleName)
@@ -72,7 +79,7 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
     await page
         .getByTestId('user-create-lastname')
         .locator('input')
-        .fill(`Reassign${suffix}`)
+        .fill('Reassign')
     await page.getByTestId('user-create-email').locator('input').fill(email)
     await page.getByTestId('user-create-role').click()
     await page.getByRole('option', { name: roleName, exact: true }).click()
@@ -95,7 +102,7 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
         .locator('[data-testid^="user-card-"]')
         .filter({ hasText: email })
     await expect(card).toBeVisible()
-    await expect(card.locator('.v-chip')).toHaveText('user')
+    await expect(card.getByTestId('user-card-role')).toHaveText('user')
 })
 
 test('the admin role cannot be deleted and its permissions are locked', async ({
@@ -147,7 +154,8 @@ test('add role button looks like the add user button', async ({
             }
         })
 
-    expect(await style('role-create-open')).toEqual(
-        await style('user-create-open'),
-    )
+    await expect(page.getByTestId('role-create-open')).toBeVisible()
+    await expect(page.getByTestId('user-create-open')).toBeVisible()
+    const userButton = await style('user-create-open')
+    await expect.poll(() => style('role-create-open')).toEqual(userButton)
 })

@@ -36,7 +36,7 @@ test.afterEach(async () => {
 const wallOutline = (page: Page, name: string) =>
     page
         .locator(`[data-testid="placement-wall"][data-name="${name}"]`)
-        .locator('.placement-wall-outline')
+        .getByTestId('placement-wall-outline')
 
 const listItem = (page: Page, id: string) =>
     page.locator(`[data-testid="placement-route"][data-route-id="${id}"]`)

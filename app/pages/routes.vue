@@ -124,7 +124,9 @@
                         class="d-flex align-center"
                         :data-testid="`index-row-${item.id}`"
                     >
-                        <span class="route-name">{{ item.name }}</span>
+                        <span class="route-name" data-testid="index-row-name">{{
+                            item.name
+                        }}</span>
                         <v-icon
                             v-if="item.has_ratings"
                             color="yellow-darken-2"
@@ -150,7 +152,7 @@
                     <div class="route-comment">{{ item.comment }}</div>
                 </template>
                 <template #item.creator="{ item }">
-                    <div class="creator-chips">
+                    <div class="creator-chips" data-testid="index-row-creators">
                         <v-chip
                             v-for="c in item.creator"
                             :key="c"

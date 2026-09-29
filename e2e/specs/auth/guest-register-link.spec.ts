@@ -1,32 +1,11 @@
-import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
-import { authAsSuperuser } from '../../support/seed'
+import { SETTINGS_ID } from '../../support/state-snapshot'
 
-const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
-const SETTINGS_ID = 'settings_123456'
-
-test.describe.configure({ mode: 'serial' })
-
-let root: PocketBase
-let registrationWasAllowed = false
-
-test.beforeAll(async () => {
-    root = new PocketBase(PB_URL)
-    await authAsSuperuser(root)
-    const settings = await root
-        .collection('settings')
-        .getOne(SETTINGS_ID, { requestKey: null })
-    registrationWasAllowed = !!settings.allow_registration
+test.beforeEach(async ({ root }) => {
     await root
         .collection('settings')
         .update(SETTINGS_ID, { allow_registration: true })
-})
-
-test.afterAll(async () => {
-    await root
-        .collection('settings')
-        .update(SETTINGS_ID, { allow_registration: registrationWasAllowed })
 })
 
 test('the guest register button opens the registration form', async ({

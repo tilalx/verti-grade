@@ -98,6 +98,7 @@
                                 size="small"
                                 color="warning"
                                 variant="tonal"
+                                :aria-pressed="selectedRating === star"
                                 :data-testid="`comments-filter-rating-${star}`"
                             >
                                 {{ star }}★

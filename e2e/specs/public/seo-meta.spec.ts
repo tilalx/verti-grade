@@ -13,13 +13,8 @@ test('server-renders open graph tags on the route list', async ({ page }) => {
 
 test('server-renders the route name as og:title on route pages', async ({
     page,
+    route,
 }) => {
-    const res = await page.request.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=1',
-    )
-    const route = (await res.json()).items[0]
     const html = await (await page.request.get(`/route?id=${route.id}`)).text()
     expect(ogContent(html, 'og:title')).toBe(route.name)
     expect(ogContent(html, 'og:type')).toBe('article')

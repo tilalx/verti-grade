@@ -1,4 +1,4 @@
-import { test, expect } from '../../support/fixtures'
+import { test, expect, authFile } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
 function luminance(color: string) {
@@ -21,28 +21,24 @@ const contrast = (a: string, b: string) => {
 }
 
 for (const colorScheme of ['light', 'dark'] as const) {
-    test(`profile header text is readable in ${colorScheme} mode`, async ({
-        browser,
-        deviceOptions,
-    }) => {
-        const context = await browser.newContext({
-            ...deviceOptions,
-            colorScheme,
-            storageState: 'e2e/.auth/user.json',
-        })
-        const page = await context.newPage()
-        await gotoSettled(page, '/')
-        await page.getByTestId('user-menu-activator').click()
-        await page.getByTestId('user-menu-profile').click()
+    test.describe(`${colorScheme} mode`, () => {
+        test.use({ colorScheme, storageState: authFile('user') })
 
-        const header = page.getByTestId('profile-header')
-        await expect(header).toBeVisible()
-        const [background, text] = await header.evaluate((el) => [
-            getComputedStyle(el).backgroundColor,
-            getComputedStyle(el.querySelector('.text-title-large')!).color,
-        ])
-        expect(background).not.toContain('gradient')
-        expect(contrast(text, background)).toBeGreaterThanOrEqual(4.5)
-        await context.close()
+        test(`profile header text is readable in ${colorScheme} mode`, async ({
+            page,
+        }) => {
+            await gotoSettled(page, '/')
+            await page.getByTestId('user-menu-activator').click()
+            await page.getByTestId('user-menu-profile').click()
+
+            const header = page.getByTestId('profile-header')
+            await expect(header).toBeVisible()
+            const [background, text] = await header.evaluate((el) => [
+                getComputedStyle(el).backgroundColor,
+                getComputedStyle(el.querySelector('.text-title-large')!).color,
+            ])
+            expect(background).not.toContain('gradient')
+            expect(contrast(text, background)).toBeGreaterThanOrEqual(4.5)
+        })
     })
 }

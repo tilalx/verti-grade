@@ -2,7 +2,12 @@
     <div class="scan-page" data-testid="scan-page">
         <h1 class="d-sr-only">{{ $t('scan.title') }}</h1>
 
-        <div v-if="cameraActive" ref="viewportRef" class="scan-viewport">
+        <div
+            v-if="cameraActive"
+            ref="viewportRef"
+            class="scan-viewport"
+            data-testid="scan-viewport"
+        >
             <QrStream
                 :formats="['QRCode']"
                 :constraints="cameraConstraints"

@@ -1,22 +1,14 @@
-import { test, expect, chromium, devices, request } from '@playwright/test'
+import { chromium, devices } from '@playwright/test'
 import os from 'node:os'
 import path from 'node:path'
+import { test, expect } from '../../support/fixtures'
 import { generateRouteQrY4m } from '../../support/qr'
 import { gotoSettled } from '../../support/nav'
 
-test('scanning a route sign opens the route', async ({ baseURL }) => {
+test('scanning a route sign opens the route', async ({ baseURL, route }) => {
     test.setTimeout(120_000)
-    const api = await request.newContext({ baseURL, ignoreHTTPSErrors: true })
-    const response = await api.get(
-        '/api/collections/routes/records?filter=' +
-            encodeURIComponent('name ~ "e2e-route-" && archived = false') +
-            '&perPage=1',
-    )
-    const routeId = (await response.json()).items[0].id as string
-    await api.dispose()
-
-    const y4mPath = path.join(os.tmpdir(), `e2e-scan-${routeId}.y4m`)
-    generateRouteQrY4m(routeId, y4mPath)
+    const y4mPath = path.join(os.tmpdir(), `e2e-scan-${route.id}.y4m`)
+    generateRouteQrY4m(route.id, y4mPath)
 
     const browser = await chromium.launch({
         args: [
@@ -25,21 +17,22 @@ test('scanning a route sign opens the route', async ({ baseURL }) => {
             '--use-fake-ui-for-media-stream',
         ],
     })
-    const context = await browser.newContext({
-        ...devices['Pixel 7'],
-        baseURL,
-        ignoreHTTPSErrors: true,
-        permissions: ['camera'],
-    })
-    const page = await context.newPage()
     try {
+        const context = await browser.newContext({
+            ...devices['Pixel 7'],
+            baseURL,
+            ignoreHTTPSErrors: true,
+            permissions: ['camera'],
+        })
+        const page = await context.newPage()
         await gotoSettled(page, '/scan')
-        const viewport = (await page.locator('.scan-viewport').boundingBox())!
-        const video = (await page
-            .locator('.scan-viewport video')
-            .boundingBox())!
-        expect(video.height).toBeGreaterThanOrEqual(viewport.height - 1)
-        await page.waitForURL(new RegExp(`/route\\?id=${routeId}`), {
+        const viewport = page.getByTestId('scan-viewport')
+        await expect(async () => {
+            const frame = (await viewport.boundingBox())!
+            const video = (await viewport.locator('video').boundingBox())!
+            expect(video.height).toBeGreaterThanOrEqual(frame.height - 1)
+        }).toPass()
+        await page.waitForURL(new RegExp(`/route\\?id=${route.id}`), {
             timeout: 30_000,
         })
         await expect(page.getByTestId('route-page-name')).toBeVisible()

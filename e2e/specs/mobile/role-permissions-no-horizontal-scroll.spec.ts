@@ -1,5 +1,12 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
+
+const horizontalOverflow = (page: Page) =>
+    page.evaluate(() => {
+        const el = document.documentElement
+        return el.scrollWidth - el.clientWidth
+    })
 
 test('the role permission editor never scrolls sideways on a small phone', async ({
     adminPage: page,
@@ -10,14 +17,13 @@ test('the role permission editor never scrolls sideways on a small phone', async
     const grid = page.getByTestId('role-permissions-table')
     await expect(grid).toBeVisible()
 
-    const overflow = await page.evaluate(() => {
-        const el = document.documentElement
-        return el.scrollWidth - el.clientWidth
-    })
-    expect(overflow).toBeLessThanOrEqual(1)
-
-    const box = (await grid.boundingBox())!
-    expect(box.x + box.width).toBeLessThanOrEqual(375)
+    await expect.poll(() => horizontalOverflow(page)).toBeLessThanOrEqual(1)
+    await expect
+        .poll(async () => {
+            const box = (await grid.boundingBox())!
+            return box.x + box.width
+        })
+        .toBeLessThanOrEqual(375)
 })
 
 test('every role card and its permission toggles stay reachable on a phone', async ({
@@ -27,20 +33,24 @@ test('every role card and its permission toggles stay reachable on a phone', asy
     await gotoSettled(page, '/admin/users')
 
     const cards = page.locator('[data-testid^="role-permissions-row-"]')
-    await expect(cards.first()).toBeVisible()
-    const count = await cards.count()
-    expect(count).toBeGreaterThan(0)
+    await expect(page.getByTestId('role-permissions-row-user')).toBeVisible()
 
-    for (let i = 0; i < count; i++) {
-        const box = (await cards.nth(i).boundingBox())!
-        expect(box.x).toBeGreaterThanOrEqual(0)
-        expect(box.x + box.width).toBeLessThanOrEqual(375)
-    }
+    await expect(async () => {
+        for (const card of await cards.all()) {
+            const box = (await card.boundingBox())!
+            expect(box.x).toBeGreaterThanOrEqual(0)
+            expect(box.x + box.width).toBeLessThanOrEqual(375)
+        }
+    }).toPass()
 
     const toggle = page.getByTestId('role-permissions-user-view_analytics')
     await toggle.scrollIntoViewIfNeeded()
-    const toggleBox = (await toggle.boundingBox())!
-    expect(toggleBox.x + toggleBox.width).toBeLessThanOrEqual(375)
+    await expect
+        .poll(async () => {
+            const box = (await toggle.boundingBox())!
+            return box.x + box.width
+        })
+        .toBeLessThanOrEqual(375)
 })
 
 test('the role create dialog opens as a bottom sheet on a phone', async ({
@@ -52,15 +62,13 @@ test('the role create dialog opens as a bottom sheet on a phone', async ({
     await page.getByTestId('role-create-open').click()
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
 
-    const sheet = page.locator('.v-overlay__content.dialog-shell--sheet')
+    const sheet = page.getByRole('dialog')
     await expect(sheet).toBeVisible()
-    const box = (await sheet.boundingBox())!
-    expect(box.x).toBeLessThanOrEqual(1)
-    expect(box.width).toBeGreaterThanOrEqual(374)
-
-    const overflow = await page.evaluate(() => {
-        const el = document.documentElement
-        return el.scrollWidth - el.clientWidth
-    })
-    expect(overflow).toBeLessThanOrEqual(1)
+    await expect
+        .poll(async () => {
+            const box = (await sheet.boundingBox())!
+            return box.x <= 1 && box.width >= 374
+        })
+        .toBe(true)
+    await expect.poll(() => horizontalOverflow(page)).toBeLessThanOrEqual(1)
 })

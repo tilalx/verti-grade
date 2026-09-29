@@ -98,6 +98,7 @@
                         <template #append>
                             <v-chip
                                 v-if="user.roleName"
+                                data-testid="user-card-role"
                                 size="small"
                                 :color="user.roleColor || undefined"
                                 :variant="user.roleColor ? 'flat' : 'tonal'"
