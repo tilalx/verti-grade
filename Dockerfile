@@ -13,12 +13,18 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/pocketbase
 
-FROM node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 AS ui-build
+FROM node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 AS ui-deps
 WORKDIR /app
 RUN npm install -g corepack --force && corepack enable
 COPY .yarnrc.yml package.json yarn.lock ./
 RUN --mount=type=cache,target=/root/.yarn/berry/cache \
     yarn install --immutable --inline-builds
+
+FROM ui-deps AS unit-test
+COPY . .
+RUN yarn test
+
+FROM ui-deps AS ui-build
 COPY nuxt.config.ts ./
 COPY postcss ./postcss
 COPY types ./types

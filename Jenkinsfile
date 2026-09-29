@@ -19,9 +19,8 @@ pipeline {
             steps {
                 script {
                     sh 'docker run --rm --privileged tonistiigi/binfmt --install all'
-                    def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
-                    def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
-                    sh "docker buildx create --name ${builderName} --use"
+                    sh 'docker buildx create --name gripello --driver docker-container 2>/dev/null || true'
+                    sh 'docker buildx use gripello'
                     sh 'docker buildx inspect --bootstrap'
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
@@ -71,11 +70,7 @@ pipeline {
             parallel {
                 stage('Vitest') {
                     steps {
-                        sh '''
-                            docker run --rm -v "$PWD":/work -w /work -v gripello-e2e-yarn-cache:/root/.yarn/berry/cache \
-                                node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 \
-                                sh -c "npm install -g corepack --force && corepack enable && yarn install --immutable --mode=skip-build && yarn test"
-                        '''
+                        sh 'docker buildx build --platform linux/amd64 --target unit-test --progress=plain --output type=cacheonly .'
                     }
                 }
                 stage('Go Hooks') {
@@ -138,9 +133,7 @@ pipeline {
     post {
         always {
             script {
-                def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
-                def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
-                sh "docker buildx rm ${builderName}"
+                sh 'docker buildx prune --builder gripello --keep-storage 20gb -f || true'
                 sh "docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
             }
             cleanWs()

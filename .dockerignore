@@ -11,6 +11,8 @@
 !public
 !i18n
 !types
+!test
+!vitest.config.ts
 !pocketbase/go.mod
 !pocketbase/go.sum
 !pocketbase/main.go
