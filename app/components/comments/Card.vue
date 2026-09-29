@@ -46,7 +46,7 @@
             </div>
 
             <div
-                v-if="comment.rating != null"
+                v-if="comment.rating"
                 class="flex-shrink-0 comment-card__rating"
                 role="img"
                 :aria-label="`${comment.rating}/5`"

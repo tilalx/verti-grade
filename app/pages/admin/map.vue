@@ -190,6 +190,7 @@
                     :editor="editor"
                     :has-trace="!!location?.map_trace"
                     :trace-busy="traceBusy"
+                    :walls-with-routes="wallsWithRoutes"
                     @upload-trace="uploadTrace"
                     @remove-trace="removeTrace"
                 />
@@ -458,6 +459,9 @@ const previewWalls = computed<WallRecord[]>(() =>
         })),
 )
 const previewRoutes = computed(() => locationRoutes.value)
+const wallsWithRoutes = computed(
+    () => new Set(locationRoutes.value.map((route) => route.wall ?? '')),
+)
 
 const { pending: traceBusy, run: runTrace } = useAsyncAction()
 const traceUrl = computed(() =>

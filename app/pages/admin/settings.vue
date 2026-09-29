@@ -224,6 +224,7 @@
                     <v-col cols="12" md="6">
                         <v-text-field
                             v-model.number="copySettings.audit_retention_days"
+                            :rules="[retentionRule]"
                             type="number"
                             :min="1"
                             :max="3650"
@@ -496,6 +497,9 @@
                 v-if="hasChanges"
                 color="primary"
                 :loading="saving"
+                :disabled="
+                    retentionRule(copySettings.audit_retention_days) !== true
+                "
                 prepend-icon="mdi-content-save-outline"
                 data-testid="settings-save"
                 @click="saveSettings"
@@ -510,6 +514,7 @@
 import type { ComponentPublicInstance } from 'vue'
 import type { UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
+import { integerBetween } from '~/utils/validation'
 import {
     BOULDER_GRADE_SYSTEMS,
     DEFAULT_BOULDER_GRADE_SYSTEM,
@@ -594,9 +599,47 @@ function legalPayload(state: Partial<SettingsRecord>) {
     return fields
 }
 
+type EditableSettings = typeof original
+type EditableField = keyof EditableSettings
+
+function sameValue(left: unknown, right: unknown) {
+    return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function untouchedFields() {
+    return (Object.keys(original) as EditableField[]).filter((field) =>
+        sameValue(copySettings[field], original[field]),
+    )
+}
+
+function fieldsPayload(state: EditableSettings) {
+    return {
+        application_url: state.application_url,
+        imprint_url: state.imprint_url,
+        privacy_url: state.privacy_url,
+        organization_name: state.organization_name,
+        organization_unit_name: state.organization_unit_name,
+        contact_email: state.contact_email,
+        audit_retention_days: Number(state.audit_retention_days) || null,
+        allow_registration: state.allow_registration,
+        route_grade_system: state.route_grade_system,
+        boulder_grade_system: state.boulder_grade_system,
+        ...legalPayload(state),
+    }
+}
+
+function changedFieldsPayload(): Record<string, unknown> {
+    const baseline: Record<string, unknown> = fieldsPayload(original)
+    return Object.fromEntries(
+        Object.entries(fieldsPayload(copySettings)).filter(
+            ([field, value]) => !sameValue(value, baseline[field]),
+        ),
+    )
+}
+
 function adoptRecord(rec: SettingsRecord | null | undefined) {
     if (!rec) return
-    const dirty = hasChanges.value
+    const untouched = untouchedFields()
     original.application_url = rec.application_url ?? ''
     original.imprint_url = rec.imprint_url ?? ''
     original.privacy_url = rec.privacy_url ?? ''
@@ -610,7 +653,10 @@ function adoptRecord(rec: SettingsRecord | null | undefined) {
     original.boulder_grade_system =
         rec.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
     Object.assign(original, legalFieldsFrom(rec))
-    if (!dirty) Object.assign(copySettings, original, legalFieldsFrom(original))
+    const fresh = { ...original, ...legalFieldsFrom(original) }
+    for (const field of untouched) {
+        Object.assign(copySettings, { [field]: fresh[field] })
+    }
 
     logoPreview.value = pbFileUrl(rec, rec.page_logo)
     iconPreview.value = pbFileUrl(rec, rec.page_icon)
@@ -634,6 +680,7 @@ const iconPreview = ref<string | null>(null)
 const signPreview = ref<string | null>(null)
 
 const { pending: saving, run: runSave } = useAsyncAction()
+const retentionRule = integerBetween(t, 1, 3650)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -795,20 +842,7 @@ async function saveSettings() {
     if (!hasChanges.value || saving.value) return
     await runSave(
         async () => {
-            const payload: Record<string, unknown> = {
-                application_url: copySettings.application_url,
-                imprint_url: copySettings.imprint_url,
-                privacy_url: copySettings.privacy_url,
-                organization_name: copySettings.organization_name,
-                organization_unit_name: copySettings.organization_unit_name,
-                contact_email: copySettings.contact_email,
-                audit_retention_days:
-                    Number(copySettings.audit_retention_days) || null,
-                allow_registration: copySettings.allow_registration,
-                route_grade_system: copySettings.route_grade_system,
-                boulder_grade_system: copySettings.boulder_grade_system,
-                ...legalPayload(copySettings),
-            }
+            const payload = changedFieldsPayload()
             if (logoFile.value) payload.page_logo = logoFile.value
             else if (logoClear.value) payload.page_logo = null
             if (iconFile.value) payload.page_icon = iconFile.value

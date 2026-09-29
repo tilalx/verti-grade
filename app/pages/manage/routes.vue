@@ -241,6 +241,7 @@
                         :headers="tableHeaders"
                         :items="routes"
                         :items-length="totalItems"
+                        :page="tableOptions.page"
                         :items-per-page="tableOptions.itemsPerPage"
                         :sort-by="tableOptions.sortBy"
                         :loading="loading"
@@ -758,7 +759,8 @@ const onRouteSaved = async (payload?: { id?: string } | null) => {
     await reloadRoutes()
 }
 
-const onRouteDeleted = async () => {
+const onRouteDeleted = async (id: string) => {
+    removeSelectedIds([id])
     notify(t('notifications.success.delete'))
     await reloadRoutes()
 }
@@ -909,7 +911,10 @@ if (initial.value) {
 
 onMounted(async () => {
     await Promise.all([
-        subscribe('routes', queueReload),
+        subscribe('routes', (event) => {
+            if (event.action === 'delete') removeSelectedIds([event.record.id])
+            queueReload()
+        }),
         subscribe('ratings', queueReload),
     ])
 })

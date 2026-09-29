@@ -17,6 +17,9 @@ const (
 func registerUserGuards(app core.App) {
 	app.OnRecordCreateRequest("users").BindFunc(func(e *core.RecordRequestEvent) error {
 		if e.Record.GetString("role") != "" {
+			if !e.HasSuperuserAuth() && !callerMayAssignRole(e.App, e.Auth, e.Record.GetString("role")) {
+				return apis.NewForbiddenError("You cannot assign a role with permissions you do not hold.", nil)
+			}
 			return e.Next()
 		}
 		role, err := e.App.FindFirstRecordByData("roles", "name", defaultRoleName)
@@ -36,6 +39,9 @@ func registerUserGuards(app core.App) {
 		if e.Auth == nil || !hasPermission(e.App, e.Auth.Id, "manage_users") {
 			return apis.NewForbiddenError("Changing a role requires manage_users.", nil)
 		}
+		if !callerMayAssignRole(e.App, e.Auth, e.Record.GetString("role")) {
+			return apis.NewForbiddenError("You cannot assign a role with permissions you do not hold.", nil)
+		}
 		return e.Next()
 	})
 
@@ -52,6 +58,16 @@ func registerUserGuards(app core.App) {
 }
 
 func registerAdminRoleGuard(app core.App) {
+	app.OnRecordCreateRequest("roles").BindFunc(func(e *core.RecordRequestEvent) error {
+		if e.HasSuperuserAuth() {
+			return e.Next()
+		}
+		if !isSubset(e.Record.GetStringSlice("permissions"), callerPermissionIDs(e.App, e.Auth)) {
+			return apis.NewForbiddenError("You cannot grant permissions you do not hold.", nil)
+		}
+		return e.Next()
+	})
+
 	app.OnRecordUpdateRequest("roles").BindFunc(func(e *core.RecordRequestEvent) error {
 		if e.HasSuperuserAuth() {
 			return e.Next()
@@ -60,7 +76,52 @@ func registerAdminRoleGuard(app core.App) {
 		if !adminRoleChangeAllowed(original.GetString("name"), e.Record.GetString("name"), original.GetStringSlice("permissions"), e.Record.GetStringSlice("permissions")) {
 			return apis.NewForbiddenError("The admin role cannot be renamed or lose permissions.", nil)
 		}
+		added := addedPermissions(original.GetStringSlice("permissions"), e.Record.GetStringSlice("permissions"))
+		if !isSubset(added, callerPermissionIDs(e.App, e.Auth)) {
+			return apis.NewForbiddenError("You cannot grant permissions you do not hold.", nil)
+		}
 		return e.Next()
+	})
+}
+
+func callerMayAssignRole(app core.App, caller *core.Record, roleID string) bool {
+	if caller == nil {
+		return false
+	}
+	role, err := app.FindRecordById("roles", roleID)
+	if err != nil {
+		return false
+	}
+	callerRole, err := app.FindRecordById("roles", caller.GetString("role"))
+	if err != nil {
+		return false
+	}
+	if role.GetString("name") == adminRoleName && callerRole.GetString("name") != adminRoleName {
+		return false
+	}
+	return isSubset(role.GetStringSlice("permissions"), callerRole.GetStringSlice("permissions"))
+}
+
+func callerPermissionIDs(app core.App, caller *core.Record) []string {
+	if caller == nil {
+		return nil
+	}
+	role, err := app.FindRecordById("roles", caller.GetString("role"))
+	if err != nil {
+		return nil
+	}
+	return role.GetStringSlice("permissions")
+}
+
+func addedPermissions(before, after []string) []string {
+	return slices.DeleteFunc(slices.Clone(after), func(permission string) bool {
+		return slices.Contains(before, permission)
+	})
+}
+
+func isSubset(subset, superset []string) bool {
+	return !slices.ContainsFunc(subset, func(item string) bool {
+		return !slices.Contains(superset, item)
 	})
 }
 
@@ -71,9 +132,7 @@ func adminRoleChangeAllowed(nameBefore, nameAfter string, permissionsBefore, per
 	if nameAfter != adminRoleName {
 		return false
 	}
-	return !slices.ContainsFunc(permissionsBefore, func(permission string) bool {
-		return !slices.Contains(permissionsAfter, permission)
-	})
+	return isSubset(permissionsBefore, permissionsAfter)
 }
 
 func hasPermission(app core.App, userID string, permission string) bool {

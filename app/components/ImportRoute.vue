@@ -250,22 +250,22 @@ const confirmImport = async () => {
                     )
 
                 if (Array.isArray(route.ratings) && route.ratings.length > 0) {
-                    for (const rating of route.ratings) {
-                        try {
-                            await pb.collection('ratings').create(
-                                sanitizeRatingPayload(rating, {
-                                    routeId: createdRoute.id,
-                                    routeType: route.type,
-                                    fallbackUserId: currentUser?.id,
-                                }),
-                            )
-                        } catch (ratingError) {
-                            console.error(
-                                'Failed to insert rating',
-                                ratingError,
-                            )
-                            failedRatings++
-                        }
+                    const ratings = route.ratings.map((rating) =>
+                        sanitizeRatingPayload(rating, {
+                            routeId: createdRoute.id,
+                            routeType: route.type,
+                            fallbackUserId: currentUser?.id,
+                        }),
+                    )
+                    try {
+                        const { failed } = await pb.send<{ failed: number }>(
+                            '/api/import/ratings',
+                            { method: 'POST', body: { ratings } },
+                        )
+                        failedRatings += failed
+                    } catch (ratingError) {
+                        console.error('Failed to insert ratings', ratingError)
+                        failedRatings += ratings.length
                     }
                 }
             } catch (routeError) {

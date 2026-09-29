@@ -722,20 +722,19 @@ onMounted(async () => {
                 }
             } catch {}
         } else if (e.action === 'update') {
-            const idx = comments.value.findIndex((c) => c.id === e.record.id)
-            if (idx !== -1) {
-                try {
-                    const rec = await pb
-                        .collection('ratings')
-                        .getOne<RatingRecord>(e.record.id, {
-                            expand: 'route_id.location,user',
-                            fields: LIST_FIELDS,
-                            requestKey: null,
-                        })
-                    comments.value[idx] = mapComment(rec)
-                } catch {}
-                scheduleStatsRefresh()
-            }
+            if (!comments.value.some((c) => c.id === e.record.id)) return
+            try {
+                const rec = await pb
+                    .collection('ratings')
+                    .getOne<RatingRecord>(e.record.id, {
+                        expand: 'route_id.location,user',
+                        fields: LIST_FIELDS,
+                        requestKey: null,
+                    })
+                const idx = comments.value.findIndex((c) => c.id === rec.id)
+                if (idx !== -1) comments.value[idx] = mapComment(rec)
+            } catch {}
+            scheduleStatsRefresh()
         }
     })
 })

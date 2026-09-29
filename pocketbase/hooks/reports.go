@@ -41,6 +41,17 @@ func registerReports(app core.App) {
 	})
 
 	app.OnRecordUpdateRequest("reports").BindFunc(func(e *core.RecordRequestEvent) error {
+		if !e.HasSuperuserAuth() {
+			original := e.Record.Original()
+			if original.GetString("status") != "open" {
+				return apis.NewBadRequestError("This report has already been decided.", nil)
+			}
+			keepServerOwnedReportFields(e.Record, original)
+			if e.Record.GetString("status") != "open" {
+				e.Record.Set("decided_at", types.NowDateTime())
+				e.Record.Set("decided_by", e.Auth.Id)
+			}
+		}
 		removing := e.Record.GetString("decision") == "content_removed" &&
 			e.Record.Original().GetString("decision") != "content_removed"
 		if removing && reportedContentExists(e.App, e.Record) {
@@ -78,6 +89,16 @@ func registerReports(app core.App) {
 		}).Bind(apis.RequireAuth())
 		return se.Next()
 	})
+}
+
+var moderatorReportFields = []string{"status", "decision", "decision_reason"}
+
+func keepServerOwnedReportFields(report *core.Record, original *core.Record) {
+	for _, field := range report.Collection().Fields {
+		if name := field.GetName(); !slices.Contains(moderatorReportFields, name) {
+			report.Set(name, original.Get(name))
+		}
+	}
 }
 
 func reportedContentCollection(report *core.Record) string {

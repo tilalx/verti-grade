@@ -24,7 +24,8 @@ export function routeSearchFilter(query: string) {
     const tokens = query.trim().split(/\s+/).filter(Boolean)
     if (tokens.length === 1 && BARE_NUMBER.test(tokens[0]!)) {
         const level = tokens[0]!
-        return gradeFilter(matchingGrades([`${level}-`, level, `${level}+`]))
+        const levelGrades = matchingGrades([`${level}-`, level, `${level}+`])
+        if (levelGrades.length) return gradeFilter(levelGrades)
     }
 
     const grades = tokens

@@ -238,9 +238,12 @@ watch(
     },
 )
 
+watch(dialog, (open) => {
+    if (!open) emit('close')
+})
+
 function close() {
     dialog.value = false
-    emit('close')
 }
 
 // ── Save ──────────────────────────────────────────────────────────────────

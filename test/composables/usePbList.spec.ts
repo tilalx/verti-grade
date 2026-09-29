@@ -73,6 +73,33 @@ describe('usePbList', () => {
         expect(list.ids.value).toEqual(['a', 'b', 'c', 'd'])
     })
 
+    it('reloads the shifted page after a removal so no row is skipped', async () => {
+        getList
+            .mockResolvedValueOnce(pageOf(['a', 'b'], 5))
+            .mockResolvedValueOnce(pageOf(['c', 'd'], 5))
+            .mockResolvedValueOnce(pageOf(['c', 'd'], 4))
+        const list = createList()
+        await list.refresh()
+        await list.loadMore()
+        list.items.value = list.items.value.filter((item) => item.id !== 'a')
+        list.totalItems.value--
+        await list.loadMore()
+        expect(getList).toHaveBeenLastCalledWith(2, 2, expect.anything())
+        expect(list.ids.value).toEqual(['b', 'c', 'd'])
+    })
+
+    it('stops loading when a page brings nothing new', async () => {
+        getList
+            .mockResolvedValueOnce(pageOf(['a', 'b'], 5))
+            .mockResolvedValueOnce(pageOf([], 5))
+        const list = createList()
+        await list.refresh()
+        await list.loadMore()
+        expect(list.hasMore.value).toBe(false)
+        await list.loadMore()
+        expect(getList).toHaveBeenCalledTimes(2)
+    })
+
     it('refresh resets to the first page', async () => {
         getList
             .mockResolvedValueOnce(pageOf(['a', 'b'], 3))

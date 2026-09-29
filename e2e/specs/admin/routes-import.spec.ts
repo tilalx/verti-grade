@@ -1,6 +1,8 @@
+import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
-import { LOCATIONS, uiaa } from '../../support/seed'
+import { authHeader, gotoSettled } from '../../support/nav'
+import { PB_URL } from '../../support/map'
+import { LOCATIONS, authAsSuperuser, uiaa } from '../../support/seed'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -97,4 +99,72 @@ test('rejects a malformed JSON file', async ({ adminPage: page }) => {
     await expect(page.getByTestId('import-route-dialog')).toBeHidden()
 
     fs.unlinkSync(file)
+})
+
+test('imports more ratings than the per-user rating rate limit', async ({
+    adminPage: page,
+    testPrefix,
+}) => {
+    const name = `${testPrefix}-import-many`
+    const ratingCount = 70
+    const file = path.join(os.tmpdir(), `${name}.json`)
+    fs.writeFileSync(
+        file,
+        JSON.stringify([
+            {
+                name,
+                ...uiaa('6'),
+                location: LOCATIONS[0],
+                type: 'Route',
+                creator: ['E2E Importer'],
+                screw_date: '2026-01-01',
+                ratings: Array.from({ length: ratingCount }, (_, index) => ({
+                    rating: 1 + (index % 5),
+                    ...uiaa('6'),
+                    comment: `${name} rating ${index}`,
+                })),
+            },
+        ]),
+    )
+    const root = new PocketBase(PB_URL)
+    await authAsSuperuser(root)
+
+    try {
+        await gotoSettled(page, '/manage/routes')
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByTestId('routes-import-open').click()
+        const chooser = await fileChooserPromise
+        await chooser.setFiles(file)
+        const bulkImport = page.waitForResponse('**/api/import/ratings')
+        await page.getByTestId('import-route-confirm').click()
+        expect((await bulkImport).ok()).toBe(true)
+        await expect(page.getByTestId('global-snackbar')).toBeVisible()
+        await expect(page.getByTestId('global-snackbar')).not.toContainText(
+            /issues/i,
+        )
+
+        const ratings = await root.collection('ratings').getList(1, 1, {
+            filter: root.filter('route_id.name = {:name}', { name }),
+        })
+        expect(ratings.totalItems).toBe(ratingCount)
+    } finally {
+        fs.unlinkSync(file)
+        const routes = await root.collection('routes').getFullList({
+            filter: root.filter('name = {:name}', { name }),
+        })
+        for (const route of routes) {
+            await root.collection('routes').delete(route.id)
+        }
+    }
+})
+
+test('only route managers may bulk import ratings', async ({
+    userPage: page,
+}) => {
+    await gotoSettled(page, '/')
+    const response = await page.request.post('/api/import/ratings', {
+        headers: await authHeader(page),
+        data: { ratings: [] },
+    })
+    expect(response.status()).toBe(403)
 })

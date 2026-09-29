@@ -572,6 +572,7 @@
         "minLength": "Mindestens {n} Zeichen.",
         "maxLength": "Maximal {n} Zeichen.",
         "passwordMismatch": "Passwörter stimmen nicht überein.",
+        "integerRange": "Gib eine ganze Zahl von {min} bis {max} ein.",
         "passwordTooWeak": "Passwort muss mindestens „Gut“ sein.",
         "email": "Bitte gib eine gültige E-Mail-Adresse ein."
     },
@@ -1067,6 +1068,7 @@
         "drawEdge": "Kletterkante zeichnen",
         "placeLabel": "Beschriftung setzen",
         "deleteWall": "Wand löschen",
+        "wallHasRoutes": "Verschiebe oder archiviere die Routen dieser Wand, bevor du sie löschst.",
         "shapes": "Boden, Matten und Einbauten",
         "shapeKind": "Art",
         "deleteShape": "Form löschen",

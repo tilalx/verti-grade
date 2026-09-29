@@ -1,7 +1,11 @@
 import QRCode from 'qrcode'
 import fs from 'node:fs'
 
-export function generateRouteQrY4m(routeId: string, outPath: string) {
+export function generateRouteQrY4m(
+    routeId: string,
+    outPath: string,
+    { codeFrames = 10, blankFrames = 0 } = {},
+) {
     const qr = QRCode.create(routeId, { errorCorrectionLevel: 'M' })
     const moduleCount = qr.modules.size
     const data = qr.modules.data
@@ -38,9 +42,10 @@ export function generateRouteQrY4m(routeId: string, outPath: string) {
     const frameHeader = 'FRAME\n'
 
     const chunks: Buffer[] = [Buffer.from(header)]
-    for (let i = 0; i < 10; i++) {
+    const blankPlane = new Uint8Array(width * height).fill(255)
+    for (let i = 0; i < codeFrames + blankFrames; i++) {
         chunks.push(Buffer.from(frameHeader))
-        chunks.push(Buffer.from(yPlane))
+        chunks.push(Buffer.from(i < codeFrames ? yPlane : blankPlane))
         chunks.push(Buffer.from(uPlane))
         chunks.push(Buffer.from(vPlane))
     }

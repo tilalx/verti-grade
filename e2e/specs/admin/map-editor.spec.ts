@@ -180,27 +180,30 @@ test('drawing a mat can be undone and redone', async ({
     }
 })
 
-test('deleting a wall that still has routes is refused on save', async ({
+test('a wall that still has routes cannot be deleted in the editor', async ({
     adminPage: page,
     testPrefix,
 }) => {
     const root = new PocketBase(PB_URL)
     await authAsSuperuser(root)
-    const seeded = await seedMap(root, testPrefix, { routes: 2 })
+    const seeded = await seedMap(root, testPrefix, { routes: 1 })
+    const wallItem = (name: string) =>
+        page.locator(
+            `[data-testid="map-editor-wall-item"][data-name="${testPrefix} ${name}"]`,
+        )
     try {
         await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
-        await page
-            .locator(
-                `[data-testid="map-editor-wall-item"][data-name="${testPrefix} North"]`,
-            )
-            .click()
-        await page.getByTestId('map-editor-delete-wall').click()
-        await page.getByTestId('map-editor-save').click()
-        await expect(page.getByTestId('global-snackbar')).toContainText(
-            'still has routes',
-        )
-        const wall = await root.collection('walls').getOne(seeded.northWallId)
-        expect(wall.id).toBe(seeded.northWallId)
+        await wallItem('Island').click()
+        await expect(page.getByTestId('map-editor-delete-wall')).toBeDisabled()
+        await expect(
+            page.getByTestId('map-editor-wall-has-routes'),
+        ).toBeVisible()
+
+        await wallItem('North').click()
+        await expect(page.getByTestId('map-editor-delete-wall')).toBeEnabled()
+        await expect(
+            page.getByTestId('map-editor-wall-has-routes'),
+        ).toHaveCount(0)
     } finally {
         await seeded.cleanup()
     }

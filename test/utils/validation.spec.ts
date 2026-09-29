@@ -6,6 +6,7 @@ import {
     validEmail,
     passwordsMatch,
     nonBlank,
+    integerBetween,
 } from '~/utils/validation'
 
 // Simple translation stub: just return the key so assertions are readable.
@@ -189,5 +190,19 @@ describe('nonBlank', () => {
     it('rejects non-string values', () => {
         expect(nonBlank(t)(null)).toBe('validation.required')
         expect(nonBlank(t)(undefined)).toBe('validation.required')
+    })
+})
+
+describe('integerBetween', () => {
+    const rule = integerBetween(t, 1, 3650)
+
+    it('passes for whole numbers in range', () => {
+        expect(rule(1)).toBe(true)
+        expect(rule(3650)).toBe(true)
+    })
+
+    it('fails for out of range, fractional or empty values', () => {
+        for (const value of [0, 3651, 1.5, '', null])
+            expect(rule(value)).toBe('validation.integerRange')
     })
 })

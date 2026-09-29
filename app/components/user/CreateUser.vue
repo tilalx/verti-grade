@@ -218,9 +218,14 @@ async function submit() {
 
     saving.value = true
     try {
-        const username = ((user.firstname || '') + (user.name || ''))
+        const nameStem = ((user.firstname || '') + (user.name || ''))
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
+            .slice(0, 140)
+        const uniqueDigits = String(
+            crypto.getRandomValues(new Uint32Array(1))[0]! % 1_000_000,
+        ).padStart(6, '0')
+        const username = `${nameStem || 'user'}${uniqueDigits}`
 
         const randomPassword = crypto.randomUUID()
 

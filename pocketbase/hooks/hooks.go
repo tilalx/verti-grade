@@ -11,6 +11,7 @@ func Register(app core.App) {
 	registerLocationGuards(app)
 	registerMapGuards(app)
 	registerRouteArchiveStamp(app)
+	registerRatingImport(app)
 	registerTicks(app)
 	registerReports(app)
 	registerNotifications(app)

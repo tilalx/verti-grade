@@ -392,6 +392,13 @@ function loadMore() {
     void loadRoutes({}, { append: true })
 }
 
+async function reloadLoadedRoutes() {
+    if (isWideLayout.value) return loadRoutes()
+    const { page, itemsPerPage } = tableOptions
+    await loadRoutes({ page: 1, itemsPerPage: page * itemsPerPage })
+    Object.assign(tableOptions, { page, itemsPerPage })
+}
+
 let scrollObserver: IntersectionObserver | null = null
 
 function setupScrollObserver() {
@@ -431,10 +438,7 @@ if (initial.value) {
 loading.value = false
 
 onMounted(async () => {
-    await subscribe('routes', () => {
-        tableOptions.page = 1
-        void loadRoutes({}, { append: false })
-    })
+    await subscribe('routes', () => void reloadLoadedRoutes())
     setupScrollObserver()
 })
 

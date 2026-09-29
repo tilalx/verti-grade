@@ -88,6 +88,43 @@ func TestAdminRoleChangeAllowed(t *testing.T) {
 	}
 }
 
+func TestPermissionSetHelpers(t *testing.T) {
+	if !isSubset([]string{"p1"}, []string{"p1", "p2"}) || !isSubset(nil, []string{"p1"}) {
+		t.Error("subset not recognised")
+	}
+	if isSubset([]string{"p1", "p3"}, []string{"p1", "p2"}) {
+		t.Error("extra permission treated as subset")
+	}
+	if added := addedPermissions([]string{"p1"}, []string{"p1", "p2"}); !slices.Equal(added, []string{"p2"}) {
+		t.Errorf("added = %v", added)
+	}
+}
+
+func TestKeepServerOwnedReportFields(t *testing.T) {
+	collection := core.NewBaseCollection("reports")
+	for _, name := range []string{"status", "decision", "decided_by", "notifier_email"} {
+		collection.Fields.Add(&core.TextField{Name: name})
+	}
+	original := core.NewRecord(collection)
+	original.Set("status", "open")
+	original.Set("notifier_email", "reporter@example.com")
+
+	report := original.Clone()
+	report.Set("status", "rejected")
+	report.Set("decision", "content_kept")
+	report.Set("decided_by", "someone-else")
+	report.Set("notifier_email", "attacker@example.com")
+
+	keepServerOwnedReportFields(report, original)
+
+	if report.GetString("status") != "rejected" || report.GetString("decision") != "content_kept" {
+		t.Errorf("moderator fields lost: %v", report.PublicExport())
+	}
+	if report.GetString("decided_by") != "" || report.GetString("notifier_email") != "reporter@example.com" {
+		t.Errorf("server-owned fields changed: %v", report.PublicExport())
+	}
+}
+
 func TestOnlyArchiveChanged(t *testing.T) {
 	if !onlyArchiveChanged([]string{"archived"}) || !onlyArchiveChanged(nil) {
 		t.Fatal("archive-only change rejected")
