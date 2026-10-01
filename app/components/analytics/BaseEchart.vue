@@ -10,11 +10,12 @@
 </template>
 
 <script setup lang="ts">
+import type { EChartsType } from 'echarts/core'
+
 interface ChartProps {
     option: Record<string, unknown>
     height?: string | number
     responsive?: boolean
-    renderer?: 'canvas' | 'svg'
     testid?: string
 }
 
@@ -23,13 +24,11 @@ const emit = defineEmits<{ click: [params: { data?: unknown }] }>()
 const props = withDefaults(defineProps<ChartProps>(), {
     height: '320px',
     responsive: true,
-    renderer: 'svg',
     testid: 'chart',
 })
 
 const chartEl = ref<HTMLElement | null>(null)
-let chartInstance: any = null
-let echartsModule: typeof import('echarts') | null = null
+let chartInstance: EChartsType | null = null
 let resizeObserver: ResizeObserver | null = null
 
 const containerStyle = computed(() => ({
@@ -59,18 +58,13 @@ const destroyChart = () => {
 }
 
 const renderChart = async () => {
+    const { initEchart } = await import('~/utils/echartsCore')
     if (!chartEl.value) {
         return
     }
 
-    if (!echartsModule) {
-        echartsModule = await import('echarts')
-    }
-
     if (!chartInstance) {
-        chartInstance = echartsModule.init(chartEl.value, null, {
-            renderer: props.renderer,
-        })
+        chartInstance = initEchart(chartEl.value, null, { renderer: 'svg' })
         chartInstance.on('click', (params: { data?: unknown }) =>
             emit('click', params),
         )

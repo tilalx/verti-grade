@@ -117,7 +117,10 @@ export default defineNuxtConfig({
         optimizeDeps: {
             include: [
                 'pocketbase',
-                'echarts',
+                'echarts/core',
+                'echarts/charts',
+                'echarts/components',
+                'echarts/renderers',
                 '@vue/devtools-core',
                 '@vue/devtools-kit',
             ],
