@@ -1,44 +1,9 @@
 <template>
-    <div class="map-page" data-testid="map-page">
+    <div class="map-screen" data-testid="map-page">
         <h1 class="d-sr-only">{{ $t('map.title') }}</h1>
 
-        <div class="map-header">
-            <v-select
-                v-if="mappedLocations.length > 1"
-                v-model="locationId"
-                :items="locationItems"
-                :label="$t('climbing.location')"
-                density="compact"
-                hide-details
-                class="map-location"
-                data-testid="map-location"
-            />
-            <span v-else-if="location" class="map-title">{{
-                location.name
-            }}</span>
-            <v-spacer />
-            <v-btn-toggle
-                v-model="mapType"
-                density="compact"
-                variant="outlined"
-                divided
-                mandatory
-                data-testid="map-type"
-            >
-                <v-btn
-                    v-for="option in typeOptions"
-                    :key="option.value"
-                    :value="option.value"
-                    size="small"
-                    :data-testid="`map-type-${option.value || 'all'}`"
-                >
-                    {{ option.label }}
-                </v-btn>
-            </v-btn-toggle>
-        </div>
-
-        <div class="map-body">
-            <div class="map-stage">
+        <div class="map-screen__body">
+            <div class="map-screen__stage">
                 <div v-if="loadFailed" class="map-empty">
                     <LayoutEmptyState
                         variant="error"
@@ -70,6 +35,7 @@
                     :show-sent="isLoggedIn"
                     :selected-wall-id="selectedWallId"
                     :selected-route-id="selectedRouteId"
+                    :inset-bottom="sheetCover"
                     @select-wall="selectWall"
                     @select-route="selectRoute"
                 />
@@ -88,29 +54,100 @@
                     </v-btn>
                 </div>
 
-                <v-btn
+                <MapFilterChips
                     v-if="map"
-                    class="map-filter-fab"
-                    icon
-                    size="large"
-                    variant="elevated"
-                    :aria-label="$t('map.filters')"
-                    data-testid="map-filter-open"
-                    @click="filtersOpen = true"
+                    v-model:grade="gradeFilter"
+                    v-model:color="colorFilter"
+                    v-model:type="mapType"
+                    type-filter
+                    class="map-screen__chips"
+                    :grades="gradeItems"
+                    :colors="colorOptions"
+                    :grade-label="gradeColumnTitle"
+                    :active-count="activeCount"
+                    @clear="resetFilters"
                 >
-                    <v-badge
-                        :model-value="activeCount > 0"
-                        :content="activeCount"
-                        color="primary"
-                    >
-                        <v-icon>mdi-filter-variant</v-icon>
-                    </v-badge>
-                </v-btn>
+                    <v-menu v-if="locationItems.length > 1">
+                        <template #activator="{ props: menuProps }">
+                            <v-chip
+                                v-bind="menuProps"
+                                variant="flat"
+                                color="surface"
+                                prepend-icon="mdi-map-marker-outline"
+                                append-icon="mdi-menu-down"
+                                data-testid="map-location"
+                            >
+                                {{ location?.name }}
+                            </v-chip>
+                        </template>
+                        <v-list density="compact">
+                            <v-list-item
+                                v-for="item in locationItems"
+                                :key="item.value"
+                                :title="item.title"
+                                :active="item.value === locationId"
+                                @click="locationId = item.value"
+                            />
+                        </v-list>
+                    </v-menu>
+                    <template v-if="isLoggedIn" #after-type>
+                        <v-chip
+                            v-for="option in sentOptions"
+                            :key="option.value"
+                            variant="flat"
+                            :color="
+                                sentFilter === option.value
+                                    ? 'primary'
+                                    : 'surface'
+                            "
+                            :aria-pressed="sentFilter === option.value"
+                            :data-testid="`map-filter-${option.value}`"
+                            @click="toggleSent(option.value)"
+                        >
+                            {{ option.label }}
+                        </v-chip>
+                    </template>
+                </MapFilterChips>
+            </div>
 
-                <v-card
+            <MapSheet
+                v-if="map"
+                v-model:snap="sheetSnap"
+                data-testid="map-list"
+                @cover="sheetCover = $event"
+            >
+                <template #header>
+                    <v-btn
+                        v-if="selectedRoute"
+                        variant="text"
+                        prepend-icon="mdi-arrow-left"
+                        data-testid="map-route-card-close"
+                        @click="selectRoute(null)"
+                    >
+                        {{ $t('map.backToList') }}
+                    </v-btn>
+                    <template v-else>
+                        <span
+                            class="text-truncate font-weight-semibold"
+                            data-testid="map-list-title"
+                            >{{ listTitle }} · {{ listCount }}</span
+                        >
+                        <v-spacer />
+                        <v-btn
+                            v-if="selectedWallId"
+                            variant="text"
+                            size="small"
+                            data-testid="map-list-all"
+                            @click="selectWall(null)"
+                        >
+                            {{ $t('map.allWalls') }}
+                        </v-btn>
+                    </template>
+                </template>
+
+                <div
                     v-if="selectedRoute"
-                    class="map-route-card"
-                    elevation="6"
+                    class="map-screen__route"
                     data-testid="map-route-card"
                 >
                     <RouteCard
@@ -118,15 +155,6 @@
                         :ticked="tickedRouteIds.has(selectedRoute.id)"
                     >
                         <template #actions>
-                            <v-btn
-                                icon="mdi-close"
-                                variant="text"
-                                size="small"
-                                :aria-label="$t('map.close')"
-                                :title="$t('map.close')"
-                                data-testid="map-route-card-close"
-                                @click="selectRoute(null)"
-                            />
                             <v-btn
                                 v-if="isLoggedIn"
                                 variant="tonal"
@@ -142,161 +170,34 @@
                             />
                         </template>
                     </RouteCard>
-                </v-card>
-            </div>
-
-            <aside
-                v-if="map && mdAndUp"
-                class="map-side"
-                data-testid="map-list"
-            >
-                <div class="map-side__header">
-                    <span
-                        class="text-truncate font-weight-semibold"
-                        data-testid="map-list-title"
-                        >{{ listTitle }} · {{ listCount }}</span
-                    >
-                    <v-spacer />
-                    <v-btn
-                        v-if="selectedWallId"
-                        variant="text"
-                        size="small"
-                        data-testid="map-list-all"
-                        @click="selectWall(null)"
-                    >
-                        {{ $t('map.allWalls') }}
-                    </v-btn>
                 </div>
-                <MapRouteList
-                    class="map-side__list"
-                    :groups="listGroups"
-                    :show-headings="!selectedWallId"
-                    :ticked-ids="tickedRouteIds"
-                    :selected-route-id="selectedRouteId"
-                    @select="onListSelect"
-                />
-            </aside>
-        </div>
-
-        <button
-            v-if="map && !mdAndUp"
-            type="button"
-            class="map-list-bar"
-            data-testid="map-show-list"
-            :aria-expanded="listOpen"
-            @click="listOpen = true"
-        >
-            <v-icon size="18">mdi-chevron-up</v-icon>
-            {{ listBarText }}
-        </button>
-
-        <v-bottom-sheet v-if="!mdAndUp" v-model="listOpen" scrollable>
-            <v-card data-testid="map-list">
-                <v-card-title class="d-flex align-center ga-2">
-                    <span class="text-truncate">{{ listTitle }}</span>
-                    <v-spacer />
-                    <v-btn
-                        v-if="selectedWallId"
-                        variant="text"
-                        size="small"
-                        data-testid="map-list-all"
-                        @click="selectWall(null)"
-                    >
-                        {{ $t('map.allWalls') }}
-                    </v-btn>
-                    <v-btn
-                        icon="mdi-close"
-                        variant="text"
-                        :aria-label="$t('map.close')"
-                        @click="listOpen = false"
-                    />
-                </v-card-title>
-                <v-card-text class="px-2">
+                <template v-else>
+                    <div class="map-screen__search">
+                        <v-text-field
+                            v-model="searchRouteName"
+                            :placeholder="$t('climbing.searchRouteName')"
+                            :aria-label="$t('climbing.searchRouteName')"
+                            prepend-inner-icon="mdi-magnify"
+                            density="compact"
+                            variant="solo-filled"
+                            flat
+                            hide-details
+                            clearable
+                            data-testid="map-filter-search"
+                            @focus="sheetSnap = 'full'"
+                        />
+                    </div>
                     <MapRouteList
+                        class="map-screen__list"
                         :groups="listGroups"
                         :show-headings="!selectedWallId"
                         :ticked-ids="tickedRouteIds"
                         :selected-route-id="selectedRouteId"
                         @select="onListSelect"
                     />
-                </v-card-text>
-            </v-card>
-        </v-bottom-sheet>
-
-        <LayoutDialogShell
-            v-model="filtersOpen"
-            max-width="480"
-            closable
-            sheet-on-mobile
-            :title="$t('map.filters')"
-            data-testid="map-filter-dialog"
-        >
-            <div class="d-flex flex-column ga-4">
-                <v-text-field
-                    v-model="searchRouteName"
-                    :label="$t('climbing.searchRouteName')"
-                    prepend-inner-icon="mdi-magnify"
-                    density="compact"
-                    hide-details
-                    clearable
-                    data-testid="map-filter-search"
-                />
-                <v-select
-                    v-model="selectedDifficulty"
-                    :label="gradeColumnTitle"
-                    :items="difficulties"
-                    item-title="text"
-                    item-value="value"
-                    density="compact"
-                    hide-details
-                    clearable
-                    data-testid="map-filter-grade"
-                />
-                <MapColorFilter
-                    v-model="colorFilter"
-                    :colors="colorOptions"
-                    data-testid="map-filter-color"
-                />
-                <v-select
-                    :model-value="selectedWallId"
-                    :items="wallItems"
-                    :label="$t('map.wall')"
-                    density="compact"
-                    hide-details
-                    clearable
-                    data-testid="map-filter-wall"
-                    @update:model-value="selectWall($event ?? null)"
-                />
-                <v-btn-toggle
-                    v-if="isLoggedIn"
-                    v-model="sentFilter"
-                    density="compact"
-                    variant="outlined"
-                    divided
-                    mandatory
-                    data-testid="map-filter-sent"
-                >
-                    <v-btn value="all">{{ $t('filter.all') }}</v-btn>
-                    <v-btn value="unsent" data-testid="map-filter-unsent">
-                        {{ $t('map.unsent') }}
-                    </v-btn>
-                    <v-btn value="sent">{{ $t('ticks.sent') }}</v-btn>
-                </v-btn-toggle>
-            </div>
-            <template #actions>
-                <v-btn variant="text" @click="resetFilters">
-                    {{ $t('map.clearFilters') }}
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    variant="flat"
-                    data-testid="map-filter-apply"
-                    @click="filtersOpen = false"
-                >
-                    {{ $t('map.showResults', { n: matchingCount }) }}
-                </v-btn>
-            </template>
-        </LayoutDialogShell>
+                </template>
+            </MapSheet>
+        </div>
 
         <TickDialog
             v-if="isLoggedIn"
@@ -308,14 +209,11 @@
 </template>
 
 <script setup lang="ts">
-import type {
-    RouteListItem,
-    RouteScoreRecord,
-    WallRecord,
-} from '~/types/models'
-import { sanitizeGymMap } from '#shared/utils/mapGeometry'
+import type { RouteListItem, RouteScoreRecord } from '~/types/models'
+import type { SheetSnap } from '~/components/map/Sheet.vue'
+import type { RouteTypeFilter } from '~/components/map/FilterChips.vue'
 import { normalizeCreators } from '#shared/utils/formatting'
-import { routesOnWall, toMapWalls } from '~/utils/gymMap'
+import { routesOnWall } from '~/utils/gymMap'
 import { toHex6 } from '~/utils/color'
 
 definePageMeta({ footer: false })
@@ -340,53 +238,23 @@ const {
     pbFilter,
     clearFilters,
 } = useRouteFilters()
-const mapType = ref<'' | 'Boulder' | 'Route'>('')
+const mapType = ref<RouteTypeFilter>('')
 
 useSeoMeta({
     title: () => t('page.title.map'),
     description: () => t('map.description'),
 })
 
-const { data: locations } = await useLocations()
-const mappedLocations = computed(() =>
-    locations.value.filter((record) => sanitizeGymMap(record.map)),
-)
-const locationItems = computed(() =>
-    mappedLocations.value.map((record) => ({
-        title: record.name,
-        value: record.id,
-    })),
-)
-const locationId = computed({
-    get: () =>
-        locations.value.some((record) => record.id === route.query.location)
-            ? (route.query.location as string)
-            : (mappedLocations.value[0]?.id ?? ''),
-    set: (id: string) => void router.replace({ query: { location: id } }),
-})
-const location = computed(() =>
-    locations.value.find((record) => record.id === locationId.value),
-)
-const map = computed(() => sanitizeGymMap(location.value?.map))
-
 const {
-    data: walls,
-    error: wallsError,
-    refresh: refreshWalls,
-} = await useAsyncData(
-    'map-walls',
-    () =>
-        locationId.value
-            ? pb.collection('walls').getFullList<WallRecord>({
-                  filter: pb.filter('location = {:id}', {
-                      id: locationId.value,
-                  }),
-                  sort: 'sort,name',
-                  requestKey: 'mapWalls',
-              })
-            : Promise.resolve([]),
-    { watch: [locationId], default: () => [] },
-)
+    locationItems,
+    locationId,
+    location,
+    map,
+    walls,
+    wallsError,
+    refreshWalls,
+    mapWalls,
+} = await useGymMapLocation('map')
 
 const {
     data: routeRecords,
@@ -437,6 +305,15 @@ const colorFilter = ref<string | null>(null)
 const colorOptions = computed(() => [
     ...new Set(routes.value.map((item) => toHex6(item.color)).filter(Boolean)),
 ])
+const gradeItems = computed(() =>
+    difficulties.value
+        .filter((item) => item.value)
+        .map((item) => ({ title: item.text, value: String(item.value) })),
+)
+const gradeFilter = computed({
+    get: () => selectedDifficulty.value || null,
+    set: (value: string | null) => (selectedDifficulty.value = value ?? ''),
+})
 
 const { data: serverMatches } = useAsyncData(
     'map-matching',
@@ -489,6 +366,7 @@ const activeCount = computed(
             selectedDifficulty.value,
             isLoggedIn.value && sentFilter.value !== 'all',
             colorFilter.value,
+            mapType.value,
         ].filter(Boolean).length,
 )
 
@@ -496,18 +374,14 @@ watch(matchingCount, (count) => {
     if (matchingIds.value) announce(t('climbing.routesFound', { n: count }))
 })
 
-const typeOptions = computed(() => [
-    { value: '', label: t('filter.all') },
-    { value: 'Boulder', label: t('map.boulders') },
-    { value: 'Route', label: t('map.routes') },
+const sentOptions = computed(() => [
+    { value: 'unsent' as const, label: t('map.unsent') },
+    { value: 'sent' as const, label: t('ticks.sent') },
 ])
 
-const mapWalls = computed(() =>
-    map.value ? toMapWalls(walls.value, map.value) : [],
-)
-const wallItems = computed(() =>
-    mapWalls.value.map((wall) => ({ title: wall.name, value: wall.id })),
-)
+function toggleSent(value: 'sent' | 'unsent') {
+    sentFilter.value = sentFilter.value === value ? 'all' : value
+}
 
 const selectedWallId = computed(() => (route.query.wall as string) || null)
 const selectedRouteId = computed(() => (route.query.route as string) || null)
@@ -522,6 +396,9 @@ const mapViewRef = useTemplateRef<{
     fitAll: (animate?: boolean) => void
 }>('mapViewRef')
 
+const sheetSnap = ref<SheetSnap>('peek')
+const sheetCover = ref(0)
+
 function setQuery(patch: Record<string, string | null>) {
     const query = { ...route.query, ...patch }
     for (const key of Object.keys(patch)) if (!patch[key]) delete query[key]
@@ -535,26 +412,17 @@ function selectWall(wallId: string | null) {
 
 function selectRoute(routeId: string | null) {
     setQuery({ route: routeId })
+    if (routeId && !mdAndUp.value && sheetSnap.value === 'peek')
+        sheetSnap.value = 'half'
 }
 
 function onListSelect(routeId: string) {
-    const route = allRoutes.value.find((item) => item.id === routeId)
-    if (route?.wall && mapWalls.value.some((wall) => wall.id === route.wall))
-        showOnMap(routeId)
-    else {
-        listOpen.value = false
-        selectRoute(routeId)
-    }
-}
-
-function showOnMap(routeId: string) {
-    listOpen.value = false
+    if (!mdAndUp.value) sheetSnap.value = 'half'
     selectRoute(routeId)
-    mapViewRef.value?.focusRoute(routeId)
+    const item = allRoutes.value.find((candidate) => candidate.id === routeId)
+    if (item?.wall && mapWalls.value.some((wall) => wall.id === item.wall))
+        nextTick(() => mapViewRef.value?.focusRoute(routeId))
 }
-
-const listOpen = ref(false)
-const filtersOpen = ref(false)
 
 const selectedWall = computed(() =>
     mapWalls.value.find((wall) => wall.id === selectedWallId.value),
@@ -564,15 +432,6 @@ const listTitle = computed(() =>
 )
 const listCount = computed(() =>
     listGroups.value.reduce((sum, group) => sum + group.routes.length, 0),
-)
-const listBarText = computed(() =>
-    selectedWall.value
-        ? t('map.showWallList', {
-              name: selectedWall.value.name,
-              n: routesOnWall(matchingRoutes.value, selectedWall.value.id)
-                  .length,
-          })
-        : t('map.showList', { n: matchingCount.value }),
 )
 
 const listGroups = computed(() => {
@@ -613,6 +472,7 @@ function resetFilters() {
     clearFilters()
     sentFilter.value = 'all'
     colorFilter.value = null
+    mapType.value = ''
 }
 
 const tickOpen = ref(false)
@@ -634,6 +494,7 @@ function restoreMapType() {
 
 onMounted(async () => {
     restoreMapType()
+    if (selectedRouteId.value && !mdAndUp.value) sheetSnap.value = 'half'
     await nextTick()
     if (selectedRouteId.value)
         mapViewRef.value?.focusRoute(selectedRouteId.value)
@@ -645,85 +506,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.map-page {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: calc(
-        100dvh - var(--v-layout-top, 64px) - var(--app-top-inset, 0px) -
-            var(--v-layout-bottom, 0px) - var(--app-bottom-inset, 0px)
-    );
-    min-height: 420px;
-}
-
-.map-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 16px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.map-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-weight: 600;
-    font-size: 1.125rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.map-location {
-    flex: 1 1 160px;
-    min-width: 160px;
-    max-width: 240px;
-}
-
-.map-header :deep(.v-btn-toggle) {
-    flex-shrink: 0;
-    overflow: visible;
-}
-
-.map-body {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-}
-
-.map-side {
-    display: flex;
-    flex-direction: column;
-    width: 380px;
-    flex-shrink: 0;
-    min-height: 0;
-    border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.map-side__header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 48px;
-    padding: 4px 8px 4px 16px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.map-side__list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 8px 12px;
-}
-
-.map-stage {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-}
-
 .map-empty {
     display: flex;
     flex-direction: column;
@@ -731,51 +513,19 @@ onMounted(async () => {
     padding-top: 48px;
 }
 
-.map-filter-fab {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-}
-
-.map-route-card {
-    position: absolute;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    width: min(480px, calc(100% - 96px));
-    max-height: 60%;
-    overflow-y: auto;
-}
-
-.map-list-bar {
-    display: flex;
-    height: 44px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 0 16px;
-    border: 0;
-    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+.map-screen__search {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 4px 12px 8px;
     background: rgb(var(--v-theme-surface));
-    color: rgb(var(--v-theme-on-surface));
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-size: 0.8125rem;
-    cursor: pointer;
 }
 
-.map-list-bar:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
-    outline-offset: -2px;
+.map-screen__list {
+    padding: 0 8px 12px;
 }
 
-@media (max-width: 599.98px) {
-    .map-route-card {
-        width: calc(100% - 32px);
-        bottom: 80px;
-    }
+.map-screen__route {
+    padding: 0 12px 16px;
 }
 </style>

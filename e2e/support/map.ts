@@ -1,4 +1,5 @@
 import PocketBase from 'pocketbase'
+import { expect, type Locator, type Page } from '@playwright/test'
 import { uiaa } from './seed'
 
 export const PB_URL = process.env.E2E_PB_URL || 'https://localhost'
@@ -126,3 +127,35 @@ export async function seedMap(
         },
     }
 }
+
+export async function settledBox(locator: Locator) {
+    let previous = ''
+    await expect
+        .poll(async () => {
+            const current = JSON.stringify(await locator.boundingBox())
+            const settled = current === previous
+            previous = current
+            return settled
+        })
+        .toBe(true)
+    return (await locator.boundingBox())!
+}
+
+export async function touchInput(page: Page) {
+    const cdp = await page.context().newCDPSession(page)
+    return (type: string, point?: { x: number; y: number }) =>
+        cdp.send('Input.dispatchTouchEvent', {
+            type,
+            touchPoints: point ? [point] : [],
+        })
+}
+
+export const centerOf = (box: {
+    x: number
+    y: number
+    width: number
+    height: number
+}) => ({
+    x: Math.round(box.x + box.width / 2),
+    y: Math.round(box.y + box.height / 2),
+})

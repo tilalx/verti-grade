@@ -126,7 +126,11 @@ test('the colour filter narrows the route list', async ({
 }) => {
     await gotoSettled(page, `/manage/map?location=${seeded.locationId}`)
     await page
-        .getByTestId('placement-color-filter')
+        .getByTestId('placement-filters')
+        .getByTestId('map-filter-color-chip')
+        .click()
+    await page
+        .getByTestId('map-filter-color')
         .locator('[data-color="#00ACC1"]')
         .click()
     const items = page.getByTestId('placement-route')

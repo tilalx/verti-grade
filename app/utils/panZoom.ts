@@ -1,4 +1,9 @@
-import type { MapBounds, MapPoint, ViewBox } from '#shared/utils/mapGeometry'
+import {
+    fitViewBox,
+    type MapBounds,
+    type MapPoint,
+    type ViewBox,
+} from '#shared/utils/mapGeometry'
 
 export interface ZoomLimits {
     minWidth: number
@@ -98,5 +103,94 @@ export function interpolateView(
         y: mix(from.y, to.y),
         width: mix(from.width, to.width),
         height: mix(from.height, to.height),
+    }
+}
+
+export interface ScreenPoint {
+    x: number
+    y: number
+}
+
+const midpoint = (a: ScreenPoint, b: ScreenPoint) => ({
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+})
+
+export function pinchView(
+    view: ViewBox,
+    rect: ScreenRect,
+    before: [ScreenPoint, ScreenPoint],
+    after: [ScreenPoint, ScreenPoint],
+    limits: ZoomLimits,
+): ViewBox {
+    const startDistance = Math.hypot(
+        before[0].x - before[1].x,
+        before[0].y - before[1].y,
+    )
+    const endDistance = Math.hypot(
+        after[0].x - after[1].x,
+        after[0].y - after[1].y,
+    )
+    const from = midpoint(...before)
+    const to = midpoint(...after)
+    const zoomed =
+        startDistance > 0
+            ? zoomAt(
+                  view,
+                  screenToMap(from, rect, view),
+                  endDistance / startDistance,
+                  limits,
+              )
+            : view
+    const unitsPerPixel = zoomed.width / rect.width
+    return panBy(
+        zoomed,
+        (from.x - to.x) * unitsPerPixel,
+        (from.y - to.y) * unitsPerPixel,
+    )
+}
+
+export const FLING_MIN_SPEED = 0.05
+const FLING_FRICTION_PER_FRAME = 0.92
+const FRAME_MS = 16
+
+export function flingVelocity(
+    velocity: ScreenPoint,
+    elapsedMs: number,
+): ScreenPoint | null {
+    const decay = Math.pow(FLING_FRICTION_PER_FRAME, elapsedMs / FRAME_MS)
+    const next = { x: velocity.x * decay, y: velocity.y * decay }
+    return Math.hypot(next.x, next.y) < FLING_MIN_SPEED ? null : next
+}
+
+const MOUSE_WHEEL_STEP = 50
+
+export function wheelIntent(event: {
+    deltaX: number
+    deltaY: number
+    deltaMode: number
+    ctrlKey: boolean
+}): 'zoom' | 'pan' {
+    if (event.ctrlKey || event.deltaMode !== 0) return 'zoom'
+    if (event.deltaX !== 0) return 'pan'
+    return Math.abs(event.deltaY) >= MOUSE_WHEEL_STEP ? 'zoom' : 'pan'
+}
+
+export function fitBetweenInsets(
+    bounds: MapBounds,
+    size: { width: number; height: number },
+    padding: number,
+    insets: { top: number; bottom: number },
+): ViewBox {
+    const visibleHeight = Math.max(
+        size.height - insets.top - insets.bottom,
+        size.height / 4,
+    )
+    const view = fitViewBox(bounds, size.width / visibleHeight, padding)
+    const unitsPerPixel = view.height / visibleHeight
+    return {
+        ...view,
+        y: view.y - insets.top * unitsPerPixel,
+        height: size.height * unitsPerPixel,
     }
 }

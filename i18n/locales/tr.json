@@ -621,8 +621,7 @@
         "userMenu": "Kullanıcı menüsü",
         "manage": "Yönetim",
         "admin": "Yönetici",
-        "quickNavigation": "Hızlı gezinme",
-        "desktopHint": "Tam düzenleyici masaüstünde kullanılabilir."
+        "quickNavigation": "Hızlı gezinme"
     },
     "permissions": {
         "title": "Roller ve yetkiler",
@@ -1022,23 +1021,21 @@
         "openList": "Rota listesini aç",
         "filters": "Rotaları filtrele",
         "clearFilters": "Sıfırla",
-        "showResults": "{n} rotayı göster",
         "close": "Kapat",
         "allWalls": "Tüm duvarlar",
         "allRoutes": "Tüm rotalar",
         "showOnMap": "Haritada göster",
-        "showList": "Listeyi göster ({n})",
-        "showWallList": "{name} · {n} rota",
         "notOnMap": "Haritada değil",
         "wall": "Duvar",
         "unsent": "Tamamlanmadı",
         "boulders": "Boulder",
         "routes": "Rotalar",
-        "wallHint": "Rotanın salon haritasındaki yeri. Ayrıntılı ayar için \"Rotaları yerleştir\"e git."
+        "wallHint": "Rotanın salon haritasındaki yeri. Ayrıntılı ayar için \"Rotaları yerleştir\"e git.",
+        "resizeList": "Listeyi yeniden boyutlandır",
+        "backToList": "Listeye dön"
     },
     "mapEditor": {
         "title": "Harita düzenleyici",
-        "largerScreen": "Harita düzenleyici daha büyük bir ekran gerektirir. Bu sayfayı tablet veya bilgisayarda aç.",
         "noLocations": "Önce ayarlardan bir konum ekle.",
         "setupTitle": "Kat planı oluştur",
         "setupIntro": "Salonun boyutunu gir. Minderleri, yapıları ve duvarları sonra çizebilirsin.",
@@ -1105,7 +1102,10 @@
         },
         "anchorFrom": "Ankraj başlangıcı",
         "anchorTo": "bitişi",
-        "anchorHint": "Bu ankraj numaralarına sahip rotalar otomatik olarak bu duvara yerleştirilir."
+        "anchorHint": "Bu ankraj numaralarına sahip rotalar otomatik olarak bu duvara yerleştirilir.",
+        "finish": "Bitir",
+        "deletePoint": "Noktayı sil",
+        "panel": "Duvarlar ve şekiller"
     },
     "mapPlacement": {
         "title": "Rotaları yerleştir",
@@ -1138,7 +1138,9 @@
         "resetConfirm": "{wall} üzerindeki {n} rotanın tümü arşivlensin mi? Haritadan ve rota listesinden kaybolurlar.",
         "resetDone": "{n} rota arşivlendi.",
         "unplacedBanner": "{n} rota henüz haritada değil.",
-        "placeThis": "Haritaya yerleştir"
+        "placeThis": "Haritaya yerleştir",
+        "more": "Diğer işlemler",
+        "routes": "Rotalar"
     },
     "scan": {
         "title": "Rota tara",

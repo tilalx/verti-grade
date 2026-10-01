@@ -621,8 +621,7 @@
         "userMenu": "User menu",
         "manage": "Manage",
         "admin": "Admin",
-        "quickNavigation": "Quick navigation",
-        "desktopHint": "The full editor is available on desktop."
+        "quickNavigation": "Quick navigation"
     },
     "users": {
         "create": "Add user",
@@ -1022,23 +1021,21 @@
         "openList": "Open route list",
         "filters": "Filter routes",
         "clearFilters": "Reset",
-        "showResults": "Show {n} routes",
         "close": "Close",
         "allWalls": "All walls",
         "allRoutes": "All routes",
         "showOnMap": "Show on map",
-        "showList": "Show list ({n})",
-        "showWallList": "{name} · {n} routes",
         "notOnMap": "Not on the map",
         "wall": "Wall",
         "unsent": "Not sent",
         "boulders": "Boulders",
         "routes": "Routes",
-        "wallHint": "Where the route sits on the gym map. Fine-tune it under Place routes."
+        "wallHint": "Where the route sits on the gym map. Fine-tune it under Place routes.",
+        "resizeList": "Resize list",
+        "backToList": "Back to list"
     },
     "mapEditor": {
         "title": "Map editor",
-        "largerScreen": "The map editor needs a larger screen. Open this page on a tablet or computer.",
         "noLocations": "Add a location in the settings first.",
         "setupTitle": "Create a floor plan",
         "setupIntro": "Enter the size of the hall. You can draw mats, structures and walls afterwards.",
@@ -1105,7 +1102,10 @@
         },
         "anchorFrom": "Anchors from",
         "anchorTo": "to",
-        "anchorHint": "Routes with these anchor numbers are placed on this wall automatically."
+        "anchorHint": "Routes with these anchor numbers are placed on this wall automatically.",
+        "finish": "Finish",
+        "deletePoint": "Delete point",
+        "panel": "Walls and shapes"
     },
     "mapPlacement": {
         "title": "Place routes",
@@ -1138,7 +1138,9 @@
         "resetConfirm": "Archive all {n} routes on {wall}? They disappear from the map and the route list.",
         "resetDone": "{n} route archived. | {n} routes archived.",
         "unplacedBanner": "{n} route is not on the map yet. | {n} routes are not on the map yet.",
-        "placeThis": "Place on map"
+        "placeThis": "Place on map",
+        "more": "More actions",
+        "routes": "Routes"
     },
     "scan": {
         "title": "Scan a route",

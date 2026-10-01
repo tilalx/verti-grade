@@ -34,9 +34,7 @@ test('logging an ascent from the map updates the wall counter', async ({
             ),
         ).toHaveAttribute('data-sent', 'true')
 
-        await page.getByTestId('map-filter-open').click()
         await page.getByTestId('map-filter-unsent').click()
-        await page.getByTestId('map-filter-apply').click()
         await expect(
             page.locator('[data-testid="map-route-dot"][data-dimmed]'),
         ).toHaveCount(1)

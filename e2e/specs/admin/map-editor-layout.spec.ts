@@ -5,9 +5,9 @@ import { gotoSettled } from '../../support/nav'
 import { PB_URL, seedMap } from '../../support/map'
 
 test.describe('narrow editor', () => {
-    test.use({ viewport: { width: 900, height: 1000 } })
+    test.use({ viewport: { width: 800, height: 1000 } })
 
-    test('stacks the side panel below the canvas', async ({
+    test('keeps the canvas full width and opens the panel as a sheet', async ({
         adminPage: page,
         testPrefix,
     }) => {
@@ -17,16 +17,20 @@ test.describe('narrow editor', () => {
         try {
             await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
             const canvas = page.getByTestId('map-editor-canvas')
-            const panel = page.getByTestId('map-editor-panel')
+            const sheet = page.getByTestId('map-editor-sheet')
             await expect(canvas).toBeVisible()
-            await expect(panel).toBeVisible()
+            await expect(sheet.getByTestId('map-editor-panel')).toBeVisible()
 
             const canvasBox = (await canvas.boundingBox())!
-            const panelBox = (await panel.boundingBox())!
-            expect(panelBox.y).toBeGreaterThanOrEqual(
-                canvasBox.y + canvasBox.height - 1,
-            )
-            expect(panelBox.width).toBeGreaterThan(600)
+            const sheetBox = (await sheet.boundingBox())!
+            expect(canvasBox.width).toBeGreaterThan(750)
+            expect(sheetBox.width).toBeGreaterThan(750)
+            expect(sheetBox.y).toBeGreaterThan(canvasBox.y)
+            await expect(
+                sheet.locator(
+                    `[data-testid="map-editor-wall-item"][data-name="${testPrefix} North"]`,
+                ),
+            ).toBeVisible()
         } finally {
             await seeded.cleanup()
         }

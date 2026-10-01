@@ -1,25 +1,75 @@
 <template>
-    <v-container fluid class="placement-page">
-        <LayoutPageHeader :title="$t('mapPlacement.title')" inline-actions>
-            <template #actions>
-                <v-select
-                    v-if="mappedLocations.length"
-                    v-model="locationId"
-                    :items="locationItems"
-                    :label="$t('climbing.location')"
-                    density="compact"
-                    hide-details
-                    class="location-select"
-                    data-testid="placement-location"
-                />
-            </template>
-        </LayoutPageHeader>
-
-        <LayoutDesktopHint class="mb-4" />
+    <div class="map-screen placement-page">
+        <div class="map-screen__bar">
+            <h1 class="map-screen__title">{{ $t('mapPlacement.title') }}</h1>
+            <v-select
+                v-if="locationItems.length > 1"
+                v-model="locationId"
+                :items="locationItems"
+                :aria-label="$t('climbing.location')"
+                density="compact"
+                variant="solo-filled"
+                flat
+                hide-details
+                class="placement-location"
+                data-testid="placement-location"
+            />
+            <v-btn
+                icon="mdi-undo"
+                variant="text"
+                :disabled="!placement.history.value.length"
+                :aria-label="$t('mapEditor.undo')"
+                :title="$t('mapEditor.undo')"
+                data-testid="placement-undo"
+                @click="placement.undo()"
+            />
+            <v-menu>
+                <template #activator="{ props: menuProps }">
+                    <v-btn
+                        v-bind="menuProps"
+                        icon="mdi-dots-vertical"
+                        variant="text"
+                        :aria-label="$t('mapPlacement.more')"
+                        data-testid="placement-more"
+                    />
+                </template>
+                <v-list density="compact">
+                    <v-list-item
+                        prepend-icon="mdi-close-circle-outline"
+                        :title="$t('mapPlacement.discard')"
+                        :disabled="!placement.changes.value.length"
+                        data-testid="placement-discard"
+                        @click="discard"
+                    />
+                    <v-list-item
+                        v-if="can('manage_settings')"
+                        prepend-icon="mdi-floor-plan"
+                        :title="$t('routes.mapEditor')"
+                        :to="`/admin/map?location=${locationId}`"
+                    />
+                </v-list>
+            </v-menu>
+            <v-btn
+                color="primary"
+                variant="flat"
+                prepend-icon="mdi-content-save-outline"
+                :disabled="!placement.changes.value.length"
+                :loading="saving"
+                data-testid="placement-save"
+                @click="save"
+            >
+                {{
+                    $t('mapPlacement.save', {
+                        n: placement.changes.value.length,
+                    })
+                }}
+            </v-btn>
+        </div>
 
         <div v-if="!map" class="placement-empty" data-testid="placement-empty">
             <LayoutEmptyState
                 icon="mdi-map-outline"
+                :card="false"
                 :title="$t('mapPlacement.noMap')"
             />
             <v-btn
@@ -27,324 +77,342 @@
                 to="/admin/map"
                 variant="tonal"
                 prepend-icon="mdi-floor-plan"
-                class="mt-4"
             >
                 {{ $t('routes.mapEditor') }}
             </v-btn>
         </div>
 
-        <v-card v-else border flat class="map-workspace">
-            <div class="placement-toolbar">
-                <span
-                    class="placement-hint text-body-small text-medium-emphasis"
-                    aria-live="polite"
-                    data-testid="placement-hint"
-                >
-                    {{ hint }}
-                </span>
-                <v-btn
-                    v-if="armedRouteId"
-                    variant="text"
-                    prepend-icon="mdi-skip-next"
-                    data-testid="placement-skip"
-                    @click="skipArmed"
-                >
-                    {{ $t('mapPlacement.skip') }}
-                </v-btn>
-                <template v-if="selectedPlaced">
-                    <v-btn
-                        icon="mdi-chevron-left"
-                        variant="tonal"
-                        :aria-label="$t('mapPlacement.nudgeBack')"
-                        :title="$t('mapPlacement.nudgeBack')"
-                        data-testid="placement-nudge-back"
-                        @click="nudge(-1)"
-                    />
-                    <v-btn
-                        icon="mdi-chevron-right"
-                        variant="tonal"
-                        :aria-label="$t('mapPlacement.nudgeForward')"
-                        :title="$t('mapPlacement.nudgeForward')"
-                        data-testid="placement-nudge-forward"
-                        @click="nudge(1)"
-                    />
-                </template>
-                <v-spacer />
-                <v-btn
-                    v-if="hasAnchorRanges"
-                    variant="tonal"
-                    prepend-icon="mdi-auto-fix"
-                    :disabled="!autoPlacements.size"
-                    data-testid="placement-auto"
-                    @click="autoPlace"
-                >
-                    {{ $t('mapPlacement.auto', { n: autoPlacements.size }) }}
-                </v-btn>
-                <v-btn
-                    icon="mdi-undo"
-                    variant="text"
-                    :disabled="!history.length"
-                    :aria-label="$t('mapEditor.undo')"
-                    :title="$t('mapEditor.undo')"
-                    data-testid="placement-undo"
-                    @click="undo"
+        <div v-else class="map-screen__body">
+            <div class="map-screen__stage">
+                <MapPlacementCanvas
+                    ref="canvasRef"
+                    :map="map"
+                    :walls="mapWalls"
+                    :routes="placement.effectiveRoutes.value"
+                    :selected-route-id="placement.selectedRouteId.value"
+                    :selected-wall-id="placement.selectedWallId.value"
+                    :armed-route-id="placement.canvasArmedId.value"
+                    :inset-bottom="sheetCover"
+                    @place="placement.place"
+                    @select-route="placement.selectedRouteId.value = $event"
+                    @select-wall="selectWall"
                 />
-                <v-btn
-                    variant="text"
-                    :disabled="!changes.length"
-                    @click="discard"
-                >
-                    {{ $t('mapPlacement.discard') }}
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    prepend-icon="mdi-content-save-outline"
-                    :disabled="!changes.length"
-                    :loading="saving"
-                    data-testid="placement-save"
-                    @click="save"
-                >
-                    {{ $t('mapPlacement.save', { n: changes.length }) }}
-                </v-btn>
+                <MapFilterChips
+                    v-model:grade="placement.gradeFilter.value"
+                    v-model:color="placement.colorFilter.value"
+                    v-model:type="placement.typeFilter.value"
+                    type-filter
+                    class="map-screen__chips"
+                    :grades="placement.gradeOptions.value"
+                    :colors="placement.colorOptions.value"
+                    :grade-label="$t('climbing.difficulty')"
+                    :active-count="placement.activeFilterCount.value"
+                    data-testid="placement-filters"
+                    @clear="placement.clearFilters()"
+                />
             </div>
 
-            <div class="map-workspace__body">
-                <div class="map-workspace__stage">
-                    <MapPlacementCanvas
-                        ref="canvasRef"
-                        :map="map"
-                        :walls="mapWalls"
-                        :routes="effectiveRoutes"
-                        :selected-route-id="selectedRouteId"
-                        :selected-wall-id="selectedWallId"
-                        :armed-route-id="canvasArmedId"
-                        @place="place"
-                        @select-route="selectedRouteId = $event"
-                        @select-wall="selectedWallId = $event"
+            <MapSheet
+                v-model:snap="sheetSnap"
+                data-testid="placement-panel"
+                @cover="sheetCover = $event"
+            >
+                <template #header>
+                    <span
+                        class="placement-hint text-body-small"
+                        aria-live="polite"
+                        data-testid="placement-hint"
+                    >
+                        {{ hint }}
+                    </span>
+                    <v-btn
+                        v-if="placement.armedRouteId.value"
+                        variant="text"
+                        size="small"
+                        prepend-icon="mdi-skip-next"
+                        data-testid="placement-skip"
+                        @click="placement.skipArmed()"
+                    >
+                        {{ $t('mapPlacement.skip') }}
+                    </v-btn>
+                    <v-btn
+                        v-if="
+                            placement.armedRouteId.value ||
+                            placement.checkedIds.value.size
+                        "
+                        icon="mdi-close"
+                        variant="text"
+                        size="small"
+                        :aria-label="$t('actions.cancel')"
+                        data-testid="placement-cancel"
+                        @click="placement.cancelArming()"
                     />
-                </div>
-
-                <aside
-                    class="map-workspace__side placement-side"
-                    data-testid="placement-panel"
-                >
-                    <div
-                        v-if="selectedWall"
-                        class="placement-wall-box"
-                        data-testid="placement-wall-box"
-                    >
-                        <p class="font-weight-semibold mb-1">
-                            {{ selectedWall.name }}
-                        </p>
-                        <p class="text-body-small text-medium-emphasis mb-2">
-                            {{
-                                $t('mapPlacement.wallRoutes', {
-                                    n: wallRoutes.length,
-                                })
-                            }}
-                        </p>
-                        <p
-                            v-if="wallAge || lastReset"
-                            class="text-body-small text-medium-emphasis mb-2"
-                            data-testid="placement-wall-age"
-                        >
-                            <template v-if="wallAge">
-                                {{
-                                    $t('mapPlacement.wallAge', {
-                                        oldest: wallAge.oldest,
-                                        average: wallAge.average,
-                                    })
-                                }}
-                            </template>
-                            <template v-if="lastReset">
-                                <template v-if="wallAge">·</template>
-                                {{
-                                    $t('mapPlacement.lastReset', {
-                                        date: formatDate(lastReset, {
-                                            locale,
-                                        }),
-                                    })
-                                }}
-                            </template>
-                        </p>
-                        <div class="d-flex flex-wrap ga-2">
-                            <v-btn
-                                size="small"
-                                variant="tonal"
-                                prepend-icon="mdi-distribute-horizontal-center"
-                                :disabled="wallRoutes.length < 2"
-                                data-testid="placement-distribute"
-                                @click="distribute"
-                            >
-                                {{ $t('mapPlacement.distribute') }}
-                            </v-btn>
-                            <v-btn
-                                size="small"
-                                variant="text"
-                                color="error"
-                                prepend-icon="mdi-restore-alert"
-                                :disabled="
-                                    !savedWallRouteIds.length ||
-                                    changes.length > 0
-                                "
-                                :title="
-                                    changes.length
-                                        ? $t('mapPlacement.resetNeedsSave')
-                                        : undefined
-                                "
-                                data-testid="placement-reset-wall"
-                                @click="resetDialogOpen = true"
-                            >
-                                {{ $t('mapPlacement.resetWall') }}
-                            </v-btn>
-                        </div>
-                    </div>
-
-                    <v-tabs
-                        v-model="tab"
-                        density="compact"
-                        grow
-                        class="flex-grow-0"
-                    >
-                        <v-tab
-                            value="unplaced"
-                            data-testid="placement-tab-unplaced"
-                        >
-                            {{
-                                $t('mapPlacement.unplaced', {
-                                    n: unplacedRoutes.length,
-                                })
-                            }}
-                        </v-tab>
-                        <v-tab
-                            value="placed"
-                            data-testid="placement-tab-placed"
-                        >
-                            {{
-                                $t('mapPlacement.placed', {
-                                    n: placedRoutes.length,
-                                })
-                            }}
-                        </v-tab>
-                    </v-tabs>
-
-                    <v-text-field
-                        v-model="search"
-                        :label="$t('climbing.searchRouteName')"
-                        prepend-inner-icon="mdi-magnify"
-                        density="compact"
-                        hide-details
-                        clearable
-                        class="ma-3 mb-2 flex-grow-0"
-                        data-testid="placement-search"
-                    />
-                    <div class="placement-filters">
-                        <v-select
-                            v-model="gradeFilter"
-                            :items="gradeOptions"
-                            :label="$t('climbing.difficulty')"
-                            density="compact"
-                            hide-details
-                            clearable
-                            data-testid="placement-grade-filter"
+                    <template v-else-if="placement.selectedPlaced.value">
+                        <v-btn
+                            icon="mdi-chevron-left"
+                            variant="tonal"
+                            size="small"
+                            :aria-label="$t('mapPlacement.nudgeBack')"
+                            :title="$t('mapPlacement.nudgeBack')"
+                            data-testid="placement-nudge-back"
+                            @click="placement.nudge(-1)"
                         />
-                        <MapColorFilter
-                            v-model="colorFilter"
-                            :colors="colorOptions"
-                            data-testid="placement-color-filter"
+                        <v-btn
+                            icon="mdi-chevron-right"
+                            variant="tonal"
+                            size="small"
+                            :aria-label="$t('mapPlacement.nudgeForward')"
+                            :title="$t('mapPlacement.nudgeForward')"
+                            data-testid="placement-nudge-forward"
+                            @click="placement.nudge(1)"
                         />
-                        <v-switch
-                            v-model="keepGoing"
-                            :label="$t('mapPlacement.keepGoing')"
-                            color="primary"
-                            density="compact"
-                            hide-details
-                            inset
-                            data-testid="placement-keep-going"
-                        />
-                    </div>
-                    <div
-                        v-if="checkedIds.size"
-                        class="placement-checked"
-                        data-testid="placement-checked"
-                    >
-                        <span class="text-body-medium">
-                            {{
-                                $t(
-                                    'mapPlacement.checked',
-                                    { n: checkedIds.size },
-                                    checkedIds.size,
+                        <v-btn
+                            icon="mdi-map-marker-remove-outline"
+                            variant="text"
+                            size="small"
+                            :aria-label="$t('mapPlacement.remove')"
+                            :title="$t('mapPlacement.remove')"
+                            data-testid="placement-remove-selected"
+                            @click="
+                                placement.unplace(
+                                    placement.selectedPlaced.value.id,
                                 )
+                            "
+                        />
+                    </template>
+                </template>
+
+                <div
+                    v-if="placement.selectedWall.value"
+                    class="placement-wall-box"
+                    data-testid="placement-wall-box"
+                >
+                    <div class="d-flex align-center ga-2">
+                        <p class="font-weight-semibold flex-grow-1">
+                            {{ placement.selectedWall.value.name }}
+                            <span
+                                class="text-medium-emphasis font-weight-regular"
+                            >
+                                ·
+                                {{
+                                    $t('mapPlacement.wallRoutes', {
+                                        n: placement.wallRoutes.value.length,
+                                    })
+                                }}
+                            </span>
+                        </p>
+                        <v-btn
+                            icon="mdi-close"
+                            variant="text"
+                            size="small"
+                            :aria-label="$t('map.close')"
+                            @click="selectWall(null)"
+                        />
+                    </div>
+                    <p
+                        v-if="placement.wallAge.value || lastReset"
+                        class="text-body-small text-medium-emphasis mb-2"
+                        data-testid="placement-wall-age"
+                    >
+                        <template v-if="placement.wallAge.value">
+                            {{
+                                $t('mapPlacement.wallAge', {
+                                    oldest: placement.wallAge.value.oldest,
+                                    average: placement.wallAge.value.average,
+                                })
                             }}
-                        </span>
+                        </template>
+                        <template v-if="lastReset">
+                            <template v-if="placement.wallAge.value"
+                                >·</template
+                            >
+                            {{
+                                $t('mapPlacement.lastReset', {
+                                    date: formatDate(lastReset, { locale }),
+                                })
+                            }}
+                        </template>
+                    </p>
+                    <div class="d-flex flex-wrap ga-2">
+                        <v-btn
+                            size="small"
+                            variant="tonal"
+                            prepend-icon="mdi-distribute-horizontal-center"
+                            :disabled="placement.wallRoutes.value.length < 2"
+                            data-testid="placement-distribute"
+                            @click="placement.distribute()"
+                        >
+                            {{ $t('mapPlacement.distribute') }}
+                        </v-btn>
                         <v-btn
                             size="small"
                             variant="text"
-                            @click="checkedIds = new Set()"
+                            color="error"
+                            prepend-icon="mdi-restore-alert"
+                            :disabled="
+                                !placement.savedWallRouteIds.value.length ||
+                                placement.changes.value.length > 0
+                            "
+                            :title="
+                                placement.changes.value.length
+                                    ? $t('mapPlacement.resetNeedsSave')
+                                    : undefined
+                            "
+                            data-testid="placement-reset-wall"
+                            @click="resetDialogOpen = true"
                         >
-                            {{ $t('actions.cancel') }}
+                            {{ $t('mapPlacement.resetWall') }}
                         </v-btn>
                     </div>
+                </div>
 
-                    <v-list density="compact" class="placement-list" nav>
-                        <v-list-item
-                            v-for="item in listedRoutes"
-                            :key="item.id"
-                            :active="
-                                item.id === armedRouteId ||
-                                item.id === selectedRouteId
-                            "
-                            rounded="lg"
-                            data-testid="placement-route"
-                            :data-route-id="item.id"
-                            @pointerdown="onItemPointerDown(item, $event)"
-                            @click="onListClick(item.id)"
-                        >
-                            <template #prepend>
-                                <v-checkbox-btn
-                                    v-if="tab === 'unplaced'"
-                                    :model-value="checkedIds.has(item.id)"
-                                    density="compact"
-                                    class="mr-1"
-                                    :aria-label="item.name"
-                                    data-testid="placement-route-check"
-                                    @click.stop
-                                    @update:model-value="toggleChecked(item.id)"
-                                />
-                                <RouteColorDot
-                                    :color="item.color"
-                                    :size="20"
-                                    class="mr-3"
-                                />
-                            </template>
-                            <v-list-item-title>{{
-                                item.name
-                            }}</v-list-item-title>
-                            <v-list-item-subtitle>
-                                {{ routeSubtitle(item) }}
-                            </v-list-item-subtitle>
-                            <template v-if="item.wall" #append>
-                                <v-btn
-                                    icon="mdi-map-marker-remove-outline"
-                                    size="small"
-                                    variant="text"
-                                    :aria-label="$t('mapPlacement.remove')"
-                                    :title="$t('mapPlacement.remove')"
-                                    data-testid="placement-remove"
-                                    @click.stop="unplace(item.id)"
-                                />
-                            </template>
-                        </v-list-item>
-                    </v-list>
-                    <p
-                        v-if="!listedRoutes.length"
-                        class="text-body-small text-medium-emphasis pa-4"
+                <div
+                    v-if="placement.hasAnchorRanges.value"
+                    class="placement-auto"
+                >
+                    <v-btn
+                        block
+                        variant="tonal"
+                        prepend-icon="mdi-auto-fix"
+                        :disabled="!placement.autoPlacements.value.size"
+                        data-testid="placement-auto"
+                        @click="placement.autoPlace()"
                     >
-                        {{ $t('table.no_data') }}
-                    </p>
-                </aside>
-            </div>
-        </v-card>
+                        {{
+                            $t('mapPlacement.auto', {
+                                n: placement.autoPlacements.value.size,
+                            })
+                        }}
+                    </v-btn>
+                </div>
+
+                <v-tabs v-model="placement.tab.value" density="compact" grow>
+                    <v-tab
+                        value="unplaced"
+                        data-testid="placement-tab-unplaced"
+                    >
+                        {{
+                            $t('mapPlacement.unplaced', {
+                                n: placement.unplacedRoutes.value.length,
+                            })
+                        }}
+                    </v-tab>
+                    <v-tab value="placed" data-testid="placement-tab-placed">
+                        {{
+                            $t('mapPlacement.placed', {
+                                n: placement.placedRoutes.value.length,
+                            })
+                        }}
+                    </v-tab>
+                </v-tabs>
+
+                <div class="placement-tools">
+                    <v-text-field
+                        v-model="placement.search.value"
+                        :placeholder="$t('climbing.searchRouteName')"
+                        :aria-label="$t('climbing.searchRouteName')"
+                        prepend-inner-icon="mdi-magnify"
+                        density="compact"
+                        variant="solo-filled"
+                        flat
+                        hide-details
+                        clearable
+                        data-testid="placement-search"
+                    />
+                    <v-switch
+                        v-model="placement.keepGoing.value"
+                        :label="$t('mapPlacement.keepGoing')"
+                        color="primary"
+                        density="compact"
+                        hide-details
+                        inset
+                        data-testid="placement-keep-going"
+                    />
+                </div>
+                <div
+                    v-if="placement.checkedIds.value.size"
+                    class="placement-checked"
+                    data-testid="placement-checked"
+                >
+                    <span class="text-body-medium">
+                        {{
+                            $t(
+                                'mapPlacement.checked',
+                                { n: placement.checkedIds.value.size },
+                                placement.checkedIds.value.size,
+                            )
+                        }}
+                    </span>
+                    <v-btn
+                        size="small"
+                        variant="text"
+                        @click="placement.cancelArming()"
+                    >
+                        {{ $t('actions.cancel') }}
+                    </v-btn>
+                </div>
+
+                <v-list density="compact" class="placement-list" nav>
+                    <v-list-item
+                        v-for="item in placement.listedRoutes.value"
+                        :key="item.id"
+                        :active="
+                            item.id === placement.armedRouteId.value ||
+                            item.id === placement.selectedRouteId.value
+                        "
+                        rounded="lg"
+                        data-testid="placement-route"
+                        :data-route-id="item.id"
+                        @pointerdown="onItemPointerDown(item, $event)"
+                        @contextmenu.prevent
+                        @click="onListClick(item.id)"
+                    >
+                        <template #prepend>
+                            <v-checkbox-btn
+                                v-if="placement.tab.value === 'unplaced'"
+                                :model-value="
+                                    placement.checkedIds.value.has(item.id)
+                                "
+                                density="compact"
+                                class="mr-1"
+                                :aria-label="item.name"
+                                data-testid="placement-route-check"
+                                @click.stop
+                                @update:model-value="
+                                    placement.toggleChecked(item.id)
+                                "
+                            />
+                            <RouteColorDot
+                                :color="item.color"
+                                :size="20"
+                                class="mr-3"
+                            />
+                        </template>
+                        <v-list-item-title>{{ item.name }}</v-list-item-title>
+                        <v-list-item-subtitle>
+                            {{ routeSubtitle(item) }}
+                        </v-list-item-subtitle>
+                        <template v-if="item.wall" #append>
+                            <v-btn
+                                icon="mdi-map-marker-remove-outline"
+                                size="small"
+                                variant="text"
+                                :aria-label="$t('mapPlacement.remove')"
+                                :title="$t('mapPlacement.remove')"
+                                data-testid="placement-remove"
+                                @click.stop="placement.unplace(item.id)"
+                            />
+                        </template>
+                    </v-list-item>
+                </v-list>
+                <p
+                    v-if="!placement.listedRoutes.value.length"
+                    class="text-body-small text-medium-emphasis pa-4"
+                >
+                    {{ $t('table.no_data') }}
+                </p>
+            </MapSheet>
+        </div>
 
         <Teleport to="body">
             <div
@@ -366,8 +434,8 @@
             :title="$t('mapPlacement.resetWall')"
             :message="
                 $t('mapPlacement.resetConfirm', {
-                    n: savedWallRouteIds.length,
-                    wall: selectedWall?.name ?? '',
+                    n: placement.savedWallRouteIds.value.length,
+                    wall: placement.selectedWall.value?.name ?? '',
                 })
             "
             :confirm-text="$t('mapPlacement.resetWall')"
@@ -383,99 +451,48 @@
             :confirm-text="$t('mapPlacement.discard')"
             @confirm="settleDiscard(true)"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
-import type { LocationRecord, RouteRecord, WallRecord } from '~/types/models'
-import {
-    autoDistribute,
-    clampUnit,
-    hasAnchorRange,
-    insertByAnchor,
-    isDescendingRange,
-    roundToCm,
-    sanitizeGymMap,
-    wallForAnchor,
-} from '#shared/utils/mapGeometry'
+import type { RouteRecord } from '~/types/models'
+import type { SheetSnap } from '~/components/map/Sheet.vue'
 import { formatAnchorPoint, formatDate } from '#shared/utils/formatting'
-import { toHex6 } from '~/utils/color'
 import { formatGrade } from '#shared/utils/grades'
-import {
-    applyPlacements,
-    placementChanges,
-    routesOnWall,
-    toMapWalls,
-    type Placement,
-} from '~/utils/gymMap'
 
 definePageMeta({
     middleware: 'auth',
     requiredPermission: 'manage_routes',
+    footer: false,
 })
 
 const BATCH_SIZE = 150
 const PLACEMENT_FIELDS =
     'id,name,color,grade,grade_system,grade_index,anchor_point,type,wall,wall_position,screw_date'
-const NUDGE_STEP = 0.02
-const DAY_MS = 86_400_000
+const DRAG_THRESHOLD_PX = 6
+const LONG_PRESS_MS = 400
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
 const route = useRoute()
-const router = useRouter()
+const { mdAndUp } = useDisplay()
 const { can } = usePermissions()
 const { success: notifySuccess } = useNotification()
 
 useSeoMeta({ title: () => t('page.title.mapPlacement') })
 
-const { data: locations } = await useLocations()
-const mappedLocations = computed(() =>
-    locations.value.filter((record: LocationRecord) =>
-        sanitizeGymMap(record.map),
-    ),
-)
-const locationItems = computed(() =>
-    mappedLocations.value.map((record) => ({
-        title: record.name,
-        value: record.id,
-    })),
-)
-const locationId = computed({
-    get: () =>
-        locations.value.some((record) => record.id === route.query.location)
-            ? (route.query.location as string)
-            : (mappedLocations.value[0]?.id ?? ''),
-    set: (id: string) => {
-        if (id === locationId.value) return
-        void confirmDiscard().then((confirmed) => {
-            if (!confirmed) return
-            pending.value = new Map()
-            history.value = []
-            void router.replace({ query: { location: id } })
-        })
-    },
-})
-const map = computed(() =>
-    sanitizeGymMap(
-        locations.value.find((record) => record.id === locationId.value)?.map,
-    ),
+const { discardDialogOpen, confirmDiscard, settleDiscard } = useDiscardConfirm(
+    () => placement.changes.value.length > 0,
 )
 
-const { data: walls } = await useAsyncData(
-    'placement-walls',
-    () =>
-        locationId.value
-            ? pb.collection('walls').getFullList<WallRecord>({
-                  filter: pb.filter('location = {:id}', {
-                      id: locationId.value,
-                  }),
-                  sort: 'sort,name',
-                  requestKey: 'placementWalls',
-              })
-            : Promise.resolve([]),
-    { watch: [locationId], default: () => [] },
-)
+const { locationItems, locationId, map, walls, mapWalls } =
+    await useGymMapLocation('placement', {
+        confirmLeave: async () => {
+            const confirmed = await confirmDiscard()
+            if (confirmed) placement.reset()
+            return confirmed
+        },
+    })
 
 const { data: routes, refresh: refreshRoutes } = await useAsyncData(
     'placement-routes',
@@ -493,145 +510,20 @@ const { data: routes, refresh: refreshRoutes } = await useAsyncData(
     { watch: [locationId], default: () => [] },
 )
 
-const mapWalls = computed(() =>
-    map.value ? toMapWalls(walls.value, map.value) : [],
-)
-const wallIds = computed(() => new Set(mapWalls.value.map((wall) => wall.id)))
+const placement = useMapPlacement(routes, walls, mapWalls)
 
-const pending = ref(new Map<string, Placement>())
-const history = ref<Map<string, Placement>[]>([])
-
-const effectiveRoutes = computed(() =>
-    applyPlacements(routes.value, pending.value),
-)
-const changes = computed(() => placementChanges(routes.value, pending.value))
-
-const selectedRouteId = ref<string | null>(null)
-const selectedWallId = ref<string | null>(null)
-const armedRouteId = ref<string | null>(null)
-const tab = ref<'unplaced' | 'placed'>('unplaced')
-const search = ref('')
-const gradeFilter = ref<string | null>(null)
-const colorFilter = ref<string | null>(null)
-const keepGoing = ref(true)
-const checkedIds = ref(new Set<string>())
-
-const isPlaced = (item: { wall?: string | null }) =>
-    !!item.wall && wallIds.value.has(item.wall)
-const unplacedRoutes = computed(() =>
-    effectiveRoutes.value.filter((item) => !isPlaced(item)),
-)
-const placedRoutes = computed(() => effectiveRoutes.value.filter(isPlaced))
-const gradeOptions = computed(() =>
-    [...new Set(effectiveRoutes.value.map((item) => formatGrade(item)))].sort(
-        (a, b) => a.localeCompare(b, undefined, { numeric: true }),
-    ),
-)
-const colorOptions = computed(() => [
-    ...new Set(
-        effectiveRoutes.value.map((item) => toHex6(item.color)).filter(Boolean),
-    ),
-])
-
-function matchesFilters(item: RouteRecord) {
-    const query = (search.value ?? '').trim().toLowerCase()
-    return (
-        (!query || item.name.toLowerCase().includes(query)) &&
-        (!gradeFilter.value || formatGrade(item) === gradeFilter.value) &&
-        (!colorFilter.value || toHex6(item.color) === colorFilter.value)
-    )
-}
-
-const listedUnplaced = computed(() =>
-    unplacedRoutes.value.filter(matchesFilters),
-)
-const listedRoutes = computed(() =>
-    tab.value === 'unplaced'
-        ? listedUnplaced.value
-        : placedRoutes.value.filter(matchesFilters),
-)
-
-const canvasArmedId = computed(
-    () => armedRouteId.value ?? checkedIds.value.values().next().value ?? null,
-)
-const selectedPlaced = computed(() => {
-    const item = effectiveRoutes.value.find(
-        (candidate) => candidate.id === selectedRouteId.value,
-    )
-    return item && isPlaced(item) ? item : null
-})
-
-const hasAnchorRanges = computed(() => walls.value.some(hasAnchorRange))
-const autoPlacements = computed(() => {
-    const ranged = walls.value.filter(
-        (wall) => wallIds.value.has(wall.id) && hasAnchorRange(wall),
-    )
-    const incomingByWall = new Map<string, RouteRecord[]>()
-    for (const item of unplacedRoutes.value) {
-        const wallId = wallForAnchor(ranged, item.anchor_point)
-        if (wallId)
-            incomingByWall.set(wallId, [
-                ...(incomingByWall.get(wallId) ?? []),
-                item,
-            ])
-    }
-    const placements = new Map<string, Placement>()
-    for (const [wallId, incoming] of incomingByWall)
-        for (const [routeId, position] of insertByAnchor(
-            routesOnWall(effectiveRoutes.value, wallId),
-            incoming,
-            isDescending(wallId),
-        ))
-            placements.set(routeId, { wall: wallId, position })
-    return placements
-})
-
-const selectedWall = computed(() =>
-    mapWalls.value.find((wall) => wall.id === selectedWallId.value),
-)
-const wallRoutes = computed(() =>
-    selectedWallId.value
-        ? routesOnWall(effectiveRoutes.value, selectedWallId.value)
-        : [],
-)
-
-const savedWallRouteIds = computed(() =>
-    selectedWallId.value
-        ? routesOnWall(routes.value, selectedWallId.value).map(
-              (item) => item.id,
-          )
-        : [],
-)
-
-const wallAge = computed(() => {
-    const now = Date.now()
-    const ages = wallRoutes.value
-        .map((item) =>
-            item.screw_date
-                ? (now -
-                      new Date(item.screw_date.replace(' ', 'T')).getTime()) /
-                  DAY_MS
-                : NaN,
-        )
-        .filter((age) => Number.isFinite(age) && age >= 0)
-    if (!ages.length) return null
-    return {
-        oldest: Math.round(Math.max(...ages)),
-        average: Math.round(
-            ages.reduce((sum, age) => sum + age, 0) / ages.length,
-        ),
-    }
-})
+const sheetSnap = ref<SheetSnap>('half')
+const sheetCover = ref(0)
 
 const { data: lastReset, refresh: refreshLastReset } = useAsyncData(
     'placement-wall-reset',
     () =>
-        selectedWallId.value
+        placement.selectedWallId.value
             ? pb
                   .collection('routes')
                   .getList<RouteRecord>(1, 1, {
                       filter: pb.filter('archived = true && wall = {:wall}', {
-                          wall: selectedWallId.value,
+                          wall: placement.selectedWallId.value,
                       }),
                       sort: '-archived_at',
                       fields: 'archived_at',
@@ -639,27 +531,25 @@ const { data: lastReset, refresh: refreshLastReset } = useAsyncData(
                   })
                   .then((result) => result.items[0]?.archived_at ?? null)
             : Promise.resolve(null),
-    { watch: [selectedWallId], default: () => null, server: false },
+    {
+        watch: [placement.selectedWallId],
+        default: () => null,
+        server: false,
+    },
 )
 
 const hint = computed(() => {
-    if (checkedIds.value.size && !armedRouteId.value)
-        return t(
-            'mapPlacement.hints.checked',
-            { n: checkedIds.value.size },
-            checkedIds.value.size,
-        )
-    if (armedRouteId.value) {
-        const armed = effectiveRoutes.value.find(
-            (item) => item.id === armedRouteId.value,
-        )
-        return t('mapPlacement.hints.armed', { name: armed?.name ?? '' })
-    }
-    const selected = effectiveRoutes.value.find(
-        (item) => item.id === selectedRouteId.value,
-    )
-    if (selected && isPlaced(selected))
-        return t('mapPlacement.hints.selected', { name: selected.name })
+    const checked = placement.checkedIds.value.size
+    if (checked && !placement.armedRouteId.value)
+        return t('mapPlacement.hints.checked', { n: checked }, checked)
+    if (placement.armedRoute.value)
+        return t('mapPlacement.hints.armed', {
+            name: placement.armedRoute.value.name,
+        })
+    if (placement.selectedPlaced.value)
+        return t('mapPlacement.hints.selected', {
+            name: placement.selectedPlaced.value.name,
+        })
     return t('mapPlacement.hints.idle')
 })
 
@@ -671,118 +561,23 @@ function routeSubtitle(item: RouteRecord) {
         : `${grade} · ${t('climbing.anchor_point')} ${anchor}`
 }
 
-function update(next: Map<string, Placement>) {
-    history.value = [...history.value, pending.value].slice(-100)
-    pending.value = next
+function selectWall(wallId: string | null) {
+    placement.selectedWallId.value = wallId
+    if (wallId && !mdAndUp.value && sheetSnap.value === 'peek')
+        sheetSnap.value = 'half'
 }
 
-function isDescending(wallId: string) {
-    const wall = walls.value.find((record) => record.id === wallId)
-    return !!wall && isDescendingRange(wall)
+function revealMap() {
+    if (!mdAndUp.value) sheetSnap.value = 'peek'
 }
 
-function nextUnplacedAfter(routeId: string) {
-    const order = listedUnplaced.value
-    const index = order.findIndex((item) => item.id === routeId)
-    return index === -1 ? null : (order[index + 1]?.id ?? null)
-}
-
-function place(routeId: string, wallId: string, position: number) {
-    if (checkedIds.value.has(routeId) && !armedRouteId.value) {
-        placeChecked(wallId)
-        return
-    }
-    const wasArmed = routeId === armedRouteId.value
-    const following = wasArmed ? nextUnplacedAfter(routeId) : null
-    const next = new Map(pending.value)
-    next.set(routeId, { wall: wallId, position })
-    update(next)
-    if (wasArmed) armedRouteId.value = keepGoing.value ? following : null
-    selectedRouteId.value = routeId
-}
-
-function placeChecked(wallId: string) {
-    const incoming = effectiveRoutes.value.filter((item) =>
-        checkedIds.value.has(item.id),
-    )
-    const placed = routesOnWall(effectiveRoutes.value, wallId).filter(
-        (item) => !checkedIds.value.has(item.id),
-    )
-    const next = new Map(pending.value)
-    for (const [routeId, position] of insertByAnchor(
-        placed,
-        incoming,
-        isDescending(wallId),
-    ))
-        next.set(routeId, { wall: wallId, position })
-    update(next)
-    checkedIds.value = new Set()
-    selectedWallId.value = wallId
-}
-
-function toggleChecked(routeId: string) {
-    const next = new Set(checkedIds.value)
-    if (!next.delete(routeId)) next.add(routeId)
-    checkedIds.value = next
-    armedRouteId.value = null
-}
-
-function autoPlace() {
-    update(new Map([...pending.value, ...autoPlacements.value]))
-    armedRouteId.value = null
-    checkedIds.value = new Set()
-}
-
-function skipArmed() {
-    if (!armedRouteId.value) return
-    armedRouteId.value =
-        nextUnplacedAfter(armedRouteId.value) ??
-        listedUnplaced.value[0]?.id ??
-        null
-}
-
-function nudge(direction: 1 | -1) {
-    const item = selectedPlaced.value
-    if (!item) return
-    const next = new Map(pending.value)
-    next.set(item.id, {
-        wall: item.wall ?? null,
-        position: roundToCm(
-            clampUnit((item.wall_position ?? 0.5) + direction * NUDGE_STEP),
-        ),
-    })
-    update(next)
-}
-
-function unplace(routeId: string) {
-    const next = new Map(pending.value)
-    next.set(routeId, { wall: null, position: null })
-    update(next)
-    if (selectedRouteId.value === routeId) selectedRouteId.value = null
-}
-
-function distribute() {
-    const positions = autoDistribute(wallRoutes.value)
-    const next = new Map(pending.value)
-    for (const [routeId, position] of positions)
-        next.set(routeId, { wall: selectedWallId.value, position })
-    update(next)
-}
-
-function undo() {
-    const previous = history.value.at(-1)
-    if (!previous) return
-    pending.value = previous
-    history.value = history.value.slice(0, -1)
-}
+watch(placement.canvasArmedId, (armedId) => {
+    if (armedId) revealMap()
+})
 
 async function discard() {
-    if (!(await confirmDiscard())) return
-    pending.value = new Map()
-    history.value = []
+    if (await confirmDiscard()) placement.reset()
 }
-
-const DRAG_THRESHOLD_PX = 6
 
 const canvasRef = useTemplateRef<{
     previewAt: (clientX: number, clientY: number) => void
@@ -798,29 +593,47 @@ const dragging = ref<{
 let suppressClick = false
 
 function onItemPointerDown(item: RouteRecord, event: PointerEvent) {
-    if (event.button !== 0 || event.pointerType === 'touch') return
+    if (event.button !== 0) return
+    const isTouch = event.pointerType === 'touch'
     const start = { x: event.clientX, y: event.clientY }
+    let longPressed = !isTouch
+    let pressTimer = 0
 
+    const startDrag = (x: number, y: number) => {
+        dragging.value = {
+            id: item.id,
+            name: item.name,
+            color: item.color,
+            x,
+            y,
+        }
+        canvasRef.value?.previewAt(x, y)
+    }
+    const preventScroll = (touchEvent: TouchEvent) => {
+        if (dragging.value) touchEvent.preventDefault()
+    }
+    const cleanup = () => {
+        clearTimeout(pressTimer)
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', end)
+        window.removeEventListener('pointercancel', cancel)
+        window.removeEventListener('touchmove', preventScroll)
+    }
     const move = (moveEvent: PointerEvent) => {
         const distance = Math.hypot(
             moveEvent.clientX - start.x,
             moveEvent.clientY - start.y,
         )
+        if (!longPressed) {
+            if (distance >= DRAG_THRESHOLD_PX) cleanup()
+            return
+        }
         if (!dragging.value && distance < DRAG_THRESHOLD_PX) return
         moveEvent.preventDefault()
-        dragging.value = {
-            id: item.id,
-            name: item.name,
-            color: item.color,
-            x: moveEvent.clientX,
-            y: moveEvent.clientY,
-        }
-        canvasRef.value?.previewAt(moveEvent.clientX, moveEvent.clientY)
+        startDrag(moveEvent.clientX, moveEvent.clientY)
     }
     const end = (endEvent: PointerEvent) => {
-        window.removeEventListener('pointermove', move)
-        window.removeEventListener('pointerup', end)
-        window.removeEventListener('pointercancel', cancel)
+        cleanup()
         if (!dragging.value) return
         suppressClick = true
         setTimeout(() => (suppressClick = false))
@@ -828,11 +641,19 @@ function onItemPointerDown(item: RouteRecord, event: PointerEvent) {
         dragging.value = null
     }
     const cancel = () => {
-        window.removeEventListener('pointermove', move)
-        window.removeEventListener('pointerup', end)
-        window.removeEventListener('pointercancel', cancel)
+        cleanup()
         canvasRef.value?.previewAt(-1, -1)
         dragging.value = null
+    }
+
+    if (isTouch) {
+        window.addEventListener('touchmove', preventScroll, { passive: false })
+        pressTimer = window.setTimeout(() => {
+            longPressed = true
+            navigator.vibrate?.(10)
+            revealMap()
+            startDrag(start.x, start.y)
+        }, LONG_PRESS_MS)
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', end)
@@ -841,26 +662,19 @@ function onItemPointerDown(item: RouteRecord, event: PointerEvent) {
 
 function onListClick(routeId: string) {
     if (suppressClick) return
-    armedRouteId.value = armedRouteId.value === routeId ? null : routeId
-    selectedRouteId.value = routeId
+    placement.arm(routeId)
 }
 
 const { pending: saving, run: runSave } = useAsyncAction()
 
 async function save() {
-    if (saving.value || !changes.value.length) return
+    const changes = placement.changes.value
+    if (saving.value || !changes.length) return
     const saved = await runSave(
         async () => {
-            for (
-                let start = 0;
-                start < changes.value.length;
-                start += BATCH_SIZE
-            ) {
+            for (let start = 0; start < changes.length; start += BATCH_SIZE) {
                 const batch = pb.createBatch()
-                for (const change of changes.value.slice(
-                    start,
-                    start + BATCH_SIZE,
-                ))
+                for (const change of changes.slice(start, start + BATCH_SIZE))
                     batch.collection('routes').update(change.id, {
                         wall: change.wall,
                         wall_position: change.wall_position,
@@ -868,8 +682,7 @@ async function save() {
                 await batch.send()
             }
             await refreshRoutes()
-            pending.value = new Map()
-            history.value = []
+            placement.reset()
             return true
         },
         { success: t('mapPlacement.saved') },
@@ -881,7 +694,7 @@ const resetDialogOpen = ref(false)
 const { pending: resetting, run: runReset } = useAsyncAction()
 
 async function resetWall() {
-    const wallId = selectedWallId.value
+    const wallId = placement.selectedWallId.value
     if (resetting.value || !wallId) return
     const archived = await runReset(async () => {
         const current = await pb.collection('routes').getFullList<RouteRecord>({
@@ -912,17 +725,11 @@ watch(
         const linked = route.query.route
         if (
             typeof linked === 'string' &&
-            unplacedRoutes.value.some((item) => item.id === linked)
-        ) {
-            armedRouteId.value = linked
-            selectedRouteId.value = linked
-        }
+            placement.unplacedRoutes.value.some((item) => item.id === linked)
+        )
+            placement.arm(linked)
     },
     { once: true, immediate: true },
-)
-
-const { discardDialogOpen, confirmDiscard, settleDiscard } = useDiscardConfirm(
-    () => changes.value.length > 0,
 )
 
 onBeforeRouteLeave(() => confirmDiscard())
@@ -930,34 +737,29 @@ onBeforeRouteLeave(() => confirmDiscard())
 function onKeyDown(event: KeyboardEvent) {
     const target = event.target as HTMLElement | null
     if (target && ['INPUT', 'TEXTAREA'].includes(target.tagName)) return
+    const selected = placement.selectedPlaced.value
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
-        undo()
+        placement.undo()
         event.preventDefault()
     } else if (event.key === 'Escape') {
-        armedRouteId.value = null
-        checkedIds.value = new Set()
+        placement.cancelArming()
     } else if (
         (event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
-        selectedPlaced.value
+        selected
     ) {
-        nudge(event.key === 'ArrowLeft' ? -1 : 1)
+        placement.nudge(event.key === 'ArrowLeft' ? -1 : 1)
         event.preventDefault()
     } else if (
         (event.key === 'Delete' || event.key === 'Backspace') &&
-        selectedRouteId.value &&
-        isPlaced(
-            effectiveRoutes.value.find(
-                (item) => item.id === selectedRouteId.value,
-            ) ?? {},
-        )
+        selected
     ) {
-        unplace(selectedRouteId.value)
+        placement.unplace(selected.id)
         event.preventDefault()
     }
 }
 
 function onBeforeUnload(event: BeforeUnloadEvent) {
-    if (changes.value.length) event.preventDefault()
+    if (placement.changes.value.length) event.preventDefault()
 }
 
 onMounted(() => {
@@ -972,70 +774,72 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.location-select {
-    min-width: 200px;
+.placement-location {
+    flex: 0 1 200px;
+    min-width: 0;
 }
 
 .placement-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.placement-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    padding-top: 48px;
 }
 
 .placement-hint {
-    flex: 1 1 280px;
-}
-
-.placement-side {
-    display: flex;
-    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 }
 
 .placement-wall-box {
-    padding: 12px 16px;
+    padding: 8px 8px 12px 16px;
     border-bottom: 1px solid
         rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
-.placement-filters {
+.placement-auto {
+    padding: 8px 12px;
+}
+
+.placement-tools {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    padding: 0 12px 8px;
+    gap: 4px 12px;
+    padding: 8px 12px 0;
 }
 
-.placement-filters .v-select {
-    flex: 1 1 140px;
+.placement-tools .v-text-field {
+    flex: 1 1 180px;
+}
+
+.placement-tools .v-switch {
+    flex: 0 0 auto;
 }
 
 .placement-checked {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: 8px;
     padding: 4px 12px 4px 16px;
     background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .placement-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-top: 0;
+    padding-top: 4px;
 }
 
 .placement-list :deep(.v-list-item) {
     cursor: grab;
     user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .placement-drag-ghost {
@@ -1052,5 +856,23 @@ onBeforeUnmount(() => {
     font-size: 0.8125rem;
     pointer-events: none;
     transform: translate(12px, 12px);
+}
+
+@media (max-width: 599.98px) {
+    .map-screen__title {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .placement-location {
+        flex: 1 1 auto;
+    }
+
+    .placement-page .map-screen__bar {
+        justify-content: flex-end;
+    }
 }
 </style>
