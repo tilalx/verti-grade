@@ -28,6 +28,10 @@ export default defineNuxtConfig({
     },
     ssr: true,
     routeRules: {
+        '/manage/**': { ssr: false },
+        '/admin/**': { ssr: false },
+        '/account/**': { ssr: false },
+        '/logbook': { ssr: false },
         '/admin/routes': {
             redirect: { to: '/manage/routes', statusCode: 301 },
         },
