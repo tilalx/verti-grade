@@ -595,7 +595,6 @@ const getAllRouteRatings = async (): Promise<void> => {
         const data = await pb.collection('ratings').getFullList<RatingRecord>({
             filter: pb.filter('route_id = {:id}', { id: route_id.value }),
             sort: '-created',
-            expand: 'user',
             requestKey: 'routeRatings',
         })
         reviews.value = data.map(mapReview)
