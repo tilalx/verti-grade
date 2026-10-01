@@ -76,6 +76,7 @@ export function useGlobalSearch() {
         const res = await pb.collection('routes').getList<RouteRecord>(1, 8, {
             filter: `archived = false && ${filter}`,
             sort: 'name',
+            skipTotal: true,
             requestKey: null,
         })
         return res.items.map((route) => ({
@@ -99,6 +100,7 @@ export function useGlobalSearch() {
             .collection('users')
             .getList<UserRecord>(1, RESULTS_PER_GROUP, {
                 filter: `(username ~ ${term} || email ~ ${term} || name ~ ${term} || firstname ~ ${term})`,
+                skipTotal: true,
                 requestKey: null,
             })
         return res.items.map((user) => ({
@@ -119,6 +121,7 @@ export function useGlobalSearch() {
             .collection('roles')
             .getList<RoleRecord>(1, RESULTS_PER_GROUP, {
                 filter: `name ~ ${quote(query)}`,
+                skipTotal: true,
                 requestKey: null,
             })
         return res.items.map((role) => ({
@@ -138,6 +141,7 @@ export function useGlobalSearch() {
                 filter: `(comment ~ ${term} || route_id.name ~ ${term})`,
                 expand: 'route_id',
                 sort: '-created',
+                skipTotal: true,
                 requestKey: null,
             })
         return res.items.map((rating) => ({
@@ -157,6 +161,7 @@ export function useGlobalSearch() {
             .getList<ReportRecord>(1, RESULTS_PER_GROUP, {
                 filter: `(explanation ~ ${term} || notifier_name ~ ${term})`,
                 sort: '-created',
+                skipTotal: true,
                 requestKey: null,
             })
         return res.items.map((report) => ({
