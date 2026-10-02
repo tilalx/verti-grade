@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { authHeader, gotoSettled } from '../../support/nav'
+import { authHeader, gotoSettled, gotoSubscribed } from '../../support/nav'
 import { uiaa } from '../../support/seed'
 
 function stat(page: Page, key: string) {
@@ -18,17 +18,6 @@ function trend(page: Page, key: string) {
     return page
         .getByTestId(`analytics-stat-${key}`)
         .getByTestId('stats-card-trend')
-}
-
-async function gotoSubscribed(page: Page, path: string, topic: string) {
-    const subscribed = page.waitForResponse(
-        (response) =>
-            response.url().includes('/api/realtime') &&
-            response.request().method() === 'POST' &&
-            !!response.request().postData()?.includes(topic),
-    )
-    await gotoSettled(page, path)
-    await subscribed
 }
 
 async function analyticsListsSetter(
