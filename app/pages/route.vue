@@ -536,7 +536,9 @@ const getRouteMetadata = async (): Promise<void> => {
             ...record,
             creator: normalizeCreators(record.creator),
         }
-    } catch {
+    } catch (err: unknown) {
+        const status = (err as { status?: number }).status ?? 0
+        if (status !== 404) throw createError({ status: status || 503 })
         metadata.value = null
     }
 }
@@ -585,7 +587,7 @@ function onReviewSaved() {
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-const { data: initial } = await useAsyncData(
+const { data: initial, error: loadError } = await useAsyncData(
     `route-detail:${route_id.value}`,
     async () => {
         if (!route_id.value) return null
@@ -599,6 +601,8 @@ if (initial.value) {
     reviews.value = initial.value.reviews
 }
 
+if (loadError.value)
+    throw createError({ status: loadError.value.status, fatal: true })
 if (!metadata.value) throw createError({ status: 404, fatal: true })
 
 loading.value = false
