@@ -1,14 +1,8 @@
 <template>
     <div class="map-view" data-testid="map-view">
-        <svg
-            ref="svgRef"
-            class="map-svg"
-            :class="{ 'map-svg--panning': isPanning }"
-            :viewBox="viewBoxAttr"
-            preserveAspectRatio="xMidYMid meet"
-            tabindex="0"
-            role="group"
-            :aria-label="$t('map.label')"
+        <MapCanvas
+            :pan-zoom="panZoom"
+            :label="$t('map.label')"
             data-testid="map-svg"
             @click="emit('selectWall', null)"
         >
@@ -91,55 +85,33 @@
                     />
                 </g>
             </g>
-        </svg>
-
-        <div v-if="size.width" class="map-labels">
-            <button
-                v-for="label in labels"
-                :key="label.id"
-                type="button"
-                tabindex="-1"
-                class="wall-pill"
-                :class="{ 'wall-pill--selected': label.id === selectedWallId }"
-                :style="{ left: `${label.x}px`, top: `${label.y}px` }"
-                data-testid="map-wall-label"
-                :data-name="label.name"
-                @click="emit('selectWall', label.id)"
-            >
-                <span class="wall-pill__name">{{ label.name }}</span>
-                <span
-                    v-if="label.count"
-                    class="wall-pill__count"
-                    data-testid="map-wall-count"
-                    >{{ label.count }}</span
-                >
-            </button>
-        </div>
-
-        <div class="map-controls">
-            <v-btn
-                icon="mdi-plus"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.zoomIn')"
-                @click="zoomBy(1.5)"
-            />
-            <v-btn
-                icon="mdi-minus"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.zoomOut')"
-                @click="zoomBy(1 / 1.5)"
-            />
-            <v-btn
-                icon="mdi-fit-to-page-outline"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.fit')"
-                data-testid="map-fit"
-                @click="fitAll(true)"
-            />
-        </div>
+            <template #overlay>
+                <div v-if="size.width" class="map-labels">
+                    <button
+                        v-for="label in labels"
+                        :key="label.id"
+                        type="button"
+                        tabindex="-1"
+                        class="wall-pill"
+                        :class="{
+                            'wall-pill--selected': label.id === selectedWallId,
+                        }"
+                        :style="{ left: `${label.x}px`, top: `${label.y}px` }"
+                        data-testid="map-wall-label"
+                        :data-name="label.name"
+                        @click="emit('selectWall', label.id)"
+                    >
+                        <span class="wall-pill__name">{{ label.name }}</span>
+                        <span
+                            v-if="label.count"
+                            class="wall-pill__count"
+                            data-testid="map-wall-count"
+                            >{{ label.count }}</span
+                        >
+                    </button>
+                </div>
+            </template>
+        </MapCanvas>
     </div>
 </template>
 
@@ -175,8 +147,10 @@ const props = withDefaults(
         showSent?: boolean
         selectedWallId?: string | null
         selectedRouteId?: string | null
+        insetBottom?: number
     }>(),
     {
+        insetBottom: 0,
         layoutRoutes: null,
         sentIds: null,
         matchingIds: null,
@@ -192,7 +166,7 @@ const emit = defineEmits<{
 }>()
 
 const DOT_RADIUS_PX = 5.5
-const HIT_RADIUS_PX = 13
+const HIT_RADIUS_PX = { fine: 13, coarse: 22 }
 const LABEL_HEIGHT_PX = 46
 const LABEL_CHAR_PX = 8
 const LABEL_PADDING_PX = 28
@@ -204,7 +178,6 @@ const FOCUS_PADDING = 2
 const ROUTE_FOCUS_RADIUS = 4
 
 const { t } = useI18n()
-const svgRef = useTemplateRef<SVGSVGElement>('svgRef')
 const bounds = computed<MapBounds>(() => ({
     minX: 0,
     minY: 0,
@@ -212,21 +185,18 @@ const bounds = computed<MapBounds>(() => ({
     maxY: props.map.height,
 }))
 
-const {
-    viewBox,
-    viewBoxAttr,
-    size,
-    pixelsPerUnit,
-    isPanning,
-    zoomBy,
-    fitTo,
-    fitAll,
-} = useSvgPanZoom(svgRef, {
+const panZoom = useSvgPanZoom({
     bounds,
     minWidth: 3,
     maxPixelsPerUnit: MAX_PIXELS_PER_METRE,
     doubleClickZoom: true,
+    insetBottom: computed(() => props.insetBottom ?? 0),
 })
+const { viewBox, size, pixelsPerUnit, fitTo, fitAll } = panZoom
+const coarsePointer = useCoarsePointer()
+const hitRadiusPx = computed(() =>
+    coarsePointer.value ? HIT_RADIUS_PX.coarse : HIT_RADIUS_PX.fine,
+)
 
 const mapWalls = computed(() => toMapWalls(props.walls, props.map))
 const dots = computed(() => placeRoutes(mapWalls.value, props.routes))
@@ -240,7 +210,7 @@ const counts = computed(() =>
 )
 
 const dotRadius = computed(() => DOT_RADIUS_PX / pixelsPerUnit.value)
-const hitRadius = computed(() => HIT_RADIUS_PX / pixelsPerUnit.value)
+const hitRadius = computed(() => hitRadiusPx.value / pixelsPerUnit.value)
 
 function isDimmed(routeId: string) {
     return !!props.matchingIds && !props.matchingIds.has(routeId)
@@ -304,7 +274,7 @@ const labels = computed(() => {
                 height: LABEL_HEIGHT_PX,
             },
             screenDots,
-            HIT_RADIUS_PX,
+            hitRadiusPx.value,
             LABEL_EDGE_PX,
         )
         const y = clampInside(box.y, LABEL_HEIGHT_PX, size.value.height)
@@ -357,26 +327,6 @@ defineExpose({ focusWall, focusRoute, fitAll })
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    background: rgba(var(--v-theme-on-surface), 0.03);
-}
-
-.map-svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    user-select: none;
-    outline: none;
-    cursor: grab;
-}
-
-.map-svg:focus-visible {
-    box-shadow: inset 0 0 0 2px rgb(var(--v-theme-primary));
-}
-
-.map-svg--panning {
-    cursor: grabbing;
 }
 
 .map-wall {
@@ -522,14 +472,5 @@ defineExpose({ focusWall, focusRoute, fitAll })
         0 0 3px rgb(var(--v-theme-surface)),
         0 0 3px rgb(var(--v-theme-surface));
     font-variant-numeric: tabular-nums;
-}
-
-.map-controls {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 }
 </style>

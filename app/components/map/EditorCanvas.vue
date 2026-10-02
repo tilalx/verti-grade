@@ -1,15 +1,11 @@
 <template>
-    <svg
-        ref="svgRef"
-        class="editor-canvas"
-        :class="[
-            `editor-canvas--${editor.tool.value}`,
-            { 'editor-canvas--panning': isPanning },
-        ]"
-        :viewBox="viewBoxAttr"
-        tabindex="0"
+    <MapCanvas
+        :pan-zoom="panZoom"
+        :label="$t('mapEditor.canvasLabel')"
         role="application"
-        :aria-label="$t('mapEditor.canvasLabel')"
+        :cursor="
+            isDrawing || editor.tool.value === 'label' ? 'crosshair' : undefined
+        "
         data-testid="map-editor-canvas"
         @click="onCanvasClick"
         @dblclick.prevent="finishDraft"
@@ -194,7 +190,7 @@
             class="editor-cursor"
             pointer-events="none"
         />
-    </svg>
+    </MapCanvas>
 </template>
 
 <script setup lang="ts">
@@ -227,13 +223,13 @@ const props = defineProps<{
     editor: ReturnType<typeof useMapEditor>
     grid: number
     traceUrl?: string | null
+    insetBottom?: number
 }>()
 
-const HANDLE_PX = 12
-const SNAP_PX = 10
+const HANDLE_PX = { fine: 12, coarse: 22 }
+const SNAP_PX = { fine: 10, coarse: 18 }
 
 const gridId = useId()
-const svgRef = useTemplateRef<SVGSVGElement>('svgRef')
 const editor = props.editor
 const map = computed(() => editor.state.value.map)
 const walls = computed(() =>
@@ -246,16 +242,22 @@ const bounds = computed<MapBounds>(() => ({
     maxY: map.value.height,
 }))
 
-const { viewBoxAttr, pixelsPerUnit, isPanning, toMap, fitAll, zoomBy } =
-    useSvgPanZoom(svgRef, {
-        bounds,
-        minWidth: 1,
-        canStartPan: (event) =>
-            !(event.target as Element).closest('[data-draggable]'),
-    })
+const panZoom = useSvgPanZoom({
+    bounds,
+    minWidth: 1,
+    insetBottom: computed(() => props.insetBottom ?? 0),
+    canStartPan: (event) =>
+        !(event.target as Element).closest('[data-draggable]'),
+})
+const { pixelsPerUnit, toMap, fitAll, zoomBy } = panZoom
+const coarsePointer = useCoarsePointer()
+const pointerKind = computed(() => (coarsePointer.value ? 'coarse' : 'fine'))
+const snapPx = computed(() => SNAP_PX[pointerKind.value])
 
 const hoverPoint = ref<MapPoint | null>(null)
-const handleSize = computed(() => HANDLE_PX / pixelsPerUnit.value)
+const handleSize = computed(
+    () => HANDLE_PX[pointerKind.value] / pixelsPerUnit.value,
+)
 const isSelectTool = computed(() => editor.tool.value === 'select')
 const isDrawing = computed(() =>
     ['shape', 'outline', 'edge'].includes(editor.tool.value),
@@ -340,7 +342,7 @@ function snapped(
     const vertex = snapToVertices(
         raw,
         allVertices(except),
-        SNAP_PX / pixelsPerUnit.value,
+        snapPx.value / pixelsPerUnit.value,
     )
     return clampToMap(vertex ?? snapPoint(raw, props.grid), map.value)
 }
@@ -500,7 +502,7 @@ function closesPolygon(point: MapPoint) {
     const [first] = editor.draft.value
     if (!first || editor.draft.value.length < 3) return false
     const gap = Math.hypot(point[0] - first[0], point[1] - first[1])
-    return gap <= SNAP_PX / pixelsPerUnit.value
+    return gap <= snapPx.value / pixelsPerUnit.value
 }
 
 function onCanvasClick(event: MouseEvent) {
@@ -574,31 +576,6 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 </script>
 
 <style scoped>
-.editor-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    user-select: none;
-    background: rgba(var(--v-theme-on-surface), 0.03);
-    outline: none;
-}
-
-.editor-canvas:focus-visible {
-    box-shadow: inset 0 0 0 2px rgb(var(--v-theme-primary));
-}
-
-.editor-canvas--shape,
-.editor-canvas--outline,
-.editor-canvas--edge,
-.editor-canvas--label {
-    cursor: crosshair;
-}
-
-.editor-canvas--panning {
-    cursor: grabbing;
-}
-
 .editor-background {
     fill: rgb(var(--v-theme-surface));
 }

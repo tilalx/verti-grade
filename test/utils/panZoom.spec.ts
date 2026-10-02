@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
     clampToBounds,
+    fitBetweenInsets,
+    flingVelocity,
+    pinchView,
+    wheelIntent,
     interpolateView,
     mapToScreen,
     panBy,
@@ -57,5 +61,78 @@ describe('view adjustments', () => {
         const target = { x: 0, y: 0, width: 10, height: 10 }
         expect(interpolateView(view, target, 0)).toEqual(view)
         expect(interpolateView(view, target, 1)).toEqual(target)
+    })
+})
+
+describe('pinchView', () => {
+    const screen = { left: 0, top: 0, width: 400, height: 300 }
+
+    it('zooms around the fingers and follows them when they move', () => {
+        const pinched = pinchView(
+            view,
+            screen,
+            [
+                { x: 100, y: 150 },
+                { x: 300, y: 150 },
+            ],
+            [
+                { x: 0, y: 150 },
+                { x: 400, y: 150 },
+            ],
+            limits,
+        )
+        expect(pinched.width).toBe(20)
+        expect(screenToMap({ x: 200, y: 150 }, screen, pinched)).toEqual(
+            screenToMap({ x: 200, y: 150 }, screen, view),
+        )
+
+        const moved = pinchView(
+            view,
+            screen,
+            [
+                { x: 100, y: 100 },
+                { x: 200, y: 100 },
+            ],
+            [
+                { x: 150, y: 100 },
+                { x: 250, y: 100 },
+            ],
+            limits,
+        )
+        expect(moved).toEqual({ ...view, x: 5 })
+    })
+})
+
+describe('flingVelocity', () => {
+    it('slows down and eventually stops', () => {
+        const next = flingVelocity({ x: 1, y: 0 }, 16)!
+        expect(next.x).toBeLessThan(1)
+        expect(flingVelocity({ x: 1, y: 0 }, 2000)).toBeNull()
+    })
+})
+
+describe('wheelIntent', () => {
+    const wheel = { deltaX: 0, deltaY: 0, deltaMode: 0, ctrlKey: false }
+
+    it('zooms for mouse wheels and trackpad pinches, pans for two-finger scroll', () => {
+        expect(wheelIntent({ ...wheel, deltaY: 100 })).toBe('zoom')
+        expect(wheelIntent({ ...wheel, deltaY: 3, deltaMode: 1 })).toBe('zoom')
+        expect(wheelIntent({ ...wheel, deltaY: 4, ctrlKey: true })).toBe('zoom')
+        expect(wheelIntent({ ...wheel, deltaY: 12 })).toBe('pan')
+        expect(wheelIntent({ ...wheel, deltaX: 30, deltaY: 120 })).toBe('pan')
+    })
+})
+
+describe('fitBetweenInsets', () => {
+    it('fits the bounds between the chips on top and the sheet below', () => {
+        const bounds = { minX: 0, minY: 0, maxX: 40, maxY: 30 }
+        const size = { width: 400, height: 600 }
+        const fitted = fitBetweenInsets(bounds, size, 0, {
+            top: 60,
+            bottom: 300,
+        })
+        expect(mapToScreen([20, 0], size, fitted).y).toBeGreaterThanOrEqual(60)
+        expect(mapToScreen([20, 30], size, fitted).y).toBeLessThanOrEqual(300)
+        expect(fitted.height / fitted.width).toBeCloseTo(600 / 400)
     })
 })

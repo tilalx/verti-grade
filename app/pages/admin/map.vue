@@ -1,28 +1,69 @@
 <template>
-    <v-container fluid class="map-editor-page">
-        <LayoutPageHeader :title="$t('mapEditor.title')" inline-actions>
-            <template #actions>
-                <v-select
-                    v-model="locationId"
-                    :items="locationItems"
-                    :label="$t('climbing.location')"
-                    density="compact"
-                    hide-details
-                    class="location-select"
-                    data-testid="map-editor-location"
+    <div class="map-screen map-editor-page">
+        <div class="map-screen__bar" data-testid="map-editor-toolbar">
+            <h1 class="map-screen__title">{{ $t('mapEditor.title') }}</h1>
+            <v-select
+                v-model="locationId"
+                :items="locationItems"
+                :aria-label="$t('climbing.location')"
+                density="compact"
+                variant="solo-filled"
+                flat
+                hide-details
+                class="editor-location"
+                data-testid="map-editor-location"
+            />
+            <template v-if="hasMap">
+                <v-btn
+                    icon="mdi-undo"
+                    variant="text"
+                    :disabled="!editor.canUndo.value"
+                    :aria-label="$t('mapEditor.undo')"
+                    :title="$t('mapEditor.undo')"
+                    data-testid="map-editor-undo"
+                    @click="editor.undo()"
                 />
+                <v-btn
+                    icon="mdi-redo"
+                    variant="text"
+                    :disabled="!editor.canRedo.value"
+                    :aria-label="$t('mapEditor.redo')"
+                    :title="$t('mapEditor.redo')"
+                    data-testid="map-editor-redo"
+                    @click="editor.redo()"
+                />
+                <v-btn
+                    :icon="preview ? 'mdi-pencil' : 'mdi-eye-outline'"
+                    variant="text"
+                    :aria-label="
+                        preview
+                            ? $t('mapEditor.backToEditing')
+                            : $t('mapEditor.preview')
+                    "
+                    :title="
+                        preview
+                            ? $t('mapEditor.backToEditing')
+                            : $t('mapEditor.preview')
+                    "
+                    data-testid="map-editor-preview"
+                    @click="preview = !preview"
+                />
+                <v-btn
+                    color="primary"
+                    variant="flat"
+                    prepend-icon="mdi-content-save-outline"
+                    :disabled="!editor.isDirty.value || !!incompleteWall"
+                    :loading="saving"
+                    data-testid="map-editor-save"
+                    @click="save"
+                >
+                    {{ $t('mapEditor.save') }}
+                </v-btn>
             </template>
-        </LayoutPageHeader>
-
-        <LayoutDesktopHint
-            v-if="!mdAndUp"
-            data-testid="map-editor-small-screen"
-        >
-            {{ $t('mapEditor.largerScreen') }}
-        </LayoutDesktopHint>
+        </div>
 
         <LayoutEmptyState
-            v-else-if="!locations.length"
+            v-if="!locations.length"
             :title="$t('mapEditor.noLocations')"
         />
 
@@ -30,7 +71,7 @@
             v-else-if="!hasMap"
             border
             flat
-            class="setup-card"
+            class="setup-card ma-4"
             data-testid="map-editor-setup"
         >
             <v-card-text>
@@ -75,118 +116,117 @@
             </v-card-text>
         </v-card>
 
-        <v-card v-else border flat class="map-workspace editor-shell">
-            <div class="editor-toolbar" data-testid="map-editor-toolbar">
-                <v-btn-toggle
-                    :model-value="activeToolKey"
-                    density="compact"
-                    variant="outlined"
-                    divided
-                    mandatory
-                >
-                    <v-btn
-                        v-for="option in toolOptions"
-                        :key="option.key"
-                        :value="option.key"
-                        :prepend-icon="option.icon"
-                        :data-testid="`map-editor-tool-${option.key}`"
-                        @click="option.select()"
+        <div v-else class="map-screen__body">
+            <div class="map-screen__stage">
+                <MapView
+                    v-if="preview"
+                    :map="editor.state.value.map"
+                    :walls="previewWalls"
+                    :routes="previewRoutes"
+                    :inset-bottom="sheetCover"
+                />
+                <MapEditorCanvas
+                    v-else
+                    ref="canvasRef"
+                    :editor="editor"
+                    :inset-bottom="sheetCover"
+                    :grid="grid"
+                    :trace-url="traceUrl"
+                />
+                <div v-if="!preview" class="map-screen__chips editor-tools">
+                    <v-btn-toggle
+                        :model-value="activeToolKey"
+                        density="comfortable"
+                        variant="flat"
+                        color="primary"
+                        base-color="surface"
+                        divided
+                        mandatory
+                        class="editor-tools__toggle"
                     >
-                        {{ option.label }}
-                    </v-btn>
-                </v-btn-toggle>
-
-                <v-select
-                    v-model="grid"
-                    :items="gridItems"
-                    :label="$t('mapEditor.grid')"
-                    density="compact"
-                    hide-details
-                    class="grid-select"
-                />
-
-                <v-spacer />
-
-                <v-btn
-                    icon="mdi-undo"
-                    variant="text"
-                    :disabled="!editor.canUndo.value"
-                    :aria-label="$t('mapEditor.undo')"
-                    :title="$t('mapEditor.undo')"
-                    data-testid="map-editor-undo"
-                    @click="editor.undo()"
-                />
-                <v-btn
-                    icon="mdi-redo"
-                    variant="text"
-                    :disabled="!editor.canRedo.value"
-                    :aria-label="$t('mapEditor.redo')"
-                    :title="$t('mapEditor.redo')"
-                    data-testid="map-editor-redo"
-                    @click="editor.redo()"
-                />
-                <v-btn
-                    icon="mdi-fit-to-page-outline"
-                    variant="text"
-                    :aria-label="$t('map.fit')"
-                    :title="$t('map.fit')"
-                    @click="canvasRef?.fitAll(true)"
-                />
-                <v-btn
-                    :prepend-icon="preview ? 'mdi-pencil' : 'mdi-eye-outline'"
-                    variant="text"
-                    data-testid="map-editor-preview"
-                    @click="preview = !preview"
-                >
-                    {{
-                        preview
-                            ? $t('mapEditor.backToEditing')
-                            : $t('mapEditor.preview')
-                    }}
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    prepend-icon="mdi-content-save-outline"
-                    :disabled="!editor.isDirty.value || !!incompleteWall"
-                    :loading="saving"
-                    data-testid="map-editor-save"
-                    @click="save"
-                >
-                    {{ $t('mapEditor.save') }}
-                </v-btn>
-            </div>
-
-            <p
-                class="editor-hint text-body-small"
-                :class="
-                    incompleteWall && editor.tool.value === 'select'
-                        ? 'text-warning'
-                        : 'text-medium-emphasis'
-                "
-                aria-live="polite"
-                data-testid="map-editor-hint"
-            >
-                {{ hint }}
-            </p>
-
-            <div class="map-workspace__body">
-                <div class="map-workspace__stage">
-                    <MapView
-                        v-if="preview"
-                        :map="editor.state.value.map"
-                        :walls="previewWalls"
-                        :routes="previewRoutes"
-                    />
-                    <MapEditorCanvas
-                        v-else
-                        ref="canvasRef"
-                        :editor="editor"
-                        :grid="grid"
-                        :trace-url="traceUrl"
-                    />
+                        <v-btn
+                            v-for="option in toolOptions"
+                            :key="option.key"
+                            :value="option.key"
+                            :prepend-icon="mdAndUp ? option.icon : undefined"
+                            :aria-label="option.label"
+                            :title="option.label"
+                            :data-testid="`map-editor-tool-${option.key}`"
+                            @click="option.select()"
+                        >
+                            <template v-if="mdAndUp">{{
+                                option.label
+                            }}</template>
+                            <v-icon v-else :icon="option.icon" />
+                        </v-btn>
+                    </v-btn-toggle>
+                    <v-menu>
+                        <template #activator="{ props: menuProps }">
+                            <v-chip
+                                v-bind="menuProps"
+                                variant="flat"
+                                color="surface"
+                                prepend-icon="mdi-grid"
+                                append-icon="mdi-menu-down"
+                                class="editor-tools__grid"
+                                data-testid="map-editor-grid"
+                            >
+                                {{ gridLabel }}
+                            </v-chip>
+                        </template>
+                        <v-list density="compact">
+                            <v-list-item
+                                v-for="item in gridItems"
+                                :key="item.value"
+                                :title="item.title"
+                                :active="grid === item.value"
+                                @click="grid = item.value"
+                            />
+                        </v-list>
+                    </v-menu>
                 </div>
+            </div>
+            <MapSheet
+                v-model:snap="sheetSnap"
+                data-testid="map-editor-sheet"
+                @cover="sheetCover = $event"
+            >
+                <template #header>
+                    <span
+                        class="editor-hint text-body-small"
+                        :class="
+                            incompleteWall && editor.tool.value === 'select'
+                                ? 'text-warning'
+                                : 'text-medium-emphasis'
+                        "
+                        aria-live="polite"
+                        data-testid="map-editor-hint"
+                    >
+                        {{ hint }}
+                    </span>
+                    <v-btn
+                        v-if="canFinish"
+                        color="primary"
+                        variant="tonal"
+                        size="small"
+                        prepend-icon="mdi-check"
+                        data-testid="map-editor-finish"
+                        @click="canvasRef?.finishDraft()"
+                    >
+                        {{ $t('mapEditor.finish') }}
+                    </v-btn>
+                    <v-btn
+                        v-if="editor.selectedVertex.value && !isDrawing"
+                        variant="text"
+                        size="small"
+                        prepend-icon="mdi-delete-outline"
+                        data-testid="map-editor-delete-point"
+                        @click="canvasRef?.removeSelectedVertex()"
+                    >
+                        {{ $t('mapEditor.deletePoint') }}
+                    </v-btn>
+                </template>
                 <MapEditorPanel
-                    class="map-workspace__side"
                     :editor="editor"
                     :has-trace="!!location?.map_trace"
                     :trace-busy="traceBusy"
@@ -194,8 +234,8 @@
                     @upload-trace="uploadTrace"
                     @remove-trace="removeTrace"
                 />
-            </div>
-        </v-card>
+            </MapSheet>
+        </div>
 
         <ConfirmDialog
             v-model="discardDialogOpen"
@@ -204,7 +244,7 @@
             :confirm-text="$t('mapPlacement.discard')"
             @confirm="settleDiscard(true)"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -228,53 +268,33 @@ import {
     type EditorState,
     type EditorWall,
 } from '~/utils/mapEditor'
+import type { SheetSnap } from '~/components/map/Sheet.vue'
 
 definePageMeta({
     middleware: ['auth'],
     requiredPermission: 'manage_settings',
+    footer: false,
 })
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const route = useRoute()
-const router = useRouter()
 const { mdAndUp } = useDisplay()
 const editor = useMapEditor()
 
 useSeoMeta({ title: () => t('page.title.mapEditor') })
 
-const { data: locations, refresh: refreshLocations } = await useLocations()
-const locationId = computed({
-    get: () => (route.query.location as string) || locations.value[0]?.id || '',
-    set: (id: string) => {
-        if (id === locationId.value) return
-        void confirmDiscard().then((confirmed) => {
-            if (confirmed)
-                void router.replace({ query: { ...route.query, location: id } })
-        })
-    },
+const {
+    locations,
+    refreshLocations,
+    locationItems,
+    locationId,
+    location,
+    walls: wallRecords,
+    refreshWalls,
+} = await useGymMapLocation('map-editor', {
+    includeUnmapped: true,
+    confirmLeave: () => confirmDiscard(),
 })
-const location = computed(() =>
-    locations.value.find((record) => record.id === locationId.value),
-)
-const locationItems = computed(() =>
-    locations.value.map((record) => ({ title: record.name, value: record.id })),
-)
-
-const { data: wallRecords, refresh: refreshWalls } = await useAsyncData(
-    'map-editor-walls',
-    () =>
-        locationId.value
-            ? pb.collection('walls').getFullList<WallRecord>({
-                  filter: pb.filter('location = {:id}', {
-                      id: locationId.value,
-                  }),
-                  sort: 'sort,name',
-                  requestKey: 'mapEditorWalls',
-              })
-            : Promise.resolve([]),
-    { watch: [locationId], default: () => [] },
-)
 
 const { data: locationRoutes } = useAsyncData(
     'map-editor-routes',
@@ -374,6 +394,19 @@ const canvasRef = useTemplateRef<{
 }>('canvasRef')
 const grid = ref(0.5)
 const preview = ref(false)
+const sheetSnap = ref<SheetSnap>('half')
+const sheetCover = ref(0)
+const gridLabel = computed(
+    () => gridItems.value.find((item) => item.value === grid.value)?.title,
+)
+const isDrawing = computed(() =>
+    ['shape', 'outline', 'edge'].includes(editor.tool.value),
+)
+const canFinish = computed(
+    () =>
+        isDrawing.value &&
+        editor.draft.value.length >= (editor.tool.value === 'edge' ? 2 : 3),
+)
 const gridItems = computed(() => [
     { title: t('mapEditor.gridOff'), value: 0 },
     { title: '0.25 m', value: 0.25 },
@@ -624,38 +657,56 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.location-select {
-    min-width: 200px;
+.editor-location {
+    flex: 0 1 220px;
+    min-width: 0;
 }
 
 .setup-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     max-width: 520px;
 }
 
-.editor-shell {
-    min-height: 520px;
-}
-
-.editor-toolbar {
+.editor-tools {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 2px 2px 6px;
 }
 
-.grid-select {
-    max-width: 130px;
+.editor-tools__toggle,
+.editor-tools__grid {
+    flex-shrink: 0;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(var(--v-border-color), 0.12);
 }
 
 .editor-hint {
-    padding: 6px 12px;
-    margin: 0;
-    min-height: 30px;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 599.98px) {
+    .map-screen__title {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .editor-location {
+        flex: 1 1 auto;
+    }
 }
 </style>

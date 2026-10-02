@@ -1,141 +1,107 @@
 <template>
-    <div class="placement-canvas-wrap">
-        <svg
-            ref="svgRef"
-            class="placement-canvas"
+    <MapCanvas
+        :pan-zoom="panZoom"
+        :label="$t('mapPlacement.canvasLabel')"
+        role="application"
+        :cursor="armedRouteId ? 'crosshair' : undefined"
+        data-testid="placement-canvas"
+        @click="onCanvasClick"
+    >
+        <MapFloorLayer :shapes="map.shapes" />
+
+        <g
+            v-for="wall in walls"
+            :key="wall.id"
+            class="placement-wall"
             :class="{
-                'placement-canvas--armed': !!armedRouteId,
-                'placement-canvas--panning': isPanning,
+                'placement-wall--selected': wall.id === selectedWallId,
             }"
-            :viewBox="viewBoxAttr"
+            data-testid="placement-wall"
+            :data-name="wall.name"
+            role="button"
             tabindex="0"
-            role="application"
-            :aria-label="$t('mapPlacement.canvasLabel')"
-            data-testid="placement-canvas"
-            @click="onCanvasClick"
+            :aria-pressed="wall.id === selectedWallId"
+            :aria-label="wall.name"
+            @click.stop="onWallClick(wall.id, $event)"
+            @keydown.enter.prevent="onWallKey(wall.id)"
+            @keydown.space.prevent="onWallKey(wall.id)"
         >
-            <MapFloorLayer :shapes="map.shapes" />
-
-            <g
-                v-for="wall in walls"
-                :key="wall.id"
-                class="placement-wall"
-                :class="{
-                    'placement-wall--selected': wall.id === selectedWallId,
-                }"
-                data-testid="placement-wall"
-                :data-name="wall.name"
-                role="button"
-                tabindex="0"
-                :aria-pressed="wall.id === selectedWallId"
-                :aria-label="wall.name"
-                @click.stop="onWallClick(wall.id, $event)"
-                @keydown.enter.prevent="onWallKey(wall.id)"
-                @keydown.space.prevent="onWallKey(wall.id)"
+            <path
+                :d="svgPath(wall.outline)"
+                class="placement-wall-outline"
+                data-testid="placement-wall-outline"
+            />
+            <path :d="svgPath(wall.edge, false)" class="placement-wall-edge" />
+            <text
+                :x="wall.labelAt[0]"
+                :y="wall.labelAt[1]"
+                :font-size="13 / pixelsPerUnit"
+                class="placement-wall-label"
+                text-anchor="middle"
+                dominant-baseline="middle"
             >
-                <path
-                    :d="svgPath(wall.outline)"
-                    class="placement-wall-outline"
-                    data-testid="placement-wall-outline"
-                />
-                <path
-                    :d="svgPath(wall.edge, false)"
-                    class="placement-wall-edge"
-                />
-                <text
-                    :x="wall.labelAt[0]"
-                    :y="wall.labelAt[1]"
-                    :font-size="13 / pixelsPerUnit"
-                    class="placement-wall-label"
-                    text-anchor="middle"
-                    dominant-baseline="middle"
-                >
-                    {{ wall.name }}
-                </text>
-            </g>
+                {{ wall.name }}
+            </text>
+        </g>
 
-            <g
-                v-for="dot in dots"
-                :key="dot.routeId"
-                class="placement-dot"
-                :class="{
-                    'placement-dot--selected': dot.routeId === selectedRouteId,
-                    'placement-dot--dragging': dot.routeId === draggingRouteId,
-                }"
-                data-draggable
-                data-testid="placement-dot"
-                :data-route-id="dot.routeId"
-                role="button"
-                tabindex="0"
-                :aria-pressed="dot.routeId === selectedRouteId"
-                :aria-label="dotLabel(dot.routeId)"
-                @pointerdown.stop="onDotDown(dot.routeId, $event)"
-                @click.stop
-                @keydown.enter.prevent="onDotKey(dot)"
-                @keydown.space.prevent="onDotKey(dot)"
-            >
-                <circle
-                    :cx="dot.point[0]"
-                    :cy="dot.point[1]"
-                    :r="hitRadius"
-                    class="placement-dot-hit"
-                />
-                <circle
-                    :cx="dot.point[0]"
-                    :cy="dot.point[1]"
-                    :r="dotRadius"
-                    :fill="dot.fill"
-                    :stroke="dot.stroke"
-                    class="placement-dot-body"
-                />
-                <circle
-                    v-if="dot.routeId === selectedRouteId"
-                    :cx="dot.point[0]"
-                    :cy="dot.point[1]"
-                    :r="dotRadius * 2"
-                    class="placement-dot-ring"
-                />
-            </g>
-
+        <g
+            v-for="dot in dots"
+            :key="dot.routeId"
+            class="placement-dot"
+            :class="{
+                'placement-dot--selected': dot.routeId === selectedRouteId,
+                'placement-dot--dragging': dot.routeId === draggingRouteId,
+            }"
+            data-draggable
+            data-testid="placement-dot"
+            :data-route-id="dot.routeId"
+            role="button"
+            tabindex="0"
+            :aria-pressed="dot.routeId === selectedRouteId"
+            :aria-label="dotLabel(dot.routeId)"
+            @pointerdown.stop="onDotDown(dot.routeId, $event)"
+            @click.stop
+            @keydown.enter.prevent="onDotKey(dot)"
+            @keydown.space.prevent="onDotKey(dot)"
+        >
             <circle
-                v-if="ghost"
-                :cx="ghost.point[0]"
-                :cy="ghost.point[1]"
-                :r="dotRadius * 1.3"
-                class="placement-ghost"
-                pointer-events="none"
-                data-testid="placement-ghost"
+                :cx="dot.point[0]"
+                :cy="dot.point[1]"
+                :r="hitRadius"
+                class="placement-dot-hit"
             />
-        </svg>
-        <div class="placement-controls">
-            <v-btn
-                icon="mdi-plus"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.zoomIn')"
-                data-testid="placement-zoom-in"
-                @click="zoomBy(1.5)"
+            <circle
+                :cx="dot.point[0]"
+                :cy="dot.point[1]"
+                :r="dotRadius"
+                :fill="dot.fill"
+                :stroke="dot.stroke"
+                class="placement-dot-body"
             />
-            <v-btn
-                icon="mdi-minus"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.zoomOut')"
-                @click="zoomBy(1 / 1.5)"
+            <circle
+                v-if="dot.routeId === selectedRouteId"
+                :cx="dot.point[0]"
+                :cy="dot.point[1]"
+                :r="dotRadius * 2"
+                class="placement-dot-ring"
             />
-            <v-btn
-                icon="mdi-fit-to-page-outline"
-                size="small"
-                variant="elevated"
-                :aria-label="$t('map.fit')"
-                @click="fitAll(true)"
-            />
-        </div>
-    </div>
+        </g>
+
+        <circle
+            v-if="ghost"
+            :cx="ghost.point[0]"
+            :cy="ghost.point[1]"
+            :r="dotRadius * 1.3"
+            class="placement-ghost"
+            pointer-events="none"
+            data-testid="placement-ghost"
+        />
+    </MapCanvas>
 </template>
 
 <script setup lang="ts">
 import {
+    boundsOf,
     nearestWall,
     pointInPolygon,
     projectOntoPolyline,
@@ -159,6 +125,7 @@ const props = defineProps<{
     selectedRouteId: string | null
     selectedWallId: string | null
     armedRouteId: string | null
+    insetBottom?: number
 }>()
 
 const emit = defineEmits<{
@@ -173,25 +140,24 @@ const HIT_RADIUS_PX = { fine: 12, coarse: 22 }
 const SNAP_RADIUS_PX = 60
 const DRAG_THRESHOLD_PX = 4
 
-const svgRef = useTemplateRef<SVGSVGElement>('svgRef')
 const bounds = computed<MapBounds>(() => ({
     minX: 0,
     minY: 0,
     maxX: props.map.width,
     maxY: props.map.height,
 }))
-const { viewBoxAttr, pixelsPerUnit, isPanning, toMap, zoomBy, fitAll } =
-    useSvgPanZoom(svgRef, {
-        bounds,
-        minWidth: 2,
-        canStartPan: (event) =>
-            !(event.target as Element).closest('[data-draggable]'),
-    })
-
-const pointer = ref<'fine' | 'coarse'>('fine')
-onMounted(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) pointer.value = 'coarse'
+const panZoom = useSvgPanZoom({
+    bounds,
+    minWidth: 2,
+    doubleClickZoom: true,
+    insetBottom: computed(() => props.insetBottom ?? 0),
+    canStartPan: (event) =>
+        !(event.target as Element).closest('[data-draggable]'),
 })
+const { pixelsPerUnit, toMap, fitAll, fitTo, svgRef } = panZoom
+
+const coarsePointer = useCoarsePointer()
+const pointer = computed(() => (coarsePointer.value ? 'coarse' : 'fine'))
 const dotRadius = computed(
     () => DOT_RADIUS_PX[pointer.value] / pixelsPerUnit.value,
 )
@@ -246,7 +212,13 @@ function placeAt(routeId: string, clientX: number, clientY: number) {
     return place(routeId, { clientX, clientY })
 }
 
-defineExpose({ fitAll, previewAt, placeAt })
+defineExpose({ fitAll, focusWall, previewAt, placeAt })
+
+function focusWall(wallId: string) {
+    const wall = props.walls.find((candidate) => candidate.id === wallId)
+    const wallBounds = wall && boundsOf([...wall.outline, ...wall.edge])
+    if (wallBounds) fitTo(wallBounds, { padding: 2 })
+}
 
 function place(routeId: string, client: { clientX: number; clientY: number }) {
     const target = snapAt(client)
@@ -333,44 +305,6 @@ function onDotDown(routeId: string, event: PointerEvent) {
 </script>
 
 <style scoped>
-.placement-canvas-wrap {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.placement-controls {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.placement-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    user-select: none;
-    outline: none;
-    background: rgba(var(--v-theme-on-surface), 0.03);
-    cursor: grab;
-}
-
-.placement-canvas:focus-visible {
-    box-shadow: inset 0 0 0 2px rgb(var(--v-theme-primary));
-}
-
-.placement-canvas--armed {
-    cursor: crosshair;
-}
-
-.placement-canvas--panning {
-    cursor: grabbing;
-}
-
 .placement-wall {
     cursor: pointer;
 }

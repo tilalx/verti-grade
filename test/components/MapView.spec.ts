@@ -3,10 +3,13 @@ import { mount } from '@vue/test-utils'
 import { useTemplateRef } from 'vue'
 import MapView from '~/components/map/MapView.vue'
 import MapFloorLayer from '~/components/map/FloorLayer.vue'
+import MapCanvas from '~/components/map/MapCanvas.vue'
 import { useSvgPanZoom } from '~/composables/useSvgPanZoom'
+import { useCoarsePointer } from '~/composables/useCoarsePointer'
 
 vi.stubGlobal('useTemplateRef', useTemplateRef)
 vi.stubGlobal('useSvgPanZoom', useSvgPanZoom)
+vi.stubGlobal('useCoarsePointer', useCoarsePointer)
 
 const map = {
     width: 40,
@@ -64,7 +67,7 @@ function createWrapper(props: Record<string, unknown> = {}) {
         props: { map, walls, routes, ...props },
         global: {
             mocks: { $t: (key: string) => key },
-            components: { MapFloorLayer },
+            components: { MapFloorLayer, MapCanvas },
             stubs: { 'v-btn': true },
         },
     })

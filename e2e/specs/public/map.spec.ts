@@ -80,12 +80,10 @@ test('a filter dims the routes that do not match', async ({
     testPrefix,
 }) => {
     await gotoSettled(page, `/map?location=${seeded.locationId}`)
-    await page.getByTestId('map-filter-open').click()
     await page
         .getByTestId('map-filter-search')
         .locator('input')
         .fill(`${testPrefix}-map-route-2`)
-    await page.getByTestId('map-filter-apply').click()
     await expect(
         page.locator('[data-testid="map-route-dot"][data-dimmed]'),
     ).toHaveCount(2)
@@ -94,12 +92,11 @@ test('a filter dims the routes that do not match', async ({
 
 test('the colour filter dims routes in other colours', async ({ page }) => {
     await gotoSettled(page, `/map?location=${seeded.locationId}`)
-    await page.getByTestId('map-filter-open').click()
+    await page.getByTestId('map-filter-color-chip').click()
     await page
         .getByTestId('map-filter-color')
         .locator('[data-color="#E53935"]')
         .click()
-    await page.getByTestId('map-filter-apply').click()
     await expect(
         page.locator('[data-testid="map-route-dot"][data-dimmed]'),
     ).toHaveCount(2)
@@ -127,7 +124,7 @@ test('on desktop the list sits next to the map, not over it', async ({
     const list = (await page.getByTestId('map-list').boundingBox())!
     const map = (await page.getByTestId('map-svg').boundingBox())!
     expect(list.x).toBeGreaterThanOrEqual(map.x + map.width - 1)
-    await expect(page.getByTestId('map-show-list')).toHaveCount(0)
+    await expect(page.getByTestId('map-sheet-handle')).toHaveCount(0)
 
     await page
         .locator(
@@ -135,4 +132,17 @@ test('on desktop the list sits next to the map, not over it', async ({
         )
         .click()
     await expect(page).toHaveURL(new RegExp(`route=${seeded.routeIds[2]}`))
+})
+
+test('the boulder chip hides routes of the other type', async ({ page }) => {
+    await gotoSettled(page, `/map?location=${seeded.locationId}`)
+    await expect(page.getByTestId('map-route-dot')).toHaveCount(3)
+    await page.getByTestId('map-type-Route').click()
+    await expect(page.getByTestId('map-type-Route')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+    )
+    await expect(page.getByTestId('map-route-dot')).toHaveCount(0)
+    await page.getByTestId('map-filter-clear').click()
+    await expect(page.getByTestId('map-route-dot')).toHaveCount(3)
 })

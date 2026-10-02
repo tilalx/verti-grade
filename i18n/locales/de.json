@@ -621,8 +621,7 @@
         "userMenu": "Benutzermenü",
         "manage": "Verwalten",
         "admin": "Administration",
-        "quickNavigation": "Schnellnavigation",
-        "desktopHint": "Der vollständige Editor ist am Desktop verfügbar."
+        "quickNavigation": "Schnellnavigation"
     },
     "users": {
         "create": "Benutzer hinzufügen",
@@ -1022,23 +1021,21 @@
         "openList": "Routenliste öffnen",
         "filters": "Routen filtern",
         "clearFilters": "Zurücksetzen",
-        "showResults": "{n} Routen zeigen",
         "close": "Schließen",
         "allWalls": "Alle Wände",
         "allRoutes": "Alle Routen",
         "showOnMap": "Auf dem Plan zeigen",
-        "showList": "Liste zeigen ({n})",
-        "showWallList": "{name} · {n} Routen",
         "notOnMap": "Nicht auf dem Plan",
         "wall": "Wand",
         "unsent": "Offen",
         "boulders": "Boulder",
         "routes": "Routen",
-        "wallHint": "Wo die Route auf dem Hallenplan liegt. Feinjustieren unter „Routen platzieren“."
+        "wallHint": "Wo die Route auf dem Hallenplan liegt. Feinjustieren unter „Routen platzieren“.",
+        "resizeList": "Liste vergrößern oder verkleinern",
+        "backToList": "Zurück zur Liste"
     },
     "mapEditor": {
         "title": "Plan-Editor",
-        "largerScreen": "Der Plan-Editor braucht einen größeren Bildschirm. Öffne die Seite auf einem Tablet oder Computer.",
         "noLocations": "Lege zuerst in den Einstellungen einen Standort an.",
         "setupTitle": "Grundriss anlegen",
         "setupIntro": "Gib die Größe der Halle ein. Matten, Einbauten und Wände zeichnest du danach.",
@@ -1105,7 +1102,10 @@
         },
         "anchorFrom": "Umlenker von",
         "anchorTo": "bis",
-        "anchorHint": "Routen mit diesen Umlenker-Nummern werden automatisch an dieser Wand platziert."
+        "anchorHint": "Routen mit diesen Umlenker-Nummern werden automatisch an dieser Wand platziert.",
+        "finish": "Fertig",
+        "deletePoint": "Punkt löschen",
+        "panel": "Wände und Flächen"
     },
     "mapPlacement": {
         "title": "Routen platzieren",
@@ -1138,7 +1138,9 @@
         "resetConfirm": "Alle {n} Routen an {wall} archivieren? Sie verschwinden von der Karte und aus der Routenliste.",
         "resetDone": "{n} Route archiviert. | {n} Routen archiviert.",
         "unplacedBanner": "{n} Route ist noch nicht auf der Karte. | {n} Routen sind noch nicht auf der Karte.",
-        "placeThis": "Auf Karte platzieren"
+        "placeThis": "Auf Karte platzieren",
+        "more": "Weitere Aktionen",
+        "routes": "Routen"
     },
     "scan": {
         "title": "Route scannen",
