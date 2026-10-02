@@ -24,6 +24,7 @@ async function openReportDialog(page: Page, routeId: string) {
 async function fillValidReport(page: Page, testPrefix: string) {
     await page.getByTestId('report-form-reason').click()
     await page.getByRole('option').first().click()
+    await expect(page.getByRole('listbox')).toBeHidden()
     await page
         .getByTestId('report-form-explanation')
         .first()
