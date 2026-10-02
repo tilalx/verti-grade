@@ -4,7 +4,7 @@
             :pan-zoom="panZoom"
             :label="$t('map.label')"
             data-testid="map-svg"
-            @click="emit('selectWall', null)"
+            @click="onBackgroundClick"
         >
             <MapFloorLayer :shapes="map.shapes" />
 
@@ -27,8 +27,17 @@
             </g>
 
             <g class="map-dots">
+                <line
+                    v-for="dot in shownDots.filter((item) => item.from)"
+                    :key="`leader-${dot.routeId}`"
+                    :x1="dot.from![0]"
+                    :y1="dot.from![1]"
+                    :x2="dot.at[0]"
+                    :y2="dot.at[1]"
+                    class="map-dot-leader"
+                />
                 <g
-                    v-for="dot in dots"
+                    v-for="dot in shownDots"
                     :key="dot.routeId"
                     class="map-dot"
                     :class="{
@@ -50,21 +59,21 @@
                 >
                     <circle
                         v-if="dot.isNew"
-                        :cx="dot.point[0]"
-                        :cy="dot.point[1]"
+                        :cx="dot.at[0]"
+                        :cy="dot.at[1]"
                         :r="dotRadius * 1.9"
                         :fill="dot.fill"
                         class="map-dot-halo"
                     />
                     <circle
-                        :cx="dot.point[0]"
-                        :cy="dot.point[1]"
+                        :cx="dot.at[0]"
+                        :cy="dot.at[1]"
                         :r="hitRadius"
                         class="map-dot-hit"
                     />
                     <circle
-                        :cx="dot.point[0]"
-                        :cy="dot.point[1]"
+                        :cx="dot.at[0]"
+                        :cy="dot.at[1]"
                         :r="dotRadius"
                         :fill="dot.fill"
                         :stroke="dot.stroke"
@@ -72,17 +81,62 @@
                     />
                     <path
                         v-if="sentIds?.has(dot.routeId)"
-                        :d="checkPath(dot.point)"
+                        :d="checkPath(dot.at)"
                         :stroke="dot.stroke"
                         class="map-dot-check"
                     />
                     <circle
                         v-if="dot.routeId === selectedRouteId"
-                        :cx="dot.point[0]"
-                        :cy="dot.point[1]"
+                        :cx="dot.at[0]"
+                        :cy="dot.at[1]"
                         :r="dotRadius * 2.2"
                         class="map-dot-ring"
                     />
+                </g>
+                <g
+                    v-for="cluster in collapsedClusters"
+                    :key="cluster.key"
+                    class="map-cluster"
+                    :class="{
+                        'map-dot--dimmed': cluster.dots.every((dot) =>
+                            isDimmed(dot.routeId),
+                        ),
+                    }"
+                    data-testid="map-route-cluster"
+                    :data-count="cluster.dots.length"
+                    role="button"
+                    tabindex="0"
+                    :aria-label="
+                        $t(
+                            'map.clusterLabel',
+                            { count: cluster.dots.length },
+                            cluster.dots.length,
+                        )
+                    "
+                    @click.stop="openCluster(cluster)"
+                    @keydown.enter.prevent="openCluster(cluster)"
+                    @keydown.space.prevent="openCluster(cluster)"
+                >
+                    <circle
+                        :cx="cluster.point[0]"
+                        :cy="cluster.point[1]"
+                        :r="hitRadius"
+                        class="map-dot-hit"
+                    />
+                    <circle
+                        :cx="cluster.point[0]"
+                        :cy="cluster.point[1]"
+                        :r="clusterRadius"
+                        class="map-cluster-body"
+                    />
+                    <text
+                        :x="cluster.point[0]"
+                        :y="cluster.point[1]"
+                        :font-size="clusterFontSize"
+                        class="map-cluster-count"
+                    >
+                        {{ cluster.dots.length }}
+                    </text>
                 </g>
             </g>
             <template #overlay>
@@ -125,7 +179,12 @@ import {
 import type { WallRecord } from '~/types/models'
 import {
     clearOfDots,
+    closestPairDistance,
+    clusterDots,
     placeRoutes,
+    spreadAround,
+    type DotCluster,
+    type RouteDot,
     toMapWalls,
     visibleLabels,
     wallCounts,
@@ -166,6 +225,9 @@ const emit = defineEmits<{
 }>()
 
 const DOT_RADIUS_PX = 5.5
+const CLUSTER_RADIUS_PX = 11
+const CLUSTER_FONT_PX = 12
+const SPREAD_HIT_RADII = 2.2
 const HIT_RADIUS_PX = { fine: 13, coarse: 22 }
 const LABEL_HEIGHT_PX = 46
 const LABEL_CHAR_PX = 8
@@ -192,7 +254,7 @@ const panZoom = useSvgPanZoom({
     doubleClickZoom: true,
     insetBottom: computed(() => props.insetBottom ?? 0),
 })
-const { viewBox, size, pixelsPerUnit, fitTo, fitAll } = panZoom
+const { viewBox, size, pixelsPerUnit, fitTo, fitAll, zoomBy, limits } = panZoom
 const coarsePointer = useCoarsePointer()
 const hitRadiusPx = computed(() =>
     coarsePointer.value ? HIT_RADIUS_PX.coarse : HIT_RADIUS_PX.fine,
@@ -211,6 +273,58 @@ const counts = computed(() =>
 
 const dotRadius = computed(() => DOT_RADIUS_PX / pixelsPerUnit.value)
 const hitRadius = computed(() => hitRadiusPx.value / pixelsPerUnit.value)
+const clusterRadius = computed(() => CLUSTER_RADIUS_PX / pixelsPerUnit.value)
+const clusterFontSize = computed(() => CLUSTER_FONT_PX / pixelsPerUnit.value)
+
+const expandedClusterKey = ref<string | null>(null)
+const clusters = computed(() => clusterDots(dots.value, hitRadius.value * 2))
+
+function isExpanded(cluster: DotCluster<RouteDot>) {
+    return (
+        cluster.key === expandedClusterKey.value ||
+        cluster.dots.some((dot) => dot.routeId === props.selectedRouteId)
+    )
+}
+
+const collapsedClusters = computed(() =>
+    clusters.value.filter(
+        (cluster) => cluster.dots.length > 1 && !isExpanded(cluster),
+    ),
+)
+
+const shownDots = computed(() =>
+    clusters.value.flatMap(
+        (cluster): (RouteDot & { at: MapPoint; from?: MapPoint })[] => {
+            if (cluster.dots.length === 1)
+                return [{ ...cluster.dots[0]!, at: cluster.dots[0]!.point }]
+            if (!isExpanded(cluster)) return []
+            const spread = spreadAround(
+                cluster.point,
+                cluster.dots.length,
+                hitRadius.value * SPREAD_HIT_RADII,
+            )
+            return cluster.dots.map((dot, index) => ({
+                ...dot,
+                at: spread[index]!,
+                from: cluster.point,
+            }))
+        },
+    ),
+)
+
+function openCluster(cluster: DotCluster<RouteDot>) {
+    const needed =
+        (hitRadius.value * SPREAD_HIT_RADII) /
+        closestPairDistance(cluster.dots.map((dot) => dot.point))
+    const available = viewBox.value.width / limits.value.minWidth
+    zoomBy(Math.min(needed, available), cluster.point)
+    if (needed > available) expandedClusterKey.value = cluster.key
+}
+
+function onBackgroundClick() {
+    expandedClusterKey.value = null
+    emit('selectWall', null)
+}
 
 function isDimmed(routeId: string) {
     return !!props.matchingIds && !props.matchingIds.has(routeId)
@@ -380,6 +494,37 @@ defineExpose({ focusWall, focusRoute, fitAll })
 
 .map-dot-hit {
     fill: transparent;
+}
+
+.map-cluster {
+    cursor: pointer;
+    outline: none;
+    transition: opacity 0.2s;
+}
+
+.map-cluster-body {
+    fill: var(--ui-bg-inverted);
+    stroke: var(--ui-bg);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+}
+
+.map-cluster:focus-visible .map-cluster-body {
+    stroke: var(--ui-primary);
+}
+
+.map-cluster-count {
+    fill: var(--ui-text-inverted);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+}
+
+.map-dot-leader {
+    stroke: var(--ui-text-muted);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
 }
 
 .map-dot-halo {

@@ -1050,7 +1050,8 @@
         "routes": "Routes",
         "wallHint": "Where the route sits on the gym map. Fine-tune it under Place routes.",
         "resizeList": "Resize list",
-        "backToList": "Back to list"
+        "backToList": "Back to list",
+        "clusterLabel": "{count} route here, tap to show | {count} routes here, tap to show"
     },
     "mapEditor": {
         "title": "Map editor",

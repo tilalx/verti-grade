@@ -97,14 +97,16 @@ test('max zoom separates routes 20 cm apart for tapping', async ({
                     ),
                 ),
             )
-        const first = await dotCenter(islandRoute!)
-        const second = await dotCenter(neighbour!)
+        const cluster = page.getByTestId('map-route-cluster')
+        await expect(cluster).toHaveAttribute('data-count', '2')
+        const clusterCenter = centerOf(await settledBox(cluster))
         await page.getByTestId('map-svg').dispatchEvent('wheel', {
             deltaY: -1000,
             ctrlKey: true,
-            clientX: (first.x + second.x) / 2,
-            clientY: (first.y + second.y) / 2,
+            clientX: clusterCenter.x,
+            clientY: clusterCenter.y,
         })
+        await expect(cluster).toHaveCount(0)
 
         const a = await dotCenter(islandRoute!)
         const b = await dotCenter(neighbour!)
@@ -121,6 +123,48 @@ test('max zoom separates routes 20 cm apart for tapping', async ({
         await expect(page.getByTestId('map-route-card')).toContainText(
             `${testPrefix}-map-route-3`,
         )
+    } finally {
+        await seeded.cleanup()
+    }
+})
+
+test('routes on the same spot open from a cluster', async ({
+    page,
+    root,
+    testPrefix,
+}) => {
+    const seeded = await seedMap(root, testPrefix, { routes: 3 })
+    try {
+        const [, neighbour, islandRoute] = seeded.routeIds
+        await root.collection('routes').update(neighbour!, {
+            wall: seeded.islandWallId,
+            wall_position: 0.75,
+        })
+        await gotoSettled(page, `/map?location=${seeded.locationId}`)
+
+        const cluster = page.getByTestId('map-route-cluster')
+        await expect(cluster).toHaveAttribute('data-count', '2')
+        await expect(
+            page.locator(
+                `[data-testid="map-route-dot"][data-route-id="${neighbour}"]`,
+            ),
+        ).toHaveCount(0)
+        await cluster.tap()
+        await expect(cluster).toHaveCount(0)
+
+        const spreadDot = page.locator(
+            `[data-testid="map-route-dot"][data-route-id="${neighbour}"] .map-dot-body`,
+        )
+        const { x, y } = centerOf(await settledBox(spreadDot))
+        await page.touchscreen.tap(x, y)
+        await expect(page.getByTestId('map-route-card')).toContainText(
+            `${testPrefix}-map-route-2`,
+        )
+        await expect(
+            page.locator(
+                `[data-testid="map-route-dot"][data-route-id="${islandRoute}"]`,
+            ),
+        ).toHaveCount(1)
     } finally {
         await seeded.cleanup()
     }

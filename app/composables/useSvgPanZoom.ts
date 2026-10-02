@@ -437,6 +437,7 @@ export function useSvgPanZoom(options: PanZoomOptions) {
         zoomBy,
         fitTo,
         fitAll,
+        limits,
     }
 }
 

@@ -1050,7 +1050,8 @@
         "routes": "Rotalar",
         "wallHint": "Rotanın salon haritasındaki yeri. Ayrıntılı ayar için \"Rotaları yerleştir\"e git.",
         "resizeList": "Listeyi yeniden boyutlandır",
-        "backToList": "Listeye dön"
+        "backToList": "Listeye dön",
+        "clusterLabel": "Burada {count} rota var, göstermek için dokunun | Burada {count} rota var, göstermek için dokunun"
     },
     "mapEditor": {
         "title": "Harita düzenleyici",
