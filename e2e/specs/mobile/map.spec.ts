@@ -53,6 +53,9 @@ test('dragging the sheet up expands it and tapping a route shows it in the sheet
         await touch('touchStart', { x, y })
         for (let step = 1; step <= 10; step++)
             await touch('touchMove', { x, y: y - step * 30 })
+        const restBeforeLiftMs = 150
+        await page.waitForTimeout(restBeforeLiftMs)
+        await touch('touchMove', { x, y: y - 300 })
         await touch('touchEnd')
         await expect
             .poll(async () => (await sheet.boundingBox())!.y)
