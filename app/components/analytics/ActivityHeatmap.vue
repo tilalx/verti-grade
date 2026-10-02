@@ -293,6 +293,8 @@ function showCellTooltip(event: MouseEvent) {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .heatmap {
     display: flex;
     gap: 16px;
@@ -428,7 +430,7 @@ function showCellTooltip(event: MouseEvent) {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-@media (max-width: 959px) {
+@variant max-lg {
     .heatmap {
         flex-direction: column-reverse;
         align-items: stretch;

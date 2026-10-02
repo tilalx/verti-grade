@@ -46,12 +46,11 @@ export function useBrowserChrome() {
     const withScrim = (color: string) =>
         scrim.value ? compositeOver(color, scrim.value) : color
     const barTarget = (name: ThemeName) => withScrim(THEME_COLORS[name].surface)
-    const pageTarget = () =>
-        withScrim(
-            THEME_COLORS[currentName()][
-                lgAndUp.value ? 'background' : 'surface'
-            ],
-        )
+    const scrimmedPage = () => {
+        if (!scrim.value) return undefined
+        const page = lgAndUp.value ? 'background' : 'surface'
+        return `background-color: ${withScrim(THEME_COLORS[currentName()][page])}`
+    }
 
     const lightBar = useTweenedColor(() => barTarget('light'))
     const darkBar = useTweenedColor(() => barTarget('dark'))
@@ -76,11 +75,8 @@ export function useBrowserChrome() {
                 : []),
             { name: 'color-scheme', content: currentName },
         ],
-        htmlAttrs: {
-            style: () =>
-                `color-scheme: ${currentName()}; background-color: ${pageTarget()}`,
-        },
-        bodyAttrs: { style: () => `background-color: ${pageTarget()}` },
+        htmlAttrs: { style: scrimmedPage },
+        bodyAttrs: { style: scrimmedPage },
     })
 
     if (import.meta.server) return

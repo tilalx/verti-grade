@@ -81,6 +81,7 @@
             <section
                 v-for="section in sections"
                 :key="section.key"
+                class="lg:hidden"
                 :data-testid="`me-section-${section.key}`"
             >
                 <p class="native-heading">{{ $t(section.label) }}</p>
@@ -171,7 +172,7 @@ const SECTION_TINTS: Record<string, string> = {
     admin: '#64748b',
 }
 
-const sections = computed(() => (lgAndUp.value ? [] : staffSections(can)))
+const sections = computed(() => staffSections(can))
 const pages = computed(() => pageLinks(!!user.value))
 
 async function logout() {

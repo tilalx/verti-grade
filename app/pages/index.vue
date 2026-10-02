@@ -281,6 +281,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .overview-hero {
     display: flex;
     flex-wrap: wrap;
@@ -369,7 +371,7 @@ onMounted(async () => {
     font-size: 0.95rem;
 }
 
-@media (max-width: 959.98px) {
+@variant max-lg {
     .overview-grid {
         grid-template-columns: minmax(0, 1fr);
     }

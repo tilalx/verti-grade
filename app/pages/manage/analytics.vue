@@ -385,6 +385,8 @@ const summaryCards = computed(() => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .comment-list {
     overflow: hidden;
 }
@@ -393,7 +395,7 @@ a.comment-item:hover {
     background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
-@media (max-width: 600px) {
+@variant max-sm {
     .analytics-page {
         padding-inline: 12px;
     }

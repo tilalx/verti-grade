@@ -31,7 +31,7 @@ describe('useDisplay', () => {
         expect(display.lgAndUp.value).toBe(false)
     })
 
-    it('uses the Vuetify 4 breakpoints for a hinted width', () => {
+    it('uses the Tailwind breakpoints for a hinted width', () => {
         hintedWidth = '1200'
         const display = useDisplay()
         expect(display.width.value).toBe(1200)
@@ -42,8 +42,8 @@ describe('useDisplay', () => {
         expect(display.xlAndUp.value).toBe(false)
     })
 
-    it('treats 840px as the start of md', () => {
-        hintedWidth = '839'
+    it('treats 768px as the start of md', () => {
+        hintedWidth = '767'
         expect(useDisplay().smAndDown.value).toBe(true)
     })
 

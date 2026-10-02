@@ -67,7 +67,7 @@ export default defineNuxtConfig({
             ],
         },
     },
-    modules: ['@nuxt/ui', '@nuxtjs/i18n', '@nuxt/image'],
+    modules: ['@nuxt/ui', '@nuxtjs/i18n'],
     css: ['~/assets/css/main.css'],
     ui: {
         fonts: false,
@@ -102,9 +102,6 @@ export default defineNuxtConfig({
             name,
             file: `${code}.ts`,
         })),
-    },
-    image: {
-        formats: ['avif', 'webp'],
     },
     imports: {
         autoImport: true,

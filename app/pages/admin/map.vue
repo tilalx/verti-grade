@@ -164,13 +164,18 @@
                                     : 'outline'
                             "
                             :icon="option.icon"
-                            :label="mdAndUp ? option.label : undefined"
+                            square
+                            class="md:px-3"
                             :aria-label="option.label"
                             :aria-pressed="activeToolKey === option.key"
                             :title="option.label"
                             :data-testid="`map-editor-tool-${option.key}`"
                             @click="option.select()"
-                        />
+                        >
+                            <span class="hidden md:inline">{{
+                                option.label
+                            }}</span>
+                        </UButton>
                     </UFieldGroup>
                     <UDropdownMenu
                         :items="gridMenuItems"
@@ -283,7 +288,6 @@ definePageMeta({
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const { mdAndUp } = useDisplay()
 const editor = useMapEditor()
 
 useSeoMeta({ title: () => t('page.title.mapEditor') })
@@ -672,6 +676,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .editor-location {
     flex: 0 1 220px;
     min-width: 0;
@@ -712,7 +718,7 @@ onBeforeUnmount(() => {
     overflow: hidden;
 }
 
-@media (max-width: 599.98px) {
+@variant max-sm {
     .map-screen__title {
         position: absolute;
         width: 1px;

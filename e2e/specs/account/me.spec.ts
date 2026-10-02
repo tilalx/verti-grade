@@ -34,7 +34,8 @@ test('on desktop the account page leaves staff links to the top navigation', asy
 }) => {
     await gotoSettled(page, '/account')
     await expect(page.getByTestId('me-name')).toBeVisible()
-    await expect(page.locator('[data-testid^="me-section-"]')).toHaveCount(0)
+    await expect(page.getByTestId('me-section-manage')).toBeHidden()
+    await expect(page.getByTestId('me-section-admin')).toBeHidden()
     await expect(page.getByTestId('nav-desktop-links')).toBeVisible()
 })
 

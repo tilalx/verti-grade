@@ -624,6 +624,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .comment-card--target {
     outline: 2px solid var(--ui-success);
     outline-offset: 2px;
@@ -671,13 +673,13 @@ onMounted(async () => {
 }
 
 /* Round hero corners on tablet */
-@media (min-width: 600px) {
+@variant sm {
     .route-hero {
         border-radius: 0 0 16px 16px;
     }
 }
 
-@media (min-width: 960px) {
+@variant lg {
     .route-page {
         max-width: 1400px;
         padding: 24px 24px 0;
@@ -746,7 +748,7 @@ onMounted(async () => {
     }
 }
 
-@media (min-width: 1400px) {
+@variant xl {
     .route-reviews-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));

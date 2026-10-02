@@ -729,6 +729,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .stats-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -749,7 +751,7 @@ onBeforeUnmount(() => {
     min-width: 100px;
 }
 
-@media (min-width: 600px) {
+@variant sm {
     .stat-chip {
         flex: 1 1 0;
         min-width: 0;

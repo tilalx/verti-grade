@@ -53,11 +53,10 @@
                     :class="{ 'grade-conversion--active': column.active }"
                     :title="column.title"
                 >
-                    {{
-                        smAndUp
-                            ? column.title
-                            : (column.shortTitle ?? column.title)
-                    }}
+                    <span class="hidden sm:inline">{{ column.title }}</span>
+                    <span class="sm:hidden">{{
+                        column.shortTitle ?? column.title
+                    }}</span>
                 </div>
             </div>
 

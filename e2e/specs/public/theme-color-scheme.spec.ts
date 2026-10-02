@@ -25,6 +25,19 @@ test.describe('dark OS preference', () => {
         await expect(page.locator(appRoot)).toHaveClass(/(^|\s)dark(\s|$)/)
     })
 
+    test('paints the dark page before hydration', async ({ page }) => {
+        await page.route('**/_nuxt/**', async (route) => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            await route.continue()
+        })
+        await page.goto('/', { waitUntil: 'domcontentloaded' })
+        await expect(page.locator('html')).not.toHaveAttribute('style', /./)
+        await expect(page.locator('body')).toHaveCSS(
+            'background-color',
+            'rgb(13, 17, 23)',
+        )
+    })
+
     test('ignores a stale light color-scheme cookie', async ({
         page,
         baseURL,
@@ -118,6 +131,10 @@ test.describe('browser bars', () => {
         await page.setViewportSize({ width: 390, height: 844 })
         await gotoSettled(page, '/')
         await expect(page.locator('body')).toHaveCSS(
+            'background-color',
+            'rgb(255, 255, 255)',
+        )
+        await expect(page.locator('header').first()).toHaveCSS(
             'background-color',
             'rgb(255, 255, 255)',
         )

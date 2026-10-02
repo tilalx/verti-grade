@@ -54,6 +54,8 @@ const emit = defineEmits<{ save: []; cancel: [] }>()
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .save-bar {
     position: fixed;
     right: 16px;
@@ -75,7 +77,7 @@ const emit = defineEmits<{ save: []; cancel: [] }>()
     transform: translateY(8px);
 }
 
-@media (min-width: 1145px) {
+@variant lg {
     .save-bar {
         position: sticky;
         top: calc(var(--app-top) + var(--app-top-inset, 0px) + 12px);
