@@ -523,7 +523,8 @@
             "duration": "Duration",
             "kinds": {
                 "cookie": "Cookie",
-                "localStorage": "Local storage"
+                "localStorage": "Local storage",
+                "indexedDB": "Browser database (IndexedDB)"
             },
             "purposes": {
                 "auth": "Keeps you signed in",
@@ -532,7 +533,8 @@
                 "exportColumns": "Remembers selected export columns",
                 "updateDismissed": "Remembers a dismissed update notice",
                 "inventorySession": "Keeps the progress of an inventory scan",
-                "inventoryInstructions": "Remembers that inventory instructions were shown"
+                "inventoryInstructions": "Remembers that inventory instructions were shown",
+                "offlineLogbook": "Keeps your logbook and unsent ascents available offline"
             },
             "durations": {
                 "session": "Until sign-out",
@@ -1140,7 +1142,9 @@
             "subtitle": "Routes you haven't sent yet, close to your level",
             "subtitleNew": "The newest routes in the gym",
             "new": "New"
-        }
+        },
+        "pendingSync": "Not synced yet",
+        "savedOffline": "Ascent saved offline. It syncs once you are back online."
     },
     "map": {
         "title": "Gym map",

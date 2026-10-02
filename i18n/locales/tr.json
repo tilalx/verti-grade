@@ -523,7 +523,8 @@
             "duration": "Süre",
             "kinds": {
                 "cookie": "Çerez",
-                "localStorage": "Yerel depolama"
+                "localStorage": "Yerel depolama",
+                "indexedDB": "Tarayıcı veritabanı (IndexedDB)"
             },
             "purposes": {
                 "auth": "Oturumunuzu açık tutar",
@@ -532,7 +533,8 @@
                 "exportColumns": "Seçilen dışa aktarma sütunlarını hatırlar",
                 "updateDismissed": "Kapatılan güncelleme bildirimini hatırlar",
                 "inventorySession": "Envanter taramasının ilerlemesini saklar",
-                "inventoryInstructions": "Envanter talimatlarının gösterildiğini hatırlar"
+                "inventoryInstructions": "Envanter talimatlarının gösterildiğini hatırlar",
+                "offlineLogbook": "Günlüğünü ve gönderilmemiş tırmanışları çevrimdışı kullanılabilir tutar"
             },
             "durations": {
                 "session": "Çıkış yapılana kadar",
@@ -1140,7 +1142,9 @@
             "subtitle": "Seviyene yakın, henüz tamamlamadığın rotalar",
             "subtitleNew": "Salonun en yeni rotaları",
             "new": "Yeni"
-        }
+        },
+        "pendingSync": "Henüz eşitlenmedi",
+        "savedOffline": "Tırmanış çevrimdışı kaydedildi. Tekrar çevrimiçi olunca eşitlenir."
     },
     "map": {
         "title": "Salon haritası",

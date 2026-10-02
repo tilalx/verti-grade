@@ -192,7 +192,7 @@ describe('upsertById / removeById', () => {
 
 describe('cache keys', () => {
     it('scopes map routes to their location', () => {
-        const inScope = routeRowsScope(cacheKeys.mapRoutes('loc1'))!
+        const inScope = routeRowsScope(cacheKeys.mapRoutes, 'loc1')!
         expect(inScope({ location: 'loc1' } as RouteRecord)).toBe(true)
         expect(inScope({ location: 'loc2' } as RouteRecord)).toBe(false)
     })
@@ -204,7 +204,7 @@ describe('cache keys', () => {
     })
 
     it('scopes map walls to their location', () => {
-        const inScope = wallsScope(cacheKeys.mapWalls('loc1'))!
+        const inScope = wallsScope(cacheKeys.mapWalls, 'loc1')!
         expect(inScope({ location: 'loc2' } as WallRecord)).toBe(false)
         expect(wallsScope(cacheKeys.overviewRoutes)).toBeUndefined()
     })

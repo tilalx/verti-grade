@@ -44,7 +44,12 @@ test('every cookie and localStorage key the app sets is disclosed', async ({
         .filter((cookie) => appHost.endsWith(cookie.domain.replace(/^\./, '')))
         .map((cookie) => cookie.name)
     const storageKeys = await page.evaluate(() => Object.keys(localStorage))
-    const usedNames = [...new Set([...cookieNames, ...storageKeys])]
+    const databaseNames = await page.evaluate(async () =>
+        (await indexedDB.databases()).map((db) => db.name ?? ''),
+    )
+    const usedNames = [
+        ...new Set([...cookieNames, ...storageKeys, ...databaseNames]),
+    ]
     expect(usedNames.length).toBeGreaterThan(0)
 
     await gotoSettled(page, '/privacy')

@@ -46,10 +46,7 @@ export function useGymMapLocation(
     const map = computed(() => sanitizeGymMap(location.value?.map))
 
     const wallsRequest = useAsyncData(
-        () =>
-            key === 'map'
-                ? cacheKeys.mapWalls(locationId.value)
-                : `${key}-walls:${locationId.value}`,
+        key === 'map' ? cacheKeys.mapWalls : `${key}-walls`,
         async () => {
             await locationsRequest
             return locationId.value
@@ -62,7 +59,7 @@ export function useGymMapLocation(
                   })
                 : []
         },
-        { default: () => [] },
+        { watch: [locationId], default: () => [] },
     )
     const walls = wallsRequest.data
     const mapWalls = computed(() =>

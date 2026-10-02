@@ -8,8 +8,9 @@ import type {
 export const cacheKeys = {
     overviewRoutes: 'overview-routes',
     overviewWalls: 'overview-walls',
-    mapRoutes: (locationId: string) => `map-routes:${locationId}`,
-    mapWalls: (locationId: string) => `map-walls:${locationId}`,
+    mapRoutes: 'map-routes',
+    mapWalls: 'map-walls',
+    mapLocation: 'map-location',
     routesList: 'routes-list',
     route: (routeId: string) => `route:${routeId}`,
     ratings: (routeId: string) => `ratings:${routeId}`,
@@ -31,18 +32,23 @@ function keySuffix(key: string, prefix: string) {
     return key.startsWith(prefix) ? key.slice(prefix.length) : undefined
 }
 
-export function routeRowsScope(key: string): InScope<RouteRecord> | undefined {
+export function routeRowsScope(
+    key: string,
+    mapLocationId = '',
+): InScope<RouteRecord> | undefined {
     if (key === cacheKeys.overviewRoutes) return () => true
     if (key === cacheKeys.routesList) return () => null
-    const locationId = keySuffix(key, cacheKeys.mapRoutes(''))
-    if (locationId !== undefined)
-        return (route) => route.location === locationId
+    if (key === cacheKeys.mapRoutes)
+        return (route) => !!mapLocationId && route.location === mapLocationId
 }
 
-export function wallsScope(key: string): InScope<WallRecord> | undefined {
+export function wallsScope(
+    key: string,
+    mapLocationId = '',
+): InScope<WallRecord> | undefined {
     if (key === cacheKeys.overviewWalls) return () => true
-    const locationId = keySuffix(key, cacheKeys.mapWalls(''))
-    if (locationId !== undefined) return (wall) => wall.location === locationId
+    if (key === cacheKeys.mapWalls)
+        return (wall) => !!mapLocationId && wall.location === mapLocationId
 }
 
 export function ratingsRouteId(key: string) {

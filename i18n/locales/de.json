@@ -523,7 +523,8 @@
             "duration": "Dauer",
             "kinds": {
                 "cookie": "Cookie",
-                "localStorage": "Lokaler Speicher"
+                "localStorage": "Lokaler Speicher",
+                "indexedDB": "Browser-Datenbank (IndexedDB)"
             },
             "purposes": {
                 "auth": "Hält dich angemeldet",
@@ -532,7 +533,8 @@
                 "exportColumns": "Merkt sich die gewählten Export-Spalten",
                 "updateDismissed": "Merkt sich einen ausgeblendeten Update-Hinweis",
                 "inventorySession": "Speichert den Fortschritt einer Inventur",
-                "inventoryInstructions": "Merkt sich, dass die Inventur-Anleitung angezeigt wurde"
+                "inventoryInstructions": "Merkt sich, dass die Inventur-Anleitung angezeigt wurde",
+                "offlineLogbook": "Hält dein Logbuch und noch nicht gesendete Begehungen offline verfügbar"
             },
             "durations": {
                 "session": "Bis zur Abmeldung",
@@ -1140,7 +1142,9 @@
             "subtitle": "Noch nicht geschaffte Routen nahe deinem Niveau",
             "subtitleNew": "Die neuesten Routen der Halle",
             "new": "Neu"
-        }
+        },
+        "pendingSync": "Noch nicht synchronisiert",
+        "savedOffline": "Begehung offline gespeichert. Sie wird synchronisiert, sobald du wieder online bist."
     },
     "map": {
         "title": "Hallenplan",

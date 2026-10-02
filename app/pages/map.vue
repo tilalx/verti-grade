@@ -278,7 +278,7 @@ const {
     error: routesError,
     refresh: refreshRoutes,
 } = await useAsyncData(
-    () => cacheKeys.mapRoutes(locationId.value),
+    cacheKeys.mapRoutes,
     () =>
         locationId.value
             ? pb.collection('averageRating').getFullList<RouteScoreRecord>({
@@ -289,8 +289,11 @@ const {
                   requestKey: 'mapRoutes',
               })
             : Promise.resolve([]),
-    { default: () => [] },
+    { watch: [locationId], default: () => [] },
 )
+
+const mapLocation = useState<string>(cacheKeys.mapLocation, () => '')
+watch(locationId, (id) => (mapLocation.value = id), { immediate: true })
 
 const locationMenuItems = computed(() =>
     locationItems.value.map((item) => ({

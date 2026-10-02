@@ -32,6 +32,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     // ponytail: grows by one small entry per rating seen this session
     const ratingLedger: RatingLedger = new Map()
     const routesToRescore = new Set<string>()
+    const mapLocation = useState<string>(cacheKeys.mapLocation, () => '')
 
     function loadedKeys() {
         return Object.keys(nuxtApp.payload.data).filter(
@@ -57,7 +58,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         ) => RouteScoreRecord[],
     ) {
         for (const key of loadedKeys()) {
-            const inScope = routeRowsScope(key)
+            const inScope = routeRowsScope(key, mapLocation.value)
             if (!inScope) continue
             const data = read<RowsData<RouteScoreRecord>>(key)
             const next = mapRows(data, (rows) => patch(rows, inScope))
@@ -174,7 +175,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     function onWall({ action, record }: RecordSubscription<WallRecord>) {
         for (const key of loadedKeys()) {
-            const inScope = wallsScope(key)
+            const inScope = wallsScope(key, mapLocation.value)
             if (!inScope) continue
             const data = read<WallRecord[]>(key)
             const next = patchList(

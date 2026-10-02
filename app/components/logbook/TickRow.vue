@@ -42,6 +42,16 @@
                 >
                     {{ $t('filter.archived') }}
                 </UBadge>
+                <UBadge
+                    v-if="tick.pending"
+                    size="sm"
+                    color="warning"
+                    variant="soft"
+                    icon="i-lucide-cloud-off"
+                    data-testid="logbook-tick-pending"
+                >
+                    {{ $t('ticks.pendingSync') }}
+                </UBadge>
             </div>
             <p
                 v-if="tick.note"
@@ -90,9 +100,10 @@
 <script setup lang="ts">
 import type { RouteRecord, TickRecord } from '~/types/models'
 import { TICK_TYPE_COLORS, TICK_TYPE_ICONS } from '~/utils/ticks'
+import type { PendingTick } from '~/utils/tickOutbox'
 
 const props = defineProps<{
-    tick: TickRecord & { expand?: { route?: RouteRecord } }
+    tick: PendingTick<TickRecord & { expand?: { route?: RouteRecord } }>
 }>()
 
 const emit = defineEmits<{

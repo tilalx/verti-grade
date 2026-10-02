@@ -229,6 +229,7 @@ import {
     type LogbookRange,
     type LogbookTick,
 } from '#shared/utils/logbook'
+import { applyTickOutbox, isOfflineError } from '~/utils/tickOutbox'
 
 type LoggedTick = TickRecord & { expand?: { route?: RouteRecord } }
 
@@ -240,6 +241,7 @@ const { t } = useI18n()
 const pb = usePocketbase()
 const { notify, error: notifyError } = useNotification()
 const { refreshTickedRoutes } = useTickedRoutes()
+const outbox = useTickOutbox()
 const { gradeSystemFor } = useGradeSystems()
 
 useHead({ title: t('page.title.logbook') })
@@ -256,17 +258,25 @@ const {
     refresh,
 } = await useAsyncData(
     'logbook',
-    () =>
-        pb.collection('ticks').getFullList<LoggedTick>({
-            sort: '-date,-created',
-            expand: 'route',
-            requestKey: null,
-        }),
+    async () => {
+        try {
+            const list = await pb.collection('ticks').getFullList<LoggedTick>({
+                sort: '-date,-created',
+                expand: 'route',
+                requestKey: null,
+            })
+            outbox.cacheTicks(list)
+            return list
+        } catch (error) {
+            if (!isOfflineError(error)) throw error
+            return outbox.cachedTicks<LoggedTick>()
+        }
+    },
     { default: () => [] },
 )
 
-const logbookTicks = computed<LogbookTick[]>(() =>
-    ticks.value.map((tick) => ({
+const logbookTicks = computed(() =>
+    applyTickOutbox(ticks.value, outbox.queue.value).map((tick) => ({
         ...tick,
         routeArchived: !!tick.expand?.route?.archived,
     })),
@@ -391,7 +401,7 @@ async function confirmDelete() {
     if (!deleteTarget.value) return
     deleting.value = true
     try {
-        await pb.collection('ticks').delete(deleteTarget.value.id)
+        await outbox.deleteTick(deleteTarget.value.id)
         notify(t('ticks.deleted'))
         deleteTarget.value = null
         await reload()

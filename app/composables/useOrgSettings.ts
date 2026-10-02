@@ -1,7 +1,5 @@
-import type { SettingsRecord } from '~/types/models'
-
 export function useOrgSettings() {
-    const { data } = useNuxtData<SettingsRecord | null>('settings')
+    const { data } = useSettingsRecord()
 
     return {
         orgName: computed(() => data.value?.organization_name || ''),
