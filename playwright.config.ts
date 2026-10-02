@@ -29,6 +29,7 @@ export default defineConfig({
         baseURL,
         ignoreHTTPSErrors: true,
         serviceWorkers: 'block',
+        actionTimeout: 15_000,
         trace: 'retain-on-failure',
         video: 'retain-on-failure',
         screenshot: 'only-on-failure',
