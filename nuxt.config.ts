@@ -54,6 +54,9 @@ export default defineNuxtConfig({
     experimental: {
         viewTransition: true,
     },
+    nitro: {
+        compressPublicAssets: { gzip: true, brotli: true },
+    },
     app: {
         head: {
             viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
