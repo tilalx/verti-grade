@@ -169,6 +169,8 @@ import {
 } from '~/utils/overview'
 import { cacheKeys } from '~/utils/realtimeCache'
 
+const OVERVIEW_FIELDS =
+    'id,name,color,grade,grade_system,grade_index,anchor_point,type,location,wall,screw_date,average_rating,ratings_count'
 const RECENT_DAYS = 7
 const POPULAR_LIMIT = 6
 
@@ -195,7 +197,12 @@ const [
 ] = await Promise.all([
     useAsyncData(
         cacheKeys.overviewRoutes,
-        () => $fetch<RouteScoreRecord[]>('/api/public/overview'),
+        () =>
+            pb.collection('averageRating').getFullList<RouteScoreRecord>({
+                filter: 'archived = false',
+                fields: OVERVIEW_FIELDS,
+                requestKey: 'overviewRoutes',
+            }),
         { default: () => [] },
     ),
     useAsyncData(

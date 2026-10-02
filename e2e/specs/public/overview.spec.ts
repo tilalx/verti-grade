@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
 import { authAsSuperuser, uiaa } from '../../support/seed'
-import { gotoSettled, waitForOverview } from '../../support/nav'
+import { gotoSettled } from '../../support/nav'
 import { PB_URL, seedMap, type SeededMap } from '../../support/map'
 
 let seeded: SeededMap
@@ -34,7 +34,6 @@ test('the overview shows new routes and walls that lead to the map', async ({
     page,
     testPrefix,
 }) => {
-    await waitForOverview(page, freshRouteId)
     await gotoSettled(page, '/')
     await expect(page.getByTestId('overview-stats')).toBeVisible()
 

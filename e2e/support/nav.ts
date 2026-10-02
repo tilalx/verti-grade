@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 export async function gotoSettled(
     page: Page,
@@ -54,24 +54,4 @@ export async function searchRoutes(page: Page, text: string) {
     )
     await page.getByTestId('filter-search').fill(text)
     await filtered
-}
-
-export async function waitForOverview(
-    page: Page,
-    routeId: string,
-    ratingsCount = 0,
-) {
-    await expect
-        .poll(
-            async () => {
-                const response = await page.request.get('/api/public/overview')
-                const rows = (await response.json()) as {
-                    id: string
-                    ratings_count?: number
-                }[]
-                return rows.find((row) => row.id === routeId)?.ratings_count
-            },
-            { timeout: 15_000 },
-        )
-        .toBe(ratingsCount)
 }

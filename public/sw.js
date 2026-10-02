@@ -3,7 +3,7 @@ const CACHE = `gripello-${BUILD}`
 const PAGES = `${CACHE}-pages`
 const OFFLINE_URL = '/offline.html'
 const PUBLIC_DATA =
-    /^\/(_i18n\/|api\/(public\/overview|collections\/(walls|locations|averageRating|open_route_defects)\/records$))/
+    /^\/(_i18n\/|api\/collections\/(walls|locations|averageRating|open_route_defects)\/records$)/
 const FILES = /^\/api\/files\//
 const FILE_CACHE_LIMIT = 50
 const NETWORK_TIMEOUT_MS = 4000
