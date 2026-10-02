@@ -13,19 +13,17 @@
             data-testid="nav-logo-custom"
         />
         <template v-else>
-            <NuxtImg
+            <img
                 src="/gripello-light.svg"
                 :alt="logoAlt"
                 class="brand-logo__default brand-logo__default--light"
                 height="36"
-                densities="x1 x2"
             />
-            <NuxtImg
+            <img
                 src="/gripello-dark.svg"
                 :alt="logoAlt"
                 class="brand-logo__default brand-logo__default--dark"
                 height="36"
-                densities="x1 x2"
             />
         </template>
     </NuxtLink>

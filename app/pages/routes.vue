@@ -12,10 +12,12 @@
                             :aria-label="$t('gradeConversion.title')"
                             :title="$t('gradeConversion.title')"
                             data-testid="index-grade-conversion-open"
+                            square
+                            class="sm:px-2.5"
                         >
-                            <template v-if="smAndUp">{{
+                            <span class="hidden sm:inline">{{
                                 $t('gradeConversion.title')
-                            }}</template>
+                            }}</span>
                         </UButton>
                     </template>
                 </GradeConversionDialog>
@@ -217,7 +219,7 @@ import { toPbSort, type SortOption } from '~/utils/sorting'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
-const { lgAndUp, smAndUp } = useDisplay()
+const { lgAndUp } = useDisplay()
 
 const isWideLayout = computed(() => lgAndUp.value)
 const { error: notifyError } = useNotification()

@@ -31,6 +31,8 @@ defineProps<{
 </template>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .page-header__title {
     font-size: 1.6rem;
     font-weight: 700;
@@ -43,7 +45,7 @@ defineProps<{
     color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
 }
 
-@media (max-width: 600px) {
+@variant max-sm {
     .page-header__title {
         font-size: 1.35rem;
     }

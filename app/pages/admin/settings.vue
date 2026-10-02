@@ -976,6 +976,8 @@ async function saveSettings() {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .settings-nav-mobile {
     position: sticky;
     top: calc(var(--app-top) + var(--app-top-inset, 0px));
@@ -1062,7 +1064,7 @@ async function saveSettings() {
     align-items: center;
 }
 
-@media (max-width: 599px) {
+@variant max-sm {
     .person-list {
         gap: 24px;
     }

@@ -536,7 +536,9 @@ const getRouteMetadata = async (): Promise<void> => {
             ...record,
             creator: normalizeCreators(record.creator),
         }
-    } catch {
+    } catch (err: unknown) {
+        const status = (err as { status?: number }).status ?? 0
+        if (status !== 404) throw createError({ status: status || 503 })
         metadata.value = null
     }
 }
@@ -585,7 +587,7 @@ function onReviewSaved() {
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-const { data: initial } = await useAsyncData(
+const { data: initial, error: loadError } = await useAsyncData(
     `route-detail:${route_id.value}`,
     async () => {
         if (!route_id.value) return null
@@ -599,6 +601,8 @@ if (initial.value) {
     reviews.value = initial.value.reviews
 }
 
+if (loadError.value)
+    throw createError({ status: loadError.value.status, fatal: true })
 if (!metadata.value) throw createError({ status: 404, fatal: true })
 
 loading.value = false
@@ -624,6 +628,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .comment-card--target {
     outline: 2px solid var(--ui-success);
     outline-offset: 2px;
@@ -671,13 +677,13 @@ onMounted(async () => {
 }
 
 /* Round hero corners on tablet */
-@media (min-width: 600px) {
+@variant sm {
     .route-hero {
         border-radius: 0 0 16px 16px;
     }
 }
 
-@media (min-width: 960px) {
+@variant lg {
     .route-page {
         max-width: 1400px;
         padding: 24px 24px 0;
@@ -746,7 +752,7 @@ onMounted(async () => {
     }
 }
 
-@media (min-width: 1400px) {
+@variant xl {
     .route-reviews-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));

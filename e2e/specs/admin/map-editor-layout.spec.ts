@@ -5,7 +5,7 @@ import { gotoSettled } from '../../support/nav'
 import { PB_URL, seedMap } from '../../support/map'
 
 test.describe('narrow editor', () => {
-    test.use({ viewport: { width: 800, height: 1000 } })
+    test.use({ viewport: { width: 700, height: 1000 } })
 
     test('keeps the canvas full width and opens the panel as a sheet', async ({
         adminPage: page,
@@ -23,8 +23,8 @@ test.describe('narrow editor', () => {
 
             const canvasBox = (await canvas.boundingBox())!
             const sheetBox = (await sheet.boundingBox())!
-            expect(canvasBox.width).toBeGreaterThan(750)
-            expect(sheetBox.width).toBeGreaterThan(750)
+            expect(canvasBox.width).toBeGreaterThan(650)
+            expect(sheetBox.width).toBeGreaterThan(650)
             expect(sheetBox.y).toBeGreaterThan(canvasBox.y)
             await expect(
                 sheet.locator(

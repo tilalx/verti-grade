@@ -811,6 +811,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .placement-location {
     flex: 0 1 200px;
     min-width: 0;
@@ -932,7 +934,7 @@ onBeforeUnmount(() => {
     transform: translate(12px, 12px);
 }
 
-@media (max-width: 599.98px) {
+@variant max-sm {
     .map-screen__title {
         position: absolute;
         width: 1px;

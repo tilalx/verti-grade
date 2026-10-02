@@ -4,7 +4,7 @@
         class="nav-bar"
         :toggle="false"
         :ui="{
-            root: 'bg-(--app-bg)/80 backdrop-blur-md',
+            root: 'bg-default lg:bg-(--app-bg)/80 lg:backdrop-blur-md',
             container: 'max-w-none',
         }"
     >

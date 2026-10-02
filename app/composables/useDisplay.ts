@@ -1,4 +1,4 @@
-const BREAKPOINTS = { sm: 600, md: 840, lg: 1145, xl: 1545 }
+const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 }
 const VIEWPORT_HINT = 'sec-ch-viewport-width'
 
 export function useDisplay() {

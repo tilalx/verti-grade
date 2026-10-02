@@ -986,11 +986,13 @@ useHead(() => ({
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .route-manager {
     padding-bottom: 64px;
 }
 
-@media (max-width: 1279.98px) {
+@variant max-xl {
     .route-manager {
         padding-bottom: 0;
     }

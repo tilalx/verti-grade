@@ -130,6 +130,8 @@ const { isHealthy, onlineCount } = useAppStatus()
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .app-footer {
     flex: 0 0 auto;
     background: transparent;
@@ -231,7 +233,7 @@ const { isHealthy, onlineCount } = useAppStatus()
     );
 }
 
-@media (max-width: 599px) {
+@variant max-sm {
     .footer-inner {
         grid-template-columns: 1fr;
         padding: 8px 16px;

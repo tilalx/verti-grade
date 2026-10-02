@@ -537,7 +537,7 @@ const SCAN_COOLDOWN_MS = 2000
 
 const { t, locale } = useI18n()
 const pb = usePocketbase()
-const { width: viewportWidth } = useDisplay()
+const { mdAndUp } = useDisplay()
 const { data: locationRecords } = useLocations()
 const {
     success: notifySuccess,
@@ -545,7 +545,7 @@ const {
     warning: notifyWarning,
 } = useNotification()
 
-const isWideLayout = computed(() => viewportWidth.value >= 740)
+const isWideLayout = computed(() => mdAndUp.value)
 
 const allRoutes = ref<RouteRecord[]>([])
 const loadingRoutes = ref(false)
@@ -1026,6 +1026,8 @@ watch(instructionsDialog, (open) => {
 </script>
 
 <style scoped>
+@reference "~/assets/css/main.css";
+
 .inventory-page {
     max-width: 600px;
     margin: 0 auto;
@@ -1108,13 +1110,13 @@ watch(instructionsDialog, (open) => {
     overflow-y: auto;
 }
 
-@media (min-width: 600px) {
+@variant sm {
     .scanner-viewport {
         height: 320px;
     }
 }
 
-@media (min-width: 740px) {
+@variant md {
     .inventory-page {
         max-width: none;
         padding: 16px 0 24px;
@@ -1166,7 +1168,7 @@ watch(instructionsDialog, (open) => {
     }
 }
 
-@media (min-width: 1545px) {
+@variant 2xl {
     .inventory-layout {
         grid-template-columns: minmax(0, 1fr) minmax(440px, 1.6fr) minmax(
                 0,
