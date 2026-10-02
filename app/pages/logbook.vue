@@ -4,7 +4,7 @@
             :title="t('ticks.logbook')"
             :subtitle="t('ticks.logbookSubtitle')"
         >
-            <template v-if="ticks.length" #actions>
+            <template v-if="logbookTicks.length" #actions>
                 <div class="flex flex-wrap gap-2">
                     <UFieldGroup data-testid="logbook-kind">
                         <UButton
@@ -57,7 +57,7 @@
             </template>
         </LayoutEmptyState>
 
-        <template v-else-if="!ticks.length">
+        <template v-else-if="!logbookTicks.length">
             <LayoutEmptyState
                 icon="i-lucide-notebook"
                 :title="t('ticks.empty')"
@@ -289,7 +289,7 @@ const routeType = computed(() =>
     kind.value === 'boulder' ? 'Boulder' : 'Route',
 )
 
-const sessions = computed(() => groupTicksByDay(ticks.value))
+const sessions = computed(() => groupTicksByDay(logbookTicks.value))
 const stats = computed(() =>
     logbookStats(logbookTicks.value, kind.value, range.value),
 )
@@ -306,7 +306,7 @@ const targetIndex = computed(() =>
 const routesById = computed(
     () =>
         new Map(
-            ticks.value
+            logbookTicks.value
                 .map((tick) => tick.expand?.route)
                 .filter((route): route is RouteRecord => !!route)
                 .map((route) => [route.id, route]),

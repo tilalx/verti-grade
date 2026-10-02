@@ -3,6 +3,11 @@ import { gotoSettled } from '../../support/nav'
 import { signInAs } from '../../support/auth'
 import { ensureUser, getRoleIds, uiaa } from '../../support/seed'
 
+test.use({
+    launchOptions: { args: ['--ignore-certificate-errors'] },
+    serviceWorkers: 'allow',
+})
+
 test('an ascent logged offline syncs when the connection returns', async ({
     page,
     root,
@@ -24,7 +29,9 @@ test('an ascent logged offline syncs when the connection returns', async ({
 
     await signInAs(page, climber.email, climber.password)
     await gotoSettled(page, routeUrl)
-    await page.evaluate(() => navigator.serviceWorker.ready)
+    await page.waitForFunction(
+        () => navigator.serviceWorker?.controller !== null,
+    )
     await gotoSettled(page, routeUrl)
     await gotoSettled(page, '/logbook')
     await expect(page.getByTestId('logbook-empty')).toBeVisible()
@@ -42,6 +49,7 @@ test('an ascent logged offline syncs when the connection returns', async ({
     await expect(pending).toBeVisible()
 
     await page.context().setOffline(false)
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
     await expect
         .poll(async () => {
             const result = await root.collection('ticks').getList(1, 1, {

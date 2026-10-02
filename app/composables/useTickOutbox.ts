@@ -48,9 +48,10 @@ function readAll<T>(name: StoreName) {
 }
 
 function replaceAll<T extends { id: string }>(name: StoreName, rows: T[]) {
+    const plainRows: T[] = JSON.parse(JSON.stringify(rows))
     return withStore(name, 'readwrite', (store) => {
         store.clear()
-        for (const row of rows) store.put(row)
+        for (const row of plainRows) store.put(row)
     })
 }
 

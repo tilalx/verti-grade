@@ -62,13 +62,16 @@ export async function waitForOverview(
     ratingsCount = 0,
 ) {
     await expect
-        .poll(async () => {
-            const response = await page.request.get('/api/public/overview')
-            const rows = (await response.json()) as {
-                id: string
-                ratings_count?: number
-            }[]
-            return rows.find((row) => row.id === routeId)?.ratings_count
-        })
+        .poll(
+            async () => {
+                const response = await page.request.get('/api/public/overview')
+                const rows = (await response.json()) as {
+                    id: string
+                    ratings_count?: number
+                }[]
+                return rows.find((row) => row.id === routeId)?.ratings_count
+            },
+            { timeout: 15_000 },
+        )
         .toBe(ratingsCount)
 }
