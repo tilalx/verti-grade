@@ -42,3 +42,20 @@ export const integerBetween =
     (v) =>
         (Number.isInteger(v) && (v as number) >= min && (v as number) <= max) ||
         t('validation.integerRange', { min, max })
+
+export interface FieldError {
+    name: string
+    message: string
+}
+
+export function validateRules(
+    state: Record<string, unknown>,
+    rules: Record<string, Rule[]>,
+): FieldError[] {
+    return Object.entries(rules).flatMap(([name, fieldRules]) => {
+        const message = fieldRules
+            .map((rule) => rule(state[name]))
+            .find((result) => result !== true)
+        return message ? [{ name, message }] : []
+    })
+}

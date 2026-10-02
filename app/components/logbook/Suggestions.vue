@@ -8,26 +8,23 @@
                     : $t('ticks.suggestions.subtitle')
             "
         />
-        <v-row density="comfortable">
-            <v-col
+        <div class="grid grid-cols-12 gap-3">
+            <div
                 v-for="route in suggestions"
                 :key="route.id"
-                cols="12"
-                sm="6"
-                lg="4"
+                class="col-span-12 sm:col-span-6 lg:col-span-4"
             >
-                <v-card
-                    variant="tonal"
+                <NuxtLink
                     :to="`/route?id=${route.id}`"
-                    class="pa-3 d-flex align-center ga-3"
+                    class="suggestion rounded-lg bg-elevated p-3 flex items-center gap-3"
                     data-testid="logbook-suggestion"
                 >
                     <RouteColorDot :color="route.color" :size="32" />
-                    <div class="flex-grow-1 suggestion__body">
-                        <div class="font-weight-medium suggestion__name">
+                    <div class="grow suggestion__body">
+                        <div class="font-medium suggestion__name">
                             {{ route.name }}
                         </div>
-                        <div class="text-body-small text-medium-emphasis">
+                        <div class="text-xs text-muted">
                             {{
                                 locationName(route) ||
                                 (route.type &&
@@ -37,19 +34,19 @@
                             }}
                         </div>
                     </div>
-                    <v-chip
+                    <UBadge
                         v-if="isNew(route)"
-                        size="x-small"
+                        size="sm"
                         color="primary"
-                        variant="flat"
+                        variant="solid"
                     >
                         {{ $t('ticks.suggestions.new') }}
-                    </v-chip>
+                    </UBadge>
                     <GradeLabel :source="route" />
-                    <v-icon icon="mdi-chevron-right" size="small" />
-                </v-card>
-            </v-col>
-        </v-row>
+                    <UIcon name="i-lucide-chevron-right" class="size-4" />
+                </NuxtLink>
+            </div>
+        </div>
     </section>
 </template>
 
@@ -113,6 +110,15 @@ const suggestions = computed(() => {
 </script>
 
 <style scoped>
+.suggestion {
+    color: inherit;
+    text-decoration: none;
+}
+
+.suggestion:hover {
+    background: var(--ui-bg-accented);
+}
+
 .suggestion__body {
     min-width: 0;
 }

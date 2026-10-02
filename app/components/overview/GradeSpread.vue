@@ -6,33 +6,30 @@
     >
         <figcaption class="grade-spread__title">{{ title }}</figcaption>
         <div class="grade-spread__bars" role="list">
-            <v-tooltip
+            <UTooltip
                 v-for="bar in bars"
                 :key="bar.grade"
                 :text="`${bar.grade}: ${$t('overview.routesCount', { n: bar.count })}`"
-                location="top"
+                :content="{ side: 'top' }"
             >
-                <template #activator="{ props: tooltipProps }">
-                    <div
-                        v-bind="tooltipProps"
-                        class="grade-spread__bar"
-                        role="listitem"
-                        tabindex="0"
-                        :aria-label="`${bar.grade}: ${bar.count}`"
-                        data-testid="overview-grade-bar"
-                    >
-                        <span class="grade-spread__count">{{
-                            bar.count || ''
-                        }}</span>
-                        <span
-                            class="grade-spread__fill"
-                            data-testid="overview-grade-fill"
-                            :style="{ height: `${(bar.count / max) * 100}%` }"
-                        />
-                        <span class="grade-spread__label">{{ bar.grade }}</span>
-                    </div>
-                </template>
-            </v-tooltip>
+                <div
+                    class="grade-spread__bar"
+                    role="listitem"
+                    tabindex="0"
+                    :aria-label="`${bar.grade}: ${bar.count}`"
+                    data-testid="overview-grade-bar"
+                >
+                    <span class="grade-spread__count">{{
+                        bar.count || ''
+                    }}</span>
+                    <span
+                        class="grade-spread__fill"
+                        data-testid="overview-grade-fill"
+                        :style="{ height: `${(bar.count / max) * 100}%` }"
+                    />
+                    <span class="grade-spread__label">{{ bar.grade }}</span>
+                </div>
+            </UTooltip>
         </div>
     </figure>
 </template>
@@ -88,20 +85,20 @@ const max = computed(() => Math.max(1, ...props.bars.map((bar) => bar.count)))
 }
 
 .grade-spread__bar:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
+    outline: 2px solid var(--ui-primary);
     outline-offset: 2px;
 }
 
 .grade-spread__count {
     font-size: 0.7rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 
 .grade-spread__fill {
     display: block;
     min-height: 2px;
     border-radius: 4px 4px 0 0;
-    background: rgb(var(--v-theme-primary));
+    background: var(--ui-primary);
     align-self: end;
 }
 

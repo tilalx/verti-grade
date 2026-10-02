@@ -23,25 +23,15 @@ test('stays signed in after changing the own password', async ({
 
     try {
         await signInAs(page, user.email, user.password)
-        await gotoSettled(page, '/')
-        await page.getByTestId('user-menu-activator').click()
-        await page.getByTestId('user-menu-profile').click()
+        await gotoSettled(page, '/account/settings')
         await page.getByTestId('profile-tab-security').click()
 
-        await page
-            .getByTestId('password-old')
-            .locator('input')
-            .fill(user.password)
-        await page
-            .getByTestId('password-new')
-            .locator('input')
-            .fill(NEW_PASSWORD)
-        await page
-            .getByTestId('password-confirm')
-            .locator('input')
-            .fill(NEW_PASSWORD)
+        await page.getByTestId('password-old').fill(user.password)
+        await page.getByTestId('password-new').fill(NEW_PASSWORD)
+        await page.getByTestId('password-confirm').fill(NEW_PASSWORD)
         await page.getByTestId('profile-save').click()
-        await expect(page.getByTestId('profile-dialog')).toBeHidden()
+        await expect(page.getByTestId('global-snackbar-message')).toBeVisible()
+        await expect(page.getByTestId('password-new')).toHaveValue('')
 
         await gotoSettled(page, '/account')
         await expect(page.getByTestId('me-guest')).toHaveCount(0)

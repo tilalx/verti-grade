@@ -12,11 +12,8 @@ test('creates a role with a color, toggles a permission, then deletes it', async
 
     await page.getByTestId('role-create-open').click()
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
-    await page.getByTestId('role-form-name').locator('input').fill(name)
-    await page
-        .getByTestId('role-form-description')
-        .locator('input')
-        .fill('created by e2e')
+    await page.getByTestId('role-form-name').fill(name)
+    await page.getByTestId('role-form-description').fill('created by e2e')
     await page.getByTestId('role-form-swatch-42A5F5').click()
     await page.getByTestId('role-form-submit').click()
     await expect(page.getByTestId('role-form-dialog')).toBeHidden()
@@ -31,7 +28,7 @@ test('creates a role with a color, toggles a permission, then deletes it', async
     )
 
     const checkbox = page.getByTestId(`role-permissions-${name}-view_analytics`)
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(checkbox).not.toBeChecked()
     const saved = page.waitForResponse(
         (res) =>
             res.request().method() === 'PATCH' &&
@@ -39,13 +36,11 @@ test('creates a role with a color, toggles a permission, then deletes it', async
     )
     await checkbox.click()
     expect((await saved).ok()).toBe(true)
-    await expect(checkbox.locator('input')).toBeChecked()
+    await expect(checkbox).toBeChecked()
 
     await gotoSettled(page, '/admin/users')
     await expect(
-        page
-            .getByTestId(`role-permissions-${name}-view_analytics`)
-            .locator('input'),
+        page.getByTestId(`role-permissions-${name}-view_analytics`),
     ).toBeChecked()
 
     await page.getByTestId(`role-delete-${name}`).click()
@@ -67,7 +62,7 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
     const email = `${testPrefix}-reassign@gripello.test`
 
     await page.getByTestId('role-create-open').click()
-    await page.getByTestId('role-form-name').locator('input').fill(roleName)
+    await page.getByTestId('role-form-name').fill(roleName)
     await page.getByTestId('role-form-submit').click()
     await expect(page.getByTestId('role-form-dialog')).toBeHidden()
     await expect(
@@ -75,12 +70,9 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
     ).toBeVisible()
 
     await page.getByTestId('user-create-open').click()
-    await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
-    await page
-        .getByTestId('user-create-lastname')
-        .locator('input')
-        .fill('Reassign')
-    await page.getByTestId('user-create-email').locator('input').fill(email)
+    await page.getByTestId('user-create-firstname').fill('E2E')
+    await page.getByTestId('user-create-lastname').fill('Reassign')
+    await page.getByTestId('user-create-email').fill(email)
     await page.getByTestId('user-create-role').click()
     await page.getByRole('option', { name: roleName, exact: true }).click()
     await page.getByTestId('user-create-submit').click()
@@ -97,7 +89,7 @@ test('moves the holders of a deleted role to the role picked in the dialog', asy
         page.getByTestId(`role-permissions-row-${roleName}`),
     ).toBeHidden()
 
-    await page.getByTestId('filter-search').locator('input').fill(email)
+    await page.getByTestId('filter-search').fill(email)
     const card = page
         .locator('[data-testid^="user-card-"]')
         .filter({ hasText: email })
@@ -114,16 +106,12 @@ test('the admin role cannot be deleted and its permissions are locked', async ({
     await expect(adminCard).toBeVisible()
     await expect(page.getByTestId('role-delete-admin')).toHaveCount(0)
     await expect(
-        page
-            .getByTestId('role-permissions-admin-manage_users')
-            .locator('input'),
+        page.getByTestId('role-permissions-admin-manage_users'),
     ).toBeDisabled()
 
     await page.getByTestId('role-edit-admin').click()
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
-    await expect(
-        page.getByTestId('role-form-name').locator('input'),
-    ).not.toBeEditable()
+    await expect(page.getByTestId('role-form-name')).not.toBeEditable()
 })
 
 test('rejects a role name that is already taken', async ({
@@ -132,11 +120,13 @@ test('rejects a role name that is already taken', async ({
     await gotoSettled(page, '/admin/users')
 
     await page.getByTestId('role-create-open').click()
-    await page.getByTestId('role-form-name').locator('input').fill('admin')
+    await page.getByTestId('role-form-name').fill('admin')
     await page.getByTestId('role-form-submit').click()
 
     await expect(page.getByTestId('role-form-dialog')).toBeVisible()
-    await expect(page.getByTestId('role-form-name')).toContainText('already')
+    await expect(
+        page.getByTestId('role-form-name'),
+    ).toHaveAccessibleDescription(/already/)
 })
 
 test('add role button looks like the add user button', async ({

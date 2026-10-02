@@ -11,11 +11,9 @@
         :aria-label="label || undefined"
         :data-ticked="ticked || undefined"
     >
-        <span
-            v-if="ticked"
-            class="route-color-dot__tick mdi mdi-check-bold"
-            aria-hidden="true"
-        />
+        <span v-if="ticked" class="route-color-dot__tick" aria-hidden="true">
+            <UIcon name="i-lucide-check" class="size-[11px]" />
+        </span>
     </span>
 </template>
 
@@ -46,7 +44,8 @@ const label = computed(() =>
     display: inline-block;
     flex-shrink: 0;
     border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-on-surface), 0.24);
+    box-shadow: inset 0 0 0 1px
+        color-mix(in oklab, var(--ui-text-highlighted) 24%, transparent);
 }
 
 .route-color-dot__tick {
@@ -59,9 +58,8 @@ const label = computed(() =>
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    font-size: 11px;
-    background: rgb(var(--v-theme-success));
-    color: rgb(var(--v-theme-on-success));
-    box-shadow: 0 0 0 2px rgb(var(--v-theme-surface));
+    background: var(--ui-success);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--ui-bg);
 }
 </style>

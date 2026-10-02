@@ -14,7 +14,7 @@ const props = defineProps<{ rows: PyramidRow[] }>()
 
 const { t } = useI18n()
 const { colors, palette } = useChartTheme()
-const theme = useTheme()
+const themeColors = useThemeColors()
 
 const option = computed(() => {
     const bottomUp = [...props.rows].reverse()
@@ -49,7 +49,7 @@ const option = computed(() => {
                 stack: 'sends',
                 barMaxWidth: 22,
                 itemStyle: {
-                    color: theme.current.value.colors.success,
+                    color: themeColors.value.success,
                     borderRadius: [0, 4, 4, 0],
                 },
                 data: bottomUp.map((row) => row.top),

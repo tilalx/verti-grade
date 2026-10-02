@@ -1,12 +1,12 @@
 <template>
-    <div class="pcf-root">
+    <div class="pcf-root flex flex-col gap-4">
         <UserPasswordField
             v-if="requireOldPassword"
             :model-value="oldPassword"
             :label="$t('account.oldPassword')"
             :placeholder="$t('account.placeholders.oldPassword')"
             :rules="[rules.required]"
-            prepend-inner-icon="mdi-lock-check-outline"
+            icon="i-lucide-lock-keyhole"
             data-testid="password-old"
             @update:model-value="emit('update:oldPassword', $event)"
         />
@@ -23,20 +23,20 @@
                 rules.maxLength,
                 rules.strength,
             ]"
-            prepend-inner-icon="mdi-lock-plus-outline"
+            icon="i-lucide-lock-keyhole-open"
             data-testid="password-new"
             @update:model-value="emit('update:password', $event)"
         />
 
         <Transition name="pcf-slide-down">
-            <div v-if="password" class="mt-n2 mb-3 px-1">
-                <div class="d-flex align-center justify-space-between mb-1">
-                    <span class="text-body-small text-medium-emphasis">
+            <div v-if="password" class="px-1">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs text-muted">
                         {{ $t('account.passwordStrength') }}
                     </span>
                     <span
-                        class="text-body-small font-weight-bold"
-                        :class="`text-${strengthColor}`"
+                        class="text-xs font-bold"
+                        :class="strengthClasses.text"
                     >
                         {{ $t(`account.strength.${strengthLabel}`) }}
                     </span>
@@ -49,7 +49,7 @@
                         class="pcf-strength-segment"
                         :class="
                             n <= strengthScore
-                                ? `bg-${strengthColor}`
+                                ? strengthClasses.bg
                                 : 'pcf-segment-empty'
                         "
                     />
@@ -62,16 +62,15 @@
                         class="pcf-requirement-item"
                         :class="req.met ? 'met' : 'unmet'"
                     >
-                        <v-icon
-                            :icon="
+                        <UIcon
+                            :name="
                                 req.met
-                                    ? 'mdi-check-circle-outline'
-                                    : 'mdi-circle-outline'
+                                    ? 'i-lucide-circle-check'
+                                    : 'i-lucide-circle'
                             "
-                            size="14"
-                            class="mr-1 flex-shrink-0"
+                            class="mr-1 shrink-0 size-[14px]"
                         />
-                        <span class="text-body-small">
+                        <span class="text-xs">
                             {{ $t(`account.requirements.${req.key}`) }}
                         </span>
                     </div>
@@ -87,16 +86,15 @@
             :hide-toggle="passwordsMatch"
             validate-on="blur"
             :rules="[rules.required, rules.matchPassword]"
-            prepend-inner-icon="mdi-lock-check-outline"
+            icon="i-lucide-lock-keyhole"
             data-testid="password-confirm"
             @update:model-value="emit('update:passwordConfirm', $event)"
         >
             <template #append-inner>
-                <v-icon
+                <UIcon
+                    name="i-lucide-circle-check"
+                    class="text-success size-[20px]"
                     v-if="passwordsMatch"
-                    icon="mdi-check-circle-outline"
-                    color="success"
-                    size="20"
                 />
             </template>
         </UserPasswordField>
@@ -161,10 +159,15 @@ const strengthLabel = computed(
     () => ['', 'weak', 'fair', 'good', 'strong'][strengthScore.value] ?? 'weak',
 )
 
-const strengthColor = computed(
+const strengthClasses = computed(
     () =>
-        ['', 'error', 'warning', 'info', 'success'][strengthScore.value] ??
-        'error',
+        [
+            { text: 'text-error', bg: 'bg-error' },
+            { text: 'text-error', bg: 'bg-error' },
+            { text: 'text-warning', bg: 'bg-warning' },
+            { text: 'text-info', bg: 'bg-info' },
+            { text: 'text-success', bg: 'bg-success' },
+        ][strengthScore.value] ?? { text: 'text-error', bg: 'bg-error' },
 )
 
 const passwordsMatch = computed(
@@ -204,7 +207,11 @@ watch(isValid, (val) => emit('validity', val), { immediate: true })
     transition: background-color 0.35s ease;
 }
 .pcf-segment-empty {
-    background-color: rgba(var(--v-theme-on-surface), 0.12);
+    background-color: color-mix(
+        in oklab,
+        var(--ui-text-highlighted) 12%,
+        transparent
+    );
 }
 
 .pcf-requirements-grid {
@@ -218,10 +225,10 @@ watch(isValid, (val) => emit('validity', val), { immediate: true })
     transition: color 0.2s;
 }
 .pcf-requirement-item.met {
-    color: rgb(var(--v-theme-success));
+    color: var(--ui-success);
 }
 .pcf-requirement-item.unmet {
-    color: rgba(var(--v-theme-on-surface), 0.45);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 45%, transparent);
 }
 
 .pcf-slide-down-enter-active,

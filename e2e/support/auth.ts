@@ -22,8 +22,8 @@ export async function fillLogin(
     identity: string,
     password: string,
 ) {
-    const identityInput = page.getByTestId('login-identity').locator('input')
-    const passwordInput = page.getByTestId('login-password').locator('input')
+    const identityInput = page.getByTestId('login-identity')
+    const passwordInput = page.getByTestId('login-password')
     await expect(async () => {
         await identityInput.fill(identity)
         await passwordInput.fill(password)

@@ -55,7 +55,8 @@ const { locale } = useI18n()
     gap: 2px;
     padding: 14px;
     border-radius: 12px;
-    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
     color: inherit;
     text-decoration: none;
     transition:
@@ -65,8 +66,8 @@ const { locale } = useI18n()
 
 .wall-tile:hover,
 .wall-tile:focus-visible {
-    border-color: rgb(var(--v-theme-primary));
-    background: rgba(var(--v-theme-primary), 0.06);
+    border-color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 6%, var(--ui-bg));
     outline: none;
 }
 
@@ -75,13 +76,13 @@ const { locale } = useI18n()
 }
 
 .wall-tile__count {
-    color: rgb(var(--v-theme-primary));
+    color: var(--ui-primary);
     font-weight: 600;
     font-size: 0.875rem;
 }
 
 .wall-tile__meta {
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 </style>

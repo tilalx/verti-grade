@@ -1,68 +1,65 @@
 <template>
-    <v-card border flat class="mb-6" data-testid="settings-locations">
-        <v-card-text class="pa-4">
-            <p class="text-title-small font-weight-semibold mb-1">
-                {{ $t('settings.locations') }}
-            </p>
-            <p class="text-body-small text-medium-emphasis mb-4">
-                {{ $t('settings.locationsIntro') }}
-            </p>
-
-            <div class="location-list">
-                <div
-                    v-for="location in locations"
-                    :key="location.id"
-                    class="location-row"
-                    data-testid="settings-location"
-                    :data-name="location.name"
-                >
-                    <v-text-field
-                        v-model="draftNames[location.id]"
-                        :label="$t('settings.locationName')"
-                        density="compact"
-                        hide-details="auto"
-                        prepend-inner-icon="mdi-map-marker-outline"
-                        :maxlength="100"
-                        data-testid="settings-location-name"
-                        @blur="rename(location)"
-                        @keydown.enter="rename(location)"
-                    />
-                    <v-btn
-                        icon="mdi-delete-outline"
-                        variant="text"
-                        color="error"
-                        density="comfortable"
-                        :loading="busyId === location.id"
-                        :aria-label="$t('settings.locationDelete')"
-                        :title="$t('settings.locationDelete')"
-                        data-testid="settings-location-delete"
-                        @click="remove(location)"
-                    />
-                </div>
-            </div>
-
-            <form class="location-row mt-3" @submit.prevent="add">
-                <v-text-field
-                    v-model="newName"
-                    :label="$t('settings.locationNew')"
-                    density="compact"
-                    hide-details="auto"
-                    prepend-inner-icon="mdi-map-marker-plus-outline"
+    <UPageCard
+        :title="$t('settings.locations')"
+        :description="$t('settings.locationsIntro')"
+        variant="subtle"
+        data-testid="settings-locations"
+    >
+        <div class="location-list">
+            <div
+                v-for="location in locations"
+                :key="location.id"
+                class="location-row"
+                data-testid="settings-location"
+                :data-name="location.name"
+            >
+                <UInput
+                    :model-value="draftNames[location.id] ?? location.name"
+                    :aria-label="$t('settings.locationName')"
+                    :placeholder="$t('settings.locationName')"
+                    icon="i-lucide-map-pin"
                     :maxlength="100"
-                    data-testid="settings-location-new"
+                    class="flex-1"
+                    data-testid="settings-location-name"
+                    @update:model-value="draftNames[location.id] = $event"
+                    @blur="rename(location)"
+                    @keydown.enter="rename(location)"
                 />
-                <v-btn
-                    type="submit"
-                    variant="tonal"
-                    :disabled="!newName.trim()"
-                    :loading="busyId === 'new'"
-                    data-testid="settings-location-add"
-                >
-                    {{ $t('settings.locationAdd') }}
-                </v-btn>
-            </form>
-        </v-card-text>
-    </v-card>
+                <UButton
+                    icon="i-lucide-trash-2"
+                    variant="ghost"
+                    color="error"
+                    :loading="busyId === location.id"
+                    :aria-label="$t('settings.locationDelete')"
+                    :title="$t('settings.locationDelete')"
+                    data-testid="settings-location-delete"
+                    @click="remove(location)"
+                />
+            </div>
+        </div>
+
+        <form class="location-row" @submit.prevent="add">
+            <UInput
+                v-model="newName"
+                :aria-label="$t('settings.locationNew')"
+                :placeholder="$t('settings.locationNew')"
+                icon="i-lucide-map-pin-plus"
+                :maxlength="100"
+                class="flex-1"
+                data-testid="settings-location-new"
+            />
+            <UButton
+                type="submit"
+                color="neutral"
+                variant="soft"
+                :disabled="!newName.trim()"
+                :loading="busyId === 'new'"
+                data-testid="settings-location-add"
+            >
+                {{ $t('settings.locationAdd') }}
+            </UButton>
+        </form>
+    </UPageCard>
 </template>
 
 <script setup lang="ts">

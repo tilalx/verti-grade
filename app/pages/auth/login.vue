@@ -17,301 +17,337 @@
         </template>
 
         <div v-if="!hasAnyAuth" class="text-center py-10">
-            <v-icon size="48" color="warning" class="mb-3"
-                >mdi-alert-circle-outline</v-icon
-            >
-            <p class="text-body-medium text-medium-emphasis">
+            <UIcon
+                name="i-lucide-circle-alert"
+                class="mb-3 size-[48px] text-warning"
+            />
+            <p class="text-sm text-muted">
                 {{ $t('notifications.error.no_auth_methods_available') }}
             </p>
         </div>
 
-        <div v-else class="position-relative">
+        <div v-else class="relative">
             <Transition name="form-swap" mode="out-in">
-                <!-- ─── LOGIN ─── -->
-                <v-form
+                <UForm
                     v-if="view === 'login'"
                     key="login"
                     ref="loginForm"
-                    v-model="loginValid"
-                    validate-on="submit"
+                    :state="loginState"
+                    :validate="validateLogin"
+                    :validate-on="[]"
                     data-testid="login-form"
-                    @submit.prevent="submitLogin"
+                    @submit="submitLogin"
                 >
-                    <v-text-field
-                        v-model="identity"
+                    <UFormField
                         :label="identityLabel"
-                        :prepend-inner-icon="identityIcon"
-                        :type="identityInputType"
-                        :autocomplete="identityAutocomplete"
-                        :name="identityAutocomplete"
-                        :rules="identityRules"
-                        :disabled="loading"
-                        color="success"
-                        class="mb-2"
-                        data-testid="login-identity"
-                        autofocus
-                        clearable
-                        @keydown.enter.prevent="submitLogin"
-                    />
+                        name="identity"
+                        class="mb-4"
+                    >
+                        <UInput
+                            v-model="identity"
+                            :icon="identityIcon"
+                            :type="identityInputType"
+                            :autocomplete="identityAutocomplete"
+                            :name="identityAutocomplete"
+                            :disabled="loading"
+                            color="success"
+                            class="w-full"
+                            data-testid="login-identity"
+                            autofocus
+                            @keydown.enter.prevent="submitLogin"
+                        >
+                            <template v-if="identity" #trailing>
+                                <UButton
+                                    icon="i-lucide-x"
+                                    color="neutral"
+                                    variant="link"
+                                    size="sm"
+                                    :aria-label="$t('actions.clear')"
+                                    @click="identity = ''"
+                                />
+                            </template>
+                        </UInput>
+                    </UFormField>
 
                     <UserPasswordField
                         v-if="authMethods.password?.enabled"
                         v-model="password"
                         :label="$t('account.password')"
-                        prepend-inner-icon="mdi-lock-outline"
+                        icon="i-lucide-lock"
                         name="password"
                         data-testid="login-password"
-                        :rules="passwordRules"
                         :disabled="loading"
                         color="success"
-                        class="mb-1"
+                        class="mb-4"
                         @keydown="detectCapsLock"
                         @keydown.enter.prevent="submitLogin"
                     />
 
-                    <v-alert
+                    <UAlert
                         v-if="capsLockOn"
-                        type="warning"
+                        color="warning"
+                        variant="soft"
+                        icon="i-lucide-triangle-alert"
                         class="mb-3"
-                        :text="$t('account.capsLockOn')"
+                        :description="$t('account.capsLockOn')"
                     />
 
-                    <v-alert
+                    <UAlert
                         v-if="unverified"
-                        type="warning"
+                        color="warning"
+                        variant="soft"
+                        icon="i-lucide-triangle-alert"
                         class="mb-3"
                         data-testid="login-unverified"
-                        :text="$t('notifications.error.email_not_verified')"
                     >
-                        <v-btn
-                            variant="text"
-                            size="small"
-                            class="text-none px-0 mt-1"
-                            data-testid="login-resend-verification"
-                            @click="openResendVerification"
-                        >
-                            {{ $t('account.resendVerification') }}
-                        </v-btn>
-                    </v-alert>
+                        <template #description>
+                            {{ $t('notifications.error.email_not_verified') }}
+                            <UButton
+                                color="warning"
+                                variant="link"
+                                size="sm"
+                                class="px-0 mt-1 block"
+                                data-testid="login-resend-verification"
+                                @click="openResendVerification"
+                            >
+                                {{ $t('account.resendVerification') }}
+                            </UButton>
+                        </template>
+                    </UAlert>
 
-                    <div class="d-flex align-center justify-space-between mb-5">
-                        <v-checkbox
+                    <div class="flex items-center justify-between mb-5">
+                        <UCheckbox
                             v-model="rememberMe"
                             :label="$t('account.remember_me')"
                             color="success"
-                            density="compact"
-                            hide-details
                             data-testid="login-remember-me"
                         />
-                        <v-btn
-                            variant="text"
+                        <UButton
+                            variant="ghost"
                             color="primary"
-                            size="small"
-                            class="text-none"
+                            size="sm"
                             data-testid="login-goto-reset"
                             @click="view = 'requestReset'"
                         >
                             {{ $t('account.reset_password') }}
-                        </v-btn>
+                        </UButton>
                     </div>
 
-                    <v-btn
+                    <UButton
                         type="submit"
                         color="primary"
                         block
-                        size="large"
-                        :loading="loading"
+                        size="lg"
                         :disabled="loading"
-                        class="mb-3 font-weight-semibold"
+                        class="mb-3 font-semibold"
                         data-testid="login-submit"
                     >
-                        <template #loader><CaptchaLoader /></template>
-                        {{ $t('account.login') }}
-                    </v-btn>
+                        <CaptchaLoader v-if="loading" />
+                        <template v-else>{{ $t('account.login') }}</template>
+                    </UButton>
 
-                    <v-btn
+                    <UButton
                         v-if="canRegister"
-                        variant="tonal"
+                        color="neutral"
+                        variant="soft"
                         block
-                        class="text-none mb-3"
+                        class="mb-3"
                         :disabled="loading"
                         data-testid="login-goto-register"
                         @click="view = 'register'"
                     >
                         {{ $t('account.createAccount') }}
-                    </v-btn>
+                    </UButton>
 
-                    <v-btn
-                        variant="text"
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
                         block
-                        class="text-none text-medium-emphasis mb-1"
-                        prepend-icon="mdi-arrow-left"
+                        class="text-muted mb-1"
+                        icon="i-lucide-arrow-left"
                         :disabled="loading"
                         @click="navigateTo('/')"
                     >
                         {{ $t('actions.back_to_home') }}
-                    </v-btn>
+                    </UButton>
 
-                    <!-- OAuth -->
                     <template v-if="authMethods.oauth2?.enabled">
-                        <div class="d-flex align-center ga-3 my-4">
-                            <v-divider />
-                            <span
-                                class="text-body-small text-medium-emphasis text-no-wrap"
-                            >
+                        <div class="flex items-center gap-3 my-4">
+                            <USeparator class="flex-1" />
+                            <span class="text-xs text-muted whitespace-nowrap">
                                 {{ $t('account.or_login_with') }}
                             </span>
-                            <v-divider />
+                            <USeparator class="flex-1" />
                         </div>
 
-                        <v-row density="comfortable">
-                            <v-col
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <UButton
                                 v-for="p in authMethods.oauth2.providers"
                                 :key="p.name"
-                                cols="12"
-                                sm="6"
+                                :disabled="loading"
+                                color="neutral"
+                                variant="outline"
+                                block
+                                :icon="providerIcon(p.name)"
+                                @click="loginWithOAuth(p.name)"
                             >
-                                <v-btn
-                                    :disabled="loading"
-                                    variant="outlined"
-                                    block
-                                    class="text-none"
-                                    @click="loginWithOAuth(p.name)"
-                                >
-                                    <v-icon start size="16">{{
-                                        providerIcon(p.name)
-                                    }}</v-icon>
-                                    {{ p.displayName }}
-                                </v-btn>
-                            </v-col>
-                        </v-row>
+                                {{ p.displayName }}
+                            </UButton>
+                        </div>
                     </template>
-                </v-form>
+                </UForm>
 
-                <v-form
+                <UForm
                     v-else-if="view === 'register'"
                     key="register"
                     ref="registerForm"
-                    validate-on="submit"
+                    :state="registerState"
+                    :validate="validateRegister"
+                    :validate-on="[]"
                     data-testid="register-form"
-                    @submit.prevent="submitRegister"
+                    @submit="submitRegister"
                 >
-                    <v-text-field
-                        v-model="registerUsername"
+                    <UFormField
                         :label="$t('account.username')"
-                        prepend-inner-icon="mdi-account-outline"
-                        autocomplete="username"
-                        :rules="usernameRules"
-                        :disabled="loading"
-                        color="success"
-                        class="mb-2"
-                        data-testid="register-username"
-                        autofocus
-                    />
-                    <v-text-field
-                        v-model="registerEmail"
+                        name="username"
+                        class="mb-4"
+                    >
+                        <UInput
+                            v-model="registerUsername"
+                            icon="i-lucide-user"
+                            autocomplete="username"
+                            :disabled="loading"
+                            color="success"
+                            class="w-full"
+                            data-testid="register-username"
+                            autofocus
+                        />
+                    </UFormField>
+                    <UFormField
                         :label="$t('account.email')"
-                        prepend-inner-icon="mdi-email-outline"
-                        type="email"
-                        autocomplete="email"
-                        :rules="emailRules"
-                        :disabled="loading"
-                        color="success"
-                        class="mb-2"
-                        data-testid="register-email"
-                    />
+                        name="email"
+                        class="mb-4"
+                    >
+                        <UInput
+                            v-model="registerEmail"
+                            icon="i-lucide-mail"
+                            type="email"
+                            autocomplete="email"
+                            :disabled="loading"
+                            color="success"
+                            class="w-full"
+                            data-testid="register-email"
+                        />
+                    </UFormField>
                     <UserPasswordChangeFields
                         v-model:password="registerPassword"
                         v-model:password-confirm="registerPasswordConfirm"
                         :require-old-password="false"
+                        @validity="registerPasswordValid = $event"
                     />
 
-                    <v-btn
+                    <UButton
                         type="submit"
                         color="primary"
                         block
-                        size="large"
-                        :loading="loading"
+                        size="lg"
                         :disabled="loading"
-                        class="mt-2 mb-3 font-weight-semibold"
+                        class="mt-6 mb-3 font-semibold"
                         data-testid="register-submit"
                     >
-                        <template #loader><CaptchaLoader /></template>
-                        {{ $t('account.createAccount') }}
-                    </v-btn>
+                        <CaptchaLoader v-if="loading" />
+                        <template v-else>{{
+                            $t('account.createAccount')
+                        }}</template>
+                    </UButton>
 
-                    <v-btn
-                        variant="text"
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
                         block
                         :disabled="loading"
-                        class="text-none text-medium-emphasis"
+                        class="text-muted"
                         @click="view = 'login'"
                     >
                         {{ $t('actions.cancel') }}
-                    </v-btn>
-                </v-form>
+                    </UButton>
+                </UForm>
 
-                <!-- ─── RESET ─── -->
-                <v-form
+                <UForm
                     v-else-if="isEmailRequestView"
                     :key="view"
                     ref="resetForm"
-                    v-model="resetValid"
-                    validate-on="submit"
+                    :state="resetState"
+                    :validate="validateReset"
+                    :validate-on="[]"
                     data-testid="reset-form"
-                    @submit.prevent="submitEmailRequest"
+                    @submit="submitEmailRequest"
                 >
-                    <v-alert
-                        type="info"
+                    <UAlert
                         color="success"
-                        icon="mdi-email-outline"
+                        variant="soft"
+                        icon="i-lucide-mail"
                         class="mb-6"
-                        :text="
+                        :description="
                             view === 'requestReset'
                                 ? $t('account.resetInfo')
                                 : $t('account.resendVerificationInfo')
                         "
                     />
 
-                    <v-text-field
-                        v-model="resetEmail"
+                    <UFormField
                         :label="$t('account.email')"
-                        prepend-inner-icon="mdi-email-outline"
-                        type="email"
-                        autocomplete="email"
-                        :rules="emailRules"
-                        :disabled="loading"
-                        color="success"
+                        name="email"
                         class="mb-5"
-                        data-testid="reset-email"
-                        autofocus
-                        clearable
-                    />
+                    >
+                        <UInput
+                            v-model="resetEmail"
+                            icon="i-lucide-mail"
+                            type="email"
+                            autocomplete="email"
+                            :disabled="loading"
+                            color="success"
+                            class="w-full"
+                            data-testid="reset-email"
+                            autofocus
+                        >
+                            <template v-if="resetEmail" #trailing>
+                                <UButton
+                                    icon="i-lucide-x"
+                                    color="neutral"
+                                    variant="link"
+                                    size="sm"
+                                    :aria-label="$t('actions.clear')"
+                                    @click="resetEmail = ''"
+                                />
+                            </template>
+                        </UInput>
+                    </UFormField>
 
-                    <v-btn
+                    <UButton
                         type="submit"
                         color="primary"
                         block
-                        size="large"
-                        :loading="loading"
+                        size="lg"
                         :disabled="loading"
-                        class="mb-3 font-weight-semibold"
+                        class="mb-3 font-semibold"
                         data-testid="reset-submit"
                     >
-                        <template #loader><CaptchaLoader /></template>
-                        {{ $t('actions.submit') }}
-                    </v-btn>
+                        <CaptchaLoader v-if="loading" />
+                        <template v-else>{{ $t('actions.submit') }}</template>
+                    </UButton>
 
-                    <v-btn
-                        variant="text"
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
                         block
                         :disabled="loading"
-                        class="text-none text-medium-emphasis"
+                        class="text-muted"
                         @click="view = 'login'"
                     >
                         {{ $t('actions.cancel') }}
-                    </v-btn>
-                </v-form>
+                    </UButton>
+                </UForm>
             </Transition>
         </div>
     </LayoutAuthLayout>
@@ -319,8 +355,14 @@
 
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import type { VForm } from 'vuetify/components'
-import { required, validEmail, minLength } from '~/utils/validation'
+import type { Form } from '@nuxt/ui'
+import {
+    required,
+    validEmail,
+    minLength,
+    validateRules,
+} from '~/utils/validation'
+import type { Rule } from '~/utils/validation'
 import { safeRedirect } from '~/utils/nav'
 defineOptions({ name: 'LoginPage' })
 
@@ -359,8 +401,6 @@ const canRegister = computed(
 const { notify, error: notifyError } = useNotification()
 const view = ref(route.query.view === 'register' ? 'register' : 'login')
 const loading = ref(false)
-const loginValid = ref(false)
-const resetValid = ref(false)
 const identity = ref('')
 const password = ref('')
 const resetEmail = ref('')
@@ -371,10 +411,12 @@ const registerPasswordConfirm = ref('')
 const rememberMe = ref(true)
 const capsLockOn = ref(false)
 const unverified = ref(false)
+const registerPasswordValid = ref(false)
 
-const loginForm = useTemplateRef<VForm>('loginForm')
-const resetForm = useTemplateRef<VForm>('resetForm')
-const registerForm = useTemplateRef<VForm>('registerForm')
+type AnyForm = Form<Record<string, unknown>>
+const loginForm = useTemplateRef<AnyForm>('loginForm')
+const resetForm = useTemplateRef<AnyForm>('resetForm')
+const registerForm = useTemplateRef<AnyForm>('registerForm')
 
 // ── Identity config ────────────────────────────────────────────────
 const idFields = authMethods?.password?.identityFields ?? []
@@ -395,9 +437,7 @@ const identityAutocomplete = computed(() =>
     supportsEmail ? 'email' : 'username',
 )
 const identityIcon = computed(() =>
-    supportsEmail && !supportsUser
-        ? 'mdi-email-outline'
-        : 'mdi-account-outline',
+    supportsEmail && !supportsUser ? 'i-lucide-mail' : 'i-lucide-user',
 )
 
 // ── View meta ──────────────────────────────────────────────────────
@@ -437,37 +477,57 @@ const identityRules = computed(() => {
 })
 const passwordRules = [required(t), minLength(t, 6)]
 const emailRules = [required(t), validEmail(t)]
-const usernameRules = [
+const usernameRules: Rule[] = [
     required(t),
     minLength(t, 3),
-    (value: string) =>
-        /^[\w][\w.-]*$/.test(value) || t('account.usernameInvalid'),
+    (value) =>
+        /^[\w][\w.-]*$/.test(String(value ?? '')) ||
+        t('account.usernameInvalid'),
 ]
+
+const loginState = computed(() => ({
+    identity: identity.value,
+    password: password.value,
+}))
+const registerState = computed(() => ({
+    username: registerUsername.value,
+    email: registerEmail.value,
+}))
+const resetState = computed(() => ({ email: resetEmail.value }))
+
+const validateLogin = (state: Record<string, unknown>) =>
+    validateRules(state, {
+        identity: identityRules.value,
+        ...(authMethods.password?.enabled && { password: passwordRules }),
+    })
+const validateRegister = (state: Record<string, unknown>) =>
+    validateRules(state, { username: usernameRules, email: emailRules })
+const validateReset = (state: Record<string, unknown>) =>
+    validateRules(state, { email: emailRules })
 
 // ── OAuth icons ────────────────────────────────────────────────────
 const PROVIDER_ICONS: Record<string, string> = {
-    apple: 'mdi-apple',
-    google: 'mdi-google',
-    microsoft: 'mdi-microsoft',
-    facebook: 'mdi-facebook',
-    github: 'mdi-github',
-    gitlab: 'mdi-gitlab',
-    discord: 'mdi-discord',
-    twitter: 'mdi-twitter',
-    spotify: 'mdi-spotify',
-    twitch: 'mdi-twitch',
-    bitbucket: 'mdi-bitbucket',
-    oidc: 'mdi-lock-outline',
-    oidc2: 'mdi-lock-outline',
-    oidc3: 'mdi-lock-outline',
+    apple: 'i-simple-icons-apple',
+    google: 'i-simple-icons-google',
+    microsoft: 'i-simple-icons-microsoft',
+    facebook: 'i-simple-icons-facebook',
+    github: 'i-simple-icons-github',
+    gitlab: 'i-simple-icons-gitlab',
+    discord: 'i-simple-icons-discord',
+    twitter: 'i-simple-icons-x',
+    spotify: 'i-simple-icons-spotify',
+    twitch: 'i-simple-icons-twitch',
+    bitbucket: 'i-simple-icons-bitbucket',
+    oidc: 'i-lucide-lock',
+    oidc2: 'i-lucide-lock',
+    oidc3: 'i-lucide-lock',
 }
-const providerIcon = (name: string) => PROVIDER_ICONS[name] ?? 'mdi-login'
+const providerIcon = (name: string) => PROVIDER_ICONS[name] ?? 'i-lucide-log-in'
 
 // ── Helpers ────────────────────────────────────────────────────────
-async function validate(form: Readonly<Ref<VForm | null>>) {
+async function validate(form: Readonly<Ref<AnyForm | null>>) {
     if (!form.value) return true
-    const { valid } = await form.value.validate()
-    return valid
+    return (await form.value.validate({ silent: true })) !== false
 }
 
 function detectCapsLock(ev: KeyboardEvent) {
@@ -475,10 +535,14 @@ function detectCapsLock(ev: KeyboardEvent) {
         capsLockOn.value = ev.getModifierState('CapsLock')
 }
 
-watch(view, async () => {
+async function focusFirstInput() {
     await nextTick()
     document.querySelector('input')?.focus()
-})
+}
+
+watch(view, focusFirstInput)
+onMounted(focusFirstInput)
+onNuxtReady(() => preloadRouteComponents(afterLoginPath))
 
 const isEmailRequestView = computed(() =>
     ['requestReset', 'resendVerification'].includes(view.value),
@@ -585,7 +649,7 @@ function resolveRegisterError(err: unknown) {
 }
 
 async function submitRegister() {
-    if (!(await validate(registerForm))) return
+    if (!(await validate(registerForm)) || !registerPasswordValid.value) return
     loading.value = true
     try {
         await pb.collection('users').create(

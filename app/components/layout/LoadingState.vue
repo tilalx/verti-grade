@@ -3,7 +3,6 @@ const props = withDefaults(
     defineProps<{
         variant?: 'list' | 'cards' | 'page'
         count?: number
-        type?: string
     }>(),
     { variant: 'list' },
 )
@@ -11,50 +10,57 @@ const props = withDefaults(
 const skeletonCount = computed(
     () => props.count ?? (props.variant === 'cards' ? 6 : 3),
 )
-const skeletonType = computed(
-    () =>
-        props.type ??
-        (props.variant === 'cards'
-            ? 'card-avatar'
-            : 'list-item-avatar-two-line'),
-)
 </script>
 
 <template>
     <div aria-busy="true" aria-live="polite" data-testid="loading-state">
         <template v-if="variant === 'page'">
-            <v-skeleton-loader type="image" height="180" />
+            <USkeleton class="h-[180px] w-full" />
             <div class="px-4 pt-4">
-                <v-skeleton-loader type="heading" class="mb-3" />
-                <v-skeleton-loader type="text" class="mb-2" />
-                <v-skeleton-loader type="text" class="mb-6" />
-                <v-skeleton-loader
+                <USkeleton class="mb-3 h-7 w-1/2" />
+                <USkeleton class="mb-2 h-4 w-full" />
+                <USkeleton class="mb-6 h-4 w-4/5" />
+                <div
                     v-for="index in skeletonCount"
                     :key="index"
-                    type="list-item-avatar-two-line"
-                    class="mb-3"
-                />
+                    class="skeleton-row mb-3 flex items-center gap-4"
+                >
+                    <USkeleton class="size-10 shrink-0 rounded-full" />
+                    <div class="flex-1 space-y-2">
+                        <USkeleton class="h-4 w-2/3" />
+                        <USkeleton class="h-3 w-1/2" />
+                    </div>
+                </div>
             </div>
         </template>
-        <v-row v-else-if="variant === 'cards'">
-            <v-col
+        <div
+            v-else-if="variant === 'cards'"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+            <div
                 v-for="index in skeletonCount"
                 :key="index"
-                cols="12"
-                sm="6"
-                lg="4"
+                class="skeleton-row rounded-lg border border-default p-4"
             >
-                <v-skeleton-loader :type="skeletonType" rounded="lg" />
-            </v-col>
-        </v-row>
+                <div class="mb-4 flex items-center gap-4">
+                    <USkeleton class="size-10 shrink-0 rounded-full" />
+                    <USkeleton class="h-4 flex-1" />
+                </div>
+                <USkeleton class="h-24 w-full" />
+            </div>
+        </div>
         <template v-else>
-            <v-skeleton-loader
+            <div
                 v-for="index in skeletonCount"
                 :key="index"
-                :type="skeletonType"
-                rounded="lg"
-                class="mb-3"
-            />
+                class="skeleton-row mb-3 flex items-center gap-4 rounded-lg p-4"
+            >
+                <USkeleton class="size-10 shrink-0 rounded-full" />
+                <div class="flex-1 space-y-2">
+                    <USkeleton class="h-4 w-2/3" />
+                    <USkeleton class="h-3 w-1/2" />
+                </div>
+            </div>
         </template>
     </div>
 </template>

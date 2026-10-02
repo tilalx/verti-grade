@@ -1,30 +1,27 @@
 <template>
-    <v-container>
+    <div class="mx-auto w-full p-4">
         <LayoutPageHeader :title="$t('page.content.index')" inline-actions>
             <template #actions>
                 <GradeConversionDialog>
                     <template #activator="{ props: activator }">
-                        <v-btn
+                        <UButton
                             v-bind="activator"
-                            variant="tonal"
-                            :icon="!smAndUp"
+                            color="neutral"
+                            variant="soft"
+                            icon="i-lucide-arrow-left-right"
                             :aria-label="$t('gradeConversion.title')"
                             :title="$t('gradeConversion.title')"
                             data-testid="index-grade-conversion-open"
                         >
-                            <v-icon :start="smAndUp"
-                                >mdi-swap-horizontal</v-icon
-                            >
                             <template v-if="smAndUp">{{
                                 $t('gradeConversion.title')
                             }}</template>
-                        </v-btn>
+                        </UButton>
                     </template>
                 </GradeConversionDialog>
             </template>
         </LayoutPageHeader>
 
-        <!-- Filter Bar -->
         <FilterBar
             v-model="searchRouteName"
             :search-label="$t('climbing.searchRouteName')"
@@ -33,176 +30,159 @@
             @clear="clearFilters"
         >
             <template #filters>
-                <v-row density="comfortable">
-                    <v-col v-if="!isWideLayout" cols="12" sm="4">
-                        <RouteSortControl
-                            :model-value="tableOptions.sortBy"
-                            :items="sortItemsMobile"
-                            @update:modelValue="onMobileSortChange"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-select
-                            :label="gradeColumnTitle"
-                            :items="difficulties"
-                            v-model="selectedDifficulty"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="index-filter-difficulty"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-select
-                            :label="$t('climbing.type')"
-                            :items="types"
-                            v-model="selectedType"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="index-filter-type"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-select
-                            :label="$t('climbing.location')"
-                            :items="locations"
-                            v-model="selectedLocation"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="index-filter-location"
-                        />
-                    </v-col>
-                    <v-col v-if="walls.length > 1" cols="12" sm="4">
-                        <v-select
-                            :label="$t('map.wall')"
-                            :items="walls"
-                            v-model="selectedWall"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="index-filter-wall"
-                        />
-                    </v-col>
-                </v-row>
+                <div class="contents">
+                    <RouteSortControl
+                        v-if="!isWideLayout"
+                        :model-value="tableOptions.sortBy"
+                        :items="sortItemsMobile"
+                        class="self-end"
+                        @update:model-value="onMobileSortChange"
+                    />
+                    <FilterSelect
+                        :label="gradeColumnTitle"
+                        v-model="selectedDifficulty"
+                        :items="difficulties"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="index-filter-difficulty"
+                    />
+                    <FilterSelect
+                        :label="$t('climbing.type')"
+                        v-model="selectedType"
+                        :items="types"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="index-filter-type"
+                    />
+                    <FilterSelect
+                        :label="$t('climbing.location')"
+                        v-model="selectedLocation"
+                        :items="locations"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="index-filter-location"
+                    />
+                    <FilterSelect
+                        v-if="walls.length > 1"
+                        :label="$t('map.wall')"
+                        v-model="selectedWall"
+                        :items="walls"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="index-filter-wall"
+                    />
+                </div>
             </template>
         </FilterBar>
 
-        <!-- DESKTOP VIEW: Data Table -->
-        <div v-if="isWideLayout" data-testid="index-table">
-            <v-data-table-server
-                class="mt-4"
-                :headers="headersDesktop"
-                :items="routes"
-                :items-length="totalItems"
+        <div v-if="isWideLayout" class="mt-4" data-testid="index-table">
+            <UTable
+                :data="routes"
+                :get-row-id="(row: RouteListItem) => row.id"
+                :columns="columnsDesktop"
                 :loading="loading"
-                :page="tableOptions.page"
-                :items-per-page="tableOptions.itemsPerPage"
-                :sort-by="tableOptions.sortBy"
-                :no-data-text="$t('table.no_data')"
-                item-value="id"
-                @update:options="loadRoutes"
+                :empty="$t('table.no_data')"
+                :ui="tableUi"
             >
-                <template #item.color="{ item }">
+                <template #color-cell="{ row }">
                     <RouteColorDot
-                        :color="item.color"
-                        :ticked="tickedRouteIds.has(item.id)"
+                        :color="row.original.color"
+                        :ticked="tickedRouteIds.has(row.original.id)"
                         :size="30"
                     />
                 </template>
-                <template #item.name="{ item }">
+                <template #name-cell="{ row }">
                     <div
-                        class="d-flex align-center"
-                        :data-testid="`index-row-${item.id}`"
+                        class="flex items-center"
+                        :data-testid="`index-row-${row.original.id}`"
                     >
                         <span class="route-name" data-testid="index-row-name">{{
-                            item.name
+                            row.original.name
                         }}</span>
-                        <v-icon
-                            v-if="item.has_ratings"
-                            color="yellow-darken-2"
-                            size="small"
-                            class="ml-2"
-                            >mdi-star-circle</v-icon
-                        >
+                        <UIcon
+                            v-if="row.original.has_ratings"
+                            name="i-lucide-badge-check"
+                            class="ml-2 size-4 text-amber-500"
+                        />
                     </div>
                 </template>
-                <template #item.difficulty="{ item }">
-                    <GradeLabel :source="item" />
+                <template #difficulty-cell="{ row }">
+                    <GradeLabel :source="row.original" />
                 </template>
-                <template #item.anchor_point="{ item }">
-                    <span>{{ formatAnchorPoint(item.anchor_point) }}</span>
+                <template #anchor_point-cell="{ row }">
+                    <span>{{
+                        formatAnchorPoint(row.original.anchor_point)
+                    }}</span>
                     <span
-                        v-if="wallName(item)"
+                        v-if="wallName(row.original)"
                         class="route-wall"
                         data-testid="index-row-wall"
-                        >{{ wallName(item) }}</span
+                        >{{ wallName(row.original) }}</span
                     >
                 </template>
-                <template #item.comment="{ item }">
-                    <div class="route-comment">{{ item.comment }}</div>
+                <template #comment-cell="{ row }">
+                    <div class="route-comment">{{ row.original.comment }}</div>
                 </template>
-                <template #item.creator="{ item }">
+                <template #creator-cell="{ row }">
                     <div class="creator-chips" data-testid="index-row-creators">
-                        <v-chip
-                            v-for="c in item.creator"
+                        <UBadge
+                            v-for="c in row.original.creator"
                             :key="c"
-                            size="small"
-                            class="ma-0"
-                            >{{ c }}</v-chip
+                            color="neutral"
+                            variant="subtle"
+                            class="rounded-full"
+                            >{{ c }}</UBadge
                         >
                     </div>
                 </template>
-                <template #item.score="{ item }">
-                    {{ formatScore(item, locale) }}
+                <template #score-cell="{ row }">
+                    {{ formatScore(row.original, locale) }}
                 </template>
-                <template #item.screw_date="{ item }">
-                    {{ formatDate(item.screw_date, { locale }) }}
+                <template #screw_date-cell="{ row }">
+                    {{ formatDate(row.original.screw_date, { locale }) }}
                 </template>
-                <template #item.actions="{ item }">
-                    <div class="d-flex align-center ga-2 justify-end">
-                        <RouteViewButton :route-id="item.id" compact />
-                        <RouteDetails :route_id="item.id" />
+                <template #actions-cell="{ row }">
+                    <div class="flex items-center gap-2 justify-end">
+                        <RouteViewButton :route-id="row.original.id" compact />
+                        <RouteDetails :route_id="row.original.id" />
                     </div>
                 </template>
-            </v-data-table-server>
+            </UTable>
+            <div
+                class="flex flex-wrap items-center justify-end gap-4 border-t px-2 py-3 text-sm"
+            >
+                <span data-testid="table-page-info">{{ pageInfo }}</span>
+                <UPagination
+                    :page="tableOptions.page"
+                    :total="totalItems"
+                    :items-per-page="tableOptions.itemsPerPage"
+                    @update:page="loadRoutes({ page: $event })"
+                />
+            </div>
         </div>
 
-        <!-- MOBILE VIEW: Card List -->
         <div v-if="!isWideLayout">
-            <v-row class="mt-2">
-                <v-col v-for="route in routes" :key="route.id" cols="12">
-                    <RouteCard
-                        :route="route"
-                        :ticked="tickedRouteIds.has(route.id)"
-                    >
-                        <template #actions>
-                            <div class="d-flex align-center ga-2 justify-end">
-                                <RouteViewButton :route-id="route.id" />
-                                <RouteDetails :route_id="route.id" />
-                            </div>
-                        </template>
-                    </RouteCard>
-                </v-col>
-            </v-row>
+            <div class="mt-2 flex flex-col gap-4">
+                <RouteCard
+                    v-for="route in routes"
+                    :key="route.id"
+                    :route="route"
+                    :ticked="tickedRouteIds.has(route.id)"
+                >
+                    <template #actions>
+                        <div class="flex items-center gap-2 justify-end">
+                            <RouteViewButton :route-id="route.id" />
+                            <RouteDetails :route_id="route.id" />
+                        </div>
+                    </template>
+                </RouteCard>
+            </div>
 
-            <!-- Infinite scroll sentinel -->
-            <div ref="sentinelRef" class="pa-4 text-center">
-                <v-progress-circular
+            <div ref="sentinelRef" class="p-4 text-center">
+                <UIcon
                     v-if="loading && routes.length > 0"
-                    indeterminate
-                    size="24"
-                    width="2"
-                    color="primary"
+                    name="i-lucide-loader-circle"
+                    class="size-6 animate-spin text-primary"
                 />
             </div>
         </div>
@@ -218,12 +198,13 @@
             class="mt-4"
             :title="$t('table.no_data')"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
+import type { TableColumn } from '@nuxt/ui'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 import {
     formatAnchorPoint,
@@ -285,19 +266,75 @@ const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 
 const { gradeColumnTitle } = useGradeSystems()
 
-const headersDesktop = computed<
-    Array<{ title: string; key: string; sortable?: boolean }>
->(() => [
-    { title: t('climbing.color'), key: 'color', sortable: false },
-    { title: t('climbing.routename'), key: 'name' },
-    { title: gradeColumnTitle.value, key: 'difficulty', nowrap: true },
-    { title: t('climbing.anchor_point'), key: 'anchor_point' },
-    { title: t('climbing.comment'), key: 'comment' },
-    { title: t('climbing.creators'), key: 'creator' },
-    { title: t('ratings.score'), key: 'score' },
-    { title: t('routes.screwed_at'), key: 'screw_date' },
-    { title: t('table.actions'), key: 'actions', sortable: false },
+const UButton = resolveComponent('UButton')
+
+function sortableHeader(label: string, key: string) {
+    return () => {
+        const active = tableOptions.sortBy[0]
+        const order = active?.key === key ? active.order : undefined
+        return h(UButton, {
+            color: 'neutral',
+            variant: 'ghost',
+            label,
+            trailingIcon:
+                order === 'asc'
+                    ? 'i-lucide-arrow-up'
+                    : order === 'desc'
+                      ? 'i-lucide-arrow-down'
+                      : 'i-lucide-arrow-up-down',
+            class: '-mx-2.5 w-[calc(100%+1.25rem)] font-semibold',
+            onClick: () => toggleSort(key),
+        })
+    }
+}
+
+function toggleSort(key: string) {
+    const active = tableOptions.sortBy[0]
+    const sortBy: SortOption[] =
+        active?.key !== key
+            ? [{ key, order: 'asc' }]
+            : active.order === 'asc'
+              ? [{ key, order: 'desc' }]
+              : []
+    void loadRoutes({ page: 1, sortBy })
+}
+
+const tableUi = {
+    th: 'px-2 xl:px-4',
+    td: 'px-2 py-2 xl:px-4 whitespace-normal text-default',
+}
+
+const columnsDesktop = computed<TableColumn<RouteListItem>[]>(() => [
+    { id: 'color', header: t('climbing.color') },
+    { id: 'name', header: sortableHeader(t('climbing.routename'), 'name') },
+    {
+        id: 'difficulty',
+        header: sortableHeader(gradeColumnTitle.value, 'difficulty'),
+        meta: { class: { td: 'whitespace-nowrap' } },
+    },
+    {
+        id: 'anchor_point',
+        header: sortableHeader(t('climbing.anchor_point'), 'anchor_point'),
+    },
+    { id: 'comment', header: sortableHeader(t('climbing.comment'), 'comment') },
+    {
+        id: 'creator',
+        header: sortableHeader(t('climbing.creators'), 'creator'),
+    },
+    { id: 'score', header: sortableHeader(t('ratings.score'), 'score') },
+    {
+        id: 'screw_date',
+        header: sortableHeader(t('routes.screwed_at'), 'screw_date'),
+    },
+    { id: 'actions', header: t('table.actions') },
 ])
+
+const pageInfo = computed(() => {
+    const { page, itemsPerPage } = tableOptions
+    const start = totalItems.value ? (page - 1) * itemsPerPage + 1 : 0
+    const end = Math.min(page * itemsPerPage, totalItems.value)
+    return `${start}-${end} / ${totalItems.value}`
+})
 
 const pbFilter = computed(() => {
     const base = baseFilter.value
@@ -467,34 +504,19 @@ onBeforeUnmount(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 .route-comment {
-    min-width: 200px;
-    max-width: 420px;
+    max-width: 320px;
+    display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 .creator-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     padding-block: 6px;
-}
-
-@media (max-width: 1279.98px) {
-    :deep(.v-data-table__td),
-    :deep(.v-data-table__th) {
-        padding-inline: 6px;
-    }
-
-    :deep(table) {
-        font-size: 13px;
-    }
-
-    .route-comment {
-        min-width: 0;
-    }
 }
 </style>

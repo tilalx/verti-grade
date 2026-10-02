@@ -1,11 +1,11 @@
 <template>
     <div
-        class="d-flex align-center ga-3 py-2"
+        class="flex items-center gap-3 py-2"
         data-testid="logbook-tick"
         :data-tick-id="tick.id"
     >
         <RouteColorDot :color="route?.color" :size="28" />
-        <div class="flex-grow-1 logbook-tick__body">
+        <div class="grow logbook-tick__body">
             <NuxtLink
                 v-if="route"
                 :to="`/route?id=${tick.route}`"
@@ -14,70 +14,76 @@
             >
                 {{ route.name }}
             </NuxtLink>
-            <span v-else class="text-medium-emphasis">
+            <span v-else class="text-muted">
                 {{ $t('ticks.removedRoute') }}
             </span>
-            <div class="d-flex align-center ga-2 mt-1 flex-wrap">
-                <v-chip
-                    size="x-small"
-                    variant="flat"
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <UBadge
+                    size="sm"
+                    variant="solid"
                     :color="TICK_TYPE_COLORS[tick.type]"
-                    :prepend-icon="TICK_TYPE_ICONS[tick.type]"
+                    :icon="TICK_TYPE_ICONS[tick.type]"
                     data-testid="logbook-tick-type"
                 >
                     {{ $t(`ticks.types.${tick.type}`) }}
-                </v-chip>
+                </UBadge>
                 <span
                     v-if="tick.type !== 'flash' && tick.attempts > 1"
-                    class="text-body-small text-medium-emphasis"
+                    class="text-xs text-muted"
                     data-testid="logbook-tick-attempts"
                 >
                     {{ $t('ticks.attemptCount', { count: tick.attempts }) }}
                 </span>
-                <v-chip
+                <UBadge
                     v-if="route?.archived"
-                    size="x-small"
-                    variant="outlined"
+                    size="sm"
+                    color="neutral"
+                    variant="outline"
                 >
                     {{ $t('filter.archived') }}
-                </v-chip>
+                </UBadge>
             </div>
             <p
                 v-if="tick.note"
-                class="text-body-small mt-1 mb-0 text-medium-emphasis"
+                class="text-xs mt-1 mb-0 text-muted"
                 data-testid="logbook-tick-note"
             >
                 {{ tick.note }}
             </p>
         </div>
         <GradeLabel :source="tick" />
-        <v-menu location="bottom end">
-            <template #activator="{ props: menu }">
-                <v-btn
-                    v-bind="menu"
-                    icon="mdi-dots-vertical"
-                    variant="text"
-                    size="small"
-                    :aria-label="$t('ticks.moreActions')"
-                    data-testid="logbook-tick-menu"
-                />
+        <UPopover :content="{ align: 'end', side: 'bottom' }">
+            <UButton
+                icon="i-lucide-ellipsis-vertical"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                :aria-label="$t('ticks.moreActions')"
+                data-testid="logbook-tick-menu"
+            />
+            <template #content="{ close }">
+                <div class="flex min-w-[160px] flex-col p-1">
+                    <UButton
+                        icon="i-lucide-pencil"
+                        color="neutral"
+                        variant="ghost"
+                        data-testid="logbook-tick-edit"
+                        @click="(close(), emit('edit', tick))"
+                    >
+                        {{ $t('actions.edit') }}
+                    </UButton>
+                    <UButton
+                        icon="i-lucide-trash-2"
+                        color="error"
+                        variant="ghost"
+                        data-testid="logbook-tick-delete"
+                        @click="(close(), emit('delete', tick))"
+                    >
+                        {{ $t('actions.delete') }}
+                    </UButton>
+                </div>
             </template>
-            <v-list density="compact">
-                <v-list-item
-                    prepend-icon="mdi-pencil-outline"
-                    :title="$t('actions.edit')"
-                    data-testid="logbook-tick-edit"
-                    @click="emit('edit', tick)"
-                />
-                <v-list-item
-                    prepend-icon="mdi-delete-outline"
-                    :title="$t('actions.delete')"
-                    base-color="error"
-                    data-testid="logbook-tick-delete"
-                    @click="emit('delete', tick)"
-                />
-            </v-list>
-        </v-menu>
+        </UPopover>
     </div>
 </template>
 

@@ -57,7 +57,7 @@ test('setters place an unplaced route by clicking it and then a wall', async ({
         ),
     ).toBeVisible()
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
 
@@ -94,7 +94,7 @@ test('dragging a route from the list into a wall places it on that wall', async 
         ),
     ).toBeVisible()
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const saved = await seeded.root.collection('routes').getOne(looseRouteId)
@@ -124,7 +124,7 @@ test('dragging a dot onto another wall moves the route there', async ({
     await page.mouse.up()
 
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const saved = await seeded.root.collection('routes').getOne(islandRoute)
@@ -154,7 +154,7 @@ test('a placed dot can be dragged along its wall', async ({
     await expect(page.getByTestId('placement-ghost')).toHaveCount(0)
 
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const saved = await seeded.root.collection('routes').getOne(routeId)
@@ -178,7 +178,7 @@ test('routes on a wall can be spread evenly and the change undone', async ({
 
     await page.getByTestId('placement-distribute').click()
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const [first, second] = await Promise.all(
@@ -195,10 +195,7 @@ test('the route form offers the walls of the chosen location', async ({
     testPrefix,
 }) => {
     await gotoSettled(page, '/manage/routes')
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .fill(`${testPrefix}-loose`)
+    await page.getByTestId('filter-search').fill(`${testPrefix}-loose`)
     await expect(page.getByTestId('routes-table')).toContainText(
         `${testPrefix}-loose`,
     )

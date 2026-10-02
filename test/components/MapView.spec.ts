@@ -68,7 +68,7 @@ function createWrapper(props: Record<string, unknown> = {}) {
         global: {
             mocks: { $t: (key: string) => key },
             components: { MapFloorLayer, MapCanvas },
-            stubs: { 'v-btn': true },
+            stubs: { UButton: true },
         },
     })
 }

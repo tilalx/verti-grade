@@ -1,456 +1,625 @@
-@font-face {
-    font-family: 'Roboto';
-    src: url('./fonts/roboto-vf-cyrillic-ext.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-    unicode-range:
-        U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@theme {
+    --font-sans: 'Roboto', sans-serif;
+    --breakpoint-sm: 600px;
+    --breakpoint-md: 840px;
+    --breakpoint-lg: 1145px;
+    --breakpoint-xl: 1545px;
+    --breakpoint-2xl: 2138px;
 }
 
-@font-face {
-    font-family: 'Roboto';
-    src: url('./fonts/roboto-vf-cyrillic.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+@layer base {
+    @media (pointer: coarse) {
+        .icon-btn {
+            position: relative;
+            overflow: visible;
+        }
+
+        .icon-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: max(100%, 44px);
+            height: max(100%, 44px);
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    *,
+    ::after,
+    ::before,
+    ::backdrop {
+        border-color: var(--ui-border);
+    }
 }
 
-@font-face {
-    font-family: 'Roboto';
-    src: url('./fonts/roboto-vf-latin-ext.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-    unicode-range:
-        U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-        U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
-        U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
+@layer components {
+    :root {
+        --app-bg: #f8faf3;
+        --app-top: 64px;
+        --app-bottom: 0px;
+        --ui-bg: #ffffff;
+        --ui-bg-muted: #edf1e6;
+        --ui-primary: #38741c;
+        --ui-secondary: #38656a;
+        --ui-success: #2e7d32;
+        --ui-info: #0061a4;
+        --ui-warning: #9a5b00;
+        --ui-error: #ba1a1a;
+        --ui-radius: 0.5rem;
+    }
 
-@font-face {
-    font-family: 'Roboto';
-    src: url('./fonts/roboto-vf-latin.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-        U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-        U+2212, U+2215, U+FEFF, U+FFFD;
-}
+    .dark {
+        --app-bg: #0d1117;
+        --ui-bg: #161b22;
+        --ui-bg-muted: #1c2128;
+        --ui-bg-elevated: #1c2128;
+        --ui-text: #dddddd;
+        --ui-primary: #238636;
+        --ui-secondary: #58a6ff;
+        --ui-success: #238636;
+        --ui-info: #58a6ff;
+        --ui-warning: #e3b341;
+        --ui-error: #f85149;
+    }
 
-:focus-visible:not(input, textarea, select) {
-    outline: 2px solid rgb(var(--v-theme-primary));
-    outline-offset: 2px;
-}
+    body {
+        background: var(--app-bg);
+        color: var(--ui-text);
+    }
 
-.scroll-anchor {
-    scroll-margin-top: 80px;
-}
+    .app-root {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+    }
 
-.fontbody {
-    font-family: 'Roboto', sans-serif;
-}
+    @media (max-width: 1144.98px) {
+        :root {
+            --app-bottom: 64px;
+            --app-bottom-inset: env(safe-area-inset-bottom, 0px);
+        }
+    }
 
-/* ── Shared UI primitives ───────────────────────────────────────────────────
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto-vf-cyrillic-ext.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+        unicode-range:
+            U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F,
+            U+FE2E-FE2F;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto-vf-cyrillic.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto-vf-latin-ext.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+        unicode-range:
+            U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+            U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+            U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url('./fonts/roboto-vf-latin.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+        unicode-range:
+            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+            U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+            U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    :focus-visible:not(input, textarea, select) {
+        outline: 2px solid var(--ui-primary);
+        outline-offset: 2px;
+    }
+
+    .scroll-anchor {
+        scroll-margin-top: 80px;
+    }
+
+    .fontbody {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* ── Shared UI primitives ───────────────────────────────────────────────────
    Rules that were copy-pasted across several components. Global on purpose:
    they are part of the design system, not of any one component. */
 
-/* Clickable avatar with a hover ring + camera overlay (user dialogs). */
-.avatar-wrapper {
-    position: relative;
-    cursor: pointer;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
+    /* Clickable avatar with a hover ring + camera overlay (user dialogs). */
+    .avatar-wrapper {
+        position: relative;
+        cursor: pointer;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
 
-.avatar-ring {
-    border: 2.5px solid rgba(var(--v-theme-primary), 0.3);
-    transition: border-color 0.2s;
-}
+    .avatar-ring {
+        border: 2.5px solid
+            color-mix(in oklab, var(--ui-primary) 30%, transparent);
+        transition: border-color 0.2s;
+    }
 
-.avatar-overlay {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
 
-.avatar-wrapper:hover .avatar-ring {
-    border-color: rgba(var(--v-theme-primary), 0.8);
-}
+    .avatar-wrapper:hover .avatar-ring {
+        border-color: color-mix(in oklab, var(--ui-primary) 80%, transparent);
+    }
 
-.avatar-wrapper:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
-    outline-offset: 2px;
-}
+    .avatar-wrapper:focus-visible {
+        outline: 2px solid var(--ui-primary);
+        outline-offset: 2px;
+    }
 
-.avatar-wrapper:hover .avatar-overlay,
-.avatar-wrapper:focus-visible .avatar-overlay {
-    opacity: 1;
-}
+    .avatar-wrapper:hover .avatar-overlay,
+    .avatar-wrapper:focus-visible .avatar-overlay {
+        opacity: 1;
+    }
 
-/* Horizontal swap used when an auth page replaces one form with another. */
-.form-swap-enter-active,
-.form-swap-leave-active {
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
-    position: absolute;
-    width: 100%;
-}
+    /* Horizontal swap used when an auth page replaces one form with another. */
+    .form-swap-enter-active,
+    .form-swap-leave-active {
+        transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+        position: absolute;
+        width: 100%;
+    }
 
-.form-swap-enter-from {
-    opacity: 0;
-    transform: translateX(16px);
-}
+    .form-swap-enter-from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
 
-.form-swap-leave-to {
-    opacity: 0;
-    transform: translateX(-16px);
-}
+    .form-swap-leave-to {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
 
-.surface-card {
-    border-radius: 14px;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.07);
-    background: rgb(var(--v-theme-surface));
-}
+    .surface-card {
+        border-radius: 14px;
+        border: 1px solid
+            color-mix(in oklab, var(--ui-text-highlighted) 7%, transparent);
+        background: var(--ui-bg);
+    }
 
-/* List card: the shell behind RouteCard and CommentCard. Both render the same
+    /* List card: the shell behind RouteCard and CommentCard. Both render the same
    anatomy (header · divider · meta rows · pill row · actions); only the
    contents differ, so the structure lives here and each component keeps just
    its own deltas. */
-.list-card {
-    position: relative;
-    overflow: hidden;
-}
+    .list-card {
+        position: relative;
+        overflow: hidden;
+    }
 
-.list-card__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-}
+    .list-card__header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+    }
 
-.list-card__checkbox {
-    margin: 0;
-    padding: 0;
-    flex-shrink: 0;
-}
+    .list-card__checkbox {
+        margin: 0;
+        padding: 0;
+        flex-shrink: 0;
+    }
 
-.list-card__title {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
+    .list-card__title {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
 
-.list-card__name {
-    font-weight: 600;
-    font-size: 1rem;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+    .list-card__name {
+        font-weight: 600;
+        font-size: 1rem;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-.list-card__meta {
-    padding: 10px 16px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+    .list-card__meta {
+        padding: 10px 16px 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-.list-card__meta-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-}
+    .list-card__meta-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+    }
 
-.list-card__meta-row--full {
-    width: 100%;
-}
+    .list-card__meta-row--full {
+        width: 100%;
+    }
 
-.list-card__meta-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-    opacity: 0.65;
-}
+    .list-card__meta-icon {
+        flex-shrink: 0;
+        margin-top: 2px;
+        opacity: 0.65;
+    }
 
-.list-card__pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 2px;
-}
+    .list-card__pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 2px;
+    }
 
-.list-card__pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    background: rgba(var(--v-theme-on-surface), 0.06);
-    border-radius: 6px;
-    padding: 3px 8px;
-}
+    .list-card__pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        color: color-mix(in oklab, var(--ui-text-highlighted) 70%, transparent);
+        background: color-mix(
+            in oklab,
+            var(--ui-text-highlighted) 6%,
+            transparent
+        );
+        border-radius: 6px;
+        padding: 3px 8px;
+    }
 
-.list-card__actions {
-    padding: 6px 10px 8px;
-    min-height: unset;
-}
+    .list-card__actions {
+        padding: 6px 10px 8px;
+        min-height: unset;
+    }
 
-/* Inventory checklist: shared by the page's manual-add dialog and the
+    /* Inventory checklist: shared by the page's manual-add dialog and the
    InventoryRouteList component, which cannot see the page's scoped styles. */
-.scope-list {
-    /* Viewport-relative so tall screens show more rows instead of padding. */
-    max-height: 46vh;
-    overflow-y: auto;
-}
-
-/* One line per route: the list is the page, so rows stay tight. */
-.scope-list .v-list-item {
-    min-height: 40px;
-}
-
-/* Anchor point doubles as the walking order, so it leads each row. */
-.anchor-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 26px;
-    margin-right: 12px;
-    font-size: 0.75rem;
-    font-variant-numeric: tabular-nums;
-    color: rgba(var(--v-theme-on-surface), 0.6);
-}
-
-/* Matches the inventory page's desktop breakpoint (Vuetify 4 xl). */
-@media (min-width: 1545px) {
     .scope-list {
-        max-height: calc(100vh - 320px);
-    }
-}
-
-.page--narrow {
-    max-width: 560px;
-}
-
-.page--prose {
-    max-width: 860px;
-}
-
-.legal-doc {
-    padding: 8px 24px;
-    line-height: 1.6;
-}
-
-.legal-doc section {
-    padding: 18px 0;
-}
-
-.legal-doc section + section {
-    border-top: 1px solid rgba(var(--v-theme-on-surface), 0.07);
-}
-
-.legal-doc h2 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.legal-doc p {
-    margin: 0;
-}
-
-.legal-doc p + p {
-    margin-top: 6px;
-}
-
-.legal-doc address {
-    font-style: normal;
-}
-
-.legal-doc .multiline {
-    white-space: pre-line;
-}
-
-.legal-doc dl {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 4px 16px;
-}
-
-.legal-doc dt {
-    color: rgba(var(--v-theme-on-surface), 0.6);
-}
-
-.legal-doc a {
-    color: rgb(var(--v-theme-primary));
-}
-
-.map-screen {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: calc(
-        100dvh - var(--v-layout-top, 64px) - var(--app-top-inset, 0px) -
-            var(--v-layout-bottom, 0px) - var(--app-bottom-inset, 0px)
-    );
-    min-height: 420px;
-}
-
-.map-screen__bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 52px;
-    padding: 6px 8px 6px 16px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.map-screen__title {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.map-screen__body {
-    position: relative;
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.map-screen__stage {
-    position: relative;
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-}
-
-.map-screen__chips {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    right: 64px;
-    z-index: 1;
-    pointer-events: none;
-}
-
-.map-screen__chips > * {
-    pointer-events: auto;
-}
-
-@media (pointer: coarse) {
-    .v-btn--icon {
-        overflow: visible;
+        /* Viewport-relative so tall screens show more rows instead of padding. */
+        max-height: 46vh;
+        overflow-y: auto;
     }
 
-    .v-btn--icon::before {
+    /* One line per route: the list is the page, so rows stay tight. */
+    .scope-list .scope-row {
+        min-height: 40px;
+    }
+
+    @media (max-width: 739.98px) {
+        .scope-list--page {
+            max-height: none;
+            overflow: visible;
+            border-radius: 14px;
+        }
+
+        .scope-list--page .scope-row {
+            min-height: 52px;
+        }
+    }
+
+    /* Anchor point doubles as the walking order, so it leads each row. */
+    .native-heading {
+        margin: 28px 16px 8px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ui-text-muted);
+    }
+
+    .native-group {
+        overflow: hidden;
+        border-radius: 14px;
+        background: var(--ui-bg);
+        border: 1px solid var(--ui-border);
+    }
+
+    .native-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        min-height: 52px;
+        padding: 8px 16px;
+        color: var(--ui-text-highlighted);
+        text-align: start;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 0.12s ease;
+    }
+
+    .native-row + .native-row::before {
         content: '';
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: max(100%, 44px);
-        height: max(100%, 44px);
-        transform: translate(-50%, -50%);
+        top: 0;
+        right: 0;
+        left: 58px;
+        border-top: 1px solid var(--ui-border);
     }
-}
 
-.text-eyebrow {
-    letter-spacing: 0.2em;
-}
+    a.native-row:active,
+    button.native-row:active {
+        background: var(--ui-bg-elevated);
+    }
 
-.alert-message {
-    flex: 1 1 16rem;
-}
+    @media (hover: hover) {
+        a.native-row:hover,
+        button.native-row:hover {
+            background: var(--ui-bg-elevated);
+        }
+    }
 
-.card-title-tight {
-    line-height: 1.3;
-}
+    .native-row__icon {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        color: #fff;
+        background: var(--native-tint, var(--ui-text-muted));
+    }
 
-.card-subtitle-muted {
-    opacity: 0.7;
-}
+    .native-row__icon > * {
+        width: 18px;
+        height: 18px;
+    }
 
-.v-main {
-    padding-left: calc(var(--v-layout-left) + env(safe-area-inset-left, 0px));
-    padding-right: calc(
-        var(--v-layout-right) + env(safe-area-inset-right, 0px)
-    );
-}
+    .native-row__text {
+        flex: 1;
+        min-width: 0;
+    }
 
-.v-bottom-sheet > .v-bottom-sheet__content > .v-card,
-.v-overlay__content.dialog-shell--sheet > .v-card {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-}
+    .native-row__subtitle {
+        display: block;
+        overflow: hidden;
+        font-size: 0.8125rem;
+        color: var(--ui-text-muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-svg [tabindex]:focus {
-    outline: none;
-}
+    .native-row__chevron {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        color: var(--ui-text-dimmed);
+    }
 
-html,
-body {
-    transition: background-color 0.32s ease;
-}
+    .anchor-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 26px;
+        height: 22px;
+        margin-right: 12px;
+        padding: 0 6px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        background: var(--ui-bg-elevated);
+        color: var(--ui-text-toned);
+    }
 
-.theme-reveal::view-transition-old(root),
-.theme-reveal::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
-}
+    /* Matches the inventory page's desktop breakpoint (Vuetify 4 xl). */
+    @media (min-width: 1545px) {
+        .scope-list {
+            max-height: calc(100vh - 320px);
+        }
+    }
 
-@media (prefers-reduced-motion: reduce) {
+    .page--narrow {
+        max-width: 560px;
+    }
+
+    .page--prose {
+        max-width: 860px;
+    }
+
+    .legal-doc {
+        padding: 8px 24px;
+        line-height: 1.6;
+    }
+
+    .legal-doc section {
+        padding: 18px 0;
+    }
+
+    .legal-doc section + section {
+        border-top: 1px solid
+            color-mix(in oklab, var(--ui-text-highlighted) 7%, transparent);
+    }
+
+    .legal-doc h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .legal-doc p {
+        margin: 0;
+    }
+
+    .legal-doc p + p {
+        margin-top: 6px;
+    }
+
+    .legal-doc address {
+        font-style: normal;
+    }
+
+    .legal-doc .multiline {
+        white-space: pre-line;
+    }
+
+    .legal-doc dl {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 4px 16px;
+    }
+
+    .legal-doc dt {
+        color: color-mix(in oklab, var(--ui-text-highlighted) 60%, transparent);
+    }
+
+    .legal-doc a {
+        color: var(--ui-primary);
+    }
+
+    .map-screen {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: calc(
+            100dvh - var(--app-top, 64px) - var(--app-top-inset, 0px) -
+                var(--app-bottom, 0px) - var(--app-bottom-inset, 0px)
+        );
+        min-height: 420px;
+    }
+
+    .map-screen__bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 52px;
+        padding: 6px 8px 6px 16px;
+        border-bottom: 1px solid var(--ui-border);
+    }
+
+    .map-screen__title {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .map-screen__body {
+        position: relative;
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .map-screen__stage {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+    }
+
+    .map-screen__chips {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 64px;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .map-screen__chips > * {
+        pointer-events: auto;
+    }
+
+    .text-eyebrow {
+        letter-spacing: 0.2em;
+    }
+
+    .alert-message {
+        flex: 1 1 16rem;
+    }
+
+    .card-title-tight {
+        line-height: 1.3;
+    }
+
+    .card-subtitle-muted {
+        opacity: 0.7;
+    }
+
+    svg [tabindex]:focus {
+        outline: none;
+    }
+
     html,
     body {
-        transition: none;
-    }
-}
-
-@media (display-mode: standalone) {
-    :root {
-        --app-top-inset: env(safe-area-inset-top, 0px);
-    }
-
-    .v-app-bar.nav-bar {
-        top: var(--app-top-inset) !important;
-    }
-
-    .v-main {
-        padding-top: calc(var(--v-layout-top) + var(--app-top-inset));
-    }
-
-    .v-application::before {
-        content: '';
-        position: fixed;
-        inset: 0 0 auto;
-        height: var(--app-top-inset);
-        background: rgb(var(--v-theme-surface));
-        z-index: 1010;
         transition: background-color 0.32s ease;
     }
 
-    .v-application.v-theme--light::before {
-        background: rgb(var(--v-theme-primary));
+    .theme-reveal::view-transition-old(root),
+    .theme-reveal::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
     }
 
-    .v-dialog--fullscreen > .v-overlay__content {
-        padding-top: var(--app-top-inset);
+    @media (prefers-reduced-motion: reduce) {
+        html,
+        body {
+            transition: none;
+        }
+    }
+
+    @media (display-mode: standalone) {
+        :root {
+            --app-top-inset: env(safe-area-inset-top, 0px);
+        }
+
+        .nav-bar {
+            top: var(--app-top-inset);
+        }
+
+        .app-root::before {
+            content: '';
+            position: fixed;
+            inset: 0 0 auto;
+            height: var(--app-top-inset);
+            background: var(--ui-bg);
+            z-index: 1010;
+            transition: background-color 0.32s ease;
+        }
+
+        html:not(.dark) .app-root::before {
+            background: var(--ui-primary);
+        }
+
+        .dialog-fullscreen {
+            padding-top: var(--app-top-inset);
+        }
     }
 }

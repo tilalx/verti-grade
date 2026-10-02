@@ -13,32 +13,24 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
 
     await page.getByTestId('routes-create-open').click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-    await page.getByTestId('route-form-name').locator('input').fill(name)
+    await page.getByTestId('route-form-name').fill(name)
     await page.getByTestId('route-form-difficulty').click()
     await page.getByRole('option', { name: '5', exact: true }).click()
     await page.getByTestId('route-form-type').click()
     await page.getByRole('option', { name: 'Route', exact: true }).click()
-    await page
-        .getByTestId('route-form-anchor-point')
-        .locator('input')
-        .fill('10')
+    await page.getByTestId('route-form-anchor-point').fill('10')
     await page.getByTestId('route-form-location').click()
     await page
         .getByRole('option', { name: workerLocation.name, exact: true })
         .click()
-    await page
-        .getByTestId('route-form-creator')
-        .locator('input')
-        .fill('E2E Setter')
+    await expect(page.getByRole('listbox')).toBeHidden()
+    await page.getByTestId('route-form-creator').fill('E2E Setter')
     await page.keyboard.press('Enter')
-    await page
-        .getByTestId('route-form-screw-date')
-        .locator('input')
-        .fill('2026-01-01')
+    await page.getByTestId('route-form-screw-date').fill('2026-01-01')
     await page.getByTestId('route-form-submit').click()
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 
-    await page.getByTestId('filter-search').locator('input').fill(name)
+    await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-row-name')).toHaveText([name])
 
     await page.getByTestId('routes-row-edit').first().click()
@@ -46,7 +38,7 @@ test('routesetter can create and delete a route (manage_routes permission)', asy
     await page.getByTestId('confirm-dialog-confirm').click()
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 
-    await page.getByTestId('filter-search').locator('input').fill(name)
+    await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-table')).not.toContainText(name)
 })
 

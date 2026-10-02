@@ -8,11 +8,11 @@ defineProps<{
 
 <template>
     <header
-        class="page-header d-flex justify-space-between ga-4 mb-4"
+        class="page-header flex justify-between gap-4 mb-4"
         :class="
             inlineActions
-                ? 'align-center'
-                : 'flex-column flex-sm-row align-sm-center'
+                ? 'items-center'
+                : 'flex-col sm:flex-row sm:items-center'
         "
     >
         <div>
@@ -23,7 +23,7 @@ defineProps<{
         </div>
         <div
             v-if="$slots.actions"
-            class="page-header__actions d-flex flex-wrap align-center ga-2"
+            class="page-header__actions flex flex-wrap items-center gap-2"
         >
             <slot name="actions" />
         </div>
@@ -35,12 +35,12 @@ defineProps<{
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: -0.3px;
-    color: rgb(var(--v-theme-on-background));
+    color: var(--ui-text-highlighted);
 }
 
 .page-header__subtitle {
     font-size: 0.85rem;
-    color: rgba(var(--v-theme-on-background), 0.5);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
 }
 
 @media (max-width: 600px) {

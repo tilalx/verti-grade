@@ -1,49 +1,47 @@
 <template>
-    <v-card
-        variant="tonal"
-        class="list-card"
+    <div
+        class="list-card rounded-lg bg-elevated"
         :data-testid="`report-card-${report.id}`"
     >
         <div class="list-card__header">
-            <v-icon
-                size="20"
-                class="flex-shrink-0"
-                :color="statusColor(report.status)"
-                >mdi-flag-outline</v-icon
-            >
+            <UIcon
+                name="i-lucide-flag"
+                class="shrink-0 size-[20px]"
+                :class="statusTextClass[statusColor(report.status)]"
+            />
 
-            <div class="flex-grow-1 min-width-0">
-                <div class="d-flex align-center ga-2 flex-wrap">
-                    <span class="text-body-medium font-weight-medium">
+            <div class="grow min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-medium">
                         {{ t(`reports.reasons.${report.reason}`) }}
                     </span>
-                    <v-chip
-                        size="x-small"
+                    <UBadge
+                        size="sm"
                         :color="statusColor(report.status)"
-                        variant="tonal"
+                        variant="soft"
                         data-testid="report-card-status"
                     >
                         {{ t(`reports.status.${report.status}`) }}
-                    </v-chip>
-                    <v-chip
+                    </UBadge>
+                    <UBadge
                         v-if="report.status !== 'open' && report.decision"
-                        size="x-small"
-                        variant="outlined"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
                     >
                         {{ t(`reports.decision.${report.decision}`) }}
-                    </v-chip>
-                    <!-- Proof the Art. 16(4) receipt actually went out. -->
-                    <v-chip
+                    </UBadge>
+                    <UBadge
                         v-if="!report.receipt_sent"
-                        size="x-small"
+                        size="sm"
                         color="warning"
-                        variant="outlined"
+                        variant="outline"
                         data-testid="report-card-receipt-pending"
                     >
                         {{ t('reports.receiptPending') }}
-                    </v-chip>
+                    </UBadge>
                 </div>
-                <div class="text-body-small text-medium-emphasis">
+                <div class="text-xs text-muted">
                     {{ formatReportDate(report.created) }}
                 </div>
             </div>
@@ -51,14 +49,14 @@
 
         <div class="list-card__meta">
             <div class="list-card__meta-row list-card__meta-row--full">
-                <span class="text-body-medium">{{ report.explanation }}</span>
+                <span class="text-sm">{{ report.explanation }}</span>
             </div>
 
             <div class="list-card__meta-row list-card__meta-row--full mt-2">
-                <span class="text-body-small text-medium-emphasis">
+                <span class="text-xs text-muted">
                     {{ t('reports.snapshot') }}:
                 </span>
-                <span class="text-body-small font-italic">
+                <span class="text-xs italic">
                     {{
                         report.content_snapshot ||
                         t('reports.contentUnavailable')
@@ -67,10 +65,10 @@
             </div>
 
             <div class="list-card__meta-row list-card__meta-row--full mt-2">
-                <span class="text-body-small text-medium-emphasis">
+                <span class="text-xs text-muted">
                     {{ t('reports.notifier') }}:
                 </span>
-                <span class="text-body-small">
+                <span class="text-xs">
                     {{ report.notifier_name }} ({{ report.notifier_email }})
                 </span>
             </div>
@@ -79,50 +77,49 @@
                 v-if="report.decision_reason"
                 class="list-card__meta-row list-card__meta-row--full mt-2"
             >
-                <span class="text-body-small text-medium-emphasis">
+                <span class="text-xs text-muted">
                     {{ t('reports.decisionReason') }}:
                 </span>
-                <span class="text-body-small">{{
-                    report.decision_reason
-                }}</span>
+                <span class="text-xs">{{ report.decision_reason }}</span>
             </div>
         </div>
 
-        <v-card-actions class="list-card__actions">
-            <v-btn
-                variant="text"
-                size="small"
+        <div class="list-card__actions flex items-center gap-1">
+            <UButton
+                color="neutral"
+                variant="ghost"
+                size="sm"
                 :href="appContentUrl(report.content_url)"
                 target="_blank"
                 rel="noopener noreferrer"
-                prepend-icon="mdi-open-in-new"
+                icon="i-lucide-external-link"
                 data-testid="report-card-view"
             >
                 {{ t('reports.viewContent') }}
-            </v-btn>
-            <v-spacer />
+            </UButton>
+            <div class="flex-1" />
             <template v-if="report.status === 'open'">
-                <v-btn
-                    variant="text"
-                    size="small"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
                     data-testid="report-card-keep"
                     @click="$emit('decide', report, 'content_kept')"
                 >
                     {{ t('reports.keepContent') }}
-                </v-btn>
-                <v-btn
+                </UButton>
+                <UButton
                     v-if="canRemove"
-                    variant="flat"
-                    size="small"
+                    size="sm"
                     color="error"
                     data-testid="report-card-remove"
                     @click="$emit('decide', report, 'content_removed')"
                 >
                     {{ t('reports.removeContent') }}
-                </v-btn>
+                </UButton>
             </template>
-        </v-card-actions>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -135,6 +132,12 @@ defineProps<{ report: ReportRecord; canRemove: boolean }>()
 defineEmits<{ decide: [report: ReportRecord, decision: ReportDecision] }>()
 
 const { t, locale } = useI18n()
+
+const statusTextClass = {
+    warning: 'text-warning',
+    success: 'text-success',
+    neutral: 'text-muted',
+}
 
 const appContentUrl = (url: string) =>
     /^\/route\?id=\w+(#comment-\w+)?$/.test(url) ? url : undefined

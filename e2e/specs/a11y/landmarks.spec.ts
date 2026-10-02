@@ -35,7 +35,7 @@ test('a blocked-submit validation error is exposed to assistive tech', async ({
     await page.getByTestId('routes-create-open').click()
     await page.getByTestId('route-form-submit').click()
 
-    await expect(
-        page.getByTestId('route-form-name').getByRole('alert').first(),
-    ).toBeVisible()
+    const name = page.getByTestId('route-form-name')
+    await expect(name).toHaveAttribute('aria-invalid', 'true')
+    await expect(name).toHaveAccessibleDescription(/required/i)
 })

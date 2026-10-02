@@ -1,44 +1,33 @@
 <template>
-    <v-card
-        variant="tonal"
-        class="list-card comment-card"
+    <div
+        class="list-card comment-card rounded-lg bg-elevated"
         :id="`comment-${comment.id}`"
         :data-testid="`comment-card-${comment.id}`"
     >
-        <!-- Header: [checkbox?] avatar · name + date · star rating -->
         <div class="list-card__header">
-            <v-checkbox
+            <UCheckbox
                 v-if="selectable"
                 :model-value="selected"
-                color="primary"
-                hide-details
-                density="compact"
                 class="list-card__checkbox"
                 :aria-label="
                     $t('common.selectItem', { name: comment.userName })
                 "
                 data-testid="comment-card-checkbox"
-                @update:modelValue="$emit('toggle-select')"
+                @update:model-value="$emit('toggle-select')"
             />
-            <v-avatar
-                size="32"
-                :color="
-                    comment.userAvatar
-                        ? undefined
-                        : avatarColor(comment.userName)
-                "
-                class="flex-shrink-0"
+            <img
+                v-if="comment.userAvatar"
+                :src="comment.userAvatar"
+                :alt="comment.userName"
+                class="size-8 shrink-0 rounded-full object-cover"
+            />
+            <span
+                v-else
+                class="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                :style="{ backgroundColor: avatarColor(comment.userName) }"
             >
-                <v-img
-                    v-if="comment.userAvatar"
-                    :src="comment.userAvatar"
-                    :alt="comment.userName"
-                    cover
-                />
-                <span v-else class="text-body-small font-weight-bold">
-                    {{ nameInitials(comment.userName) }}
-                </span>
-            </v-avatar>
+                {{ nameInitials(comment.userName) }}
+            </span>
 
             <div class="list-card__title">
                 <span class="list-card__name">{{ comment.userName }}</span>
@@ -47,39 +36,35 @@
 
             <div
                 v-if="comment.rating"
-                class="flex-shrink-0 comment-card__rating"
+                class="shrink-0 comment-card__rating"
                 role="img"
                 :aria-label="`${comment.rating}/5`"
             >
-                <v-icon
+                <UIcon
                     v-for="star in 5"
                     :key="star"
-                    size="18"
-                    :color="
+                    name="i-lucide-star"
+                    class="size-[18px]"
+                    :class="
                         star <= comment.rating
-                            ? 'yellow-darken-2'
-                            : 'grey-lighten-2'
+                            ? 'text-amber-500 fill-current'
+                            : 'text-dimmed'
                     "
-                >
-                    {{
-                        star <= comment.rating ? 'mdi-star' : 'mdi-star-outline'
-                    }}
-                </v-icon>
+                />
             </div>
         </div>
 
-        <v-divider />
+        <USeparator />
 
-        <!-- Meta section -->
         <div class="list-card__meta">
-            <!-- Comment text -->
             <div
                 v-if="comment.comment"
                 class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="list-card__meta-icon"
-                    >mdi-comment-text-outline</v-icon
-                >
+                <UIcon
+                    name="i-lucide-message-square-text"
+                    class="list-card__meta-icon size-[15px]"
+                />
                 <div class="comment-card__comment-wrap">
                     <span
                         ref="commentEl"
@@ -92,11 +77,11 @@
                         >{{ comment.comment }}</span
                     >
                     <div v-if="collapsible && isLong" class="mt-1">
-                        <v-btn
-                            variant="text"
-                            size="x-small"
-                            :color="expanded ? 'default' : 'primary'"
-                            class="px-0 text-none"
+                        <UButton
+                            variant="link"
+                            size="xs"
+                            :color="expanded ? 'neutral' : 'primary'"
+                            class="px-0"
                             data-testid="comment-card-toggle"
                             @click="expanded = !expanded"
                         >
@@ -105,61 +90,56 @@
                                     ? t('comments.showLess')
                                     : t('comments.showMore')
                             }}
-                        </v-btn>
+                        </UButton>
                     </div>
                 </div>
             </div>
 
-            <!-- Route row (admin view) -->
             <div
                 v-if="showRoute && comment.routeName"
                 class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="list-card__meta-icon"
-                    >mdi-routes</v-icon
-                >
+                <UIcon
+                    name="i-lucide-route"
+                    class="list-card__meta-icon size-[15px]"
+                />
                 <NuxtLink
                     v-if="comment.routeId"
                     :to="`/route?id=${comment.routeId}`"
-                    class="comment-card__route-link text-body-medium font-weight-medium text-primary text-decoration-none"
+                    class="comment-card__route-link text-sm font-medium text-primary no-underline"
                 >
                     {{ comment.routeName }}
                 </NuxtLink>
-                <span v-else class="text-body-medium font-weight-medium">{{
+                <span v-else class="text-sm font-medium">{{
                     comment.routeName
                 }}</span>
             </div>
 
-            <!-- Pills: location · difficulty -->
             <div class="list-card__pills">
                 <span v-if="comment.location" class="list-card__pill">
-                    <v-icon size="13">mdi-map-marker-outline</v-icon>
+                    <UIcon name="i-lucide-map-pin" class="size-[13px]" />
                     {{ comment.location }}
                 </span>
-                <v-tooltip
+                <UTooltip
                     v-if="comment.difficultyLabel"
-                    location="top"
                     :text="t('ratings.perceived_difficulty')"
                 >
-                    <template #activator="{ props: tooltipProps }">
-                        <span
-                            v-bind="tooltipProps"
-                            class="list-card__pill comment-card__pill--primary"
-                        >
-                            <v-icon size="13">mdi-gauge</v-icon>
-                            {{ t('ratings.felt') }}
-                            {{ comment.difficultyLabel }}
-                        </span>
-                    </template>
-                </v-tooltip>
+                    <span class="list-card__pill comment-card__pill--primary">
+                        <UIcon name="i-lucide-gauge" class="size-[13px]" />
+                        {{ t('ratings.felt') }}
+                        {{ comment.difficultyLabel }}
+                    </span>
+                </UTooltip>
             </div>
         </div>
 
-        <v-card-actions v-if="$slots.actions" class="list-card__actions">
-            <v-spacer />
+        <div
+            v-if="$slots.actions"
+            class="list-card__actions flex items-center justify-end gap-1"
+        >
             <slot name="actions" />
-        </v-card-actions>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -247,7 +227,7 @@ function timeAgo(dateStr: string): string {
 <style scoped>
 .comment-card__date {
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
     line-height: 1.2;
 }
 
@@ -258,7 +238,7 @@ function timeAgo(dateStr: string): string {
 
 .comment-card__comment {
     font-size: 0.8rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 70%, transparent);
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.5;
@@ -276,8 +256,8 @@ function timeAgo(dateStr: string): string {
 }
 
 .comment-card__pill--primary {
-    color: rgb(var(--v-theme-primary));
-    background: rgba(var(--v-theme-primary), 0.08);
+    color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
 
 .comment-card .list-card__meta-icon {
@@ -286,9 +266,5 @@ function timeAgo(dateStr: string): string {
 
 .comment-card .list-card__pills {
     padding-left: 22px;
-}
-
-.comment-card .list-card__pill :deep(.v-icon) {
-    margin-top: 1px;
 }
 </style>

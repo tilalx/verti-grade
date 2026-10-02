@@ -111,7 +111,7 @@ test('pressing Enter on a dot while a route is armed places it there', async ({
         ),
     ).toBeVisible()
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const saved = await seeded.root.collection('routes').getOne(loose.id)

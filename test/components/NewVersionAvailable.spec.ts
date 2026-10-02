@@ -5,10 +5,9 @@ import NewVersionAvailable from '~/components/notifications/newVersionAvailable.
 const DISMISS_KEY = 'gripello:update-dismissed'
 
 const alertStub = {
-    props: ['closable', 'closeLabel'],
-    emits: ['click:close'],
+    emits: ['update:open'],
     template:
-        '<div class="v-alert"><slot /><button class="close" @click="$emit(\'click:close\')" /></div>',
+        '<div class="alert"><slot name="description" /><button class="close" @click="$emit(\'update:open\', false)" /></div>',
 }
 const dialogStub = {
     template: '<div><slot name="activator" :props="{}" /></div>',
@@ -34,8 +33,8 @@ function createWrapper() {
     return mount(NewVersionAvailable, {
         global: {
             stubs: {
-                'v-alert': alertStub,
-                'v-btn': { template: '<button><slot /></button>' },
+                UAlert: alertStub,
+                UButton: { template: '<button><slot /></button>' },
                 NotificationsReleaseNotesDialog: dialogStub,
                 NotificationsCommitListDialog: dialogStub,
             },

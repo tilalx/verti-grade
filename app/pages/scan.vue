@@ -1,6 +1,6 @@
 <template>
     <div class="scan-page" data-testid="scan-page">
-        <h1 class="d-sr-only">{{ $t('scan.title') }}</h1>
+        <h1 class="sr-only">{{ $t('scan.title') }}</h1>
 
         <div
             v-if="cameraActive"
@@ -22,17 +22,23 @@
                 class="scan-starting"
                 data-testid="scan-starting"
             >
-                <v-progress-circular indeterminate size="32" />
+                <UIcon
+                    name="i-lucide-loader-circle"
+                    class="size-8 animate-spin"
+                />
                 <span class="scan-starting__text">{{
                     $t('scan.starting')
                 }}</span>
             </div>
-            <v-btn
+            <UButton
                 v-if="scanning && torchSupported"
                 class="scan-torch"
-                :icon="torchOn ? 'mdi-flashlight' : 'mdi-flashlight-off'"
-                :color="torchOn ? 'warning' : undefined"
-                variant="flat"
+                :icon="
+                    torchOn ? 'i-lucide-flashlight' : 'i-lucide-flashlight-off'
+                "
+                :color="torchOn ? 'warning' : 'neutral'"
+                variant="solid"
+                size="lg"
                 :aria-label="$t('inventory.toggleTorch')"
                 data-testid="scan-torch"
                 @click="toggleTorch"
@@ -40,47 +46,51 @@
         </div>
 
         <div v-else class="scan-idle">
-            <v-icon size="72" class="scan-idle__icon">mdi-qrcode-scan</v-icon>
-            <p class="text-title-medium mb-2">{{ $t('scan.title') }}</p>
-            <p class="text-body-medium text-medium-emphasis mb-6">
+            <UIcon
+                name="i-lucide-scan-qr-code"
+                class="scan-idle__icon size-[72px]"
+            />
+            <p class="text-base font-medium mb-2">{{ $t('scan.title') }}</p>
+            <p class="text-sm text-muted mb-6">
                 {{ $t('scan.intro') }}
             </p>
-            <v-alert
+            <UAlert
                 v-if="scannerError"
-                type="warning"
-                variant="tonal"
+                color="warning"
+                variant="soft"
+                icon="i-lucide-triangle-alert"
+                :description="scannerError"
                 class="mb-4 text-left"
                 data-testid="scan-error"
-            >
-                {{ scannerError }}
-            </v-alert>
-            <v-btn
+            />
+            <UButton
                 color="primary"
-                size="large"
-                prepend-icon="mdi-camera-outline"
+                size="xl"
+                icon="i-lucide-camera"
                 data-testid="scan-start"
                 @click="start"
             >
                 {{ $t('scan.start') }}
-            </v-btn>
+            </UButton>
         </div>
 
         <p
-            class="scan-hint text-body-small text-medium-emphasis"
+            class="scan-hint text-xs text-muted"
             aria-live="polite"
             data-testid="scan-hint"
         >
             {{ hint }}
         </p>
         <div class="scan-actions">
-            <v-btn
+            <UButton
                 to="/map"
-                variant="text"
-                prepend-icon="mdi-map-outline"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-map"
                 data-testid="scan-open-map"
             >
                 {{ $t('scan.findOnMap') }}
-            </v-btn>
+            </UButton>
         </div>
     </div>
 </template>
@@ -101,7 +111,7 @@ const LOOKUP_RETRY_MS = 2000
 
 const { t } = useI18n()
 const pb = usePocketbase()
-const theme = useTheme()
+const themeColors = useThemeColors()
 
 useSeoMeta({ title: () => t('page.title.scan') })
 
@@ -175,12 +185,12 @@ function tagFor(rawValue: string) {
     if (route === undefined) return { color: PENDING_COLOR, label: '…' }
     if (!route)
         return {
-            color: String(theme.current.value.colors.error),
+            color: themeColors.value.error,
             label: t('scan.unknownRoute'),
         }
     const grade = formatGrade(route)
     return {
-        color: String(theme.current.value.colors.success),
+        color: themeColors.value.success,
         label: grade ? `${route.name} · ${grade}` : route.name,
     }
 }
@@ -230,8 +240,8 @@ onBeforeUnmount(() => clearTimeout(rejectedTimer))
     display: flex;
     flex-direction: column;
     min-height: calc(
-        100dvh - var(--v-layout-top, 64px) - var(--app-top-inset, 0px) -
-            var(--v-layout-bottom, 0px) - var(--app-bottom-inset, 0px)
+        100dvh - var(--app-top, 64px) - var(--app-top-inset, 0px) -
+            var(--app-bottom, 0px) - var(--app-bottom-inset, 0px)
     );
 }
 
@@ -297,7 +307,7 @@ onBeforeUnmount(() => clearTimeout(rejectedTimer))
 }
 
 .scan-idle__icon {
-    color: rgba(var(--v-theme-on-surface), 0.3);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
     margin-bottom: 16px;
 }
 

@@ -1,55 +1,57 @@
 <template>
-    <v-menu
-        v-model="menuOpen"
-        :close-on-content-click="false"
-        location="bottom end"
-        offset="8"
-        transition="scale-transition"
+    <UDropdownMenu
+        :items="menuItems"
+        :content="
+            collapsed
+                ? { side: 'right', align: 'end', sideOffset: 8 }
+                : { side: 'top', align: 'start', sideOffset: 8 }
+        "
+        :ui="{
+            content: collapsed
+                ? 'w-60'
+                : 'w-(--reka-dropdown-menu-trigger-width) min-w-60',
+        }"
     >
-        <template #activator="{ props: menuProps }">
-            <v-btn
-                v-bind="menuProps"
-                icon
-                variant="text"
-                data-testid="user-menu-activator"
-                :aria-label="$t('nav.userMenu')"
-            >
-                <v-avatar size="36" :color="image ? undefined : 'primary'">
-                    <v-img v-if="image" :src="image" :alt="displayName" cover />
-                    <span v-else class="text-title-small font-weight-bold">{{
-                        initials
-                    }}</span>
-                </v-avatar>
-            </v-btn>
-        </template>
-
-        <v-card elevation="3" border min-width="220">
-            <v-list density="compact" :lines="false" nav slim class="py-1">
-                <v-list-item
-                    v-for="item in menuItems"
-                    :key="item.key"
-                    :to="item.to"
-                    :prepend-icon="item.icon"
-                    :title="item.title"
-                    :base-color="item.color"
-                    :disabled="item.disabled"
-                    density="compact"
-                    rounded="lg"
-                    :data-testid="`user-menu-${item.key}`"
-                    @click="handleAction(item)"
-                />
-            </v-list>
-        </v-card>
-    </v-menu>
-
-    <UserEditUserSelf
-        v-if="user"
-        v-model:dialog-open="dialogOpen"
-        :user-id="user.id"
-    />
+        <UButton
+            color="neutral"
+            variant="ghost"
+            :block="!collapsed"
+            :square="collapsed"
+            class="data-[state=open]:bg-elevated"
+            :class="collapsed ? 'mx-auto rounded-full p-0.5' : 'p-1.5'"
+            data-testid="user-menu-activator"
+            :aria-label="$t('nav.userMenu')"
+        >
+            <UUser
+                :name="displayName"
+                :description="user?.email"
+                :avatar="{
+                    src: image || undefined,
+                    text: initials,
+                    class: image ? undefined : 'bg-primary',
+                    ui: { fallback: 'text-inverted font-bold' },
+                }"
+                class="min-w-0 flex-1 text-start"
+                :ui="{
+                    wrapper: collapsed ? 'hidden' : 'min-w-0',
+                    name: 'truncate',
+                    description: 'truncate',
+                }"
+            />
+            <UIcon
+                v-if="!collapsed"
+                name="i-lucide-chevrons-up-down"
+                class="size-4 shrink-0 text-dimmed"
+            />
+        </UButton>
+    </UDropdownMenu>
 </template>
 
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui'
+
+defineProps<{ collapsed?: boolean }>()
+
 const router = useRouter()
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -79,49 +81,48 @@ const initials = computed(() => {
         .join('')
 })
 
-// ── UI state ──────────────────────────────────────────────────────────────────
-
-const menuOpen = ref(false)
-const dialogOpen = ref(false)
 const isLoggingOut = ref(false)
 
-// ── Menu items ────────────────────────────────────────────────────────────────
-
-const menuItems = computed(() => [
-    {
-        key: 'profile',
-        title: t('account.profile'),
-        icon: 'mdi-account-edit-outline',
-        action: () => {
-            dialogOpen.value = true
-            menuOpen.value = false
+const menuItems = computed<DropdownMenuItem[][]>(() => [
+    [
+        {
+            type: 'label',
+            label: displayName.value,
+            description: user.value?.email,
+            avatar: {
+                src: image.value || undefined,
+                text: initials.value,
+                alt: displayName.value,
+            },
         },
-    },
-    {
-        key: 'activity',
-        title: t('routes.activity'),
-        icon: 'mdi-clipboard-text-clock-outline',
-        to: '/account/activity',
-        action: () => {
-            menuOpen.value = false
+    ],
+    [
+        {
+            'data-testid': 'user-menu-profile',
+            label: t('account.profile'),
+            icon: 'i-lucide-user-pen',
+            to: '/account/settings',
         },
-    },
-    {
-        key: 'logout',
-        title: t('account.logout'),
-        icon: 'mdi-logout-variant',
-        color: 'error',
-        loading: isLoggingOut.value,
-        disabled: isLoggingOut.value,
-        action: logout,
-    },
+        {
+            'data-testid': 'user-menu-activity',
+            label: t('routes.activity'),
+            icon: 'i-lucide-clipboard-clock',
+            to: '/account/activity',
+        },
+    ],
+    [
+        {
+            'data-testid': 'user-menu-logout',
+            label: t('account.logout'),
+            icon: 'i-lucide-log-out',
+            color: 'error',
+            disabled: isLoggingOut.value,
+            onSelect: logout,
+        },
+    ],
 ])
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-
-function handleAction(item: { action?: () => unknown }) {
-    item.action?.()
-}
 
 async function logout() {
     if (isLoggingOut.value) return

@@ -10,14 +10,14 @@ test('selects filtered routes and archives them', async ({
     await createRoute()
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
     await page.getByTestId('routes-select-all').click()
     await page.getByTestId('routes-archive-selected').click()
     await page.getByTestId('confirm-dialog-confirm').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
 
     await page.getByTestId('routes-filter-archived').click()
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
@@ -39,7 +39,7 @@ test('shows an error and keeps routes when archiving fails', async ({
     await createRoute()
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
     await page.route('**/api/batch', (route) => route.abort('failed'))
@@ -48,6 +48,6 @@ test('shows an error and keeps routes when archiving fails', async ({
     await page.getByTestId('routes-archive-selected').click()
     await page.getByTestId('confirm-dialog-confirm').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 })

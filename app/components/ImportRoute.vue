@@ -1,16 +1,14 @@
 <template>
     <div>
-        <!-- Hidden file input -->
         <input
             ref="fileInput"
             type="file"
-            class="d-none"
+            class="hidden"
             accept="application/json"
             data-testid="import-route-file-input"
             @change="handleFileChange"
         />
 
-        <!-- Import Preview Dialog -->
         <LayoutDialogShell
             v-model="showPreviewDialog"
             max-width="900"
@@ -18,89 +16,105 @@
             :title="$t('importRoutes.title')"
             data-testid="import-route-dialog"
         >
-            <p class="mb-4 text-body-medium text-medium-emphasis">
+            <p class="mb-4 text-sm text-muted">
                 {{ $t('importRoutes.intro') }}
             </p>
 
-            <v-expansion-panels
+            <div
                 v-if="smAndDown"
-                variant="accordion"
+                class="divide-y rounded-lg border"
                 data-testid="import-route-list"
             >
-                <v-expansion-panel
+                <UCollapsible
                     v-for="(item, index) in routesToImport"
                     :key="index"
                     data-testid="import-route-list-item"
                 >
-                    <v-expansion-panel-title>
-                        <v-avatar
-                            :color="item.color ?? undefined"
-                            size="24"
-                            class="mr-3 flex-shrink-0"
+                    <button
+                        type="button"
+                        class="flex w-full items-center gap-3 px-4 py-3 text-left"
+                    >
+                        <span
+                            class="size-6 shrink-0 rounded-full"
+                            :style="{ background: item.color ?? undefined }"
                         />
-                        <div>
-                            <div class="text-body-large">
+                        <div class="flex-1">
+                            <div class="text-base">
                                 {{ String(item.name ?? '') }}
                             </div>
-                            <div class="text-body-small text-medium-emphasis">
+                            <div class="text-xs text-muted">
                                 {{ previewSummary(item) }}
                             </div>
                         </div>
-                    </v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                        <ImportRouteRatings
-                            :name="item.name"
-                            :ratings="item.ratings"
+                        <UIcon
+                            name="i-lucide-chevron-down"
+                            class="size-5 shrink-0"
                         />
-                    </v-expansion-panel-text>
-                </v-expansion-panel>
-            </v-expansion-panels>
-
-            <v-data-table
-                v-else
-                v-model:expanded="expanded"
-                :headers="previewHeaders"
-                :items="routesToImport"
-                item-value="name"
-                show-expand
-            >
-                <template #item.color="{ item }">
-                    <v-avatar :color="item.color ?? undefined" size="24" />
-                </template>
-
-                <template #item.ratings="{ item }">
-                    {{ item.ratings?.length || 0 }}
-                </template>
-
-                <template #expanded-row="{ columns, item }">
-                    <tr>
-                        <td :colspan="columns.length">
+                    </button>
+                    <template #content>
+                        <div class="px-4 pb-2">
                             <ImportRouteRatings
                                 :name="item.name"
                                 :ratings="item.ratings"
                             />
-                        </td>
-                    </tr>
+                        </div>
+                    </template>
+                </UCollapsible>
+            </div>
+
+            <UTable
+                v-else
+                v-model:expanded="expanded"
+                :data="routesToImport"
+                :columns="previewColumns"
+            >
+                <template #color-cell="{ row }">
+                    <span
+                        class="block size-6 rounded-full"
+                        :style="{ background: row.original.color ?? undefined }"
+                    />
                 </template>
-            </v-data-table>
+
+                <template #expand-cell="{ row }">
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        :icon="
+                            row.getIsExpanded()
+                                ? 'i-lucide-chevron-up'
+                                : 'i-lucide-chevron-down'
+                        "
+                        :aria-label="$t('importRoutes.ratingsCount')"
+                        @click="row.toggleExpanded()"
+                    />
+                </template>
+
+                <template #expanded="{ row }">
+                    <ImportRouteRatings
+                        :name="row.original.name"
+                        :ratings="row.original.ratings"
+                    />
+                </template>
+            </UTable>
 
             <template #actions>
-                <v-btn
-                    variant="text"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
                     data-testid="import-route-cancel"
                     @click="cancelImport"
                 >
                     {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
+                </UButton>
+                <div class="flex-1" />
+                <UButton
                     color="primary"
                     :loading="loading"
                     data-testid="import-route-confirm"
                     @click="confirmImport"
                 >
                     {{ $t('importRoutes.confirm') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
     </div>
@@ -111,6 +125,7 @@ import {
     resolveImportedGrading,
     type ImportedGrading,
 } from '#shared/utils/grades'
+import type { TableColumn } from '@nuxt/ui'
 import type { UserRecord, WallRecord } from '~/types/models'
 
 interface ImportedRating extends ImportedGrading {
@@ -143,7 +158,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const showPreviewDialog = ref(false)
 const loading = ref(false)
 const routesToImport = ref<ImportedRoute[]>([])
-const expanded = ref<string[]>([])
+const expanded = ref<Record<string, boolean>>({})
 
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
@@ -162,16 +177,22 @@ const previewSummary = (route: ImportedRoute) =>
         .filter((part) => part !== undefined && part !== null && part !== '')
         .join(' · ')
 
-const previewHeaders = computed(() => [
-    { title: t('climbing.color'), value: 'color', sortable: false },
-    { title: t('routes.name'), value: 'name' },
+const previewColumns = computed<TableColumn<ImportedRoute>[]>(() => [
+    { id: 'color', header: t('climbing.color') },
+    { accessorKey: 'name', header: t('routes.name') },
     {
-        title: t('climbing.difficulty'),
-        value: (route: ImportedRoute) => route.grade ?? route.difficulty,
+        id: 'difficulty',
+        header: t('climbing.difficulty'),
+        accessorFn: (route) => route.grade ?? route.difficulty,
     },
-    { title: t('climbing.anchor_point'), value: 'anchor_point' },
-    { title: t('climbing.location'), value: 'location' },
-    { title: t('importRoutes.ratingsCount'), value: 'ratings' },
+    { accessorKey: 'anchor_point', header: t('climbing.anchor_point') },
+    { accessorKey: 'location', header: t('climbing.location') },
+    {
+        id: 'ratings',
+        header: t('importRoutes.ratingsCount'),
+        accessorFn: (route) => route.ratings?.length || 0,
+    },
+    { id: 'expand' },
 ])
 
 const open = () => {

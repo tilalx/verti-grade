@@ -1,5 +1,5 @@
 <template>
-    <v-container class="activity-page">
+    <div class="activity-page mx-auto w-full px-4">
         <LayoutPageHeader
             :title="seesEverything ? t('audit.title') : t('audit.titleOwn')"
             :subtitle="
@@ -14,46 +14,36 @@
             @clear="clearFilters"
         >
             <template #filters>
-                <v-row density="comfortable">
-                    <v-col cols="12" sm="6" md="4">
-                        <v-select
-                            v-model="actionFilter"
-                            :items="actionItems"
-                            item-title="title"
-                            item-value="value"
-                            :label="t('audit.filterAction')"
-                            density="compact"
-                            hide-details="auto"
-                            clearable
-                            data-testid="audit-filter-action"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                        <v-select
-                            v-model="collectionFilter"
-                            :items="collectionItems"
-                            item-title="title"
-                            item-value="value"
-                            :label="t('audit.filterCollection')"
-                            density="compact"
-                            hide-details="auto"
-                            clearable
-                            data-testid="audit-filter-collection"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                        <v-select
-                            v-model="periodFilter"
-                            :items="periodItems"
-                            item-title="title"
-                            item-value="value"
-                            :label="t('audit.filterPeriod')"
-                            density="compact"
-                            hide-details="auto"
-                            data-testid="audit-filter-period"
-                        />
-                    </v-col>
-                </v-row>
+                <div class="contents">
+                    <FilterSelect
+                        :label="t('audit.filterAction')"
+                        v-model="actionFilter"
+                        :items="actionItems"
+                        label-key="title"
+                        value-key="value"
+                        clear
+                        :placeholder="t('filter.all')"
+                        data-testid="audit-filter-action"
+                    />
+                    <FilterSelect
+                        :label="t('audit.filterCollection')"
+                        v-model="collectionFilter"
+                        :items="collectionItems"
+                        label-key="title"
+                        value-key="value"
+                        clear
+                        :placeholder="t('filter.all')"
+                        data-testid="audit-filter-collection"
+                    />
+                    <FilterSelect
+                        :label="t('audit.filterPeriod')"
+                        v-model="periodFilter"
+                        :items="periodItems"
+                        label-key="title"
+                        value-key="value"
+                        data-testid="audit-filter-period"
+                    />
+                </div>
             </template>
         </FilterBar>
 
@@ -62,7 +52,7 @@
 
             <LayoutEmptyState
                 v-if="!loading && !entries.length"
-                icon="mdi-clipboard-text-clock-outline"
+                icon="i-lucide-clipboard-clock"
                 :title="t('audit.empty')"
                 :hint="t('audit.emptyHint')"
             />
@@ -75,18 +65,19 @@
             />
 
             <div v-if="hasMore" class="text-center mt-4">
-                <v-btn
-                    variant="tonal"
+                <UButton
+                    color="neutral"
+                    variant="soft"
                     :loading="loadingMore"
                     data-testid="audit-load-more"
                     @click="loadMore"
                 >
                     {{ t('actions.load_more') }}
-                </v-btn>
+                </UButton>
             </div>
 
             <p
-                class="text-body-small text-medium-emphasis text-center mt-6"
+                class="text-xs text-muted text-center mt-6"
                 data-testid="audit-retention-note"
             >
                 {{
@@ -98,7 +89,7 @@
                 }}
             </p>
         </div>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">

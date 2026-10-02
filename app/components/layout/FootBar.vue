@@ -1,47 +1,46 @@
 <template>
-    <v-footer
+    <footer
         v-if="$route.meta.footer !== false"
-        class="app-footer d-none d-lg-flex"
-        elevation="0"
+        class="app-footer hidden lg:flex"
         data-testid="app-footer"
     >
         <div class="footer-inner">
             <!-- Left: legal links -->
             <div class="footer-left">
-                <v-btn
+                <UButton
                     v-bind="legalLinkProps(settings.privacy_url, '/privacy')"
-                    variant="plain"
-                    density="compact"
-                    class="footer-link-btn"
+                    variant="link"
+                    color="neutral"
+                    class="px-1.5 text-[13px] font-medium text-muted hover:text-highlighted"
                     data-testid="footer-privacy"
                 >
                     {{ $t('legal.privacy') }}
-                </v-btn>
+                </UButton>
 
                 <span class="link-sep">·</span>
 
-                <v-btn
+                <UButton
                     v-bind="legalLinkProps(settings.imprint_url, '/imprint')"
-                    variant="plain"
-                    density="compact"
-                    class="footer-link-btn"
+                    variant="link"
+                    color="neutral"
+                    class="px-1.5 text-[13px] font-medium text-muted hover:text-highlighted"
                     data-testid="footer-imprint"
                 >
                     {{ $t('legal.imprint') }}
-                </v-btn>
+                </UButton>
 
                 <span v-if="settings.contact_email" class="link-sep">·</span>
 
-                <v-btn
+                <UButton
                     v-if="settings.contact_email"
                     :href="`mailto:${settings.contact_email}`"
-                    variant="plain"
-                    density="compact"
-                    class="footer-link-btn"
+                    variant="link"
+                    color="neutral"
+                    class="px-1.5 text-[13px] font-medium text-muted hover:text-highlighted"
                     data-testid="footer-contact"
                 >
                     {{ $t('settings.contactEmail') }}
-                </v-btn>
+                </UButton>
             </div>
 
             <!-- Center: status pills -->
@@ -59,7 +58,7 @@
                 </div>
 
                 <div class="status-pill">
-                    <v-icon size="11">mdi-account-multiple-outline</v-icon>
+                    <UIcon name="i-lucide-users" class="size-[11px]" />
                     <span class="status-label">{{
                         $t('dashboard.online', [onlineCount])
                     }}</span>
@@ -83,7 +82,7 @@
                             class="status-pill status-pill--link"
                             data-testid="footer-version"
                         >
-                            <v-icon size="11">mdi-tag-outline</v-icon>
+                            <UIcon name="i-lucide-tag" class="size-[11px]" />
                             <span class="status-label">{{
                                 appVersionLabel
                             }}</span>
@@ -94,18 +93,18 @@
 
             <!-- Right: copyright -->
             <div class="footer-right">
-                <v-btn
+                <UButton
                     href="https://github.com/gripello/gripello"
                     target="_blank"
-                    variant="plain"
-                    density="compact"
-                    class="footer-brand-btn"
+                    variant="link"
+                    color="neutral"
+                    class="text-[11.5px] font-medium text-muted hover:text-highlighted"
                 >
                     © {{ currentYear }} Gripello
-                </v-btn>
+                </UButton>
             </div>
         </div>
-    </v-footer>
+    </footer>
 </template>
 
 <script setup lang="ts">
@@ -134,7 +133,8 @@ const { isHealthy, onlineCount } = useAppStatus()
 .app-footer {
     flex: 0 0 auto;
     background: transparent;
-    border-top: 1px solid rgba(var(--v-border-color), 0.08);
+    border-top: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 8%, transparent);
     padding: 0;
 }
 
@@ -169,15 +169,16 @@ const { isHealthy, onlineCount } = useAppStatus()
     gap: 5px;
     padding: 2px 9px;
     border-radius: 999px;
-    background: rgba(var(--v-theme-on-surface), 0.05);
-    border: 1px solid rgba(var(--v-border-color), 0.08);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 5%, transparent);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 8%, transparent);
 }
 
 .status-label {
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.02em;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
     white-space: nowrap;
 }
 
@@ -189,13 +190,14 @@ const { isHealthy, onlineCount } = useAppStatus()
 }
 
 .dot--ok {
-    background: rgb(var(--v-theme-success));
-    box-shadow: 0 0 0 2px rgba(var(--v-theme-success), 0.2);
+    background: var(--ui-success);
+    box-shadow: 0 0 0 2px
+        color-mix(in oklab, var(--ui-success) 20%, transparent);
 }
 
 .dot--err {
-    background: rgb(var(--v-theme-error));
-    box-shadow: 0 0 0 2px rgba(var(--v-theme-error), 0.2);
+    background: var(--ui-error);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ui-error) 20%, transparent);
 }
 
 /* ── Right ──────────────────────────────────────────────── */
@@ -205,37 +207,11 @@ const { isHealthy, onlineCount } = useAppStatus()
 }
 
 /* ── Shared button styles ───────────────────────────────── */
-.footer-link-btn {
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(var(--v-theme-on-surface), 0.6);
-    text-transform: none;
-    min-width: unset;
-    padding: 0 6px;
-    letter-spacing: 0;
-}
-
-.footer-link-btn:hover {
-    color: rgba(var(--v-theme-on-surface), 0.9);
-}
 
 .link-sep {
     font-size: 13px;
-    color: rgba(var(--v-theme-on-surface), 0.35);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 35%, transparent);
     user-select: none;
-}
-
-.footer-brand-btn {
-    font-size: 11.5px;
-    font-weight: 500;
-    color: rgba(var(--v-theme-on-surface), 0.6);
-    text-transform: none;
-    min-width: unset;
-    letter-spacing: 0;
-}
-
-.footer-brand-btn:hover {
-    color: rgba(var(--v-theme-on-surface), 0.9);
 }
 
 .status-pill--link {
@@ -247,8 +223,12 @@ const { isHealthy, onlineCount } = useAppStatus()
 }
 
 .status-pill--link:hover {
-    background: rgba(var(--v-theme-on-surface), 0.09);
-    border-color: rgba(var(--v-border-color), 0.18);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 9%, transparent);
+    border-color: color-mix(
+        in oklab,
+        var(--ui-text-highlighted) 18%,
+        transparent
+    );
 }
 
 @media (max-width: 599px) {

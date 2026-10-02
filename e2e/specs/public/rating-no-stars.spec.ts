@@ -69,9 +69,9 @@ test('a new review cannot be submitted without stars', async ({
         await page.getByTestId('review-open-cta').click()
         await page.getByTestId('review-form-difficulty').click()
         await page.getByRole('option').first().click()
+        await expect(page.getByRole('listbox')).toBeHidden()
         await page
             .getByTestId('review-form-comment')
-            .locator('textarea')
             .first()
             .fill('Only words, no stars')
 

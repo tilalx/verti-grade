@@ -28,10 +28,7 @@ test('an edit landing after a new review does not duplicate the card', async ({
     try {
         const edited = await review('edited')
         await gotoSettled(page, '/manage/comments')
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(testPrefix)
+        await page.getByTestId('filter-search').fill(testPrefix)
         const editedCard = page.getByTestId(`comment-card-${edited.id}`)
         await expect(editedCard).toBeVisible()
 

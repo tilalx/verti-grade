@@ -4,10 +4,7 @@ import { uiaa } from '../../support/seed'
 
 test('shows no rows for a search with no matches', async ({ page }) => {
     await gotoSettled(page, '/routes')
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .fill('no-such-route-e2e-xyz')
+    await page.getByTestId('filter-search').fill('no-such-route-e2e-xyz')
     await expect(page.getByTestId('index-table')).not.toContainText(
         'e2e-route-',
     )
@@ -15,7 +12,7 @@ test('shows no rows for a search with no matches', async ({ page }) => {
 
 test('filters the route list by search text', async ({ page }) => {
     await gotoSettled(page, '/routes')
-    await page.getByTestId('filter-search').locator('input').fill('e2e-route-1')
+    await page.getByTestId('filter-search').fill('e2e-route-1')
     await expect(page.getByTestId('index-table')).toContainText('e2e-route-1')
 })
 
@@ -32,7 +29,6 @@ test('filters by grade, and every visible row actually matches', async ({
     const table = page.getByTestId('index-table')
     await page
         .getByTestId('filter-search')
-        .locator('input')
         .fill(five.name.replace(/-\d+$/, '-'))
     await expect(table.getByTestId(`index-row-${five.id}`)).toBeVisible()
     await expect(table.getByTestId(`index-row-${six.id}`)).toHaveCount(0)
@@ -40,7 +36,7 @@ test('filters by grade, and every visible row actually matches', async ({
 
 test('searches by setter name', async ({ page }) => {
     await gotoSettled(page, '/routes')
-    await page.getByTestId('filter-search').locator('input').fill('Setter 3')
+    await page.getByTestId('filter-search').fill('Setter 3')
     const rows = page
         .getByTestId('index-table')
         .getByRole('row')
@@ -57,7 +53,7 @@ test('combines a route name with a signed grade', async ({
     const route = await createRoute(uiaa('6+'))
 
     await gotoSettled(page, '/routes')
-    const search = page.getByTestId('filter-search').locator('input')
+    const search = page.getByTestId('filter-search')
     const exactRoute = page
         .getByTestId('index-table')
         .getByText(route.name, { exact: true })

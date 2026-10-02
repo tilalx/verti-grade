@@ -1,103 +1,117 @@
 <template>
-    <v-btn
-        icon
-        variant="text"
+    <UButton
+        icon="i-lucide-search"
+        color="neutral"
+        variant="ghost"
+        size="xl"
         data-testid="command-palette-open"
         :aria-label="`${$t('nav.commandPalette')} (${shortcutLabel})`"
         @click="open = true"
-    >
-        <v-icon>mdi-magnify</v-icon>
-    </v-btn>
+    />
 
-    <v-dialog
-        v-model="open"
-        max-width="600"
-        location="top"
-        class="command-palette"
-        :aria-label="$t('nav.commandPalette')"
-        data-testid="command-palette"
-        @after-enter="searchInput?.focus()"
-        @after-leave="query = ''"
+    <UModal
+        v-model:open="open"
+        :title="$t('nav.commandPalette')"
+        :ui="{
+            content:
+                'sm:max-w-[min(760px,calc(100vw-4rem))] rounded-xl sm:top-[10vh] sm:translate-y-0',
+        }"
+        @after:leave="query = ''"
     >
-        <v-card rounded="xl">
-            <v-text-field
-                ref="searchInput"
-                v-model="query"
-                hide-details
-                variant="solo"
-                flat
-                prepend-inner-icon="mdi-magnify"
-                :loading="searching"
-                :placeholder="$t('nav.commandPalettePlaceholder')"
-                :aria-label="$t('nav.commandPalettePlaceholder')"
-                data-testid="command-palette-input"
-                @keydown.down.prevent="moveActive(1)"
-                @keydown.up.prevent="moveActive(-1)"
-                @keydown.enter.prevent="choose(results[activeIndex])"
-            />
-            <v-divider />
+        <template #content>
+            <div data-testid="command-palette">
+                <UInput
+                    v-model="query"
+                    autofocus
+                    variant="none"
+                    size="xl"
+                    class="w-full"
+                    icon="i-lucide-search"
+                    :loading="searching"
+                    :placeholder="$t('nav.commandPalettePlaceholder')"
+                    :aria-label="$t('nav.commandPalettePlaceholder')"
+                    data-testid="command-palette-input"
+                    @keydown.down.prevent="moveActive(1)"
+                    @keydown.up.prevent="moveActive(-1)"
+                    @keydown.enter.prevent="choose(results[activeIndex])"
+                />
+                <USeparator />
 
-            <v-list
-                v-if="results.length"
-                ref="resultList"
-                density="compact"
-                nav
-                max-height="400"
-                class="py-2"
-            >
-                <template v-for="group in groups" :key="group.key">
-                    <v-list-subheader
-                        :data-testid="`command-palette-group-${group.key}`"
-                    >
-                        {{ $t(group.label) }}
-                    </v-list-subheader>
-                    <v-list-item
-                        v-for="result in group.items"
-                        :key="result.key"
-                        :active="result.index === activeIndex"
-                        :aria-current="
-                            result.index === activeIndex ? 'true' : undefined
-                        "
-                        :prepend-icon="result.icon"
-                        :title="result.title"
-                        :subtitle="result.subtitle"
-                        color="primary"
-                        rounded="lg"
-                        data-testid="command-palette-result"
-                        @click="choose(result)"
-                        @mousemove="activeIndex = result.index"
-                    >
-                        <template v-if="result.color" #prepend>
+                <div
+                    v-if="results.length"
+                    ref="resultList"
+                    class="max-h-[min(65vh,640px)] overflow-y-auto p-2"
+                >
+                    <template v-for="group in groups" :key="group.key">
+                        <div
+                            class="px-3 pt-2 pb-1 text-xs font-medium text-muted"
+                            :data-testid="`command-palette-group-${group.key}`"
+                        >
+                            {{ $t(group.label) }}
+                        </div>
+                        <button
+                            v-for="result in group.items"
+                            :key="result.key"
+                            type="button"
+                            class="palette-item"
+                            :class="{
+                                'is-active': result.index === activeIndex,
+                            }"
+                            :aria-current="
+                                result.index === activeIndex
+                                    ? 'true'
+                                    : undefined
+                            "
+                            data-testid="command-palette-result"
+                            @click="choose(result)"
+                            @mousemove="activeIndex = result.index"
+                        >
                             <span
-                                class="route-dot mr-4"
+                                v-if="result.color"
+                                class="route-dot"
                                 :style="{ background: result.color }"
                             />
-                        </template>
-                    </v-list-item>
-                </template>
-            </v-list>
+                            <UIcon
+                                v-else-if="result.icon"
+                                :name="result.icon"
+                                class="size-5 shrink-0"
+                            />
+                            <span class="min-w-0 flex-1 text-start">
+                                <span class="block truncate text-sm">{{
+                                    result.title
+                                }}</span>
+                                <span
+                                    v-if="result.subtitle"
+                                    class="block truncate text-xs text-muted"
+                                    >{{ result.subtitle }}</span
+                                >
+                            </span>
+                        </button>
+                    </template>
+                </div>
 
-            <div
-                v-else-if="!searching"
-                class="pa-6 text-center text-body-medium text-medium-emphasis"
-                data-testid="command-palette-empty"
-            >
-                {{ $t('nav.commandPaletteEmpty') }}
-            </div>
-
-            <v-divider />
-            <div
-                class="palette-footer d-flex flex-wrap ga-4 px-4 py-2 text-body-small text-medium-emphasis"
-            >
-                <span
-                    ><kbd>↑</kbd><kbd>↓</kbd>
-                    {{ $t('nav.paletteNavigate') }}</span
+                <div
+                    v-else-if="!searching"
+                    class="p-6 text-center text-sm text-muted"
+                    data-testid="command-palette-empty"
                 >
-                <span><kbd>↵</kbd> {{ $t('nav.paletteOpen') }}</span>
-                <span><kbd>Esc</kbd> {{ $t('nav.paletteClose') }}</span>
+                    {{ $t('nav.commandPaletteEmpty') }}
+                </div>
+
+                <USeparator />
+                <div
+                    class="palette-footer flex flex-wrap gap-4 px-4 py-2 text-xs text-muted"
+                >
+                    <span
+                        ><kbd>↑</kbd><kbd>↓</kbd>
+                        {{ $t('nav.paletteNavigate') }}</span
+                    >
+                    <span><kbd>↵</kbd> {{ $t('nav.paletteOpen') }}</span>
+                    <span><kbd>Esc</kbd> {{ $t('nav.paletteClose') }}</span>
+                </div>
             </div>
-        </v-card>
-    </v-dialog>
+        </template>
+    </UModal>
 </template>
 
 <script setup lang="ts">
@@ -114,8 +128,7 @@ const query = ref('')
 const activeIndex = ref(0)
 const searching = ref(false)
 const remoteGroups = ref<SearchGroup[]>([])
-const searchInput = useTemplateRef<{ focus: () => void }>('searchInput')
-const resultList = useTemplateRef<{ $el: HTMLElement }>('resultList')
+const resultList = useTemplateRef<HTMLElement>('resultList')
 const shortcutLabel = ref('Ctrl+K')
 
 const pageResults = computed<SearchResult[]>(() => {
@@ -173,8 +186,8 @@ watch(query, (value) => {
 
 watch(activeIndex, async () => {
     await nextTick()
-    resultList.value?.$el
-        .querySelector('.v-list-item--active')
+    resultList.value
+        ?.querySelector('.is-active')
         ?.scrollIntoView({ block: 'nearest' })
 })
 
@@ -208,8 +221,19 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.command-palette :deep(.v-overlay__content) {
-    margin-top: 12vh;
+.palette-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.palette-item.is-active {
+    color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 10%, transparent);
 }
 
 .route-dot {
@@ -217,7 +241,8 @@ onBeforeUnmount(() => {
     height: 14px;
     border-radius: 50%;
     flex-shrink: 0;
-    box-shadow: 0 0 0 1px rgba(var(--v-theme-on-surface), 0.2);
+    box-shadow: 0 0 0 1px
+        color-mix(in oklab, var(--ui-text-highlighted) 20%, transparent);
 }
 
 .palette-footer kbd {
@@ -225,7 +250,8 @@ onBeforeUnmount(() => {
     min-width: 20px;
     margin-right: 2px;
     padding: 0 4px;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.2);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 20%, transparent);
     border-radius: 4px;
     font-family: inherit;
     font-size: 0.7rem;

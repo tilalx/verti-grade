@@ -44,7 +44,8 @@
         "unknownUser": "Unknown User",
         "tabs": {
             "profile": "Profile",
-            "security": "Security"
+            "security": "Security",
+            "preferences": "Preferences"
         },
         "placeholders": {
             "firstname": "Jane",
@@ -139,7 +140,7 @@
         "mapEditor": "Map editor",
         "mapPlacement": "Place routes",
         "scan": "Scan",
-        "me": "Me",
+        "me": "More",
         "moreActions": "More actions",
         "selectedCount": "{n} selected",
         "list": "Routes"
@@ -244,6 +245,7 @@
         "routesFound": "Routes found: {n}",
         "create": "Create route",
         "color": "Color",
+        "customColor": "Custom color",
         "routename": "Route name",
         "difficulty": "Grade",
         "anchor_point": "Anchor",
@@ -518,6 +520,7 @@
             "purposes": {
                 "auth": "Keeps you signed in",
                 "colorScheme": "Remembers light or dark mode",
+                "sidebar": "Remembers whether the side navigation is expanded",
                 "exportColumns": "Remembers selected export columns",
                 "updateDismissed": "Remembers a dismissed update notice",
                 "inventorySession": "Keeps the progress of an inventory scan",
@@ -553,7 +556,8 @@
             "mapPlacement": "Place routes - Gripello",
             "scan": "Scan route - Gripello",
             "me": "My account - Gripello",
-            "overview": "Overview - Gripello"
+            "overview": "Overview - Gripello",
+            "accountSettings": "Settings - Gripello"
         },
         "content": {
             "settings": "Settings",
@@ -613,13 +617,16 @@
         "commandPaletteEmpty": "No results",
         "themeToggle": "Switch theme",
         "themeSystem": "System theme",
+        "themeSystemHint": "Follows your device setting",
         "themeLight": "Light theme",
         "themeDark": "Dark theme",
         "openMenu": "Open menu",
         "skipToContent": "Skip to content",
         "mainNavigation": "Main navigation",
+        "toggleSidebar": "Toggle sidebar",
         "userMenu": "User menu",
         "manage": "Manage",
+        "moderation": "Moderation",
         "admin": "Admin",
         "quickNavigation": "Quick navigation"
     },
@@ -746,7 +753,18 @@
         "boulderGradeSystem": "Boulder scale",
         "gradingHint": "Applies to newly set routes. Existing routes keep their scale until edited.",
         "allowRegistration": "Allow public registration",
-        "allowRegistrationHint": "Anyone can create a climber account without permissions. Requires a working mail server for email verification."
+        "allowRegistrationHint": "Anyone can create a climber account without permissions. Requires a working mail server for email verification.",
+        "description": "Manage your organization, branding, grading scales and legal information.",
+        "sections": "Settings sections",
+        "branding": "Branding",
+        "brandingHint": "Logos and icons shown in the app, the browser tab and on printed route labels.",
+        "organizationHint": "Name, contact and account options of your organization.",
+        "publicUrlsHint": "Addresses used for links, emails and QR codes.",
+        "assetHints": {
+            "logo": "PNG, JPG, SVG or WebP. Shown in the navigation bar.",
+            "icon": "ICO file shown in the browser tab.",
+            "sign": "PNG, JPG, SVG or WebP. Printed on route labels."
+        }
     },
     "errors": {
         "notFound": {
@@ -1185,5 +1203,19 @@
         "progress": "You have sent {sent} of {total} current routes.",
         "openLogbook": "Open logbook",
         "gradeSpread": "Grades on the wall"
+    },
+    "accountSettings": {
+        "title": "Settings",
+        "subtitle": "Manage your profile, preferences and security.",
+        "profileDescription": "How other people see you in the app.",
+        "avatar": "Avatar",
+        "avatarDescription": "JPG, PNG, SVG or WebP.",
+        "emailDescription": "Used to sign in and to receive notifications.",
+        "preferencesDescription": "Language and appearance of the app.",
+        "language": "Language",
+        "languageDescription": "Used for the interface and for emails you receive.",
+        "theme": "Theme",
+        "themeDescription": "Follow your system or pick a fixed theme.",
+        "passwordDescription": "Confirm your current password before choosing a new one."
     }
 }

@@ -82,7 +82,6 @@ test('a filter dims the routes that do not match', async ({
     await gotoSettled(page, `/map?location=${seeded.locationId}`)
     await page
         .getByTestId('map-filter-search')
-        .locator('input')
         .fill(`${testPrefix}-map-route-2`)
     await expect(
         page.locator('[data-testid="map-route-dot"][data-dimmed]'),

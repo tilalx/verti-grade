@@ -15,38 +15,38 @@
         </template>
 
         <template #title>
-            <v-icon size="20">mdi-tag-outline</v-icon>
+            <UIcon name="i-lucide-tag" class="size-[20px]" />
             {{ $t('notifications.releaseNotes.title') }}
         </template>
 
         <div
             v-if="loading"
-            class="d-flex justify-center py-8"
+            class="flex justify-center py-8"
             data-testid="release-notes-loading"
         >
-            <v-progress-circular
-                indeterminate
-                size="24"
-                width="2"
-                color="primary"
+            <UIcon
+                name="i-lucide-loader-circle"
+                class="size-6 animate-spin text-primary"
             />
         </div>
 
-        <v-alert
+        <UAlert
             v-else-if="error"
-            type="error"
+            color="error"
+            variant="soft"
+            icon="i-lucide-circle-alert"
+            :description="$t('notifications.releaseNotes.error')"
             data-testid="release-notes-error"
-        >
-            {{ $t('notifications.releaseNotes.error') }}
-        </v-alert>
+        />
 
-        <v-alert
+        <UAlert
             v-else-if="!notes && !commits.length"
-            type="info"
+            color="info"
+            variant="soft"
+            icon="i-lucide-info"
+            :description="$t('notifications.releaseNotes.notFound')"
             data-testid="release-notes-empty"
-        >
-            {{ $t('notifications.releaseNotes.notFound') }}
-        </v-alert>
+        />
 
         <template v-else>
             <section
@@ -54,15 +54,15 @@
                 class="mb-6"
                 data-testid="release-notes-commits"
             >
-                <div class="d-flex align-center ga-2 mb-2">
+                <div class="flex items-center gap-2 mb-2">
                     <span class="release-version">
                         {{
                             $t('notifications.releaseNotes.sinceRelease', [tag])
                         }}
                     </span>
-                    <v-chip size="x-small" variant="tonal" color="primary">
+                    <UBadge size="sm" variant="soft" color="primary">
                         {{ commits.length }}
-                    </v-chip>
+                    </UBadge>
                 </div>
                 <div
                     v-for="commit in parsedCommits"
@@ -112,49 +112,51 @@
             </section>
 
             <section v-if="notes" data-testid="release-notes-release">
-                <div class="d-flex align-center flex-wrap ga-2 mb-3">
+                <div class="flex items-center flex-wrap gap-2 mb-3">
                     <span class="release-version">{{ tag }}</span>
-                    <v-chip
+                    <UBadge
                         v-if="installed"
-                        size="x-small"
+                        size="sm"
                         color="success"
-                        variant="tonal"
+                        variant="soft"
                     >
                         {{ $t('notifications.releaseNotes.installed') }}
-                    </v-chip>
+                    </UBadge>
                     <span class="release-date">
                         {{ formatDate(publishedAt, { locale }) }}
                     </span>
-                    <v-spacer />
-                    <v-btn
+                    <div class="flex-1" />
+                    <UButton
                         v-if="repoUrl && tag"
                         :href="`${repoUrl}/releases/tag/${tag}`"
                         target="_blank"
                         rel="noopener"
-                        size="small"
-                        variant="text"
-                        append-icon="mdi-open-in-new"
+                        size="sm"
+                        color="neutral"
+                        variant="ghost"
+                        trailing-icon="i-lucide-external-link"
                     >
                         {{ $t('notifications.releaseNotes.viewOnGithub') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
                 <template v-if="release.changes.length">
-                    <v-chip-group
-                        v-model="category"
-                        mandatory
-                        selected-class="text-primary"
-                        class="mb-2"
-                    >
-                        <v-chip
+                    <div class="mb-2 flex flex-wrap gap-2">
+                        <UButton
                             v-for="filter in filters"
                             :key="filter.value"
-                            :value="filter.value"
-                            size="small"
-                            :variant="
-                                category === filter.value ? 'tonal' : 'outlined'
+                            size="sm"
+                            :color="
+                                category === filter.value
+                                    ? 'primary'
+                                    : 'neutral'
                             "
+                            :variant="
+                                category === filter.value ? 'soft' : 'outline'
+                            "
+                            :aria-pressed="category === filter.value"
                             :data-testid="`release-notes-filter-${filter.value}`"
+                            @click="category = filter.value"
                         >
                             {{
                                 $t(
@@ -162,8 +164,8 @@
                                 )
                             }}
                             <span class="filter-count">{{ filter.count }}</span>
-                        </v-chip>
-                    </v-chip-group>
+                        </UButton>
+                    </div>
 
                     <div
                         v-for="(change, index) in visibleChanges"
@@ -180,15 +182,15 @@
                             {{ change.type ?? '•' }}
                         </span>
                         <div class="change-text">
-                            <v-chip
+                            <UBadge
                                 v-if="change.breaking"
-                                size="x-small"
+                                size="sm"
                                 color="error"
-                                variant="flat"
-                                class="mr-1"
+                                variant="solid"
+                                class="me-1"
                             >
                                 {{ $t('notifications.releaseNotes.breaking') }}
-                            </v-chip>
+                            </UBadge>
                             <b v-if="change.scope">{{ change.scope }}:</b>
                             {{ change.subject }}
                             <div class="change-meta">
@@ -309,13 +311,13 @@ const changelog = computed(() =>
 
 .release-date {
     font-size: 12px;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
 }
 
 .release-body {
     white-space: pre-wrap;
     font-size: 13px;
-    color: rgba(var(--v-theme-on-surface), 0.75);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 75%, transparent);
     word-break: break-word;
 }
 
@@ -330,7 +332,8 @@ const changelog = computed(() =>
     align-items: flex-start;
     gap: 10px;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+    border-bottom: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 6%, transparent);
     font-size: 13px;
 }
 
@@ -346,39 +349,39 @@ const changelog = computed(() =>
     font-weight: 600;
     text-align: center;
     text-transform: lowercase;
-    background: rgba(var(--v-theme-on-surface), 0.07);
-    color: rgba(var(--v-theme-on-surface), 0.7);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 7%, transparent);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 70%, transparent);
 }
 
 .change-type--feat {
-    background: rgba(var(--v-theme-primary), 0.14);
-    color: rgb(var(--v-theme-primary));
+    background: color-mix(in oklab, var(--ui-primary) 14%, transparent);
+    color: var(--ui-primary);
 }
 
 .change-type--fix {
-    background: rgba(var(--v-theme-error), 0.12);
-    color: rgb(var(--v-theme-error));
+    background: color-mix(in oklab, var(--ui-error) 12%, transparent);
+    color: var(--ui-error);
 }
 
 .change-type--deps {
-    background: rgba(var(--v-theme-on-surface), 0.05);
-    color: rgba(var(--v-theme-on-surface), 0.5);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 5%, transparent);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
 }
 
 .change-text {
     flex: 1;
     min-width: 0;
     word-break: break-word;
-    color: rgba(var(--v-theme-on-surface), 0.87);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 87%, transparent);
 }
 
 .change-meta {
     font-size: 12px;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
 }
 
 .change-link {
-    color: rgb(var(--v-theme-primary));
+    color: var(--ui-primary);
     text-decoration: none;
 }
 
@@ -389,9 +392,10 @@ const changelog = computed(() =>
 .release-footer {
     margin-top: 12px;
     padding-top: 8px;
-    border-top: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+    border-top: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 6%, transparent);
     font-size: 12px;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
 }
 
 .mono {

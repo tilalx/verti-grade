@@ -15,7 +15,8 @@ test('climbers see their account without staff links', async ({
     await expect(page.getByTestId('me-name')).toBeVisible()
     await expect(page.locator('[data-testid^="me-staff-"]')).toHaveCount(0)
     await page.getByTestId('me-profile').click()
-    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.waitForURL(/\/account\/settings$/)
+    await expect(page.getByTestId('profile-firstname')).toBeVisible()
 })
 
 test('on phones staff get the pages their role allows', async ({

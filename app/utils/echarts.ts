@@ -61,26 +61,16 @@ export const gridBase = {
     containLabel: true,
 }
 
-function readCssVar(variable: string) {
-    if (typeof window === 'undefined') return ''
-    return getComputedStyle(document.documentElement)
-        .getPropertyValue(variable)
-        .trim()
-}
-
 export function readChartColors(isDark: boolean): ChartColors {
-    const onSurface =
-        readCssVar('--v-theme-on-surface') ||
-        (isDark ? '236 236 236' : '18 18 18')
-    const surface =
-        readCssVar('--v-theme-surface') || (isDark ? '30 30 30' : '255 255 255')
+    const onSurface = isDark ? '221, 221, 221' : '23, 23, 23'
+    const surface = isDark ? '22, 27, 34' : '255, 255, 255'
 
     return {
-        labelColor: `rgba(${onSurface}, 0.45)`,
+        labelColor: `rgba(${onSurface}, 0.7)`,
         gridColor: `rgba(${onSurface}, 0.08)`,
         tooltipBg: `rgba(${surface}, 0.96)`,
         tooltipText: `rgba(${onSurface}, 0.9)`,
-        tooltipMuted: `rgba(${onSurface}, 0.45)`,
+        tooltipMuted: `rgba(${onSurface}, 0.65)`,
         tooltipBorder: `rgba(${onSurface}, 0.1)`,
     }
 }

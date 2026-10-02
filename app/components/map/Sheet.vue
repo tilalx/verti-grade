@@ -166,19 +166,18 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: rgb(var(--v-theme-surface));
-    color: rgb(var(--v-theme-on-surface));
+    background: var(--ui-bg);
+    color: var(--ui-text-highlighted);
 }
 
 .map-sheet--side {
     width: 380px;
     flex-shrink: 0;
-    border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border-left: 1px solid var(--ui-border);
 }
 
 .map-sheet--side .map-sheet__header {
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    border-bottom: 1px solid var(--ui-border);
 }
 
 .map-sheet--bottom {
@@ -220,11 +219,15 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
     height: 4px;
     margin: 8px auto;
     border-radius: 2px;
-    background: rgba(var(--v-theme-on-surface), 0.3);
+    background: color-mix(
+        in oklab,
+        var(--ui-text-highlighted) 30%,
+        transparent
+    );
 }
 
 .map-sheet__handle:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
+    outline: 2px solid var(--ui-primary);
     outline-offset: -2px;
 }
 

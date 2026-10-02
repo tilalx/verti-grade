@@ -33,10 +33,7 @@ test('loading more after deletes still reaches every review', async ({
         }
 
         await gotoSettled(page, '/manage/comments')
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(testPrefix)
+        await page.getByTestId('filter-search').fill(testPrefix)
         const showing = page.getByTestId('comments-showing')
         await expect(showing).toHaveText('Showing 48 of 60 reviews')
 

@@ -12,7 +12,7 @@ test('switching to another route via the command palette shows that route', asyn
     await expect(page.getByTestId('route-page-name')).toHaveText(first.name)
 
     await page.getByTestId('command-palette-open').click()
-    const input = page.getByTestId('command-palette-input').locator('input')
+    const input = page.getByTestId('command-palette-input')
     await input.fill(second.name)
     await expect(
         page.getByTestId('command-palette-result').first(),

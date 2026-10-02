@@ -16,23 +16,16 @@ test('tells the admin no invite was sent when mail is not configured', async ({
 
     await gotoSettled(page, '/')
     await page.getByTestId('command-palette-open').click()
-    await page
-        .getByTestId('command-palette-input')
-        .locator('input')
-        .fill('Users')
+    await page.getByTestId('command-palette-input').fill('Users')
     await page.getByTestId('command-palette-result').first().click()
     await page.waitForURL('**/admin/users')
 
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-mail-warning')).toBeVisible()
-    await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
-    await page
-        .getByTestId('user-create-lastname')
-        .locator('input')
-        .fill('NoMail')
+    await page.getByTestId('user-create-firstname').fill('E2E')
+    await page.getByTestId('user-create-lastname').fill('NoMail')
     await page
         .getByTestId('user-create-email')
-        .locator('input')
         .fill(`${testPrefix}-nomail@gripello.test`)
     await page.getByTestId('user-create-submit').click()
 

@@ -11,25 +11,25 @@ defineProps<{
 </script>
 
 <template>
-    <v-card v-if="ratings?.length" class="my-4" border flat>
-        <v-card-title class="text-body-large">
+    <div v-if="ratings?.length" class="my-4 rounded-lg border bg-default">
+        <div class="px-4 pt-3 pb-1 text-base font-semibold">
             {{ $t('importRoutes.ratingsFor', { name }) }}
-        </v-card-title>
-        <v-list density="compact">
-            <v-list-item v-for="(rating, i) in ratings" :key="i">
-                <v-list-item-title>
+        </div>
+        <ul class="py-1">
+            <li v-for="(rating, i) in ratings" :key="i" class="px-4 py-1.5">
+                <div class="text-sm">
                     <strong>{{ $t('importRoutes.ratingLabel') }}:</strong>
                     {{ rating.rating }}/5,
                     <strong>{{ $t('importRoutes.difficultyLabel') }}:</strong>
                     {{ rating.grade ?? rating.difficulty }}
-                </v-list-item-title>
-                <v-list-item-subtitle>
+                </div>
+                <div class="text-sm text-muted">
                     {{ rating.comment || $t('importRoutes.noComment') }}
-                </v-list-item-subtitle>
-            </v-list-item>
-        </v-list>
-    </v-card>
-    <p v-else class="text-center pa-4 text-body-medium text-medium-emphasis">
+                </div>
+            </li>
+        </ul>
+    </div>
+    <p v-else class="text-center p-4 text-sm text-muted">
         {{ $t('importRoutes.noRatings') }}
     </p>
 </template>

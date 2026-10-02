@@ -1,21 +1,16 @@
 <template>
-    <v-card
-        variant="tonal"
-        class="list-card route-card"
+    <div
+        class="list-card route-card rounded-lg bg-elevated"
         :data-testid="`route-card-${route.id}`"
     >
-        <!-- Header: [checkbox?] avatar · name + badges · difficulty -->
         <div class="list-card__header">
-            <v-checkbox
+            <UCheckbox
                 v-if="selectable"
                 :model-value="modelValue"
-                color="primary"
-                hide-details
-                density="compact"
                 class="list-card__checkbox"
                 :aria-label="$t('common.selectItem', { name: route.name })"
                 data-testid="route-card-checkbox"
-                @update:modelValue="$emit('update:modelValue', !!$event)"
+                @update:model-value="$emit('update:modelValue', !!$event)"
             />
             <RouteColorDot :color="route.color" :ticked="ticked" :size="32" />
             <div class="list-card__title">
@@ -26,18 +21,18 @@
                     v-if="route.has_ratings || route.archived"
                     class="route-card__badges"
                 >
-                    <v-icon
+                    <UIcon
+                        name="i-lucide-badge-check"
+                        class="size-[14px] text-amber-500"
                         v-if="route.has_ratings"
-                        color="yellow-darken-2"
-                        size="14"
-                        >mdi-star-circle</v-icon
-                    >
-                    <v-chip
+                    />
+                    <UBadge
                         v-if="route.archived"
-                        size="x-small"
-                        variant="outlined"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
                         class="ml-1"
-                        >{{ $t('filter.archived') }}</v-chip
+                        >{{ $t('filter.archived') }}</UBadge
                     >
                 </span>
             </div>
@@ -48,51 +43,50 @@
             />
         </div>
 
-        <v-divider />
+        <USeparator />
 
-        <!-- Compact meta section -->
         <div class="list-card__meta">
-            <!-- Comment -->
             <div
                 v-if="route.comment"
                 class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="list-card__meta-icon"
-                    >mdi-comment-text-outline</v-icon
-                >
+                <UIcon
+                    name="i-lucide-message-square-text"
+                    class="list-card__meta-icon size-[15px]"
+                />
                 <span class="route-card__comment">{{ route.comment }}</span>
             </div>
 
-            <!-- Creators -->
             <div
                 v-if="route.creator?.length"
                 class="list-card__meta-row list-card__meta-row--full"
             >
-                <v-icon size="15" class="list-card__meta-icon"
-                    >mdi-account-hard-hat-outline</v-icon
-                >
-                <div class="d-flex flex-wrap ga-1">
-                    <v-chip
+                <UIcon
+                    name="i-lucide-hard-hat"
+                    class="list-card__meta-icon size-[15px]"
+                />
+                <div class="flex flex-wrap gap-1">
+                    <UBadge
                         v-for="c in route.creator"
                         :key="c"
-                        size="x-small"
-                        class="ma-0"
-                        >{{ c }}</v-chip
+                        size="sm"
+                        color="neutral"
+                        variant="soft"
+                        >{{ c }}</UBadge
                     >
                 </div>
             </div>
 
-            <!-- Inline pills: anchor · date · location · type · score -->
             <div class="list-card__pills">
                 <span v-if="anchorPoint !== '—'" class="list-card__pill">
                     {{ $t('climbing.anchor_point') }} {{ anchorPoint }}
                 </span>
                 <span v-if="screwDate" class="list-card__pill">
-                    <v-icon size="13">mdi-calendar-month-outline</v-icon>
+                    <UIcon name="i-lucide-calendar-days" class="size-[13px]" />
                     {{ screwDate }}
                 </span>
                 <span v-if="locationName(route)" class="list-card__pill">
-                    <v-icon size="13">mdi-map-marker-outline</v-icon>
+                    <UIcon name="i-lucide-map-pin" class="size-[13px]" />
                     {{ locationName(route) }}
                 </span>
                 <span
@@ -100,7 +94,7 @@
                     class="list-card__pill"
                     data-testid="route-card-wall"
                 >
-                    <v-icon size="13">mdi-wall</v-icon>
+                    <UIcon name="i-lucide-brick-wall" class="size-[13px]" />
                     {{ wallName(route) }}
                 </span>
                 <span
@@ -108,21 +102,23 @@
                     class="list-card__pill"
                     data-testid="route-card-type"
                 >
-                    <v-icon size="13">mdi-shape</v-icon>
+                    <UIcon name="i-lucide-shapes" class="size-[13px]" />
                     {{ $t(`routes.types.${route.type.toLowerCase()}`) }}
                 </span>
                 <span v-if="hasScore" class="list-card__pill">
-                    <v-icon size="13">mdi-star</v-icon>
+                    <UIcon name="i-lucide-star" class="size-[13px]" />
                     {{ score }}
                 </span>
             </div>
         </div>
 
-        <v-card-actions v-if="$slots.actions" class="list-card__actions">
-            <v-spacer />
+        <div
+            v-if="$slots.actions"
+            class="list-card__actions flex items-center justify-end gap-2"
+        >
             <slot name="actions" />
-        </v-card-actions>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -177,7 +173,7 @@ const score = computed(() => formatScore(props.route, locale.value))
     font-size: 1.4rem;
     font-weight: 700;
     line-height: 1;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
     flex-shrink: 0;
 }
 
@@ -189,7 +185,7 @@ const score = computed(() => formatScore(props.route, locale.value))
 
 .route-card__comment {
     font-size: 0.8rem;
-    color: rgba(var(--v-theme-on-surface), 0.7);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 70%, transparent);
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;

@@ -3,25 +3,23 @@ import { gotoSettled } from '../../support/nav'
 import { SETTINGS_ID } from '../../support/state-snapshot'
 
 test('updates organization settings', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=organization')
 
     const value = `E2E Org ${Date.now()}`
-    await page.getByTestId('settings-org-name').locator('input').fill(value)
+    await page.getByTestId('settings-org-name').fill(value)
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
-    await gotoSettled(page, '/admin/settings')
-    await expect(
-        page.getByTestId('settings-org-name').locator('input'),
-    ).toHaveValue(value)
+    await gotoSettled(page, '/admin/settings?section=organization')
+    await expect(page.getByTestId('settings-org-name')).toHaveValue(value)
 })
 
 test('shows an error and keeps the form open when save fails', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=organization')
 
-    const orgName = page.getByTestId('settings-org-name').locator('input')
+    const orgName = page.getByTestId('settings-org-name')
     const original = `E2E Baseline ${Date.now()}`
     await orgName.fill(original)
     await page.getByTestId('settings-save').click()
@@ -31,10 +29,7 @@ test('shows an error and keeps the form open when save fails', async ({
         route.abort('failed'),
     )
 
-    await page
-        .getByTestId('settings-org-name')
-        .locator('input')
-        .fill(`E2E Fail ${Date.now()}`)
+    await page.getByTestId('settings-org-name').fill(`E2E Fail ${Date.now()}`)
     await page.getByTestId('settings-save').click()
 
     await expect(
@@ -45,41 +40,35 @@ test('shows an error and keeps the form open when save fails', async ({
     await expect(page.getByTestId('settings-save')).toBeVisible()
 
     await page.unroute('**/api/collections/settings/records/**')
-    await gotoSettled(page, '/admin/settings')
-    await expect(
-        page.getByTestId('settings-org-name').locator('input'),
-    ).toHaveValue(original)
+    await gotoSettled(page, '/admin/settings?section=organization')
+    await expect(page.getByTestId('settings-org-name')).toHaveValue(original)
 })
 
 test('legal fields feed the built-in imprint page', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=urls')
+    await page.getByTestId('settings-imprint-url').fill('')
+    await page.getByTestId('settings-privacy-url').fill('')
+    if (await page.getByTestId('settings-save').isVisible()) {
+        await page.getByTestId('settings-save').click()
+        await expect(page.getByTestId('settings-save')).toBeHidden()
+    }
 
+    await gotoSettled(page, '/admin/settings?section=legal')
     const address = `E2E Street ${Date.now()}\n12345 City`
-    await page.getByTestId('settings-imprint-url').locator('input').fill('')
-    await page.getByTestId('settings-privacy-url').locator('input').fill('')
-    await page
-        .getByTestId('settings-legal-address')
-        .locator('textarea')
-        .first()
-        .fill(address)
+    await page.getByTestId('settings-legal-address').first().fill(address)
     await page.getByTestId('settings-legal-add-representative').click()
     const representative = page
         .getByTestId('settings-legal-representative')
         .last()
     await representative
         .getByTestId('settings-legal-representative-name')
-        .locator('input')
         .fill('E2E Representative')
     await representative
         .getByTestId('settings-legal-representative-role')
-        .locator('input')
         .fill('Chair')
-    await page
-        .getByTestId('settings-legal-vat-id')
-        .locator('input')
-        .fill('DE123456789')
+    await page.getByTestId('settings-legal-vat-id').fill('DE123456789')
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
@@ -105,13 +94,10 @@ test('legal fields feed the built-in imprint page', async ({
 test('external legal URLs override the built-in pages', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=urls')
 
     const imprintUrl = 'https://example.com/imprint'
-    await page
-        .getByTestId('settings-imprint-url')
-        .locator('input')
-        .fill(imprintUrl)
+    await page.getByTestId('settings-imprint-url').fill(imprintUrl)
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
@@ -125,8 +111,8 @@ test('external legal URLs override the built-in pages', async ({
         '/privacy',
     )
 
-    await gotoSettled(page, '/admin/settings')
-    await page.getByTestId('settings-imprint-url').locator('input').fill('')
+    await gotoSettled(page, '/admin/settings?section=urls')
+    await page.getByTestId('settings-imprint-url').fill('')
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 })
@@ -141,7 +127,7 @@ test('removing a representative marks the form dirty and saves', async ({
             { name: 'E2E Drop', role: 'Treasurer' },
         ],
     })
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=legal')
 
     const rows = page.getByTestId('settings-legal-representative')
     await expect(rows).toHaveCount(2)
@@ -155,9 +141,9 @@ test('removing a representative marks the form dirty and saves', async ({
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=legal')
     await expect(rows).toHaveCount(1)
     await expect(
-        rows.getByTestId('settings-legal-representative-name').locator('input'),
+        rows.getByTestId('settings-legal-representative-name'),
     ).toHaveValue('E2E Keep')
 })

@@ -116,6 +116,12 @@ const onDrop = (targetKey: string) => {
     dragKey.value = null
 }
 
+function toggleIn<T>(list: T[], key: T, checked: boolean) {
+    return checked
+        ? [...list.filter((entry) => entry !== key), key]
+        : list.filter((entry) => entry !== key)
+}
+
 const toggleAll = () => {
     selected.value = allSelected.value ? [] : [...DEFAULT_ORDER]
 }
@@ -175,34 +181,37 @@ const confirm = async () => {
         :title="$t(format === 'pdf' ? 'export.title_pdf' : 'export.title')"
         data-testid="export-options-dialog"
     >
-        <v-select
-            v-model="exportLocale"
-            :items="localeItems"
-            :label="$t('export.language')"
-            density="compact"
-            class="mb-2"
-            data-testid="export-locale"
-        />
-        <template v-if="format === 'pdf'">
-            <v-checkbox
+        <UFormField :label="$t('export.language')" class="mb-4">
+            <USelect
+                v-model="exportLocale"
+                :items="localeItems"
+                label-key="title"
+                class="w-full"
+                data-testid="export-locale"
+            />
+        </UFormField>
+        <div v-if="format === 'pdf'" class="flex flex-col gap-3">
+            <UCheckbox
                 v-for="field in PDF_FIELDS"
                 :key="field.key"
-                v-model="pdfFields"
+                :model-value="pdfFields.includes(field.key)"
                 :value="field.key"
                 :label="$t(field.labelKey)"
-                density="compact"
-                hide-details
                 :data-testid="`export-show-${field.key}`"
+                @update:model-value="
+                    pdfFields = toggleIn(pdfFields, field.key, !!$event)
+                "
             />
-        </template>
+        </div>
         <template v-else>
-            <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-medium text-medium-emphasis">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-sm text-muted">
                     {{ $t('export.columns') }}
                 </span>
-                <v-btn
-                    variant="text"
-                    size="small"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
                     data-testid="export-toggle-all"
                     @click="toggleAll"
                 >
@@ -211,42 +220,47 @@ const confirm = async () => {
                             ? $t('actions.deselect_all')
                             : $t('actions.select_all')
                     }}
-                </v-btn>
+                </UButton>
             </div>
             <div
                 v-for="(column, index) in orderedColumns"
                 :key="column.key"
-                class="export-column d-flex align-center"
+                class="export-column flex items-center"
                 draggable="true"
                 :data-testid="`export-column-${column.key}`"
                 @dragstart="dragKey = column.key"
                 @dragover.prevent
                 @drop.prevent="onDrop(column.key)"
             >
-                <v-icon class="export-column__handle" size="small">
-                    mdi-drag-horizontal-variant
-                </v-icon>
-                <v-checkbox
-                    v-model="selected"
+                <UIcon
+                    name="i-lucide-grip-horizontal"
+                    class="export-column__handle size-4"
+                />
+                <UCheckbox
+                    :model-value="selected.includes(column.key)"
                     :value="column.key"
                     :label="$t(column.labelKey)"
-                    density="compact"
-                    hide-details
+                    class="py-2"
+                    @update:model-value="
+                        selected = toggleIn(selected, column.key, !!$event)
+                    "
                 />
-                <v-spacer />
-                <v-btn
-                    icon="mdi-chevron-up"
-                    variant="text"
-                    size="small"
+                <div class="flex-1" />
+                <UButton
+                    icon="i-lucide-chevron-up"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
                     :disabled="index === 0"
                     :aria-label="$t('export.move_up')"
                     :data-testid="`export-move-up-${column.key}`"
                     @click="move(column.key, -1)"
                 />
-                <v-btn
-                    icon="mdi-chevron-down"
-                    variant="text"
-                    size="small"
+                <UButton
+                    icon="i-lucide-chevron-down"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
                     :disabled="index === orderedColumns.length - 1"
                     :aria-label="$t('export.move_down')"
                     :data-testid="`export-move-down-${column.key}`"
@@ -255,18 +269,18 @@ const confirm = async () => {
             </div>
         </template>
         <template #actions>
-            <v-btn variant="text" @click="open = false">
+            <UButton color="neutral" variant="ghost" @click="open = false">
                 {{ $t('actions.cancel') }}
-            </v-btn>
-            <v-spacer />
-            <v-btn
+            </UButton>
+            <div class="flex-1" />
+            <UButton
                 color="primary"
                 :disabled="format === 'xlsx' && !selected.length"
                 data-testid="export-confirm"
                 @click="confirm"
             >
                 {{ $t('actions.export') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>

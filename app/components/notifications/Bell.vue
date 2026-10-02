@@ -1,121 +1,106 @@
 <template>
-    <v-menu
-        v-model="open"
-        :close-on-content-click="false"
-        location="bottom end"
-        offset="8"
+    <UPopover
+        v-model:open="open"
+        :content="{ align: 'end', side: 'bottom', sideOffset: 8 }"
     >
-        <template #activator="{ props: activatorProps }">
-            <v-btn
-                v-bind="activatorProps"
-                icon
-                variant="text"
-                size="small"
-                :class="['nav-bell', { 'nav-bell--active': unreadCount }]"
-                :aria-label="$t('notifications.center.title')"
-                data-testid="notification-bell"
-            >
-                <v-badge
-                    :model-value="unreadCount > 0"
-                    color="error"
-                    offset-x="-2"
-                    offset-y="-2"
-                >
-                    <template #badge>
-                        <span data-testid="notification-badge">{{
-                            unreadCount
-                        }}</span>
-                    </template>
-                    <v-icon size="20">mdi-bell-outline</v-icon>
-                </v-badge>
-            </v-btn>
-        </template>
-
-        <v-card
-            width="360"
-            max-width="calc(100vw - 24px)"
-            data-testid="notification-menu"
+        <UButton
+            color="neutral"
+            variant="ghost"
+            size="xl"
+            square
+            :aria-label="$t('notifications.center.title')"
+            data-testid="notification-bell"
         >
+            <UChip
+                :show="unreadCount > 0"
+                color="error"
+                size="3xl"
+                :ui="{ base: 'px-1 py-2 text-[10px]' }"
+            >
+                <template #content>
+                    <span data-testid="notification-badge">{{
+                        unreadCount
+                    }}</span>
+                </template>
+                <UIcon name="i-lucide-bell" class="size-6" />
+            </UChip>
+        </UButton>
+
+        <template #content>
             <div
-                class="d-flex align-center justify-space-between px-4 py-3 ga-2"
+                class="w-[360px] max-w-[calc(100vw-24px)]"
+                data-testid="notification-menu"
             >
-                <span class="text-title-small font-weight-bold">
-                    {{ $t('notifications.center.title') }}
-                </span>
-                <v-btn
-                    v-if="unreadCount"
-                    variant="text"
-                    size="small"
-                    class="text-none"
-                    data-testid="notification-mark-all"
-                    @click="markAllRead"
-                >
-                    {{ $t('notifications.center.markAllRead') }}
-                </v-btn>
-            </div>
+                <div class="flex items-center justify-between px-4 py-3 gap-2">
+                    <span class="text-sm font-bold">
+                        {{ $t('notifications.center.title') }}
+                    </span>
+                    <UButton
+                        v-if="unreadCount"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        data-testid="notification-mark-all"
+                        @click="markAllRead"
+                    >
+                        {{ $t('notifications.center.markAllRead') }}
+                    </UButton>
+                </div>
 
-            <v-divider />
+                <USeparator />
 
-            <v-list
-                density="compact"
-                max-height="400"
-                class="notification-list"
-            >
-                <v-list-item
-                    v-if="!items.length"
-                    data-testid="notification-empty"
-                >
-                    <v-list-item-title
-                        class="text-body-medium text-medium-emphasis"
+                <ul class="max-h-[400px] overflow-y-auto py-1">
+                    <li
+                        v-if="!items.length"
+                        class="px-4 py-2 text-sm text-muted"
+                        data-testid="notification-empty"
                     >
                         {{ $t('notifications.center.empty') }}
-                    </v-list-item-title>
-                </v-list-item>
+                    </li>
 
-                <v-list-item
-                    v-for="item in items"
-                    :key="item.id"
-                    :class="{ 'notification-item--unread': !item.read }"
-                    :data-testid="`notification-item-${item.id}`"
-                    @click="openItem(item)"
-                >
-                    <template #prepend>
-                        <v-icon
-                            size="18"
-                            :color="item.read ? 'medium-emphasis' : 'primary'"
-                        >
-                            {{
-                                item.read ? 'mdi-circle-outline' : 'mdi-circle'
-                            }}
-                        </v-icon>
-                    </template>
-
-                    <v-list-item-title
-                        class="text-body-medium notification-item__title"
+                    <li
+                        v-for="item in items"
+                        :key="item.id"
+                        role="button"
+                        tabindex="0"
+                        :class="[
+                            'notification-item flex cursor-pointer items-center gap-3 px-4 py-2',
+                            { 'notification-item--unread': !item.read },
+                        ]"
+                        :data-testid="`notification-item-${item.id}`"
+                        @click="openItem(item)"
+                        @keydown.enter.self="openItem(item)"
                     >
-                        {{ label(item) }}
-                    </v-list-item-title>
-                    <v-list-item-subtitle class="text-body-small">
-                        {{ timeAgo(item.created, $t, locale) }}
-                    </v-list-item-subtitle>
-
-                    <template #append>
-                        <v-btn
-                            icon
-                            size="x-small"
-                            variant="text"
+                        <UIcon
+                            name="i-lucide-circle"
+                            :class="[
+                                'size-[18px] shrink-0',
+                                item.read ? 'text-muted' : 'text-primary',
+                            ]"
+                        />
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm notification-item__title">
+                                {{ label(item) }}
+                            </div>
+                            <div class="text-xs text-muted">
+                                {{ timeAgo(item.created, $t, locale) }}
+                            </div>
+                        </div>
+                        <UButton
+                            icon="i-lucide-x"
+                            size="xs"
+                            color="neutral"
+                            variant="ghost"
                             :aria-label="$t('notifications.center.dismiss')"
                             :title="$t('notifications.center.dismiss')"
                             data-testid="notification-dismiss"
                             @click.stop="dismiss(item.id)"
-                        >
-                            <v-icon size="16">mdi-close</v-icon>
-                        </v-btn>
-                    </template>
-                </v-list-item>
-            </v-list>
-        </v-card>
-    </v-menu>
+                        />
+                    </li>
+                </ul>
+            </div>
+        </template>
+    </UPopover>
 </template>
 
 <script setup lang="ts">
@@ -151,17 +136,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.nav-bell {
-    opacity: 0.8;
-}
-
-.nav-bell:hover,
-.nav-bell--active {
-    opacity: 1;
+.notification-item:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
 .notification-item--unread {
-    background: rgba(var(--v-theme-primary), 0.06);
+    background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
 }
 
 .notification-item__title {

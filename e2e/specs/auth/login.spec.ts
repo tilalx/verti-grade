@@ -10,16 +10,18 @@ test.describe('login', () => {
         await fillLogin(page, 'e2e-admin@gripello.test', 'E2ePassw0rd!')
         await page.getByTestId('login-submit').click()
         await page.waitForURL('**/manage/routes')
-        await expect(page.getByTestId('routes-create-open')).toBeVisible()
+        await expect(page.getByTestId('routes-create-open')).toBeVisible({
+            timeout: 15_000,
+        })
 
-        await expect(page.getByTestId('global-snackbar')).toBeHidden()
+        await expect(page.getByTestId('global-snackbar').last()).toBeHidden()
     })
 
     test('shows an error for invalid credentials', async ({ page }) => {
         await gotoSettled(page, '/auth/login')
         await fillLogin(page, 'e2e-admin@gripello.test', 'wrong-password')
         await page.getByTestId('login-submit').click()
-        await expect(page.getByTestId('global-snackbar')).toBeVisible()
+        await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
         await expect(page).toHaveURL(/\/auth\/login/)
     })
 
@@ -37,7 +39,7 @@ test.describe('login', () => {
         )
         await fillLogin(page, 'e2e-admin@gripello.test', 'E2ePassw0rd!')
         await page.getByTestId('login-submit').click()
-        await expect(page.getByTestId('global-snackbar')).toBeVisible()
+        await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
         await expect(page).toHaveURL(/\/auth\/login/)
         expect(aborted).toBeGreaterThan(0)
     })

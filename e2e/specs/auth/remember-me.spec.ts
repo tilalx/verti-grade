@@ -6,10 +6,7 @@ import { gotoSettled } from '../../support/nav'
 async function signIn(page: Page, rememberMe: boolean) {
     await gotoSettled(page, '/auth/login')
     await fillLogin(page, 'e2e-user@gripello.test', 'E2ePassw0rd!')
-    await page
-        .getByTestId('login-remember-me')
-        .locator('input')
-        .setChecked(rememberMe)
+    await page.getByTestId('login-remember-me').setChecked(rememberMe)
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 }

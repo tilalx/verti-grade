@@ -177,7 +177,6 @@ test('deciding a report notifies the other moderators exactly once', async ({
     await card.getByTestId('report-card-keep').click()
     await page
         .getByTestId('report-decision-reason')
-        .locator('textarea')
         .first()
         .fill('Reviewed, no rule broken.')
 

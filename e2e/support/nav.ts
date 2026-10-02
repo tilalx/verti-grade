@@ -41,6 +41,6 @@ export async function searchRoutes(page: Page, text: string) {
             response.url().includes('/api/collections/averageRating/records') &&
             decodeURIComponent(response.url()).includes(`name ~ "${text}"`),
     )
-    await page.getByTestId('filter-search').locator('input').fill(text)
+    await page.getByTestId('filter-search').fill(text)
     await filtered
 }

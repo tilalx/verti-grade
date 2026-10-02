@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import EmptyState from '~/components/layout/EmptyState.vue'
 
-const iconStub = { props: ['icon'], template: '<i :data-icon="icon" />' }
+const iconStub = { props: ['name'], template: '<i :data-icon="name" />' }
 
 function createWrapper(
     props: Record<string, unknown> = {},
@@ -10,7 +10,7 @@ function createWrapper(
     return mount(EmptyState, {
         props: { title: 'Nothing here', ...props },
         slots,
-        global: { stubs: { 'v-icon': iconStub } },
+        global: { stubs: { UIcon: iconStub } },
     })
 }
 
@@ -20,7 +20,7 @@ describe('EmptyState', () => {
 
         expect(wrapper.attributes('role')).toBeUndefined()
         expect(wrapper.find('i').attributes('data-icon')).toBe(
-            'mdi-magnify-remove-outline',
+            'i-lucide-search-x',
         )
         expect(wrapper.find('.empty-state__icon--error').exists()).toBe(false)
     })
@@ -30,7 +30,7 @@ describe('EmptyState', () => {
 
         expect(wrapper.attributes('role')).toBe('alert')
         expect(wrapper.find('i').attributes('data-icon')).toBe(
-            'mdi-alert-circle-outline',
+            'i-lucide-circle-alert',
         )
         expect(wrapper.find('.empty-state__icon--error').exists()).toBe(true)
     })
@@ -38,10 +38,12 @@ describe('EmptyState', () => {
     it('keeps an explicit icon in the error variant', () => {
         const wrapper = createWrapper({
             variant: 'error',
-            icon: 'mdi-wifi-off',
+            icon: 'i-lucide-wifi-off',
         })
 
-        expect(wrapper.find('i').attributes('data-icon')).toBe('mdi-wifi-off')
+        expect(wrapper.find('i').attributes('data-icon')).toBe(
+            'i-lucide-wifi-off',
+        )
     })
 
     it('renders the actions slot only when provided', () => {

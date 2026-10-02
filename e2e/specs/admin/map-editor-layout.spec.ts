@@ -48,7 +48,6 @@ test('leaving with unsaved changes asks in a dialog', async ({
         await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
         await page
             .getByTestId('map-editor-new-wall')
-            .locator('input')
             .fill(`${testPrefix} Draft`)
         await page.getByTestId('map-editor-add-wall').click()
         await expect(

@@ -22,9 +22,10 @@ export function reportContentUrl(
     return routeId ? `/route?id=${routeId}#comment-${id}` : `#comment-${id}`
 }
 
-export function statusColor(status: ReportStatus | string): string {
+export function statusColor(
+    status: ReportStatus | string,
+): 'warning' | 'success' | 'neutral' {
     if (status === 'open') return 'warning'
     if (status === 'actioned') return 'success'
-    if (status === 'rejected') return 'medium-emphasis'
-    return 'medium-emphasis'
+    return 'neutral'
 }

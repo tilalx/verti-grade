@@ -9,7 +9,7 @@ test('paginates the mobile route card list', async ({
     await Promise.all(Array.from({ length: 12 }, () => createRoute()))
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row')).toHaveCount(12)
     await expect(page.getByTestId('routes-mobile-pagination')).toBeVisible()
 
@@ -51,7 +51,7 @@ test('the pager stays under the thumb while stepping', async ({
     await Promise.all(Array.from({ length: 30 }, () => createRoute()))
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await page.getByTestId('routes-mobile-page-size').click()
     await page.getByRole('option', { name: '10', exact: true }).click()
     await expect(page.getByTestId('routes-mobile-goto-3')).toBeVisible()

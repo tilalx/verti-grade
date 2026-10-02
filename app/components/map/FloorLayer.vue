@@ -48,32 +48,32 @@ const emit = defineEmits<{
 
 <style scoped>
 .floor-shape {
-    stroke: rgba(var(--v-theme-on-surface), 0.12);
+    stroke: color-mix(in oklab, var(--ui-text-highlighted) 12%, transparent);
     stroke-width: 1;
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
 }
 
 .floor-shape--floor {
-    fill: rgba(var(--v-theme-on-surface), 0.04);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
 .floor-shape--mat {
-    fill: rgba(var(--v-theme-on-surface), 0.1);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 10%, transparent);
 }
 
 .floor-shape--structure {
-    fill: rgba(var(--v-theme-on-surface), 0.22);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 22%, transparent);
 }
 
 .floor-shape:focus-visible {
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
 
 .floor-shape--selected {
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
     stroke-dasharray: 6 4;
 }

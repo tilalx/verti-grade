@@ -34,7 +34,7 @@ test('the page strip keeps its ends in view on a small phone', async ({
     await Promise.all(Array.from({ length: 60 }, () => createRoute()))
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await page.getByTestId('routes-mobile-page-size').click()
     await page.getByRole('option', { name: '10', exact: true }).click()
     await expect(page.getByTestId('routes-mobile-goto-6')).toBeVisible()

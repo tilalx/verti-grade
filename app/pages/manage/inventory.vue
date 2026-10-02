@@ -1,5 +1,5 @@
 <template>
-    <v-container class="inventory-page pa-0">
+    <div class="inventory-page p-0">
         <div class="inventory-layout">
             <div
                 class="inventory-layout__controls"
@@ -19,15 +19,16 @@
                         @camera-on="onCameraOn"
                         @error="onCameraError"
                     />
-                    <v-btn
+                    <UButton
                         v-if="scanning && torchSupported"
                         class="scanner-viewport__torch"
                         :icon="
-                            torchOn ? 'mdi-flashlight' : 'mdi-flashlight-off'
+                            torchOn
+                                ? 'i-lucide-flashlight'
+                                : 'i-lucide-flashlight-off'
                         "
-                        :color="torchOn ? 'warning' : undefined"
-                        variant="flat"
-                        size="small"
+                        :color="torchOn ? 'warning' : 'neutral'"
+                        variant="solid"
                         :aria-label="$t('inventory.toggleTorch')"
                         data-testid="inventory-torch"
                         @click="toggleTorch"
@@ -40,10 +41,10 @@
                         inline-actions
                     >
                         <template #actions>
-                            <v-btn
-                                icon="mdi-refresh"
-                                variant="text"
-                                size="small"
+                            <UButton
+                                icon="i-lucide-refresh-cw"
+                                color="neutral"
+                                variant="ghost"
                                 :disabled="
                                     scannedRouteIds.length === 0 && !scanning
                                 "
@@ -51,68 +52,67 @@
                                 data-testid="inventory-reset"
                                 @click="resetDialog = true"
                             />
-                            <v-btn
-                                icon="mdi-information-outline"
-                                variant="text"
-                                size="small"
+                            <UButton
+                                icon="i-lucide-info"
+                                color="neutral"
+                                variant="ghost"
                                 :aria-label="$t('inventory.showInstructions')"
                                 @click="instructionsDialog = true"
                             />
                         </template>
                     </LayoutPageHeader>
 
-                    <div class="d-flex flex-wrap align-center ga-3">
+                    <div class="flex flex-wrap items-center gap-3">
                         <div
                             v-if="!locationLocked"
-                            class="inventory-locations d-flex ga-1"
+                            class="inventory-locations flex gap-1"
                             role="group"
                             :aria-label="$t('inventory.locationLabel')"
                             data-testid="inventory-location"
                         >
-                            <v-btn
+                            <UButton
                                 v-for="item in locationItems"
                                 :key="item.value"
-                                size="small"
-                                rounded="lg"
+                                size="sm"
                                 :variant="
                                     sessionLocation === item.value
-                                        ? 'flat'
-                                        : 'outlined'
+                                        ? 'solid'
+                                        : 'outline'
                                 "
                                 :color="
                                     sessionLocation === item.value
                                         ? 'primary'
-                                        : undefined
+                                        : 'neutral'
                                 "
+                                :aria-pressed="sessionLocation === item.value"
                                 :data-testid="`inventory-location-${item.title}`"
                                 @click="sessionLocation = item.value"
                             >
                                 {{ item.title }}
-                            </v-btn>
+                            </UButton>
                         </div>
-                        <v-chip
+                        <UButton
                             v-else
+                            size="sm"
                             color="primary"
-                            variant="tonal"
-                            size="small"
-                            closable
-                            close-label="inventory.changeLocation"
+                            variant="soft"
+                            trailing-icon="i-lucide-x"
+                            :aria-label="$t('inventory.changeLocation')"
                             data-testid="inventory-change-location"
-                            @click:close="resetDialog = true"
+                            @click="resetDialog = true"
                         >
                             {{ sessionLocationName }}
-                        </v-chip>
+                        </UButton>
 
-                        <div class="progress-group d-flex align-center ga-2">
-                            <v-progress-linear
+                        <div class="progress-group flex items-center gap-2">
+                            <UProgress
                                 :model-value="progress"
                                 color="success"
-                                height="6"
-                                rounded
-                                class="flex-grow-1"
+                                size="sm"
+                                class="grow"
                             />
                             <span
-                                class="text-body-small text-medium-emphasis flex-shrink-0"
+                                class="text-xs text-muted shrink-0"
                                 data-testid="inventory-progress"
                             >
                                 {{ foundRoutes.length }}/{{ scoped.length }}
@@ -122,7 +122,7 @@
 
                     <p
                         v-if="!sessionLocation"
-                        class="text-body-small text-medium-emphasis mt-2 mb-0"
+                        class="text-xs text-muted mt-2 mb-0"
                     >
                         {{
                             restoredUnscoped
@@ -133,57 +133,57 @@
                 </div>
 
                 <div v-if="scannerError" class="px-4 pt-3">
-                    <v-alert
-                        type="error"
-                        density="compact"
-                        closable
+                    <UAlert
+                        color="error"
+                        variant="soft"
+                        icon="i-lucide-circle-alert"
+                        :description="scannerError"
+                        :close="true"
                         data-testid="inventory-scanner-error"
-                        @click:close="scannerError = ''"
-                    >
-                        {{ scannerError }}
-                    </v-alert>
+                        @update:open="scannerError = ''"
+                    />
                 </div>
 
-                <div class="d-flex ga-2 px-4 pt-3">
-                    <v-btn
+                <div class="flex gap-2 px-4 pt-3">
+                    <UButton
                         v-if="!scanning"
                         color="primary"
-                        class="flex-1-1"
+                        class="flex-auto justify-center"
                         :disabled="loadingRoutes || !sessionLocation"
                         :loading="loadingRoutes"
-                        prepend-icon="mdi-camera"
+                        icon="i-lucide-camera"
                         data-testid="inventory-start"
                         @click="startScanner()"
                     >
                         {{ $t('inventory.start') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         v-else
                         color="warning"
-                        class="flex-1-1"
-                        prepend-icon="mdi-stop-circle"
+                        class="flex-auto justify-center"
+                        icon="i-lucide-circle-stop"
                         data-testid="inventory-stop"
                         @click="stopScanner()"
                     >
                         {{ $t('inventory.stop') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         v-if="scannedRouteIds.length > 0"
                         color="primary"
-                        variant="tonal"
-                        class="flex-1-1"
+                        variant="soft"
+                        class="flex-auto justify-center"
                         :disabled="loadingRoutes || !sessionLocation"
-                        prepend-icon="mdi-check"
+                        icon="i-lucide-check"
                         data-testid="inventory-finish-open"
                         @click="openFinishDialog()"
                     >
                         {{ $t('inventory.finish') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
                 <div
                     v-if="unlocatedCount > 0"
-                    class="px-4 pt-2 text-body-small text-medium-emphasis"
+                    class="px-4 pt-2 text-xs text-muted"
                     data-testid="inventory-unlocated-note"
                 >
                     {{
@@ -197,112 +197,105 @@
             </div>
 
             <div class="inventory-layout__lists" data-testid="inventory-lists">
-                <v-tabs
-                    v-if="!isWideLayout"
-                    v-model="activeTab"
-                    density="compact"
-                    grow
-                    class="mt-3"
-                    color="primary"
-                >
-                    <v-tab value="missing" data-testid="inventory-tab-missing">
-                        {{ $t('inventory.stillToFind') }}
-                        <v-chip
-                            size="x-small"
-                            variant="tonal"
-                            color="warning"
-                            class="ml-2"
-                            data-testid="inventory-missing-count"
+                <template v-if="!isWideLayout">
+                    <div class="inventory-segments mx-4 mt-4" role="tablist">
+                        <button
+                            v-for="tab in inventoryTabs"
+                            :key="tab.value"
+                            type="button"
+                            role="tab"
+                            class="inventory-tab"
+                            :class="{
+                                'inventory-tab--active':
+                                    activeTab === tab.value,
+                            }"
+                            :aria-selected="activeTab === tab.value"
+                            :data-testid="`inventory-tab-${tab.value}`"
+                            @click="activeTab = tab.value"
                         >
-                            {{ missing.length }}
-                        </v-chip>
-                    </v-tab>
-                    <v-tab value="found" data-testid="inventory-tab-found">
-                        {{ $t('inventory.reviewFoundTitle') }}
-                        <v-chip
-                            size="x-small"
-                            variant="tonal"
-                            color="success"
-                            class="ml-2"
-                            data-testid="inventory-found-count"
-                        >
-                            {{ foundRoutes.length }}
-                        </v-chip>
-                    </v-tab>
-                </v-tabs>
+                            {{ tab.label }}
+                            <UBadge
+                                size="sm"
+                                variant="soft"
+                                :color="tab.color"
+                                class="ml-2"
+                                :data-testid="`inventory-${tab.value}-count`"
+                            >
+                                {{ tab.count }}
+                            </UBadge>
+                        </button>
+                    </div>
 
-                <v-tabs-window
-                    v-if="!isWideLayout"
-                    v-model="activeTab"
-                    class="px-4 pt-3 pb-6"
-                >
-                    <v-tabs-window-item value="missing">
+                    <div class="px-4 pt-3 pb-6" role="tabpanel">
+                        <template v-if="activeTab === 'missing'">
+                            <InventoryRouteList
+                                :routes="missing"
+                                mode="missing"
+                                empty-icon="i-lucide-check-check"
+                                :empty-title="missingEmptyTitle"
+                                @action="markFound"
+                            />
+
+                            <UButton
+                                v-if="missing.length"
+                                color="neutral"
+                                variant="ghost"
+                                size="sm"
+                                block
+                                icon="i-lucide-plus"
+                                class="mt-2"
+                                data-testid="inventory-manual-open"
+                                @click="openManualDialog()"
+                            >
+                                {{ $t('inventory.addManually') }}
+                            </UButton>
+                        </template>
+
                         <InventoryRouteList
-                            :routes="missing"
-                            mode="missing"
-                            empty-icon="mdi-check-all"
-                            :empty-title="missingEmptyTitle"
-                            @action="markFound"
-                        />
-
-                        <v-btn
-                            v-if="missing.length"
-                            variant="text"
-                            size="small"
-                            block
-                            prepend-icon="mdi-plus"
-                            class="mt-2"
-                            data-testid="inventory-manual-open"
-                            @click="openManualDialog()"
-                        >
-                            {{ $t('inventory.addManually') }}
-                        </v-btn>
-                    </v-tabs-window-item>
-
-                    <v-tabs-window-item value="found">
-                        <InventoryRouteList
+                            v-else
                             :routes="foundRoutes"
                             mode="found"
-                            empty-icon="mdi-qrcode-scan"
+                            empty-icon="i-lucide-scan-qr-code"
                             :empty-title="$t('inventory.noScans')"
                             @action="undoScan"
                         />
-                    </v-tabs-window-item>
-                </v-tabs-window>
+                    </div>
+                </template>
 
                 <div v-else class="inventory-columns px-4 pt-1 pb-6">
                     <section
                         class="inventory-column inventory-column--missing"
                         data-testid="inventory-column-missing"
                     >
-                        <div class="d-flex align-center ga-2 mb-2">
-                            <h2 class="text-title-small font-weight-semibold">
+                        <div class="flex items-center gap-2 mb-2">
+                            <h2 class="text-sm font-medium font-semibold">
                                 {{ $t('inventory.stillToFind') }}
                             </h2>
-                            <v-chip
-                                size="x-small"
-                                variant="tonal"
+                            <UBadge
+                                size="sm"
+                                variant="soft"
                                 color="warning"
                                 data-testid="inventory-missing-count"
                             >
                                 {{ missing.length }}
-                            </v-chip>
-                            <v-spacer />
-                            <v-btn
+                            </UBadge>
+                            <div class="flex-1" />
+                            <UButton
                                 v-if="missing.length"
-                                variant="text"
-                                size="small"
-                                prepend-icon="mdi-plus"
+                                color="neutral"
+                                variant="ghost"
+                                size="sm"
+                                icon="i-lucide-plus"
                                 data-testid="inventory-manual-open"
                                 @click="openManualDialog()"
                             >
                                 {{ $t('inventory.addManually') }}
-                            </v-btn>
+                            </UButton>
                         </div>
                         <InventoryRouteList
                             :routes="missing"
                             mode="missing"
-                            empty-icon="mdi-check-all"
+                            empty-icon="i-lucide-check-check"
                             :empty-title="missingEmptyTitle"
                             @action="markFound"
                         />
@@ -312,23 +305,23 @@
                         class="inventory-column inventory-column--found"
                         data-testid="inventory-column-found"
                     >
-                        <div class="d-flex align-center ga-2 mb-2">
-                            <h2 class="text-title-small font-weight-semibold">
+                        <div class="flex items-center gap-2 mb-2">
+                            <h2 class="text-sm font-medium font-semibold">
                                 {{ $t('inventory.reviewFoundTitle') }}
                             </h2>
-                            <v-chip
-                                size="x-small"
-                                variant="tonal"
+                            <UBadge
+                                size="sm"
+                                variant="soft"
                                 color="success"
                                 data-testid="inventory-found-count"
                             >
                                 {{ foundRoutes.length }}
-                            </v-chip>
+                            </UBadge>
                         </div>
                         <InventoryRouteList
                             :routes="foundRoutes"
                             mode="found"
-                            empty-icon="mdi-qrcode-scan"
+                            empty-icon="i-lucide-scan-qr-code"
                             :empty-title="$t('inventory.noScans')"
                             @action="undoScan"
                         />
@@ -343,19 +336,19 @@
             closable
             :title="$t('inventory.instructionsTitle')"
         >
-            <p class="text-body-medium text-medium-emphasis mb-3">
+            <p class="text-sm text-muted mb-3">
                 {{ $t('inventory.instructionsIntro') }}
             </p>
-            <ol class="instructions-list text-body-medium">
+            <ol class="instructions-list text-sm">
                 <li>{{ $t('inventory.instructionsStep1') }}</li>
                 <li>{{ $t('inventory.instructionsStep2') }}</li>
                 <li>{{ $t('inventory.instructionsStep3') }}</li>
             </ol>
             <template #actions>
-                <v-spacer />
-                <v-btn color="primary" @click="instructionsDialog = false">
+                <div class="flex-1" />
+                <UButton color="primary" @click="instructionsDialog = false">
                     {{ $t('inventory.instructionsClose') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
 
@@ -368,44 +361,48 @@
             :subtitle="$t('inventory.addManuallyHint')"
             data-testid="inventory-manual-dialog"
         >
-            <v-text-field
+            <UInput
                 v-model="manualSearch"
-                :label="$t('inventory.searchRoutes')"
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                density="compact"
-                clearable
-                hide-details
-                class="mb-3"
+                :placeholder="$t('inventory.searchRoutes')"
+                :aria-label="$t('inventory.searchRoutes')"
+                icon="i-lucide-search"
+                class="mb-3 w-full"
                 data-testid="inventory-manual-search"
-            />
-            <v-list
-                v-if="manualMatches.length"
-                density="compact"
-                class="scope-list rounded-lg"
-                border
             >
-                <v-list-item
-                    v-for="route in manualMatches"
-                    :key="route.id"
-                    :data-testid="`inventory-manual-item-${route.id}`"
-                    @click="markFound(route, { closeManual: true })"
-                >
-                    <template #prepend>
+                <template v-if="manualSearch" #trailing>
+                    <UButton
+                        icon="i-lucide-x"
+                        color="neutral"
+                        variant="link"
+                        size="sm"
+                        :aria-label="$t('actions.clear')"
+                        @click="manualSearch = ''"
+                    />
+                </template>
+            </UInput>
+            <ul
+                v-if="manualMatches.length"
+                class="scope-list rounded-lg border"
+            >
+                <li v-for="route in manualMatches" :key="route.id">
+                    <button
+                        type="button"
+                        class="scope-row inventory-row-button flex w-full items-center px-4 py-1 text-left"
+                        :data-testid="`inventory-manual-item-${route.id}`"
+                        @click="markFound(route, { closeManual: true })"
+                    >
                         <span class="anchor-badge">{{
                             formatAnchorPoint(route.anchor_point)
                         }}</span>
-                    </template>
-                    <v-list-item-title class="text-body-medium">
-                        {{ route.name }}
-                    </v-list-item-title>
-                    <template #append>
-                        <span class="text-body-small text-medium-emphasis">
+                        <span class="min-w-0 flex-1 truncate text-sm">
+                            {{ route.name }}
+                        </span>
+                        <span class="text-xs text-muted">
                             <GradeLabel :source="route" />
                         </span>
-                    </template>
-                </v-list-item>
-            </v-list>
+                    </button>
+                </li>
+            </ul>
             <LayoutEmptyState
                 v-else
                 :card="false"
@@ -421,58 +418,45 @@
             :subtitle="sessionLocation || undefined"
             data-testid="inventory-finish-dialog"
         >
-            <div class="text-title-small font-weight-semibold mb-1">
+            <div class="text-sm font-medium font-semibold mb-1">
                 {{ $t('inventory.reviewMissingTitle') }}
-                <v-chip
-                    size="x-small"
-                    variant="tonal"
-                    color="error"
-                    class="ml-1"
-                >
+                <UBadge size="sm" variant="soft" color="error" class="ml-1">
                     {{ archiveIds.length }}
-                </v-chip>
+                </UBadge>
             </div>
-            <p
-                v-if="missing.length"
-                class="text-body-small text-medium-emphasis mb-2"
-            >
+            <p v-if="missing.length" class="text-xs text-muted mb-2">
                 {{ $t('inventory.reviewMissingDescription') }}
             </p>
-            <v-list density="compact" class="review-list rounded-lg" border>
-                <v-list-item
+            <ul class="review-list rounded-lg border">
+                <li
                     v-for="route in missing"
                     :key="`missing-${route.id}`"
+                    class="flex min-h-10 items-center gap-3 px-4 py-1"
                 >
-                    <template #prepend>
-                        <v-checkbox-btn
-                            :model-value="archiveSelection.has(route.id)"
-                            density="compact"
-                            :aria-label="route.name || route.id"
-                            :data-testid="`inventory-archive-toggle-${route.id}`"
-                            @update:model-value="
-                                toggleArchive(route.id, $event)
-                            "
-                        />
-                    </template>
-                    <v-list-item-title class="text-body-medium">
+                    <UCheckbox
+                        :model-value="archiveSelection.has(route.id)"
+                        :aria-label="route.name || route.id"
+                        :data-testid="`inventory-archive-toggle-${route.id}`"
+                        @update:model-value="
+                            toggleArchive(route.id, $event === true)
+                        "
+                    />
+                    <span class="min-w-0 flex-1 truncate text-sm">
                         {{ route.name }}
-                    </v-list-item-title>
-                    <template #append>
-                        <span class="text-body-small text-medium-emphasis">
-                            <GradeLabel :source="route" />
-                        </span>
-                    </template>
-                </v-list-item>
-                <v-list-item v-if="missing.length === 0">
-                    <v-list-item-title
-                        class="text-body-medium text-medium-emphasis"
-                    >
-                        {{ $t('inventory.nothingToArchive') }}
-                    </v-list-item-title>
-                </v-list-item>
-            </v-list>
+                    </span>
+                    <span class="text-xs text-muted">
+                        <GradeLabel :source="route" />
+                    </span>
+                </li>
+                <li
+                    v-if="missing.length === 0"
+                    class="flex min-h-10 items-center px-4 py-1 text-sm text-muted"
+                >
+                    {{ $t('inventory.nothingToArchive') }}
+                </li>
+            </ul>
 
-            <p class="text-body-small text-medium-emphasis mt-3 mb-0">
+            <p class="text-xs text-muted mt-3 mb-0">
                 {{
                     $t('inventory.progress', {
                         found: foundRoutes.length,
@@ -482,17 +466,18 @@
             </p>
 
             <template #actions>
-                <v-btn
-                    variant="text"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
                     data-testid="inventory-finish-cancel"
                     @click="finishDialog = false"
                 >
                     {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
+                </UButton>
+                <div class="flex-1" />
+                <UButton
                     color="warning"
-                    prepend-icon="mdi-archive-outline"
+                    icon="i-lucide-archive"
                     :loading="archiving"
                     data-testid="inventory-finish-confirm"
                     @click="confirmFinish"
@@ -504,7 +489,7 @@
                               })
                             : $t('inventory.archiveNone')
                     }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
 
@@ -521,7 +506,7 @@
             :confirm-text="$t('inventory.reset')"
             @confirm="confirmReset"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -591,6 +576,20 @@ const manualSearch = ref('')
 const finishDialog = ref(false)
 const resetDialog = ref(false)
 const activeTab = ref<'missing' | 'found'>('missing')
+const inventoryTabs = computed(() => [
+    {
+        value: 'missing' as const,
+        label: t('inventory.stillToFind'),
+        count: missing.value.length,
+        color: 'warning' as const,
+    },
+    {
+        value: 'found' as const,
+        label: t('inventory.reviewFoundTitle'),
+        count: foundRoutes.value.length,
+        color: 'success' as const,
+    },
+])
 const { pending: archiving, run: runArchive } = useAsyncAction()
 const archiveSelection = ref(new Set<string>())
 
@@ -797,7 +796,7 @@ watch(
     { immediate: true },
 )
 
-const theme = useTheme()
+const themeColors = useThemeColors()
 
 const codeTag = (rawValue: string) => {
     const id = extractRouteId(rawValue)
@@ -805,23 +804,23 @@ const codeTag = (rawValue: string) => {
 
     if (!id || !info)
         return {
-            color: String(theme.current.value.colors.error),
+            color: themeColors.value.error,
             label: tagUnknown,
         }
     if (info.location !== activeLocation) {
         return {
-            color: String(theme.current.value.colors.error),
+            color: themeColors.value.error,
             label: `${info.name} · ${info.locationName || '—'}`,
         }
     }
     if (scannedIdSet.has(id)) {
         return {
-            color: String(theme.current.value.colors.info),
+            color: themeColors.value.info,
             label: `${tagCounted} · ${info.name}`,
         }
     }
     return {
-        color: String(theme.current.value.colors.success),
+        color: themeColors.value.success,
         label: info.name,
     }
 }
@@ -1062,6 +1061,40 @@ watch(instructionsDialog, (open) => {
     right: 12px;
 }
 
+.inventory-segments {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--ui-bg-elevated);
+}
+
+.inventory-tab {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 12px;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ui-text-muted);
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.inventory-tab--active {
+    color: var(--ui-text-highlighted);
+    background: var(--ui-bg);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+}
+
+.inventory-row-button:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
+}
+
 .instructions-list {
     margin: 0;
     padding-left: 20px;
@@ -1135,7 +1168,7 @@ watch(instructionsDialog, (open) => {
 
 @media (min-width: 1545px) {
     .inventory-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(440px, 1.4fr) minmax(
+        grid-template-columns: minmax(0, 1fr) minmax(440px, 1.6fr) minmax(
                 0,
                 1fr
             );

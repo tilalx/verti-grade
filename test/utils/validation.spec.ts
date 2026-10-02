@@ -7,6 +7,7 @@ import {
     passwordsMatch,
     nonBlank,
     integerBetween,
+    validateRules,
 } from '~/utils/validation'
 
 // Simple translation stub: just return the key so assertions are readable.
@@ -204,5 +205,25 @@ describe('integerBetween', () => {
     it('fails for out of range, fractional or empty values', () => {
         for (const value of [0, 3651, 1.5, '', null])
             expect(rule(value)).toBe('validation.integerRange')
+    })
+})
+
+describe('validateRules', () => {
+    const rules = {
+        name: [required(t), minLength(t, 3)],
+        email: [validEmail(t)],
+    }
+
+    it('returns no errors for a valid state', () => {
+        expect(validateRules({ name: 'Anna', email: 'a@b.de' }, rules)).toEqual(
+            [],
+        )
+    })
+
+    it('reports the first failing rule per field', () => {
+        expect(validateRules({ name: '', email: 'nope' }, rules)).toEqual([
+            { name: 'name', message: 'validation.required' },
+            { name: 'email', message: 'validation.email' },
+        ])
     })
 })

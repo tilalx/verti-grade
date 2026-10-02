@@ -1,76 +1,76 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { useThemeMode } from '~/composables/useThemeMode'
 
-type Listener = (event: { matches: boolean }) => void
+const colorMode = reactive({ preference: 'system', value: 'light' })
 
-let systemDark = false
-let schemeListeners: Listener[] = []
-const themeName = ref('light')
-const change = vi.fn((name: string) => (themeName.value = name))
+class FakeChannel {
+    static instances: FakeChannel[] = []
+    listeners: ((event: MessageEvent) => void)[] = []
+    posted: unknown[] = []
+    constructor() {
+        FakeChannel.instances.push(this)
+    }
+    postMessage(data: unknown) {
+        this.posted.push(data)
+    }
+    addEventListener(_: string, listener: (event: MessageEvent) => void) {
+        this.listeners.push(listener)
+    }
+    removeEventListener(_: string, listener: (event: MessageEvent) => void) {
+        this.listeners = this.listeners.filter((entry) => entry !== listener)
+    }
+    receive(data: unknown) {
+        this.listeners.forEach((listener) => listener({ data } as MessageEvent))
+    }
+}
 
 beforeEach(() => {
-    systemDark = false
-    schemeListeners = []
-    themeName.value = 'light'
-    change.mockClear()
-    vi.stubGlobal('useTheme', () => ({ name: themeName, change }))
-    vi.stubGlobal('useCookie', () => ref('system'))
+    colorMode.preference = 'system'
+    colorMode.value = 'light'
+    vi.stubGlobal('useColorMode', () => colorMode)
+    vi.stubGlobal('BroadcastChannel', FakeChannel)
     vi.stubGlobal(
         'matchMedia',
-        vi.fn((query: string) => ({
-            matches: query.includes('dark') ? systemDark : false,
-            addEventListener: (_: string, listener: Listener) =>
-                schemeListeners.push(listener),
-            removeEventListener: (_: string, listener: Listener) =>
-                (schemeListeners = schemeListeners.filter(
-                    (entry) => entry !== listener,
-                )),
-        })),
+        vi.fn(() => ({ matches: false })),
     )
     window.matchMedia = globalThis.matchMedia
 })
 
-const flipSystem = (dark: boolean) => {
-    systemDark = dark
-    schemeListeners.forEach((listener) => listener({ matches: dark }))
-}
-
 describe('useThemeMode', () => {
-    it('follows OS appearance changes in system mode', () => {
-        const { listenForThemeChanges } = useThemeMode()
-        const stop = listenForThemeChanges()
-        flipSystem(true)
-        expect(change).toHaveBeenLastCalledWith('dark')
-        flipSystem(false)
-        expect(change).toHaveBeenLastCalledWith('light')
-        stop()
-    })
-
-    it('ignores OS appearance changes after an explicit choice', async () => {
-        const { setMode, listenForThemeChanges } = useThemeMode()
-        await setMode('light')
-        const stop = listenForThemeChanges()
-        change.mockClear()
-        flipSystem(true)
-        expect(change).not.toHaveBeenCalled()
-        stop()
-    })
-
-    it('stops listening after cleanup', () => {
-        const { listenForThemeChanges } = useThemeMode()
-        listenForThemeChanges()()
-        flipSystem(true)
-        expect(change).not.toHaveBeenCalled()
-    })
-
-    it('cycles system, light, dark and shares the mode between callers', async () => {
+    it('shares the chosen mode between callers', async () => {
         const first = useThemeMode()
         const second = useThemeMode()
-        await first.cycleMode()
+        await first.setMode('light')
         expect(second.mode.value).toBe('light')
-        await first.cycleMode()
+        await first.setMode('dark')
         expect(second.mode.value).toBe('dark')
-        expect(change).toHaveBeenLastCalledWith('dark')
+        expect(colorMode.preference).toBe('dark')
+    })
+
+    it('broadcasts explicit choices to other tabs', async () => {
+        await useThemeMode().setMode('dark')
+        expect(FakeChannel.instances[0]!.posted).toContain('dark')
+    })
+
+    it('adopts modes broadcast by other tabs until cleanup', async () => {
+        const stop = useThemeMode().listenForThemeChanges()
+        FakeChannel.instances[0]!.receive('dark')
+        expect(colorMode.preference).toBe('dark')
+        stop()
+        FakeChannel.instances[0]!.receive('light')
+        expect(colorMode.preference).toBe('dark')
+    })
+
+    it('ignores unknown broadcast payloads', () => {
+        const stop = useThemeMode().listenForThemeChanges()
+        FakeChannel.instances[0]!.receive('purple')
+        expect(colorMode.preference).toBe('system')
+        stop()
+    })
+
+    it('falls back to system for an unknown stored preference', () => {
+        colorMode.preference = 'sepia'
+        expect(useThemeMode().mode.value).toBe('system')
     })
 })

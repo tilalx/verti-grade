@@ -21,20 +21,20 @@ test('toggles a permission for a role', async ({
     const checkbox = page.getByTestId(
         `role-permissions-${role.name}-manage_users`,
     )
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(checkbox).not.toBeChecked()
 
     const saved = roleSaved(page)
     await checkbox.click()
     expect((await saved).ok()).toBe(true)
-    await expect(checkbox.locator('input')).toBeChecked()
+    await expect(checkbox).toBeChecked()
 
     await gotoSettled(page, '/admin/users')
-    await expect(checkbox.locator('input')).toBeChecked()
+    await expect(checkbox).toBeChecked()
 
     const reverted = roleSaved(page)
     await checkbox.click()
     expect((await reverted).ok()).toBe(true)
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(checkbox).not.toBeChecked()
 })
 
 test('shows an error and does not persist the change when the update fails', async ({
@@ -48,17 +48,17 @@ test('shows an error and does not persist the change when the update fails', asy
     const checkbox = page.getByTestId(
         `role-permissions-${role.name}-manage_settings`,
     )
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(checkbox).not.toBeChecked()
 
     await page.route('**/api/collections/roles/records/**', (route) =>
         route.abort('failed'),
     )
 
     await checkbox.click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
+    await expect(checkbox).not.toBeChecked()
 
     await page.unroute('**/api/collections/roles/records/**')
     await gotoSettled(page, '/admin/users')
-    await expect(checkbox.locator('input')).not.toBeChecked()
+    await expect(checkbox).not.toBeChecked()
 })

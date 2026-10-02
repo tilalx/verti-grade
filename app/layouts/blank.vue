@@ -1,7 +1,7 @@
 <template>
-    <v-main>
+    <main class="flex flex-1 flex-col">
         <slot />
-    </v-main>
+    </main>
     <div v-if="hydrated" data-testid="page-hydrated" hidden />
 </template>
 

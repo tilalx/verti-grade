@@ -20,7 +20,9 @@ test('the route form sheet sits flush and shifts nothing behind it', async ({
         .toBe(true)
 
     const anchors = async () => {
-        const logo = (await page.getByTestId('nav-logo').boundingBox())!
+        const logo = (await page
+            .locator('[data-testid="nav-logo"]:visible')
+            .boundingBox())!
         const search = (await page.getByTestId('filter-search').boundingBox())!
         return [logo.x, search.x, search.width]
     }

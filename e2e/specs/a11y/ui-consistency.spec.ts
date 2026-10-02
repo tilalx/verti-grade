@@ -37,7 +37,7 @@ test('every icon-only button exposes an accessible name', async ({
     ]) {
         await gotoSettled(page, path)
         const unnamed = await page
-            .locator('button.v-btn--icon:visible')
+            .locator('button.icon-btn:visible')
             .evaluateAll((buttons) =>
                 buttons
                     .filter(
@@ -73,10 +73,7 @@ test('an empty result set renders the shared empty state as a real card', async 
     adminPage: page,
 }) => {
     await gotoSettled(page, '/admin/users')
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .fill('zzz-no-such-user-zzz')
+    await page.getByTestId('filter-search').fill('zzz-no-such-user-zzz')
     const empty = page.getByTestId('empty-state')
     await expect(empty).toBeVisible()
     await expect(empty).toHaveCSS('display', 'block')

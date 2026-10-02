@@ -86,9 +86,10 @@ test('runs an inventory without a camera: pick a site, mark a route found', asyn
         workerLocation.name,
     )
 
-    await expect(
-        page.getByTestId('inventory-change-location').getByLabel(/./),
-    ).toHaveAttribute('aria-label', 'Change location')
+    await expect(page.getByTestId('inventory-change-location')).toHaveAttribute(
+        'aria-label',
+        'Change location',
+    )
 
     await page.getByTestId(`inventory-undo-${route.id}`).click()
     await expect(

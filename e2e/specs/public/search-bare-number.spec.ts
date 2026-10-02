@@ -31,7 +31,7 @@ test('a number that is no grade searches route names', async ({
     const other = await createRoute(`${digitFreePrefix} other`, '2099-01-02')
     try {
         await gotoSettled(page, '/routes')
-        await page.getByTestId('filter-search').locator('input').fill('97')
+        await page.getByTestId('filter-search').fill('97')
         await expect(page.getByTestId(`index-row-${matching.id}`)).toBeVisible()
         await expect(page.getByTestId(`index-row-${other.id}`)).toHaveCount(0)
     } finally {

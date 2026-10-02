@@ -44,7 +44,8 @@
         "unknownUser": "Unbekannter Benutzer",
         "tabs": {
             "profile": "Profil",
-            "security": "Sicherheit"
+            "security": "Sicherheit",
+            "preferences": "Präferenzen"
         },
         "placeholders": {
             "firstname": "Max",
@@ -139,7 +140,7 @@
         "mapEditor": "Plan-Editor",
         "mapPlacement": "Routen platzieren",
         "scan": "Scannen",
-        "me": "Ich",
+        "me": "Mehr",
         "moreActions": "Weitere Aktionen",
         "selectedCount": "{n} ausgewählt",
         "list": "Routen"
@@ -244,6 +245,7 @@
         "routesFound": "Gefundene Routen: {n}",
         "create": "Route erstellen",
         "color": "Farbe",
+        "customColor": "Eigene Farbe",
         "routename": "Routenname",
         "difficulty": "Grad",
         "anchor_point": "Umlenker",
@@ -518,6 +520,7 @@
             "purposes": {
                 "auth": "Hält dich angemeldet",
                 "colorScheme": "Merkt sich hellen oder dunklen Modus",
+                "sidebar": "Merkt sich, ob die Seitennavigation ausgeklappt ist",
                 "exportColumns": "Merkt sich die gewählten Export-Spalten",
                 "updateDismissed": "Merkt sich einen ausgeblendeten Update-Hinweis",
                 "inventorySession": "Speichert den Fortschritt einer Inventur",
@@ -553,7 +556,8 @@
             "mapPlacement": "Routen platzieren - Gripello",
             "scan": "Route scannen - Gripello",
             "me": "Mein Konto - Gripello",
-            "overview": "Übersicht - Gripello"
+            "overview": "Übersicht - Gripello",
+            "accountSettings": "Einstellungen - Gripello"
         },
         "content": {
             "settings": "Einstellungen",
@@ -613,13 +617,16 @@
         "commandPaletteEmpty": "Keine Ergebnisse",
         "themeToggle": "Design wechseln",
         "themeSystem": "Systemdesign",
+        "themeSystemHint": "Folgt der Einstellung deines Geräts",
         "themeLight": "Helles Design",
         "themeDark": "Dunkles Design",
         "openMenu": "Menü öffnen",
         "skipToContent": "Zum Inhalt springen",
         "mainNavigation": "Hauptnavigation",
+        "toggleSidebar": "Seitenleiste umschalten",
         "userMenu": "Benutzermenü",
         "manage": "Verwalten",
+        "moderation": "Moderation",
         "admin": "Administration",
         "quickNavigation": "Schnellnavigation"
     },
@@ -746,7 +753,18 @@
         "boulderGradeSystem": "Skala für Boulder",
         "gradingHint": "Gilt für neu geschraubte Routen. Bestehende Routen behalten ihre Skala bis zur Bearbeitung.",
         "allowRegistration": "Öffentliche Registrierung erlauben",
-        "allowRegistrationHint": "Jede Person kann ein Kletterkonto ohne Berechtigungen anlegen. Erfordert einen funktionierenden Mailserver für die E-Mail-Bestätigung."
+        "allowRegistrationHint": "Jede Person kann ein Kletterkonto ohne Berechtigungen anlegen. Erfordert einen funktionierenden Mailserver für die E-Mail-Bestätigung.",
+        "description": "Verwalte Organisation, Branding, Bewertungsskalen und rechtliche Angaben.",
+        "sections": "Einstellungsbereiche",
+        "branding": "Branding",
+        "brandingHint": "Logos und Icons in der App, im Browser-Tab und auf gedruckten Routenschildern.",
+        "organizationHint": "Name, Kontakt und Kontooptionen deiner Organisation.",
+        "publicUrlsHint": "Adressen für Links, E-Mails und QR-Codes.",
+        "assetHints": {
+            "logo": "PNG, JPG, SVG oder WebP. Wird in der Navigationsleiste angezeigt.",
+            "icon": "ICO-Datei, die im Browser-Tab angezeigt wird.",
+            "sign": "PNG, JPG, SVG oder WebP. Wird auf Routenschilder gedruckt."
+        }
     },
     "errors": {
         "notFound": {
@@ -1185,5 +1203,19 @@
         "progress": "Du hast {sent} von {total} aktuellen Routen geschafft.",
         "openLogbook": "Logbuch öffnen",
         "gradeSpread": "Grade an der Wand"
+    },
+    "accountSettings": {
+        "title": "Einstellungen",
+        "subtitle": "Verwalte dein Profil, deine Präferenzen und deine Sicherheit.",
+        "profileDescription": "So sehen dich andere in der App.",
+        "avatar": "Avatar",
+        "avatarDescription": "JPG, PNG, SVG oder WebP.",
+        "emailDescription": "Für die Anmeldung und für Benachrichtigungen.",
+        "preferencesDescription": "Sprache und Erscheinungsbild der App.",
+        "language": "Sprache",
+        "languageDescription": "Für die Oberfläche und für E-Mails, die du erhältst.",
+        "theme": "Design",
+        "themeDescription": "Folge deinem System oder wähle ein festes Design.",
+        "passwordDescription": "Bestätige dein aktuelles Passwort, bevor du ein neues wählst."
     }
 }

@@ -1,24 +1,25 @@
 <template>
     <template v-if="modelValue === undefined">
-        <v-btn
+        <UButton
             v-if="callToAction"
             color="primary"
-            size="large"
+            size="xl"
             block
-            prepend-icon="mdi-star-plus-outline"
+            icon="i-lucide-star-plus"
             data-testid="review-open-cta"
             @click="internalOpen = true"
         >
             {{ $t('ratings.createReview') }}
-        </v-btn>
-        <v-btn
+        </UButton>
+        <UButton
             v-else
-            variant="tonal"
+            color="neutral"
+            variant="soft"
             data-testid="review-open"
             @click="internalOpen = true"
         >
             {{ $t('ratings.createReview') }}
-        </v-btn>
+        </UButton>
     </template>
 
     <LayoutDialogShell
@@ -31,93 +32,135 @@
         "
         data-testid="review-form-dialog"
     >
-        <!-- Context row: shown only in edit mode -->
         <div
             v-if="isEditMode && review"
-            class="d-flex align-center ga-3 mb-4 pa-3 rounded-lg review-form__context"
+            class="flex items-center gap-3 mb-4 p-3 rounded-lg review-form__context"
         >
-            <v-avatar size="30" :color="avatarColor(review.userName)">
-                <span class="text-body-small font-weight-bold">{{
-                    nameInitials(review.userName)
-                }}</span>
-            </v-avatar>
+            <span
+                class="inline-flex size-[30px] shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                :style="{ backgroundColor: avatarColor(review.userName) }"
+            >
+                {{ nameInitials(review.userName) }}
+            </span>
             <div>
-                <div class="text-body-medium font-weight-medium">
+                <div class="text-sm font-medium">
                     {{ review.userName }}
                 </div>
-                <div class="text-body-small text-medium-emphasis">
+                <div class="text-xs text-muted">
                     {{ review.routeName }}
                 </div>
             </div>
         </div>
 
-        <v-form v-model="isFormValid">
-            <!-- Stars and difficulty share a row from sm up -->
-            <v-row density="comfortable" align="center" class="mb-1">
-                <v-col cols="12" sm="6">
-                    <div class="d-flex align-center ga-3 review-form__rating">
-                        <span class="v-label">{{ $t('ratings.stars') }}</span>
-                        <v-rating
-                            v-model="form.rating"
-                            hover
-                            active-color="yellow-darken-2"
-                            color="grey-lighten-1"
-                            density="compact"
-                            size="default"
-                            clearable
-                            data-testid="review-form-rating"
-                        />
+        <UForm
+            :state="form"
+            :validate="(state) => validateRules(state, formRules)"
+            @submit.prevent
+        >
+            <div class="grid grid-cols-12 items-end gap-4 mb-4">
+                <div
+                    class="col-span-12 sm:col-span-6 flex flex-col gap-1 review-form__rating"
+                >
+                    <span
+                        id="review-form-rating-label"
+                        class="text-sm font-medium text-default"
+                        >{{ $t('ratings.stars') }}</span
+                    >
+                    <div
+                        role="radiogroup"
+                        aria-labelledby="review-form-rating-label"
+                        class="flex items-center"
+                        data-testid="review-form-rating"
+                        @mouseleave="hoverRating = null"
+                    >
+                        <button
+                            v-for="star in 5"
+                            :key="star"
+                            type="button"
+                            role="radio"
+                            :aria-checked="form.rating === star"
+                            :aria-label="`${$t('ratings.stars')}: ${star}/5`"
+                            class="rounded p-1 focus-visible:outline-2 focus-visible:outline-primary"
+                            @mouseenter="hoverRating = star"
+                            @click="toggleRating(star)"
+                        >
+                            <UIcon
+                                name="i-lucide-star"
+                                class="size-6"
+                                :class="
+                                    star <= (hoverRating ?? form.rating ?? 0)
+                                        ? 'text-amber-500 fill-current'
+                                        : 'text-dimmed'
+                                "
+                            />
+                        </button>
                     </div>
-                </v-col>
+                </div>
 
-                <v-col cols="12" sm="6">
-                    <v-select
+                <UFormField
+                    :label="`${$t('ratings.difficulty')} (${$t(`gradeSystems.${gradeSystem}`)})`"
+                    name="grade"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <USelectMenu
                         v-model="form.grade"
-                        :label="`${$t('ratings.difficulty')} (${$t(`gradeSystems.${gradeSystem}`)})`"
                         :items="gradeLabels(gradeSystem)"
-                        :rules="isEditMode ? [] : [rules.required]"
-                        clearable
-                        hide-details="auto"
+                        clear
+                        class="w-full"
                         data-testid="review-form-difficulty"
+                        @clear="form.grade = null"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <v-textarea
-                v-model="form.comment"
+            <UFormField
                 :label="$t('ratings.comment')"
-                :rules="isEditMode ? [] : [rules.requiredAndNotEmpty]"
-                rows="6"
-                auto-grow
-                :counter="isEditMode ? 1000 : undefined"
-                data-testid="review-form-comment"
-            />
-        </v-form>
+                :hint="isEditMode ? `${form.comment.length}/1000` : undefined"
+                name="comment"
+            >
+                <UTextarea
+                    v-model="form.comment"
+                    :rows="6"
+                    autoresize
+                    class="w-full"
+                    data-testid="review-form-comment"
+                />
+            </UFormField>
+        </UForm>
 
         <template #actions>
-            <v-btn
-                variant="text"
+            <UButton
+                color="neutral"
+                variant="ghost"
                 data-testid="review-form-cancel"
                 @click="close"
-                >{{ $t('actions.cancel') }}</v-btn
+                >{{ $t('actions.cancel') }}</UButton
             >
-            <v-spacer />
-            <v-btn
-                :disabled="!isEditMode && (!isFormValid || !form.rating)"
-                :loading="saving"
+            <div class="flex-1" />
+            <UButton
+                :disabled="
+                    saving || (!isEditMode && (!isFormValid || !form.rating))
+                "
                 color="primary"
                 data-testid="review-form-submit"
                 @click="submit"
             >
-                <template #loader><CaptchaLoader /></template>
-                {{ isEditMode ? $t('actions.save') : $t('actions.submit') }}
-            </v-btn>
+                <CaptchaLoader v-if="saving" />
+                <template v-else>{{
+                    isEditMode ? $t('actions.save') : $t('actions.submit')
+                }}</template>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
-import { required, nonBlank } from '~/utils/validation'
+import {
+    required,
+    nonBlank,
+    validateRules,
+    type Rule,
+} from '~/utils/validation'
 import {
     DEFAULT_ROUTE_GRADE_SYSTEM,
     gradeIndex,
@@ -184,7 +227,7 @@ const sheetOpen = computed({
 
 // ── Form state ─────────────────────────────────────────────────────────────
 
-const isFormValid = ref(false)
+const hoverRating = ref<number | null>(null)
 const saving = ref(false)
 
 const form = reactive({
@@ -196,6 +239,20 @@ const form = reactive({
 const rules = {
     required: required(t),
     requiredAndNotEmpty: nonBlank(t),
+}
+
+const formRules = computed((): Record<string, Rule[]> =>
+    isEditMode.value
+        ? {}
+        : { grade: [rules.required], comment: [rules.requiredAndNotEmpty] },
+)
+
+const isFormValid = computed(
+    () => validateRules(form, formRules.value).length === 0,
+)
+
+function toggleRating(star: number) {
+    form.rating = form.rating === star ? undefined : star
 }
 
 watch(
@@ -230,7 +287,6 @@ function resetForm() {
     form.rating = undefined
     form.grade = null
     form.comment = ''
-    isFormValid.value = false
 }
 
 function close() {
@@ -282,7 +338,7 @@ async function submit() {
 
 <style scoped>
 .review-form__context {
-    background: rgba(var(--v-theme-on-surface), 0.06);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 6%, transparent);
 }
 
 .review-form__rating {

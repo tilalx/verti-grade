@@ -38,9 +38,9 @@ test('imports routes from a JSON file', async ({
 
     await expect(page.getByTestId('import-route-dialog')).toBeVisible()
     await page.getByTestId('import-route-confirm').click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
 
-    await page.getByTestId('filter-search').locator('input').fill(name)
+    await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText(name)
     await expect(page.getByTestId('routes-table')).toContainText(
         workerLocation.name,
@@ -82,7 +82,9 @@ test('reports import issues when route creation fails server-side', async ({
 
     await expect(page.getByTestId('import-route-dialog')).toBeVisible()
     await page.getByTestId('import-route-confirm').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(/issues/i)
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
+        /issues/i,
+    )
 })
 
 test('rejects a malformed JSON file', async ({ adminPage: page }, testInfo) => {
@@ -95,7 +97,7 @@ test('rejects a malformed JSON file', async ({ adminPage: page }, testInfo) => {
     const chooser = await fileChooserPromise
     await chooser.setFiles(file)
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(page.getByTestId('import-route-dialog')).toBeHidden()
 })
 
@@ -135,8 +137,8 @@ test('imports more ratings than the per-user rating rate limit', async ({
     const bulkImport = page.waitForResponse('**/api/import/ratings')
     await page.getByTestId('import-route-confirm').click()
     expect((await bulkImport).ok()).toBe(true)
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
-    await expect(page.getByTestId('global-snackbar')).not.toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).not.toContainText(
         /issues/i,
     )
 

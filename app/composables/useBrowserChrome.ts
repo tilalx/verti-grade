@@ -1,10 +1,8 @@
-import { compositeOver, mixColors, parseColor } from '~/utils/chromeColor'
-
-type ThemeName = 'light' | 'dark'
+import { compositeOver, mixColors } from '~/utils/chromeColor'
+import { THEME_COLORS, type ThemeName } from '~/utils/themeColors'
 
 const TWEEN_MS = 320
-const SCRIM_SELECTOR = '.v-overlay--active > .v-overlay__scrim'
-const DEFAULT_SCRIM_OPACITY = 0.32
+const SCRIM_SELECTOR = '[data-slot="overlay"][data-state="open"]'
 const LIGHT_QUERY = '(prefers-color-scheme: light)'
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
@@ -37,37 +35,22 @@ function useTweenedColor(target: () => string) {
     return shown
 }
 
-function readActiveScrim(): string | null {
-    const scrim = document.querySelector(SCRIM_SELECTOR)
-    if (!scrim) return null
-    const style = getComputedStyle(scrim)
-    const color = parseColor(style.backgroundColor)
-    if (!color) return null
-    const opacity =
-        parseFloat(style.getPropertyValue('--v-overlay-opacity')) ||
-        DEFAULT_SCRIM_OPACITY
-    return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] * opacity})`
-}
-
 export function useBrowserChrome() {
-    const theme = useTheme()
+    const colorMode = useColorMode()
     const { lgAndUp } = useDisplay()
     const { mode, listenForThemeChanges } = useThemeMode()
     const scrim = ref<string | null>(null)
 
     const currentName = (): ThemeName =>
-        theme.current.value.dark ? 'dark' : 'light'
+        colorMode.value === 'dark' ? 'dark' : 'light'
     const withScrim = (color: string) =>
         scrim.value ? compositeOver(color, scrim.value) : color
-    const barTarget = (name: ThemeName) =>
-        withScrim(String(theme.themes.value[name]!.colors.surface))
+    const barTarget = (name: ThemeName) => withScrim(THEME_COLORS[name].surface)
     const pageTarget = () =>
         withScrim(
-            String(
-                lgAndUp.value
-                    ? theme.current.value.colors.background
-                    : theme.current.value.colors.surface,
-            ),
+            THEME_COLORS[currentName()][
+                lgAndUp.value ? 'background' : 'surface'
+            ],
         )
 
     const lightBar = useTweenedColor(() => barTarget('light'))
@@ -105,7 +88,12 @@ export function useBrowserChrome() {
     let frame = 0
     const observer = new MutationObserver(() => {
         cancelAnimationFrame(frame)
-        frame = requestAnimationFrame(() => (scrim.value = readActiveScrim()))
+        frame = requestAnimationFrame(
+            () =>
+                (scrim.value = document.querySelector(SCRIM_SELECTOR)
+                    ? THEME_COLORS[currentName()].scrim
+                    : null),
+        )
     })
     let stopListening: (() => void) | null = null
 
@@ -138,7 +126,7 @@ export function useBrowserChrome() {
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: ['class'],
+            attributeFilter: ['class', 'data-state'],
         })
     })
 

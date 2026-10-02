@@ -17,18 +17,9 @@ test('two people with the same short name can both be created', async ({
         await gotoSettled(page, '/admin/users')
         for (const email of emails) {
             await page.getByTestId('user-create-open').click()
-            await page
-                .getByTestId('user-create-firstname')
-                .locator('input')
-                .fill('Q')
-            await page
-                .getByTestId('user-create-lastname')
-                .locator('input')
-                .fill('Z')
-            await page
-                .getByTestId('user-create-email')
-                .locator('input')
-                .fill(email)
+            await page.getByTestId('user-create-firstname').fill('Q')
+            await page.getByTestId('user-create-lastname').fill('Z')
+            await page.getByTestId('user-create-email').fill(email)
             await page.getByTestId('user-create-submit').click()
             await expect(page.getByTestId('user-create-dialog')).toBeHidden()
         }

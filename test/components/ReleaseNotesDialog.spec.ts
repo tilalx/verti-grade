@@ -3,20 +3,18 @@ import { mount } from '@vue/test-utils'
 import ReleaseNotesDialog from '~/components/notifications/ReleaseNotesDialog.vue'
 
 const stubs = {
-    'v-dialog': {
-        template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+    LayoutDialogShell: {
+        props: ['subtitle'],
+        template:
+            '<div><slot name="activator" :props="{}" /><slot name="title" />{{ subtitle }}<slot /></div>',
     },
-    'v-card': { template: '<div><slot /></div>' },
-    'v-card-title': { template: '<div><slot /></div>' },
-    'v-card-subtitle': { template: '<div><slot /></div>' },
-    'v-card-text': { template: '<div><slot /></div>' },
-    'v-alert': { template: '<div><slot /></div>' },
-    'v-chip': { template: '<span class="chip"><slot /></span>' },
-    'v-icon': { template: '<i><slot /></i>' },
-    'v-spacer': true,
-    'v-btn': { template: '<button><slot /></button>' },
-    'v-progress-circular': { template: '<div class="spinner" />' },
-    'v-chip-group': { template: '<div><slot /></div>' },
+    UAlert: {
+        props: ['description'],
+        template: '<div>{{ description }}</div>',
+    },
+    UBadge: { template: '<span class="chip"><slot /></span>' },
+    UIcon: true,
+    UButton: { template: '<button><slot /></button>' },
 }
 
 function createWrapper(props = {}) {

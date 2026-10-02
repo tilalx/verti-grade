@@ -50,9 +50,10 @@
                         :show-system="isUnexpectedSystem(route)"
                         class="map-route-row__grade"
                     />
-                    <span
+                    <UIcon
                         v-if="linkRows"
-                        class="map-route-row__chevron mdi mdi-chevron-right"
+                        name="i-lucide-chevron-right"
+                        class="map-route-row__chevron"
                         aria-hidden="true"
                     />
                 </component>
@@ -64,7 +65,7 @@
                     :title="$t('routes.view')"
                     data-testid="route-view"
                 >
-                    <span class="mdi mdi-chevron-right" aria-hidden="true" />
+                    <UIcon name="i-lucide-chevron-right" aria-hidden="true" />
                 </NuxtLink>
             </div>
         </template>
@@ -112,7 +113,7 @@ function subtitle(route: RouteListItem) {
 }
 
 .map-route-list__muted {
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 
 .map-route-row {
@@ -124,7 +125,7 @@ function subtitle(route: RouteListItem) {
 }
 
 .map-route-row--active {
-    background: rgba(var(--v-theme-primary), 0.12);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
 }
 
 .map-route-row__main {
@@ -147,16 +148,16 @@ function subtitle(route: RouteListItem) {
 .map-route-row__chevron {
     flex: 0 0 auto;
     font-size: 20px;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 
 .map-route-row__main:hover {
-    background: rgba(var(--v-theme-on-surface), 0.04);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
 .map-route-row__main:focus-visible,
 .map-route-row__open:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
+    outline: 2px solid var(--ui-primary);
     outline-offset: -2px;
 }
 
@@ -176,7 +177,7 @@ function subtitle(route: RouteListItem) {
 
 .map-route-row__meta {
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 
 .map-route-row__grade {
@@ -196,6 +197,6 @@ function subtitle(route: RouteListItem) {
     color: inherit;
     font-size: 20px;
     text-decoration: none;
-    background: rgba(var(--v-theme-on-surface), 0.08);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 8%, transparent);
 }
 </style>

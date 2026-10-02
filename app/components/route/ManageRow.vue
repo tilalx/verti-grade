@@ -5,11 +5,9 @@
         data-testid="routes-row"
         :data-route-id="route.id"
     >
-        <v-checkbox-btn
+        <UCheckbox
             :model-value="selected"
-            density="compact"
-            color="primary"
-            class="manage-row__check"
+            class="manage-row__check p-2"
             :aria-label="$t('actions.select_route', { name: route.name })"
             data-testid="routes-row-select"
             @update:model-value="emit('update:selected', !!$event)"
@@ -24,18 +22,18 @@
             <span class="manage-row__text">
                 <span class="manage-row__name">
                     {{ route.name }}
-                    <v-icon
+                    <UIcon
+                        name="i-lucide-badge-check"
+                        class="size-[14px] text-amber-500"
                         v-if="route.has_ratings"
-                        size="14"
-                        color="yellow-darken-2"
-                        >mdi-star-circle</v-icon
-                    >
-                    <v-chip
+                    />
+                    <UBadge
                         v-if="route.archived"
-                        size="x-small"
-                        variant="outlined"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
                         class="ml-1"
-                        >{{ $t('filter.archived') }}</v-chip
+                        >{{ $t('filter.archived') }}</UBadge
                     >
                 </span>
                 <span class="manage-row__meta">{{ meta }}</span>
@@ -91,13 +89,16 @@ const meta = computed(() => {
     align-items: center;
     gap: 4px;
     min-height: 64px;
-    padding: 4px 4px 4px 0;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    padding: 4px 8px 4px 4px;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.manage-row:last-child {
+    border-bottom: 0;
 }
 
 .manage-row--selected {
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
 
 .manage-row__check {
@@ -120,7 +121,7 @@ const meta = computed(() => {
 }
 
 .manage-row__main:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
+    outline: 2px solid var(--ui-primary);
 }
 
 .manage-row__text {
@@ -142,7 +143,7 @@ const meta = computed(() => {
 
 .manage-row__meta {
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

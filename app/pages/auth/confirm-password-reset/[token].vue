@@ -21,18 +21,18 @@
                 @validity="fieldsValid = $event"
             />
 
-            <v-btn
+            <UButton
                 color="success"
                 block
-                size="large"
+                size="lg"
                 :loading="loading"
                 :disabled="loading || !fieldsValid"
-                class="mb-3 font-weight-semibold"
+                class="mt-4 mb-3 font-semibold"
                 data-testid="confirm-reset-submit"
                 @click="submit"
             >
                 {{ $t('actions.save') }}
-            </v-btn>
+            </UButton>
         </template>
     </AuthTokenAction>
 </template>

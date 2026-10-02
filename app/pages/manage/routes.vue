@@ -1,69 +1,75 @@
 <template>
-    <v-container class="route-manager">
+    <div class="route-manager mx-auto w-full p-4">
         <LayoutPageHeader :title="$t('routes.dashboard')" inline-actions>
             <template #actions>
                 <template v-if="!isMobile">
-                    <v-btn
+                    <UButton
                         color="primary"
-                        prepend-icon="mdi-routes"
+                        icon="i-lucide-route"
                         data-testid="routes-create-open"
                         @click="routeFormRef?.open()"
                     >
                         {{ $t('climbing.create') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         color="primary"
-                        variant="tonal"
-                        prepend-icon="mdi-file-import-outline"
+                        variant="soft"
+                        icon="i-lucide-file-input"
                         data-testid="routes-import-open"
                         @click="importRouteRef?.open()"
                     >
                         {{ $t('actions.import') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         color="primary"
-                        variant="tonal"
-                        prepend-icon="mdi-map-marker-radius-outline"
+                        variant="soft"
+                        icon="i-lucide-map-pinned"
                         to="/manage/map"
                         data-testid="routes-place-on-map"
                     >
                         {{ $t('routes.mapPlacement') }}
-                    </v-btn>
+                    </UButton>
                 </template>
-                <v-btn
+                <UButton
                     v-if="isMobile"
-                    icon="mdi-plus"
+                    icon="i-lucide-plus"
                     color="primary"
-                    variant="flat"
                     :aria-label="$t('climbing.create')"
                     data-testid="routes-create-open"
                     @click="routeFormRef?.open()"
                 />
-                <v-menu v-if="isMobile" location="bottom end">
-                    <template #activator="{ props: menuProps }">
-                        <v-btn
-                            v-bind="menuProps"
-                            icon="mdi-dots-vertical"
-                            variant="text"
-                            :aria-label="$t('routes.moreActions')"
-                            data-testid="routes-more"
-                        />
+                <UPopover v-if="isMobile" :content="{ align: 'end' }">
+                    <UButton
+                        icon="i-lucide-ellipsis-vertical"
+                        color="neutral"
+                        variant="ghost"
+                        :aria-label="$t('routes.moreActions')"
+                        data-testid="routes-more"
+                    />
+                    <template #content="{ close }">
+                        <nav class="flex min-w-[200px] flex-col gap-0.5 p-1">
+                            <UButton
+                                color="neutral"
+                                variant="ghost"
+                                icon="i-lucide-file-input"
+                                data-testid="routes-import-open"
+                                @click="openImport(close)"
+                            >
+                                {{ $t('actions.import') }}
+                            </UButton>
+                            <UButton
+                                color="neutral"
+                                variant="ghost"
+                                icon="i-lucide-map-pinned"
+                                to="/manage/map"
+                                data-testid="routes-place-on-map"
+                                @click="close()"
+                            >
+                                {{ $t('routes.mapPlacement') }}
+                            </UButton>
+                        </nav>
                     </template>
-                    <v-list density="compact" nav>
-                        <v-list-item
-                            prepend-icon="mdi-file-import-outline"
-                            :title="$t('actions.import')"
-                            data-testid="routes-import-open"
-                            @click="importRouteRef?.open()"
-                        />
-                        <v-list-item
-                            prepend-icon="mdi-map-marker-radius-outline"
-                            :title="$t('routes.mapPlacement')"
-                            to="/manage/map"
-                            data-testid="routes-place-on-map"
-                        />
-                    </v-list>
-                </v-menu>
+                </UPopover>
             </template>
         </LayoutPageHeader>
 
@@ -76,395 +82,375 @@
         />
         <ImportRoute ref="importRouteRef" @closed="reloadRoutes" />
 
-        <v-row>
-            <v-col>
-                <FilterBar
-                    v-model="searchRouteName"
-                    :search-label="$t('climbing.searchRouteName')"
-                    :search-placeholder="$t('climbing.searchRouteHint')"
-                    :active-filter-count="activeFilterCount"
-                    @clear="clearFilters"
-                >
-                    <template #filters>
-                        <v-row density="comfortable" align="center">
-                            <v-col v-if="isMobile" cols="12" sm="6">
-                                <RouteSortControl
-                                    :model-value="tableOptions.sortBy"
-                                    :items="sortItemsMobile"
-                                    @update:modelValue="onMobileSortChange"
-                                />
-                            </v-col>
-                            <v-col cols="6" sm="3">
-                                <v-select
-                                    :label="gradeColumnTitle"
-                                    :items="difficulties"
-                                    v-model="selectedDifficulty"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    data-testid="routes-filter-difficulty"
-                                />
-                            </v-col>
-                            <v-col cols="6" sm="3">
-                                <v-select
-                                    :label="$t('climbing.type')"
-                                    :items="types"
-                                    v-model="selectedType"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    data-testid="routes-filter-type"
-                                />
-                            </v-col>
-                            <v-col cols="6" sm="3">
-                                <v-select
-                                    :label="$t('climbing.location')"
-                                    :items="locations"
-                                    v-model="selectedLocation"
-                                    item-title="text"
-                                    item-value="value"
-                                    clearable
-                                    hide-details
-                                    density="compact"
-                                    data-testid="routes-filter-location"
-                                />
-                            </v-col>
-                            <v-col
-                                cols="6"
-                                sm="auto"
-                                class="d-flex align-center"
-                            >
-                                <v-chip
-                                    :color="
-                                        displayArchived ? 'warning' : undefined
-                                    "
-                                    :variant="
-                                        displayArchived ? 'tonal' : 'outlined'
-                                    "
-                                    prepend-icon="mdi-archive-outline"
-                                    data-testid="routes-filter-archived"
-                                    @click="displayArchived = !displayArchived"
-                                >
-                                    {{ $t('filter.archived') }}
-                                </v-chip>
-                            </v-col>
-                        </v-row>
-                    </template>
-                </FilterBar>
+        <FilterBar
+            v-model="searchRouteName"
+            :search-label="$t('climbing.searchRouteName')"
+            :search-placeholder="$t('climbing.searchRouteHint')"
+            :active-filter-count="activeFilterCount"
+            @clear="clearFilters"
+        >
+            <template #filters>
+                <div class="contents">
+                    <RouteSortControl
+                        v-if="isMobile"
+                        :model-value="tableOptions.sortBy"
+                        :items="sortItemsMobile"
+                        @update:model-value="onMobileSortChange"
+                    />
+                    <FilterSelect
+                        :label="gradeColumnTitle"
+                        v-model="selectedDifficulty"
+                        :items="difficulties"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="routes-filter-difficulty"
+                    />
+                    <FilterSelect
+                        :label="$t('climbing.type')"
+                        v-model="selectedType"
+                        :items="types"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="routes-filter-type"
+                    />
+                    <FilterSelect
+                        :label="$t('climbing.location')"
+                        v-model="selectedLocation"
+                        :items="locations"
+                        label-key="text"
+                        value-key="value"
+                        data-testid="routes-filter-location"
+                    />
+                    <div class="flex items-center">
+                        <UButton
+                            :color="displayArchived ? 'warning' : 'neutral'"
+                            :variant="displayArchived ? 'soft' : 'outline'"
+                            icon="i-lucide-archive"
+                            class="rounded-full"
+                            :aria-pressed="displayArchived"
+                            data-testid="routes-filter-archived"
+                            @click="displayArchived = !displayArchived"
+                        >
+                            {{ $t('filter.archived') }}
+                        </UButton>
+                    </div>
+                </div>
+            </template>
+        </FilterBar>
 
-                <v-row>
-                    <v-col cols="12">
-                        <div class="route-manager__actions">
-                            <v-btn
-                                @click="selectAll"
-                                color="primary"
-                                variant="tonal"
-                                :size="isMobile ? 'small' : undefined"
-                                :aria-label="selectAllLabel"
-                                :title="selectAllAction"
-                                class="route-manager__count"
-                                data-testid="routes-select-all"
-                            >
-                                <v-icon start>{{ selectAllIcon }}</v-icon>
-                                {{ selectAllText }}
-                            </v-btn>
-                            <v-btn
-                                v-if="hasSelection"
-                                @click="openExportOptions('pdf')"
-                                color="success"
-                                variant="tonal"
-                                :loading="exportingFormat === 'pdf'"
-                                :disabled="
-                                    !!exportingFormat &&
-                                    exportingFormat !== 'pdf'
-                                "
-                                :size="isMobile ? 'small' : undefined"
-                                data-testid="routes-export-pdf"
-                            >
-                                <v-icon start>mdi-printer</v-icon>
-                                {{ $t('actions.print') }}
-                            </v-btn>
-                            <v-btn
-                                v-if="hasSelection"
-                                @click="openExportOptions('xlsx')"
-                                color="success"
-                                variant="tonal"
-                                :loading="exportingFormat === 'xlsx'"
-                                :disabled="
-                                    !!exportingFormat &&
-                                    exportingFormat !== 'xlsx'
-                                "
-                                :size="isMobile ? 'small' : undefined"
-                                data-testid="routes-export-xlsx"
-                            >
-                                <v-icon start>mdi-file-excel</v-icon>
-                                XLSX
-                            </v-btn>
-                            <v-btn
-                                v-if="hasSelection"
-                                @click="exportSelectedJson"
-                                color="success"
-                                variant="tonal"
-                                :loading="exportingFormat === 'json'"
-                                :disabled="
-                                    !!exportingFormat &&
-                                    exportingFormat !== 'json'
-                                "
-                                :size="isMobile ? 'small' : undefined"
-                                data-testid="routes-export-json"
-                            >
-                                <v-icon start>mdi-code-json</v-icon>
-                                JSON
-                            </v-btn>
-                            <v-btn
-                                v-if="hasSelection"
-                                @click="handleArchiveClick"
-                                color="warning"
-                                variant="tonal"
-                                :size="isMobile ? 'small' : undefined"
-                                data-testid="routes-archive-selected"
-                            >
-                                <v-icon start>mdi-archive-outline</v-icon>
-                                {{ $t('actions.archive') }}
-                            </v-btn>
-                        </div>
-                    </v-col>
-                </v-row>
+        <div class="route-manager__actions">
+            <UButton
+                color="primary"
+                variant="soft"
+                :icon="selectAllIcon"
+                :size="isMobile ? 'sm' : 'md'"
+                :aria-label="selectAllLabel"
+                :title="selectAllAction"
+                class="route-manager__count font-semibold"
+                data-testid="routes-select-all"
+                @click="selectAll"
+            >
+                {{ selectAllText }}
+            </UButton>
+            <UButton
+                v-if="hasSelection"
+                color="success"
+                variant="soft"
+                icon="i-lucide-printer"
+                :loading="exportingFormat === 'pdf'"
+                :disabled="!!exportingFormat && exportingFormat !== 'pdf'"
+                :size="isMobile ? 'sm' : 'md'"
+                data-testid="routes-export-pdf"
+                @click="openExportOptions('pdf')"
+            >
+                {{ $t('actions.print') }}
+            </UButton>
+            <UButton
+                v-if="hasSelection"
+                color="success"
+                variant="soft"
+                icon="i-lucide-file-spreadsheet"
+                :loading="exportingFormat === 'xlsx'"
+                :disabled="!!exportingFormat && exportingFormat !== 'xlsx'"
+                :size="isMobile ? 'sm' : 'md'"
+                data-testid="routes-export-xlsx"
+                @click="openExportOptions('xlsx')"
+            >
+                XLSX
+            </UButton>
+            <UButton
+                v-if="hasSelection"
+                color="success"
+                variant="soft"
+                icon="i-lucide-file-json"
+                :loading="exportingFormat === 'json'"
+                :disabled="!!exportingFormat && exportingFormat !== 'json'"
+                :size="isMobile ? 'sm' : 'md'"
+                data-testid="routes-export-json"
+                @click="exportSelectedJson"
+            >
+                JSON
+            </UButton>
+            <UButton
+                v-if="hasSelection"
+                color="warning"
+                variant="soft"
+                icon="i-lucide-archive"
+                :size="isMobile ? 'sm' : 'md'"
+                data-testid="routes-archive-selected"
+                @click="handleArchiveClick"
+            >
+                {{ $t('actions.archive') }}
+            </UButton>
+        </div>
 
-                <div v-if="!isMobile" data-testid="routes-table">
-                    <v-data-table-server
-                        class="route-manager__table"
-                        :headers="tableHeaders"
-                        :items="routes"
-                        :items-length="totalItems"
-                        :page="tableOptions.page"
-                        :items-per-page="tableOptions.itemsPerPage"
-                        :sort-by="tableOptions.sortBy"
-                        :loading="loading"
-                        :items-per-page-options="pageSizeOptions"
-                        :no-data-text="$t('table.no_data')"
-                        item-value="id"
-                        @update:options="loadRoutes"
+        <div v-if="!isMobile" class="mt-4" data-testid="routes-table">
+            <UTable
+                :data="routes"
+                :columns="tableColumns"
+                :loading="loading"
+                :empty="$t('table.no_data')"
+                :row-selection="rowSelection"
+                :get-row-id="(route: RouteListItem) => route.id"
+                :ui="tableUi"
+            >
+                <template #selected-cell="{ row }">
+                    <UCheckbox
+                        :model-value="selectedRouteIds.has(row.original.id)"
+                        :aria-label="
+                            $t('actions.select_route', {
+                                name: row.original.name,
+                            })
+                        "
+                        data-testid="routes-row-checkbox"
+                        @update:model-value="
+                            updateRouteSelection(row.original, !!$event)
+                        "
+                    />
+                </template>
+                <template #color-cell="{ row }">
+                    <span
+                        class="block size-6 rounded-full"
+                        :style="{ background: row.original.color ?? undefined }"
+                    />
+                </template>
+                <template #name-cell="{ row }">
+                    <div
+                        class="route-manager__name"
+                        :data-testid="`routes-row-${row.original.id}`"
                     >
-                        <template #item.selected="{ item }">
-                            <v-checkbox
-                                :model-value="selectedRouteIds.has(item.id)"
-                                color="primary"
-                                hide-details
-                                density="compact"
+                        <span
+                            class="route-manager__name-text"
+                            data-testid="routes-row-name"
+                            >{{ row.original.name }}</span
+                        >
+                        <UIcon
+                            v-if="row.original.has_ratings"
+                            name="i-lucide-badge-check"
+                            class="size-4 text-amber-500"
+                        />
+                        <UBadge
+                            v-if="row.original.archived"
+                            size="sm"
+                            color="neutral"
+                            variant="outline"
+                        >
+                            {{ $t('filter.archived') }}
+                        </UBadge>
+                    </div>
+                </template>
+                <template #difficulty-cell="{ row }">
+                    <GradeLabel :source="row.original" />
+                </template>
+                <template #anchor_point-cell="{ row }">
+                    {{ formatAnchorPoint(row.original.anchor_point) }}
+                </template>
+                <template #comment-cell="{ row }">
+                    <div class="route-manager__comment">
+                        {{ row.original.comment }}
+                    </div>
+                </template>
+                <template #creator-cell="{ row }">
+                    <div class="route-manager__creator-chips">
+                        <UBadge
+                            v-for="creator in row.original.creator"
+                            :key="creator"
+                            color="neutral"
+                            variant="subtle"
+                            class="rounded-full"
+                            >{{ creator }}</UBadge
+                        >
+                    </div>
+                </template>
+                <template #location-cell="{ row }">
+                    {{ locationName(row.original) }}
+                </template>
+                <template #type-cell="{ row }">
+                    {{ row.original.type }}
+                </template>
+                <template #score-cell="{ row }">
+                    {{ formatScore(row.original, locale) }}
+                </template>
+                <template #actions-cell="{ row }">
+                    <div class="route-manager__row-actions">
+                        <UButton
+                            icon="i-lucide-pencil"
+                            color="neutral"
+                            variant="ghost"
+                            :aria-label="$t('actions.edit')"
+                            data-testid="routes-row-edit"
+                            @click="routeFormRef?.open(row.original)"
+                        />
+                        <RouteViewButton :route-id="row.original.id" compact />
+                        <RouteDetails :route_id="row.original.id" />
+                    </div>
+                </template>
+            </UTable>
+            <div
+                class="flex flex-wrap items-center justify-end gap-4 border-t px-2 py-3 text-sm"
+            >
+                <div class="flex items-center gap-2">
+                    <span class="text-muted">{{
+                        $t('table.rows_per_page')
+                    }}</span>
+                    <USelect
+                        :model-value="tableOptions.itemsPerPage"
+                        :items="pageSizeOptions"
+                        :aria-label="$t('table.rows_per_page')"
+                        class="w-24"
+                        data-testid="routes-page-size"
+                        @update:model-value="
+                            loadRoutes({
+                                page: 1,
+                                itemsPerPage: Number($event),
+                            })
+                        "
+                    />
+                </div>
+                <span data-testid="table-page-info">{{ pageInfo }}</span>
+                <UPagination
+                    :page="tableOptions.page"
+                    :total="totalItems"
+                    :items-per-page="tableOptions.itemsPerPage"
+                    @update:page="loadRoutes({ page: $event })"
+                />
+            </div>
+        </div>
+
+        <div v-else class="route-manager__mobile-section">
+            <USkeleton
+                v-if="loading && routes.length === 0"
+                class="mt-4 h-40 w-full"
+            />
+            <LayoutEmptyState
+                v-else-if="!loading && routes.length === 0"
+                class="mt-4"
+                :title="$t('table.no_data')"
+            />
+            <div
+                v-else
+                ref="mobileListRef"
+                class="route-manager__rows native-group"
+                data-testid="routes-rows"
+            >
+                <RouteManageRow
+                    v-for="route in routes"
+                    :key="route.id"
+                    :route="route"
+                    :selected="selectedRouteIds.has(route.id)"
+                    @update:selected="updateRouteSelection(route, $event)"
+                    @edit="routeFormRef?.open(route)"
+                >
+                    <template #actions>
+                        <RouteDetails :route_id="route.id" compact />
+                        <RouteViewButton :route-id="route.id" compact />
+                    </template>
+                </RouteManageRow>
+            </div>
+
+            <nav
+                class="route-manager__mobile-pagination"
+                :aria-label="$t('table.pagination')"
+                data-testid="routes-mobile-pagination"
+            >
+                <div class="route-manager__pager-pill">
+                    <div class="route-manager__pager">
+                        <UButton
+                            icon="i-lucide-chevron-left"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
+                            :disabled="tableOptions.page <= 1"
+                            :aria-label="$t('table.previous_page')"
+                            data-testid="routes-mobile-prev"
+                            @click="onMobilePageChange(tableOptions.page - 1)"
+                        />
+                        <template
+                            v-for="(page, index) in pageItems"
+                            :key="`${page}-${index}`"
+                        >
+                            <span
+                                v-if="page === ELLIPSIS"
+                                class="route-manager__page-gap"
+                                data-testid="routes-mobile-page-gap"
+                                aria-hidden="true"
+                                >{{ page }}</span
+                            >
+                            <UButton
+                                v-else
+                                :variant="
+                                    page === tableOptions.page
+                                        ? 'solid'
+                                        : 'ghost'
+                                "
+                                :color="
+                                    page === tableOptions.page
+                                        ? 'primary'
+                                        : 'neutral'
+                                "
+                                :aria-current="
+                                    page === tableOptions.page
+                                        ? 'page'
+                                        : undefined
+                                "
                                 :aria-label="
-                                    $t('actions.select_route', {
-                                        name: item.name,
+                                    $t('table.page_of', {
+                                        page,
+                                        total: pageLength,
                                     })
                                 "
-                                data-testid="routes-row-checkbox"
-                                @update:modelValue="
-                                    updateRouteSelection(item, !!$event)
-                                "
-                            />
-                        </template>
-                        <template #item.color="{ item }">
-                            <v-avatar
-                                :color="item.color ?? undefined"
-                                size="24"
-                            />
-                        </template>
-                        <template #item.name="{ item }">
-                            <div
-                                class="route-manager__name"
-                                :data-testid="`routes-row-${item.id}`"
+                                size="sm"
+                                class="route-manager__page-btn justify-center"
+                                :data-testid="`routes-mobile-goto-${page}`"
+                                @click="onMobilePageChange(page)"
                             >
-                                <span
-                                    class="route-manager__name-text"
-                                    data-testid="routes-row-name"
-                                    >{{ item.name }}</span
-                                >
-                                <v-icon
-                                    v-if="item.has_ratings"
-                                    color="yellow-darken-2"
-                                    size="small"
-                                >
-                                    mdi-star-circle
-                                </v-icon>
-                                <v-chip
-                                    v-if="item.archived"
-                                    size="x-small"
-                                    variant="outlined"
-                                >
-                                    {{ $t('filter.archived') }}
-                                </v-chip>
-                            </div>
+                                {{ page }}
+                            </UButton>
                         </template>
-                        <template #item.difficulty="{ item }">
-                            <GradeLabel :source="item" />
-                        </template>
-                        <template #item.anchor_point="{ item }">
-                            {{ formatAnchorPoint(item.anchor_point) }}
-                        </template>
-                        <template #item.comment="{ item }">
-                            <div class="route-manager__comment">
-                                {{ item.comment }}
-                            </div>
-                        </template>
-                        <template #item.creator="{ item }">
-                            <div class="route-manager__creator-chips">
-                                <v-chip
-                                    v-for="creator in item.creator"
-                                    :key="creator"
-                                    size="small"
-                                    class="ma-0"
-                                    >{{ creator }}</v-chip
-                                >
-                            </div>
-                        </template>
-                        <template #item.location="{ item }">
-                            {{ locationName(item) }}
-                        </template>
-                        <template #item.score="{ item }">
-                            {{ formatScore(item, locale) }}
-                        </template>
-                        <template #item.actions="{ item }">
-                            <div class="route-manager__row-actions">
-                                <v-btn
-                                    icon="mdi-pencil-outline"
-                                    variant="text"
-                                    size="small"
-                                    class="mr-1"
-                                    :aria-label="$t('actions.edit')"
-                                    data-testid="routes-row-edit"
-                                    @click="routeFormRef?.open(item)"
-                                />
-                                <RouteViewButton :route-id="item.id" compact />
-                                <RouteDetails :route_id="item.id" />
-                            </div>
-                        </template>
-                    </v-data-table-server>
-                </div>
-
-                <div v-else class="route-manager__mobile-section">
-                    <v-skeleton-loader
-                        v-if="loading && routes.length === 0"
-                        type="card"
-                        class="mt-4"
-                        :elevation="0"
-                    />
-                    <LayoutEmptyState
-                        v-else-if="!loading && routes.length === 0"
-                        class="mt-4"
-                        :title="$t('table.no_data')"
-                    />
-                    <div
-                        v-else
-                        ref="mobileListRef"
-                        class="route-manager__rows"
-                        data-testid="routes-rows"
-                    >
-                        <RouteManageRow
-                            v-for="route in routes"
-                            :key="route.id"
-                            :route="route"
-                            :selected="selectedRouteIds.has(route.id)"
-                            @update:selected="
-                                updateRouteSelection(route, $event)
-                            "
-                            @edit="routeFormRef?.open(route)"
-                        >
-                            <template #actions>
-                                <RouteDetails :route_id="route.id" compact />
-                                <RouteViewButton :route-id="route.id" compact />
-                            </template>
-                        </RouteManageRow>
-                    </div>
-
-                    <nav
-                        class="route-manager__mobile-pagination"
-                        :aria-label="$t('table.pagination')"
-                        data-testid="routes-mobile-pagination"
-                    >
-                        <div class="route-manager__pager">
-                            <v-btn
-                                icon="mdi-chevron-left"
-                                variant="text"
-                                size="small"
-                                :disabled="tableOptions.page <= 1"
-                                :aria-label="$t('table.previous_page')"
-                                data-testid="routes-mobile-prev"
-                                @click="
-                                    onMobilePageChange(tableOptions.page - 1)
-                                "
-                            />
-                            <template
-                                v-for="(page, index) in pageItems"
-                                :key="`${page}-${index}`"
-                            >
-                                <span
-                                    v-if="page === ELLIPSIS"
-                                    class="route-manager__page-gap"
-                                    data-testid="routes-mobile-page-gap"
-                                    aria-hidden="true"
-                                    >{{ page }}</span
-                                >
-                                <v-btn
-                                    v-else
-                                    :variant="
-                                        page === tableOptions.page
-                                            ? 'flat'
-                                            : 'text'
-                                    "
-                                    :color="
-                                        page === tableOptions.page
-                                            ? 'primary'
-                                            : undefined
-                                    "
-                                    :aria-current="
-                                        page === tableOptions.page
-                                            ? 'page'
-                                            : undefined
-                                    "
-                                    :aria-label="
-                                        $t('table.page_of', {
-                                            page,
-                                            total: pageLength,
-                                        })
-                                    "
-                                    size="small"
-                                    class="route-manager__page-btn"
-                                    :data-testid="`routes-mobile-goto-${page}`"
-                                    @click="onMobilePageChange(page)"
-                                >
-                                    {{ page }}
-                                </v-btn>
-                            </template>
-                            <v-btn
-                                icon="mdi-chevron-right"
-                                variant="text"
-                                size="small"
-                                :disabled="tableOptions.page >= pageLength"
-                                :aria-label="$t('table.next_page')"
-                                data-testid="routes-mobile-next"
-                                @click="
-                                    onMobilePageChange(tableOptions.page + 1)
-                                "
-                            />
-                        </div>
-                        <v-select
-                            :model-value="tableOptions.itemsPerPage"
-                            :items="pageSizeOptions"
-                            :aria-label="$t('table.rows_per_page')"
-                            density="compact"
-                            hide-details
-                            class="route-manager__page-size"
-                            data-testid="routes-mobile-page-size"
-                            @update:modelValue="onMobileItemsPerPageChange"
+                        <UButton
+                            icon="i-lucide-chevron-right"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
+                            :disabled="tableOptions.page >= pageLength"
+                            :aria-label="$t('table.next_page')"
+                            data-testid="routes-mobile-next"
+                            @click="onMobilePageChange(tableOptions.page + 1)"
                         />
-                    </nav>
+                    </div>
+                    <USelect
+                        :model-value="tableOptions.itemsPerPage"
+                        :items="pageSizeOptions"
+                        :aria-label="$t('table.rows_per_page')"
+                        variant="ghost"
+                        size="sm"
+                        class="route-manager__page-size w-20"
+                        data-testid="routes-mobile-page-size"
+                        @update:model-value="onItemsPerPageChange"
+                    />
                 </div>
-            </v-col>
-        </v-row>
+            </nav>
+        </div>
 
         <ExportOptionsDialog
             v-model="showExportOptions"
@@ -479,7 +465,7 @@
             :confirm-text="$t('actions.archive')"
             @confirm="archiveSelected"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -493,6 +479,7 @@ import {
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
+import type { TableColumn } from '@nuxt/ui'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 
 interface LoadOptions {
@@ -558,27 +545,89 @@ const pageSizeOptions = [10, 25, 50, 100]
 
 const routeFormRef = useTemplateRef('routeFormRef')
 const importRouteRef = useTemplateRef('importRouteRef')
+const openImport = (close: () => void) => {
+    close()
+    importRouteRef.value?.open()
+}
 
 const { gradeColumnTitle } = useGradeSystems()
 
-const tableHeaders = computed(() => [
-    { title: '', key: 'selected', sortable: false, width: 56 },
-    { title: t('climbing.color'), key: 'color', sortable: false },
-    { title: t('climbing.routename'), key: 'name' },
-    { title: gradeColumnTitle.value, key: 'difficulty', nowrap: true },
-    { title: t('climbing.anchor_point'), key: 'anchor_point' },
-    { title: t('climbing.comment'), key: 'comment', sortable: false },
-    { title: t('routes.route_setter'), key: 'creator', sortable: false },
-    { title: t('climbing.location'), key: 'location' },
-    { title: t('climbing.type'), key: 'type' },
-    { title: t('ratings.score'), key: 'score' },
+const UButton = resolveComponent('UButton')
+
+function sortableHeader(label: string, key: string) {
+    return () => {
+        const active = tableOptions.sortBy[0]
+        const order = active?.key === key ? active.order : undefined
+        return h(UButton, {
+            color: 'neutral',
+            variant: 'ghost',
+            label,
+            trailingIcon:
+                order === 'asc'
+                    ? 'i-lucide-arrow-up'
+                    : order === 'desc'
+                      ? 'i-lucide-arrow-down'
+                      : 'i-lucide-arrow-up-down',
+            class: '-mx-2.5 w-[calc(100%+1.25rem)] font-semibold',
+            onClick: () => toggleSort(key),
+        })
+    }
+}
+
+function toggleSort(key: string) {
+    const active = tableOptions.sortBy[0]
+    const sortBy: SortOption[] =
+        active?.key !== key
+            ? [{ key, order: 'asc' }]
+            : active.order === 'asc'
+              ? [{ key, order: 'desc' }]
+              : []
+    void loadRoutes({ page: 1, sortBy })
+}
+
+const tableUi = {
+    th: 'px-2 xl:px-4',
+    td: 'px-2 py-2 xl:px-4 whitespace-normal text-default',
+}
+
+const tableColumns = computed<TableColumn<RouteListItem>[]>(() => [
+    { id: 'selected', meta: { class: { th: 'w-11', td: 'w-11' } } },
+    { id: 'color', header: t('climbing.color') },
+    { id: 'name', header: sortableHeader(t('climbing.routename'), 'name') },
     {
-        title: t('table.actions'),
-        key: 'actions',
-        sortable: false,
-        align: 'end' as const,
+        id: 'difficulty',
+        header: sortableHeader(gradeColumnTitle.value, 'difficulty'),
+        meta: { class: { td: 'whitespace-nowrap' } },
+    },
+    {
+        id: 'anchor_point',
+        header: sortableHeader(t('climbing.anchor_point'), 'anchor_point'),
+    },
+    { id: 'comment', header: t('climbing.comment') },
+    { id: 'creator', header: t('routes.route_setter') },
+    {
+        id: 'location',
+        header: sortableHeader(t('climbing.location'), 'location'),
+    },
+    { id: 'type', header: sortableHeader(t('climbing.type'), 'type') },
+    { id: 'score', header: sortableHeader(t('ratings.score'), 'score') },
+    {
+        id: 'actions',
+        header: t('table.actions'),
+        meta: { class: { th: 'text-end' } },
     },
 ])
+
+const rowSelection = computed(() =>
+    Object.fromEntries(Array.from(selectedRouteIds.value, (id) => [id, true])),
+)
+
+const pageInfo = computed(() => {
+    const { page, itemsPerPage } = tableOptions
+    const start = totalItems.value ? (page - 1) * itemsPerPage + 1 : 0
+    const end = Math.min(page * itemsPerPage, totalItems.value)
+    return `${start}-${end} / ${totalItems.value}`
+})
 
 const pbFilter = computed(() => {
     const parts = []
@@ -614,9 +663,9 @@ const selectAllLabel = computed(() =>
         : selectAllAction.value,
 )
 const selectAllIcon = computed(() => {
-    if (areAllSelected.value) return 'mdi-checkbox-marked-outline'
-    if (hasSelection.value) return 'mdi-minus-box-outline'
-    return 'mdi-checkbox-blank-outline'
+    if (areAllSelected.value) return 'i-lucide-square-check-big'
+    if (hasSelection.value) return 'i-lucide-square-minus'
+    return 'i-lucide-square'
 })
 
 const { exportingFormat, exportPdf, exportXlsx, exportJson } = useRouteExport()
@@ -852,12 +901,10 @@ const onMobilePageChange = async (value: number) => {
 
     await loadRoutes({ page: value })
 
-    ;(mobileListRef.value?.$el as HTMLElement | undefined)?.scrollIntoView({
-        block: 'start',
-    })
+    mobileListRef.value?.scrollIntoView({ block: 'start' })
 }
 
-const onMobileItemsPerPageChange = (value: number | string) => {
+const onItemsPerPageChange = (value: number | string) => {
     const size = Number(value)
     if (!size || size === tableOptions.itemsPerPage) {
         return
@@ -950,8 +997,7 @@ useHead(() => ({
 }
 
 .route-manager__rows {
-    margin-top: 4px;
-    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    margin-top: 8px;
 }
 
 .route-manager__count {
@@ -964,10 +1010,6 @@ useHead(() => ({
     gap: 8px;
     align-items: center;
     margin-bottom: 16px;
-}
-
-.route-manager__table {
-    margin-top: 16px;
 }
 
 .route-manager__comment {
@@ -1007,19 +1049,27 @@ useHead(() => ({
 }
 
 .route-manager__mobile-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: center;
-    align-items: center;
     position: sticky;
     bottom: calc(
-        var(--v-layout-bottom, 0px) + env(safe-area-inset-bottom, 0px)
+        var(--app-bottom, 0px) + env(safe-area-inset-bottom, 0px) + 12px
     );
     z-index: 2;
-    padding-block: 8px;
-    background: rgb(var(--v-theme-background));
-    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    pointer-events: none;
+}
+
+.route-manager__pager-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    background: var(--ui-bg);
+    box-shadow: 0 6px 20px -6px rgb(0 0 0 / 0.35);
+    pointer-events: auto;
 }
 
 .route-manager__page-size {
@@ -1037,30 +1087,13 @@ useHead(() => ({
 .route-manager__page-btn {
     min-width: 32px;
     padding-inline: 0;
+    border-radius: 999px;
 }
 
 .route-manager__page-gap {
     min-width: 16px;
     text-align: center;
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), 0.5);
-}
-
-@media (max-width: 1279.98px) {
-    .route-manager__table :deep(.v-data-table__td),
-    .route-manager__table :deep(.v-data-table__th) {
-        padding-inline: 6px;
-    }
-
-    .route-manager__table :deep(.v-data-table__th:first-child),
-    .route-manager__table :deep(.v-data-table__td:first-child) {
-        width: 44px;
-        min-width: 44px;
-        padding-inline: 2px;
-    }
-
-    .route-manager__table :deep(table) {
-        font-size: 13px;
-    }
+    color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
 }
 </style>

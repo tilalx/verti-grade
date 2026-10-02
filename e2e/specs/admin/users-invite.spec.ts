@@ -5,12 +5,9 @@ import { gotoSettled } from '../../support/nav'
 async function fillCreateForm(page: Page, email: string, lastname: string) {
     await page.getByTestId('user-create-open').click()
     await expect(page.getByTestId('user-create-dialog')).toBeVisible()
-    await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
-    await page
-        .getByTestId('user-create-lastname')
-        .locator('input')
-        .fill(lastname)
-    await page.getByTestId('user-create-email').locator('input').fill(email)
+    await page.getByTestId('user-create-firstname').fill('E2E')
+    await page.getByTestId('user-create-lastname').fill(lastname)
+    await page.getByTestId('user-create-email').fill(email)
 }
 
 test('sends an invite mail after creating a user', async ({
@@ -49,10 +46,10 @@ test('keeps the created user when the invite mail fails', async ({
     await fillCreateForm(page, email, 'InviteFail')
     await page.getByTestId('user-create-submit').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(page.getByTestId('user-create-dialog')).toBeHidden()
 
-    await page.getByTestId('filter-search').locator('input').fill(email)
+    await page.getByTestId('filter-search').fill(email)
     await expect(
         page.locator('[data-testid^="user-card-"]').filter({ hasText: email }),
     ).toBeVisible()

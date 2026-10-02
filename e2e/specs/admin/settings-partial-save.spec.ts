@@ -5,7 +5,7 @@ test('saving settings only sends the fields that were edited', async ({
     adminPage: page,
     testPrefix,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=organization')
     const current = await (
         await page.request.get(
             '/api/collections/settings/records/settings_123456',
@@ -23,10 +23,7 @@ test('saving settings only sends the fields that were edited', async ({
         },
     )
 
-    await page
-        .getByTestId('settings-org-name')
-        .locator('input')
-        .fill(`${testPrefix}-org`)
+    await page.getByTestId('settings-org-name').fill(`${testPrefix}-org`)
     await page.getByTestId('settings-save').click()
     await expect(page.getByTestId('settings-save')).toBeHidden()
 
@@ -36,13 +33,15 @@ test('saving settings only sends the fields that were edited', async ({
 test('an out of range audit retention cannot be saved', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=organization')
     const retention = page.getByTestId('settings-audit-retention')
 
-    await retention.locator('input').fill('0')
-    await expect(retention).toContainText('whole number from 1 to 3650')
+    await retention.fill('0')
+    await expect(retention).toHaveAccessibleDescription(
+        /whole number from 1 to 3650/,
+    )
     await expect(page.getByTestId('settings-save')).toBeDisabled()
 
-    await retention.locator('input').fill('3649')
+    await retention.fill('3649')
     await expect(page.getByTestId('settings-save')).toBeEnabled()
 })

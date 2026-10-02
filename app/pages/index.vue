@@ -1,5 +1,5 @@
 <template>
-    <v-container class="overview" data-testid="overview">
+    <div class="overview mx-auto w-full p-4" data-testid="overview">
         <header class="overview-hero">
             <div class="overview-hero__text">
                 <h1 class="overview-hero__title">
@@ -27,14 +27,15 @@
             data-testid="load-error"
         >
             <template #actions>
-                <v-btn
-                    variant="tonal"
-                    prepend-icon="mdi-refresh"
+                <UButton
+                    color="neutral"
+                    variant="soft"
+                    icon="i-lucide-refresh-cw"
                     data-testid="load-error-retry"
                     @click="retryLoad"
                 >
                     {{ $t('errors.retry') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutEmptyState>
 
@@ -54,14 +55,15 @@
                     <section v-if="walls.length" class="overview-section">
                         <div class="overview-section__head">
                             <h2>{{ $t('overview.walls') }}</h2>
-                            <v-btn
+                            <UButton
                                 to="/map"
-                                variant="text"
-                                append-icon="mdi-map-outline"
+                                color="neutral"
+                                variant="ghost"
+                                trailing-icon="i-lucide-map"
                                 data-testid="overview-open-map"
                             >
                                 {{ $t('overview.openMap') }}
-                            </v-btn>
+                            </UButton>
                         </div>
                         <OverviewWallTiles :walls="walls" />
                     </section>
@@ -82,7 +84,7 @@
                             link-rows
                             data-testid="overview-popular"
                         />
-                        <p v-else class="text-body-medium text-medium-emphasis">
+                        <p v-else class="text-sm text-muted">
                             {{ $t('overview.popularEmpty') }}
                         </p>
                     </section>
@@ -105,21 +107,21 @@
                                 })
                             }}
                         </p>
-                        <v-progress-linear
+                        <UProgress
                             :model-value="progressPercent"
                             color="primary"
-                            height="8"
-                            rounded
+                            size="lg"
                             class="my-3"
                         />
-                        <v-btn
+                        <UButton
                             to="/logbook"
-                            variant="tonal"
+                            color="neutral"
+                            variant="soft"
                             block
-                            prepend-icon="mdi-notebook-check-outline"
+                            icon="i-lucide-book-check"
                         >
                             {{ $t('overview.openLogbook') }}
-                        </v-btn>
+                        </UButton>
                     </section>
                     <AuthGuestCta
                         v-else
@@ -134,7 +136,7 @@
                         <p class="overview-card__title">
                             {{ $t('overview.gradeSpread') }}
                         </p>
-                        <div class="d-flex flex-column ga-5">
+                        <div class="flex flex-col gap-5">
                             <OverviewGradeSpread
                                 :title="$t('map.routes')"
                                 :bars="routeBars"
@@ -148,7 +150,7 @@
                 </aside>
             </div>
         </template>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -296,12 +298,12 @@ onMounted(async () => {
 
 .overview-hero__stats {
     margin: 6px 0 0;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
     font-size: 1rem;
 }
 
 .overview-hero__link {
-    color: rgb(var(--v-theme-primary));
+    color: var(--ui-primary);
     font-weight: 600;
     text-decoration: none;
 }
@@ -331,6 +333,10 @@ onMounted(async () => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     column-gap: 16px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
 }
 
 .overview-grid {
@@ -349,7 +355,8 @@ onMounted(async () => {
 .overview-card {
     padding: 16px;
     border-radius: 12px;
-    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
 }
 
 .overview-card__title {

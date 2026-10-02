@@ -56,22 +56,26 @@ test.describe('dark theme', () => {
 })
 
 async function coveredBySafeAreaPadding(sheet: Locator) {
-    return sheet.evaluate((element) =>
-        [...document.styleSheets].some((styleSheet) => {
-            try {
-                return [...styleSheet.cssRules].some(
-                    (rule) =>
-                        rule instanceof CSSStyleRule &&
+    return sheet.evaluate((element) => {
+        const covers = (rules: CSSRuleList): boolean =>
+            [...rules].some(
+                (rule) =>
+                    (rule instanceof CSSStyleRule &&
                         element.matches(rule.selectorText) &&
                         rule.style.paddingBottom.includes(
                             'safe-area-inset-bottom',
-                        ),
-                )
+                        )) ||
+                    ('cssRules' in rule &&
+                        covers((rule as CSSGroupingRule).cssRules)),
+            )
+        return [...document.styleSheets].some((styleSheet) => {
+            try {
+                return covers(styleSheet.cssRules)
             } catch {
                 return false
             }
-        }),
-    )
+        })
+    })
 }
 
 test('the filter sheet keeps its actions above the home indicator', async ({
@@ -101,7 +105,7 @@ for (const path of ['/scan', '/map']) {
     }) => {
         await gotoSettled(page, path)
         await page.addStyleTag({
-            content: '.v-main { --app-bottom-inset: 34px !important; }',
+            content: ':root { --app-bottom-inset: 34px !important; }',
         })
         await expect
             .poll(() =>

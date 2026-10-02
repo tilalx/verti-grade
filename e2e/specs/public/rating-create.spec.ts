@@ -9,13 +9,13 @@ test('an anonymous visitor can submit a review', async ({ page, route }) => {
 
     await page
         .getByTestId('review-form-rating')
-        .getByRole('button', { name: 'Rating 5 of 5' })
+        .getByRole('radio', { name: /5\/5$/ })
         .click()
     await page.getByTestId('review-form-difficulty').click()
     await page.getByRole('option').first().click()
+    await expect(page.getByRole('listbox')).toBeHidden()
     await page
         .getByTestId('review-form-comment')
-        .locator('textarea')
         .first()
         .fill('Great climb, e2e review')
     await page.getByTestId('review-form-submit').click()
@@ -41,18 +41,18 @@ test('keeps the dialog open when the review submit fails', async ({
 
     await page
         .getByTestId('review-form-rating')
-        .getByRole('button', { name: 'Rating 5 of 5' })
+        .getByRole('radio', { name: /5\/5$/ })
         .click()
     await page.getByTestId('review-form-difficulty').click()
     await page.getByRole('option').first().click()
+    await expect(page.getByRole('listbox')).toBeHidden()
     await page
         .getByTestId('review-form-comment')
-        .locator('textarea')
         .first()
         .fill('Should not be submitted, network fails')
     await page.getByTestId('review-form-submit').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
 })
 

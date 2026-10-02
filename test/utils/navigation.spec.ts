@@ -9,12 +9,12 @@ const allowing =
 describe('visibleNavItems', () => {
     it('drops links and empty groups the role cannot open', () => {
         const keys = visibleNavItems(allowing()).map((item) => item.key)
-        expect(keys).toEqual(['home', 'map', 'list', 'logbook'])
+        expect(keys).toEqual(['home', 'list', 'map', 'logbook'])
     })
 
     it('shows guests only the public pages', () => {
         const keys = visibleNavItems(allowing(), false).map((item) => item.key)
-        expect(keys).toEqual(['home', 'map', 'list'])
+        expect(keys).toEqual(['home', 'list', 'map'])
     })
 })
 
@@ -37,7 +37,23 @@ describe('staffSections', () => {
         )
         expect(staffSections(all).map((section) => section.key)).toEqual([
             'manage',
+            'moderation',
             'admin',
+        ])
+    })
+
+    it('groups moderation apart from route setting', () => {
+        const sections = staffSections(
+            allowing('manage_comments', 'manage_reports', 'view_analytics'),
+        )
+        expect(
+            sections.map((section) => [
+                section.key,
+                section.links.map((link) => link.to),
+            ]),
+        ).toEqual([
+            ['manage', ['/manage/analytics']],
+            ['moderation', ['/manage/comments', '/manage/reports']],
         ])
     })
 

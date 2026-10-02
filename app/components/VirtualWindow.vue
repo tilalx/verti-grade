@@ -71,6 +71,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .lazy-render__placeholder {
     border-radius: 4px;
-    background: rgba(var(--v-theme-on-surface), 0.04);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 </style>

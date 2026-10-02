@@ -1,49 +1,43 @@
 <template>
-    <v-list
+    <ul
         v-if="routes.length"
-        density="compact"
-        class="scope-list rounded-lg"
-        border
+        class="scope-list scope-list--page divide-y divide-default rounded-lg border border-default bg-default"
     >
-        <v-list-item
+        <li
             v-for="route in routes"
             :key="route.id"
+            class="scope-row flex items-center px-4 py-1.5"
             :data-testid="`inventory-${rowPrefix}-${route.id}`"
         >
-            <template #prepend>
-                <span v-if="mode === 'missing'" class="anchor-badge">
-                    {{ formatAnchorPoint(route.anchor_point) }}
-                </span>
-                <v-icon v-else size="16" color="success" class="mr-3">
-                    mdi-check-circle-outline
-                </v-icon>
-                <RouteColorDot :color="route.color" :size="20" class="mr-3" />
-            </template>
-            <v-list-item-title class="text-body-medium">
+            <span v-if="mode === 'missing'" class="anchor-badge">
+                {{ formatAnchorPoint(route.anchor_point) }}
+            </span>
+            <UIcon
+                v-else
+                name="i-lucide-circle-check"
+                class="mr-3 size-[16px] text-success"
+            />
+            <RouteColorDot :color="route.color" :size="20" class="mr-3" />
+            <span class="min-w-0 flex-1 truncate text-sm text-highlighted">
                 {{ route.name }}
-            </v-list-item-title>
-            <template #append>
-                <span class="text-body-small text-medium-emphasis mr-2">
-                    <GradeLabel :source="route" />
-                </span>
-                <v-btn
-                    :icon="mode === 'missing' ? 'mdi-check' : 'mdi-undo'"
-                    variant="text"
-                    size="small"
-                    :aria-label="actionLabel"
-                    :data-testid="`inventory-${actionPrefix}-${route.id}`"
-                    @click="emit('action', route)"
-                />
-            </template>
-        </v-list-item>
-    </v-list>
+            </span>
+            <span class="mr-2 text-sm font-semibold text-default">
+                <GradeLabel :source="route" />
+            </span>
+            <UButton
+                :icon="
+                    mode === 'missing' ? 'i-lucide-check' : 'i-lucide-undo-2'
+                "
+                color="neutral"
+                variant="ghost"
+                :aria-label="actionLabel"
+                :data-testid="`inventory-${actionPrefix}-${route.id}`"
+                @click="emit('action', route)"
+            />
+        </li>
+    </ul>
 
-    <LayoutEmptyState
-        v-else
-        :card="false"
-        :icon="emptyIcon"
-        :title="emptyTitle"
-    />
+    <LayoutEmptyState v-else :icon="emptyIcon" :title="emptyTitle" />
 </template>
 
 <script setup lang="ts">

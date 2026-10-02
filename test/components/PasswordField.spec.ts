@@ -1,19 +1,27 @@
 import { mount } from '@vue/test-utils'
 import PasswordField from '~/components/user/PasswordField.vue'
 
-const textFieldStub = {
-    props: ['modelValue', 'type', 'label', 'autocomplete'],
+const formFieldStub = { template: '<div><slot /></div>' }
+const inputStub = {
+    props: ['modelValue', 'type', 'autocomplete'],
     template:
-        '<div><input :type="type" :value="modelValue" :autocomplete="autocomplete" /><slot name="append-inner" /></div>',
+        '<div><input :type="type" :value="modelValue" :autocomplete="autocomplete" /><slot name="trailing" /></div>',
 }
-const iconStub = { props: ['icon'], template: '<i :data-icon="icon" />' }
+const buttonStub = {
+    props: ['icon'],
+    template: '<button type="button" :data-icon="icon"><slot /></button>',
+}
 
 function createWrapper(props: Record<string, unknown> = {}) {
     return mount(PasswordField, {
         props: { label: 'Password', modelValue: 'secret', ...props },
         global: {
             mocks: { $t: (key: string) => key },
-            stubs: { 'v-text-field': textFieldStub, 'v-icon': iconStub },
+            stubs: {
+                UFormField: formFieldStub,
+                UInput: inputStub,
+                UButton: buttonStub,
+            },
         },
     })
 }
@@ -28,7 +36,7 @@ describe('PasswordField', () => {
             'current-password',
         )
         expect(toggle.attributes('aria-label')).toBe('account.showPassword')
-        expect(toggle.attributes('data-icon')).toBe('mdi-eye-outline')
+        expect(toggle.attributes('data-icon')).toBe('i-lucide-eye')
     })
 
     it('reveals the password when the toggle is clicked', async () => {
@@ -39,17 +47,15 @@ describe('PasswordField', () => {
         const toggle = wrapper.find('[data-testid="password-toggle"]')
         expect(wrapper.find('input').attributes('type')).toBe('text')
         expect(toggle.attributes('aria-label')).toBe('account.hidePassword')
-        expect(toggle.attributes('data-icon')).toBe('mdi-eye-off-outline')
+        expect(toggle.attributes('data-icon')).toBe('i-lucide-eye-off')
     })
 
-    it('toggles from the keyboard', async () => {
+    it('renders the toggle as a native button for keyboard access', () => {
         const wrapper = createWrapper()
 
-        await wrapper
-            .find('[data-testid="password-toggle"]')
-            .trigger('keydown', { key: 'Enter' })
-
-        expect(wrapper.find('input').attributes('type')).toBe('text')
+        expect(
+            wrapper.find('[data-testid="password-toggle"]').element.tagName,
+        ).toBe('BUTTON')
     })
 
     it('omits the toggle when hideToggle is set', () => {

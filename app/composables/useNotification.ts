@@ -1,15 +1,32 @@
 export type NotificationColor = 'success' | 'error' | 'warning' | 'info'
 
-export interface NotificationItem {
-    text: string
-    color: NotificationColor
+const ICONS: Record<NotificationColor, string> = {
+    success: 'i-lucide-circle-check',
+    error: 'i-lucide-circle-alert',
+    info: 'i-lucide-info',
+    warning: 'i-lucide-triangle-alert',
 }
 
 export function useNotification() {
-    const queue = useState<NotificationItem[]>('snackbar-queue', () => [])
+    const toast = useToast()
 
     function notify(text: string, color: NotificationColor = 'success') {
-        queue.value = [...queue.value, { text, color }]
+        if (import.meta.server) return
+        toast.add({
+            title: () =>
+                h(
+                    'span',
+                    {
+                        'data-testid': 'global-snackbar-message',
+                        'data-color': color,
+                    },
+                    text,
+                ),
+            color,
+            icon: ICONS[color],
+            duration: 6000,
+            'data-testid': 'global-snackbar',
+        } as Parameters<typeof toast.add>[0])
     }
 
     const success = (msg: string) => notify(msg, 'success')
@@ -17,5 +34,5 @@ export function useNotification() {
     const warning = (msg: string) => notify(msg, 'warning')
     const info = (msg: string) => notify(msg, 'info')
 
-    return { queue, notify, success, error, warning, info }
+    return { notify, success, error, warning, info }
 }

@@ -70,11 +70,8 @@ test('an admin opens registration from the settings page', async ({
     root,
 }) => {
     await setRegistration(root, false)
-    await gotoSettled(adminPage, '/admin/settings')
-    await adminPage
-        .getByTestId('settings-allow-registration')
-        .locator('input')
-        .check()
+    await gotoSettled(adminPage, '/admin/settings?section=organization')
+    await adminPage.getByTestId('settings-allow-registration').check()
     await adminPage.getByTestId('settings-save').click()
     await expect.poll(() => registrationAllowed(root)).toBe(true)
 
@@ -109,10 +106,10 @@ test('a climber signs up, verifies the email and signs in', async ({
 
     await gotoSettled(page, '/auth/login')
     await page.getByTestId('login-goto-register').click()
-    await page.getByTestId('register-username').locator('input').fill(username)
-    await page.getByTestId('register-email').locator('input').fill(email)
-    await page.getByTestId('password-new').locator('input').fill(PASSWORD)
-    await page.getByTestId('password-confirm').locator('input').fill(PASSWORD)
+    await page.getByTestId('register-username').fill(username)
+    await page.getByTestId('register-email').fill(email)
+    await page.getByTestId('password-new').fill(PASSWORD)
+    await page.getByTestId('password-confirm').fill(PASSWORD)
     const signup = page.waitForResponse(
         (response) =>
             response.url().includes('/api/collections/users/records') &&
@@ -160,9 +157,7 @@ test('an unverified climber resends the verification mail from the sign-in page'
     await signIn(page, email)
     await expect(page.getByTestId('login-unverified')).toBeVisible()
     await page.getByTestId('login-resend-verification').click()
-    await expect(page.getByTestId('reset-email').locator('input')).toHaveValue(
-        email,
-    )
+    await expect(page.getByTestId('reset-email')).toHaveValue(email)
     await page.getByTestId('reset-submit').click()
     await expect(page.getByTestId('login-form')).toBeVisible()
 

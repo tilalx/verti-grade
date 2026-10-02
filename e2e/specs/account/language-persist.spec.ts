@@ -11,15 +11,13 @@ test('the chosen language is saved on the user and restored on the next login', 
     const user = await createUser()
 
     const firstSession = await pageAs(user)
-    await gotoSettled(firstSession, '/')
+    await gotoSettled(firstSession, '/account/settings?tab=preferences')
     await expect(firstSession.locator('html')).toHaveAttribute('lang', 'en')
-    await firstSession.getByTestId('user-menu-activator').click()
-    await firstSession.getByTestId('user-menu-profile').click()
     await firstSession.getByTestId('profile-language').click()
     await firstSession.getByTestId('profile-language-de').click()
     await expect(firstSession.locator('html')).toHaveAttribute('lang', 'en')
     await firstSession.getByTestId('profile-save').click()
-    await expect(firstSession.getByTestId('profile-dialog')).toBeHidden()
+    await expect(firstSession.getByTestId('profile-unsaved')).toHaveCount(0)
     await expect(firstSession.locator('html')).toHaveAttribute('lang', 'de')
     await expect
         .poll(

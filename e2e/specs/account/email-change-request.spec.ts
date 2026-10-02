@@ -2,11 +2,8 @@ import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-async function openProfileDialog(page: Page) {
-    await gotoSettled(page, '/')
-    await page.getByTestId('user-menu-activator').click()
-    await page.getByTestId('user-menu-profile').click()
-    await expect(page.getByTestId('profile-dialog')).toBeVisible()
+async function openProfileSettings(page: Page) {
+    await gotoSettled(page, '/account/settings')
     await expect(page.getByTestId('profile-email')).toBeVisible()
 }
 
@@ -16,10 +13,10 @@ test('requests an email change instead of writing the address', async ({
     testPrefix,
 }) => {
     const page = await pageAs(await createUser())
-    await openProfileDialog(page)
+    await openProfileSettings(page)
 
     const newEmail = `${testPrefix}-newaddr@gripello.test`
-    await page.getByTestId('profile-email').locator('input').fill(newEmail)
+    await page.getByTestId('profile-email').fill(newEmail)
 
     const changeRequest = page.waitForRequest((req) =>
         req.url().includes('/api/collections/users/request-email-change'),
@@ -47,22 +44,18 @@ test('reports a failed confirmation mail without claiming the change', async ({
         route.abort('failed'),
     )
 
-    await openProfileDialog(page)
+    await openProfileSettings(page)
     await page
         .getByTestId('profile-email')
-        .locator('input')
         .fill(`${testPrefix}-failaddr@gripello.test`)
     await page.getByTestId('profile-save').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
 })
 
 test('blocks saving a malformed email address', async ({ userPage: page }) => {
-    await openProfileDialog(page)
-    await page
-        .getByTestId('profile-email')
-        .locator('input')
-        .fill('not-an-email')
+    await openProfileSettings(page)
+    await page.getByTestId('profile-email').fill('not-an-email')
     await page.getByTestId('profile-save').click()
 
     await expect(page.getByTestId('profile-email')).toBeVisible()

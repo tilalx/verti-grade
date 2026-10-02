@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ButtonProps } from '@nuxt/ui'
+
 const open = defineModel<boolean>({ default: false })
 
 withDefaults(
@@ -6,7 +8,7 @@ withDefaults(
         title?: string
         message?: string
         confirmText?: string
-        confirmColor?: string
+        confirmColor?: ButtonProps['color']
         loading?: boolean
         maxWidth?: string | number
     }>(),
@@ -26,24 +28,25 @@ const emit = defineEmits<{ confirm: [] }>()
         :max-width="maxWidth"
         data-testid="confirm-dialog"
     >
-        <div class="text-body-medium text-medium-emphasis">{{ message }}</div>
+        <div class="text-sm text-muted">{{ message }}</div>
         <template #actions>
-            <v-btn
-                variant="text"
+            <UButton
+                color="neutral"
+                variant="ghost"
                 data-testid="confirm-dialog-cancel"
                 @click="open = false"
             >
                 {{ $t('actions.cancel') }}
-            </v-btn>
-            <v-spacer />
-            <v-btn
+            </UButton>
+            <div class="flex-1" />
+            <UButton
                 :color="confirmColor"
                 :loading="loading"
                 data-testid="confirm-dialog-confirm"
                 @click="emit('confirm')"
             >
                 {{ confirmText ?? $t('actions.delete') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>

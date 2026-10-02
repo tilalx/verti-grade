@@ -7,7 +7,7 @@ test('changing the filter on page two jumps back to the first page', async ({
     await gotoSettled(page, '/manage/routes')
     const range = page
         .getByTestId('routes-table')
-        .locator('.v-data-table-footer__info')
+        .getByTestId('table-page-info')
 
     await searchRoutes(page, 'e2e-route-')
     await expect(range).toContainText(/^\s*1\D/)

@@ -1,102 +1,92 @@
 <template>
     <div data-testid="analytics-filters">
         <FilterBar
-            inline-filters
             :active-filter-count="activeFilterCount"
             @clear="clearFilters"
         >
             <template #search>
-                <div class="flex-grow-1 flex-xl-grow-0 min-w-0">
-                    <v-chip-group
-                        :model-value="range"
-                        mandatory
-                        selected-class="text-primary"
-                        class="range-toggle"
-                        @update:model-value="selectRange"
-                    >
-                        <v-chip
+                <div class="grow xl:grow-0 min-w-0">
+                    <div class="range-toggle flex gap-2 overflow-x-auto py-1">
+                        <UButton
                             v-for="option in ANALYTICS_RANGES"
                             :key="option"
-                            :value="option"
-                            :variant="option === range ? 'tonal' : 'outlined'"
+                            class="shrink-0 rounded-full"
+                            :color="option === range ? 'primary' : 'neutral'"
+                            :variant="option === range ? 'soft' : 'outline'"
                             :aria-pressed="option === range"
                             :data-testid="`analytics-range-${option}`"
+                            @click="option !== range && selectRange(option)"
                         >
                             {{ $t(`analytics.filters.ranges.${option}`) }}
-                        </v-chip>
-                    </v-chip-group>
+                        </UButton>
+                    </div>
                 </div>
             </template>
 
             <template #filters>
-                <v-row density="comfortable" align="center">
+                <div class="contents">
                     <template v-if="range === 'custom'">
-                        <v-col cols="6" sm="3" md="2" xl="auto">
-                            <v-text-field
+                        <UFormField
+                            :label="$t('analytics.filters.from')"
+                            class="w-full sm:w-auto"
+                        >
+                            <UInput
                                 :model-value="query.from ?? ''"
                                 type="date"
-                                :label="$t('analytics.filters.from')"
-                                density="compact"
-                                hide-details
+                                class="w-full"
                                 data-testid="analytics-filter-from"
                                 @update:model-value="
-                                    emit('update', { from: $event })
+                                    emit('update', { from: String($event) })
                                 "
                             />
-                        </v-col>
-                        <v-col cols="6" sm="3" md="2" xl="auto">
-                            <v-text-field
+                        </UFormField>
+                        <UFormField
+                            :label="$t('analytics.filters.to')"
+                            class="w-full sm:w-auto"
+                        >
+                            <UInput
                                 :model-value="query.to ?? ''"
                                 type="date"
-                                :label="$t('analytics.filters.to')"
-                                density="compact"
-                                hide-details
+                                class="w-full"
                                 data-testid="analytics-filter-to"
                                 @update:model-value="
-                                    emit('update', { to: $event })
+                                    emit('update', { to: String($event) })
                                 "
                             />
-                        </v-col>
+                        </UFormField>
                     </template>
-                    <v-col cols="12" sm="6" md="3" xl>
-                        <v-select
-                            :model-value="selectedLocations"
-                            :items="locations"
-                            item-title="name"
-                            item-value="id"
-                            :label="$t('analytics.filters.locations')"
-                            multiple
-                            chips
-                            closable-chips
-                            density="compact"
-                            hide-details
-                            data-testid="analytics-filter-location"
-                            @update:model-value="
-                                emit('update', { location: $event.join(',') })
-                            "
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="6" md="3" xl>
-                        <v-select
-                            :model-value="selectedTypes"
-                            :items="typeOptions"
-                            :label="$t('analytics.filters.types')"
-                            multiple
-                            chips
-                            closable-chips
-                            density="compact"
-                            hide-details
-                            data-testid="analytics-filter-type"
-                            @update:model-value="
-                                emit('update', { type: $event.join(',') })
-                            "
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="auto" class="d-flex align-center">
-                        <v-chip
-                            :color="includeArchived ? 'warning' : undefined"
-                            :variant="includeArchived ? 'tonal' : 'outlined'"
-                            prepend-icon="mdi-archive-outline"
+                    <USelect
+                        :model-value="selectedLocations"
+                        :items="locations"
+                        label-key="name"
+                        value-key="id"
+                        multiple
+                        :placeholder="$t('analytics.filters.locations')"
+                        :aria-label="$t('analytics.filters.locations')"
+                        class="w-full sm:w-56"
+                        data-testid="analytics-filter-location"
+                        @update:model-value="
+                            emit('update', { location: $event.join(',') })
+                        "
+                    />
+                    <USelect
+                        :model-value="selectedTypes"
+                        :items="typeOptions"
+                        multiple
+                        :placeholder="$t('analytics.filters.types')"
+                        :aria-label="$t('analytics.filters.types')"
+                        class="w-full sm:w-56"
+                        data-testid="analytics-filter-type"
+                        @update:model-value="
+                            emit('update', { type: $event.join(',') })
+                        "
+                    />
+                    <div class="flex items-center">
+                        <UButton
+                            class="rounded-full"
+                            :color="includeArchived ? 'warning' : 'neutral'"
+                            :variant="includeArchived ? 'soft' : 'outline'"
+                            icon="i-lucide-archive"
                             :aria-pressed="includeArchived"
                             data-testid="analytics-filter-archived"
                             @click="
@@ -106,9 +96,9 @@
                             "
                         >
                             {{ $t('filter.archived') }}
-                        </v-chip>
-                    </v-col>
-                </v-row>
+                        </UButton>
+                    </div>
+                </div>
             </template>
         </FilterBar>
     </div>
@@ -167,10 +157,6 @@ function clearFilters() {
 </script>
 
 <style scoped>
-.min-w-0 {
-    min-width: 0;
-}
-
 .range-toggle {
     max-width: 100%;
     scrollbar-width: none;

@@ -2,12 +2,11 @@ import { mount } from '@vue/test-utils'
 import ConfirmDialog from '~/components/ConfirmDialog.vue'
 
 const dialogStub = {
-    props: ['modelValue'],
+    props: ['modelValue', 'title'],
     emits: ['update:modelValue'],
-    template: '<div><slot /></div>',
+    template: '<div>{{ title }}<slot /><slot name="actions" /></div>',
 }
 
-const simpleSlotStub = { template: '<div><slot /></div>' }
 const buttonStub = {
     props: ['loading'],
     template: '<button @click="$emit(\'click\')"><slot /></button>',
@@ -26,13 +25,8 @@ function createWrapper(props: Record<string, unknown> = {}) {
                 $t: (key: string) => key,
             },
             stubs: {
-                'v-dialog': dialogStub,
-                'v-card': simpleSlotStub,
-                'v-card-title': simpleSlotStub,
-                'v-card-text': simpleSlotStub,
-                'v-card-actions': simpleSlotStub,
-                'v-btn': buttonStub,
-                'v-spacer': simpleSlotStub,
+                LayoutDialogShell: dialogStub,
+                UButton: buttonStub,
             },
         },
     })

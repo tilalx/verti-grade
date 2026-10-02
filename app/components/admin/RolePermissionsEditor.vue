@@ -5,144 +5,127 @@
             :subtitle="t('permissions.subtitle')"
         >
             <template #actions>
-                <v-btn
+                <UButton
                     color="primary"
-                    prepend-icon="mdi-shield-plus-outline"
+                    icon="i-lucide-shield-plus"
                     data-testid="role-create-open"
                     @click="startCreate"
                 >
                     {{ t('permissions.addRole') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutSectionHeader>
 
-        <v-row v-if="loading">
-            <v-col v-for="i in 3" :key="i" cols="12" md="6" lg="4">
-                <v-skeleton-loader type="card" rounded="lg" />
-            </v-col>
-        </v-row>
+        <div v-if="loading" class="grid grid-cols-12 gap-4">
+            <USkeleton
+                v-for="i in 3"
+                :key="i"
+                class="col-span-12 h-48 rounded-lg md:col-span-6 lg:col-span-4"
+            />
+        </div>
 
         <LayoutEmptyState
             v-else-if="!roles.length"
-            icon="mdi-shield-off-outline"
+            icon="i-lucide-shield-off"
             :title="t('permissions.noRoles')"
         />
 
-        <v-row v-else data-testid="role-permissions-table">
-            <v-col v-for="role in roles" :key="role.id" cols="12" md="6" lg="4">
-                <v-card
-                    border
-                    flat
-                    height="100%"
-                    class="role-card d-flex flex-column"
+        <div
+            v-else
+            class="grid grid-cols-12 gap-4"
+            data-testid="role-permissions-table"
+        >
+            <div
+                v-for="role in roles"
+                :key="role.id"
+                class="col-span-12 md:col-span-6 lg:col-span-4"
+            >
+                <div
+                    class="role-card flex h-full flex-col rounded-lg border bg-default"
                     :data-testid="`role-permissions-row-${role.name}`"
                 >
-                    <v-card-item class="pb-1 pt-3">
-                        <template #prepend>
-                            <v-avatar
-                                size="42"
-                                :color="role.color || 'surface-variant'"
-                                :data-testid="`role-color-${role.name}`"
-                            >
-                                <v-icon
-                                    size="20"
-                                    :color="readableTextOn(role.color)"
-                                >
-                                    mdi-shield-account-outline
-                                </v-icon>
-                            </v-avatar>
-                        </template>
-
-                        <v-card-title
-                            class="text-body-medium font-weight-semibold px-0 py-0 card-title-tight"
+                    <div class="flex items-center gap-3 px-4 pb-1 pt-3">
+                        <span
+                            class="inline-flex size-[42px] shrink-0 items-center justify-center rounded-full"
+                            :class="{ 'bg-elevated': !role.color }"
+                            :style="{
+                                backgroundColor: role.color || undefined,
+                                color: readableTextOn(role.color),
+                            }"
+                            :data-testid="`role-color-${role.name}`"
                         >
-                            {{ role.name }}
-                        </v-card-title>
-                        <v-card-subtitle
-                            class="text-body-small px-0 py-0 card-subtitle-muted text-wrap"
-                        >
-                            {{
-                                role.description ||
-                                t('permissions.noDescription')
-                            }}
-                        </v-card-subtitle>
+                            <UIcon
+                                name="i-lucide-shield-user"
+                                class="size-[20px]"
+                            />
+                        </span>
 
-                        <template #append>
-                            <v-chip
-                                size="small"
-                                variant="tonal"
-                                :data-testid="`role-granted-${role.name}`"
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-semibold card-title-tight">
+                                {{ role.name }}
+                            </div>
+                            <div
+                                class="text-xs card-subtitle-muted text-muted whitespace-normal"
                             >
-                                {{ grantedCount(role) }}/{{
-                                    allPermissions.length
+                                {{
+                                    role.description ||
+                                    t('permissions.noDescription')
                                 }}
-                            </v-chip>
-                        </template>
-                    </v-card-item>
+                            </div>
+                        </div>
 
-                    <v-divider class="mt-3" />
-
-                    <v-card-text class="py-2 flex-grow-1">
-                        <v-row density="compact">
-                            <v-col
-                                v-for="perm in allPermissions"
-                                :key="perm.id"
-                                cols="12"
-                                sm="6"
-                            >
-                                <v-checkbox
-                                    :model-value="hasPermission(role, perm.id)"
-                                    :label="
-                                        t('permissions.features.' + perm.name)
-                                    "
-                                    :disabled="isProtectedRole(role) || saving"
-                                    density="compact"
-                                    hide-details
-                                    color="primary"
-                                    :data-testid="`role-permissions-${role.name}-${perm.name}`"
-                                    @update:model-value="
-                                        togglePermission(role, perm)
-                                    "
-                                />
-                            </v-col>
-                        </v-row>
-                    </v-card-text>
-
-                    <v-card-actions class="pt-0 px-2 pb-2">
-                        <v-spacer />
-                        <v-btn
-                            icon
-                            size="small"
-                            variant="text"
-                            :aria-label="t('permissions.editRole')"
-                            :data-testid="`role-edit-${role.name}`"
-                            @click="startEdit(role)"
+                        <UBadge
+                            color="neutral"
+                            variant="soft"
+                            :data-testid="`role-granted-${role.name}`"
                         >
-                            <v-icon size="18">mdi-pencil-outline</v-icon>
-                            <v-tooltip activator="parent" location="top">{{
-                                t('permissions.editRole')
-                            }}</v-tooltip>
-                        </v-btn>
-                        <v-btn
+                            {{ grantedCount(role) }}/{{ allPermissions.length }}
+                        </UBadge>
+                    </div>
+
+                    <USeparator class="mt-3" />
+
+                    <div class="grid grow grid-cols-12 gap-2 px-4 py-3">
+                        <UCheckbox
+                            v-for="perm in allPermissions"
+                            :key="perm.id"
+                            :model-value="hasPermission(role, perm.id)"
+                            :label="t('permissions.features.' + perm.name)"
+                            :disabled="isProtectedRole(role) || saving"
+                            class="col-span-12 sm:col-span-6"
+                            :data-testid="`role-permissions-${role.name}-${perm.name}`"
+                            @update:model-value="togglePermission(role, perm)"
+                        />
+                    </div>
+
+                    <div class="flex justify-end gap-1 px-2 pb-2">
+                        <UTooltip :text="t('permissions.editRole')">
+                            <UButton
+                                icon="i-lucide-pencil"
+                                color="neutral"
+                                variant="ghost"
+                                :aria-label="t('permissions.editRole')"
+                                :data-testid="`role-edit-${role.name}`"
+                                @click="startEdit(role)"
+                            />
+                        </UTooltip>
+                        <UTooltip
                             v-if="!isProtectedRole(role)"
-                            icon
-                            size="small"
-                            variant="text"
-                            :aria-label="t('permissions.deleteRole')"
-                            :data-testid="`role-delete-${role.name}`"
-                            @click="confirmDelete(role)"
+                            :text="t('permissions.deleteRole')"
                         >
-                            <v-icon size="18" color="error"
-                                >mdi-delete-outline</v-icon
-                            >
-                            <v-tooltip activator="parent" location="top">{{
-                                t('permissions.deleteRole')
-                            }}</v-tooltip>
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-        </v-row>
+                            <UButton
+                                icon="i-lucide-trash-2"
+                                color="error"
+                                variant="ghost"
+                                :aria-label="t('permissions.deleteRole')"
+                                :data-testid="`role-delete-${role.name}`"
+                                @click="confirmDelete(role)"
+                            />
+                        </UTooltip>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <AdminRoleFormDialog
             :role="editingRole"
@@ -156,7 +139,7 @@
             sheet-on-mobile
             data-testid="role-delete-dialog"
         >
-            <p class="text-body-medium mb-4">
+            <p class="text-sm mb-4">
                 {{
                     deletingRole
                         ? t('permissions.deleteRoleConfirm', {
@@ -167,56 +150,54 @@
             </p>
 
             <template v-if="holderCount > 0">
-                <v-alert
-                    type="warning"
-                    variant="tonal"
-                    density="compact"
+                <UAlert
+                    color="warning"
+                    variant="soft"
+                    icon="i-lucide-triangle-alert"
                     class="mb-4"
-                    data-testid="role-delete-holders"
-                >
-                    {{
+                    :description="
                         t(
                             'permissions.deleteRoleReassign',
                             { n: holderCount },
                             holderCount,
                         )
-                    }}
-                </v-alert>
-
-                <v-select
-                    v-model="reassignTo"
-                    :items="reassignOptions"
-                    item-title="name"
-                    item-value="id"
-                    :label="t('permissions.reassignTo')"
-                    prepend-inner-icon="mdi-account-switch-outline"
-                    hide-details
-                    data-testid="role-delete-reassign"
+                    "
+                    data-testid="role-delete-holders"
                 />
+
+                <UFormField :label="t('permissions.reassignTo')">
+                    <USelect
+                        v-model="reassignTo"
+                        :items="reassignOptions"
+                        icon="i-lucide-user-round-cog"
+                        class="w-full"
+                        data-testid="role-delete-reassign"
+                    />
+                </UFormField>
             </template>
 
             <template #actions>
-                <v-btn
-                    variant="text"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
                     data-testid="role-delete-cancel"
                     @click="deleteDialog = false"
                 >
                     {{ t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
+                </UButton>
+                <div class="flex-1" />
+                <UButton
                     color="error"
-                    variant="flat"
                     :loading="deleting || countingHolders"
                     :disabled="
                         countingHolders || (holderCount > 0 && !reassignTo)
                     "
-                    prepend-icon="mdi-delete-outline"
+                    icon="i-lucide-trash-2"
                     data-testid="role-delete-confirm"
                     @click="deleteRole"
                 >
                     {{ t('actions.delete') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
     </section>
@@ -249,12 +230,15 @@ const deleteDialog = ref(false)
 const deletingRole = ref<RoleRecord | null>(null)
 const holderCount = ref(0)
 const countingHolders = ref(false)
-const reassignTo = ref<string | null>(null)
+const reassignTo = ref<string>()
 const { pending: deleting, run: runDelete } = useAsyncAction()
 
 const reassignOptions = computed(() =>
     deletingRole.value
-        ? reassignTargets(roles.value, deletingRole.value.id)
+        ? reassignTargets(roles.value, deletingRole.value.id).map((role) => ({
+              label: role.name,
+              value: role.id,
+          }))
         : [],
 )
 
@@ -326,7 +310,7 @@ async function confirmDelete(role: RoleRecord) {
     deletingRole.value = role
     holderCount.value = 0
     countingHolders.value = true
-    reassignTo.value = defaultReassignTarget(roles.value, role.id)
+    reassignTo.value = defaultReassignTarget(roles.value, role.id) ?? undefined
     deleteDialog.value = true
 
     try {

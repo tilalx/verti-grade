@@ -168,10 +168,7 @@ test('custom range writes the dates into the url', async ({
 }) => {
     await gotoSettled(page, '/manage/analytics')
     await page.getByTestId('analytics-range-custom').click()
-    await page
-        .getByTestId('analytics-filter-from')
-        .locator('input')
-        .fill('2020-01-01')
+    await page.getByTestId('analytics-filter-from').fill('2020-01-01')
     await expect(page).toHaveURL(/range=custom/)
     await expect(page).toHaveURL(/from=2020-01-01/)
 })
@@ -390,5 +387,5 @@ test('shows an error notification when the analytics fetch fails', async ({
         route.fulfill({ status: 500, body: 'boom' }),
     )
     await page.getByTestId('analytics-range-30d').click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
 })

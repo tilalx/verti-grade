@@ -18,10 +18,7 @@ test('the same user can be edited again after closing with Escape', async ({
     )
     try {
         await gotoSettled(page, '/admin/users')
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(user.email)
+        await page.getByTestId('filter-search').fill(user.email)
         await expect(page.getByTestId('users-showing')).toContainText(
             'Showing 1 of 1',
         )

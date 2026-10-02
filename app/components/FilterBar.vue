@@ -7,18 +7,16 @@ const props = withDefaults(
         searchPlaceholder?: string
         searchIcon?: string
         activeFilterCount?: number
-        inlineFilters?: boolean
     }>(),
     {
-        searchIcon: 'mdi-magnify',
+        searchIcon: 'i-lucide-search',
         activeFilterCount: 0,
     },
 )
 
 const emit = defineEmits<{ clear: [] }>()
 
-const { smAndUp, xlAndUp } = useDisplay()
-const filtersInline = computed(() => props.inlineFilters && xlAndUp.value)
+const { smAndUp } = useDisplay()
 const sheetOpen = ref(false)
 
 function handleClear() {
@@ -29,105 +27,100 @@ function handleClear() {
 </script>
 
 <template>
-    <v-card border flat class="mb-4">
-        <v-card-text class="pa-3">
-            <div class="d-flex align-center ga-2">
-                <slot name="search">
-                    <v-text-field
-                        v-model="search"
-                        :label="searchLabel"
-                        :placeholder="searchPlaceholder"
-                        :prepend-inner-icon="searchIcon"
-                        clearable
-                        hide-details
-                        density="compact"
-                        class="flex-grow-1"
-                        data-testid="filter-search"
-                    />
-                </slot>
-                <div v-if="filtersInline" class="flex-grow-1 min-w-0">
-                    <slot name="filters" />
-                </div>
-                <!-- Mobile: open bottom sheet -->
-                <!-- No `density="compact"`: in Vuetify 4 it subtracts 12px,
-                     shrinking a small button until it clips its own icon. -->
-                <v-btn
-                    v-if="!smAndUp"
-                    variant="tonal"
-                    size="small"
-                    icon
-                    :aria-label="$t('filter.title')"
-                    data-testid="filter-open-sheet"
-                    @click="sheetOpen = true"
+    <div class="mb-4 rounded-lg border bg-default">
+        <div class="flex flex-wrap items-center gap-2 p-3">
+            <slot name="search">
+                <UInput
+                    v-model="search"
+                    :placeholder="searchPlaceholder || searchLabel"
+                    :aria-label="searchLabel"
+                    :icon="searchIcon"
+                    class="min-w-0 flex-1 sm:min-w-72"
+                    data-testid="filter-search"
                 >
-                    <v-badge
-                        :model-value="activeFilterCount > 0"
-                        :content="activeFilterCount"
-                        color="primary"
-                    >
-                        <v-icon>mdi-filter-variant</v-icon>
-                    </v-badge>
-                </v-btn>
-                <!-- Desktop: clear button when filters are active -->
-                <v-btn
-                    v-if="smAndUp && activeFilterCount > 0"
-                    variant="text"
-                    size="small"
-                    prepend-icon="mdi-close"
-                    data-testid="filter-clear"
-                    @click="handleClear"
-                >
-                    {{ $t('actions.clear') }}
-                </v-btn>
-            </div>
-
-            <!-- Desktop: inline filters below search -->
-            <div v-if="smAndUp && !filtersInline" class="mt-2">
+                    <template v-if="search" #trailing>
+                        <UButton
+                            icon="i-lucide-x"
+                            color="neutral"
+                            variant="link"
+                            size="sm"
+                            :aria-label="$t('actions.clear')"
+                            @click="search = ''"
+                        />
+                    </template>
+                </UInput>
+            </slot>
+            <div v-if="smAndUp" class="flex flex-wrap items-center gap-2">
                 <slot name="filters" />
             </div>
-        </v-card-text>
-        <slot name="below" />
-    </v-card>
-
-    <!-- Mobile: filters in bottom sheet -->
-    <v-bottom-sheet v-if="!smAndUp" v-model="sheetOpen" inset>
-        <v-card class="py-2" data-testid="filter-sheet">
-            <v-toolbar color="transparent" flat density="compact" class="pt-1">
-                <v-toolbar-title
-                    class="text-body-large font-weight-semibold pl-2"
+            <UButton
+                v-if="!smAndUp"
+                variant="soft"
+                color="neutral"
+                size="lg"
+                :aria-label="$t('filter.title')"
+                data-testid="filter-open-sheet"
+                @click="sheetOpen = true"
+            >
+                <UChip
+                    :show="activeFilterCount > 0"
+                    :text="activeFilterCount"
+                    color="primary"
+                    size="3xl"
                 >
-                    {{ $t('filter.title') }}
-                </v-toolbar-title>
-                <template #append>
-                    <v-btn
+                    <UIcon name="i-lucide-list-filter" class="size-5" />
+                </UChip>
+            </UButton>
+            <UButton
+                v-if="smAndUp && activeFilterCount > 0"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-x"
+                data-testid="filter-clear"
+                @click="handleClear"
+            >
+                {{ $t('actions.clear') }}
+            </UButton>
+        </div>
+        <slot name="below" />
+    </div>
+
+    <UDrawer
+        v-if="!smAndUp"
+        v-model:open="sheetOpen"
+        :title="$t('filter.title')"
+    >
+        <template #content>
+            <div
+                class="pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
+                data-testid="filter-sheet"
+            >
+                <div class="flex items-center gap-1 px-4 pt-1">
+                    <span class="text-base font-semibold">
+                        {{ $t('filter.title') }}
+                    </span>
+                    <div class="flex-1" />
+                    <UButton
                         v-if="activeFilterCount > 0"
-                        variant="text"
-                        size="small"
+                        variant="ghost"
+                        size="sm"
                         color="error"
-                        class="mr-1"
                         @click="handleClear"
                     >
                         {{ $t('actions.clear') }}
-                    </v-btn>
-                    <v-btn
-                        icon
-                        variant="text"
+                    </UButton>
+                    <UButton
+                        icon="i-lucide-x"
+                        color="neutral"
+                        variant="ghost"
                         :aria-label="$t('actions.close')"
                         @click="sheetOpen = false"
-                    >
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                </template>
-            </v-toolbar>
-            <v-card-text>
-                <slot name="filters" />
-            </v-card-text>
-        </v-card>
-    </v-bottom-sheet>
+                    />
+                </div>
+                <div class="flex flex-col gap-3 p-4">
+                    <slot name="filters" />
+                </div>
+            </div>
+        </template>
+    </UDrawer>
 </template>
-
-<style scoped>
-.min-w-0 {
-    min-width: 0;
-}
-</style>

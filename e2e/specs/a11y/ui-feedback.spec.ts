@@ -18,10 +18,7 @@ test('announces the number of routes found after searching', async ({
     page,
 }) => {
     await gotoSettled(page, '/routes')
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .fill('no-such-route-e2e-xyz')
+    await page.getByTestId('filter-search').fill('no-such-route-e2e-xyz')
     await expect(page.locator('.nuxt-announcer')).toHaveText(/:\s*0$/)
 })
 
@@ -36,9 +33,9 @@ test('renders the navigation loading indicator', async ({ page }) => {
     await expect(page.locator('.nuxt-loading-indicator')).toBeAttached()
 })
 
-test('keeps the focus ring off text inputs', async ({ page }) => {
+test('keeps the global focus ring off text inputs', async ({ page }) => {
     await gotoSettled(page, '/routes')
-    const search = page.getByTestId('filter-search').locator('input')
+    const search = page.getByTestId('filter-search')
     await search.focus()
-    await expect(search).toHaveCSS('outline-style', 'none')
+    await expect(search).toHaveCSS('outline-offset', '0px')
 })

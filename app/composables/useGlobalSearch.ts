@@ -28,7 +28,7 @@ const RESULTS_PER_GROUP = 5
 
 const SETTINGS_SECTIONS = [
     {
-        anchor: 'settings-branding',
+        section: 'branding',
         labels: [
             'settings.assets.logo',
             'settings.assets.icon',
@@ -36,7 +36,7 @@ const SETTINGS_SECTIONS = [
         ],
     },
     {
-        anchor: 'settings-organization',
+        section: 'organization',
         labels: [
             'settings.organization',
             'settings.organizationName',
@@ -46,7 +46,7 @@ const SETTINGS_SECTIONS = [
         ],
     },
     {
-        anchor: 'settings-urls',
+        section: 'urls',
         labels: [
             'settings.publicUrls',
             'settings.applicationUrl',
@@ -54,7 +54,7 @@ const SETTINGS_SECTIONS = [
             'settings.privacyUrl',
         ],
     },
-    { anchor: 'settings-legal', labels: ['settings.legalTitle'] },
+    { section: 'legal', labels: ['settings.legalTitle'] },
 ]
 
 const quote = (value: string) =>
@@ -81,7 +81,7 @@ export function useGlobalSearch() {
         return res.items.map((route) => ({
             key: `route-${route.id}`,
             to: `/route?id=${route.id}`,
-            icon: 'mdi-map-marker-path',
+            icon: 'i-lucide-waypoints',
             title: route.name,
             subtitle: [
                 formatGrade(route),
@@ -104,7 +104,7 @@ export function useGlobalSearch() {
         return res.items.map((user) => ({
             key: `user-${user.id}`,
             to: `/admin/users?search=${encodeURIComponent(user.email ?? user.username ?? '')}`,
-            icon: 'mdi-account-outline',
+            icon: 'i-lucide-user',
             title:
                 [user.firstname, user.name].filter(Boolean).join(' ') ||
                 user.username ||
@@ -124,7 +124,7 @@ export function useGlobalSearch() {
         return res.items.map((role) => ({
             key: `role-${role.id}`,
             to: '/admin/users#roles',
-            icon: 'mdi-shield-account-outline',
+            icon: 'i-lucide-shield-user',
             title: role.name,
             color: role.color,
         }))
@@ -143,7 +143,7 @@ export function useGlobalSearch() {
         return res.items.map((rating) => ({
             key: `review-${rating.id}`,
             to: `/manage/comments?search=${encodeURIComponent(query)}`,
-            icon: 'mdi-comment-outline',
+            icon: 'i-lucide-message-square',
             title: shorten(rating.comment) || '—',
             subtitle: (rating.expand?.route_id as RouteRecord | undefined)
                 ?.name,
@@ -162,7 +162,7 @@ export function useGlobalSearch() {
         return res.items.map((report) => ({
             key: `report-${report.id}`,
             to: `/manage/reports?search=${encodeURIComponent(query)}`,
-            icon: 'mdi-flag-outline',
+            icon: 'i-lucide-flag',
             title: shorten(report.explanation) || '—',
             subtitle: report.notifier_name ?? undefined,
         }))
@@ -175,8 +175,8 @@ export function useGlobalSearch() {
                 .filter((label) => t(label).toLowerCase().includes(needle))
                 .map((label) => ({
                     key: `setting-${label}`,
-                    to: `/admin/settings#${section.anchor}`,
-                    icon: 'mdi-cog-outline',
+                    to: `/admin/settings?section=${section.section}`,
+                    icon: 'i-lucide-settings',
                     title: t(label),
                     subtitle: t(section.labels[0]!),
                 })),

@@ -1,11 +1,11 @@
 <template>
-    <v-container class="page--prose" data-testid="privacy-page">
+    <div class="page--prose mx-auto w-full p-4" data-testid="privacy-page">
         <LayoutPageHeader
             :title="$t('legal.privacy')"
             :subtitle="$t('legal.privacyPage.subtitle')"
         />
 
-        <v-card class="surface-card legal-doc" flat>
+        <div class="surface-card legal-doc">
             <section>
                 <h2>{{ $t('legal.privacyPage.controllerTitle') }}</h2>
                 <p v-if="settings?.organization_name">
@@ -43,7 +43,7 @@
                 <h2>{{ $t('legal.privacyPage.storage.title') }}</h2>
                 <p class="mb-3">{{ $t('legal.privacyPage.storage.body') }}</p>
                 <div class="table-scroll">
-                    <v-table density="compact" class="bg-transparent">
+                    <table class="storage-table w-full text-sm">
                         <thead>
                             <tr>
                                 <th>{{ $t('legal.storage.name') }}</th>
@@ -58,7 +58,7 @@
                                 :key="entry.name"
                                 data-testid="privacy-storage-row"
                             >
-                                <td class="text-no-wrap">
+                                <td class="whitespace-nowrap">
                                     <code>{{ entry.name }}</code>
                                 </td>
                                 <td>
@@ -73,7 +73,7 @@
                                         )
                                     }}
                                 </td>
-                                <td class="text-no-wrap">
+                                <td class="whitespace-nowrap">
                                     {{
                                         $t(
                                             `legal.storage.durations.${entry.duration}`,
@@ -82,7 +82,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </v-table>
+                    </table>
                 </div>
             </section>
 
@@ -96,8 +96,8 @@
                 </ul>
                 <p>{{ $t('legal.privacyPage.rights.complaint') }}</p>
             </section>
-        </v-card>
-    </v-container>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -140,6 +140,18 @@ useSeoMeta({
 <style scoped>
 .table-scroll {
     overflow-x: auto;
+}
+
+.storage-table th,
+.storage-table td {
+    padding: 6px 12px;
+    text-align: start;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.storage-table th {
+    font-weight: 500;
+    color: var(--ui-text-muted);
 }
 
 .rights-list {
