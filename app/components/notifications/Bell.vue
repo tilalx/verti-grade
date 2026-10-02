@@ -110,8 +110,15 @@ import type { NotificationRecord } from '~/types/models'
 const { t, locale } = useI18n()
 const pb = usePocketbase()
 const { subscribe } = usePbSubscription()
-const { items, unreadCount, refresh, markRead, markAllRead, dismiss } =
-    useNotificationQueue()
+const {
+    items,
+    unreadCount,
+    refresh,
+    applyEvent,
+    markRead,
+    markAllRead,
+    dismiss,
+} = useNotificationQueue()
 
 const open = ref(false)
 
@@ -131,7 +138,7 @@ onMounted(async () => {
     if (!pb.authStore.isValid) return
 
     await refresh()
-    await subscribe('notifications', () => void refresh())
+    await subscribe('notifications', applyEvent)
 })
 </script>
 

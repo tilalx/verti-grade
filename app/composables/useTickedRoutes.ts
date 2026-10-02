@@ -2,7 +2,7 @@ import type { TickRecord } from '~/types/models'
 
 export function useTickedRoutes() {
     const pb = usePocketbase()
-    const { data, refresh } = useAsyncData(
+    const { data } = useAsyncData(
         'ticked-routes',
         async () => {
             if (!pb.authStore.isValid) return []
@@ -20,6 +20,7 @@ export function useTickedRoutes() {
 
     return {
         tickedRouteIds: computed(() => new Set(data.value)),
-        refreshTickedRoutes: refresh,
+        refreshTickedRoutes: () =>
+            refreshNuxtData(['ticked-routes', 'logbook']),
     }
 }

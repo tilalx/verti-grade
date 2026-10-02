@@ -246,6 +246,7 @@ useHead({ title: t('page.title.logbook') })
 
 definePageMeta({
     middleware: ['auth'],
+    keepalive: true,
 })
 
 // ponytail: loads the whole logbook at once, paginate by session once logbooks grow into the thousands
@@ -371,7 +372,7 @@ const deleteTarget = ref<TickRecord | null>(null)
 const deleting = ref(false)
 
 function reload() {
-    return Promise.all([refresh(), refreshTickedRoutes()])
+    return refreshTickedRoutes()
 }
 
 function openEdit(tick: TickRecord) {

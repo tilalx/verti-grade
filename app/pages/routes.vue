@@ -221,6 +221,7 @@ import {
     wallName,
 } from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
+import { cacheKeys, coalesce } from '~/utils/realtimeCache'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -265,11 +266,11 @@ const tableOptions = reactive<TableOptions>({
     sortBy: [{ key: 'screw_date', order: 'desc' }],
 })
 
+definePageMeta({ keepalive: true })
+
 const loading = ref(true)
-const routes = shallowRef<RouteListItem[]>([])
 const { tickedRouteIds } = useTickedRoutes()
 const { defectsByRoute } = useOpenDefects()
-const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 
 const { gradeColumnTitle } = useGradeSystems()
@@ -377,6 +378,50 @@ const toPbSortIndex = (sortByArr: SortOption[]) =>
         difficulty: 'grade_index',
     })
 
+function fetchRoutes(
+    page: number,
+    perPage: number,
+    requestKey: string | null = 'routesList',
+) {
+    return pb
+        .collection('averageRating')
+        .getList<RouteScoreRecord>(page, perPage, {
+            filter: pbFilter.value,
+            sort: toPbSortIndex(tableOptions.sortBy),
+            expand: 'location,wall',
+            requestKey,
+        })
+}
+
+function fetchLoadedRoutes() {
+    const { page, itemsPerPage } = tableOptions
+    return isWideLayout.value
+        ? fetchRoutes(page, itemsPerPage, null)
+        : fetchRoutes(1, page * itemsPerPage, null)
+}
+
+const { data: routePage, refresh: reloadLoadedRoutes } = await useAsyncData(
+    cacheKeys.routesList,
+    fetchLoadedRoutes,
+    { default: () => ({ items: [] as RouteScoreRecord[], totalItems: 0 }) },
+)
+loading.value = false
+
+const totalItems = computed(() => routePage.value.totalItems)
+const routes = computed<RouteListItem[]>(() =>
+    routePage.value.items.map((route) => {
+        const hasRatings =
+            Number(route.ratings_count ?? 0) > 0 &&
+            typeof route.average_rating === 'number'
+        return {
+            ...route,
+            creator: normalizeCreators(route.creator),
+            has_ratings: hasRatings,
+            score: hasRatings ? route.average_rating : undefined,
+        }
+    }),
+)
+
 async function loadRoutes(
     options: Partial<TableOptions> = {},
     meta: { append?: boolean } = {},
@@ -388,40 +433,17 @@ async function loadRoutes(
         tableOptions.itemsPerPage = options.itemsPerPage
     if (options.sortBy) tableOptions.sortBy = options.sortBy
 
-    const sort = toPbSortIndex(tableOptions.sortBy)
-
     try {
-        const res = await pb
-            .collection('averageRating')
-            .getList<RouteScoreRecord>(
-                tableOptions.page,
-                tableOptions.itemsPerPage,
-                {
-                    filter: pbFilter.value,
-                    sort,
-                    expand: 'location,wall',
-                },
-            )
-
-        const newRoutes: RouteListItem[] = res.items.map((route) => {
-            const hasRatings =
-                Number(route.ratings_count ?? 0) > 0 &&
-                typeof route.average_rating === 'number'
-            return {
-                ...route,
-                creator: normalizeCreators(route.creator),
-                has_ratings: hasRatings,
-                score: hasRatings ? route.average_rating : undefined,
-            }
-        })
-
-        if (meta.append) {
-            routes.value = routes.value.concat(newRoutes)
-        } else {
-            routes.value = newRoutes
+        const res = await fetchRoutes(
+            tableOptions.page,
+            tableOptions.itemsPerPage,
+        )
+        routePage.value = {
+            items: meta.append
+                ? routePage.value.items.concat(res.items)
+                : res.items,
+            totalItems: res.totalItems,
         }
-
-        totalItems.value = res.totalItems
         if (!meta.append)
             announce(t('climbing.routesFound', { n: res.totalItems }))
     } catch (error) {
@@ -439,12 +461,7 @@ function loadMore() {
     void loadRoutes({}, { append: true })
 }
 
-async function reloadLoadedRoutes() {
-    if (isWideLayout.value) return loadRoutes()
-    const { page, itemsPerPage } = tableOptions
-    await loadRoutes({ page: 1, itemsPerPage: page * itemsPerPage })
-    Object.assign(tableOptions, { page, itemsPerPage })
-}
+const reloadSoon = coalesce(reloadLoadedRoutes)
 
 let scrollObserver: IntersectionObserver | null = null
 
@@ -471,21 +488,10 @@ watch(pbFilter, () => {
     }, 300)
 })
 
-const { subscribe } = usePbSubscription()
-
-const { data: initial } = await useAsyncData('index-routes', async () => {
-    await loadRoutes({ ...tableOptions })
-    return { routes: routes.value, totalItems: totalItems.value }
-})
-
-if (initial.value) {
-    routes.value = initial.value.routes
-    totalItems.value = initial.value.totalItems
-}
-loading.value = false
+const { subscribe } = usePbSubscription(reloadSoon)
 
 onMounted(async () => {
-    await subscribe('routes', () => void reloadLoadedRoutes())
+    await subscribe('routes', reloadSoon)
     setupScrollObserver()
 })
 

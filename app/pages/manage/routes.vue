@@ -483,6 +483,7 @@ import {
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
+import { coalesce } from '~/utils/realtimeCache'
 import type { TableColumn } from '@nuxt/ui'
 import type { RouteListItem, RouteScoreRecord } from '~/types/models'
 
@@ -920,7 +921,6 @@ const onItemsPerPageChange = (value: number | string) => {
 }
 
 let filterDebounceTimer: ReturnType<typeof setTimeout> | undefined
-let subscriptionDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
 watch(pbFilter, () => {
     if (filterDebounceTimer) {
@@ -938,15 +938,10 @@ watch(pbFilter, () => {
     }, 300)
 })
 
-const queueReload = () => {
-    clearTimeout(subscriptionDebounceTimer)
-    subscriptionDebounceTimer = setTimeout(() => {
-        void (async () => {
-            invalidateAllRouteIdsCache()
-            await reloadRoutes()
-        })()
-    }, 250)
-}
+const queueReload = coalesce(async () => {
+    invalidateAllRouteIdsCache()
+    await reloadRoutes()
+}, 500)
 
 const { subscribe } = usePbSubscription()
 
@@ -976,7 +971,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     clearTimeout(filterDebounceTimer)
-    clearTimeout(subscriptionDebounceTimer)
 })
 
 useHead(() => ({

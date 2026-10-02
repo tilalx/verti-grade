@@ -169,6 +169,7 @@ import {
 } from '#shared/utils/grades'
 import type { RatingRecord } from '~/types/models'
 import { avatarColor, nameInitials } from '~/utils/avatar'
+import { newRecordId } from '~/utils/realtimeCache'
 
 type EditableReview = RatingRecord & { userName?: string; routeName?: string }
 
@@ -198,6 +199,7 @@ const pb = usePocketbase()
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
 const { capHeaders } = useCapToken()
+const { $realtimeCache } = useNuxtApp()
 
 const isEditMode = computed(() => !!props.review)
 
@@ -295,37 +297,49 @@ function close() {
 
 // ── Submit ─────────────────────────────────────────────────────────────────
 
+function gradingFields() {
+    return {
+        grade: form.grade ?? '',
+        grade_system: gradeSystem.value,
+        grade_index: gradeIndex(gradeSystem.value, form.grade),
+    }
+}
+
 async function submit() {
+    if (isEditMode.value) return saveEdit()
+
+    const rating: RatingRecord = {
+        id: newRecordId(),
+        route_id: props.routeId,
+        rating: form.rating,
+        ...gradingFields(),
+        comment: form.comment?.trim(),
+    }
+    $realtimeCache.applyRating({ ...rating, created: new Date().toISOString() })
+    emit('saved', null)
+    close()
+    try {
+        await pb.collection('ratings').create(rating, {
+            headers: await capHeaders('rating'),
+        })
+    } catch (err) {
+        $realtimeCache.revertRating(rating)
+        console.error('Failed to save review:', err)
+        notifyError(t('notifications.error.generic'))
+    }
+}
+
+async function saveEdit() {
     saving.value = true
     try {
-        const grading = {
-            grade: form.grade ?? '',
-            grade_system: gradeSystem.value,
-            grade_index: gradeIndex(gradeSystem.value, form.grade),
-        }
-
-        if (isEditMode.value) {
-            const updated = await pb
-                .collection('ratings')
-                .update<RatingRecord>(props.review!.id, {
-                    rating: form.rating,
-                    ...grading,
-                    comment: form.comment,
-                })
-            emit('saved', updated)
-        } else {
-            await pb.collection('ratings').create(
-                {
-                    route_id: props.routeId,
-                    rating: form.rating,
-                    ...grading,
-                    comment: form.comment?.trim(),
-                },
-                { headers: await capHeaders('rating') },
-            )
-            emit('saved', null)
-        }
-
+        const updated = await pb
+            .collection('ratings')
+            .update<RatingRecord>(props.review!.id, {
+                rating: form.rating,
+                ...gradingFields(),
+                comment: form.comment,
+            })
+        emit('saved', updated)
         close()
     } catch (err) {
         console.error('Failed to save review:', err)

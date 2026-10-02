@@ -1,9 +1,11 @@
 type UnsubFn = () => void | Promise<void>
 
-export function usePbSubscription() {
+export function usePbSubscription(onReactivate?: () => void) {
     const pb = usePocketbase()
     const subscriptions = new Map<string, UnsubFn>()
     let unmounted = false
+    let active = true
+    let missedWhileInactive = false
 
     async function subscribe(
         collection: string,
@@ -20,7 +22,13 @@ export function usePbSubscription() {
         }
         const unsub: UnsubFn = await pb
             .collection(collection)
-            .subscribe(topic, callback)
+            .subscribe(topic, (e) => {
+                if (!active) {
+                    missedWhileInactive = true
+                    return
+                }
+                return callback(e)
+            })
         if (unmounted) {
             try {
                 await unsub()
@@ -43,6 +51,17 @@ export function usePbSubscription() {
             subscriptions.delete(key)
         }
     }
+
+    onDeactivated(() => {
+        active = false
+    })
+
+    onActivated(() => {
+        active = true
+        if (!missedWhileInactive) return
+        missedWhileInactive = false
+        onReactivate?.()
+    })
 
     onBeforeUnmount(() => {
         unmounted = true

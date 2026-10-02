@@ -77,6 +77,7 @@ import type { RatingRecord } from '~/types/models'
 import type { CommentCardItem } from '~/components/comments/Card.vue'
 import { formatGrade } from '#shared/utils/grades'
 import { reportContentUrl } from '~/utils/reports'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 const { t } = useI18n()
 
@@ -86,12 +87,33 @@ const props = defineProps<{
 }>()
 
 const pb = usePocketbase() as PocketBase
-const { subscribe, unsubscribeFrom } = usePbSubscription()
 const { error: notifyError } = useNotification()
 
 const isSheetOpen = ref(false)
-const isLoading = ref(false)
-const reviews = ref<CommentCardItem[]>([])
+
+const {
+    data: ratings,
+    status,
+    execute: loadRatings,
+} = useAsyncData(
+    cacheKeys.ratingsSheet(props.route_id),
+    async () => {
+        try {
+            return await pb.collection('ratings').getFullList<RatingRecord>({
+                filter: pb.filter('route_id = {:id}', { id: props.route_id }),
+                sort: '-created',
+                requestKey: null,
+            })
+        } catch (error) {
+            console.error('Error fetching ratings:', error)
+            notifyError(t('ratings.loadError'))
+            return []
+        }
+    },
+    { server: false, immediate: false, default: () => [] },
+)
+const isLoading = computed(() => status.value === 'pending')
+const reviews = computed(() => ratings.value.map(mapReview))
 
 const reportDialog = ref(false)
 const reportTarget = ref<string | null>(null)
@@ -106,41 +128,10 @@ function openReport(id: string) {
     reportDialog.value = true
 }
 
-const openSheet = async () => {
+function openSheet() {
     isSheetOpen.value = true
-    await fetchClimbingRatings()
-    await subscribe('ratings', (e) => {
-        if (e.record.route_id === props.route_id) {
-            fetchClimbingRatings()
-        }
-    })
+    if (props.route_id && status.value !== 'success') void loadRatings()
 }
-
-const fetchClimbingRatings = async () => {
-    if (!props.route_id) {
-        return
-    }
-
-    isLoading.value = true
-    try {
-        const data = await pb.collection('ratings').getFullList<RatingRecord>({
-            filter: pb.filter('route_id = {:id}', { id: props.route_id }),
-            sort: '-created',
-        })
-
-        reviews.value = data.map(mapReview)
-    } catch (error) {
-        console.error('Error fetching ratings:', error)
-        reviews.value = []
-        notifyError(t('ratings.loadError'))
-    } finally {
-        isLoading.value = false
-    }
-}
-
-watch(isSheetOpen, (isOpen) => {
-    if (!isOpen) void unsubscribeFrom('ratings')
-})
 
 function mapReview(
     r: RatingRecord & { expand?: Record<string, unknown> },

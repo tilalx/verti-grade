@@ -1,5 +1,7 @@
+import type { RecordSubscription } from 'pocketbase'
 import type { NotificationRecord } from '~/types/models'
 import { sendInBatches } from '~/utils/batch'
+import { removeById, upsertById } from '~/utils/realtimeCache'
 
 export function useNotificationQueue() {
     const pb = usePocketbase()
@@ -34,6 +36,16 @@ export function useNotificationQueue() {
             console.error('Failed to load notifications:', err)
             loaded.value = true
         }
+    }
+
+    function applyEvent({
+        action,
+        record,
+    }: RecordSubscription<NotificationRecord>) {
+        items.value =
+            action === 'delete'
+                ? removeById(items.value, record.id)
+                : upsertById(items.value, record, 'start')
     }
 
     async function markRead(id: string) {
@@ -91,6 +103,7 @@ export function useNotificationQueue() {
         loaded,
         unreadCount,
         refresh,
+        applyEvent,
         markRead,
         markAllRead,
         dismiss,

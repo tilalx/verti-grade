@@ -194,6 +194,20 @@ describe('useNotificationQueue', () => {
         expect(items.value).toHaveLength(1)
     })
 
+    it('applies realtime events without refetching', async () => {
+        const getFullList = vi.fn().mockResolvedValue([record('a')])
+        pbMock.collection = vi.fn().mockReturnValue({ getFullList })
+
+        const { refresh, applyEvent, items } = await loadComposable()
+        await refresh()
+        applyEvent({ action: 'create', record: record('b') })
+        applyEvent({ action: 'update', record: record('a', true) })
+        applyEvent({ action: 'delete', record: record('b') })
+
+        expect(items.value).toEqual([record('a', true)])
+        expect(getFullList).toHaveBeenCalledTimes(1)
+    })
+
     it('empties the queue when signed out', async () => {
         pbMock.authStore.isValid = false
         pbMock.collection = vi.fn()

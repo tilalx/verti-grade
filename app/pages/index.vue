@@ -167,11 +167,12 @@ import {
     sentShare,
     wallSummaries,
 } from '~/utils/overview'
+import { cacheKeys } from '~/utils/realtimeCache'
 
-const OVERVIEW_FIELDS =
-    'id,name,color,grade,grade_system,grade_index,anchor_point,type,location,wall,screw_date,average_rating,ratings_count'
 const RECENT_DAYS = 7
 const POPULAR_LIMIT = 6
+
+definePageMeta({ keepalive: true })
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -188,35 +189,26 @@ useSeoMeta({
     ogType: 'website',
 })
 
-const {
-    data: routeRecords,
-    error: routesError,
-    refresh: refreshRoutes,
-} = await useAsyncData(
-    'overview-routes',
-    () =>
-        pb.collection('averageRating').getFullList<RouteScoreRecord>({
-            filter: 'archived = false',
-            fields: OVERVIEW_FIELDS,
-            requestKey: 'overviewRoutes',
-        }),
-    { default: () => [] },
-)
-
-const {
-    data: wallRecords,
-    error: wallsError,
-    refresh: refreshWalls,
-} = await useAsyncData(
-    'overview-walls',
-    () =>
-        pb.collection('walls').getFullList<WallRecord>({
-            fields: 'id,name,location,sort',
-            sort: 'sort,name',
-            requestKey: 'overviewWalls',
-        }),
-    { default: () => [] },
-)
+const [
+    { data: routeRecords, error: routesError, refresh: refreshRoutes },
+    { data: wallRecords, error: wallsError, refresh: refreshWalls },
+] = await Promise.all([
+    useAsyncData(
+        cacheKeys.overviewRoutes,
+        () => $fetch<RouteScoreRecord[]>('/api/public/overview'),
+        { default: () => [] },
+    ),
+    useAsyncData(
+        cacheKeys.overviewWalls,
+        () =>
+            pb.collection('walls').getFullList<WallRecord>({
+                fields: 'id,name,location,sort',
+                sort: 'sort,name',
+                requestKey: 'overviewWalls',
+            }),
+        { default: () => [] },
+    ),
+])
 
 const loadFailed = computed(() => !!routesError.value || !!wallsError.value)
 
@@ -270,14 +262,6 @@ const progressPercent = computed(() =>
         ? (progress.value.sent / progress.value.total) * 100
         : 0,
 )
-
-const { subscribe } = usePbSubscription()
-
-onMounted(async () => {
-    await subscribe('routes', () => void refreshRoutes())
-    await subscribe('ratings', () => void refreshRoutes())
-    await subscribe('walls', () => void refreshWalls())
-})
 </script>
 
 <style scoped>

@@ -1,6 +1,7 @@
 import type { WallRecord } from '~/types/models'
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { toMapWalls } from '~/utils/gymMap'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 interface GymMapLocationOptions {
     includeUnmapped?: boolean
@@ -45,7 +46,10 @@ export function useGymMapLocation(
     const map = computed(() => sanitizeGymMap(location.value?.map))
 
     const wallsRequest = useAsyncData(
-        `${key}-walls`,
+        () =>
+            key === 'map'
+                ? cacheKeys.mapWalls(locationId.value)
+                : `${key}-walls:${locationId.value}`,
         async () => {
             await locationsRequest
             return locationId.value
@@ -58,7 +62,7 @@ export function useGymMapLocation(
                   })
                 : []
         },
-        { watch: [locationId], default: () => [] },
+        { default: () => [] },
     )
     const walls = wallsRequest.data
     const mapWalls = computed(() =>

@@ -26,10 +26,7 @@ test('an anonymous visitor can submit a review', async ({ page, route }) => {
     await expect(page.getByTestId('empty-state')).toBeHidden()
 })
 
-test('keeps the dialog open when the review submit fails', async ({
-    page,
-    route,
-}) => {
+test('rolls the review back when the submit fails', async ({ page, route }) => {
     await gotoSettled(page, `/route?id=${route.id}`)
 
     await page.getByTestId('review-open-cta').click()
@@ -52,8 +49,10 @@ test('keeps the dialog open when the review submit fails', async ({
         .fill('Should not be submitted, network fails')
     await page.getByTestId('review-form-submit').click()
 
+    await expect(page.getByTestId('review-form-dialog')).toBeHidden()
     await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
-    await expect(page.getByTestId('review-form-dialog')).toBeVisible()
+    await expect(page.getByTestId('comment-card-report')).toHaveCount(0)
+    await expect(page.getByTestId('empty-state')).toBeVisible()
 })
 
 test('blocks submit when no rating is selected', async ({ page, route }) => {

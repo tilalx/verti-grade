@@ -154,7 +154,7 @@ onMounted(async () => {
             await pb
                 .collection('settings')
                 .subscribe('settings_123456', (e) => {
-                    settings.value = e.record as SettingsRecord
+                    settingsData.value = e.record as SettingsRecord
                 }),
         )
     } catch (error) {

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { LocationRecord, RouteRecord, WallRecord } from '~/types/models'
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 const pb = usePocketbase()
 
-const { data: unplaced, refresh } = useAsyncData(
-    'unplaced-routes',
+const { data: unplaced } = useAsyncData(
+    cacheKeys.unplacedRoutes,
     async () => {
         const [walls, locations] = await Promise.all([
             pb.collection('walls').getFullList<WallRecord>({
@@ -49,9 +50,6 @@ const { data: unplaced, refresh } = useAsyncData(
     },
     { server: false, default: () => null },
 )
-
-const { subscribe } = usePbSubscription()
-onMounted(() => subscribe('routes', () => void refresh()).catch(() => {}))
 </script>
 
 <template>
