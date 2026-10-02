@@ -50,7 +50,6 @@ test('removing content deletes the comment and records the decision', async ({
     await card.getByTestId('report-card-remove').click()
     await page
         .getByTestId('report-decision-reason')
-        .locator('textarea')
         .first()
         .fill('Breaches the rules, removed.')
     await page.getByTestId('report-decision-confirm').click()
@@ -90,7 +89,6 @@ test('keeping content records a rejection and leaves the comment in place', asyn
     await card.getByTestId('report-card-keep').click()
     await page
         .getByTestId('report-decision-reason')
-        .locator('textarea')
         .first()
         .fill('Reviewed, no rule broken.')
     await page.getByTestId('report-decision-confirm').click()
@@ -141,7 +139,7 @@ test('shows skeleton cards while the queue reloads', async ({
         await route.continue()
     })
 
-    await page.getByTestId('filter-search').locator('input').fill('skeleton')
+    await page.getByTestId('filter-search').fill('skeleton')
     await expect(page.getByTestId('reports-skeleton').first()).toBeVisible()
 
     release()

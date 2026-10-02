@@ -1,5 +1,5 @@
 <template>
-    <v-container class="analytics-page">
+    <div class="analytics-page mx-auto w-full p-4">
         <LayoutPageHeader
             :title="t('analytics.title')"
             :subtitle="t('analytics.subtitle')"
@@ -12,17 +12,14 @@
             @update="updateQuery"
         />
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div
                 v-for="card in summaryCards"
                 :key="card.key"
-                cols="6"
-                md="4"
-                xl="2"
-                class="d-flex"
+                class="col-span-6 md:col-span-4 xl:col-span-2 flex"
             >
                 <AnalyticsStatsCard
-                    class="w-100"
+                    class="w-full"
                     :data-testid="`analytics-stat-${card.key}`"
                     :title="t(`analytics.cards.${card.key}`)"
                     :subtitle="card.subtitle"
@@ -35,14 +32,14 @@
                     :meter="card.meter"
                     :loading="initialLoading"
                 />
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" lg="7" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 lg:col-span-7 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.grades')"
-                    icon="mdi-chart-bar"
+                    icon="i-lucide-chart-column"
                     color="info"
                     :loading="initialLoading"
                     :empty="!analytics?.gradeDistribution.length"
@@ -52,30 +49,30 @@
                         :types="analytics!.types"
                     />
                 </AnalyticsSection>
-            </v-col>
-            <v-col cols="12" lg="5" class="d-flex">
+            </div>
+            <div class="col-span-12 lg:col-span-5 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.gradeBalance')"
-                    icon="mdi-scale-unbalanced"
+                    icon="i-lucide-scale"
                     color="warning"
                     :subtitle="t('analytics.hints.gradeBalance')"
                     :loading="initialLoading"
                     :empty="!hasGradeImbalance"
-                    empty-icon="mdi-check-circle-outline"
+                    empty-icon="i-lucide-circle-check"
                     :empty-text="t('analytics.empty.gradeBalance')"
                 >
                     <AnalyticsGradeBalanceChart
                         :grades="analytics!.gradeDistribution"
                     />
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" lg="8" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 lg:col-span-8 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.activity')"
-                    icon="mdi-chart-timeline-variant"
+                    icon="i-lucide-chart-spline"
                     color="success"
                     :loading="initialLoading"
                     :empty="!hasActivity"
@@ -86,11 +83,11 @@
                         :bucket="analytics!.bucket"
                     />
                 </AnalyticsSection>
-            </v-col>
-            <v-col cols="12" lg="4" class="d-flex">
+            </div>
+            <div class="col-span-12 lg:col-span-4 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.ratingDistribution')"
-                    icon="mdi-star-outline"
+                    icon="i-lucide-star"
                     color="warning"
                     :loading="initialLoading"
                     :empty="!analytics?.summary.ratings.value"
@@ -99,14 +96,14 @@
                         :counts="analytics!.ratingDistribution"
                     />
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" lg="7" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 lg:col-span-7 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.gradeFeedback')"
-                    icon="mdi-target"
+                    icon="i-lucide-target"
                     color="error"
                     :subtitle="t('analytics.hints.gradeFeedback')"
                     :loading="initialLoading"
@@ -117,11 +114,11 @@
                         :routes="analytics!.gradeFeedback"
                     />
                 </AnalyticsSection>
-            </v-col>
-            <v-col cols="12" lg="5" class="d-flex">
+            </div>
+            <div class="col-span-12 lg:col-span-5 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.setters')"
-                    icon="mdi-account-hard-hat-outline"
+                    icon="i-lucide-hard-hat"
                     color="warning"
                     testid="analytics-setters"
                     :loading="initialLoading"
@@ -129,14 +126,14 @@
                 >
                     <AnalyticsSetterChart :setters="analytics!.setters" />
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" lg="6" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 lg:col-span-6 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.ratedRoutes')"
-                    icon="mdi-thumbs-up-down-outline"
+                    icon="i-lucide-thumbs-up"
                     color="success"
                     :subtitle="t('analytics.hints.ratedRoutes')"
                     :loading="initialLoading"
@@ -149,11 +146,11 @@
                         :baseline="analytics!.ratingBaseline ?? 0"
                     />
                 </AnalyticsSection>
-            </v-col>
-            <v-col cols="12" lg="6" class="d-flex">
+            </div>
+            <div class="col-span-12 lg:col-span-6 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.oldestActive')"
-                    icon="mdi-history"
+                    icon="i-lucide-history"
                     color="warning"
                     :subtitle="t('analytics.hints.oldestActive')"
                     :loading="initialLoading"
@@ -161,14 +158,14 @@
                 >
                     <AnalyticsAgeChart :routes="analytics!.oldestActive" />
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" lg="8" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 lg:col-span-8 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.locationGrades')"
-                    icon="mdi-map-marker-outline"
+                    icon="i-lucide-map-pin"
                     color="info"
                     :loading="initialLoading"
                     :empty="!analytics?.locationGrades.length"
@@ -177,60 +174,76 @@
                         :cells="analytics!.locationGrades"
                     />
                 </AnalyticsSection>
-            </v-col>
-            <v-col cols="12" lg="4" class="d-flex">
+            </div>
+            <div class="col-span-12 lg:col-span-4 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.latestComments')"
-                    icon="mdi-comment-text-multiple-outline"
+                    icon="i-lucide-messages-square"
                     color="secondary"
                     testid="analytics-latest-comments"
                     flush
                     :loading="initialLoading"
                     :empty="!analytics?.latestComments.length"
-                    empty-icon="mdi-comment-off-outline"
+                    empty-icon="i-lucide-message-square-off"
                     :empty-text="t('analytics.empty.latestComments')"
                 >
-                    <v-list
-                        lines="two"
-                        density="compact"
-                        class="comment-list py-1"
-                    >
-                        <v-list-item
+                    <ul class="comment-list py-1">
+                        <li
                             v-for="comment in analytics!.latestComments"
                             :key="comment.id"
-                            :to="
-                                comment.routeId
-                                    ? `/route?id=${comment.routeId}`
-                                    : undefined
-                            "
-                            :title="
-                                comment.routeName ||
-                                t('analytics.labels.unknown')
-                            "
-                            :subtitle="comment.comment"
                         >
-                            <template #append>
-                                <v-rating
+                            <component
+                                :is="comment.routeId ? NuxtLink : 'div'"
+                                :to="
+                                    comment.routeId
+                                        ? `/route?id=${comment.routeId}`
+                                        : undefined
+                                "
+                                class="comment-item flex items-center gap-3 px-4 py-2"
+                            >
+                                <div class="min-w-0 flex-1">
+                                    <div class="truncate text-sm font-medium">
+                                        {{
+                                            comment.routeName ||
+                                            t('analytics.labels.unknown')
+                                        }}
+                                    </div>
+                                    <div
+                                        class="line-clamp-2 text-xs text-muted"
+                                    >
+                                        {{ comment.comment }}
+                                    </div>
+                                </div>
+                                <div
                                     v-if="comment.rating !== null"
-                                    :model-value="comment.rating"
-                                    readonly
-                                    density="compact"
-                                    size="14"
-                                    color="warning"
-                                    class="comment-rating"
-                                />
-                            </template>
-                        </v-list-item>
-                    </v-list>
+                                    class="flex shrink-0"
+                                    role="img"
+                                    :aria-label="`${comment.rating}/5`"
+                                >
+                                    <UIcon
+                                        v-for="star in 5"
+                                        :key="star"
+                                        name="i-lucide-star"
+                                        :class="[
+                                            'size-3.5',
+                                            star <= Math.round(comment.rating)
+                                                ? 'fill-current text-warning'
+                                                : 'text-dimmed',
+                                        ]"
+                                    />
+                                </div>
+                            </component>
+                        </li>
+                    </ul>
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-2" density="comfortable">
-            <v-col cols="12" class="d-flex">
+        <div class="mb-3 grid grid-cols-12 gap-3">
+            <div class="col-span-12 flex">
                 <AnalyticsSection
                     :title="t('analytics.sections.activityHeatmap')"
-                    icon="mdi-calendar-month-outline"
+                    icon="i-lucide-calendar-days"
                     color="success"
                     :loading="initialLoading"
                     :empty="!analytics?.dailyRouteActivity.length"
@@ -239,9 +252,9 @@
                         :timeline="analytics!.dailyRouteActivity"
                     />
                 </AnalyticsSection>
-            </v-col>
-        </v-row>
-    </v-container>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -254,6 +267,7 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+const NuxtLink = resolveComponent('NuxtLink')
 
 useHead(() => ({
     title: t('analytics.meta.title'),
@@ -300,7 +314,7 @@ const summaryCards = computed(() => {
             key: 'activeRoutes',
             value: activeRoutes,
             previous: null,
-            icon: 'mdi-flag-checkered',
+            icon: 'i-lucide-flag-triangle-right',
             color: 'info',
             format: formatCount,
             spark: [],
@@ -313,7 +327,7 @@ const summaryCards = computed(() => {
             key: 'routesSet',
             value: summary?.routesSet.value ?? 0,
             previous: summary?.routesSet.previous ?? null,
-            icon: 'mdi-map-marker-path',
+            icon: 'i-lucide-waypoints',
             color: 'success',
             format: formatCount,
             spark: counts(data?.routeTimeline),
@@ -324,7 +338,7 @@ const summaryCards = computed(() => {
             key: 'ratings',
             value: summary?.ratings.value ?? 0,
             previous: summary?.ratings.previous ?? null,
-            icon: 'mdi-star-outline',
+            icon: 'i-lucide-star',
             color: 'warning',
             format: formatCount,
             spark: counts(data?.ratingTimeline),
@@ -335,7 +349,7 @@ const summaryCards = computed(() => {
             key: 'averageRating',
             value: summary?.ratings.value ? summary.averageRating.value : null,
             previous: summary?.averageRating.previous ?? null,
-            icon: 'mdi-star-half-full',
+            icon: 'i-lucide-star-half',
             color: 'warning',
             format: (value: number) => formatNumber(value, locale.value, 2),
             spark: [],
@@ -348,7 +362,7 @@ const summaryCards = computed(() => {
             key: 'comments',
             value: summary?.comments.value ?? 0,
             previous: summary?.comments.previous ?? null,
-            icon: 'mdi-comment-text-multiple-outline',
+            icon: 'i-lucide-messages-square',
             color: 'secondary',
             format: formatCount,
             spark: counts(data?.commentTimeline),
@@ -359,7 +373,7 @@ const summaryCards = computed(() => {
             key: 'averageLifespan',
             value: summary?.averageLifespanDays ?? null,
             previous: null,
-            icon: 'mdi-timer-sand',
+            icon: 'i-lucide-hourglass',
             color: 'error',
             format: (value: number) => t('analytics.labels.days', { n: value }),
             spark: [],
@@ -375,13 +389,8 @@ const summaryCards = computed(() => {
     overflow: hidden;
 }
 
-.comment-list :deep(.v-list-item) {
-    grid-template-columns: max-content minmax(0, 1fr) auto;
-}
-
-.comment-rating :deep(.v-btn) {
-    width: 16px;
-    height: 16px;
+a.comment-item:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
 @media (max-width: 600px) {

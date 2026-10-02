@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import ExportOptionsDialog from '~/components/ExportOptionsDialog.vue'
 
 const slotStub = { template: '<div><slot /></div>' }
+const dialogStub = { template: '<div><slot /><slot name="actions" /></div>' }
 const buttonStub = {
     props: ['disabled', 'icon'],
     template:
@@ -11,10 +12,8 @@ const iconStub = { template: '<i><slot /></i>' }
 const checkboxStub = {
     props: ['modelValue', 'value', 'label'],
     emits: ['update:modelValue'],
-    template: `<input type="checkbox" :value="value" :checked="modelValue.includes(value)"
-    @change="$emit('update:modelValue', modelValue.includes(value)
-      ? modelValue.filter(k => k !== value)
-      : [...modelValue, value])" />`,
+    template: `<input type="checkbox" :value="value" :checked="modelValue"
+    @change="$emit('update:modelValue', !modelValue)" />`,
 }
 
 const selectStub = {
@@ -30,16 +29,12 @@ function createWrapper(format: 'pdf' | 'xlsx' = 'xlsx') {
         global: {
             mocks: { $t: (key: string) => key },
             stubs: {
-                'v-dialog': slotStub,
-                'v-card': slotStub,
-                'v-card-title': slotStub,
-                'v-card-text': slotStub,
-                'v-card-actions': slotStub,
-                'v-spacer': slotStub,
-                'v-icon': iconStub,
-                'v-btn': buttonStub,
-                'v-checkbox': checkboxStub,
-                'v-select': selectStub,
+                LayoutDialogShell: dialogStub,
+                UFormField: slotStub,
+                UIcon: iconStub,
+                UButton: buttonStub,
+                UCheckbox: checkboxStub,
+                USelect: selectStub,
             },
         },
     })

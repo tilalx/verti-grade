@@ -23,34 +23,22 @@ test('asks to sign in again when re-authentication fails after a password change
 
     try {
         await signInAs(page, user.email, user.password)
-        await gotoSettled(page, '/')
+        await gotoSettled(page, '/account/settings?tab=security')
         await page.route(
             '**/api/collections/users/auth-with-password',
             (route) => route.abort(),
         )
-        await page.getByTestId('user-menu-activator').click()
-        await page.getByTestId('user-menu-profile').click()
-        await page.getByTestId('profile-tab-security').click()
 
-        await page
-            .getByTestId('password-old')
-            .locator('input')
-            .fill(user.password)
-        await page
-            .getByTestId('password-new')
-            .locator('input')
-            .fill(NEW_PASSWORD)
-        await page
-            .getByTestId('password-confirm')
-            .locator('input')
-            .fill(NEW_PASSWORD)
+        await page.getByTestId('password-old').fill(user.password)
+        await page.getByTestId('password-new').fill(NEW_PASSWORD)
+        await page.getByTestId('password-confirm').fill(NEW_PASSWORD)
         await page.getByTestId('profile-save').click()
 
         await expect(page).toHaveURL(/\/auth\/login/)
-        await expect(page.getByTestId('profile-dialog')).toBeHidden()
-        await expect(
-            page.getByText('Password changed. Please sign in again'),
-        ).toBeVisible()
+        await expect(page.getByTestId('settings-page')).toHaveCount(0)
+        await expect(page.getByTestId('global-snackbar-message')).toContainText(
+            'Password changed. Please sign in again',
+        )
     } finally {
         await root
             .collection('users')

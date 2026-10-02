@@ -5,147 +5,138 @@
         data-testid="user-edit-dialog"
     >
         <template #title>
-            <div
-                class="avatar-wrapper"
-                role="button"
-                tabindex="0"
-                :aria-label="$t('account.changeAvatar')"
-                data-testid="user-edit-avatar-upload"
-                @click="avatarInput?.click()"
-                @keydown.enter.prevent="avatarInput?.click()"
-                @keydown.space.prevent="avatarInput?.click()"
+            <UTooltip
+                :text="$t('account.changeAvatar')"
+                ignore-non-keyboard-focus
             >
-                <v-avatar size="64" class="avatar-ring">
-                    <v-img
-                        v-if="avatarPreview"
-                        :src="avatarPreview"
+                <div
+                    class="avatar-wrapper"
+                    role="button"
+                    tabindex="0"
+                    :aria-label="$t('account.changeAvatar')"
+                    data-testid="user-edit-avatar-upload"
+                    @click="avatarInput?.click()"
+                    @keydown.enter.prevent="avatarInput?.click()"
+                    @keydown.space.prevent="avatarInput?.click()"
+                >
+                    <UAvatar
+                        :src="avatarPreview || undefined"
                         :alt="$t('account.changeAvatar')"
-                        cover
+                        icon="i-lucide-user"
+                        class="avatar-ring size-16 text-[32px]"
                     />
-                    <v-icon
-                        v-else
-                        icon="mdi-account-outline"
-                        size="32"
-                        color="grey-lighten-1"
-                    />
-                </v-avatar>
-                <div class="avatar-overlay">
-                    <v-icon icon="mdi-camera" size="18" color="white" />
+                    <div class="avatar-overlay">
+                        <UIcon
+                            name="i-lucide-camera"
+                            class="size-[18px] text-white"
+                        />
+                    </div>
                 </div>
-                <v-tooltip activator="parent" location="bottom">
-                    {{ $t('account.changeAvatar') }}
-                </v-tooltip>
-            </div>
+            </UTooltip>
             <input
                 type="file"
                 ref="avatarInput"
                 accept="image/jpeg,image/png,image/svg+xml,image/webp"
-                class="d-none"
+                class="hidden"
                 @change="onAvatarPicked"
             />
 
-            <div class="flex-grow-1 overflow-hidden">
-                <div class="text-title-large font-weight-bold text-truncate">
+            <div class="grow overflow-hidden">
+                <div class="text-[1.375rem] leading-7 font-bold truncate">
                     {{ $t('users.edit') }}
                 </div>
-                <div
-                    class="text-body-medium text-medium-emphasis text-truncate"
-                >
+                <div class="text-sm text-muted truncate">
                     {{ editableUser.email }}
                 </div>
             </div>
         </template>
 
-        <v-form ref="form" v-model="valid">
-            <!-- Name fields -->
-            <v-row density="comfortable">
-                <v-col cols="12" sm="6">
-                    <v-text-field
+        <UForm ref="form" :state="editableUser" :validate="validateForm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <UFormField :label="$t('account.firstname')" name="firstname">
+                    <UInput
                         v-model="editableUser.firstname"
-                        :rules="nameRules"
-                        :label="$t('account.firstname')"
                         :placeholder="$t('account.placeholders.firstname')"
-                        prepend-inner-icon="mdi-account-outline"
+                        icon="i-lucide-user"
+                        class="w-full"
                         data-testid="user-edit-firstname"
                     />
-                </v-col>
-                <v-col cols="12" sm="6">
-                    <v-text-field
+                </UFormField>
+                <UFormField :label="$t('account.lastname')" name="name">
+                    <UInput
                         v-model="editableUser.name"
-                        :rules="nameRules"
-                        :label="$t('account.lastname')"
                         :placeholder="$t('account.placeholders.lastname')"
-                        prepend-inner-icon="mdi-account-outline"
+                        icon="i-lucide-user"
+                        class="w-full"
                         data-testid="user-edit-lastname"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <!-- Email (read-only) -->
-            <v-text-field
-                :model-value="editableUser.email"
-                :label="$t('account.email')"
-                prepend-inner-icon="mdi-email-outline"
-                disabled
-                class="mb-1"
-            >
-                <template #append-inner>
-                    <v-tooltip :text="$t('account.emailLocked')" location="top">
-                        <template #activator="{ props: tp }">
-                            <v-icon
-                                v-bind="tp"
-                                icon="mdi-lock-outline"
-                                size="18"
-                            />
-                        </template>
-                    </v-tooltip>
-                </template>
-            </v-text-field>
+            <UFormField :label="$t('account.email')" class="mb-4">
+                <UInput
+                    :model-value="editableUser.email"
+                    icon="i-lucide-mail"
+                    disabled
+                    class="w-full"
+                >
+                    <template #trailing>
+                        <UTooltip :text="$t('account.emailLocked')">
+                            <UIcon name="i-lucide-lock" class="size-[18px]" />
+                        </UTooltip>
+                    </template>
+                </UInput>
+            </UFormField>
 
-            <!-- Role -->
-            <v-select
-                v-model="editableUser.role"
-                :items="roles"
-                item-title="name"
-                item-value="id"
-                :label="$t('users.role')"
-                prepend-inner-icon="mdi-shield-account-outline"
-                clearable
-                data-testid="user-edit-role"
-            />
-        </v-form>
+            <UFormField :label="$t('users.role')" name="role">
+                <USelectMenu
+                    v-model="editableUser.role"
+                    :items="roleItems"
+                    value-key="value"
+                    :search-input="false"
+                    icon="i-lucide-shield-user"
+                    clear
+                    class="w-full"
+                    data-testid="user-edit-role"
+                />
+            </UFormField>
+        </UForm>
         <template #actions>
-            <v-btn variant="text" data-testid="user-edit-cancel" @click="close">
+            <UButton
+                color="neutral"
+                variant="ghost"
+                data-testid="user-edit-cancel"
+                @click="close"
+            >
                 {{ $t('actions.cancel') }}
-            </v-btn>
-            <v-spacer />
-            <v-chip
+            </UButton>
+            <div class="flex-1" />
+            <UBadge
                 v-if="hasChanges"
-                size="small"
                 color="warning"
-                variant="tonal"
-                prepend-icon="mdi-pencil-outline"
+                variant="soft"
+                icon="i-lucide-pencil"
                 class="mr-2"
             >
                 {{ $t('account.unsavedChanges') }}
-            </v-chip>
-            <v-btn
+            </UBadge>
+            <UButton
                 :disabled="!valid || !hasChanges"
                 :loading="saving"
                 color="primary"
-                prepend-icon="mdi-content-save-outline"
+                icon="i-lucide-save"
                 data-testid="user-edit-submit"
                 @click="save"
             >
                 {{ $t('actions.save') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
-import type { VForm } from 'vuetify/components'
-import { required, maxLength } from '~/utils/validation'
+import type { Form } from '@nuxt/ui'
+import { required, maxLength, validateRules } from '~/utils/validation'
 import type { UserRecord } from '~/types/models'
 
 type EditableUserSource = UserRecord & { avatarUrl?: string | null }
@@ -159,10 +150,12 @@ const props = withDefaults(
 )
 
 const dialog = ref(false)
-const valid = ref(false)
 const saving = ref(false)
-const form = ref<VForm | null>(null)
+const form = ref<Form<typeof editableUser> | null>(null)
 const { data: roles } = useRoles()
+const roleItems = computed(() =>
+    (roles.value ?? []).map((role) => ({ label: role.name, value: role.id })),
+)
 
 const editableUser = reactive({
     id: '',
@@ -205,6 +198,9 @@ const { error: notifyError } = useNotification()
 
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]
+const validateForm = (state: Record<string, unknown>) =>
+    validateRules(state, { firstname: nameRules, name: nameRules })
+const valid = computed(() => validateForm(editableUser).length === 0)
 
 const hasChanges = computed(() => {
     if (avatarFile.value) return true
@@ -248,8 +244,7 @@ function close() {
 
 // ── Save ──────────────────────────────────────────────────────────────────
 async function save() {
-    const result = await form.value?.validate()
-    if (!result?.valid) return
+    if ((await form.value?.validate({ silent: true })) === false) return
 
     saving.value = true
     try {

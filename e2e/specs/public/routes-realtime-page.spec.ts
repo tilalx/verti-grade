@@ -9,10 +9,8 @@ test('a route change elsewhere keeps the visitor on their page', async ({
     for (let index = 0; index < 25; index++) await createRoute()
 
     await gotoSettled(page, '/routes')
-    const range = page
-        .getByTestId('index-table')
-        .locator('.v-data-table-footer__info')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    const range = page.getByTestId('index-table').getByTestId('table-page-info')
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(range).toContainText(/^\s*1\D.*\b25\s*$/)
     await page.getByRole('button', { name: /next page/i }).click()
     await expect(range).toContainText(/^\s*21\D.*\b25\s*$/)

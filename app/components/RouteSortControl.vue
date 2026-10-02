@@ -32,34 +32,32 @@ function toggleOrder() {
 </script>
 
 <template>
-    <div class="d-flex align-center ga-2">
-        <v-select
-            :model-value="activeKey"
+    <div class="flex items-center gap-2">
+        <USelect
+            :model-value="activeKey ?? undefined"
             :items="props.items"
-            :label="$t('table.sort_by')"
-            item-title="title"
-            item-value="key"
-            hide-details
-            density="compact"
-            class="flex-grow-1"
+            :placeholder="$t('table.sort_by')"
+            :aria-label="$t('table.sort_by')"
+            label-key="title"
+            value-key="key"
+            class="grow"
             data-testid="sort-field"
-            @update:modelValue="onKeyChange"
+            @update:model-value="onKeyChange"
         />
-        <v-btn
-            variant="tonal"
-            density="comfortable"
-            size="small"
-            icon
+        <UButton
+            variant="soft"
+            color="neutral"
+            :icon="
+                isDescending
+                    ? 'i-lucide-arrow-down-wide-narrow'
+                    : 'i-lucide-arrow-up-narrow-wide'
+            "
             :disabled="!activeKey"
             data-testid="sort-order-toggle"
             :aria-label="
                 isDescending ? $t('table.sort_desc') : $t('table.sort_asc')
             "
             @click="toggleOrder"
-        >
-            <v-icon>{{
-                isDescending ? 'mdi-sort-descending' : 'mdi-sort-ascending'
-            }}</v-icon>
-        </v-btn>
+        />
     </div>
 </template>

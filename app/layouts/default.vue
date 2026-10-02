@@ -1,12 +1,15 @@
 <template>
     <a href="#main-content" class="skip-link">{{ $t('nav.skipToContent') }}</a>
-    <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
-    <div class="page-body">
-        <v-main id="main-content" tabindex="-1">
-            <NotificationsNewVersionAvailable v-if="isLoggedIn" />
-            <slot />
-        </v-main>
-        <LayoutFootBar :settings="settings" />
+    <div class="app-frame">
+        <LayoutSideBar :loggedIn="isLoggedIn" :settings="settings" />
+        <div class="page-body">
+            <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
+            <main id="main-content" class="app-main" tabindex="-1">
+                <NotificationsNewVersionAvailable v-if="isLoggedIn" />
+                <slot />
+            </main>
+            <LayoutFootBar :settings="settings" />
+        </div>
     </div>
     <LayoutBottomNav />
     <div v-if="hydrated" data-testid="page-hydrated" hidden />
@@ -169,14 +172,23 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.app-frame {
+    display: flex;
+    flex: 1 1 auto;
+}
+
 .page-body {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+    min-width: 0;
 }
 
-.page-body :deep(.v-main) {
+.app-main {
     flex: 1 0 auto;
+    padding: 0 env(safe-area-inset-right, 0px)
+        calc(var(--app-bottom) + var(--app-bottom-inset, 0px))
+        env(safe-area-inset-left, 0px);
 }
 
 .skip-link {
@@ -185,8 +197,8 @@ onBeforeUnmount(() => {
     left: 16px;
     z-index: 9999;
     padding: 8px 16px;
-    background: rgb(var(--v-theme-primary));
-    color: rgb(var(--v-theme-on-primary));
+    background: var(--ui-primary);
+    color: #fff;
     border-radius: 0 0 8px 8px;
     font-weight: 600;
     font-size: 0.875rem;
@@ -196,9 +208,5 @@ onBeforeUnmount(() => {
 
 .skip-link:focus {
     top: 0;
-}
-
-#main-content {
-    padding-top: 64px;
 }
 </style>

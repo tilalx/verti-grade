@@ -1,75 +1,95 @@
 <template>
-    <v-alert
+    <UAlert
         v-if="updateAvailable && !dismissed"
-        type="info"
-        border="start"
-        closable
-        rounded="0"
+        color="info"
+        variant="soft"
+        icon="i-lucide-info"
+        close
+        class="rounded-none border-s-4 border-info"
         data-testid="update-banner"
-        close-label="notifications.updateBanner.dismiss"
-        @click:close="dismiss"
+        @update:open="(open: boolean) => !open && dismiss()"
     >
-        <div class="d-flex align-center flex-wrap ga-2">
-            <strong>{{ $t('notifications.updateBanner.title') }}</strong>
+        <template #close="{ ui }">
+            <UButton
+                icon="i-lucide-x"
+                color="neutral"
+                variant="link"
+                :aria-label="$t('notifications.updateBanner.dismiss')"
+                :class="ui.close()"
+                @click="dismiss"
+            />
+        </template>
+        <template #description>
+            <div class="flex items-center flex-wrap gap-2">
+                <strong>{{ $t('notifications.updateBanner.title') }}</strong>
 
-            <template v-if="mode === 'release'">
-                <span>
-                    {{
-                        $t('notifications.updateBanner.message', [latest?.tag])
-                    }}
-                </span>
-                <NotificationsReleaseNotesDialog
-                    :tag="latest?.tag"
-                    :notes="latest?.notes"
-                    :published-at="latest?.publishedAt"
-                    :repo-url="repoUrl"
-                    :installed-version="appVersionLabel"
-                    :error="error"
-                    :loading="loading"
-                >
-                    <template #activator="{ props: activatorProps }">
-                        <v-btn
-                            v-bind="activatorProps"
-                            variant="text"
-                            size="small"
-                            density="comfortable"
-                            data-testid="update-banner-changelog"
-                        >
-                            {{ $t('notifications.updateBanner.viewChangelog') }}
-                        </v-btn>
-                    </template>
-                </NotificationsReleaseNotesDialog>
-            </template>
+                <template v-if="mode === 'release'">
+                    <span>
+                        {{
+                            $t('notifications.updateBanner.message', [
+                                latest?.tag,
+                            ])
+                        }}
+                    </span>
+                    <NotificationsReleaseNotesDialog
+                        :tag="latest?.tag"
+                        :notes="latest?.notes"
+                        :published-at="latest?.publishedAt"
+                        :repo-url="repoUrl"
+                        :installed-version="appVersionLabel"
+                        :error="error"
+                        :loading="loading"
+                    >
+                        <template #activator="{ props: activatorProps }">
+                            <UButton
+                                v-bind="activatorProps"
+                                color="neutral"
+                                variant="ghost"
+                                size="sm"
+                                data-testid="update-banner-changelog"
+                            >
+                                {{
+                                    $t(
+                                        'notifications.updateBanner.viewChangelog',
+                                    )
+                                }}
+                            </UButton>
+                        </template>
+                    </NotificationsReleaseNotesDialog>
+                </template>
 
-            <template v-else>
-                <span>
-                    {{
-                        $t(
-                            'notifications.updateBanner.commitsMessage',
-                            commits.length,
-                        )
-                    }}
-                </span>
-                <NotificationsCommitListDialog
-                    :commits="commits"
-                    :repo-url="repoUrl"
-                    :installed-sha="appVersionLabel"
-                >
-                    <template #activator="{ props: activatorProps }">
-                        <v-btn
-                            v-bind="activatorProps"
-                            variant="text"
-                            size="small"
-                            density="comfortable"
-                            data-testid="update-banner-commits"
-                        >
-                            {{ $t('notifications.updateBanner.viewCommits') }}
-                        </v-btn>
-                    </template>
-                </NotificationsCommitListDialog>
-            </template>
-        </div>
-    </v-alert>
+                <template v-else>
+                    <span>
+                        {{
+                            $t(
+                                'notifications.updateBanner.commitsMessage',
+                                commits.length,
+                            )
+                        }}
+                    </span>
+                    <NotificationsCommitListDialog
+                        :commits="commits"
+                        :repo-url="repoUrl"
+                        :installed-sha="appVersionLabel"
+                    >
+                        <template #activator="{ props: activatorProps }">
+                            <UButton
+                                v-bind="activatorProps"
+                                color="neutral"
+                                variant="ghost"
+                                size="sm"
+                                data-testid="update-banner-commits"
+                            >
+                                {{
+                                    $t('notifications.updateBanner.viewCommits')
+                                }}
+                            </UButton>
+                        </template>
+                    </NotificationsCommitListDialog>
+                </template>
+            </div>
+        </template>
+    </UAlert>
 </template>
 
 <script setup lang="ts">

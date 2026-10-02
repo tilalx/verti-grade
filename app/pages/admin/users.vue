@@ -1,12 +1,11 @@
 <template>
-    <v-container class="users-page">
+    <div class="users-page mx-auto w-full p-4">
         <LayoutPageHeader :title="t('users.title')">
             <template #actions>
                 <UserCreateUser @user-created="reloadUsers" />
             </template>
         </LayoutPageHeader>
 
-        <!-- ── Filter bar ────────────────────────────────────────────────── -->
         <FilterBar
             v-model="search"
             :search-label="t('users.searchUsers')"
@@ -14,21 +13,18 @@
             @clear="clearFilters"
         >
             <template #filters>
-                <v-row density="comfortable">
-                    <v-col cols="12" sm="6" md="4">
-                        <v-select
-                            v-model="selectedRole"
-                            :label="t('users.role')"
-                            :items="roleOptions"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="users-filter-role"
-                        />
-                    </v-col>
-                </v-row>
+                <div class="contents">
+                    <FilterSelect
+                        :label="t('users.role')"
+                        v-model="selectedRole"
+                        :items="roleOptions"
+                        value-key="value"
+                        :placeholder="t('filter.all')"
+                        clear
+                        data-testid="users-filter-role"
+                        @clear="selectedRole = null"
+                    />
+                </div>
             </template>
         </FilterBar>
 
@@ -38,158 +34,134 @@
             type="list-item-avatar-two-line"
         />
 
-        <!-- ── Empty state ───────────────────────────────────────────────── -->
         <LayoutEmptyState
             v-else-if="!loading && !users.length"
-            icon="mdi-account-off-outline"
+            icon="i-lucide-user-x"
             :title="t('users.noUsers')"
             :hint="t('users.noUsersHint')"
         />
 
-        <!-- ── User Cards ────────────────────────────────────────────────── -->
-        <v-row v-else>
-            <v-col v-for="user in users" :key="user.id" cols="12" sm="6" lg="4">
-                <v-card
-                    border
-                    flat
-                    class="user-card d-flex flex-column"
+        <div v-else class="grid grid-cols-12 gap-4">
+            <div
+                v-for="user in users"
+                :key="user.id"
+                class="col-span-12 sm:col-span-6 lg:col-span-4"
+            >
+                <div
+                    class="user-card flex h-full flex-col rounded-lg border bg-default"
                     :data-testid="`user-card-${user.id}`"
                 >
-                    <v-card-item class="pb-1 pt-3">
-                        <template #prepend>
-                            <v-avatar
-                                size="42"
-                                :color="
-                                    user.avatarUrl
-                                        ? undefined
-                                        : avatarColor(user.username)
-                                "
-                            >
-                                <v-img
-                                    v-if="user.avatarUrl"
-                                    :src="user.avatarUrl"
-                                    :alt="user.username"
-                                    cover
-                                />
-                                <span
-                                    v-else
-                                    class="text-body-small font-weight-bold"
-                                >
-                                    {{ initials(user.firstname, user.name) }}
-                                </span>
-                            </v-avatar>
-                        </template>
-
-                        <v-card-title
-                            class="text-body-medium font-weight-semibold px-0 py-0 card-title-tight"
+                    <div class="flex items-center gap-3 px-4 pb-1 pt-3">
+                        <img
+                            v-if="user.avatarUrl"
+                            :src="user.avatarUrl"
+                            :alt="user.username"
+                            class="size-[42px] shrink-0 rounded-full object-cover"
+                        />
+                        <span
+                            v-else
+                            class="inline-flex size-[42px] shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                            :style="{
+                                backgroundColor: avatarColor(user.username),
+                            }"
                         >
-                            {{
-                                [user.firstname, user.name]
-                                    .filter(Boolean)
-                                    .join(' ') || user.username
-                            }}
-                        </v-card-title>
-                        <v-card-subtitle
-                            class="text-body-small px-0 py-0 card-subtitle-muted"
-                        >
-                            {{ user.username }}
-                        </v-card-subtitle>
+                            {{ initials(user.firstname, user.name) }}
+                        </span>
 
-                        <template #append>
-                            <v-chip
-                                v-if="user.roleName"
-                                data-testid="user-card-role"
-                                size="small"
-                                :color="user.roleColor || undefined"
-                                :variant="user.roleColor ? 'flat' : 'tonal'"
-                                :style="
-                                    user.roleColor
-                                        ? {
-                                              color: readableTextOn(
-                                                  user.roleColor,
-                                              ),
-                                          }
-                                        : undefined
-                                "
+                        <div class="min-w-0 flex-1">
+                            <div
+                                class="text-sm font-semibold card-title-tight truncate"
                             >
-                                {{ user.roleName }}
-                            </v-chip>
-                        </template>
-                    </v-card-item>
+                                {{
+                                    [user.firstname, user.name]
+                                        .filter(Boolean)
+                                        .join(' ') || user.username
+                                }}
+                            </div>
+                            <div
+                                class="text-xs card-subtitle-muted text-muted truncate"
+                            >
+                                {{ user.username }}
+                            </div>
+                        </div>
 
-                    <v-card-text class="py-2">
-                        <div class="text-body-small text-disabled">
+                        <UBadge
+                            v-if="user.roleName"
+                            data-testid="user-card-role"
+                            :color="user.roleColor ? 'neutral' : 'primary'"
+                            :variant="user.roleColor ? 'solid' : 'soft'"
+                            :style="
+                                user.roleColor
+                                    ? {
+                                          backgroundColor: user.roleColor,
+                                          color: readableTextOn(user.roleColor),
+                                      }
+                                    : undefined
+                            "
+                        >
+                            {{ user.roleName }}
+                        </UBadge>
+                    </div>
+
+                    <div class="px-4 py-2">
+                        <div class="text-xs text-dimmed">
                             {{ user.email }}
                         </div>
-                        <div class="text-body-small text-disabled mt-1">
+                        <div class="text-xs text-dimmed mt-1">
                             {{ t('table.created_at') }}:
                             {{ formatCreatedDate(user.created) }}
                         </div>
-                    </v-card-text>
+                    </div>
 
-                    <v-card-actions class="pt-0 px-2 pb-2">
-                        <v-spacer />
-                        <v-btn
-                            icon
-                            size="small"
-                            variant="text"
-                            :aria-label="t('actions.edit')"
-                            data-testid="user-card-edit"
-                            @click="editUser(user)"
-                        >
-                            <v-icon size="18">mdi-pencil-outline</v-icon>
-                            <v-tooltip activator="parent" location="top">{{
-                                t('actions.edit')
-                            }}</v-tooltip>
-                        </v-btn>
-                        <v-btn
-                            icon
-                            size="small"
-                            variant="text"
-                            :disabled="user.id === currentUserId"
-                            :aria-label="t('actions.delete')"
-                            data-testid="user-card-delete"
-                            @click="confirmDelete(user)"
-                        >
-                            <v-icon size="18" color="error"
-                                >mdi-delete-outline</v-icon
-                            >
-                            <v-tooltip activator="parent" location="top">{{
-                                t('actions.delete')
-                            }}</v-tooltip>
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-        </v-row>
+                    <div class="mt-auto flex justify-end gap-1 px-2 pb-2">
+                        <UTooltip :text="t('actions.edit')">
+                            <UButton
+                                icon="i-lucide-pencil"
+                                color="neutral"
+                                variant="ghost"
+                                :aria-label="t('actions.edit')"
+                                data-testid="user-card-edit"
+                                @click="editUser(user)"
+                            />
+                        </UTooltip>
+                        <UTooltip :text="t('actions.delete')">
+                            <UButton
+                                icon="i-lucide-trash-2"
+                                color="error"
+                                variant="ghost"
+                                :disabled="user.id === currentUserId"
+                                :aria-label="t('actions.delete')"
+                                data-testid="user-card-delete"
+                                @click="confirmDelete(user)"
+                            />
+                        </UTooltip>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Result count + load more -->
         <div v-if="!loading && users.length" class="text-center mt-4">
-            <p
-                class="text-body-small text-medium-emphasis mb-3"
-                data-testid="users-showing"
-            >
+            <p class="text-xs text-muted mb-3" data-testid="users-showing">
                 {{ t('users.showing', { n: users.length, total: totalItems }) }}
             </p>
-            <v-btn
+            <UButton
                 v-if="hasMore"
-                variant="tonal"
+                color="neutral"
+                variant="soft"
                 :loading="loadingMore"
                 data-testid="users-load-more"
                 @click="loadMore"
             >
                 {{ t('actions.load_more') }}
-            </v-btn>
+            </UButton>
         </div>
 
-        <!-- ── Edit User Dialog ──────────────────────────────────────────── -->
         <UserEditUser
             :user="editingUser"
             @user-updated="onUserUpdated"
             @close="editingUser = null"
         />
 
-        <!-- ── Delete Confirmation Dialog ────────────────────────────────── -->
         <ConfirmDialog
             v-model="deleteDialog"
             :title="t('users.delete')"
@@ -198,13 +170,12 @@
             @confirm="deleteUser"
         />
 
-        <!-- ── Role Permissions ──────────────────────────────────────────── -->
-        <v-divider class="my-8" />
+        <USeparator class="my-8" />
 
         <div id="roles" class="scroll-anchor">
             <AdminRolePermissionsEditor />
         </div>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -256,10 +227,9 @@ const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
 const { data: roles } = useRoles()
 
-const roleOptions = computed(() => [
-    { text: t('filter.all'), value: null },
-    ...roles.value.map((r) => ({ text: r.name, value: r.id })),
-])
+const roleOptions = computed(() =>
+    roles.value.map((r) => ({ label: r.name, value: r.id })),
+)
 
 // ── Data fetching ──────────────────────────────────────────────────────────
 
@@ -444,6 +414,6 @@ onMounted(async () => {
 }
 
 .user-card:hover {
-    border-color: rgba(var(--v-theme-primary), 0.3);
+    border-color: color-mix(in oklab, var(--ui-primary) 30%, transparent);
 }
 </style>

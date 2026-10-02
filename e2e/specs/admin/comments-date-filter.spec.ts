@@ -10,7 +10,7 @@ test('the week filter sends a PocketBase-formatted cutoff and keeps new comments
     await gotoSettled(page, '/manage/comments')
     const id = await createComment(page, route.id, `${testPrefix}-this-week`)
     await gotoSettled(page, '/manage/comments')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
 
     const filterRequest = page.waitForRequest((request) => {
         const url = new URL(request.url())

@@ -3,17 +3,16 @@ import { mount } from '@vue/test-utils'
 import CommitListDialog from '~/components/notifications/CommitListDialog.vue'
 
 const stubs = {
-    'v-dialog': {
-        template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+    LayoutDialogShell: {
+        props: ['subtitle'],
+        template:
+            '<div><slot name="activator" :props="{}" /><slot name="title" />{{ subtitle }}<slot /></div>',
     },
-    'v-card': { template: '<div><slot /></div>' },
-    'v-card-title': { template: '<div><slot /></div>' },
-    'v-card-subtitle': { template: '<div><slot /></div>' },
-    'v-card-text': { template: '<div><slot /></div>' },
-    'v-alert': { template: '<div class="alert"><slot /></div>' },
-    'v-icon': { template: '<i><slot /></i>' },
-    'v-spacer': true,
-    'v-btn': { template: '<button><slot /></button>' },
+    UAlert: {
+        props: ['description'],
+        template: '<div class="alert">{{ description }}</div>',
+    },
+    UIcon: true,
 }
 
 function createWrapper(props = {}) {

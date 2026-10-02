@@ -16,7 +16,7 @@
             }}</span>
         </template>
 
-        <div class="position-relative">
+        <div class="relative">
             <Transition name="form-swap" mode="out-in">
                 <div
                     v-if="step === 'form' && auto"
@@ -24,27 +24,26 @@
                     class="text-center py-6"
                     :data-testid="`${testidPrefix}-pending`"
                 >
-                    <v-progress-circular
-                        indeterminate
-                        color="success"
-                        size="48"
-                        class="mb-6"
+                    <UIcon
+                        name="i-lucide-loader-circle"
+                        class="mb-6 size-12 animate-spin text-success"
                     />
                 </div>
 
                 <div v-else-if="step === 'form'" key="form">
                     <slot :submit="submit" :loading="loading" />
 
-                    <v-btn
-                        variant="text"
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
                         block
-                        class="text-none text-medium-emphasis"
-                        prepend-icon="mdi-arrow-left"
+                        class="text-muted"
+                        icon="i-lucide-arrow-left"
                         :disabled="loading"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('actions.back_to_home') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
                 <div
@@ -54,21 +53,22 @@
                     :data-testid="`${testidPrefix}-done`"
                 >
                     <div class="success-ring">
-                        <v-icon size="40" color="success"
-                            >mdi-check-circle-outline</v-icon
-                        >
+                        <UIcon
+                            name="i-lucide-circle-check"
+                            class="size-[40px] text-success"
+                        />
                     </div>
 
-                    <v-btn
+                    <UButton
                         color="success"
                         block
-                        size="large"
-                        class="font-weight-semibold"
+                        size="lg"
+                        class="font-semibold"
                         :data-testid="`${testidPrefix}-goto-login`"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('account.login') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
                 <div
@@ -77,19 +77,20 @@
                     class="text-center py-6"
                     :data-testid="`${testidPrefix}-invalid`"
                 >
-                    <v-icon size="48" color="error" class="mb-4"
-                        >mdi-link-off</v-icon
-                    >
-                    <v-btn
+                    <UIcon
+                        name="i-lucide-link-2-off"
+                        class="mb-4 size-[48px] text-error"
+                    />
+                    <UButton
                         color="success"
-                        variant="tonal"
+                        variant="soft"
                         block
                         class="mt-4"
                         :data-testid="`${testidPrefix}-back`"
                         @click="navigateTo('/auth/login')"
                     >
                         {{ $t('actions.back_to_home') }}
-                    </v-btn>
+                    </UButton>
                 </div>
             </Transition>
         </div>
@@ -181,8 +182,8 @@ onMounted(() => {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 2px solid rgba(var(--v-theme-success), 0.3);
-    background: rgba(var(--v-theme-success), 0.08);
+    border: 2px solid color-mix(in oklab, var(--ui-success) 30%, transparent);
+    background: color-mix(in oklab, var(--ui-success) 8%, transparent);
     margin: 0 auto 24px;
 }
 </style>

@@ -86,19 +86,19 @@
         </div>
 
         <nav class="heatmap-years">
-            <v-btn
+            <UButton
                 v-for="year in availableYears"
                 :key="year"
-                size="small"
-                density="comfortable"
+                size="sm"
                 class="heatmap-year"
-                :color="year === selectedYear ? 'primary' : undefined"
-                :variant="year === selectedYear ? 'flat' : 'text'"
+                :color="year === selectedYear ? 'primary' : 'neutral'"
+                :variant="year === selectedYear ? 'solid' : 'ghost'"
+                :aria-pressed="year === selectedYear"
                 :data-testid="`analytics-heatmap-year-${year}`"
                 @click="selectedYear = year"
             >
                 {{ year }}
-            </v-btn>
+            </UButton>
         </nav>
 
         <teleport to="body">
@@ -307,11 +307,12 @@ function showCellTooltip(event: MouseEvent) {
 .heatmap-title {
     font-size: 0.875rem;
     margin-bottom: 8px;
-    color: rgb(var(--v-theme-on-surface));
+    color: var(--ui-text-highlighted);
 }
 
 .heatmap-box {
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 12%, transparent);
     border-radius: 8px;
     padding: 12px 16px 10px;
 }
@@ -332,7 +333,7 @@ function showCellTooltip(event: MouseEvent) {
 .heatmap-label {
     font-size: 11px;
     line-height: 1;
-    color: rgba(var(--v-theme-on-surface), 0.6);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 60%, transparent);
     white-space: nowrap;
     align-self: center;
 }
@@ -349,7 +350,8 @@ function showCellTooltip(event: MouseEvent) {
 .heatmap-cell {
     aspect-ratio: 1;
     border-radius: 3px;
-    outline: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+    outline: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 5%, transparent);
     outline-offset: -1px;
 }
 
@@ -358,19 +360,19 @@ function showCellTooltip(event: MouseEvent) {
 }
 
 .heatmap-level-0 {
-    background: rgba(var(--v-theme-on-surface), 0.07);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 7%, transparent);
 }
 .heatmap-level-1 {
-    background: rgba(var(--v-theme-primary), 0.35);
+    background: color-mix(in oklab, var(--ui-primary) 35%, transparent);
 }
 .heatmap-level-2 {
-    background: rgba(var(--v-theme-primary), 0.6);
+    background: color-mix(in oklab, var(--ui-primary) 60%, transparent);
 }
 .heatmap-level-3 {
-    background: rgba(var(--v-theme-primary), 0.8);
+    background: color-mix(in oklab, var(--ui-primary) 80%, transparent);
 }
 .heatmap-level-4 {
-    background: rgb(var(--v-theme-primary));
+    background: var(--ui-primary);
 }
 
 .heatmap-legend {
@@ -380,7 +382,7 @@ function showCellTooltip(event: MouseEvent) {
     gap: 3px;
     margin-top: 8px;
     font-size: 11px;
-    color: rgba(var(--v-theme-on-surface), 0.6);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 60%, transparent);
 }
 
 .heatmap-legend .heatmap-cell {
@@ -401,6 +403,8 @@ function showCellTooltip(event: MouseEvent) {
     gap: 2px;
     padding-top: 28px;
     flex-shrink: 0;
+    max-height: 220px;
+    overflow-y: auto;
 }
 
 .heatmap-year {
@@ -417,9 +421,10 @@ function showCellTooltip(event: MouseEvent) {
     border-radius: 8px;
     font-size: 12px;
     white-space: nowrap;
-    background: rgba(var(--v-theme-surface), 0.96);
-    color: rgba(var(--v-theme-on-surface), 0.9);
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+    background: color-mix(in oklab, var(--ui-bg) 96%, transparent);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 90%, transparent);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 10%, transparent);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
@@ -434,6 +439,7 @@ function showCellTooltip(event: MouseEvent) {
         flex-direction: row;
         flex-wrap: wrap;
         padding-top: 0;
+        max-height: none;
     }
 
     .heatmap-year {

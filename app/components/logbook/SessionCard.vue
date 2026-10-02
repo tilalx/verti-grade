@@ -1,52 +1,52 @@
 <template>
-    <v-card variant="tonal" class="h-100" :data-testid="`logbook-day-${day}`">
+    <div
+        class="h-full rounded-lg bg-elevated"
+        :data-testid="`logbook-day-${day}`"
+    >
         <button
             type="button"
-            class="session-card__header pa-4"
+            class="session-card__header p-4"
             :aria-expanded="open"
             data-testid="logbook-session-toggle"
             @click="open = !open"
         >
-            <div class="flex-grow-1 text-left">
-                <h2 class="text-title-small font-weight-bold mb-2">
+            <div class="grow text-left">
+                <h2 class="text-sm font-medium font-bold mb-2">
                     {{ formattedDay }}
                 </h2>
-                <div class="d-flex flex-wrap ga-2">
-                    <v-chip
-                        size="small"
-                        prepend-icon="mdi-format-list-bulleted"
-                    >
+                <div class="flex flex-wrap gap-2">
+                    <UBadge color="neutral" variant="soft" icon="i-lucide-list">
                         {{
                             $t('ticks.session.climbs', {
                                 count: summary.climbs,
                             })
                         }}
-                    </v-chip>
-                    <v-chip
-                        size="small"
+                    </UBadge>
+                    <UBadge
                         color="success"
-                        prepend-icon="mdi-flag-checkered"
+                        variant="soft"
+                        icon="i-lucide-flag-triangle-right"
                         data-testid="logbook-session-sends"
                     >
                         {{ $t('ticks.sendCount', { count: summary.sends }) }}
-                    </v-chip>
-                    <v-chip
+                    </UBadge>
+                    <UBadge
                         v-if="summary.flashes"
-                        size="small"
-                        color="amber-darken-2"
-                        prepend-icon="mdi-lightning-bolt"
+                        color="warning"
+                        variant="soft"
+                        icon="i-lucide-zap"
                     >
                         {{
                             $t('ticks.session.flashes', {
                                 count: summary.flashes,
                             })
                         }}
-                    </v-chip>
-                    <v-chip
+                    </UBadge>
+                    <UBadge
                         v-if="summary.hardest"
-                        size="small"
                         color="primary"
-                        prepend-icon="mdi-trending-up"
+                        variant="soft"
+                        icon="i-lucide-trending-up"
                         data-testid="logbook-session-hardest"
                     >
                         {{
@@ -54,25 +54,26 @@
                                 grade: summary.hardest.grade,
                             })
                         }}
-                    </v-chip>
+                    </UBadge>
                 </div>
             </div>
-            <v-icon :icon="open ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+            <UIcon
+                :name="open ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                class="size-6"
+            />
         </button>
-        <v-expand-transition>
-            <div v-show="open" class="px-4 pb-2">
-                <v-divider class="mb-1" />
-                <template v-for="(tick, index) in ticks" :key="tick.id">
-                    <v-divider v-if="index" />
-                    <LogbookTickRow
-                        :tick="tick"
-                        @edit="emit('edit', $event)"
-                        @delete="emit('delete', $event)"
-                    />
-                </template>
-            </div>
-        </v-expand-transition>
-    </v-card>
+        <div v-show="open" class="px-4 pb-2">
+            <USeparator class="mb-1" />
+            <template v-for="(tick, index) in ticks" :key="tick.id">
+                <USeparator v-if="index" />
+                <LogbookTickRow
+                    :tick="tick"
+                    @edit="emit('edit', $event)"
+                    @delete="emit('delete', $event)"
+                />
+            </template>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">

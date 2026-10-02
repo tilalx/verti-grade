@@ -3,7 +3,7 @@ import { gotoSettled } from '../../support/nav'
 
 async function fillNewPassword(page: import('@playwright/test').Page) {
     for (const field of ['password-new', 'password-confirm']) {
-        await page.getByTestId(field).locator('input').fill('NewPassw0rd!123')
+        await page.getByTestId(field).fill('NewPassw0rd!123')
     }
 }
 
@@ -38,7 +38,7 @@ test('keeps the form and notifies on a non-token error', async ({ page }) => {
     await fillNewPassword(page)
     await page.getByTestId('confirm-reset-submit').click()
 
-    const snackbar = page.getByTestId('global-snackbar')
+    const snackbar = page.getByTestId('global-snackbar').last()
     await expect(snackbar).toContainText('Something went wrong')
     await expect(snackbar).not.toContainText('Password too weak')
     await expect(page.getByTestId('confirm-reset-submit')).toBeVisible()

@@ -1,13 +1,13 @@
 <template>
     <div>
-        <v-btn
+        <UButton
             color="primary"
-            prepend-icon="mdi-account-plus-outline"
+            icon="i-lucide-user-plus"
             data-testid="user-create-open"
             @click="dialog = true"
         >
             {{ $t('users.create') }}
-        </v-btn>
+        </UButton>
 
         <LayoutDialogShell
             v-model="dialog"
@@ -15,139 +15,143 @@
             data-testid="user-create-dialog"
         >
             <template #title>
-                <v-avatar color="primary" variant="tonal" size="44">
-                    <v-icon icon="mdi-account-plus-outline" size="22" />
-                </v-avatar>
+                <span
+                    class="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                >
+                    <UIcon name="i-lucide-user-plus" class="size-[22px]" />
+                </span>
                 <div>
-                    <div class="text-title-large font-weight-bold">
+                    <div class="text-[1.375rem] leading-7 font-bold">
                         {{ $t('users.create') }}
                     </div>
-                    <div class="text-body-medium text-medium-emphasis">
+                    <div class="text-sm text-muted">
                         {{ $t('users.createHint') }}
                     </div>
                 </div>
             </template>
 
-            <v-alert
+            <UAlert
                 v-if="!mailConfigured"
-                type="warning"
-                variant="tonal"
-                icon="mdi-email-off-outline"
+                color="warning"
+                variant="soft"
+                icon="i-lucide-mail-x"
                 class="mb-4"
                 data-testid="user-create-mail-warning"
-            >
-                {{ $t('users.inviteMailNotConfigured') }}
-            </v-alert>
+                :description="$t('users.inviteMailNotConfigured')"
+            />
 
-            <v-form ref="form" v-model="valid" @submit.prevent="submit">
-                <!-- Avatar upload -->
-                <div class="d-flex justify-center mb-6">
-                    <div
-                        class="avatar-wrapper"
-                        role="button"
-                        tabindex="0"
-                        :aria-label="$t('account.changeAvatar')"
-                        data-testid="user-create-avatar-upload"
-                        @click="avatarInput?.click()"
-                        @keydown.enter.prevent="avatarInput?.click()"
-                        @keydown.space.prevent="avatarInput?.click()"
-                    >
-                        <v-avatar size="80" class="avatar-ring">
-                            <v-img
-                                v-if="avatarPreview"
-                                :src="avatarPreview"
+            <UForm
+                ref="form"
+                :state="user"
+                :validate="validateForm"
+                @submit="submit"
+            >
+                <div class="flex justify-center mb-6">
+                    <UTooltip :text="$t('account.changeAvatar')">
+                        <div
+                            class="avatar-wrapper"
+                            role="button"
+                            tabindex="0"
+                            :aria-label="$t('account.changeAvatar')"
+                            data-testid="user-create-avatar-upload"
+                            @click="avatarInput?.click()"
+                            @keydown.enter.prevent="avatarInput?.click()"
+                            @keydown.space.prevent="avatarInput?.click()"
+                        >
+                            <UAvatar
+                                :src="avatarPreview || undefined"
                                 :alt="$t('account.changeAvatar')"
-                                cover
+                                icon="i-lucide-user"
+                                class="avatar-ring size-20 text-[40px]"
                             />
-                            <v-icon
-                                v-else
-                                icon="mdi-account-outline"
-                                size="40"
-                                color="grey-lighten-1"
-                            />
-                        </v-avatar>
-                        <div class="avatar-overlay">
-                            <v-icon icon="mdi-camera" size="20" color="white" />
+                            <div class="avatar-overlay">
+                                <UIcon
+                                    name="i-lucide-camera"
+                                    class="size-[20px] text-white"
+                                />
+                            </div>
                         </div>
-                        <v-tooltip activator="parent" location="bottom">
-                            {{ $t('account.changeAvatar') }}
-                        </v-tooltip>
-                    </div>
+                    </UTooltip>
                     <input
                         type="file"
                         ref="avatarInput"
                         accept="image/jpeg,image/png,image/svg+xml,image/webp"
-                        class="d-none"
+                        class="hidden"
                         @change="onAvatarPicked"
                     />
                 </div>
 
-                <!-- Name fields -->
-                <v-row density="comfortable">
-                    <v-col cols="12" sm="6">
-                        <v-text-field
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <UFormField
+                        :label="$t('account.firstname')"
+                        name="firstname"
+                    >
+                        <UInput
                             v-model="user.firstname"
-                            :rules="nameRules"
-                            :label="$t('account.firstname')"
                             :placeholder="$t('account.placeholders.firstname')"
-                            prepend-inner-icon="mdi-account-outline"
+                            icon="i-lucide-user"
+                            class="w-full"
                             data-testid="user-create-firstname"
                         />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                        <v-text-field
+                    </UFormField>
+                    <UFormField :label="$t('account.lastname')" name="name">
+                        <UInput
                             v-model="user.name"
-                            :rules="nameRules"
-                            :label="$t('account.lastname')"
                             :placeholder="$t('account.placeholders.lastname')"
-                            prepend-inner-icon="mdi-account-outline"
+                            icon="i-lucide-user"
+                            class="w-full"
                             data-testid="user-create-lastname"
                         />
-                    </v-col>
-                </v-row>
+                    </UFormField>
+                </div>
 
-                <!-- Email -->
-                <v-text-field
-                    v-model="user.email"
-                    :rules="emailRules"
+                <UFormField
                     :label="$t('account.email')"
-                    type="email"
-                    prepend-inner-icon="mdi-email-outline"
-                    class="mb-1"
-                    data-testid="user-create-email"
-                />
+                    name="email"
+                    class="mb-4"
+                >
+                    <UInput
+                        v-model="user.email"
+                        type="email"
+                        icon="i-lucide-mail"
+                        class="w-full"
+                        data-testid="user-create-email"
+                    />
+                </UFormField>
 
-                <!-- Role -->
-                <v-select
-                    v-model="user.role"
-                    :items="roles"
-                    item-title="name"
-                    item-value="id"
-                    :label="$t('users.role')"
-                    prepend-inner-icon="mdi-shield-account-outline"
-                    clearable
-                    data-testid="user-create-role"
-                />
-            </v-form>
+                <UFormField :label="$t('users.role')" name="role">
+                    <USelectMenu
+                        v-model="user.role"
+                        :items="roleItems"
+                        value-key="value"
+                        :search-input="false"
+                        icon="i-lucide-shield-user"
+                        clear
+                        class="w-full"
+                        data-testid="user-create-role"
+                    />
+                </UFormField>
+            </UForm>
             <template #actions>
-                <v-btn
-                    variant="text"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
                     data-testid="user-create-cancel"
                     @click="closeDialog"
                 >
                     {{ $t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
+                </UButton>
+                <div class="flex-1" />
+                <UButton
                     :disabled="!valid"
                     :loading="saving"
                     color="primary"
-                    prepend-icon="mdi-check"
+                    icon="i-lucide-check"
                     data-testid="user-create-submit"
                     @click="submit"
                 >
                     {{ $t('actions.create') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
     </div>
@@ -155,18 +159,25 @@
 
 <script setup lang="ts">
 import type { ClientResponseError } from 'pocketbase'
-import type { VForm } from 'vuetify/components'
-import { required, maxLength, validEmail } from '~/utils/validation'
+import type { Form } from '@nuxt/ui'
+import {
+    required,
+    maxLength,
+    validEmail,
+    validateRules,
+} from '~/utils/validation'
 
 const { t } = useI18n()
 const pb = usePocketbase()
 const emit = defineEmits<{ 'user-created': []; closed: [] }>()
 
 const dialog = ref(false)
-const valid = ref(false)
 const saving = ref(false)
-const form = ref<VForm | null>(null)
+const form = ref<Form<typeof user> | null>(null)
 const { data: roles } = useRoles()
+const roleItems = computed(() =>
+    (roles.value ?? []).map((role) => ({ label: role.name, value: role.id })),
+)
 
 const user = reactive({
     email: '',
@@ -196,16 +207,21 @@ const { notify, error: notifyError } = useNotification()
 const { data: mailStatus } = useMailStatus()
 const mailConfigured = computed(() => mailStatus.value?.configured !== false)
 
-// ── Roles ─────────────────────────────────────────────────────────────────
-
 // ── Validation ────────────────────────────────────────────────────────────
 const nameRules = [required(t), maxLength(t, 30)]
 const emailRules = [required(t), validEmail(t)]
+const validateForm = (state: Record<string, unknown>) =>
+    validateRules(state, {
+        firstname: nameRules,
+        name: nameRules,
+        email: emailRules,
+    })
+const valid = computed(() => validateForm(user).length === 0)
 
 function closeDialog() {
     dialog.value = false
-    form.value?.reset()
-    form.value?.resetValidation()
+    Object.assign(user, { email: '', name: '', firstname: '', role: null })
+    form.value?.clear()
     avatarFile.value = null
     avatarPreview.value = null
     emit('closed')
@@ -213,8 +229,7 @@ function closeDialog() {
 
 // ── Submit ────────────────────────────────────────────────────────────────
 async function submit() {
-    const result = await form.value?.validate()
-    if (!result?.valid) return
+    if ((await form.value?.validate({ silent: true })) === false) return
 
     saving.value = true
     try {

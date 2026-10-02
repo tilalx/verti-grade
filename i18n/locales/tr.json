@@ -44,7 +44,8 @@
         "unknownUser": "Bilinmeyen Kullanıcı",
         "tabs": {
             "profile": "Profil",
-            "security": "Güvenlik"
+            "security": "Güvenlik",
+            "preferences": "Tercihler"
         },
         "placeholders": {
             "firstname": "Ahmet",
@@ -139,7 +140,7 @@
         "mapEditor": "Harita düzenleyici",
         "mapPlacement": "Rotaları yerleştir",
         "scan": "Tara",
-        "me": "Ben",
+        "me": "Daha fazla",
         "moreActions": "Diğer işlemler",
         "selectedCount": "{n} seçildi",
         "list": "Rotalar"
@@ -244,6 +245,7 @@
         "routesFound": "Bulunan rotalar: {n}",
         "create": "Rota Oluştur",
         "color": "Renk",
+        "customColor": "Özel renk",
         "routename": "Rota Adı",
         "difficulty": "Derece",
         "anchor_point": "Ankraj",
@@ -518,6 +520,7 @@
             "purposes": {
                 "auth": "Oturumunuzu açık tutar",
                 "colorScheme": "Açık veya koyu modu hatırlar",
+                "sidebar": "Yan gezinmenin açık olup olmadığını hatırlar",
                 "exportColumns": "Seçilen dışa aktarma sütunlarını hatırlar",
                 "updateDismissed": "Kapatılan güncelleme bildirimini hatırlar",
                 "inventorySession": "Envanter taramasının ilerlemesini saklar",
@@ -553,7 +556,8 @@
             "mapPlacement": "Rotaları yerleştir - Gripello",
             "scan": "Rota tara - Gripello",
             "me": "Hesabım - Gripello",
-            "overview": "Genel bakış - Gripello"
+            "overview": "Genel bakış - Gripello",
+            "accountSettings": "Ayarlar - Gripello"
         },
         "content": {
             "settings": "Ayarlar",
@@ -613,13 +617,16 @@
         "commandPaletteEmpty": "Sonuç yok",
         "themeToggle": "Temayı değiştir",
         "themeSystem": "Sistem teması",
+        "themeSystemHint": "Cihaz ayarını izler",
         "themeLight": "Açık tema",
         "themeDark": "Koyu tema",
         "openMenu": "Menüyü aç",
         "skipToContent": "İçeriğe geç",
         "mainNavigation": "Ana gezinme",
+        "toggleSidebar": "Kenar çubuğunu aç/kapat",
         "userMenu": "Kullanıcı menüsü",
         "manage": "Yönetim",
+        "moderation": "Moderasyon",
         "admin": "Yönetici",
         "quickNavigation": "Hızlı gezinme"
     },
@@ -746,7 +753,18 @@
         "boulderGradeSystem": "Boulder skalası",
         "gradingHint": "Yeni kurulan rotalara uygulanır. Mevcut rotalar düzenlenene kadar skalalarını korur.",
         "allowRegistration": "Herkese açık kayda izin ver",
-        "allowRegistrationHint": "Herkes yetkisiz bir tırmanıcı hesabı oluşturabilir. E-posta doğrulaması için çalışan bir posta sunucusu gerekir."
+        "allowRegistrationHint": "Herkes yetkisiz bir tırmanıcı hesabı oluşturabilir. E-posta doğrulaması için çalışan bir posta sunucusu gerekir.",
+        "description": "Kuruluşunu, marka görünümünü, derece sistemlerini ve yasal bilgileri yönet.",
+        "sections": "Ayar bölümleri",
+        "branding": "Marka",
+        "brandingHint": "Uygulamada, tarayıcı sekmesinde ve basılı rota etiketlerinde gösterilen logolar ve simgeler.",
+        "organizationHint": "Kuruluşunun adı, iletişim bilgileri ve hesap seçenekleri.",
+        "publicUrlsHint": "Bağlantılar, e-postalar ve QR kodları için kullanılan adresler.",
+        "assetHints": {
+            "logo": "PNG, JPG, SVG veya WebP. Gezinme çubuğunda gösterilir.",
+            "icon": "Tarayıcı sekmesinde gösterilen ICO dosyası.",
+            "sign": "PNG, JPG, SVG veya WebP. Rota etiketlerine basılır."
+        }
     },
     "errors": {
         "notFound": {
@@ -1185,5 +1203,19 @@
         "progress": "{total} güncel rotanın {sent} tanesini tamamladın.",
         "openLogbook": "Günlüğü aç",
         "gradeSpread": "Duvardaki dereceler"
+    },
+    "accountSettings": {
+        "title": "Ayarlar",
+        "subtitle": "Profilini, tercihlerini ve güvenliğini yönet.",
+        "profileDescription": "Diğer kişilerin seni uygulamada nasıl gördüğü.",
+        "avatar": "Avatar",
+        "avatarDescription": "JPG, PNG, SVG veya WebP.",
+        "emailDescription": "Giriş yapmak ve bildirim almak için kullanılır.",
+        "preferencesDescription": "Uygulamanın dili ve görünümü.",
+        "language": "Dil",
+        "languageDescription": "Arayüz ve aldığın e-postalar için kullanılır.",
+        "theme": "Tema",
+        "themeDescription": "Sistemini takip et veya sabit bir tema seç.",
+        "passwordDescription": "Yeni bir şifre seçmeden önce mevcut şifreni doğrula."
     }
 }

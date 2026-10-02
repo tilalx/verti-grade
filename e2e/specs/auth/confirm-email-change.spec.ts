@@ -11,10 +11,7 @@ test('shows the invalid-link state for a bogus email-change token', async ({
     page,
 }) => {
     await gotoSettled(page, '/auth/confirm-email-change/not-a-real-token')
-    await page
-        .getByTestId('email-change-password')
-        .locator('input')
-        .fill('E2ePassw0rd!')
+    await page.getByTestId('email-change-password').fill('E2ePassw0rd!')
 
     const submit = page.getByTestId('email-change-submit')
     await expect(submit).toBeEnabled()
@@ -31,10 +28,7 @@ test('confirms an email change and sends the user back to sign in', async ({
     )
 
     await gotoSettled(page, '/auth/confirm-email-change/looks-like-a-token')
-    await page
-        .getByTestId('email-change-password')
-        .locator('input')
-        .fill('E2ePassw0rd!')
+    await page.getByTestId('email-change-password').fill('E2ePassw0rd!')
     await page.getByTestId('email-change-submit').click()
 
     await expect(page.getByTestId('email-change-done')).toBeVisible()

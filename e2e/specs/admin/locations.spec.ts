@@ -12,8 +12,8 @@ test('admins add, rename and delete locations used by the route form', async ({
     const name = `${testPrefix} Hall`
     const renamed = `${testPrefix} Wall`
 
-    await gotoSettled(page, '/admin/settings')
-    await page.getByTestId('settings-location-new').locator('input').fill(name)
+    await gotoSettled(page, '/admin/settings?section=locations')
+    await page.getByTestId('settings-location-new').fill(name)
     await page.getByTestId('settings-location-add').click()
     await expect(locationRow(page, name)).toHaveCount(1)
 
@@ -24,7 +24,6 @@ test('admins add, rename and delete locations used by the route form', async ({
     )
     await locationRow(page, name)
         .getByTestId('settings-location-name')
-        .locator('input')
         .fill(renamed)
     await page.keyboard.press('Enter')
     expect((await renameSaved).ok()).toBe(true)
@@ -37,7 +36,7 @@ test('admins add, rename and delete locations used by the route form', async ({
         page.getByRole('option', { name: renamed, exact: true }),
     ).toBeVisible()
 
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=locations')
     await locationRow(page, renamed)
         .getByTestId('settings-location-delete')
         .click()
@@ -54,10 +53,10 @@ test('a location that still has routes cannot be deleted', async ({
     const location = await root.collection('locations').create({ name })
     const route = await createRoute({ location: location.id })
 
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=locations')
     const row = locationRow(page, name)
     await row.getByTestId('settings-location-delete').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         /cannot be deleted/,
     )
     await expect(row).toHaveCount(1)

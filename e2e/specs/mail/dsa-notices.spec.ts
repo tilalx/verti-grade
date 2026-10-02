@@ -60,7 +60,6 @@ test('Art. 16(5): the notifier is told the decision, exactly once', async ({
     await card.getByTestId('report-card-keep').click()
     await page
         .getByTestId('report-decision-reason')
-        .locator('textarea')
         .first()
         .fill(`${testPrefix}-reasoning`)
     await page.getByTestId('report-decision-confirm').click()

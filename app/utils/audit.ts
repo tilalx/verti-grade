@@ -65,15 +65,15 @@ export function compressIp(ip?: string | null): string {
 }
 
 export function actionIcon(action: AuditAction | string): string {
-    if (action === 'create') return 'mdi-plus-circle-outline'
-    if (action === 'update') return 'mdi-pencil-outline'
-    if (action === 'delete') return 'mdi-trash-can-outline'
-    if (action === 'login') return 'mdi-login'
-    if (action === 'login_failed') return 'mdi-account-alert-outline'
+    if (action === 'create') return 'i-lucide-circle-plus'
+    if (action === 'update') return 'i-lucide-pencil'
+    if (action === 'delete') return 'i-lucide-trash-2'
+    if (action === 'login') return 'i-lucide-log-in'
+    if (action === 'login_failed') return 'i-lucide-user-round-x'
     if (action === 'password_reset' || action === 'password_reset_request') {
-        return 'mdi-lock-reset'
+        return 'i-lucide-rotate-ccw'
     }
-    return 'mdi-email-sync-outline'
+    return 'i-lucide-mail-check'
 }
 
 export function actionColor(action: AuditAction | string): string {

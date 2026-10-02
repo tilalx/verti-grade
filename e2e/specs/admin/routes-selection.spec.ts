@@ -10,10 +10,10 @@ test('row checkboxes and select-all reflect the selected route ids', async ({
     await createRoute()
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
-    const boxes = page.getByTestId('routes-row-checkbox').locator('input')
+    const boxes = page.getByTestId('routes-row-checkbox')
     await expect(boxes).toHaveCount(2)
     await expect(boxes.first()).not.toBeChecked()
 
@@ -48,7 +48,7 @@ test('repeated select-all reuses the loaded id list', async ({
 
     await page.route('**/api/realtime**', (route) => route.abort())
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
 
     let idListRequests = 0
@@ -62,7 +62,7 @@ test('repeated select-all reuses the loaded id list', async ({
         }
     })
 
-    const boxes = page.getByTestId('routes-row-checkbox').locator('input')
+    const boxes = page.getByTestId('routes-row-checkbox')
     const selectAll = page.getByTestId('routes-select-all')
 
     await selectAll.click()

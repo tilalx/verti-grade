@@ -16,11 +16,7 @@ test.beforeEach(async ({ root, route, testPrefix }) => {
 async function openReviewsFor(page: Page, route: RecordModel) {
     await gotoSettled(page, '/routes')
 
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .first()
-        .fill(route.name)
+    await page.getByTestId('filter-search').first().fill(route.name)
 
     const row = page
         .getByRole('row')

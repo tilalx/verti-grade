@@ -1,22 +1,20 @@
 <template>
-    <v-card
-        variant="tonal"
-        class="list-card audit-card"
+    <div
+        class="list-card audit-card rounded-lg bg-elevated"
         :data-testid="`audit-card-${entry.id}`"
     >
         <div class="audit-card__body">
-            <v-icon
-                size="20"
-                class="audit-card__icon"
-                :color="actionColor(entry.action)"
-                >{{ actionIcon(entry.action) }}</v-icon
-            >
+            <UIcon
+                :name="actionIcon(entry.action)"
+                class="audit-card__icon size-[20px]"
+                :class="actionTextClass"
+            />
 
             <div class="audit-card__text">
                 <div class="audit-card__summary">
                     <span
-                        class="font-weight-medium"
-                        :class="`text-${actionColor(entry.action)}`"
+                        class="font-medium"
+                        :class="actionTextClass"
                         data-testid="audit-card-action"
                     >
                         {{ t(`audit.action.${entry.action}`) }}
@@ -24,14 +22,14 @@
                     <template v-if="targetLabel">
                         <span class="audit-card__dot">·</span>
                         <span
-                            class="font-weight-medium"
+                            class="font-medium"
                             data-testid="audit-card-target"
                             >{{ targetLabel }}</span
                         >
                     </template>
                 </div>
 
-                <div class="audit-card__meta text-body-small">
+                <div class="audit-card__meta text-xs">
                     <span data-testid="audit-card-actor">{{ actorName }}</span>
                     <template v-if="entry.record_id">
                         <span class="audit-card__dot">·</span>
@@ -52,7 +50,7 @@
 
                 <div
                     v-if="changedFields.length"
-                    class="audit-card__meta text-body-small"
+                    class="audit-card__meta text-xs"
                 >
                     <span>{{ t('audit.changedLabel') }}:</span>
                     <span data-testid="audit-card-fields">{{
@@ -62,14 +60,14 @@
             </div>
 
             <time
-                class="audit-card__time text-body-small"
+                class="audit-card__time text-xs"
                 :datetime="entry.created ?? undefined"
                 :title="absoluteTime"
                 data-testid="audit-card-time"
                 >{{ relativeTime }}</time
             >
         </div>
-    </v-card>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -101,6 +99,17 @@ const targetLabel = computed(() => {
 
 const targetUrl = computed(() =>
     auditTargetUrl(props.entry.collection_name, props.entry.record_id),
+)
+
+const actionTextClass = computed(
+    () =>
+        ({
+            success: 'text-success',
+            info: 'text-info',
+            error: 'text-error',
+            primary: 'text-primary',
+            warning: 'text-warning',
+        })[actionColor(props.entry.action)] ?? 'text-muted',
 )
 
 const changedFields = computed(() => props.entry.changed_fields ?? [])
@@ -148,7 +157,7 @@ const absoluteTime = computed(() =>
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    color: rgba(var(--v-theme-on-surface), 0.7);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 70%, transparent);
 }
 
 .audit-card__dot {
@@ -162,6 +171,6 @@ const absoluteTime = computed(() =>
 .audit-card__time {
     flex-shrink: 0;
     white-space: nowrap;
-    color: rgba(var(--v-theme-on-surface), 0.6);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 60%, transparent);
 }
 </style>

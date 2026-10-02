@@ -16,7 +16,7 @@ test('deleting a comment lowers the total by exactly one', async ({
     )
     await gotoSettled(page, '/manage/comments')
 
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     const showing = page.getByTestId('comments-showing')
     await expect(showing).toHaveText('Showing 2 of 2 reviews')
 
@@ -36,7 +36,7 @@ test('a realtime comment outside the active filter is not inserted', async ({
     route,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await page.getByTestId('comments-filter-rating-1').click()
 
     const hiddenId = await createComment(
@@ -69,23 +69,16 @@ test('creating and deleting users keeps the user total exact', async ({
     for (const index of [0, 1]) {
         await page.getByTestId('user-create-open').click()
         await expect(page.getByTestId('user-create-dialog')).toBeVisible()
-        await page
-            .getByTestId('user-create-firstname')
-            .locator('input')
-            .fill('E2E')
-        await page
-            .getByTestId('user-create-lastname')
-            .locator('input')
-            .fill(`${suffix}${index}`)
+        await page.getByTestId('user-create-firstname').fill('E2E')
+        await page.getByTestId('user-create-lastname').fill(`${suffix}${index}`)
         await page
             .getByTestId('user-create-email')
-            .locator('input')
             .fill(`${suffix}-${index}@gripello.test`)
         await page.getByTestId('user-create-submit').click()
         await expect(page.getByTestId('user-create-dialog')).toBeHidden()
     }
 
-    await page.getByTestId('filter-search').locator('input').fill(suffix)
+    await page.getByTestId('filter-search').fill(suffix)
     const cards = page.locator('[data-testid^="user-card-"]').filter({
         hasText: suffix,
     })
@@ -113,7 +106,7 @@ test('a realtime comment under a non-date sort refetches instead of inflating th
     route,
 }) => {
     await gotoSettled(page, '/manage/comments')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await page.getByTestId('comments-sort').click()
     await page.getByRole('option', { name: 'Most stars' }).click()
 
@@ -147,7 +140,7 @@ test('a realtime user resolved after the search changed is not inserted', async 
     createUser,
 }) => {
     await gotoSettled(page, '/admin/users')
-    const search = page.getByTestId('filter-search').locator('input')
+    const search = page.getByTestId('filter-search')
     await search.fill(`${testPrefix}-late`)
 
     await page.route('**/api/collections/users/records?*', async (route) => {

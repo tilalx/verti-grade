@@ -1,29 +1,51 @@
 <template>
     <section class="info-list" data-testid="me-info">
-        <p class="info-list__heading">{{ $t('me.info') }}</p>
-        <v-list class="info-list__card" nav rounded="lg" bg-color="surface">
-            <v-list-item
+        <p class="native-heading">{{ $t('me.info') }}</p>
+        <div class="native-group" style="--native-tint: #8e8e93">
+            <NuxtLink
                 v-bind="legalLinkProps(settings?.privacy_url, '/privacy')"
-                prepend-icon="mdi-shield-lock-outline"
-                :title="$t('legal.privacy')"
-                append-icon="mdi-chevron-right"
+                class="native-row"
                 data-testid="footer-privacy"
-            />
-            <v-list-item
+            >
+                <span class="native-row__icon"
+                    ><UIcon name="i-lucide-shield-check"
+                /></span>
+                <span class="native-row__text">{{ $t('legal.privacy') }}</span>
+                <UIcon
+                    name="i-lucide-chevron-right"
+                    class="native-row__chevron"
+                />
+            </NuxtLink>
+            <NuxtLink
                 v-bind="legalLinkProps(settings?.imprint_url, '/imprint')"
-                prepend-icon="mdi-scale-balance"
-                :title="$t('legal.imprint')"
-                append-icon="mdi-chevron-right"
+                class="native-row"
                 data-testid="footer-imprint"
-            />
-            <v-list-item
+            >
+                <span class="native-row__icon"
+                    ><UIcon name="i-lucide-scale"
+                /></span>
+                <span class="native-row__text">{{ $t('legal.imprint') }}</span>
+                <UIcon
+                    name="i-lucide-chevron-right"
+                    class="native-row__chevron"
+                />
+            </NuxtLink>
+            <a
                 v-if="settings?.contact_email"
                 :href="`mailto:${settings.contact_email}`"
-                prepend-icon="mdi-email-outline"
-                :title="$t('settings.contactEmail')"
-                :subtitle="settings.contact_email"
+                class="native-row"
                 data-testid="footer-contact"
-            />
+            >
+                <span class="native-row__icon"
+                    ><UIcon name="i-lucide-mail"
+                /></span>
+                <span class="native-row__text">
+                    <span class="block">{{ $t('settings.contactEmail') }}</span>
+                    <span class="native-row__subtitle">{{
+                        settings.contact_email
+                    }}</span>
+                </span>
+            </a>
             <NotificationsReleaseNotesDialog
                 :tag="installedBase ? `v${installedBase}` : appVersionLabel"
                 :notes="installedNotes"
@@ -36,42 +58,56 @@
                 installed
             >
                 <template #activator="{ props: activatorProps }">
-                    <v-list-item
+                    <button
                         v-bind="activatorProps"
-                        prepend-icon="mdi-tag-outline"
-                        :title="$t('me.version')"
-                        :subtitle="appVersionLabel"
-                        append-icon="mdi-chevron-right"
+                        type="button"
+                        class="native-row"
                         data-testid="footer-version"
-                    />
+                    >
+                        <span class="native-row__icon"
+                            ><UIcon name="i-lucide-tag"
+                        /></span>
+                        <span class="native-row__text">
+                            <span class="block">{{ $t('me.version') }}</span>
+                            <span class="native-row__subtitle">{{
+                                appVersionLabel
+                            }}</span>
+                        </span>
+                        <UIcon
+                            name="i-lucide-chevron-right"
+                            class="native-row__chevron"
+                        />
+                    </button>
                 </template>
             </NotificationsReleaseNotesDialog>
-            <v-list-item
-                prepend-icon="mdi-server-network"
-                :title="$t('me.status')"
-                data-testid="footer-health"
-            >
-                <v-list-item-subtitle class="info-list__status">
-                    <span
-                        class="info-list__dot"
-                        :class="isHealthy ? 'info-list__dot--ok' : ''"
-                    />
-                    {{
-                        isHealthy
-                            ? $t('notifications.success.health')
-                            : $t('notifications.error.health')
-                    }}
-                    · {{ $t('dashboard.online', [onlineCount]) }}
-                </v-list-item-subtitle>
-            </v-list-item>
-        </v-list>
+            <div class="native-row" data-testid="footer-health">
+                <span class="native-row__icon"
+                    ><UIcon name="i-lucide-server"
+                /></span>
+                <span class="native-row__text">
+                    <span class="block">{{ $t('me.status') }}</span>
+                    <span class="native-row__subtitle info-list__status">
+                        <span
+                            class="info-list__dot"
+                            :class="isHealthy ? 'info-list__dot--ok' : ''"
+                        />
+                        {{
+                            isHealthy
+                                ? $t('notifications.success.health')
+                                : $t('notifications.error.health')
+                        }}
+                        · {{ $t('dashboard.online', [onlineCount]) }}
+                    </span>
+                </span>
+            </div>
+        </div>
         <a
             class="info-list__copyright"
-            href="https://github.com/tilalx/verti-grade"
+            href="https://github.com/gripello/gripello"
             target="_blank"
             rel="noopener noreferrer"
         >
-            © {{ new Date().getFullYear() }} verti-grade
+            © {{ new Date().getFullYear() }} Gripello
         </a>
     </section>
 </template>
@@ -96,16 +132,6 @@ const { isHealthy, onlineCount } = useAppStatus()
 </script>
 
 <style scoped>
-.info-list__heading {
-    margin: 24px 4px 8px;
-    font-weight: 600;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-}
-
-.info-list__card {
-    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
 .info-list__status {
     display: flex;
     align-items: center;
@@ -116,11 +142,11 @@ const { isHealthy, onlineCount } = useAppStatus()
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgb(var(--v-theme-error));
+    background: var(--ui-error);
 }
 
 .info-list__dot--ok {
-    background: rgb(var(--v-theme-success));
+    background: var(--ui-success);
 }
 
 .info-list__copyright {
@@ -128,7 +154,7 @@ const { isHealthy, onlineCount } = useAppStatus()
     margin: 16px 0 8px;
     text-align: center;
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-disabled-opacity));
+    color: var(--ui-text-dimmed);
     text-decoration: none;
 }
 </style>

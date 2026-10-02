@@ -1,8 +1,12 @@
 <template>
-    <v-card class="surface-card w-100" elevation="0" :data-testid="testid">
-        <v-card-title class="section-header">
+    <div class="surface-card w-full" :data-testid="testid">
+        <div class="section-header">
             <div class="section-icon" :style="{ background: tint }">
-                <v-icon size="16" :color="color">{{ icon }}</v-icon>
+                <UIcon
+                    :name="icon"
+                    class="size-[16px]"
+                    :style="{ color: accent }"
+                />
             </div>
             <div class="section-heading">
                 <div class="section-title">{{ title }}</div>
@@ -10,16 +14,18 @@
                     {{ subtitle }}
                 </div>
             </div>
-            <v-spacer />
+            <div class="flex-1" />
             <slot name="actions" />
-        </v-card-title>
-        <v-divider />
-        <v-card-text :class="{ 'pa-0': flush }">
-            <v-skeleton-loader
-                v-if="loading"
-                :type="flush ? 'list-item-two-line@3' : 'image'"
-                :class="flush ? 'px-4 py-2' : 'section-skeleton'"
-            />
+        </div>
+        <USeparator />
+        <div :class="flush ? 'p-0' : 'p-4'">
+            <div v-if="loading && flush" class="flex flex-col gap-4 px-4 py-2">
+                <div v-for="n in 3" :key="n" class="flex flex-col gap-2">
+                    <USkeleton class="h-4 w-3/4" />
+                    <USkeleton class="h-3 w-1/2" />
+                </div>
+            </div>
+            <USkeleton v-else-if="loading" class="section-skeleton w-full" />
             <LayoutEmptyState
                 v-else-if="empty"
                 :icon="emptyIcon"
@@ -27,8 +33,8 @@
                 :title="emptyText ?? $t('analytics.emptySection')"
             />
             <slot v-else />
-        </v-card-text>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -47,11 +53,14 @@ const props = withDefaults(
     }>(),
     {
         color: 'primary',
-        emptyIcon: 'mdi-chart-box-outline',
+        emptyIcon: 'i-lucide-chart-column',
     },
 )
 
-const tint = computed(() => `rgba(var(--v-theme-${props.color}), 0.12)`)
+const accent = computed(() => `var(--ui-${props.color})`)
+const tint = computed(
+    () => `color-mix(in oklab, ${accent.value} 12%, transparent)`,
+)
 </script>
 
 <style scoped>
@@ -82,7 +91,7 @@ const tint = computed(() => `rgba(var(--v-theme-${props.color}), 0.12)`)
     font-weight: 400;
     line-height: 1.3;
     white-space: normal;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
 }
 
 .section-title {

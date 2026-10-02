@@ -1,20 +1,21 @@
 <template>
-    <v-container class="page--prose" data-testid="imprint-page">
+    <div class="page--prose mx-auto w-full p-4" data-testid="imprint-page">
         <LayoutPageHeader
             :title="$t('legal.imprint')"
             :subtitle="$t('legal.imprintPage.subtitle')"
         />
 
-        <v-alert
+        <UAlert
             v-if="!settings?.legal_address"
-            type="warning"
+            color="warning"
+            variant="soft"
+            icon="i-lucide-triangle-alert"
+            :description="$t('legal.imprintPage.incomplete')"
             class="mb-4"
             data-testid="imprint-incomplete"
-        >
-            {{ $t('legal.imprintPage.incomplete') }}
-        </v-alert>
+        />
 
-        <v-card class="surface-card legal-doc" flat>
+        <div class="surface-card legal-doc">
             <section>
                 <h2>{{ $t('legal.imprintPage.provider') }}</h2>
                 <address>
@@ -44,7 +45,7 @@
                     data-testid="imprint-representative"
                 >
                     {{ person.name
-                    }}<span v-if="person.role" class="text-medium-emphasis">
+                    }}<span v-if="person.role" class="text-muted">
                         – {{ person.role }}</span
                     >
                 </p>
@@ -101,19 +102,19 @@
                 <h2>{{ $t('legal.imprintPage.disputeTitle') }}</h2>
                 <p>{{ $t('legal.imprintPage.dispute') }}</p>
             </section>
-        </v-card>
+        </div>
 
-        <v-btn
+        <UButton
             to="/privacy"
-            variant="text"
+            variant="ghost"
             color="primary"
-            prepend-icon="mdi-shield-outline"
+            icon="i-lucide-shield"
             class="mt-3"
             data-testid="imprint-privacy-link"
         >
             {{ $t('legal.privacy') }}
-        </v-btn>
-    </v-container>
+        </UButton>
+    </div>
 </template>
 
 <script setup lang="ts">

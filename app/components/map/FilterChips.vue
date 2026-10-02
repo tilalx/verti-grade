@@ -6,85 +6,99 @@
         data-testid="map-chips"
     >
         <slot />
-        <v-chip
+        <UButton
             v-for="option in typeOptions"
             :key="option.value"
-            variant="flat"
-            :color="type === option.value ? 'primary' : 'surface'"
+            class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
+            :color="type === option.value ? 'primary' : 'neutral'"
+            :variant="type === option.value ? 'solid' : 'outline'"
             :aria-pressed="type === option.value"
             :data-testid="`map-type-${option.value}`"
             @click="type = type === option.value ? '' : option.value"
         >
             {{ option.label }}
-        </v-chip>
+        </UButton>
         <slot name="after-type" />
-        <v-menu v-if="grades.length">
-            <template #activator="{ props: menuProps }">
-                <v-chip
-                    v-bind="menuProps"
-                    variant="flat"
-                    :color="grade ? 'primary' : 'surface'"
-                    append-icon="mdi-menu-down"
-                    data-testid="map-filter-grade"
-                >
-                    {{ gradeText }}
-                </v-chip>
-            </template>
-            <v-list
-                density="compact"
-                max-height="360"
-                data-testid="map-grade-menu"
+        <UPopover v-if="grades.length" :content="{ align: 'start' }">
+            <UButton
+                class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
+                :color="grade ? 'primary' : 'neutral'"
+                :variant="grade ? 'solid' : 'outline'"
+                trailing-icon="i-lucide-chevron-down"
+                data-testid="map-filter-grade"
             >
-                <v-list-item
-                    :title="$t('filter.all')"
-                    :active="!grade"
-                    @click="grade = null"
-                />
-                <v-list-item
-                    v-for="item in grades"
-                    :key="String(item.value)"
-                    :title="item.title"
-                    :active="grade === item.value"
-                    data-testid="map-grade-option"
-                    @click="grade = item.value"
-                />
-            </v-list>
-        </v-menu>
-        <v-menu v-if="colors.length">
-            <template #activator="{ props: menuProps }">
-                <v-chip
-                    v-bind="menuProps"
-                    variant="flat"
-                    :color="color ? 'primary' : 'surface'"
-                    append-icon="mdi-menu-down"
-                    data-testid="map-filter-color-chip"
+                {{ gradeText }}
+            </UButton>
+            <template #content="{ close }">
+                <div
+                    class="flex max-h-[360px] min-w-[160px] flex-col gap-0.5 overflow-y-auto p-1"
+                    role="listbox"
+                    data-testid="map-grade-menu"
                 >
-                    <span
-                        v-if="color"
-                        class="map-chips__swatch"
-                        :style="{ background: color }"
-                    />
-                    {{ $t('climbing.color') }}
-                </v-chip>
+                    <button
+                        type="button"
+                        role="option"
+                        class="map-chips__option"
+                        :class="{ 'map-chips__option--active': !grade }"
+                        :aria-selected="!grade"
+                        @click="selectGrade(null, close)"
+                    >
+                        {{ $t('filter.all') }}
+                    </button>
+                    <button
+                        v-for="item in grades"
+                        :key="String(item.value)"
+                        type="button"
+                        role="option"
+                        class="map-chips__option"
+                        :class="{
+                            'map-chips__option--active': grade === item.value,
+                        }"
+                        :aria-selected="grade === item.value"
+                        data-testid="map-grade-option"
+                        @click="selectGrade(item.value, close)"
+                    >
+                        {{ item.title }}
+                    </button>
+                </div>
             </template>
-            <v-card class="pa-3" max-width="300">
-                <MapColorFilter
-                    v-model="color"
-                    :colors="colors"
-                    data-testid="map-filter-color"
+        </UPopover>
+        <UPopover v-if="colors.length" :content="{ align: 'start' }">
+            <UButton
+                class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
+                :color="color ? 'primary' : 'neutral'"
+                :variant="color ? 'solid' : 'outline'"
+                trailing-icon="i-lucide-chevron-down"
+                data-testid="map-filter-color-chip"
+            >
+                <span
+                    v-if="color"
+                    class="map-chips__swatch"
+                    :style="{ background: color }"
                 />
-            </v-card>
-        </v-menu>
-        <v-chip
+                {{ $t('climbing.color') }}
+            </UButton>
+            <template #content>
+                <div class="max-w-[300px] p-3">
+                    <MapColorFilter
+                        v-model="color"
+                        :colors="colors"
+                        data-testid="map-filter-color"
+                    />
+                </div>
+            </template>
+        </UPopover>
+        <UButton
             v-if="activeCount"
-            variant="flat"
-            color="surface"
-            prepend-icon="mdi-close"
+            class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
+            color="neutral"
+            variant="outline"
+            icon="i-lucide-x"
             data-testid="map-filter-clear"
             @click="emit('clear')"
         >
             {{ $t('map.clearFilters') }}
-        </v-chip>
+        </UButton>
     </div>
 </template>
 
@@ -115,6 +129,11 @@ const typeOptions = computed(() =>
         : [],
 )
 
+function selectGrade(value: string | null, close: () => void) {
+    grade.value = value
+    close()
+}
+
 const gradeText = computed(
     () =>
         props.grades.find((item) => item.value === grade.value)?.title ??
@@ -136,11 +155,25 @@ const gradeText = computed(
     display: none;
 }
 
-.map-chips :deep(.v-chip) {
+.map-chip,
+.map-chips :slotted(.map-chip) {
     flex-shrink: 0;
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(var(--v-border-color), 0.12);
+}
+
+.map-chips__option {
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.map-chips__option:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 6%, transparent);
+}
+
+.map-chips__option--active {
+    color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
 }
 
 .map-chips__swatch {
@@ -149,6 +182,7 @@ const gradeText = computed(
     height: 14px;
     margin-right: 6px;
     border-radius: 50%;
-    border: 1px solid rgba(var(--v-border-color), 0.4);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 40%, transparent);
 }
 </style>

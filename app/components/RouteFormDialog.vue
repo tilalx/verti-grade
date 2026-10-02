@@ -7,186 +7,225 @@
         :persistent="hasChanges"
         data-testid="route-form-dialog"
     >
-        <v-form ref="formRef" @submit.prevent="submit">
-            <!-- Name -->
-            <v-text-field
-                v-model="form.name"
+        <UForm
+            ref="formRef"
+            :state="form"
+            :validate="validateForm"
+            class="flex flex-col gap-4"
+            @submit="submit"
+        >
+            <UFormField
                 :label="$t('routes.name')"
-                :rules="nameRules"
-                maxlength="30"
-                counter
-                class="mb-1"
-                data-testid="route-form-name"
-            />
+                name="name"
+                :hint="`${form.name.length}/30`"
+            >
+                <UInput
+                    v-model="form.name"
+                    maxlength="30"
+                    class="w-full"
+                    data-testid="route-form-name"
+                />
+            </UFormField>
 
-            <!-- Difficulty and Type -->
-            <v-row density="comfortable" class="mb-1">
-                <v-col cols="6">
-                    <v-select
-                        v-model="form.grade"
-                        :label="gradeFieldLabel"
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField :label="gradeFieldLabel" name="grade">
+                    <USelect
+                        :model-value="form.grade ?? undefined"
                         :items="gradeLabels(gradeSystem)"
-                        :rules="[requiredRule]"
+                        class="w-full"
                         data-testid="route-form-difficulty"
+                        @update:model-value="form.grade = $event"
                     />
-                </v-col>
-                <v-col cols="6">
-                    <v-select
+                </UFormField>
+                <UFormField :label="$t('climbing.type')" name="type">
+                    <USelect
                         v-model="form.type"
-                        :label="$t('climbing.type')"
                         :items="typeItems"
-                        item-title="title"
-                        item-value="value"
-                        :rules="[requiredRule]"
+                        label-key="title"
+                        class="w-full"
                         data-testid="route-form-type"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <!-- Anchor Point and Location -->
-            <v-row density="comfortable" class="mb-1">
-                <v-col cols="6">
-                    <v-text-field
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                    :label="$t('climbing.anchor_point')"
+                    name="anchor_point"
+                >
+                    <UInput
                         v-model.number="form.anchor_point"
-                        :label="$t('climbing.anchor_point')"
-                        :rules="anchorPointRules"
                         type="number"
                         :min="isBoulderRoute ? 0 : 1"
                         max="100"
                         step="1"
+                        class="w-full"
                         data-testid="route-form-anchor-point"
                     />
-                </v-col>
-                <v-col cols="6">
-                    <v-select
+                </UFormField>
+                <UFormField :label="$t('climbing.location')" name="location">
+                    <USelect
                         v-model="form.location"
-                        :label="$t('climbing.location')"
-                        :items="locationRecords"
-                        item-title="name"
-                        item-value="id"
-                        :rules="[requiredRule]"
+                        :items="locationRecords ?? []"
+                        label-key="name"
+                        value-key="id"
+                        class="w-full"
                         data-testid="route-form-location"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <v-select
+            <UFormField
                 v-if="wallItems.length"
-                v-model="form.wall"
                 :label="$t('map.wall')"
-                :items="wallItems"
-                :hint="$t('map.wallHint')"
-                persistent-hint
-                clearable
-                class="mb-3"
-                data-testid="route-form-wall"
-            />
+                :help="$t('map.wallHint')"
+                name="wall"
+            >
+                <USelectMenu
+                    :model-value="form.wall || undefined"
+                    :items="wallItems"
+                    label-key="title"
+                    value-key="value"
+                    :search-input="false"
+                    clear
+                    class="w-full"
+                    data-testid="route-form-wall"
+                    @update:model-value="form.wall = $event ?? ''"
+                />
+            </UFormField>
 
-            <!-- Route Setter -->
-            <v-combobox
-                v-model="form.creator"
-                :label="$t('routes.route_setter')"
-                :items="setterItems"
-                :rules="[creatorRule]"
-                multiple
-                chips
-                closable-chips
-                class="mb-1"
-                data-testid="route-form-creator"
-            />
+            <UFormField :label="$t('routes.route_setter')" name="creator">
+                <UInputMenu
+                    v-model="form.creator"
+                    :items="setterItems"
+                    multiple
+                    create-item
+                    class="w-full"
+                    data-testid="route-form-creator"
+                    @create="addCreator"
+                />
+            </UFormField>
 
-            <!-- Screwed at and Archived -->
-            <v-row density="comfortable" class="mb-1">
-                <v-col cols="6">
-                    <v-text-field
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField :label="$t('routes.screwed_at')" name="screw_date">
+                    <UInput
                         v-model="form.screw_date"
-                        :label="$t('routes.screwed_at')"
                         type="date"
-                        :rules="[requiredRule]"
+                        class="w-full"
                         data-testid="route-form-screw-date"
                     />
-                </v-col>
-                <v-col
-                    v-if="isEditMode"
-                    cols="6"
-                    class="d-flex align-center justify-center align-self-stretch"
-                >
-                    <v-switch
+                </UFormField>
+                <div v-if="isEditMode" class="flex items-center justify-center">
+                    <USwitch
                         v-model="form.archived"
                         :label="$t('climbing.archived')"
-                        color="primary"
-                        density="compact"
-                        hide-details
                         data-testid="route-form-archived"
                     />
-                </v-col>
-            </v-row>
+                </div>
+            </div>
 
-            <!-- Comment -->
-            <v-textarea
-                v-model="form.comment"
+            <UFormField
                 :label="$t('climbing.comment')"
-                rows="2"
-                auto-grow
-                counter="255"
-                class="mb-2"
-                data-testid="route-form-comment"
-            />
-
-            <!-- Color picker -->
-            <div class="color-picker-section">
-                <v-color-picker
-                    v-model="form.color"
-                    hide-inputs
-                    :modes="['hex']"
-                    width="100%"
-                    elevation="0"
+                name="comment"
+                :hint="`${form.comment.length}/255`"
+            >
+                <UTextarea
+                    v-model="form.comment"
+                    :rows="2"
+                    autoresize
+                    class="w-full"
+                    data-testid="route-form-comment"
                 />
+            </UFormField>
 
-                <div class="d-flex flex-wrap ga-1 mt-2 mb-1">
+            <UFormField :label="$t('climbing.color')">
+                <div
+                    class="flex flex-wrap items-center gap-2"
+                    role="radiogroup"
+                    :aria-label="$t('climbing.color')"
+                >
                     <button
                         v-for="c in activePalette"
                         :key="c"
                         type="button"
-                        class="color-dot"
-                        :style="{
-                            backgroundColor: c,
-                            boxShadow:
-                                form.color?.toUpperCase() === c.toUpperCase()
-                                    ? '0 0 0 2px white, 0 0 0 4px ' + c
-                                    : 'none',
-                        }"
+                        role="radio"
+                        class="color-swatch"
+                        :class="{ 'color-swatch--active': isCurrentColor(c) }"
+                        :aria-checked="isCurrentColor(c)"
+                        :aria-label="c"
+                        :style="{ backgroundColor: c }"
                         @click="form.color = c"
                     />
+                    <UPopover :content="{ side: 'top', align: 'end' }">
+                        <button
+                            type="button"
+                            class="color-swatch color-swatch--custom"
+                            :class="{
+                                'color-swatch--active':
+                                    !activePalette.some(isCurrentColor),
+                            }"
+                            :aria-label="$t('climbing.customColor')"
+                            data-testid="route-form-color-custom"
+                        >
+                            <UIcon
+                                name="i-lucide-pipette"
+                                class="size-5 rounded-full bg-default p-0.5 text-muted"
+                            />
+                        </button>
+                        <template #content>
+                            <div class="flex w-60 flex-col gap-3 p-3">
+                                <UColorPicker
+                                    v-model="form.color"
+                                    class="mx-auto"
+                                />
+                                <UInput
+                                    v-model="form.color"
+                                    :aria-label="$t('climbing.customColor')"
+                                    class="w-full font-mono"
+                                    data-testid="route-form-color-hex"
+                                >
+                                    <template #leading>
+                                        <span
+                                            class="size-4 rounded-full ring ring-default"
+                                            :style="{
+                                                backgroundColor: form.color,
+                                            }"
+                                        />
+                                    </template>
+                                </UInput>
+                            </div>
+                        </template>
+                    </UPopover>
                 </div>
-            </div>
-        </v-form>
+            </UFormField>
+        </UForm>
         <template #actions>
-            <v-btn
+            <UButton
                 v-if="isEditMode"
                 color="error"
-                variant="text"
-                prepend-icon="mdi-delete-outline"
+                variant="ghost"
+                icon="i-lucide-trash-2"
                 data-testid="route-form-delete"
                 @click="deleteDialog = true"
             >
                 {{ $t('actions.delete') }}
-            </v-btn>
-            <v-spacer />
-            <v-btn
-                variant="text"
+            </UButton>
+            <div class="flex-1" />
+            <UButton
+                color="neutral"
+                variant="ghost"
                 data-testid="route-form-cancel"
                 @click="close"
-                >{{ $t('actions.cancel') }}</v-btn
+                >{{ $t('actions.cancel') }}</UButton
             >
-            <v-btn
+            <UButton
                 color="primary"
                 :loading="saving"
                 data-testid="route-form-submit"
                 @click="submit"
             >
                 {{ isEditMode ? $t('actions.save') : $t('actions.create') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 
@@ -201,6 +240,7 @@
 
 <script setup lang="ts">
 import type PocketBase from 'pocketbase'
+import type { Form } from '@nuxt/ui'
 import type { RouteRecord, WallRecord } from '~/types/models'
 import {
     freePosition,
@@ -212,7 +252,7 @@ import {
     normalizeCreators,
     formatDateToYYYYMMDD,
 } from '#shared/utils/formatting'
-import { required, maxLength } from '~/utils/validation'
+import { required, maxLength, type Rule } from '~/utils/validation'
 import { ROUTE_TYPES } from '~/utils/routes'
 import {
     gradeIndex,
@@ -224,11 +264,6 @@ import {
 const { t } = useI18n()
 const { error: notifyError } = useNotification()
 const pb = usePocketbase() as PocketBase
-
-type VFormHandle = {
-    validate: () => Promise<{ valid: boolean }>
-    reset: () => void
-} | null
 
 const fallbackColors = [
     '#F44336',
@@ -280,6 +315,9 @@ const similarColors = computed(() => {
         .slice(0, 12)
 })
 
+const isCurrentColor = (color: string) =>
+    form.color?.toUpperCase() === color.toUpperCase()
+
 const activePalette = computed(() =>
     colorModified.value && similarColors.value.length
         ? similarColors.value
@@ -310,7 +348,7 @@ const dialogOpen = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
 const deleteDialog = ref(false)
-const formRef = ref<VFormHandle>(null)
+const formRef = ref<Form<typeof form> | null>(null)
 const setterItems = ref<string[]>([])
 const editRouteId = ref<string | null>(null)
 const originalAnchorPointIsZero = ref(false)
@@ -402,7 +440,7 @@ async function wallPosition(wallId: string | null) {
 }
 
 const typeItems = computed(() =>
-    ROUTE_TYPES.map((value) => ({
+    ROUTE_TYPES.map((value): { title: string; value: string } => ({
         title: t(`routes.types.${value.toLowerCase()}`),
         value,
     })),
@@ -421,16 +459,36 @@ const isAnchorPointValid = (value: number | null) => {
     return n >= 1 && n <= 100
 }
 
-const anchorPointRules = [
-    (v: number | null) =>
+const anchorPointRules: Rule[] = [
+    (v) =>
         (v !== null && v !== undefined && String(v) !== '') ||
         t('validation.required'),
-    (v: number | null) =>
-        isAnchorPointValid(v) || t('validation.anchorPointRange'),
+    (v) =>
+        isAnchorPointValid(v as number | null) ||
+        t('validation.anchorPointRange'),
 ]
 
-const creatorRule = (v: string[]) =>
+const creatorRule: Rule = (v) =>
     (Array.isArray(v) && v.length > 0) || t('validation.required')
+
+const validateForm = (state: Partial<typeof form>) =>
+    validateRules(state, {
+        name: nameRules,
+        grade: [requiredRule],
+        type: [requiredRule],
+        anchor_point: anchorPointRules,
+        location: [requiredRule],
+        creator: [creatorRule],
+        screw_date: [requiredRule],
+    })
+
+function addCreator(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed || form.creator.includes(trimmed)) return
+    form.creator = [...form.creator, trimmed]
+    if (!setterItems.value.includes(trimmed))
+        setterItems.value = [...setterItems.value, trimmed]
+}
 
 const gradeSystem = computed(() =>
     originalGrading.value && originalGrading.value.type === form.type
@@ -509,6 +567,7 @@ async function open(route?: RouteRecord) {
     if (route) {
         loadFromRoute(route)
     }
+    openSnapshot.value = JSON.stringify(form)
     dialogOpen.value = true
     void getSetters()
     await fetchUsedColors()
@@ -541,7 +600,7 @@ watch(
 
 async function submit() {
     if (!formRef.value) return
-    const { valid } = await formRef.value.validate()
+    const valid = (await formRef.value.validate({ silent: true })) !== false
     if (!valid) return
 
     saving.value = true
@@ -601,21 +660,41 @@ defineExpose({ open })
 </script>
 
 <style scoped>
-.color-picker-section :deep(.v-color-picker) {
-    box-shadow: none;
-}
-
-.color-dot {
-    width: 28px;
-    height: 28px;
+.color-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: none;
     cursor: pointer;
     flex-shrink: 0;
-    transition: box-shadow 0.15s;
+    box-shadow: inset 0 0 0 1px
+        color-mix(in oklab, var(--ui-text-highlighted) 18%, transparent);
+    transition:
+        box-shadow 0.15s,
+        transform 0.15s;
 }
 
-.color-dot:hover {
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
+.color-swatch:hover {
+    transform: scale(1.08);
+}
+
+.color-swatch--active {
+    box-shadow:
+        0 0 0 2px var(--ui-bg),
+        0 0 0 4px var(--ui-primary);
+}
+
+.color-swatch--custom {
+    background: conic-gradient(
+        from 90deg,
+        #f44336,
+        #ffeb3b,
+        #4caf50,
+        #03a9f4,
+        #9c27b0,
+        #f44336
+    );
 }
 </style>

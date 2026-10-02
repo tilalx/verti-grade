@@ -18,7 +18,7 @@ test('shows seeded review stats and deletes a comment', async ({
     await card.getByTestId('comment-card-delete').click()
     await page.getByTestId('confirm-dialog-confirm').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(card).toHaveCount(0)
 })
 
@@ -57,14 +57,11 @@ test('edits a comment', async ({ adminPage: page, testPrefix, route }) => {
 
     await expect(page.getByTestId('review-form-dialog')).toBeVisible()
     const newComment = `${testPrefix}-edited-comment`
-    await page
-        .getByTestId('review-form-comment')
-        .getByRole('textbox')
-        .fill(newComment)
+    await page.getByTestId('review-form-comment').fill(newComment)
     await page.getByTestId('review-form-submit').click()
 
     await expect(page.getByTestId('review-form-dialog')).toBeHidden()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(card).toContainText(newComment)
 })
 
@@ -96,7 +93,7 @@ test('shows an error and keeps the comment when delete fails', async ({
     await card.getByTestId('comment-card-delete').click()
     await page.getByTestId('confirm-dialog-confirm').click()
 
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
     await expect(card).toBeVisible()
 })
 

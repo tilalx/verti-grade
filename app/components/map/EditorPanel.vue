@@ -3,143 +3,168 @@
         <section class="panel-section">
             <p class="panel-heading">{{ $t('mapEditor.walls') }}</p>
             <form class="panel-row" @submit.prevent="submitWall">
-                <v-text-field
-                    v-model="newWallName"
-                    :label="$t('mapEditor.newWall')"
-                    density="compact"
-                    hide-details
-                    :maxlength="100"
-                    data-testid="map-editor-new-wall"
-                />
-                <v-btn
+                <UFormField :label="$t('mapEditor.newWall')" class="flex-1">
+                    <UInput
+                        v-model="newWallName"
+                        :maxlength="100"
+                        class="w-full"
+                        data-testid="map-editor-new-wall"
+                    />
+                </UFormField>
+                <UButton
                     type="submit"
-                    variant="tonal"
+                    color="neutral"
+                    variant="soft"
+                    class="self-end"
                     :disabled="!newWallName.trim()"
                     data-testid="map-editor-add-wall"
                 >
                     {{ $t('mapEditor.addWall') }}
-                </v-btn>
+                </UButton>
             </form>
 
-            <v-list density="compact" class="panel-list" nav>
-                <v-list-item
+            <div class="panel-list">
+                <div
                     v-for="(wall, index) in sortedWalls"
                     :key="wall.key"
-                    :active="wall.key === editor.selectedWall.value?.key"
-                    rounded="lg"
+                    class="panel-item"
+                    :class="{
+                        'panel-item--active':
+                            wall.key === editor.selectedWall.value?.key,
+                    }"
                     data-testid="map-editor-wall-item"
                     :data-name="wall.name"
                     @click="selectWall(wall.key)"
                 >
-                    <v-list-item-title>{{ wall.name }}</v-list-item-title>
-                    <v-list-item-subtitle
-                        v-if="wallProblems(wall).length"
-                        class="text-error"
+                    <button
+                        type="button"
+                        class="panel-item__main"
+                        :aria-pressed="
+                            wall.key === editor.selectedWall.value?.key
+                        "
                     >
-                        {{ problemText(wall) }}
-                    </v-list-item-subtitle>
-                    <template #append>
-                        <v-btn
-                            icon="mdi-chevron-up"
-                            size="x-small"
-                            variant="text"
-                            :disabled="index === 0"
-                            :aria-label="$t('mapEditor.moveUp')"
-                            @click.stop="commit(moveWall(state, wall.key, -1))"
-                        />
-                        <v-btn
-                            icon="mdi-chevron-down"
-                            size="x-small"
-                            variant="text"
-                            :disabled="index === sortedWalls.length - 1"
-                            :aria-label="$t('mapEditor.moveDown')"
-                            @click.stop="commit(moveWall(state, wall.key, 1))"
-                        />
-                    </template>
-                </v-list-item>
-            </v-list>
+                        <span class="block truncate">{{ wall.name }}</span>
+                        <span
+                            v-if="wallProblems(wall).length"
+                            class="block text-xs text-error"
+                        >
+                            {{ problemText(wall) }}
+                        </span>
+                    </button>
+                    <UButton
+                        icon="i-lucide-chevron-up"
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        :disabled="index === 0"
+                        :aria-label="$t('mapEditor.moveUp')"
+                        @click.stop="commit(moveWall(state, wall.key, -1))"
+                    />
+                    <UButton
+                        icon="i-lucide-chevron-down"
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        :disabled="index === sortedWalls.length - 1"
+                        :aria-label="$t('mapEditor.moveDown')"
+                        @click.stop="commit(moveWall(state, wall.key, 1))"
+                    />
+                </div>
+            </div>
 
             <div
                 v-if="editor.selectedWall.value"
                 class="panel-details"
                 data-testid="map-editor-wall-details"
             >
-                <v-text-field
-                    :model-value="editor.selectedWall.value.name"
-                    :label="$t('mapEditor.wallName')"
-                    density="compact"
-                    hide-details="auto"
-                    :maxlength="100"
-                    data-testid="map-editor-wall-name"
-                    @change="renameWall"
-                />
-                <div class="d-flex ga-2">
-                    <v-text-field
-                        :model-value="editor.selectedWall.value.anchorFrom"
+                <UFormField :label="$t('mapEditor.wallName')">
+                    <UInput
+                        :model-value="editor.selectedWall.value.name"
+                        :maxlength="100"
+                        class="w-full"
+                        data-testid="map-editor-wall-name"
+                        @change="renameWall"
+                    />
+                </UFormField>
+                <div class="flex gap-2">
+                    <UFormField
                         :label="$t('mapEditor.anchorFrom')"
-                        type="number"
-                        min="1"
-                        density="compact"
-                        hide-details
-                        data-testid="map-editor-wall-anchor-from"
-                        @change="setAnchor('anchorFrom', $event)"
-                    />
-                    <v-text-field
-                        :model-value="editor.selectedWall.value.anchorTo"
+                        class="flex-1"
+                    >
+                        <UInput
+                            :model-value="
+                                editor.selectedWall.value.anchorFrom ??
+                                undefined
+                            "
+                            type="number"
+                            min="1"
+                            class="w-full"
+                            data-testid="map-editor-wall-anchor-from"
+                            @change="setAnchor('anchorFrom', $event)"
+                        />
+                    </UFormField>
+                    <UFormField
                         :label="$t('mapEditor.anchorTo')"
-                        type="number"
-                        min="1"
-                        density="compact"
-                        hide-details
-                        data-testid="map-editor-wall-anchor-to"
-                        @change="setAnchor('anchorTo', $event)"
-                    />
+                        class="flex-1"
+                    >
+                        <UInput
+                            :model-value="
+                                editor.selectedWall.value.anchorTo ?? undefined
+                            "
+                            type="number"
+                            min="1"
+                            class="w-full"
+                            data-testid="map-editor-wall-anchor-to"
+                            @change="setAnchor('anchorTo', $event)"
+                        />
+                    </UFormField>
                 </div>
-                <p class="text-body-small text-medium-emphasis">
+                <p class="text-xs text-muted">
                     {{ $t('mapEditor.anchorHint') }}
                 </p>
                 <div class="panel-actions">
-                    <v-btn
-                        size="small"
+                    <UButton
+                        size="sm"
                         v-bind="stepStyle('outline')"
-                        prepend-icon="mdi-vector-polygon"
+                        icon="i-lucide-pentagon"
                         data-testid="map-editor-draw-outline"
                         @click="editor.selectTool('outline')"
                     >
                         {{ $t('mapEditor.drawOutline') }}
-                    </v-btn>
-                    <v-btn
-                        size="small"
+                    </UButton>
+                    <UButton
+                        size="sm"
                         v-bind="stepStyle('edge')"
-                        prepend-icon="mdi-vector-polyline"
+                        icon="i-lucide-spline"
                         data-testid="map-editor-draw-edge"
                         @click="editor.selectTool('edge')"
                     >
                         {{ $t('mapEditor.drawEdge') }}
-                    </v-btn>
-                    <v-btn
-                        size="small"
-                        variant="tonal"
-                        prepend-icon="mdi-label-outline"
+                    </UButton>
+                    <UButton
+                        size="sm"
+                        color="neutral"
+                        variant="soft"
+                        icon="i-lucide-tag"
                         @click="editor.selectTool('label')"
                     >
                         {{ $t('mapEditor.placeLabel') }}
-                    </v-btn>
-                    <v-btn
-                        size="small"
-                        variant="text"
+                    </UButton>
+                    <UButton
+                        size="sm"
+                        variant="ghost"
                         color="error"
-                        prepend-icon="mdi-delete-outline"
+                        icon="i-lucide-trash-2"
                         :disabled="selectedWallHasRoutes"
                         data-testid="map-editor-delete-wall"
                         @click="deleteWall"
                     >
                         {{ $t('mapEditor.deleteWall') }}
-                    </v-btn>
+                    </UButton>
                 </div>
                 <p
                     v-if="selectedWallHasRoutes"
-                    class="text-body-small text-medium-emphasis mt-2"
+                    class="text-xs text-muted mt-2"
                     data-testid="map-editor-wall-has-routes"
                 >
                     {{ $t('mapEditor.wallHasRoutes') }}
@@ -149,86 +174,106 @@
 
         <section class="panel-section">
             <p class="panel-heading">{{ $t('mapEditor.shapes') }}</p>
-            <v-list density="compact" class="panel-list" nav>
-                <v-list-item
+            <div class="panel-list">
+                <button
                     v-for="(shape, index) in state.map.shapes"
                     :key="index"
-                    :active="selectedShapeIndex === index"
-                    :prepend-icon="SHAPE_ICONS[shape.kind]"
-                    :title="`${$t(`mapEditor.kinds.${shape.kind}`)} ${index + 1}`"
-                    rounded="lg"
+                    type="button"
+                    class="panel-item panel-shape"
+                    :class="{
+                        'panel-item--active': selectedShapeIndex === index,
+                    }"
+                    :aria-pressed="selectedShapeIndex === index"
                     data-testid="map-editor-shape-item"
                     @click="editor.selection.value = { kind: 'shape', index }"
-                />
-            </v-list>
+                >
+                    <UIcon
+                        :name="SHAPE_ICONS[shape.kind]"
+                        class="size-5 shrink-0"
+                    />
+                    {{ `${$t(`mapEditor.kinds.${shape.kind}`)} ${index + 1}` }}
+                </button>
+            </div>
             <div v-if="selectedShapeIndex !== null" class="panel-details">
-                <v-select
-                    :model-value="state.map.shapes[selectedShapeIndex]?.kind"
-                    :items="kindItems"
-                    :label="$t('mapEditor.shapeKind')"
-                    density="compact"
-                    hide-details
-                    @update:model-value="changeKind"
-                />
-                <v-btn
-                    size="small"
-                    variant="text"
+                <UFormField :label="$t('mapEditor.shapeKind')">
+                    <USelect
+                        :model-value="
+                            state.map.shapes[selectedShapeIndex]?.kind
+                        "
+                        :items="kindItems"
+                        class="w-full"
+                        @update:model-value="changeKind"
+                    />
+                </UFormField>
+                <UButton
+                    size="sm"
+                    variant="ghost"
                     color="error"
-                    prepend-icon="mdi-delete-outline"
+                    icon="i-lucide-trash-2"
+                    class="self-start"
                     data-testid="map-editor-delete-shape"
                     @click="deleteShape"
                 >
                     {{ $t('mapEditor.deleteShape') }}
-                </v-btn>
+                </UButton>
             </div>
         </section>
 
         <section class="panel-section">
             <p class="panel-heading">{{ $t('mapEditor.canvas') }}</p>
             <form class="panel-row" @submit.prevent="resize">
-                <v-text-field
-                    v-model.number="width"
-                    type="number"
-                    :label="$t('mapEditor.width')"
-                    suffix="m"
-                    density="compact"
-                    hide-details
-                    data-testid="map-editor-width"
-                />
-                <v-text-field
-                    v-model.number="height"
-                    type="number"
-                    :label="$t('mapEditor.height')"
-                    suffix="m"
-                    density="compact"
-                    hide-details
-                    data-testid="map-editor-height"
-                />
-                <v-btn
+                <UFormField :label="$t('mapEditor.width')" class="flex-1">
+                    <UInput
+                        v-model.number="width"
+                        type="number"
+                        class="w-full"
+                        data-testid="map-editor-width"
+                    >
+                        <template #trailing>
+                            <span class="text-xs text-muted">m</span>
+                        </template>
+                    </UInput>
+                </UFormField>
+                <UFormField :label="$t('mapEditor.height')" class="flex-1">
+                    <UInput
+                        v-model.number="height"
+                        type="number"
+                        class="w-full"
+                        data-testid="map-editor-height"
+                    >
+                        <template #trailing>
+                            <span class="text-xs text-muted">m</span>
+                        </template>
+                    </UInput>
+                </UFormField>
+                <UButton
                     type="submit"
-                    variant="tonal"
+                    color="neutral"
+                    variant="soft"
+                    class="self-end"
                     :disabled="
                         width === state.map.width && height === state.map.height
                     "
                 >
                     {{ $t('mapEditor.apply') }}
-                </v-btn>
+                </UButton>
             </form>
-            <p v-if="resizeError" class="text-body-small text-error mt-1">
+            <p v-if="resizeError" class="text-xs text-error mt-1">
                 {{ $t('mapEditor.resizeTooSmall') }}
             </p>
         </section>
 
         <section class="panel-section">
             <p class="panel-heading">{{ $t('mapEditor.trace') }}</p>
-            <p class="text-body-small text-medium-emphasis mb-2">
+            <p class="text-xs text-muted mb-2">
                 {{ $t('mapEditor.traceHint') }}
             </p>
             <div class="panel-actions">
-                <v-btn
-                    size="small"
-                    variant="tonal"
-                    prepend-icon="mdi-image-plus-outline"
+                <UButton
+                    size="sm"
+                    color="neutral"
+                    variant="soft"
+                    icon="i-lucide-image-plus"
                     :loading="traceBusy"
                     data-testid="map-editor-trace-upload"
                     @click="traceInput?.click()"
@@ -238,18 +283,18 @@
                             ? $t('mapEditor.replaceTrace')
                             : $t('mapEditor.uploadTrace')
                     }}
-                </v-btn>
-                <v-btn
+                </UButton>
+                <UButton
                     v-if="hasTrace"
-                    size="small"
-                    variant="text"
+                    size="sm"
+                    variant="ghost"
                     color="error"
-                    prepend-icon="mdi-delete-outline"
+                    icon="i-lucide-trash-2"
                     :disabled="traceBusy"
                     @click="emit('removeTrace')"
                 >
                     {{ $t('mapEditor.removeTrace') }}
-                </v-btn>
+                </UButton>
                 <input
                     ref="traceInput"
                     type="file"
@@ -260,46 +305,35 @@
                 />
             </div>
             <template v-if="hasTrace && state.map.trace">
-                <v-slider
-                    :model-value="state.map.trace.opacity"
-                    :label="$t('mapEditor.traceOpacity')"
-                    :min="0.1"
-                    :max="1"
-                    :step="0.05"
-                    density="compact"
-                    hide-details
-                    @update:model-value="
-                        (opacity) => setTrace({ opacity: Number(opacity) })
-                    "
-                />
-                <div class="panel-row">
-                    <v-text-field
-                        :model-value="state.map.trace.x"
-                        type="number"
-                        label="X"
-                        suffix="m"
-                        density="compact"
-                        hide-details
-                        @change="setTraceNumber('x', $event)"
+                <UFormField :label="$t('mapEditor.traceOpacity')" class="mt-3">
+                    <USlider
+                        :model-value="state.map.trace.opacity"
+                        :min="0.1"
+                        :max="1"
+                        :step="0.05"
+                        @update:model-value="
+                            (opacity) => setTrace({ opacity: Number(opacity) })
+                        "
                     />
-                    <v-text-field
-                        :model-value="state.map.trace.y"
-                        type="number"
-                        label="Y"
-                        suffix="m"
-                        density="compact"
-                        hide-details
-                        @change="setTraceNumber('y', $event)"
-                    />
-                    <v-text-field
-                        :model-value="state.map.trace.width"
-                        type="number"
-                        :label="$t('mapEditor.width')"
-                        suffix="m"
-                        density="compact"
-                        hide-details
-                        @change="setTraceNumber('width', $event)"
-                    />
+                </UFormField>
+                <div class="panel-row mt-3">
+                    <UFormField
+                        v-for="traceField in traceFields"
+                        :key="traceField.key"
+                        :label="traceField.label"
+                        class="flex-1"
+                    >
+                        <UInput
+                            :model-value="state.map.trace[traceField.key]"
+                            type="number"
+                            class="w-full"
+                            @change="setTraceNumber(traceField.key, $event)"
+                        >
+                            <template #trailing>
+                                <span class="text-xs text-muted">m</span>
+                            </template>
+                        </UInput>
+                    </UFormField>
                 </div>
             </template>
         </section>
@@ -338,9 +372,9 @@ const emit = defineEmits<{
 }>()
 
 const SHAPE_ICONS: Record<MapShapeKind, string> = {
-    floor: 'mdi-floor-plan',
-    mat: 'mdi-rectangle-outline',
-    structure: 'mdi-cube-outline',
+    floor: 'i-lucide-land-plot',
+    mat: 'i-lucide-rectangle-horizontal',
+    structure: 'i-lucide-box',
 }
 
 const { t } = useI18n()
@@ -371,10 +405,16 @@ const selectedShapeIndex = computed(() =>
 )
 const kindItems = computed(() =>
     MAP_SHAPE_KINDS.map((kind) => ({
-        title: t(`mapEditor.kinds.${kind}`),
+        label: t(`mapEditor.kinds.${kind}`),
         value: kind,
     })),
 )
+
+const traceFields = computed(() => [
+    { key: 'x' as const, label: 'X' },
+    { key: 'y' as const, label: 'Y' },
+    { key: 'width' as const, label: t('mapEditor.width') },
+])
 
 function commit(next: EditorState) {
     editor.commit(next)
@@ -383,10 +423,10 @@ function commit(next: EditorState) {
 function stepStyle(step: 'outline' | 'edge') {
     const wall = editor.selectedWall.value
     if (editor.tool.value === step)
-        return { variant: 'flat' as const, color: 'primary' }
+        return { variant: 'solid' as const, color: 'primary' as const }
     if (wall && wallProblems(wall).includes(step))
-        return { variant: 'tonal' as const, color: 'warning' }
-    return { variant: 'tonal' as const }
+        return { variant: 'soft' as const, color: 'warning' as const }
+    return { variant: 'soft' as const, color: 'neutral' as const }
 }
 
 function problemText(wall: EditorWall) {
@@ -506,8 +546,47 @@ function onTraceChosen(event: Event) {
 }
 
 .panel-list {
-    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     margin-top: 8px;
+}
+
+.panel-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+    padding-right: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.panel-item:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
+}
+
+.panel-item__main {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.panel-shape {
+    gap: 12px;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.panel-item--active {
+    color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
 }
 
 .panel-details {
@@ -517,7 +596,7 @@ function onTraceChosen(event: Event) {
     margin-top: 10px;
     padding: 12px;
     border-radius: 8px;
-    background: rgba(var(--v-theme-on-surface), 0.04);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
 }
 
 .panel-actions {

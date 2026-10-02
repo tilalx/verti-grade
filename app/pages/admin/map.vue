@@ -2,39 +2,40 @@
     <div class="map-screen map-editor-page">
         <div class="map-screen__bar" data-testid="map-editor-toolbar">
             <h1 class="map-screen__title">{{ $t('mapEditor.title') }}</h1>
-            <v-select
+            <USelect
                 v-model="locationId"
                 :items="locationItems"
+                label-key="title"
                 :aria-label="$t('climbing.location')"
-                density="compact"
-                variant="solo-filled"
-                flat
-                hide-details
+                variant="soft"
                 class="editor-location"
                 data-testid="map-editor-location"
             />
             <template v-if="hasMap">
-                <v-btn
-                    icon="mdi-undo"
-                    variant="text"
+                <UButton
+                    icon="i-lucide-undo-2"
+                    color="neutral"
+                    variant="ghost"
                     :disabled="!editor.canUndo.value"
                     :aria-label="$t('mapEditor.undo')"
                     :title="$t('mapEditor.undo')"
                     data-testid="map-editor-undo"
                     @click="editor.undo()"
                 />
-                <v-btn
-                    icon="mdi-redo"
-                    variant="text"
+                <UButton
+                    icon="i-lucide-redo-2"
+                    color="neutral"
+                    variant="ghost"
                     :disabled="!editor.canRedo.value"
                     :aria-label="$t('mapEditor.redo')"
                     :title="$t('mapEditor.redo')"
                     data-testid="map-editor-redo"
                     @click="editor.redo()"
                 />
-                <v-btn
-                    :icon="preview ? 'mdi-pencil' : 'mdi-eye-outline'"
-                    variant="text"
+                <UButton
+                    :icon="preview ? 'i-lucide-pencil' : 'i-lucide-eye'"
+                    color="neutral"
+                    variant="ghost"
                     :aria-label="
                         preview
                             ? $t('mapEditor.backToEditing')
@@ -48,17 +49,17 @@
                     data-testid="map-editor-preview"
                     @click="preview = !preview"
                 />
-                <v-btn
+                <UButton
                     color="primary"
-                    variant="flat"
-                    prepend-icon="mdi-content-save-outline"
+                    variant="solid"
+                    icon="i-lucide-save"
                     :disabled="!editor.isDirty.value || !!incompleteWall"
                     :loading="saving"
                     data-testid="map-editor-save"
                     @click="save"
                 >
                     {{ $t('mapEditor.save') }}
-                </v-btn>
+                </UButton>
             </template>
         </div>
 
@@ -67,54 +68,65 @@
             :title="$t('mapEditor.noLocations')"
         />
 
-        <v-card
+        <div
             v-else-if="!hasMap"
-            border
-            flat
-            class="setup-card ma-4"
+            class="setup-card m-4 rounded-lg border bg-default"
             data-testid="map-editor-setup"
         >
-            <v-card-text>
-                <p class="text-title-small font-weight-semibold mb-1">
+            <div class="p-4">
+                <p class="text-sm font-medium font-semibold mb-1">
                     {{ $t('mapEditor.setupTitle') }}
                 </p>
-                <p class="text-body-small text-medium-emphasis mb-4">
+                <p class="text-xs text-muted mb-4">
                     {{ $t('mapEditor.setupIntro') }}
                 </p>
                 <form class="setup-row" @submit.prevent="createFloorPlan">
-                    <v-text-field
-                        v-model.number="setupWidth"
-                        type="number"
+                    <UFormField
                         :label="$t('mapEditor.width')"
-                        suffix="m"
-                        density="compact"
-                        hide-details
-                        :min="MAP_LIMITS.minSize"
-                        :max="MAP_LIMITS.maxSize"
-                        data-testid="map-editor-setup-width"
-                    />
-                    <v-text-field
-                        v-model.number="setupHeight"
-                        type="number"
+                        class="setup-field"
+                    >
+                        <UInput
+                            v-model.number="setupWidth"
+                            type="number"
+                            :min="MAP_LIMITS.minSize"
+                            :max="MAP_LIMITS.maxSize"
+                            class="w-full"
+                            data-testid="map-editor-setup-width"
+                        >
+                            <template #trailing>
+                                <span class="text-xs text-muted">m</span>
+                            </template>
+                        </UInput>
+                    </UFormField>
+                    <UFormField
                         :label="$t('mapEditor.height')"
-                        suffix="m"
-                        density="compact"
-                        hide-details
-                        :min="MAP_LIMITS.minSize"
-                        :max="MAP_LIMITS.maxSize"
-                        data-testid="map-editor-setup-height"
-                    />
-                    <v-btn
+                        class="setup-field"
+                    >
+                        <UInput
+                            v-model.number="setupHeight"
+                            type="number"
+                            :min="MAP_LIMITS.minSize"
+                            :max="MAP_LIMITS.maxSize"
+                            class="w-full"
+                            data-testid="map-editor-setup-height"
+                        >
+                            <template #trailing>
+                                <span class="text-xs text-muted">m</span>
+                            </template>
+                        </UInput>
+                    </UFormField>
+                    <UButton
                         type="submit"
                         color="primary"
+                        class="self-end"
                         :disabled="!validSetupSize"
                         data-testid="map-editor-create"
                     >
                         {{ $t('mapEditor.create') }}
-                    </v-btn>
+                    </UButton>
                 </form>
-            </v-card-text>
-        </v-card>
+            </div>
+        </div>
 
         <div v-else class="map-screen__body">
             <div class="map-screen__stage">
@@ -134,56 +146,48 @@
                     :trace-url="traceUrl"
                 />
                 <div v-if="!preview" class="map-screen__chips editor-tools">
-                    <v-btn-toggle
-                        :model-value="activeToolKey"
-                        density="comfortable"
-                        variant="flat"
-                        color="primary"
-                        base-color="surface"
-                        divided
-                        mandatory
-                        class="editor-tools__toggle"
+                    <UFieldGroup
+                        class="editor-tools__toggle shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
                     >
-                        <v-btn
+                        <UButton
                             v-for="option in toolOptions"
                             :key="option.key"
-                            :value="option.key"
-                            :prepend-icon="mdAndUp ? option.icon : undefined"
+                            size="lg"
+                            :color="
+                                activeToolKey === option.key
+                                    ? 'primary'
+                                    : 'neutral'
+                            "
+                            :variant="
+                                activeToolKey === option.key
+                                    ? 'solid'
+                                    : 'outline'
+                            "
+                            :icon="option.icon"
+                            :label="mdAndUp ? option.label : undefined"
                             :aria-label="option.label"
+                            :aria-pressed="activeToolKey === option.key"
                             :title="option.label"
                             :data-testid="`map-editor-tool-${option.key}`"
                             @click="option.select()"
+                        />
+                    </UFieldGroup>
+                    <UDropdownMenu
+                        :items="gridMenuItems"
+                        :content="{ align: 'start' }"
+                    >
+                        <UButton
+                            size="lg"
+                            color="neutral"
+                            variant="outline"
+                            icon="i-lucide-grid-3x3"
+                            trailing-icon="i-lucide-chevron-down"
+                            class="editor-tools__grid shadow-[0_1px_3px_rgb(0_0_0/0.2)] rounded-full"
+                            data-testid="map-editor-grid"
                         >
-                            <template v-if="mdAndUp">{{
-                                option.label
-                            }}</template>
-                            <v-icon v-else :icon="option.icon" />
-                        </v-btn>
-                    </v-btn-toggle>
-                    <v-menu>
-                        <template #activator="{ props: menuProps }">
-                            <v-chip
-                                v-bind="menuProps"
-                                variant="flat"
-                                color="surface"
-                                prepend-icon="mdi-grid"
-                                append-icon="mdi-menu-down"
-                                class="editor-tools__grid"
-                                data-testid="map-editor-grid"
-                            >
-                                {{ gridLabel }}
-                            </v-chip>
-                        </template>
-                        <v-list density="compact">
-                            <v-list-item
-                                v-for="item in gridItems"
-                                :key="item.value"
-                                :title="item.title"
-                                :active="grid === item.value"
-                                @click="grid = item.value"
-                            />
-                        </v-list>
-                    </v-menu>
+                            {{ gridLabel }}
+                        </UButton>
+                    </UDropdownMenu>
                 </div>
             </div>
             <MapSheet
@@ -193,38 +197,39 @@
             >
                 <template #header>
                     <span
-                        class="editor-hint text-body-small"
+                        class="editor-hint text-xs"
                         :class="
                             incompleteWall && editor.tool.value === 'select'
                                 ? 'text-warning'
-                                : 'text-medium-emphasis'
+                                : 'text-muted'
                         "
                         aria-live="polite"
                         data-testid="map-editor-hint"
                     >
                         {{ hint }}
                     </span>
-                    <v-btn
+                    <UButton
                         v-if="canFinish"
                         color="primary"
-                        variant="tonal"
-                        size="small"
-                        prepend-icon="mdi-check"
+                        variant="soft"
+                        size="sm"
+                        icon="i-lucide-check"
                         data-testid="map-editor-finish"
                         @click="canvasRef?.finishDraft()"
                     >
                         {{ $t('mapEditor.finish') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         v-if="editor.selectedVertex.value && !isDrawing"
-                        variant="text"
-                        size="small"
-                        prepend-icon="mdi-delete-outline"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        icon="i-lucide-trash-2"
                         data-testid="map-editor-delete-point"
                         @click="canvasRef?.removeSelectedVertex()"
                     >
                         {{ $t('mapEditor.deletePoint') }}
-                    </v-btn>
+                    </UButton>
                 </template>
                 <MapEditorPanel
                     :editor="editor"
@@ -399,6 +404,16 @@ const sheetCover = ref(0)
 const gridLabel = computed(
     () => gridItems.value.find((item) => item.value === grid.value)?.title,
 )
+const gridMenuItems = computed(() =>
+    gridItems.value.map((item) => ({
+        label: item.title,
+        type: 'checkbox' as const,
+        checked: grid.value === item.value,
+        onSelect: () => {
+            grid.value = item.value
+        },
+    })),
+)
 const isDrawing = computed(() =>
     ['shape', 'outline', 'edge'].includes(editor.tool.value),
 )
@@ -422,25 +437,25 @@ const drawShape = (kind: MapShapeKind) => () => {
 const toolOptions = computed(() => [
     {
         key: 'select',
-        icon: 'mdi-cursor-default-outline',
+        icon: 'i-lucide-mouse-pointer-2',
         label: t('mapEditor.tools.select'),
         select: () => editor.selectTool('select'),
     },
     {
         key: 'floor',
-        icon: 'mdi-floor-plan',
+        icon: 'i-lucide-land-plot',
         label: t('mapEditor.kinds.floor'),
         select: drawShape('floor'),
     },
     {
         key: 'mat',
-        icon: 'mdi-rectangle-outline',
+        icon: 'i-lucide-rectangle-horizontal',
         label: t('mapEditor.kinds.mat'),
         select: drawShape('mat'),
     },
     {
         key: 'structure',
-        icon: 'mdi-cube-outline',
+        icon: 'i-lucide-box',
         label: t('mapEditor.kinds.structure'),
         select: drawShape('structure'),
     },
@@ -670,6 +685,10 @@ onBeforeUnmount(() => {
     max-width: 520px;
 }
 
+.setup-field {
+    flex: 1 1 140px;
+}
+
 .editor-tools {
     display: flex;
     align-items: center;
@@ -682,9 +701,6 @@ onBeforeUnmount(() => {
 .editor-tools__toggle,
 .editor-tools__grid {
     flex-shrink: 0;
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(var(--v-border-color), 0.12);
 }
 
 .editor-hint {

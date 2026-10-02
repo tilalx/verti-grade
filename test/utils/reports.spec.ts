@@ -26,11 +26,11 @@ describe('statusColor', () => {
     it('maps each status to its own colour', () => {
         expect(statusColor('open')).toBe('warning')
         expect(statusColor('actioned')).toBe('success')
-        expect(statusColor('rejected')).toBe('medium-emphasis')
+        expect(statusColor('rejected')).toBe('neutral')
     })
 
     it('degrades to a neutral colour for an unknown status', () => {
-        expect(statusColor('something-else')).toBe('medium-emphasis')
+        expect(statusColor('something-else')).toBe('neutral')
     })
 })
 

@@ -1,69 +1,79 @@
 <template>
-    <v-container class="page--narrow" data-testid="me-page">
-        <h1 class="d-sr-only">{{ $t('me.title') }}</h1>
+    <div class="page--narrow mx-auto w-full px-4" data-testid="me-page">
+        <h1 class="sr-only">{{ $t('me.title') }}</h1>
 
         <AuthGuestCta v-if="!user" redirect="/account" test-id-prefix="me" />
 
         <template v-else>
-            <div class="me-header">
-                <v-avatar size="64" :color="avatar ? undefined : 'primary'">
-                    <v-img
-                        v-if="avatar"
-                        :src="avatar"
-                        :alt="displayName"
-                        cover
-                    />
-                    <span v-else class="text-title-large font-weight-bold">{{
-                        initials
-                    }}</span>
-                </v-avatar>
-                <div class="me-header__text">
-                    <p
-                        class="text-title-large font-weight-bold text-truncate"
+            <NuxtLink
+                to="/account/settings"
+                class="native-group native-row mt-6 py-3"
+                data-testid="me-profile"
+            >
+                <UAvatar
+                    :src="avatar || undefined"
+                    :alt="displayName"
+                    :text="initials"
+                    class="size-14 text-xl font-bold"
+                    :class="avatar ? undefined : 'bg-primary'"
+                    :ui="{ fallback: 'text-inverted' }"
+                />
+                <span class="native-row__text">
+                    <span
+                        class="block truncate text-lg font-semibold"
                         data-testid="me-name"
+                        >{{ displayName }}</span
                     >
-                        {{ displayName }}
-                    </p>
-                    <p
-                        class="text-body-medium text-medium-emphasis text-truncate"
-                    >
-                        {{ user.email }}
-                    </p>
-                </div>
-            </div>
+                    <span class="native-row__subtitle">{{
+                        $t('me.profileHint')
+                    }}</span>
+                </span>
+                <UIcon
+                    name="i-lucide-chevron-right"
+                    class="native-row__chevron"
+                />
+            </NuxtLink>
 
-            <v-list class="me-list" nav rounded="lg" bg-color="surface">
-                <v-list-item
-                    prepend-icon="mdi-account-edit-outline"
-                    :title="$t('account.profile')"
-                    :subtitle="$t('me.profileHint')"
-                    data-testid="me-profile"
-                    @click="profileOpen = true"
-                />
-                <v-list-item
+            <div class="native-group mt-4">
+                <NuxtLink
                     to="/account/activity"
-                    prepend-icon="mdi-clipboard-text-clock-outline"
-                    :title="$t('routes.activity')"
-                />
-            </v-list>
+                    class="native-row"
+                    style="--native-tint: var(--ui-primary)"
+                >
+                    <span class="native-row__icon">
+                        <UIcon name="i-lucide-clipboard-clock" />
+                    </span>
+                    <span class="native-row__text">{{
+                        $t('routes.activity')
+                    }}</span>
+                    <UIcon
+                        name="i-lucide-chevron-right"
+                        class="native-row__chevron"
+                    />
+                </NuxtLink>
+            </div>
         </template>
 
-        <section class="d-lg-none" data-testid="me-pages">
-            <p class="me-section">{{ $t('me.pages') }}</p>
-            <div class="me-tiles">
-                <v-card
+        <section class="lg:hidden" data-testid="me-pages">
+            <p class="native-heading">{{ $t('me.pages') }}</p>
+            <div class="native-group">
+                <NuxtLink
                     v-for="link in pages"
                     :key="link.to"
                     :to="link.to"
-                    variant="tonal"
-                    class="me-tile"
+                    class="native-row"
+                    style="--native-tint: var(--ui-primary)"
                     :data-testid="`me-page-${navTestId(link.to)}`"
                 >
-                    <v-icon size="26" class="me-tile__icon">{{
-                        link.icon
-                    }}</v-icon>
-                    <span class="me-tile__label">{{ $t(link.label) }}</span>
-                </v-card>
+                    <span class="native-row__icon">
+                        <UIcon :name="link.icon" />
+                    </span>
+                    <span class="native-row__text">{{ $t(link.label) }}</span>
+                    <UIcon
+                        name="i-lucide-chevron-right"
+                        class="native-row__chevron"
+                    />
+                </NuxtLink>
             </div>
         </section>
 
@@ -71,48 +81,54 @@
             <section
                 v-for="section in sections"
                 :key="section.key"
-                class="me-staff"
                 :data-testid="`me-section-${section.key}`"
             >
-                <p class="me-section">{{ $t(section.label) }}</p>
-                <div class="me-tiles">
-                    <v-card
+                <p class="native-heading">{{ $t(section.label) }}</p>
+                <div class="native-group">
+                    <NuxtLink
                         v-for="link in section.links"
                         :key="link.to"
                         :to="link.to"
-                        variant="tonal"
-                        class="me-tile"
+                        class="native-row"
+                        :style="{ '--native-tint': SECTION_TINTS[section.key] }"
                         :data-testid="`me-staff-${navTestId(link.to)}`"
                     >
-                        <v-icon size="26" class="me-tile__icon">{{
-                            link.icon
-                        }}</v-icon>
-                        <span class="me-tile__label">{{ $t(link.label) }}</span>
-                    </v-card>
+                        <span class="native-row__icon">
+                            <UIcon :name="link.icon" />
+                        </span>
+                        <span class="native-row__text">{{
+                            $t(link.label)
+                        }}</span>
+                        <UIcon
+                            name="i-lucide-chevron-right"
+                            class="native-row__chevron"
+                        />
+                    </NuxtLink>
                 </div>
             </section>
-
-            <v-btn
-                block
-                variant="tonal"
-                color="error"
-                size="large"
-                prepend-icon="mdi-logout-variant"
-                class="mt-6"
-                :loading="loggingOut"
+        </template>
+        <LayoutInfoList v-if="!lgAndUp" :settings="settings" />
+        <div v-if="user" class="native-group mt-6 mb-4">
+            <button
+                type="button"
+                class="native-row justify-center font-semibold text-error"
+                :disabled="loggingOut"
                 data-testid="me-logout"
                 @click="logout"
             >
+                <UIcon
+                    :name="
+                        loggingOut
+                            ? 'i-lucide-loader-circle'
+                            : 'i-lucide-log-out'
+                    "
+                    class="size-5"
+                    :class="{ 'animate-spin': loggingOut }"
+                />
                 {{ $t('account.logout') }}
-            </v-btn>
-
-            <UserEditUserSelf
-                v-model:dialog-open="profileOpen"
-                :user-id="user.id"
-            />
-        </template>
-        <LayoutInfoList v-if="!lgAndUp" :settings="settings" />
-    </v-container>
+            </button>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -129,7 +145,6 @@ const { data: settings } = useNuxtData<SettingsRecord>('settings')
 useSeoMeta({ title: () => t('page.title.me') })
 
 const user = ref(pb.authStore.record)
-const profileOpen = ref(false)
 const loggingOut = ref(false)
 
 const displayName = computed(
@@ -150,6 +165,12 @@ const avatar = computed(() =>
     usePbFileUrl(user.value, user.value?.avatar, { thumb: '100x100' }),
 )
 
+const SECTION_TINTS: Record<string, string> = {
+    manage: 'var(--ui-info)',
+    moderation: 'var(--ui-warning)',
+    admin: '#64748b',
+}
+
 const sections = computed(() => (lgAndUp.value ? [] : staffSections(can)))
 const pages = computed(() => pageLinks(!!user.value))
 
@@ -163,57 +184,3 @@ async function logout() {
     }
 }
 </script>
-
-<style scoped>
-.me-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 8px 0 20px;
-}
-
-.me-header__text {
-    min-width: 0;
-}
-
-.me-header__text p {
-    margin: 0;
-}
-
-.me-list {
-    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
-.me-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-    gap: 8px;
-}
-
-.me-tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 88px;
-    padding: 12px 8px;
-    text-align: center;
-}
-
-.me-tile__icon {
-    color: rgb(var(--v-theme-primary));
-}
-
-.me-tile__label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    line-height: 1.25;
-}
-
-.me-section {
-    margin: 24px 4px 8px;
-    font-weight: 600;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-}
-</style>

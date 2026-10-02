@@ -15,36 +15,33 @@ const isError = computed(() => props.variant === 'error')
 const resolvedIcon = computed(
     () =>
         props.icon ??
-        (isError.value
-            ? 'mdi-alert-circle-outline'
-            : 'mdi-magnify-remove-outline'),
+        (isError.value ? 'i-lucide-circle-alert' : 'i-lucide-search-x'),
 )
 </script>
 
 <template>
     <div
         class="empty-state py-12 text-center"
-        :class="card ? 'rounded-lg border bg-surface' : ''"
+        :class="card ? 'rounded-lg border border-default bg-default' : ''"
         :role="isError ? 'alert' : undefined"
         data-testid="empty-state"
     >
-        <v-icon
-            :icon="resolvedIcon"
-            size="56"
-            class="empty-state__icon mb-4"
+        <UIcon
+            :name="resolvedIcon"
+            class="empty-state__icon mb-4 size-[56px]"
             data-testid="empty-state-icon"
             :class="{ 'empty-state__icon--error': isError }"
         />
-        <div v-if="eyebrow" class="text-headline-large font-weight-bold mb-1">
+        <div v-if="eyebrow" class="text-[2rem] leading-10 font-bold mb-1">
             {{ eyebrow }}
         </div>
-        <div class="text-title-large text-medium-emphasis">{{ title }}</div>
-        <div v-if="hint" class="text-body-medium text-medium-emphasis mt-1">
+        <div class="text-[1.375rem] leading-7 text-muted">{{ title }}</div>
+        <div v-if="hint" class="text-sm text-muted mt-1">
             {{ hint }}
         </div>
         <div
             v-if="$slots.actions"
-            class="d-flex flex-wrap justify-center ga-2 mt-4"
+            class="flex flex-wrap justify-center gap-2 mt-4"
         >
             <slot name="actions" />
         </div>
@@ -53,10 +50,10 @@ const resolvedIcon = computed(
 
 <style scoped>
 .empty-state__icon {
-    color: rgba(var(--v-theme-on-surface), 0.26);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 26%, transparent);
 }
 
 .empty-state__icon--error {
-    color: rgb(var(--v-theme-error));
+    color: var(--ui-error);
 }
 </style>

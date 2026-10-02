@@ -23,7 +23,7 @@ test('stacked setter chips keep clear of the row dividers', async ({
         creator: ['E2E Setter With A Long Name', 'Second Long Setter Name'],
     })
     await gotoSettled(page, '/routes')
-    await page.getByTestId('filter-search').locator('input').fill(route.name)
+    await page.getByTestId('filter-search').fill(route.name)
 
     const row = page
         .getByRole('row')

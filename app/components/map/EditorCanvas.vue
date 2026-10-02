@@ -577,26 +577,26 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 
 <style scoped>
 .editor-background {
-    fill: rgb(var(--v-theme-surface));
+    fill: var(--ui-bg);
 }
 
 .editor-grid-line {
     fill: none;
-    stroke: rgba(var(--v-theme-on-surface), 0.08);
+    stroke: color-mix(in oklab, var(--ui-text-highlighted) 8%, transparent);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }
 
 .editor-wall-outline {
-    fill: rgba(var(--v-theme-on-surface), 0.3);
-    stroke: rgba(var(--v-theme-on-surface), 0.45);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
+    stroke: color-mix(in oklab, var(--ui-text-highlighted) 45%, transparent);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }
 
 .editor-wall--selected .editor-wall-outline {
-    fill: rgba(var(--v-theme-primary), 0.28);
-    stroke: rgb(var(--v-theme-primary));
+    fill: color-mix(in oklab, var(--ui-primary) 28%, transparent);
+    stroke: var(--ui-primary);
     stroke-width: 2;
 }
 
@@ -608,14 +608,14 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 .editor-vertex:focus-visible,
 .editor-midpoint:focus-visible {
     outline: none;
-    stroke: rgb(var(--v-theme-secondary));
+    stroke: var(--ui-secondary);
     stroke-width: 3;
     vector-effect: non-scaling-stroke;
 }
 
 .editor-wall-edge {
     fill: none;
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 4;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -623,7 +623,7 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 }
 
 .editor-wall-label {
-    fill: rgb(var(--v-theme-on-surface));
+    fill: var(--ui-text-highlighted);
     font-weight: 600;
 }
 
@@ -633,47 +633,47 @@ defineExpose({ fitAll, zoomBy, finishDraft, removeSelectedVertex })
 }
 
 .editor-vertex {
-    fill: rgb(var(--v-theme-surface));
-    stroke: rgb(var(--v-theme-primary));
+    fill: var(--ui-bg);
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
     cursor: grab;
 }
 
 .editor-vertex--edge {
-    fill: rgb(var(--v-theme-primary));
+    fill: var(--ui-primary);
 }
 
 .editor-vertex--selected {
-    fill: rgb(var(--v-theme-error));
-    stroke: rgb(var(--v-theme-error));
+    fill: var(--ui-error);
+    stroke: var(--ui-error);
 }
 
 .editor-midpoint {
-    fill: rgba(var(--v-theme-primary), 0.5);
+    fill: color-mix(in oklab, var(--ui-primary) 50%, transparent);
     cursor: copy;
 }
 
 .editor-draft-line {
     fill: none;
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
     stroke-dasharray: 6 4;
     vector-effect: non-scaling-stroke;
 }
 
 .editor-draft-point {
-    fill: rgb(var(--v-theme-primary));
+    fill: var(--ui-primary);
 }
 
 .editor-draft-point--first {
-    fill: rgb(var(--v-theme-surface));
-    stroke: rgb(var(--v-theme-primary));
+    fill: var(--ui-bg);
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
 
 .editor-cursor {
-    fill: rgba(var(--v-theme-primary), 0.6);
+    fill: color-mix(in oklab, var(--ui-primary) 60%, transparent);
 }
 </style>

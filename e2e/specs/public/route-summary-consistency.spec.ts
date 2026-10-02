@@ -43,10 +43,7 @@ test('the route list shows the color dot and grade', async ({
     testPrefix,
 }) => {
     await gotoSettled(page, '/routes')
-    await page
-        .getByTestId('filter-search')
-        .locator('input')
-        .fill(`${testPrefix}-summary`)
+    await page.getByTestId('filter-search').fill(`${testPrefix}-summary`)
     const row = page
         .getByRole('row')
         .filter({ has: page.getByTestId(`index-row-${routeId}`) })

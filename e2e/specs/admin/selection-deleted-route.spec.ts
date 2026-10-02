@@ -51,10 +51,7 @@ test('a route deleted elsewhere drops out of the admin selection', async ({
     const [deletedId, keptId] = site.routeIds as [string, string]
     try {
         await gotoSettled(page, '/manage/routes')
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(`${testPrefix}-sel-`)
+        await page.getByTestId('filter-search').fill(`${testPrefix}-sel-`)
         await expect(page.getByTestId('routes-table')).toContainText(
             `${testPrefix}-sel-1`,
         )
@@ -69,7 +66,7 @@ test('a route deleted elsewhere drops out of the admin selection', async ({
         )
 
         await page.getByTestId('routes-archive-selected').click()
-        await expect(page.getByTestId('global-snackbar')).toBeVisible()
+        await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
         await expect
             .poll(
                 async () =>

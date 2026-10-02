@@ -55,35 +55,37 @@ onMounted(() => subscribe('routes', () => void refresh()).catch(() => {}))
 </script>
 
 <template>
-    <v-alert
+    <UAlert
         v-if="unplaced"
-        type="info"
-        variant="tonal"
-        density="compact"
-        icon="mdi-map-marker-question-outline"
+        color="info"
+        variant="soft"
+        icon="i-lucide-map-pin"
         class="mb-4"
         data-testid="unplaced-banner"
     >
-        <div class="d-flex flex-wrap align-center ga-2">
-            <span>{{
-                $t(
-                    'mapPlacement.unplacedBanner',
-                    { n: unplaced.count },
-                    unplaced.count,
-                )
-            }}</span>
-            <v-spacer />
-            <v-btn
-                size="small"
-                variant="tonal"
-                :to="{
-                    path: '/manage/map',
-                    query: { location: unplaced.location },
-                }"
-                data-testid="unplaced-banner-open"
-            >
-                {{ $t('routes.mapPlacement') }}
-            </v-btn>
-        </div>
-    </v-alert>
+        <template #description>
+            <div class="flex flex-wrap items-center gap-2">
+                <span>{{
+                    $t(
+                        'mapPlacement.unplacedBanner',
+                        { n: unplaced.count },
+                        unplaced.count,
+                    )
+                }}</span>
+                <div class="flex-1" />
+                <UButton
+                    size="sm"
+                    color="info"
+                    variant="soft"
+                    :to="{
+                        path: '/manage/map',
+                        query: { location: unplaced.location },
+                    }"
+                    data-testid="unplaced-banner-open"
+                >
+                    {{ $t('routes.mapPlacement') }}
+                </UButton>
+            </div>
+        </template>
+    </UAlert>
 </template>

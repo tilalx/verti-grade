@@ -1,82 +1,88 @@
 <template>
-    <VApp class="fontbody">
-        <NuxtLayout>
-            <v-container class="error-page d-flex align-center justify-center">
-                <div class="text-center" data-testid="error-page">
-                    <div
-                        class="error-ring"
-                        :class="{ 'error-ring--danger': !isNotFound }"
-                    >
-                        <v-icon
-                            size="40"
-                            :color="isNotFound ? 'success' : 'error'"
-                            :icon="
-                                isNotFound
-                                    ? 'mdi-map-marker-question-outline'
-                                    : 'mdi-alert-circle-outline'
-                            "
-                        />
-                    </div>
-
-                    <div
-                        class="text-label-medium text-medium-emphasis mb-2 text-eyebrow"
-                        data-testid="error-status"
-                    >
-                        {{ $t('errors.eyebrow', { code: status }) }}
-                    </div>
-
-                    <div class="error-code" aria-hidden="true">
-                        {{ status }}
-                    </div>
-
-                    <h1 class="text-headline-small font-weight-bold mb-2">
-                        {{ title }}
-                        <span v-if="isNotFound" class="d-block text-success">
-                            {{ $t('errors.notFound.accent') }}
-                        </span>
-                    </h1>
-                    <p class="text-body-medium text-medium-emphasis mb-8">
-                        {{ subtitle }}
-                    </p>
-
-                    <div class="d-flex flex-wrap justify-center ga-3">
-                        <v-btn
-                            color="primary"
-                            size="large"
-                            prepend-icon="mdi-home-outline"
-                            class="font-weight-semibold"
-                            data-testid="error-home"
-                            @click="goHome"
+    <UApp>
+        <div class="app-root fontbody">
+            <NuxtLayout>
+                <div class="error-page flex items-center justify-center px-4">
+                    <div class="text-center" data-testid="error-page">
+                        <div
+                            class="error-ring"
+                            :class="{ 'error-ring--danger': !isNotFound }"
                         >
-                            {{ $t('actions.back_to_home') }}
-                        </v-btn>
-                        <v-btn
-                            v-if="isNotFound"
-                            variant="text"
-                            size="large"
-                            class="text-none text-medium-emphasis"
-                            prepend-icon="mdi-arrow-left"
-                            data-testid="error-back"
-                            @click="goBack"
+                            <UIcon
+                                :name="
+                                    isNotFound
+                                        ? 'i-lucide-map-pin'
+                                        : 'i-lucide-circle-alert'
+                                "
+                                class="size-[40px]"
+                                :class="
+                                    isNotFound ? 'text-success' : 'text-error'
+                                "
+                            />
+                        </div>
+
+                        <div
+                            class="text-xs font-medium text-muted mb-2 text-eyebrow"
+                            data-testid="error-status"
                         >
-                            {{ $t('errors.goBack') }}
-                        </v-btn>
-                        <v-btn
-                            v-else
-                            variant="text"
-                            size="large"
-                            class="text-none text-medium-emphasis"
-                            prepend-icon="mdi-refresh"
-                            data-testid="error-retry"
-                            @click="retry"
-                        >
-                            {{ $t('errors.retry') }}
-                        </v-btn>
+                            {{ $t('errors.eyebrow', { code: status }) }}
+                        </div>
+
+                        <div class="error-code" aria-hidden="true">
+                            {{ status }}
+                        </div>
+
+                        <h1 class="text-2xl font-bold mb-2">
+                            {{ title }}
+                            <span v-if="isNotFound" class="block text-success">
+                                {{ $t('errors.notFound.accent') }}
+                            </span>
+                        </h1>
+                        <p class="text-sm text-muted mb-8">
+                            {{ subtitle }}
+                        </p>
+
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <UButton
+                                color="primary"
+                                size="xl"
+                                icon="i-lucide-house"
+                                class="font-semibold"
+                                data-testid="error-home"
+                                @click="goHome"
+                            >
+                                {{ $t('actions.back_to_home') }}
+                            </UButton>
+                            <UButton
+                                v-if="isNotFound"
+                                variant="ghost"
+                                color="neutral"
+                                size="xl"
+                                class="normal-case text-muted"
+                                icon="i-lucide-arrow-left"
+                                data-testid="error-back"
+                                @click="goBack"
+                            >
+                                {{ $t('errors.goBack') }}
+                            </UButton>
+                            <UButton
+                                v-else
+                                variant="ghost"
+                                color="neutral"
+                                size="xl"
+                                class="normal-case text-muted"
+                                icon="i-lucide-refresh-cw"
+                                data-testid="error-retry"
+                                @click="retry"
+                            >
+                                {{ $t('errors.retry') }}
+                            </UButton>
+                        </div>
                     </div>
                 </div>
-            </v-container>
-        </NuxtLayout>
-    </VApp>
+            </NuxtLayout>
+        </div>
+    </UApp>
 </template>
 
 <script setup lang="ts">
@@ -125,14 +131,14 @@ useHead({
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 2px solid rgba(var(--v-theme-success), 0.3);
-    background: rgba(var(--v-theme-success), 0.08);
+    border: 2px solid color-mix(in oklab, var(--ui-success) 30%, transparent);
+    background: color-mix(in oklab, var(--ui-success) 8%, transparent);
     margin: 0 auto 24px;
 }
 
 .error-ring--danger {
-    border-color: rgba(var(--v-theme-error), 0.3);
-    background: rgba(var(--v-theme-error), 0.08);
+    border-color: color-mix(in oklab, var(--ui-error) 30%, transparent);
+    background: color-mix(in oklab, var(--ui-error) 8%, transparent);
 }
 
 .error-code {
@@ -141,6 +147,6 @@ useHead({
     line-height: 1;
     letter-spacing: -0.04em;
     margin-bottom: 16px;
-    color: rgba(var(--v-theme-on-background), 0.12);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 12%, transparent);
 }
 </style>

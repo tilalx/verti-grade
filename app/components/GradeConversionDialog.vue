@@ -10,36 +10,37 @@
     >
         <template #activator="{ props: activatorProps }">
             <slot name="activator" :props="activatorProps">
-                <v-btn
+                <UButton
                     v-bind="activatorProps"
-                    variant="text"
-                    size="small"
-                    prepend-icon="mdi-swap-horizontal"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
+                    icon="i-lucide-arrow-left-right"
                     data-testid="grade-conversion-open"
                 >
                     {{ $t('gradeConversion.open') }}
-                </v-btn>
+                </UButton>
             </slot>
         </template>
 
-        <v-chip-group
-            v-model="visibleKeys"
-            multiple
-            filter
-            class="mb-1"
+        <div
+            class="mb-3 flex flex-wrap gap-2"
             data-testid="grade-conversion-columns"
         >
-            <v-chip
+            <UButton
                 v-for="column in toggleableColumns"
                 :key="column.key"
-                :value="column.key"
-                size="small"
-                variant="outlined"
+                size="xs"
+                :color="isVisible(column.key) ? 'primary' : 'neutral'"
+                :variant="isVisible(column.key) ? 'soft' : 'outline'"
+                :icon="isVisible(column.key) ? 'i-lucide-check' : undefined"
+                :aria-pressed="isVisible(column.key)"
                 :data-testid="`grade-conversion-toggle-${column.key}`"
+                @click="toggleColumn(column.key)"
             >
                 {{ column.title }}
-            </v-chip>
-        </v-chip-group>
+            </UButton>
+        </div>
 
         <div class="grade-conversion" data-testid="grade-conversion-table">
             <div
@@ -237,6 +238,17 @@ const visibleColumns = computed(() =>
     ),
 )
 
+function isVisible(key: string) {
+    return visibleKeys.value?.includes(key) ?? false
+}
+
+function toggleColumn(key: string) {
+    const current = visibleKeys.value ?? []
+    visibleKeys.value = current.includes(key)
+        ? current.filter((visibleKey) => visibleKey !== key)
+        : [...current, key]
+}
+
 type ColumnWidth = [track: string, min: number]
 
 const DEFAULT_WIDTH: ColumnWidth = ['minmax(52px, 1fr)', 52]
@@ -316,7 +328,7 @@ watch(open, async (isOpen) => {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: rgb(var(--v-theme-surface));
+    background: var(--ui-bg);
 }
 
 .grade-conversion__header > div {
@@ -327,8 +339,7 @@ watch(open, async (isOpen) => {
     text-align: center;
     font-weight: 600;
     font-size: 0.8rem;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    border-bottom: 1px solid var(--ui-border);
 }
 
 .grade-conversion__body {
@@ -337,8 +348,8 @@ watch(open, async (isOpen) => {
     background: repeating-linear-gradient(
         to bottom,
         transparent 0 var(--row-height),
-        rgba(var(--v-theme-on-surface), 0.04) var(--row-height)
-            calc(2 * var(--row-height))
+        color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent)
+            var(--row-height) calc(2 * var(--row-height))
     );
 }
 
@@ -349,7 +360,7 @@ watch(open, async (isOpen) => {
 
 .grade-conversion__column--ircra {
     font-weight: 700;
-    background: rgba(var(--v-theme-on-surface), 0.05);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 5%, transparent);
 }
 
 .grade-conversion__label {
@@ -370,7 +381,8 @@ watch(open, async (isOpen) => {
     text-align: center;
     font-size: 0.75rem;
     line-height: 1.2;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.25);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 25%, transparent);
     border-radius: 4px;
 }
 
@@ -379,7 +391,7 @@ watch(open, async (isOpen) => {
 }
 
 .grade-conversion__label--highlight {
-    color: rgb(var(--v-theme-primary));
+    color: var(--ui-primary);
     font-weight: 800;
 }
 
@@ -389,7 +401,7 @@ watch(open, async (isOpen) => {
     right: 0;
     height: var(--row-height);
     transform: translateY(-50%);
-    background: rgba(var(--v-theme-primary), 0.12);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
     pointer-events: none;
 }
 </style>

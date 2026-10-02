@@ -7,7 +7,7 @@ test('opens with the keyboard shortcut and jumps to a route', async ({
     await gotoSettled(page, '/')
     await page.keyboard.press('ControlOrMeta+k')
 
-    const input = page.getByTestId('command-palette-input').locator('input')
+    const input = page.getByTestId('command-palette-input')
     await expect(input).toBeFocused()
     await input.fill('e2e-route-1')
 
@@ -22,7 +22,7 @@ test('lists permitted pages for signed-in users', async ({
 }) => {
     await gotoSettled(page, '/')
     await page.getByTestId('command-palette-open').click()
-    const input = page.getByTestId('command-palette-input').locator('input')
+    const input = page.getByTestId('command-palette-input')
     await expect(input).toBeFocused()
     await input.fill('Users')
     await page.getByTestId('command-palette-result').first().click()
@@ -34,7 +34,6 @@ test('shows an empty state when nothing matches', async ({ page }) => {
     await page.getByTestId('command-palette-open').click()
     await page
         .getByTestId('command-palette-input')
-        .locator('input')
         .fill('no-such-thing-e2e-xyz')
     await expect(page.getByTestId('command-palette-empty')).toBeVisible()
 })
@@ -42,10 +41,7 @@ test('shows an empty state when nothing matches', async ({ page }) => {
 test('finds routes by setter and shows grade and setter', async ({ page }) => {
     await gotoSettled(page, '/')
     await page.getByTestId('command-palette-open').click()
-    await page
-        .getByTestId('command-palette-input')
-        .locator('input')
-        .fill('Setter 2')
+    await page.getByTestId('command-palette-input').fill('Setter 2')
     await expect(page.getByTestId('command-palette-group-routes')).toBeVisible()
     await expect(
         page.getByTestId('command-palette-result').first(),
@@ -55,7 +51,7 @@ test('finds routes by setter and shows grade and setter', async ({ page }) => {
 test('moves the selection with the arrow keys', async ({ page }) => {
     await gotoSettled(page, '/')
     await page.keyboard.press('ControlOrMeta+k')
-    const input = page.getByTestId('command-palette-input').locator('input')
+    const input = page.getByTestId('command-palette-input')
     await input.fill('e2e-route-1')
     const results = page.getByTestId('command-palette-result')
     await expect(results.nth(1)).toBeVisible()
@@ -70,7 +66,7 @@ async function paletteSearch(
 ) {
     await gotoSettled(page, '/')
     await page.getByTestId('command-palette-open').click()
-    await page.getByTestId('command-palette-input').locator('input').fill(text)
+    await page.getByTestId('command-palette-input').fill(text)
 }
 
 test.describe('admin search across the app', () => {
@@ -86,9 +82,9 @@ test.describe('admin search across the app', () => {
             .first()
             .click()
         await page.waitForURL(/\/admin\/users\?search=/)
-        await expect(
-            page.getByTestId('filter-search').locator('input'),
-        ).toHaveValue('e2e-user@gripello.test')
+        await expect(page.getByTestId('filter-search')).toHaveValue(
+            'e2e-user@gripello.test',
+        )
     })
 
     test('finds roles', async ({ adminPage: page }) => {
@@ -114,7 +110,7 @@ test.describe('admin search across the app', () => {
             .getByTestId('command-palette-result')
             .filter({ hasText: 'Privacy URL' })
             .click()
-        await page.waitForURL(/\/admin\/settings#settings-urls/)
+        await page.waitForURL(/\/admin\/settings\?section=urls/)
     })
 })
 
@@ -132,7 +128,7 @@ test('never queries admin data without permission', async ({
             forbidden.push(request.url())
     })
     await page.getByTestId('command-palette-open').click()
-    await page.getByTestId('command-palette-input').locator('input').fill('e2e')
+    await page.getByTestId('command-palette-input').fill('e2e')
     await expect(page.getByTestId('command-palette-group-routes')).toBeVisible()
     for (const group of ['users', 'roles', 'reviews', 'reports', 'settings'])
         await expect(

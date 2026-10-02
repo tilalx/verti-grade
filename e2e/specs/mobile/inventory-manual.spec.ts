@@ -53,10 +53,7 @@ test('marks a route found through the manual search dialog', async ({
     const dialog = page.getByTestId('inventory-manual-dialog')
     await expect(dialog).toBeVisible()
 
-    await page
-        .getByTestId('inventory-manual-search')
-        .locator('input')
-        .fill(route.name)
+    await page.getByTestId('inventory-manual-search').fill(route.name)
     await page.getByTestId(`inventory-manual-item-${routeId}`).click()
 
     await expect(dialog).toBeHidden()

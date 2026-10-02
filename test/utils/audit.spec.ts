@@ -94,7 +94,7 @@ describe('actionColor', () => {
 describe('actionIcon', () => {
     it('returns an icon for every action in the list', () => {
         for (const action of AUDIT_ACTIONS) {
-            expect(actionIcon(action)).toMatch(/^mdi-/)
+            expect(actionIcon(action)).toMatch(/^i-lucide-/)
         }
     })
 })

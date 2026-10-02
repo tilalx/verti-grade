@@ -4,9 +4,7 @@ import { gotoSettled } from '../../support/nav'
 test('the profile avatar upload opens with the keyboard', async ({
     userPage: page,
 }) => {
-    await gotoSettled(page, '/')
-    await page.getByTestId('user-menu-activator').click()
-    await page.getByTestId('user-menu-profile').click()
+    await gotoSettled(page, '/account/settings')
 
     const upload = page.getByTestId('profile-avatar-upload')
     await expect(upload).toHaveAttribute('role', 'button')

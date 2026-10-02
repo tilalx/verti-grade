@@ -16,26 +16,32 @@
         </svg>
         <slot name="overlay" />
         <div class="map-canvas__controls">
-            <v-btn
-                icon="mdi-plus"
-                size="small"
-                variant="elevated"
+            <UButton
+                icon="i-lucide-plus"
+                size="lg"
+                color="neutral"
+                variant="outline"
+                class="shadow-md"
                 :aria-label="$t('map.zoomIn')"
                 data-testid="map-zoom-in"
                 @click="panZoom.zoomBy(1.5)"
             />
-            <v-btn
-                icon="mdi-minus"
-                size="small"
-                variant="elevated"
+            <UButton
+                icon="i-lucide-minus"
+                size="lg"
+                color="neutral"
+                variant="outline"
+                class="shadow-md"
                 :aria-label="$t('map.zoomOut')"
                 data-testid="map-zoom-out"
                 @click="panZoom.zoomBy(1 / 1.5)"
             />
-            <v-btn
-                icon="mdi-fit-to-page-outline"
-                size="small"
-                variant="elevated"
+            <UButton
+                icon="i-lucide-scan"
+                size="lg"
+                color="neutral"
+                variant="outline"
+                class="shadow-md"
                 :aria-label="$t('map.fit')"
                 data-testid="map-fit"
                 @click="panZoom.fitAll(true)"
@@ -70,7 +76,7 @@ function bindSvg(element: unknown) {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: rgba(var(--v-theme-on-surface), 0.03);
+    background: color-mix(in oklab, var(--ui-text-highlighted) 3%, transparent);
 }
 
 .map-canvas__svg {
@@ -87,7 +93,7 @@ function bindSvg(element: unknown) {
 }
 
 .map-canvas__svg:focus-visible {
-    box-shadow: inset 0 0 0 2px rgb(var(--v-theme-primary));
+    box-shadow: inset 0 0 0 2px var(--ui-primary);
 }
 
 .map-canvas__svg--panning {

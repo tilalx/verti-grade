@@ -1,47 +1,39 @@
 <template>
-    <v-container>
+    <div class="mx-auto w-full p-4">
         <LayoutPageHeader
             :title="t('ticks.logbook')"
             :subtitle="t('ticks.logbookSubtitle')"
         >
             <template v-if="ticks.length" #actions>
-                <div class="d-flex flex-wrap ga-2">
-                    <v-btn-toggle
-                        v-model="kind"
-                        mandatory
-                        density="compact"
-                        variant="outlined"
-                        color="primary"
-                        divided
-                        data-testid="logbook-kind"
-                    >
-                        <v-btn
+                <div class="flex flex-wrap gap-2">
+                    <UFieldGroup data-testid="logbook-kind">
+                        <UButton
                             v-for="option in LOGBOOK_KINDS"
                             :key="option"
-                            :value="option"
+                            size="sm"
+                            :color="kind === option ? 'primary' : 'neutral'"
+                            :variant="kind === option ? 'soft' : 'outline'"
+                            :aria-pressed="kind === option"
                             :data-testid="`logbook-kind-${option}`"
+                            @click="kind = option"
                         >
                             {{ t(`ticks.kind.${option}`) }}
-                        </v-btn>
-                    </v-btn-toggle>
-                    <v-btn-toggle
-                        v-model="range"
-                        mandatory
-                        density="compact"
-                        variant="outlined"
-                        color="primary"
-                        divided
-                        data-testid="logbook-range"
-                    >
-                        <v-btn
+                        </UButton>
+                    </UFieldGroup>
+                    <UFieldGroup data-testid="logbook-range">
+                        <UButton
                             v-for="option in LOGBOOK_RANGES"
                             :key="option"
-                            :value="option"
+                            size="sm"
+                            :color="range === option ? 'primary' : 'neutral'"
+                            :variant="range === option ? 'soft' : 'outline'"
+                            :aria-pressed="range === option"
                             :data-testid="`logbook-range-${option}`"
+                            @click="range = option"
                         >
                             {{ t(`ticks.range.${option}`) }}
-                        </v-btn>
-                    </v-btn-toggle>
+                        </UButton>
+                    </UFieldGroup>
                 </div>
             </template>
         </LayoutPageHeader>
@@ -53,20 +45,21 @@
             data-testid="load-error"
         >
             <template #actions>
-                <v-btn
-                    variant="tonal"
-                    prepend-icon="mdi-refresh"
+                <UButton
+                    color="neutral"
+                    variant="soft"
+                    icon="i-lucide-refresh-cw"
                     data-testid="load-error-retry"
                     @click="refresh()"
                 >
                     {{ t('errors.retry') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutEmptyState>
 
         <template v-else-if="!ticks.length">
             <LayoutEmptyState
-                icon="mdi-notebook-outline"
+                icon="i-lucide-notebook"
                 :title="t('ticks.empty')"
                 :hint="t('ticks.emptyHint')"
                 class="mb-6"
@@ -76,17 +69,15 @@
         </template>
 
         <template v-else>
-            <v-row density="comfortable" class="mb-2">
-                <v-col
+            <div class="mb-3 grid grid-cols-12 gap-3">
+                <div
                     v-for="tile in tiles"
                     :key="tile.key"
-                    cols="6"
-                    md="3"
-                    class="d-flex"
+                    class="col-span-6 md:col-span-3 flex"
                     :data-testid="`logbook-stat-${tile.key}`"
                 >
                     <AnalyticsStatsCard
-                        class="w-100"
+                        class="w-full"
                         :title="tile.title"
                         :value="tile.value"
                         :previous="tile.previous"
@@ -96,107 +87,114 @@
                         :meter="tile.meter"
                         :subtitle="tile.subtitle"
                     />
-                </v-col>
-            </v-row>
+                </div>
+            </div>
 
-            <v-tabs
-                v-model="tab"
-                color="primary"
-                class="mb-4"
+            <div
+                role="tablist"
+                class="mb-4 flex gap-1 border-b"
                 data-testid="logbook-tabs"
             >
-                <v-tab value="sessions" data-testid="logbook-tab-sessions">
-                    {{ t('ticks.tabs.sessions') }}
-                </v-tab>
-                <v-tab value="stats" data-testid="logbook-tab-stats">
-                    {{ t('ticks.tabs.stats') }}
-                </v-tab>
-                <v-tab value="projects" data-testid="logbook-tab-projects">
-                    {{ t('ticks.tabs.projects') }}
-                    <v-chip
-                        v-if="projects.length"
-                        size="x-small"
-                        class="ml-2"
+                <UButton
+                    v-for="option in LOGBOOK_TABS"
+                    :key="option"
+                    role="tab"
+                    :aria-selected="tab === option"
+                    color="neutral"
+                    variant="ghost"
+                    :class="[
+                        '-mb-px rounded-none border-b-2',
+                        tab === option
+                            ? 'border-primary text-primary'
+                            : 'border-transparent',
+                    ]"
+                    :data-testid="`logbook-tab-${option}`"
+                    @click="tab = option"
+                >
+                    {{ t(`ticks.tabs.${option}`) }}
+                    <UBadge
+                        v-if="option === 'projects' && projects.length"
+                        size="sm"
+                        color="neutral"
+                        variant="soft"
+                        class="ms-2"
                         data-testid="logbook-projects-count"
                     >
                         {{ projects.length }}
-                    </v-chip>
-                </v-tab>
-            </v-tabs>
+                    </UBadge>
+                </UButton>
+            </div>
 
-            <v-tabs-window v-model="tab">
-                <v-tabs-window-item value="sessions">
-                    <v-row density="comfortable">
-                        <v-col
-                            v-for="(session, index) in sessions"
-                            :key="session.day"
-                            cols="12"
-                            lg="6"
+            <div v-if="tab === 'sessions'" role="tabpanel">
+                <div class="grid grid-cols-12 gap-3">
+                    <div
+                        v-for="(session, index) in sessions"
+                        :key="session.day"
+                        class="col-span-12 lg:col-span-6"
+                    >
+                        <LogbookSessionCard
+                            :day="session.day"
+                            :ticks="session.ticks"
+                            :initially-open="index < 2"
+                            @edit="openEdit"
+                            @delete="deleteTarget = $event"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div v-else-if="tab === 'stats'" role="tabpanel">
+                <div class="grid grid-cols-12 gap-3">
+                    <div class="col-span-12 md:col-span-6">
+                        <AnalyticsSection
+                            :title="t('ticks.pyramid.title')"
+                            :subtitle="t('ticks.pyramid.subtitle')"
+                            icon="i-lucide-triangle"
+                            :empty="!pyramid.length"
+                            :empty-text="t('ticks.chartEmpty')"
+                            testid="logbook-section-pyramid"
                         >
-                            <LogbookSessionCard
-                                :day="session.day"
-                                :ticks="session.ticks"
-                                :initially-open="index < 2"
-                                @edit="openEdit"
-                                @delete="deleteTarget = $event"
+                            <LogbookPyramidChart :rows="pyramid" />
+                        </AnalyticsSection>
+                    </div>
+                    <div class="col-span-12 md:col-span-6">
+                        <AnalyticsSection
+                            :title="t('ticks.progression.title')"
+                            :subtitle="t('ticks.progression.subtitle')"
+                            icon="i-lucide-chart-line"
+                            :empty="!progressionPoints.some((p) => p.sends)"
+                            :empty-text="t('ticks.chartEmpty')"
+                            testid="logbook-section-progression"
+                        >
+                            <LogbookProgressionChart
+                                :points="progressionPoints"
+                                :system="gradeSystemFor(routeType)"
                             />
-                        </v-col>
-                    </v-row>
-                </v-tabs-window-item>
+                        </AnalyticsSection>
+                    </div>
+                </div>
+            </div>
 
-                <v-tabs-window-item value="stats">
-                    <v-row density="comfortable">
-                        <v-col cols="12" md="6">
-                            <AnalyticsSection
-                                :title="t('ticks.pyramid.title')"
-                                :subtitle="t('ticks.pyramid.subtitle')"
-                                icon="mdi-triangle-outline"
-                                :empty="!pyramid.length"
-                                :empty-text="t('ticks.chartEmpty')"
-                                testid="logbook-section-pyramid"
-                            >
-                                <LogbookPyramidChart :rows="pyramid" />
-                            </AnalyticsSection>
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <AnalyticsSection
-                                :title="t('ticks.progression.title')"
-                                :subtitle="t('ticks.progression.subtitle')"
-                                icon="mdi-chart-line"
-                                :empty="!progressionPoints.some((p) => p.sends)"
-                                :empty-text="t('ticks.chartEmpty')"
-                                testid="logbook-section-progression"
-                            >
-                                <LogbookProgressionChart
-                                    :points="progressionPoints"
-                                    :system="gradeSystemFor(routeType)"
-                                />
-                            </AnalyticsSection>
-                        </v-col>
-                    </v-row>
-                </v-tabs-window-item>
-
-                <v-tabs-window-item value="projects">
-                    <LogbookProjects
-                        v-if="projects.length"
-                        :projects="projects"
-                        @log="openLog"
-                    />
-                    <LayoutEmptyState
-                        v-else
-                        icon="mdi-target"
-                        :title="t('ticks.projects.empty')"
-                        :hint="t('ticks.projects.emptyHint')"
-                        class="mb-6"
-                        data-testid="logbook-projects-empty"
-                    />
-                    <LogbookSuggestions
-                        v-if="!projects.length"
-                        :kind="kind"
-                        :target-index="targetIndex"
-                    />
-                </v-tabs-window-item>
-            </v-tabs-window>
+            <div v-else role="tabpanel">
+                <LogbookProjects
+                    v-if="projects.length"
+                    :projects="projects"
+                    @log="openLog"
+                />
+                <LayoutEmptyState
+                    v-else
+                    icon="i-lucide-target"
+                    :title="t('ticks.projects.empty')"
+                    :hint="t('ticks.projects.emptyHint')"
+                    class="mb-6"
+                    data-testid="logbook-projects-empty"
+                />
+                <LogbookSuggestions
+                    v-if="!projects.length"
+                    :kind="kind"
+                    :target-index="targetIndex"
+                />
+            </div>
         </template>
 
         <TickDialog
@@ -214,7 +212,7 @@
             @update:model-value="deleteTarget = null"
             @confirm="confirmDelete"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -236,6 +234,7 @@ type LoggedTick = TickRecord & { expand?: { route?: RouteRecord } }
 
 const LOGBOOK_KINDS: LogbookKind[] = ['boulder', 'route']
 const LOGBOOK_RANGES: LogbookRange[] = ['30d', '12m', 'all']
+const LOGBOOK_TABS = ['sessions', 'stats', 'projects'] as const
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -274,7 +273,7 @@ const logbookTicks = computed<LogbookTick[]>(() =>
 
 const kind = ref<LogbookKind>(preferredKind(logbookTicks.value))
 const range = ref<LogbookRange>('12m')
-const tab = ref('sessions')
+const tab = ref<(typeof LOGBOOK_TABS)[number]>('sessions')
 const routeType = computed(() =>
     kind.value === 'boulder' ? 'Boulder' : 'Route',
 )
@@ -319,7 +318,7 @@ const tiles = computed(() => {
             title: t('ticks.stats.sends'),
             value: current.sends,
             previous: previous?.sends ?? null,
-            icon: 'mdi-flag-checkered',
+            icon: 'i-lucide-flag-triangle-right',
             color: 'success',
             format: undefined,
             meter: undefined,
@@ -330,7 +329,7 @@ const tiles = computed(() => {
             title: t('ticks.stats.hardest'),
             value: current.hardest?.grade_index ?? null,
             previous: null,
-            icon: 'mdi-trending-up',
+            icon: 'i-lucide-trending-up',
             color: 'primary',
             format: () => current.hardest?.grade ?? '—',
             meter: undefined,
@@ -345,8 +344,8 @@ const tiles = computed(() => {
             title: t('ticks.stats.flashRate'),
             value: percent(current.flashRate),
             previous: percent(previous?.flashRate ?? null),
-            icon: 'mdi-lightning-bolt',
-            color: 'amber-darken-2',
+            icon: 'i-lucide-zap',
+            color: 'warning',
             format: (value: number) => `${value}%`,
             meter: current.flashRate ?? undefined,
             subtitle: undefined,
@@ -356,7 +355,7 @@ const tiles = computed(() => {
             title: t('ticks.stats.sessions'),
             value: current.sessions,
             previous: previous?.sessions ?? null,
-            icon: 'mdi-calendar-check-outline',
+            icon: 'i-lucide-calendar-check',
             color: 'info',
             format: undefined,
             meter: undefined,

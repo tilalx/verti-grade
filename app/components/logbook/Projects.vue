@@ -1,25 +1,22 @@
 <template>
-    <v-row density="comfortable">
-        <v-col
+    <div class="grid grid-cols-12 gap-3">
+        <div
             v-for="project in projects"
             :key="project.route"
-            cols="12"
-            md="6"
-            xl="4"
+            class="col-span-12 md:col-span-6 xl:col-span-4"
         >
-            <v-card
-                variant="tonal"
-                class="h-100 pa-4 d-flex flex-column ga-3"
+            <div
+                class="h-full rounded-lg bg-elevated p-4 flex flex-col gap-3"
                 data-testid="logbook-project"
                 :data-route-id="project.route"
             >
-                <div class="d-flex align-center ga-3">
+                <div class="flex items-center gap-3">
                     <RouteColorDot :color="project.record?.color" :size="32" />
-                    <div class="flex-grow-1 project__body">
-                        <div class="font-weight-medium project__name">
+                    <div class="grow project__body">
+                        <div class="font-medium project__name">
                             {{ project.record?.name }}
                         </div>
-                        <div class="text-body-small text-medium-emphasis">
+                        <div class="text-xs text-muted">
                             {{
                                 $t('ticks.attemptCount', {
                                     count: project.attempts,
@@ -40,27 +37,28 @@
                     </div>
                     <GradeLabel :source="project.record" />
                 </div>
-                <div class="d-flex ga-2 justify-end mt-auto">
-                    <v-btn
+                <div class="flex gap-2 justify-end mt-auto">
+                    <UButton
                         :to="`/route?id=${project.route}`"
-                        variant="tonal"
-                        append-icon="mdi-chevron-right"
+                        color="neutral"
+                        variant="soft"
+                        trailing-icon="i-lucide-chevron-right"
                     >
                         {{ $t('routes.view') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         color="primary"
-                        variant="flat"
-                        prepend-icon="mdi-check-circle-outline"
+                        variant="solid"
+                        icon="i-lucide-circle-check"
                         data-testid="logbook-project-log"
                         @click="emit('log', project.route)"
                     >
                         {{ $t('ticks.projects.logSend') }}
-                    </v-btn>
+                    </UButton>
                 </div>
-            </v-card>
-        </v-col>
-    </v-row>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">

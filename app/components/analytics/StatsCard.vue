@@ -1,57 +1,61 @@
 <template>
-    <v-card class="stats-card surface-card" elevation="0">
-        <div class="accent-bar" :class="`bg-${color}`"></div>
-        <v-card-text class="card-body">
-            <div class="d-flex align-center justify-space-between mb-3">
+    <div class="stats-card surface-card" :style="{ '--accent': accent }">
+        <div class="accent-bar"></div>
+        <div class="card-body">
+            <div class="flex items-center justify-between mb-3">
                 <div class="icon-badge" :style="{ background: tint }">
-                    <v-icon :icon="icon" :color="color" size="18" />
+                    <UIcon :name="icon" class="accent-text size-[18px]" />
                 </div>
-                <v-chip
+                <UBadge
                     v-if="delta !== null && !loading"
-                    size="x-small"
-                    variant="tonal"
+                    size="sm"
+                    variant="soft"
                     :color="
                         delta === 0
-                            ? undefined
+                            ? 'neutral'
                             : delta > 0
                               ? 'success'
                               : 'error'
                     "
-                    :prepend-icon="
+                    :icon="
                         delta === 0
-                            ? 'mdi-minus'
+                            ? 'i-lucide-minus'
                             : delta > 0
-                              ? 'mdi-arrow-up'
-                              : 'mdi-arrow-down'
+                              ? 'i-lucide-arrow-up'
+                              : 'i-lucide-arrow-down'
                     "
                     data-testid="stats-card-trend"
                 >
                     {{ formatDelta(delta) }}
-                </v-chip>
+                </UBadge>
             </div>
 
             <div class="card-label">{{ title }}</div>
 
             <div v-if="loading" class="mt-1">
-                <v-skeleton-loader type="text" width="80" />
+                <USkeleton class="h-4 w-20" />
             </div>
             <template v-else>
                 <div class="card-value" data-testid="stats-card-value">
                     {{ value === null ? '—' : format(value) }}
                 </div>
-                <v-progress-linear
+                <div
                     v-if="meter !== null"
-                    :model-value="meter * 100"
-                    :color="color"
-                    rounded
-                    height="6"
-                    class="my-2"
+                    class="meter my-2"
+                    role="progressbar"
+                    :aria-valuenow="Math.round(meter * 100)"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                     data-testid="stats-card-meter"
-                />
+                >
+                    <div
+                        class="meter-fill"
+                        :style="{ width: `${Math.min(meter, 1) * 100}%` }"
+                    />
+                </div>
                 <svg
                     v-else-if="sparkPoints"
-                    class="sparkline my-1"
-                    :class="`text-${color}`"
+                    class="sparkline accent-text my-1"
                     viewBox="0 0 100 24"
                     preserveAspectRatio="none"
                     aria-hidden="true"
@@ -72,8 +76,8 @@
                     }}</span>
                 </div>
             </template>
-        </v-card-text>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -99,7 +103,10 @@ const props = withDefaults(
     },
 )
 
-const tint = computed(() => `rgba(var(--v-theme-${props.color}), 0.12)`)
+const accent = computed(() => `var(--ui-${props.color})`)
+const tint = computed(
+    () => `color-mix(in oklab, ${accent.value} 12%, transparent)`,
+)
 const delta = computed(() =>
     props.previous === null || props.value === null
         ? null
@@ -133,6 +140,24 @@ function formatDelta(value: number) {
     left: 0;
     right: 0;
     height: 3px;
+    background: var(--accent);
+}
+
+.accent-text {
+    color: var(--accent);
+}
+
+.meter {
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--accent) 20%, transparent);
+}
+
+.meter-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
 }
 
 .card-body {
@@ -153,7 +178,7 @@ function formatDelta(value: number) {
     font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: rgba(var(--v-theme-on-surface), 0.5);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
     margin-bottom: 4px;
 }
 
@@ -161,7 +186,7 @@ function formatDelta(value: number) {
     font-size: 30px;
     font-weight: 600;
     line-height: 1.1;
-    color: rgb(var(--v-theme-on-surface));
+    color: var(--ui-text-highlighted);
 }
 
 .sparkline {
@@ -173,6 +198,6 @@ function formatDelta(value: number) {
 .card-footer {
     font-size: 11px;
     min-height: 18px;
-    color: rgba(var(--v-theme-on-surface), 0.4);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 40%, transparent);
 }
 </style>

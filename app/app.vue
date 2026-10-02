@@ -1,16 +1,24 @@
 <template>
-    <VApp class="fontbody">
-        <NuxtLoadingIndicator color="rgb(var(--v-theme-primary))" :height="3" />
-        <NuxtAnnouncer />
-        <NuxtLayout>
-            <NuxtPage />
-        </NuxtLayout>
-        <GlobalSnackbar />
-    </VApp>
+    <UApp :locale="uiLocale" :toaster="{ position: 'top-center' }">
+        <div class="app-root fontbody">
+            <NuxtLoadingIndicator color="var(--ui-primary)" :height="3" />
+            <NuxtAnnouncer />
+            <NuxtLayout>
+                <NuxtPage />
+            </NuxtLayout>
+        </div>
+    </UApp>
 </template>
 
 <script setup lang="ts">
+import { de, en, ru, tr, uk } from '@nuxt/ui/locale'
+
+const UI_LOCALES = { de, en, ru, tr, uk }
+
 const { locale } = useI18n()
+const uiLocale = computed(
+    () => UI_LOCALES[locale.value as keyof typeof UI_LOCALES] ?? en,
+)
 useHead({ htmlAttrs: { lang: locale } })
 useBrowserChrome()
 </script>

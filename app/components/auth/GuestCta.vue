@@ -8,28 +8,35 @@ const { allowRegistration } = useOrgSettings()
 </script>
 
 <template>
-    <v-card border flat :data-testid="`${testIdPrefix}-guest`">
-        <v-card-text class="text-center pa-6">
-            <v-icon size="56" class="guest-cta__icon mb-3"
-                >mdi-account-circle-outline</v-icon
-            >
-            <p class="text-title-medium mb-1">{{ $t('me.guestTitle') }}</p>
-            <p class="text-body-medium text-medium-emphasis mb-5">
+    <div
+        class="rounded-lg border bg-default"
+        :data-testid="`${testIdPrefix}-guest`"
+    >
+        <div class="text-center p-6">
+            <UIcon
+                name="i-lucide-circle-user"
+                class="guest-cta__icon mb-3 size-[56px]"
+            />
+            <p class="text-base font-medium mb-1">{{ $t('me.guestTitle') }}</p>
+            <p class="text-sm text-muted mb-5">
                 {{ $t('me.guestIntro') }}
             </p>
-            <div class="d-flex flex-column ga-2">
-                <v-btn
+            <div class="flex flex-col gap-2">
+                <UButton
                     color="primary"
-                    size="large"
+                    size="lg"
+                    block
                     :to="{ path: '/auth/login', query: { redirect } }"
                     :data-testid="`${testIdPrefix}-login`"
                 >
                     {{ $t('routes.login') }}
-                </v-btn>
-                <v-btn
+                </UButton>
+                <UButton
                     v-if="allowRegistration"
-                    variant="tonal"
-                    size="large"
+                    color="neutral"
+                    variant="soft"
+                    size="lg"
+                    block
                     :to="{
                         path: '/auth/login',
                         query: { view: 'register', redirect },
@@ -37,14 +44,14 @@ const { allowRegistration } = useOrgSettings()
                     :data-testid="`${testIdPrefix}-register`"
                 >
                     {{ $t('me.register') }}
-                </v-btn>
+                </UButton>
             </div>
-        </v-card-text>
-    </v-card>
+        </div>
+    </div>
 </template>
 
 <style scoped>
 .guest-cta__icon {
-    color: rgba(var(--v-theme-on-surface), 0.3);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
 }
 </style>

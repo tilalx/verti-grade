@@ -19,7 +19,7 @@
         </NuxtLink>
     </div>
     <div v-else class="new-routes-empty" data-testid="overview-new-empty">
-        <v-icon size="28">mdi-calendar-blank-outline</v-icon>
+        <UIcon name="i-lucide-calendar" class="size-[28px]" />
         <span>{{ $t('overview.newRoutesEmpty') }}</span>
     </div>
 </template>
@@ -61,8 +61,9 @@ function metaFor(route: RouteListItem) {
     gap: 12px;
     padding: 16px;
     border-radius: 12px;
-    border: 1px dashed rgba(var(--v-border-color), var(--v-border-opacity));
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    border: 1px dashed var(--ui-border);
+    background: var(--ui-bg);
+    color: var(--ui-text-muted);
 }
 
 .new-routes {
@@ -83,7 +84,8 @@ function metaFor(route: RouteListItem) {
     row-gap: 2px;
     padding: 12px 14px;
     border-radius: 12px;
-    background: rgba(var(--v-theme-on-surface), 0.05);
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
     color: inherit;
     text-decoration: none;
     scroll-snap-align: start;
@@ -92,7 +94,7 @@ function metaFor(route: RouteListItem) {
 
 .new-route:hover,
 .new-route:focus-visible {
-    background: rgba(var(--v-theme-primary), 0.12);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
     outline: none;
 }
 
@@ -114,7 +116,7 @@ function metaFor(route: RouteListItem) {
 .new-route__meta {
     grid-column: 2 / span 2;
     font-size: 0.75rem;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

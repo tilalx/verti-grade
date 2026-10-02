@@ -22,13 +22,13 @@ test('editing a route west of UTC keeps its set date', async ({
     const route = await createRoute({ screw_date: '2026-03-14 00:00:00.000Z' })
 
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(route.name)
+    await page.getByTestId('filter-search').fill(route.name)
     await expect(page.getByTestId('routes-row-name')).toHaveText([route.name])
     await page.getByTestId('routes-row-edit').first().click()
     await expect(page.getByTestId('route-form-dialog')).toBeVisible()
-    await expect(
-        page.getByTestId('route-form-screw-date').locator('input'),
-    ).toHaveValue('2026-03-14')
+    await expect(page.getByTestId('route-form-screw-date')).toHaveValue(
+        '2026-03-14',
+    )
     await page.getByTestId('route-form-submit').click()
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 

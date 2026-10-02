@@ -335,8 +335,8 @@ defineExpose({ focusWall, focusRoute, fitAll })
 }
 
 .map-wall-outline {
-    fill: rgba(var(--v-theme-on-surface), 0.2);
-    stroke: rgba(var(--v-theme-on-surface), 0.3);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 20%, transparent);
+    stroke: color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
     stroke-width: 1;
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
@@ -345,17 +345,17 @@ defineExpose({ focusWall, focusRoute, fitAll })
 
 .map-wall:hover .map-wall-outline,
 .map-wall:focus-visible .map-wall-outline {
-    fill: rgba(var(--v-theme-on-surface), 0.28);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 28%, transparent);
 }
 
 .map-wall:focus-visible .map-wall-outline {
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
 }
 
 .map-wall--selected .map-wall-outline {
-    fill: rgba(var(--v-theme-primary), 0.22);
-    stroke: rgb(var(--v-theme-primary));
+    fill: color-mix(in oklab, var(--ui-primary) 22%, transparent);
+    stroke: var(--ui-primary);
     stroke-width: 2;
 }
 
@@ -369,7 +369,7 @@ defineExpose({ focusWall, focusRoute, fitAll })
 }
 
 .map-dot:focus-visible .map-dot-hit {
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
@@ -402,7 +402,7 @@ defineExpose({ focusWall, focusRoute, fitAll })
 
 .map-dot-ring {
     fill: none;
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2.5;
     vector-effect: non-scaling-stroke;
     pointer-events: none;
@@ -452,8 +452,8 @@ defineExpose({ focusWall, focusRoute, fitAll })
 .wall-pill__name {
     padding: 4px 12px;
     border-radius: 999px;
-    background: rgb(var(--v-theme-primary));
-    color: rgb(var(--v-theme-on-primary));
+    background: var(--ui-primary);
+    color: #fff;
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.3;
@@ -461,16 +461,16 @@ defineExpose({ focusWall, focusRoute, fitAll })
 }
 
 .wall-pill--selected .wall-pill__name {
-    outline: 3px solid rgba(var(--v-theme-primary), 0.35);
+    outline: 3px solid color-mix(in oklab, var(--ui-primary) 35%, transparent);
 }
 
 .wall-pill__count {
     font-size: 0.8125rem;
     font-weight: 700;
-    color: rgb(var(--v-theme-on-surface));
+    color: var(--ui-text-highlighted);
     text-shadow:
-        0 0 3px rgb(var(--v-theme-surface)),
-        0 0 3px rgb(var(--v-theme-surface));
+        0 0 3px var(--ui-bg),
+        0 0 3px var(--ui-bg);
     font-variant-numeric: tabular-nums;
 }
 </style>

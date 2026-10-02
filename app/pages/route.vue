@@ -1,42 +1,39 @@
 <template>
-    <v-container class="route-page pa-0">
+    <div class="route-page p-0">
         <LayoutLoadingState v-if="loading" variant="page" />
 
         <template v-else-if="metadata">
             <div class="route-layout">
                 <div class="route-layout__main">
-                    <!-- ── Hero header ────────────────────────────────────────────── -->
                     <div
                         class="route-hero"
                         data-testid="route-hero"
                         :style="heroStyle"
                     >
                         <div class="route-hero__overlay" />
-                        <v-btn
-                            icon="mdi-arrow-left"
-                            variant="flat"
-                            size="small"
-                            class="route-hero__back route-hero__tint"
+                        <UButton
+                            icon="i-lucide-arrow-left"
+                            color="neutral"
+                            class="route-hero__back bg-(--hero-tint) text-(--hero-ink) hover:bg-(--hero-tint)/80 rounded-full"
                             :aria-label="t('errors.goBack')"
                             data-testid="route-back"
                             @click="goBack"
                         />
                         <div class="route-hero__content">
-                            <!-- Type + location -->
                             <div
                                 class="route-hero__chips"
                                 data-testid="route-hero-chips"
                             >
-                                <v-chip
+                                <UBadge
                                     v-if="metadata.type"
-                                    size="small"
-                                    variant="flat"
-                                    class="route-hero__tint"
+                                    size="lg"
+                                    color="neutral"
+                                    class="bg-(--hero-tint) text-(--hero-ink) hover:bg-(--hero-tint)/80 rounded-full"
                                     data-testid="route-type-chip"
-                                    :prepend-icon="
+                                    :icon="
                                         metadata.type === 'Boulder'
-                                            ? 'mdi-image-filter-hdr'
-                                            : 'mdi-routes'
+                                            ? 'i-lucide-mountain'
+                                            : 'i-lucide-route'
                                     "
                                 >
                                     {{
@@ -44,45 +41,44 @@
                                             `routes.types.${metadata.type?.toLowerCase()}`,
                                         )
                                     }}
-                                </v-chip>
-                                <v-chip
+                                </UBadge>
+                                <UBadge
                                     v-if="
                                         route_id && tickedRouteIds.has(route_id)
                                     "
-                                    size="small"
-                                    variant="flat"
+                                    size="lg"
                                     color="primary"
-                                    prepend-icon="mdi-check"
+                                    class="rounded-full"
+                                    icon="i-lucide-check"
                                     data-testid="route-ticked"
                                 >
                                     {{ t('ticks.sent') }}
-                                </v-chip>
-                                <v-chip
+                                </UBadge>
+                                <UBadge
                                     v-if="locationName(metadata)"
-                                    size="small"
-                                    variant="flat"
-                                    class="route-hero__tint"
-                                    prepend-icon="mdi-map-marker-outline"
+                                    size="lg"
+                                    color="neutral"
+                                    class="bg-(--hero-tint) text-(--hero-ink) hover:bg-(--hero-tint)/80 rounded-full"
+                                    icon="i-lucide-map-pin"
                                 >
                                     {{ locationName(metadata) }}
-                                </v-chip>
-                                <v-chip
+                                </UBadge>
+                                <UBadge
                                     v-if="wallName(metadata)"
-                                    size="small"
-                                    variant="flat"
-                                    class="route-hero__tint"
-                                    prepend-icon="mdi-wall"
+                                    size="lg"
+                                    color="neutral"
+                                    class="bg-(--hero-tint) text-(--hero-ink) hover:bg-(--hero-tint)/80 rounded-full"
+                                    icon="i-lucide-brick-wall"
                                     data-testid="route-wall"
                                 >
                                     {{ wallName(metadata) }}
-                                </v-chip>
+                                </UBadge>
                             </div>
 
-                            <!-- Name + difficulty badge inline -->
                             <div class="route-hero__headline">
                                 <div class="route-hero__name">
                                     <h1
-                                        class="text-headline-small font-weight-bold mb-1 route-hero__ink route-hero__title"
+                                        class="text-2xl font-bold mb-1 route-hero__ink route-hero__title"
                                         data-testid="route-page-name"
                                     >
                                         {{ metadata.name }}
@@ -90,15 +86,14 @@
 
                                     <div
                                         v-if="metadata.creator?.length"
-                                        class="d-flex align-center ga-1 mt-1"
+                                        class="flex items-center gap-1 mt-1"
                                     >
-                                        <v-icon
-                                            size="14"
-                                            class="route-hero__ink-muted"
-                                            >mdi-account-hard-hat-outline</v-icon
-                                        >
+                                        <UIcon
+                                            name="i-lucide-hard-hat"
+                                            class="route-hero__ink-muted size-[14px]"
+                                        />
                                         <span
-                                            class="text-body-medium route-hero__ink-muted"
+                                            class="text-sm route-hero__ink-muted"
                                             >{{
                                                 metadata.creator.join(', ')
                                             }}</span
@@ -123,7 +118,7 @@
                                             data-testid="route-grade-badge"
                                         >
                                             <span
-                                                class="route-hero__difficulty-text font-weight-black"
+                                                class="route-hero__difficulty-text font-black"
                                                 >{{ difficulty }}</span
                                             >
                                             <span
@@ -143,115 +138,113 @@
                         </div>
                     </div>
 
-                    <!-- ── Stats bar ──────────────────────────────────────────────── -->
-                    <v-card class="stats-card mx-4 mt-n4" elevation="3">
-                        <div
-                            class="d-flex align-center justify-space-around py-3"
-                        >
+                    <div class="stats-card mx-4 -mt-4 rounded-lg shadow-md">
+                        <div class="flex items-center justify-around py-3">
                             <LayoutStatTile
                                 :label="t('ratings.score')"
                                 :value="avgRating"
-                                icon="mdi-star"
+                                icon="i-lucide-star"
                                 icon-color="yellow-darken-2"
                                 data-testid="route-avg-rating"
                             />
-                            <v-divider vertical class="my-1" />
+                            <USeparator
+                                orientation="vertical"
+                                class="my-1 h-10"
+                            />
                             <LayoutStatTile
                                 :label="t('ratings.climber_reviews')"
                                 :value="reviews.length"
                             />
-                            <v-divider vertical class="my-1" />
+                            <USeparator
+                                orientation="vertical"
+                                class="my-1 h-10"
+                            />
                             <LayoutStatTile
                                 :label="t('ratings.difficulty')"
                                 :value="avgPerceivedDifficulty || '—'"
-                                icon="mdi-trending-up"
+                                icon="i-lucide-trending-up"
                                 icon-color="primary"
                             />
                         </div>
-                    </v-card>
+                    </div>
 
-                    <!-- ── Route details ──────────────────────────────────────────── -->
                     <div class="route-details" data-testid="route-details">
-                        <!-- Date + comment -->
                         <div
                             v-if="formattedScrewDate || metadata.comment"
                             class="mb-4"
                         >
                             <div
                                 v-if="formattedScrewDate"
-                                class="d-flex align-center ga-2 mb-2"
+                                class="flex items-center gap-2 mb-2"
                             >
-                                <v-icon size="16" color="medium-emphasis"
-                                    >mdi-calendar-outline</v-icon
-                                >
-                                <span
-                                    class="text-body-medium text-medium-emphasis"
-                                    >{{ formattedScrewDate }}</span
-                                >
+                                <UIcon
+                                    name="i-lucide-calendar"
+                                    class="size-[16px] text-muted"
+                                />
+                                <span class="text-sm text-muted">{{
+                                    formattedScrewDate
+                                }}</span>
                             </div>
                             <div
                                 v-if="
                                     metadata.anchor_point &&
                                     metadata.type !== 'Boulder'
                                 "
-                                class="d-flex align-center ga-2 mb-2"
+                                class="flex items-center gap-2 mb-2"
                             >
-                                <v-icon size="16" color="medium-emphasis"
-                                    >mdi-pound</v-icon
-                                >
-                                <span
-                                    class="text-body-medium text-medium-emphasis"
+                                <UIcon
+                                    name="i-lucide-hash"
+                                    class="size-[16px] text-muted"
+                                />
+                                <span class="text-sm text-muted"
                                     >{{ t('climbing.anchor_point') }}:
                                     {{ metadata.anchor_point }}</span
                                 >
                             </div>
                             <div
                                 v-if="metadata.comment"
-                                class="d-flex align-start ga-2"
+                                class="flex items-start gap-2"
                             >
-                                <v-icon
-                                    size="16"
-                                    color="medium-emphasis"
-                                    class="mt-1"
-                                    >mdi-information-outline</v-icon
-                                >
-                                <span
-                                    class="text-body-medium text-medium-emphasis font-italic"
-                                    >{{ metadata.comment }}</span
-                                >
+                                <UIcon
+                                    name="i-lucide-info"
+                                    class="mt-1 size-[16px] text-muted"
+                                />
+                                <span class="text-sm text-muted italic">{{
+                                    metadata.comment
+                                }}</span>
                             </div>
                         </div>
 
-                        <div v-if="route_id" class="d-flex flex-wrap ga-2 mb-6">
-                            <v-btn
+                        <div v-if="route_id" class="flex flex-wrap gap-2 mb-6">
+                            <UButton
                                 v-if="isLoggedIn"
                                 color="primary"
-                                variant="flat"
-                                size="large"
-                                class="flex-grow-1"
-                                prepend-icon="mdi-check-circle-outline"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-circle-check"
                                 data-testid="tick-open"
                                 @click="tickDialog = true"
                             >
                                 {{ t('ticks.logAscent') }}
-                            </v-btn>
-                            <v-btn
-                                :color="isLoggedIn ? undefined : 'primary'"
-                                :variant="isLoggedIn ? 'tonal' : 'flat'"
-                                size="large"
-                                class="flex-grow-1"
-                                prepend-icon="mdi-star-plus-outline"
+                            </UButton>
+                            <UButton
+                                :color="isLoggedIn ? 'neutral' : 'primary'"
+                                :variant="isLoggedIn ? 'soft' : 'solid'"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-star-plus"
                                 data-testid="review-open-cta"
                                 @click="reviewDialog = true"
                             >
                                 {{ t('ratings.createReview') }}
-                            </v-btn>
-                            <v-btn
+                            </UButton>
+                            <UButton
                                 v-if="metadata?.wall && metadata.location"
-                                variant="tonal"
-                                size="large"
-                                class="flex-grow-1"
-                                prepend-icon="mdi-map-marker-outline"
+                                color="neutral"
+                                variant="soft"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-map-pin"
                                 :to="{
                                     path: '/map',
                                     query: {
@@ -262,13 +255,14 @@
                                 data-testid="route-show-on-map"
                             >
                                 {{ t('map.showOnMap') }}
-                            </v-btn>
-                            <v-btn
+                            </UButton>
+                            <UButton
                                 v-else-if="canPlaceOnMap"
-                                variant="tonal"
-                                size="large"
-                                class="flex-grow-1"
-                                prepend-icon="mdi-map-marker-plus-outline"
+                                color="neutral"
+                                variant="soft"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-map-pin-plus"
                                 :to="{
                                     path: '/manage/map',
                                     query: {
@@ -279,7 +273,7 @@
                                 data-testid="route-place-on-map"
                             >
                                 {{ t('mapPlacement.placeThis') }}
-                            </v-btn>
+                            </UButton>
                             <TickDialog
                                 v-if="isLoggedIn"
                                 v-model="tickDialog"
@@ -296,26 +290,24 @@
                     </div>
                 </div>
 
-                <!-- ── Reviews section ────────────────────────────────────────── -->
                 <div
                     class="route-layout__reviews px-4 pt-4"
                     data-testid="route-reviews"
                 >
-                    <div class="d-flex align-center justify-space-between mb-3">
-                        <span class="text-body-large font-weight-bold">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-base font-bold">
                             {{ t('ratings.climber_reviews') }}
                         </span>
-                        <v-chip
+                        <UBadge
                             v-if="reviews.length"
-                            size="small"
-                            variant="tonal"
+                            variant="soft"
                             color="primary"
+                            class="rounded-full"
                         >
                             {{ reviews.length }}
-                        </v-chip>
+                        </UBadge>
                     </div>
 
-                    <!-- Review list -->
                     <div v-if="reviews.length" class="route-reviews-list">
                         <CommentsCard
                             v-for="review in reviews"
@@ -329,10 +321,11 @@
                             }"
                         >
                             <template #actions>
-                                <v-btn
-                                    icon="mdi-flag-outline"
-                                    variant="text"
-                                    size="small"
+                                <UButton
+                                    icon="i-lucide-flag"
+                                    color="neutral"
+                                    variant="ghost"
+                                    size="sm"
                                     :aria-label="t('reports.reportAction')"
                                     :title="t('reports.reportAction')"
                                     data-testid="comment-card-report"
@@ -342,10 +335,9 @@
                         </CommentsCard>
                     </div>
 
-                    <!-- Empty state -->
                     <LayoutEmptyState
                         v-else
-                        icon="mdi-star-shooting-outline"
+                        icon="i-lucide-sparkles"
                         :title="t('ratings.no_reviews_yet')"
                         :hint="t('ratings.be_the_first')"
                     />
@@ -358,12 +350,11 @@
                         :content-url="reportUrl"
                     />
 
-                    <!-- Bottom spacer for mobile -->
                     <div class="route-page__bottom-spacer" />
                 </div>
             </div>
         </template>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -453,9 +444,9 @@ useHead(
 
 const difficulty = computed(() => formatGrade(metadata.value))
 
-const theme = useTheme()
+const themeColors = useThemeColors()
 const heroColor = computed(
-    () => metadata.value?.color || String(theme.current.value.colors.primary),
+    () => metadata.value?.color || themeColors.value.primary,
 )
 
 const heroIsLight = computed(() => isLightColor(heroColor.value))
@@ -634,7 +625,7 @@ onMounted(async () => {
 
 <style scoped>
 .comment-card--target {
-    outline: 2px solid rgb(var(--v-theme-success));
+    outline: 2px solid var(--ui-success);
     outline-offset: 2px;
     animation: target-fade 3s ease-out forwards;
 }
@@ -642,10 +633,10 @@ onMounted(async () => {
 @keyframes target-fade {
     0%,
     60% {
-        outline-color: rgb(var(--v-theme-success));
+        outline-color: var(--ui-success);
     }
     100% {
-        outline-color: rgba(var(--v-theme-success), 0);
+        outline-color: color-mix(in oklab, var(--ui-success) 0%, transparent);
     }
 }
 
@@ -857,6 +848,6 @@ onMounted(async () => {
 .stats-card {
     position: relative;
     z-index: 2;
-    background: rgb(var(--v-theme-surface));
+    background: var(--ui-bg);
 }
 </style>

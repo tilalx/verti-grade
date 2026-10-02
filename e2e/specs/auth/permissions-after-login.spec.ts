@@ -10,10 +10,7 @@ async function signIn(page: Page) {
 
 async function logOut(page: Page) {
     if ((page.viewportSize()?.width ?? 0) >= 1280) {
-        await page
-            .getByRole('banner')
-            .getByTestId('user-menu-activator')
-            .click()
+        await page.getByTestId('user-menu-activator').click()
         await page.getByTestId('user-menu-logout').click()
     } else {
         await page.getByTestId('bottom-nav-account').click()

@@ -8,9 +8,10 @@ test('command palette dialog and search field are named', async ({ page }) => {
     await expect(
         page.getByRole('dialog', { name: 'Search' }).first(),
     ).toBeVisible()
-    await expect(
-        page.getByTestId('command-palette-input').locator('input'),
-    ).toHaveAttribute('aria-label', /Route name/)
+    await expect(page.getByTestId('command-palette-input')).toHaveAttribute(
+        'aria-label',
+        /Route name/,
+    )
 })
 
 test('dialog shell is named by its title', async ({ adminPage: page }) => {
@@ -32,8 +33,7 @@ test('comment selection checkboxes name the reviewer', async ({
     await expect(
         page
             .getByTestId(`comment-card-${id}`)
-            .getByTestId('comment-card-checkbox')
-            .locator('input'),
+            .getByTestId('comment-card-checkbox'),
     ).toHaveAttribute('aria-label', /^Select .+/)
 })
 

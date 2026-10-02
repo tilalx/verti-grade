@@ -5,7 +5,7 @@ import { gradeOf } from '../../support/seed'
 test('settings show the grading scale per route type', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=grading')
 
     const routeScale = page.getByTestId('settings-route-grade-system')
     const boulderScale = page.getByTestId('settings-boulder-grade-system')
@@ -41,25 +41,23 @@ test('creates a boulder graded on the boulder scale', async ({
     const name = `${testPrefix}-bldr`
 
     await page.getByTestId('routes-create-open').click()
-    await page.getByTestId('route-form-name').locator('input').fill(name)
+    await page.getByTestId('route-form-name').fill(name)
     await page.getByTestId('route-form-type').click()
     await page.getByRole('option', { name: 'Boulder', exact: true }).click()
-    await expect(page.getByTestId('route-form-difficulty')).toContainText(
-        'Fontainebleau',
-    )
+    await expect(
+        page.getByTestId('route-form-difficulty'),
+    ).toHaveAccessibleName(/Fontainebleau/)
     await page.getByTestId('route-form-difficulty').click()
     await page.getByRole('option', { name: '6A+', exact: true }).click()
-    await page.getByTestId('route-form-anchor-point').locator('input').fill('0')
+    await page.getByTestId('route-form-anchor-point').fill('0')
     await page.getByTestId('route-form-location').click()
     await page
         .getByRole('option', { name: workerLocation.name, exact: true })
         .click()
-    await page.getByTestId('route-form-creator').locator('input').fill('E2E')
+    await expect(page.getByRole('listbox')).toBeHidden()
+    await page.getByTestId('route-form-creator').fill('E2E')
     await page.keyboard.press('Enter')
-    await page
-        .getByTestId('route-form-screw-date')
-        .locator('input')
-        .fill('2026-01-01')
+    await page.getByTestId('route-form-screw-date').fill('2026-01-01')
     await page.getByTestId('route-form-submit').click()
     await expect(page.getByTestId('route-form-dialog')).toBeHidden()
 
@@ -71,7 +69,7 @@ test('creates a boulder graded on the boulder scale', async ({
         grade_system: 'font',
         grade_index: 16.4,
     })
-    await page.getByTestId('filter-search').locator('input').fill(name)
+    await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText('6A+')
     await expect(
         page.getByTestId('routes-table').locator('tbody'),
@@ -92,7 +90,7 @@ test('editing keeps the route scale and switching type resets the grade', async 
         creator: ['E2E'],
     })
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(name)
+    await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText('6b')
     await expect(page.getByTestId('routes-table')).toContainText('Fr')
     await expect(
@@ -101,17 +99,17 @@ test('editing keeps the route scale and switching type resets the grade', async 
 
     await page.getByTestId('routes-row-edit').first().click()
     const grade = page.getByTestId('route-form-difficulty')
-    await expect(grade).toContainText('French')
+    await expect(grade).toHaveAccessibleName(/French/)
     await expect(grade).toContainText('6b')
 
     await page.getByTestId('route-form-type').click()
     await page.getByRole('option', { name: 'Boulder', exact: true }).click()
-    await expect(grade).toContainText('Fontainebleau')
+    await expect(grade).toHaveAccessibleName(/Fontainebleau/)
     await expect(grade).not.toContainText('6b')
 
     await page.getByTestId('route-form-type').click()
     await page.getByRole('option', { name: 'Route', exact: true }).click()
-    await expect(grade).toContainText('French')
+    await expect(grade).toHaveAccessibleName(/French/)
 })
 
 test('route page links its grade to the IRCRA conversion table', async ({
@@ -154,7 +152,7 @@ test('route page links its grade to the IRCRA conversion table', async ({
 })
 
 test('settings open the conversion table', async ({ adminPage: page }) => {
-    await gotoSettled(page, '/admin/settings')
+    await gotoSettled(page, '/admin/settings?section=grading')
     await page.getByTestId('grade-conversion-open').click()
     await expect(page.getByTestId('grade-conversion-dialog')).toBeVisible()
     await expect(page.getByTestId('grade-conversion-french-6a')).toBeVisible()

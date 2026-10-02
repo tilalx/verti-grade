@@ -1,6 +1,6 @@
 import PocketBase from 'pocketbase'
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
+import { gotoSubscribed } from '../../support/nav'
 import { PB_URL } from '../../support/map'
 import { authAsSuperuser, ensureLocations, uiaa } from '../../support/seed'
 
@@ -27,11 +27,8 @@ test('an edit landing after a new review does not duplicate the card', async ({
         })
     try {
         const edited = await review('edited')
-        await gotoSettled(page, '/manage/comments')
-        await page
-            .getByTestId('filter-search')
-            .locator('input')
-            .fill(testPrefix)
+        await gotoSubscribed(page, '/manage/comments', 'ratings')
+        await page.getByTestId('filter-search').fill(testPrefix)
         const editedCard = page.getByTestId(`comment-card-${edited.id}`)
         await expect(editedCard).toBeVisible()
 

@@ -67,99 +67,25 @@ export default defineNuxtConfig({
             ],
         },
     },
-    modules: ['@nuxtjs/i18n', '@nuxt/image', 'vuetify-nuxt-module'],
-    css: ['~/assets/css/main.css', '@mdi/font/css/materialdesignicons.min.css'],
-    vuetify: {
-        moduleOptions: {
-            autoimport: true, // Automatically imports Vuetify components
-            prefixComposables: ['useLayout'],
-            ssrClientHints: {
-                reloadOnFirstRequest: false,
-                prefersColorScheme: true, // Uses Sec-CH-Prefers-Color-Scheme for theme detection
-                viewportSize: true, // Enable Sec-CH-Viewport-Width, Sec-CH-DPR for responsive layout on SSR
-                prefersColorSchemeOptions: {
-                    cookie: {
-                        name: 'color-scheme', // Stores user's preferred color scheme
-                    },
-                    useBrowserThemeOnly: false,
-                },
-                prefersReducedMotion: true, // Uses Sec-CH-Prefers-Reduced-Motion for reduced motion detection
-            },
+    modules: ['@nuxt/ui', '@nuxtjs/i18n', '@nuxt/image'],
+    css: ['~/assets/css/main.css'],
+    ui: {
+        fonts: false,
+    },
+    postcss: {
+        plugins: {
+            './postcss/sfc-layer.ts': {},
         },
-        vuetifyOptions: {
-            defaults: {
-                VBtn: { variant: 'flat', rounded: 'lg' },
-                VCardActions: { VBtn: { variant: 'flat' } },
-                VCard: { rounded: 'lg' },
-                VDialog: { maxWidth: 520 },
-                VContainer: { fluid: true },
-                VAlert: { variant: 'tonal', density: 'compact', rounded: 'lg' },
-                VTextField: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VTextarea: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VSelect: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VCombobox: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VAutocomplete: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VFileInput: {
-                    variant: 'outlined',
-                    density: 'comfortable',
-                    rounded: 'lg',
-                },
-                VDataTable: { density: 'comfortable', hover: true },
-                VDataTableServer: { density: 'comfortable', hover: true },
-            },
-            theme: {
-                defaultTheme: 'light',
-                themes: {
-                    light: {
-                        colors: {
-                            background: '#F8FAF3',
-                            surface: '#FFFFFF',
-                            'surface-bright': '#FFFFFF',
-                            'surface-light': '#EDF1E6',
-                            primary: '#38741C',
-                            secondary: '#38656A',
-                            accent: '#56624C',
-                            error: '#BA1A1A',
-                            info: '#0061A4',
-                            success: '#2E7D32',
-                            warning: '#9A5B00',
-                        },
-                    },
-                    dark: {
-                        colors: {
-                            background: '#0d1117',
-                            surface: '#161b22',
-                            primary: '#238636',
-                            secondary: '#58a6ff',
-                            error: '#f85149',
-                            info: '#58a6ff',
-                            success: '#238636',
-                            warning: '#e3b341',
-                            'on-surface': '#dddddd',
-                        },
-                    },
-                },
-            },
+    },
+    colorMode: {
+        preference: 'system',
+        fallback: 'light',
+        storage: 'cookie',
+        storageKey: 'theme-mode',
+    },
+    icon: {
+        clientBundle: {
+            scan: { globInclude: ['app/**/*.{vue,ts}'] },
         },
     },
     i18n: {
@@ -179,9 +105,6 @@ export default defineNuxtConfig({
     },
     image: {
         formats: ['avif', 'webp'],
-    },
-    build: {
-        transpile: ['vuetify'],
     },
     imports: {
         autoImport: true,

@@ -2,8 +2,8 @@ import { INVENTORY_INSTRUCTIONS_KEY, INVENTORY_STORAGE_KEY } from './inventory'
 
 export const AUTH_COOKIE = 'pb_auth'
 export const SESSION_ONLY_AUTH_COOKIE = 'pb_auth_session'
-export const COLOR_SCHEME_COOKIE = 'color-scheme'
 export const THEME_MODE_COOKIE = 'theme-mode'
+export const SIDEBAR_OPEN_COOKIE = 'sidebar-open'
 export const EXPORT_COLUMNS_KEY = 'gripello.export-columns'
 export const UPDATE_DISMISSED_KEY = 'gripello:update-dismissed'
 
@@ -25,15 +25,15 @@ export const CLIENT_STORAGE: ClientStorageEntry[] = [
         duration: 'session',
     },
     {
-        name: COLOR_SCHEME_COOKIE,
+        name: THEME_MODE_COOKIE,
         kind: 'cookie',
         purpose: 'colorScheme',
         duration: 'oneYear',
     },
     {
-        name: THEME_MODE_COOKIE,
+        name: SIDEBAR_OPEN_COOKIE,
         kind: 'cookie',
-        purpose: 'colorScheme',
+        purpose: 'sidebar',
         duration: 'oneYear',
     },
     {

@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
     <header
-        class="section-header d-flex flex-column flex-sm-row align-sm-center justify-space-between ga-3 mb-4"
+        class="section-header flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"
     >
         <div>
             <h2 class="section-header__title">{{ title }}</h2>
@@ -15,7 +15,7 @@ defineProps<{
                 {{ subtitle }}
             </p>
         </div>
-        <div v-if="$slots.actions" class="d-flex align-center ga-2">
+        <div v-if="$slots.actions" class="flex items-center gap-2">
             <slot name="actions" />
         </div>
     </header>
@@ -26,11 +26,11 @@ defineProps<{
     font-size: 1.15rem;
     font-weight: 600;
     letter-spacing: -0.2px;
-    color: rgb(var(--v-theme-on-background));
+    color: var(--ui-text-highlighted);
 }
 
 .section-header__subtitle {
     font-size: 0.85rem;
-    color: rgba(var(--v-theme-on-background), 0.5);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 50%, transparent);
 }
 </style>

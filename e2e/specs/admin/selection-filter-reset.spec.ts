@@ -16,7 +16,7 @@ test('changing the route filter clears the selection', async ({
     }
 
     await gotoSettled(page, '/manage/routes')
-    const search = page.getByTestId('filter-search').locator('input')
+    const search = page.getByTestId('filter-search')
     const selectAll = page.getByTestId('routes-select-all')
 
     await search.fill(`${testPrefix}-a`)
@@ -44,7 +44,7 @@ test('changing a comment filter clears the selection', async ({
     await gotoSettled(page, `/manage/comments?search=${testPrefix}`)
 
     const card = page.getByTestId(`comment-card-${id}`)
-    await card.getByTestId('comment-card-checkbox').locator('input').click()
+    await card.getByTestId('comment-card-checkbox').click()
     await expect(page.getByTestId('comments-bulk-delete')).toBeVisible()
 
     await page.getByTestId('comments-filter-rating-1').click()
@@ -61,7 +61,7 @@ test('a comment deleted elsewhere drops out of the selection', async ({
     await gotoSettled(page, `/manage/comments?search=${testPrefix}`)
 
     const card = page.getByTestId(`comment-card-${id}`)
-    await card.getByTestId('comment-card-checkbox').locator('input').click()
+    await card.getByTestId('comment-card-checkbox').click()
     await expect(page.getByTestId('comments-bulk-delete')).toBeVisible()
 
     await deleteComment(page, id)

@@ -7,18 +7,12 @@ test('duplicate email on user creation shows a readable message', async ({
 }) => {
     await gotoSettled(page, '/admin/users')
     await page.getByTestId('user-create-open').click()
-    await page.getByTestId('user-create-firstname').locator('input').fill('E2E')
-    await page
-        .getByTestId('user-create-lastname')
-        .locator('input')
-        .fill('Duplicate')
-    await page
-        .getByTestId('user-create-email')
-        .locator('input')
-        .fill('e2e-admin@gripello.test')
+    await page.getByTestId('user-create-firstname').fill('E2E')
+    await page.getByTestId('user-create-lastname').fill('Duplicate')
+    await page.getByTestId('user-create-email').fill('e2e-admin@gripello.test')
     await page.getByTestId('user-create-submit').click()
 
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'A user with this email already exists.',
     )
 })

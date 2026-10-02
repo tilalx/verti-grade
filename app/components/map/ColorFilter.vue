@@ -46,12 +46,13 @@ function toggle(color: string) {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid rgba(var(--v-border-color), 0.3);
+    border: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
     cursor: pointer;
 }
 
 .color-filter__swatch--active {
-    outline: 3px solid rgb(var(--v-theme-primary));
+    outline: 3px solid var(--ui-primary);
     outline-offset: 2px;
 }
 

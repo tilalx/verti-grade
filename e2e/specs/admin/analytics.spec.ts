@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { authHeader, gotoSettled } from '../../support/nav'
+import { authHeader, gotoSettled, gotoSubscribed } from '../../support/nav'
 import { uiaa } from '../../support/seed'
 
 function stat(page: Page, key: string) {
@@ -18,17 +18,6 @@ function trend(page: Page, key: string) {
     return page
         .getByTestId(`analytics-stat-${key}`)
         .getByTestId('stats-card-trend')
-}
-
-async function gotoSubscribed(page: Page, path: string, topic: string) {
-    const subscribed = page.waitForResponse(
-        (response) =>
-            response.url().includes('/api/realtime') &&
-            response.request().method() === 'POST' &&
-            !!response.request().postData()?.includes(topic),
-    )
-    await gotoSettled(page, path)
-    await subscribed
 }
 
 async function analyticsListsSetter(
@@ -168,10 +157,7 @@ test('custom range writes the dates into the url', async ({
 }) => {
     await gotoSettled(page, '/manage/analytics')
     await page.getByTestId('analytics-range-custom').click()
-    await page
-        .getByTestId('analytics-filter-from')
-        .locator('input')
-        .fill('2020-01-01')
+    await page.getByTestId('analytics-filter-from').fill('2020-01-01')
     await expect(page).toHaveURL(/range=custom/)
     await expect(page).toHaveURL(/from=2020-01-01/)
 })
@@ -390,5 +376,5 @@ test('shows an error notification when the analytics fetch fails', async ({
         route.fulfill({ status: 500, body: 'boom' }),
     )
     await page.getByTestId('analytics-range-30d').click()
-    await expect(page.getByTestId('global-snackbar')).toBeVisible()
+    await expect(page.getByTestId('global-snackbar').last()).toBeVisible()
 })

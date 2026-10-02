@@ -15,40 +15,42 @@
         :error-message="$t('account.wrongOldPassword')"
     >
         <template #default="{ submit, loading }">
-            <v-form
+            <UForm
                 ref="form"
-                v-model="valid"
+                :state="formState"
+                :validate="validateForm"
                 data-testid="email-change-form"
-                @submit.prevent="validateAndSubmit(submit)"
+                @submit="submit"
             >
                 <UserPasswordField
                     v-model="password"
-                    :rules="passwordRules"
+                    name="password"
                     :label="$t('account.password')"
-                    prepend-inner-icon="mdi-lock-outline"
+                    icon="i-lucide-lock"
                     class="mb-2"
                     data-testid="email-change-password"
                 />
-            </v-form>
+            </UForm>
 
-            <v-btn
+            <UButton
                 color="success"
                 block
-                size="large"
+                size="lg"
                 :loading="loading"
                 :disabled="loading || !valid"
-                class="mb-3 font-weight-semibold"
+                class="mb-3 font-semibold"
                 data-testid="email-change-submit"
                 @click="validateAndSubmit(submit)"
             >
                 {{ $t('actions.save') }}
-            </v-btn>
+            </UButton>
         </template>
     </AuthTokenAction>
 </template>
 
 <script setup lang="ts">
-import { required } from '~/utils/validation'
+import type { Form } from '@nuxt/ui'
+import { required, validateRules } from '~/utils/validation'
 
 defineOptions({ name: 'ConfirmEmailChangePage' })
 definePageMeta({ layout: 'blank', auth: false })
@@ -58,16 +60,15 @@ const pb = usePocketbase()
 
 useHead({ title: t('page.title.emailChange') })
 
-const form = useTemplateRef<{ validate: () => Promise<{ valid: boolean }> }>(
-    'form',
-)
-const valid = ref(false)
+const form = useTemplateRef<Form<{ password: string }>>('form')
 const password = ref('')
-const passwordRules = [required(t)]
+const formState = computed(() => ({ password: password.value }))
+const validateForm = (state: Record<string, unknown>) =>
+    validateRules(state, { password: [required(t)] })
+const valid = computed(() => validateForm(formState.value).length === 0)
 
 async function validateAndSubmit(submit: () => Promise<void>) {
-    const result = await form.value?.validate()
-    if (result?.valid) await submit()
+    if ((await form.value?.validate({ silent: true })) !== false) await submit()
 }
 
 async function confirmEmailChange(token: string) {

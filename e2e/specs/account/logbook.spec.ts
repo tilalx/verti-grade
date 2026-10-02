@@ -40,12 +40,8 @@ test('a climber logs, edits and deletes an ascent', async ({
     await expect(page.getByTestId('route-ticked')).toHaveCount(0)
     await page.getByTestId('tick-open').click()
     await page.getByTestId('tick-type-top').click()
-    await page.getByTestId('tick-attempts').locator('input').fill('3')
-    await page
-        .getByTestId('tick-note')
-        .locator('textarea')
-        .first()
-        .fill('Crux at the roof')
+    await page.getByTestId('tick-attempts').fill('3')
+    await page.getByTestId('tick-note').first().fill('Crux at the roof')
     await page.getByTestId('tick-submit').click()
     await expect(page.getByTestId('route-ticked')).toBeVisible()
 
@@ -63,9 +59,7 @@ test('a climber logs, edits and deletes an ascent', async ({
     await tick.getByTestId('logbook-tick-menu').click()
     await page.getByTestId('logbook-tick-edit').click()
     await page.getByTestId('tick-type-flash').click()
-    await expect(
-        page.getByTestId('tick-attempts').locator('input'),
-    ).toBeDisabled()
+    await expect(page.getByTestId('tick-attempts')).toBeDisabled()
     await page.getByTestId('tick-submit').click()
     await expect(tick.getByTestId('logbook-tick-type')).toHaveText('Flash')
     await expect(tick.getByTestId('logbook-tick-attempts')).toHaveCount(0)

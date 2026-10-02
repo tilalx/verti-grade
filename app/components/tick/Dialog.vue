@@ -7,86 +7,103 @@
         :title="tick ? $t('ticks.edit') : $t('ticks.logAscent')"
         data-testid="tick-dialog"
     >
-        <v-form ref="formRef" @submit.prevent="submit">
-            <div class="d-flex ga-2 mb-5" role="radiogroup">
-                <v-btn
+        <UForm
+            ref="formRef"
+            :state="form"
+            :validate="
+                (state) =>
+                    validateRules(state, {
+                        attempts: [attemptsRule],
+                        day: [required(t)],
+                    })
+            "
+            @submit="submit"
+        >
+            <div class="flex gap-2 mb-5" role="radiogroup">
+                <UButton
                     v-for="type in TICK_TYPES"
                     :key="type"
                     role="radio"
                     :aria-checked="form.type === type"
-                    :color="form.type === type ? 'primary' : undefined"
-                    :variant="form.type === type ? 'flat' : 'tonal'"
-                    :prepend-icon="TICK_TYPE_ICONS[type]"
-                    height="48"
-                    class="tick-dialog__type"
+                    :color="form.type === type ? 'primary' : 'neutral'"
+                    :variant="form.type === type ? 'solid' : 'soft'"
+                    :icon="TICK_TYPE_ICONS[type]"
+                    class="tick-dialog__type h-12 justify-center"
                     :data-testid="`tick-type-${type}`"
                     @click="form.type = type"
                 >
                     {{ $t(`ticks.types.${type}`) }}
-                </v-btn>
+                </UButton>
             </div>
 
-            <v-row density="comfortable">
-                <v-col cols="12" sm="6">
-                    <v-number-input
+            <div class="grid grid-cols-12 gap-3 mb-4">
+                <UFormField
+                    name="attempts"
+                    :label="$t('ticks.attempts')"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <UInputNumber
                         v-model="form.attempts"
                         :min="1"
                         :max="999"
                         :disabled="form.type === 'flash'"
-                        :label="$t('ticks.attempts')"
-                        :rules="[attemptsRule]"
-                        control-variant="split"
-                        variant="outlined"
-                        inset
+                        class="w-full"
                         data-testid="tick-attempts"
                     />
-                </v-col>
-                <v-col cols="12" sm="6">
-                    <v-text-field
+                </UFormField>
+                <UFormField
+                    name="day"
+                    :label="$t('ticks.date')"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <UInput
                         v-model="form.day"
                         type="date"
                         :max="today"
-                        :label="$t('ticks.date')"
-                        :rules="[required(t)]"
+                        class="w-full"
                         data-testid="tick-date"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <v-textarea
-                v-model="form.note"
+            <UFormField
+                name="note"
                 :label="$t('ticks.note')"
-                :hint="$t('ticks.noteHint')"
-                persistent-hint
-                :counter="500"
-                :maxlength="500"
-                rows="2"
-                auto-grow
-                data-testid="tick-note"
-            />
-        </v-form>
+                :help="$t('ticks.noteHint')"
+                :hint="`${form.note.length}/500`"
+            >
+                <UTextarea
+                    v-model="form.note"
+                    :maxlength="500"
+                    :rows="2"
+                    autoresize
+                    class="w-full"
+                    data-testid="tick-note"
+                />
+            </UFormField>
+        </UForm>
 
         <template #actions>
-            <v-btn variant="text" @click="open = false">
+            <UButton color="neutral" variant="ghost" @click="open = false">
                 {{ $t('actions.cancel') }}
-            </v-btn>
-            <v-spacer />
-            <v-btn
+            </UButton>
+            <div class="flex-1" />
+            <UButton
                 color="primary"
                 :loading="saving"
                 data-testid="tick-submit"
                 @click="submit"
             >
                 {{ $t('actions.save') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
-import type { VForm } from 'vuetify/components'
+import type { Form } from '@nuxt/ui'
 import type { TickRecord } from '~/types/models'
-import { required } from '~/utils/validation'
+import { required, validateRules } from '~/utils/validation'
 import {
     TICK_TYPES,
     tickDate,
@@ -112,7 +129,6 @@ const pb = usePocketbase()
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
 
-const formRef = useTemplateRef<VForm>('formRef')
 const saving = ref(false)
 const today = ref(localToday())
 
@@ -123,8 +139,12 @@ const form = reactive({
     note: '',
 })
 
-const attemptsRule = (value: number) =>
-    (Number.isInteger(value) && value >= 1 && value <= 999) ||
+const formRef = useTemplateRef<Form<typeof form>>('formRef')
+
+const attemptsRule = (value: unknown) =>
+    (Number.isInteger(value) &&
+        (value as number) >= 1 &&
+        (value as number) <= 999) ||
     t('ticks.attemptsInvalid')
 
 function localToday() {
@@ -148,8 +168,10 @@ watch(
 )
 
 async function submit() {
-    const { valid } = (await formRef.value?.validate()) ?? { valid: false }
-    if (!valid) return
+    const valid =
+        !!formRef.value &&
+        (await formRef.value.validate({ silent: true })) !== false
+    if (!valid || saving.value) return
     saving.value = true
     const fields = {
         type: form.type,

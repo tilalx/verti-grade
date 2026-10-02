@@ -1,55 +1,55 @@
 <template>
-    <v-container class="reports-page">
+    <div class="reports-page mx-auto w-full p-4">
         <LayoutPageHeader
             :title="t('reports.title')"
             :subtitle="t('reports.subtitle')"
         />
 
-        <v-alert
+        <UAlert
             v-if="!mailConfigured"
-            type="warning"
-            variant="tonal"
-            icon="mdi-email-off-outline"
+            color="warning"
+            variant="soft"
+            icon="i-lucide-mail-x"
             class="mb-4"
             data-testid="reports-mail-warning"
         >
-            <div class="d-flex flex-wrap align-center ga-2">
-                <span class="alert-message">{{
-                    t('reports.mailWarning')
-                }}</span>
-                <v-btn
-                    variant="text"
-                    size="small"
-                    to="/admin/settings"
-                    data-testid="reports-mail-warning-link"
-                >
-                    {{ t('reports.mailWarningAction') }}
-                </v-btn>
-            </div>
-        </v-alert>
+            <template #description>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="alert-message">{{
+                        t('reports.mailWarning')
+                    }}</span>
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        to="/admin/settings"
+                        data-testid="reports-mail-warning-link"
+                    >
+                        {{ t('reports.mailWarningAction') }}
+                    </UButton>
+                </div>
+            </template>
+        </UAlert>
 
         <FilterBar
             v-model="search"
-            :search-label="t('reports.title')"
+            :search-label="t('actions.search')"
             :active-filter-count="statusFilter ? 1 : 0"
             @clear="clearFilters"
         >
             <template #filters>
-                <v-row density="comfortable">
-                    <v-col cols="12" sm="6" md="4">
-                        <v-select
-                            v-model="statusFilter"
-                            :items="statusItems"
-                            item-title="title"
-                            item-value="value"
-                            :label="t('reports.filterStatus')"
-                            density="compact"
-                            hide-details="auto"
-                            clearable
-                            data-testid="reports-filter-status"
-                        />
-                    </v-col>
-                </v-row>
+                <div class="contents">
+                    <FilterSelect
+                        :label="t('reports.filterStatus')"
+                        v-model="statusFilter"
+                        :items="statusItems"
+                        value-key="value"
+                        clear
+                        :placeholder="t('filter.all')"
+                        data-testid="reports-filter-status"
+                        @clear="statusFilter = null"
+                    />
+                </div>
             </template>
         </FilterBar>
 
@@ -62,7 +62,7 @@
 
             <LayoutEmptyState
                 v-if="!loading && !reports.length"
-                icon="mdi-flag-outline"
+                icon="i-lucide-flag"
                 :title="t('reports.empty')"
                 :hint="t('reports.emptyHint')"
             />
@@ -77,14 +77,15 @@
             />
 
             <div v-if="hasMore" class="text-center mt-4">
-                <v-btn
-                    variant="tonal"
+                <UButton
+                    color="neutral"
+                    variant="soft"
                     :loading="loadingMore"
                     data-testid="reports-load-more"
                     @click="loadMore"
                 >
                     {{ t('actions.load_more') }}
-                </v-btn>
+                </UButton>
             </div>
         </div>
 
@@ -95,49 +96,51 @@
             :title="t('reports.decideTitle')"
             data-testid="report-decision-dialog"
         >
-            <p class="text-body-medium mb-3">
+            <p class="text-sm mb-3">
                 {{
                     pendingDecision === 'content_removed'
                         ? t('reports.decision.content_removed')
                         : t('reports.decision.content_kept')
                 }}
             </p>
-            <v-textarea
-                v-model="decisionReason"
+            <UFormField
                 :label="t('reports.decisionReason')"
-                :hint="t('reports.decisionReasonHint')"
-                persistent-hint
-                rows="3"
-                auto-grow
-                counter="2000"
-                density="comfortable"
-                data-testid="report-decision-reason"
-            />
+                :help="t('reports.decisionReasonHint')"
+                :hint="`${decisionReason.length}/2000`"
+            >
+                <UTextarea
+                    v-model="decisionReason"
+                    :rows="3"
+                    autoresize
+                    class="w-full"
+                    data-testid="report-decision-reason"
+                />
+            </UFormField>
             <template #actions>
-                <v-btn
-                    variant="text"
+                <UButton
+                    color="neutral"
+                    variant="ghost"
                     data-testid="report-decision-cancel"
                     @click="decisionDialog = false"
                 >
                     {{ t('actions.cancel') }}
-                </v-btn>
-                <v-spacer />
-                <v-btn
+                </UButton>
+                <div class="flex-1" />
+                <UButton
                     :loading="deciding"
                     :color="
                         pendingDecision === 'content_removed'
                             ? 'error'
                             : 'primary'
                     "
-                    variant="flat"
                     data-testid="report-decision-confirm"
                     @click="confirmDecision"
                 >
                     {{ t('actions.save') }}
-                </v-btn>
+                </UButton>
             </template>
         </LayoutDialogShell>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -182,8 +185,8 @@ const pendingReport = ref<ReportRecord | null>(null)
 
 const statusItems = computed(() =>
     REPORT_STATUSES.map((value) => ({
-        value,
-        title: t(`reports.status.${value}`),
+        value: value as string,
+        label: t(`reports.status.${value}`),
     })),
 )
 

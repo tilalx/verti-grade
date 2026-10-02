@@ -12,6 +12,17 @@ export async function gotoSettled(
     if (expectPath) await page.waitForURL(expectPath)
 }
 
+export async function gotoSubscribed(page: Page, path: string, topic: string) {
+    const subscribed = page.waitForResponse(
+        (response) =>
+            response.url().includes('/api/realtime') &&
+            response.request().method() === 'POST' &&
+            !!response.request().postData()?.includes(topic),
+    )
+    await gotoSettled(page, path)
+    await subscribed
+}
+
 export async function assertSettledUrl(page: Page, path: string | RegExp) {
     await page.waitForURL(path)
 }
@@ -41,6 +52,6 @@ export async function searchRoutes(page: Page, text: string) {
             response.url().includes('/api/collections/averageRating/records') &&
             decodeURIComponent(response.url()).includes(`name ~ "${text}"`),
     )
-    await page.getByTestId('filter-search').locator('input').fill(text)
+    await page.getByTestId('filter-search').fill(text)
     await filtered
 }

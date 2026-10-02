@@ -1,15 +1,13 @@
 <template>
-    <v-container class="comments-page">
+    <div class="comments-page mx-auto w-full p-4">
         <LayoutPageHeader :title="t('routes.comments')" />
 
         <div class="stats-scroll mb-3">
             <div class="stats-scroll__inner">
-                <v-card
+                <div
                     v-for="tile in statTiles"
                     :key="tile.key"
-                    border
-                    flat
-                    class="stat-chip pa-2 px-3"
+                    class="stat-chip rounded-lg border bg-default p-2 px-3"
                     :data-testid="`comments-stat-${tile.key}`"
                 >
                     <LayoutStatTile
@@ -19,11 +17,10 @@
                         :icon="tile.icon"
                         :icon-color="tile.iconColor"
                     />
-                </v-card>
+                </div>
             </div>
         </div>
 
-        <!-- ── Filter bar ────────────────────────────────────────────────── -->
         <FilterBar
             v-model="search"
             :search-label="t('actions.search')"
@@ -31,130 +28,128 @@
             @clear="clearFilters"
         >
             <template #filters>
-                <v-row density="comfortable" align="center">
-                    <v-col cols="6" sm="4" md="3">
-                        <v-select
-                            v-model="selectedLocation"
-                            :label="t('climbing.location')"
-                            :items="locations"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="comments-filter-location"
-                        />
-                    </v-col>
-                    <v-col cols="6" sm="3" md="2">
-                        <v-select
-                            v-model="selectedDifficulty"
-                            :label="t('climbing.difficulty')"
-                            :items="difficulties"
-                            item-title="text"
-                            item-value="value"
-                            clearable
-                            hide-details
-                            density="compact"
-                            data-testid="comments-filter-difficulty"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="5" md="3">
-                        <v-select
+                <div class="contents">
+                    <FilterSelect
+                        :label="t('climbing.location')"
+                        v-model="selectedLocation"
+                        :items="locations"
+                        label-key="text"
+                        value-key="value"
+                        :placeholder="t('filter.all')"
+                        clear
+                        data-testid="comments-filter-location"
+                        @clear="selectedLocation = null"
+                    />
+                    <FilterSelect
+                        :label="t('climbing.difficulty')"
+                        v-model="selectedDifficulty"
+                        :items="difficulties"
+                        label-key="text"
+                        value-key="value"
+                        :placeholder="t('filter.all')"
+                        clear
+                        data-testid="comments-filter-difficulty"
+                        @clear="selectedDifficulty = null"
+                    />
+                    <div class="w-full sm:w-56">
+                        <USelect
                             v-model="sortOrder"
                             :items="sortOptions"
-                            item-title="label"
-                            item-value="value"
-                            hide-details
-                            density="compact"
-                            prepend-inner-icon="mdi-sort"
+                            icon="i-lucide-arrow-up-down"
                             :aria-label="t('table.sort_by')"
+                            class="w-full"
                             data-testid="comments-sort"
                         />
-                    </v-col>
-                </v-row>
+                    </div>
+                </div>
 
-                <v-row density="comfortable" align="center" class="mt-2">
-                    <v-col cols="12" sm="auto">
-                        <v-chip-group
-                            v-model="selectedRating"
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex flex-wrap gap-2">
+                        <UButton
+                            size="xs"
+                            :color="
+                                selectedRating === 0 ? 'warning' : 'neutral'
+                            "
+                            variant="soft"
+                            :icon="
+                                selectedRating === 0
+                                    ? 'i-lucide-check'
+                                    : undefined
+                            "
+                            :aria-pressed="selectedRating === 0"
+                            data-testid="comments-filter-rating-all"
+                            @click="selectedRating = 0"
+                        >
+                            {{ t('filter.all') }}
+                        </UButton>
+                        <UButton
+                            v-for="star in [1, 2, 3, 4, 5]"
+                            :key="star"
+                            size="xs"
                             color="warning"
-                            column
-                            mandatory
+                            :variant="
+                                selectedRating === star ? 'solid' : 'soft'
+                            "
+                            :icon="
+                                selectedRating === star
+                                    ? 'i-lucide-check'
+                                    : undefined
+                            "
+                            :aria-pressed="selectedRating === star"
+                            :data-testid="`comments-filter-rating-${star}`"
+                            @click="selectedRating = star"
                         >
-                            <v-chip
-                                filter
-                                :value="0"
-                                size="small"
-                                variant="tonal"
-                                data-testid="comments-filter-rating-all"
-                            >
-                                {{ t('filter.all') }}
-                            </v-chip>
-                            <v-chip
-                                v-for="star in [1, 2, 3, 4, 5]"
-                                :key="star"
-                                filter
-                                :value="star"
-                                size="small"
-                                color="warning"
-                                variant="tonal"
-                                :aria-pressed="selectedRating === star"
-                                :data-testid="`comments-filter-rating-${star}`"
-                            >
-                                {{ star }}★
-                            </v-chip>
-                        </v-chip-group>
-                    </v-col>
-                    <v-col cols="12" sm="auto">
-                        <v-btn-toggle
-                            v-model="dateFilter"
-                            density="compact"
-                            mandatory
-                            rounded="lg"
-                            divided
-                            variant="outlined"
-                            data-testid="comments-filter-date"
+                            {{ star }}★
+                        </UButton>
+                    </div>
+                    <UFieldGroup data-testid="comments-filter-date">
+                        <UButton
+                            v-for="option in dateOptions"
+                            :key="option.value"
+                            size="sm"
+                            color="neutral"
+                            :variant="
+                                dateFilter === option.value
+                                    ? 'solid'
+                                    : 'outline'
+                            "
+                            :aria-pressed="dateFilter === option.value"
+                            @click="dateFilter = option.value"
                         >
-                            <v-btn value="" size="small">{{
-                                t('filter.all')
-                            }}</v-btn>
-                            <v-btn value="week" size="small">{{
-                                t('comments.thisWeek')
-                            }}</v-btn>
-                            <v-btn value="month" size="small">{{
-                                t('comments.thisMonth')
-                            }}</v-btn>
-                        </v-btn-toggle>
-                    </v-col>
-                </v-row>
+                            {{ option.label }}
+                        </UButton>
+                    </UFieldGroup>
+                </div>
             </template>
 
             <template #below>
-                <v-slide-y-transition>
+                <Transition name="slide-y">
                     <div
                         v-if="selectedCount > 0"
-                        class="bulk-bar px-4 py-2 d-flex align-center ga-2 flex-wrap"
+                        class="bulk-bar px-4 py-2 flex items-center gap-2 flex-wrap"
                     >
-                        <v-icon size="18" color="primary"
-                            >mdi-check-circle-outline</v-icon
-                        >
-                        <span class="text-body-medium font-weight-medium">
+                        <UIcon
+                            name="i-lucide-circle-check"
+                            class="size-[18px] text-primary"
+                        />
+                        <span class="text-sm font-medium">
                             {{ t('comments.selected', { n: selectedCount }) }}
                         </span>
-                        <v-spacer />
-                        <v-btn
-                            size="small"
-                            variant="text"
+                        <div class="flex-1" />
+                        <UButton
+                            size="sm"
+                            color="neutral"
+                            variant="ghost"
                             data-testid="comments-bulk-cancel"
                             @click="clearSelection"
                         >
                             {{ t('actions.cancel') }}
-                        </v-btn>
-                        <v-btn
-                            size="small"
+                        </UButton>
+                        <UButton
+                            size="sm"
                             color="error"
-                            variant="tonal"
-                            prepend-icon="mdi-delete-outline"
+                            variant="soft"
+                            icon="i-lucide-trash-2"
                             data-testid="comments-bulk-delete"
                             @click="bulkDeleteDialog = true"
                         >
@@ -163,9 +158,9 @@
                                     n: selectedCount,
                                 })
                             }}
-                        </v-btn>
+                        </UButton>
                     </div>
-                </v-slide-y-transition>
+                </Transition>
             </template>
         </FilterBar>
 
@@ -174,22 +169,18 @@
             variant="cards"
         />
 
-        <!-- ── Empty state ─────────────────────────────────────────────────── -->
         <LayoutEmptyState
             v-else-if="!loading && !comments.length"
-            icon="mdi-comment-off-outline"
+            icon="i-lucide-message-square-off"
             :title="t('comments.noComments')"
             :hint="t('comments.noCommentsHint')"
         />
 
-        <!-- ── Comment Cards ───────────────────────────────────────────────── -->
-        <v-row v-else>
-            <v-col
+        <div v-else class="grid grid-cols-12 gap-4">
+            <div
                 v-for="comment in comments"
                 :key="comment.id"
-                cols="12"
-                sm="6"
-                lg="4"
+                class="col-span-12 sm:col-span-6 lg:col-span-4"
             >
                 <VirtualWindow :estimated-height="240">
                     <CommentsCard
@@ -200,24 +191,20 @@
                         @toggle-select="toggleSelect(comment.id)"
                     >
                         <template #actions>
-                            <v-btn
-                                icon
-                                size="small"
-                                variant="text"
-                                :aria-label="t('actions.edit')"
-                                data-testid="comment-card-edit"
-                                @click="openEdit(comment)"
-                            >
-                                <v-icon size="18">mdi-pencil-outline</v-icon>
-                                <v-tooltip activator="parent" location="top">{{
-                                    t('actions.edit')
-                                }}</v-tooltip>
-                            </v-btn>
-                            <v-btn
-                                icon="mdi-delete-outline"
+                            <UTooltip :text="t('actions.edit')">
+                                <UButton
+                                    icon="i-lucide-pencil"
+                                    color="neutral"
+                                    variant="ghost"
+                                    :aria-label="t('actions.edit')"
+                                    data-testid="comment-card-edit"
+                                    @click="openEdit(comment)"
+                                />
+                            </UTooltip>
+                            <UButton
+                                icon="i-lucide-trash-2"
                                 color="error"
-                                size="small"
-                                variant="text"
+                                variant="ghost"
                                 :aria-label="t('actions.delete')"
                                 data-testid="comment-card-delete"
                                 @click="openDelete(comment)"
@@ -225,15 +212,11 @@
                         </template>
                     </CommentsCard>
                 </VirtualWindow>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <!-- Result count + infinite-scroll sentinel -->
         <div v-if="!loading && comments.length" class="text-center mt-4">
-            <p
-                class="text-body-small text-medium-emphasis mb-3"
-                data-testid="comments-showing"
-            >
+            <p class="text-xs text-muted mb-3" data-testid="comments-showing">
                 {{
                     t('comments.showing', {
                         n: comments.length,
@@ -242,24 +225,20 @@
                 }}
             </p>
             <div ref="sentinelRef" class="load-sentinel">
-                <v-progress-circular
+                <UIcon
                     v-if="loadingMore"
-                    indeterminate
-                    size="24"
-                    width="2"
-                    color="primary"
+                    name="i-lucide-loader-circle"
+                    class="size-6 animate-spin text-primary"
                 />
             </div>
         </div>
 
-        <!-- ── Edit Dialog (shared ReviewFormDialog component) ────────────── -->
         <ReviewFormDialog
             v-model="editDialog"
             :review="editingReview"
             @saved="onReviewSaved"
         />
 
-        <!-- ── Single Delete Dialog (shared across all cards) ──────────────── -->
         <ConfirmDialog
             v-model="deleteDialog"
             :title="t('actions.confirm')"
@@ -268,7 +247,6 @@
             @confirm="confirmDelete"
         />
 
-        <!-- ── Bulk Delete Dialog ───────────────────────────────────────────── -->
         <ConfirmDialog
             v-model="bulkDeleteDialog"
             :title="
@@ -282,7 +260,7 @@
             :loading="bulkDeleting"
             @confirm="bulkDelete"
         />
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -355,8 +333,8 @@ const statTiles = computed(() => [
         label: t('comments.avgRating'),
         value: stats.value.avgRating,
         color: 'warning',
-        icon: 'mdi-star',
-        iconColor: 'yellow-darken-2',
+        icon: 'i-lucide-star',
+        iconColor: 'amber-500',
     },
     {
         key: 'this-week',
@@ -414,19 +392,21 @@ function clearFilters() {
 
 const { gradeFilterItems, gradeFilterClause } = useGradeSystems()
 
-const difficulties = computed(() => [
-    { text: t('filter.all'), value: null },
-    ...gradeFilterItems.value,
-])
+const difficulties = gradeFilterItems
 
 const { data: locationRecords } = useLocations()
 
-const locations = computed(() => [
-    { text: t('filter.all'), value: null },
-    ...(locationRecords.value ?? []).map((location) => ({
+const locations = computed(() =>
+    (locationRecords.value ?? []).map((location) => ({
         text: location.name,
         value: location.id,
     })),
+)
+
+const dateOptions = computed(() => [
+    { label: t('filter.all'), value: '' },
+    { label: t('comments.thisWeek'), value: 'week' },
+    { label: t('comments.thisMonth'), value: 'month' },
 ])
 
 const sortOptions = computed(() => [
@@ -776,13 +756,27 @@ onBeforeUnmount(() => {
     }
 }
 
+.slide-y-enter-active,
+.slide-y-leave-active {
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+}
+
+.slide-y-enter-from,
+.slide-y-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
 .load-sentinel {
     min-height: 32px;
 }
 
 .bulk-bar {
-    border-top: 1px solid rgba(var(--v-border-color), 0.12);
-    background: rgba(var(--v-theme-primary), 0.05);
+    border-top: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 12%, transparent);
+    background: color-mix(in oklab, var(--ui-primary) 5%, transparent);
     border-radius: 0 0 8px 8px;
 }
 </style>

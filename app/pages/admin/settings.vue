@@ -1,517 +1,545 @@
 <template>
-    <v-container>
-        <LayoutPageHeader :title="$t('page.content.settings')" />
+    <div class="w-full p-4" :class="{ 'max-lg:pb-24': hasChanges }">
+        <LayoutPageHeader
+            :title="$t('page.content.settings')"
+            :subtitle="$t('settings.description')"
+        />
 
-        <v-alert
+        <UAlert
             v-if="!mailConfigured"
-            type="info"
-            variant="tonal"
-            icon="mdi-email-off-outline"
+            color="info"
+            variant="soft"
+            icon="i-lucide-mail-x"
             class="mb-4"
             data-testid="settings-mail-warning"
         >
-            <div class="d-flex flex-wrap align-center ga-2">
-                <span class="alert-message">{{
-                    $t('settings.mailNotConfigured')
-                }}</span>
-                <v-btn
-                    variant="text"
-                    size="small"
-                    :href="pbMailSettingsUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="settings-mail-warning-link"
-                >
-                    {{ $t('settings.mailNotConfiguredAction') }}
-                </v-btn>
-            </div>
-        </v-alert>
+            <template #description>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="alert-message">{{
+                        $t('settings.mailNotConfigured')
+                    }}</span>
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        :href="pbMailSettingsUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="settings-mail-warning-link"
+                    >
+                        {{ $t('settings.mailNotConfiguredAction') }}
+                    </UButton>
+                </div>
+            </template>
+        </UAlert>
 
-        <!-- Image Upload Cards -->
-        <v-row
-            id="settings-branding"
-            class="mb-4 scroll-anchor"
-            density="comfortable"
+        <nav
+            class="settings-nav-mobile lg:hidden"
+            :aria-label="$t('settings.sections')"
         >
-            <v-col
-                v-for="asset in assetFields"
-                :key="asset.key"
-                cols="12"
-                sm="4"
-            >
-                <v-card
-                    border
-                    flat
-                    height="100%"
-                    class="asset-card"
-                    :class="{ 'border-primary': asset.isDirty }"
+            <UNavigationMenu
+                :items="sectionNavItems"
+                highlight
+                class="w-max min-w-full"
+            />
+        </nav>
+
+        <div class="flex gap-8">
+            <aside class="hidden w-52 shrink-0 lg:block">
+                <nav
+                    class="settings-nav-desktop"
+                    :aria-label="$t('settings.sections')"
                 >
-                    <v-card-text class="pa-4">
-                        <div
-                            class="d-flex align-center justify-space-between mb-3"
-                        >
-                            <span
-                                class="text-title-small font-weight-semibold"
-                                :data-testid="`settings-asset-label-${asset.key}`"
-                            >
-                                {{ asset.label }}
-                            </span>
-                            <div class="d-flex align-center ga-1">
-                                <v-chip
-                                    v-if="asset.isDirty"
-                                    color="warning"
-                                    size="x-small"
-                                    variant="tonal"
-                                >
-                                    {{ $t('settings.changed') }}
-                                </v-chip>
-                                <v-btn
-                                    v-if="asset.isDirty"
-                                    icon
-                                    size="x-small"
-                                    variant="text"
-                                    :aria-label="$t('settings.revertChange')"
-                                    :title="$t('settings.revertChange')"
-                                    @click.stop="asset.onRevert()"
-                                >
-                                    <v-icon size="16">mdi-close</v-icon>
-                                </v-btn>
-                            </div>
-                        </div>
+                    <UNavigationMenu
+                        :items="sectionNavItems"
+                        orientation="vertical"
+                        highlight
+                    />
+                </nav>
+            </aside>
 
-                        <div
-                            class="asset-drop-zone rounded-lg position-relative"
-                        >
-                            <button
-                                type="button"
-                                class="asset-drop-trigger d-flex flex-column align-center justify-center"
-                                :data-testid="`settings-asset-${asset.key}`"
-                                :aria-label="`${asset.label}: ${asset.preview.value ? $t('settings.replace') : $t('settings.clickToUpload')}`"
-                                @click="asset.triggerInput()"
-                            >
-                                <img
-                                    v-if="asset.preview.value"
-                                    :src="asset.preview.value"
-                                    :alt="asset.label"
-                                    class="asset-preview"
-                                />
-                                <template v-else>
-                                    <v-icon
-                                        size="28"
-                                        class="mb-2 text-medium-emphasis"
-                                        >mdi-image-plus-outline</v-icon
-                                    >
-                                    <span
-                                        class="text-body-small text-medium-emphasis"
-                                        >{{
-                                            $t('settings.clickToUpload')
-                                        }}</span
-                                    >
-                                </template>
-                            </button>
+            <div class="min-w-0 flex-1">
+                <LayoutSaveBar
+                    :show="hasChanges"
+                    :loading="saving"
+                    :disabled="retentionError !== false"
+                    test-id-prefix="settings"
+                    @save="saveSettings"
+                />
 
-                            <div
-                                v-if="asset.preview.value"
-                                class="asset-overlay rounded-lg"
-                                :data-testid="`settings-asset-actions-${asset.key}`"
+                <div class="flex flex-col gap-6">
+                    <UPageCard
+                        v-if="activeSection === 'branding'"
+                        id="settings-branding"
+                        :title="$t('settings.branding')"
+                        :description="$t('settings.brandingHint')"
+                        variant="subtle"
+                    >
+                        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <article
+                                v-for="asset in assetFields"
+                                :key="asset.key"
+                                class="asset-card"
+                                :class="{ 'asset-card--dirty': asset.isDirty }"
                             >
                                 <button
                                     type="button"
-                                    class="asset-overlay__action asset-overlay__replace"
-                                    :data-testid="`settings-asset-replace-${asset.key}`"
+                                    class="asset-card__preview"
+                                    :class="{
+                                        'asset-card__preview--empty':
+                                            !asset.preview.value,
+                                    }"
+                                    :data-testid="`settings-asset-${asset.key}`"
+                                    :aria-label="`${asset.label}: ${asset.preview.value ? $t('settings.replace') : $t('settings.clickToUpload')}`"
                                     @click="asset.triggerInput()"
                                 >
-                                    <v-icon size="24"
-                                        >mdi-image-edit-outline</v-icon
+                                    <img
+                                        v-if="asset.preview.value"
+                                        :src="asset.preview.value"
+                                        :alt="asset.label"
+                                        class="asset-card__image"
+                                        :class="{
+                                            'asset-card__image--mono':
+                                                asset.key === 'logo',
+                                        }"
+                                    />
+                                    <span
+                                        v-else
+                                        class="flex flex-col items-center gap-2 text-sm text-muted"
                                     >
-                                    <span class="text-body-small">{{
-                                        $t('settings.replace')
-                                    }}</span>
+                                        <UIcon
+                                            name="i-lucide-image-plus"
+                                            class="size-8"
+                                        />
+                                        {{ $t('settings.clickToUpload') }}
+                                    </span>
                                 </button>
-                                <button
-                                    v-if="!asset.isDirty"
-                                    type="button"
-                                    class="asset-overlay__action asset-overlay__delete"
-                                    :data-testid="`settings-asset-delete-${asset.key}`"
-                                    @click="asset.onDelete()"
-                                >
-                                    <v-icon size="24"
-                                        >mdi-delete-outline</v-icon
+
+                                <div class="flex flex-1 flex-col gap-1 p-4">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="font-semibold text-highlighted"
+                                            :data-testid="`settings-asset-label-${asset.key}`"
+                                            >{{ asset.label }}</span
+                                        >
+                                        <UBadge
+                                            v-if="asset.isDirty"
+                                            color="warning"
+                                            size="sm"
+                                            variant="soft"
+                                        >
+                                            {{ $t('settings.changed') }}
+                                        </UBadge>
+                                    </div>
+                                    <p class="text-sm text-muted">
+                                        {{ asset.hint }}
+                                    </p>
+
+                                    <div
+                                        class="mt-auto flex flex-wrap items-center gap-2 pt-3"
                                     >
-                                    <span class="text-body-small">{{
-                                        $t('settings.removeImage')
-                                    }}</span>
-                                </button>
-                            </div>
+                                        <div
+                                            v-if="asset.preview.value"
+                                            class="flex flex-wrap gap-2"
+                                            :data-testid="`settings-asset-actions-${asset.key}`"
+                                        >
+                                            <UButton
+                                                color="neutral"
+                                                variant="outline"
+                                                size="sm"
+                                                icon="i-lucide-image-up"
+                                                :data-testid="`settings-asset-replace-${asset.key}`"
+                                                @click="asset.triggerInput()"
+                                            >
+                                                {{ $t('settings.replace') }}
+                                            </UButton>
+                                            <UButton
+                                                v-if="!asset.isDirty"
+                                                color="error"
+                                                variant="ghost"
+                                                size="sm"
+                                                icon="i-lucide-trash-2"
+                                                :data-testid="`settings-asset-delete-${asset.key}`"
+                                                @click="asset.onDelete()"
+                                            >
+                                                {{ $t('settings.removeImage') }}
+                                            </UButton>
+                                        </div>
+                                        <UButton
+                                            v-else
+                                            color="neutral"
+                                            variant="outline"
+                                            size="sm"
+                                            icon="i-lucide-upload"
+                                            @click="asset.triggerInput()"
+                                        >
+                                            {{ $t('settings.clickToUpload') }}
+                                        </UButton>
+                                        <UButton
+                                            v-if="asset.isDirty"
+                                            color="neutral"
+                                            variant="ghost"
+                                            size="sm"
+                                            icon="i-lucide-undo-2"
+                                            @click="asset.onRevert()"
+                                        >
+                                            {{ $t('settings.revertChange') }}
+                                        </UButton>
+                                    </div>
+                                </div>
+
+                                <input
+                                    :ref="
+                                        (el) => {
+                                            asset.inputRef.value =
+                                                el as HTMLInputElement | null
+                                        }
+                                    "
+                                    type="file"
+                                    :accept="asset.accept"
+                                    class="hidden"
+                                    @change="
+                                        onFileChange($event, asset.onSelect)
+                                    "
+                                />
+                            </article>
                         </div>
+                    </UPageCard>
 
-                        <v-file-input
-                            :ref="
-                                (el) => {
-                                    asset.inputRef.value = el
-                                }
-                            "
-                            :accept="asset.accept"
-                            :model-value="asset.file.value"
-                            @update:model-value="
-                                (f) =>
-                                    asset.onSelect(
-                                        Array.isArray(f) ? (f[0] ?? null) : f,
-                                    )
-                            "
-                            class="d-none"
-                            hide-details
-                        />
-                    </v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
-
-        <!-- Organization -->
-        <v-card
-            id="settings-organization"
-            border
-            flat
-            class="mb-6 scroll-anchor"
-        >
-            <v-card-text class="pa-4">
-                <p class="text-title-small font-weight-semibold mb-4">
-                    {{ $t('settings.organization') }}
-                </p>
-                <v-row density="comfortable">
-                    <v-col cols="12" md="6">
-                        <v-text-field
-                            v-model="copySettings.organization_name"
-                            :label="$t('settings.organizationName')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-domain"
-                            :placeholder="
-                                $t('settings.organizationNamePlaceholder')
-                            "
-                            :maxlength="50"
-                            counter
-                            data-testid="settings-org-name"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <v-text-field
-                            v-model="copySettings.organization_unit_name"
-                            :label="$t('settings.organizationUnit')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-office-building-outline"
-                            :placeholder="
-                                $t('settings.organizationUnitPlaceholder')
-                            "
-                            :maxlength="50"
-                            counter
-                            data-testid="settings-org-unit"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <v-text-field
-                            v-model="copySettings.contact_email"
-                            type="email"
-                            :label="$t('settings.contactEmail')"
-                            :hint="$t('settings.contactEmailHint')"
-                            persistent-hint
-                            density="compact"
-                            prepend-inner-icon="mdi-email-outline"
-                            data-testid="settings-contact-email"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <v-text-field
-                            v-model.number="copySettings.audit_retention_days"
-                            :rules="[retentionRule]"
-                            type="number"
-                            :min="1"
-                            :max="3650"
-                            :label="$t('settings.auditRetention')"
-                            :hint="$t('settings.auditRetentionHint')"
-                            persistent-hint
-                            density="compact"
-                            prepend-inner-icon="mdi-clipboard-text-clock-outline"
-                            data-testid="settings-audit-retention"
-                        />
-                    </v-col>
-                    <v-col cols="12">
-                        <v-switch
-                            v-model="copySettings.allow_registration"
-                            :label="$t('settings.allowRegistration')"
-                            :hint="$t('settings.allowRegistrationHint')"
-                            persistent-hint
-                            color="primary"
-                            density="compact"
-                            inset
-                            data-testid="settings-allow-registration"
-                        />
-                    </v-col>
-                </v-row>
-            </v-card-text>
-        </v-card>
-
-        <AdminLocationsCard />
-
-        <v-card border flat class="mb-6">
-            <v-card-text class="pa-4">
-                <p class="text-title-small font-weight-semibold mb-1">
-                    {{ $t('settings.grading') }}
-                </p>
-                <div class="d-flex align-center flex-wrap ga-2 mb-4">
-                    <p class="text-body-small text-medium-emphasis">
-                        {{ $t('settings.gradingHint') }}
-                    </p>
-                    <v-spacer />
-                    <GradeConversionDialog />
-                </div>
-                <v-row density="comfortable">
-                    <v-col cols="12" md="6">
-                        <v-select
-                            v-model="copySettings.route_grade_system"
-                            :label="$t('settings.routeGradeSystem')"
-                            :items="gradeSystemItems(ROUTE_GRADE_SYSTEMS)"
-                            density="compact"
-                            hide-details
-                            prepend-inner-icon="mdi-stairs-up"
-                            data-testid="settings-route-grade-system"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <v-select
-                            v-model="copySettings.boulder_grade_system"
-                            :label="$t('settings.boulderGradeSystem')"
-                            :items="gradeSystemItems(BOULDER_GRADE_SYSTEMS)"
-                            density="compact"
-                            hide-details
-                            prepend-inner-icon="mdi-cube-outline"
-                            data-testid="settings-boulder-grade-system"
-                        />
-                    </v-col>
-                </v-row>
-            </v-card-text>
-        </v-card>
-
-        <!-- URL Fields -->
-        <v-card id="settings-urls" border flat class="mb-6 scroll-anchor">
-            <v-card-text class="pa-4">
-                <p class="text-title-small font-weight-semibold mb-4">
-                    {{ $t('settings.publicUrls') }}
-                </p>
-                <v-row density="comfortable">
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.application_url"
-                            :label="$t('settings.applicationUrl')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-web"
-                            placeholder="https://app.example.com"
-                            data-testid="settings-application-url"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.imprint_url"
-                            :label="$t('settings.imprintUrl')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-file-document-outline"
-                            placeholder="https://example.com/imprint"
-                            :hint="$t('settings.legalUrlHint')"
-                            persistent-hint
-                            data-testid="settings-imprint-url"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.privacy_url"
-                            :label="$t('settings.privacyUrl')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-shield-outline"
-                            placeholder="https://example.com/privacy"
-                            :hint="$t('settings.legalUrlHint')"
-                            persistent-hint
-                            data-testid="settings-privacy-url"
-                        />
-                    </v-col>
-                </v-row>
-            </v-card-text>
-        </v-card>
-
-        <v-card id="settings-legal" border flat class="mb-6 scroll-anchor">
-            <v-card-text class="pa-4">
-                <p class="text-title-small font-weight-semibold mb-1">
-                    {{ $t('settings.legalTitle') }}
-                </p>
-                <p class="text-body-small text-medium-emphasis mb-4">
-                    {{ $t('settings.legalIntro') }}
-                </p>
-                <v-row density="comfortable">
-                    <v-col cols="12">
-                        <v-textarea
-                            v-model="copySettings.legal_address"
-                            :label="$t('settings.legalAddress')"
-                            :placeholder="
-                                $t('settings.legalAddressPlaceholder')
-                            "
-                            density="compact"
-                            rows="3"
-                            auto-grow
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-map-marker-outline"
-                            data-testid="settings-legal-address"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.legal_phone"
-                            :label="$t('settings.legalPhone')"
-                            density="compact"
-                            hide-details="auto"
-                            type="tel"
-                            prepend-inner-icon="mdi-phone-outline"
-                            data-testid="settings-legal-phone"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.legal_register"
-                            :label="$t('settings.legalRegister')"
-                            :placeholder="
-                                $t('settings.legalRegisterPlaceholder')
-                            "
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-file-certificate-outline"
-                            data-testid="settings-legal-register"
-                        />
-                    </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="copySettings.legal_vat_id"
-                            :label="$t('settings.legalVatId')"
-                            placeholder="DE123456789"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-cash-register"
-                            data-testid="settings-legal-vat-id"
-                        />
-                    </v-col>
-                    <v-col cols="12">
-                        <v-text-field
-                            v-model="copySettings.legal_editorial"
-                            :label="$t('settings.legalEditorial')"
-                            :hint="$t('settings.legalEditorialHint')"
-                            persistent-hint
-                            density="compact"
-                            prepend-inner-icon="mdi-pencil-outline"
-                            data-testid="settings-legal-editorial"
-                        />
-                    </v-col>
-                </v-row>
-
-                <p class="text-title-small font-weight-semibold mt-6 mb-3">
-                    {{ $t('settings.legalRepresentatives') }}
-                </p>
-                <div class="person-list">
-                    <div
-                        v-for="(
-                            person, index
-                        ) in copySettings.legal_representatives"
-                        :key="index"
-                        class="person-row"
-                        data-testid="settings-legal-representative"
+                    <UPageCard
+                        v-if="activeSection === 'organization'"
+                        id="settings-organization"
+                        :ui="formCardUi"
+                        :title="$t('settings.organization')"
+                        :description="$t('settings.organizationHint')"
+                        variant="subtle"
                     >
-                        <v-text-field
-                            v-model="person.name"
-                            :label="$t('settings.legalPersonName')"
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-account-outline"
-                            data-testid="settings-legal-representative-name"
-                        />
-                        <v-text-field
-                            v-model="person.role"
-                            :label="$t('settings.legalPersonRole')"
-                            :placeholder="
-                                $t('settings.legalPersonRolePlaceholder')
-                            "
-                            density="compact"
-                            hide-details="auto"
-                            prepend-inner-icon="mdi-badge-account-outline"
-                            data-testid="settings-legal-representative-role"
-                        />
-                        <v-btn
-                            icon="mdi-delete-outline"
-                            variant="text"
-                            color="error"
-                            density="comfortable"
-                            :aria-label="$t('settings.legalRemovePerson')"
-                            :title="$t('settings.legalRemovePerson')"
-                            data-testid="settings-legal-remove-representative"
-                            @click="
-                                copySettings.legal_representatives.splice(
-                                    index,
-                                    1,
-                                )
-                            "
-                        />
-                    </div>
+                        <UFormField
+                            :label="$t('settings.organizationName')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.organization_name"
+                                icon="i-lucide-building-2"
+                                :placeholder="
+                                    $t('settings.organizationNamePlaceholder')
+                                "
+                                :maxlength="50"
+                                class="w-full"
+                                data-testid="settings-org-name"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.organizationUnit')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.organization_unit_name"
+                                icon="i-lucide-building-2"
+                                :placeholder="
+                                    $t('settings.organizationUnitPlaceholder')
+                                "
+                                :maxlength="50"
+                                class="w-full"
+                                data-testid="settings-org-unit"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.contactEmail')"
+                            :description="$t('settings.contactEmailHint')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.contact_email"
+                                type="email"
+                                icon="i-lucide-mail"
+                                class="w-full"
+                                data-testid="settings-contact-email"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.auditRetention')"
+                            :description="$t('settings.auditRetentionHint')"
+                            :error="retentionError"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model.number="
+                                    copySettings.audit_retention_days
+                                "
+                                type="number"
+                                :min="1"
+                                :max="3650"
+                                icon="i-lucide-clipboard-clock"
+                                class="w-full"
+                                data-testid="settings-audit-retention"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.allowRegistration')"
+                            :description="$t('settings.allowRegistrationHint')"
+                            :ui="fieldUi"
+                        >
+                            <USwitch
+                                v-model="copySettings.allow_registration"
+                                :aria-label="$t('settings.allowRegistration')"
+                                data-testid="settings-allow-registration"
+                            />
+                        </UFormField>
+                    </UPageCard>
+
+                    <AdminLocationsCard
+                        v-if="activeSection === 'locations'"
+                        id="settings-locations-section"
+                    />
+
+                    <UPageCard
+                        v-if="activeSection === 'grading'"
+                        id="settings-grading"
+                        :title="$t('settings.grading')"
+                        :description="$t('settings.gradingHint')"
+                        variant="subtle"
+                        :ui="{ ...formCardUi, footer: 'pt-2 lg:col-span-2' }"
+                    >
+                        <template #footer>
+                            <GradeConversionDialog />
+                        </template>
+                        <UFormField
+                            :label="$t('settings.routeGradeSystem')"
+                            :ui="fieldUi"
+                        >
+                            <USelect
+                                v-model="copySettings.route_grade_system"
+                                :items="gradeSystemItems(ROUTE_GRADE_SYSTEMS)"
+                                icon="i-lucide-trending-up"
+                                class="w-full"
+                                data-testid="settings-route-grade-system"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.boulderGradeSystem')"
+                            :ui="fieldUi"
+                        >
+                            <USelect
+                                v-model="copySettings.boulder_grade_system"
+                                :items="gradeSystemItems(BOULDER_GRADE_SYSTEMS)"
+                                icon="i-lucide-box"
+                                class="w-full"
+                                data-testid="settings-boulder-grade-system"
+                            />
+                        </UFormField>
+                    </UPageCard>
+
+                    <UPageCard
+                        v-if="activeSection === 'urls'"
+                        id="settings-urls"
+                        :ui="formCardUi"
+                        :title="$t('settings.publicUrls')"
+                        :description="$t('settings.publicUrlsHint')"
+                        variant="subtle"
+                    >
+                        <UFormField
+                            :label="$t('settings.applicationUrl')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.application_url"
+                                icon="i-lucide-globe"
+                                placeholder="https://app.example.com"
+                                class="w-full"
+                                data-testid="settings-application-url"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.imprintUrl')"
+                            :description="$t('settings.legalUrlHint')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.imprint_url"
+                                icon="i-lucide-file-text"
+                                placeholder="https://example.com/imprint"
+                                class="w-full"
+                                data-testid="settings-imprint-url"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.privacyUrl')"
+                            :description="$t('settings.legalUrlHint')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.privacy_url"
+                                icon="i-lucide-shield"
+                                placeholder="https://example.com/privacy"
+                                class="w-full"
+                                data-testid="settings-privacy-url"
+                            />
+                        </UFormField>
+                    </UPageCard>
+
+                    <UPageCard
+                        v-if="activeSection === 'legal'"
+                        id="settings-legal"
+                        :ui="formCardUi"
+                        :title="$t('settings.legalTitle')"
+                        :description="$t('settings.legalIntro')"
+                        variant="subtle"
+                    >
+                        <UFormField
+                            :label="$t('settings.legalAddress')"
+                            :ui="fieldUi"
+                        >
+                            <UTextarea
+                                v-model="copySettings.legal_address"
+                                :placeholder="
+                                    $t('settings.legalAddressPlaceholder')
+                                "
+                                :rows="3"
+                                autoresize
+                                icon="i-lucide-map-pin"
+                                class="w-full"
+                                data-testid="settings-legal-address"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.legalPhone')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.legal_phone"
+                                type="tel"
+                                icon="i-lucide-phone"
+                                class="w-full"
+                                data-testid="settings-legal-phone"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.legalRegister')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.legal_register"
+                                :placeholder="
+                                    $t('settings.legalRegisterPlaceholder')
+                                "
+                                icon="i-lucide-file-badge"
+                                class="w-full"
+                                data-testid="settings-legal-register"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.legalVatId')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.legal_vat_id"
+                                placeholder="DE123456789"
+                                icon="i-lucide-receipt"
+                                class="w-full"
+                                data-testid="settings-legal-vat-id"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.legalEditorial')"
+                            :description="$t('settings.legalEditorialHint')"
+                            :ui="fieldUi"
+                        >
+                            <UInput
+                                v-model="copySettings.legal_editorial"
+                                icon="i-lucide-pencil"
+                                class="w-full"
+                                data-testid="settings-legal-editorial"
+                            />
+                        </UFormField>
+                        <UFormField
+                            :label="$t('settings.legalRepresentatives')"
+                            :ui="fieldUi"
+                            class="lg:col-span-2"
+                        >
+                            <div class="person-list">
+                                <div
+                                    v-for="(
+                                        person, index
+                                    ) in copySettings.legal_representatives"
+                                    :key="index"
+                                    class="person-row"
+                                    data-testid="settings-legal-representative"
+                                >
+                                    <UFormField
+                                        :label="$t('settings.legalPersonName')"
+                                    >
+                                        <UInput
+                                            v-model="person.name"
+                                            icon="i-lucide-user"
+                                            class="w-full"
+                                            data-testid="settings-legal-representative-name"
+                                        />
+                                    </UFormField>
+                                    <UFormField
+                                        :label="$t('settings.legalPersonRole')"
+                                    >
+                                        <UInput
+                                            v-model="person.role"
+                                            :placeholder="
+                                                $t(
+                                                    'settings.legalPersonRolePlaceholder',
+                                                )
+                                            "
+                                            icon="i-lucide-id-card"
+                                            class="w-full"
+                                            data-testid="settings-legal-representative-role"
+                                        />
+                                    </UFormField>
+                                    <UButton
+                                        icon="i-lucide-trash-2"
+                                        variant="ghost"
+                                        color="error"
+                                        class="self-end"
+                                        :aria-label="
+                                            $t('settings.legalRemovePerson')
+                                        "
+                                        :title="
+                                            $t('settings.legalRemovePerson')
+                                        "
+                                        data-testid="settings-legal-remove-representative"
+                                        @click="
+                                            copySettings.legal_representatives.splice(
+                                                index,
+                                                1,
+                                            )
+                                        "
+                                    />
+                                </div>
+                            </div>
+                            <UButton
+                                color="neutral"
+                                variant="soft"
+                                size="sm"
+                                icon="i-lucide-user-plus"
+                                :class="{
+                                    'mt-3': copySettings.legal_representatives
+                                        .length,
+                                }"
+                                data-testid="settings-legal-add-representative"
+                                @click="
+                                    copySettings.legal_representatives.push({
+                                        name: '',
+                                        role: '',
+                                    })
+                                "
+                            >
+                                {{ $t('settings.legalAddPerson') }}
+                            </UButton>
+                        </UFormField>
+                    </UPageCard>
                 </div>
-                <v-btn
-                    variant="tonal"
-                    size="small"
-                    prepend-icon="mdi-account-plus-outline"
-                    class="mt-3"
-                    data-testid="settings-legal-add-representative"
-                    @click="
-                        copySettings.legal_representatives.push({
-                            name: '',
-                            role: '',
-                        })
-                    "
-                >
-                    {{ $t('settings.legalAddPerson') }}
-                </v-btn>
-            </v-card-text>
-        </v-card>
-
-        <!-- Actions Row -->
-        <div class="d-flex align-center">
-            <v-fade-transition>
-                <span
-                    v-if="hasChanges"
-                    class="text-body-small text-medium-emphasis"
-                >
-                    <v-icon size="14" class="mr-1">mdi-circle-medium</v-icon>
-                    {{ $t('account.unsavedChanges') }}
-                </span>
-            </v-fade-transition>
-
-            <v-spacer />
-
-            <v-btn
-                v-if="hasChanges"
-                color="primary"
-                :loading="saving"
-                :disabled="
-                    retentionRule(copySettings.audit_retention_days) !== true
-                "
-                prepend-icon="mdi-content-save-outline"
-                data-testid="settings-save"
-                @click="saveSettings"
-            >
-                {{ $t('actions.save') }}
-            </v-btn>
+            </div>
         </div>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">
-import type { ComponentPublicInstance } from 'vue'
 import type { UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
 import { integerBetween } from '~/utils/validation'
@@ -523,7 +551,7 @@ import {
     type GradeSystem,
 } from '#shared/utils/grades'
 
-type FileInputRef = Element | ComponentPublicInstance | null
+type FileInputRef = HTMLInputElement | null
 
 const pb = usePocketbase()
 const { t } = useI18n()
@@ -538,16 +566,12 @@ definePageMeta({
     requiredPermission: 'manage_settings',
 })
 
-// ── Data fetching ─────────────────────────────────────────────────────────────
-
 const { data: settings } = useNuxtData<SettingsRecord>('settings')
 
 const { data: mailStatus } = useMailStatus()
 const pbMailSettingsUrl =
     (import.meta.dev ? 'http://localhost:8090' : '') + '/_/#/settings/mail'
 const mailConfigured = computed(() => mailStatus.value?.configured !== false)
-
-// ── State ─────────────────────────────────────────────────────────────────────
 
 const original = reactive({
     application_url: '',
@@ -565,8 +589,8 @@ const original = reactive({
 
 function gradeSystemItems(systems: GradeSystem[]) {
     return systems.map((value) => ({
-        title: t(`gradeSystems.${value}`),
-        value,
+        label: t(`gradeSystems.${value}`),
+        value: value as string,
     }))
 }
 
@@ -681,8 +705,10 @@ const signPreview = ref<string | null>(null)
 
 const { pending: saving, run: runSave } = useAsyncAction()
 const retentionRule = integerBetween(t, 1, 3650)
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const retentionError = computed(() => {
+    const result = retentionRule(copySettings.audit_retention_days)
+    return result === true ? false : result
+})
 
 function pbFileUrl(
     rec: Partial<SettingsRecord> | null | undefined,
@@ -691,56 +717,53 @@ function pbFileUrl(
     return usePbFileUrl(rec, filename) || null
 }
 
-function clickFileInput(target: FileInputRef) {
-    const root = target && '$el' in target ? target.$el : target
-    ;(root as HTMLElement | null)?.querySelector('input')?.click()
+function onFileChange(event: Event, onSelect: (file: File | null) => void) {
+    const input = event.target as HTMLInputElement
+    onSelect(input.files?.[0] ?? null)
+    input.value = ''
 }
-
-// ── Asset field descriptors (drives the template v-for) ───────────────────────
 
 const assetFields = computed(() => [
     {
         key: 'logo',
         label: t('settings.assets.logo'),
+        hint: t('settings.assetHints.logo'),
         accept: 'image/jpeg,image/png,image/svg+xml,image/webp',
-        file: logoFile,
         preview: logoPreview,
         inputRef: logoInputRef,
         isDirty: !!logoFile.value || logoClear.value,
         onSelect: onLogoSelected,
         onRevert: onLogoRevert,
         onDelete: onLogoDelete,
-        triggerInput: () => clickFileInput(logoInputRef.value),
+        triggerInput: () => logoInputRef.value?.click(),
     },
     {
         key: 'icon',
         label: t('settings.assets.icon'),
+        hint: t('settings.assetHints.icon'),
         accept: '.ico,image/vnd.microsoft.icon,image/x-icon',
-        file: iconFile,
         preview: iconPreview,
         inputRef: iconInputRef,
         isDirty: !!iconFile.value || iconClear.value,
         onSelect: onIconSelected,
         onRevert: onIconRevert,
         onDelete: onIconDelete,
-        triggerInput: () => clickFileInput(iconInputRef.value),
+        triggerInput: () => iconInputRef.value?.click(),
     },
     {
         key: 'sign',
         label: t('settings.assets.sign'),
+        hint: t('settings.assetHints.sign'),
         accept: 'image/jpeg,image/png,image/svg+xml,image/webp',
-        file: signFile,
         preview: signPreview,
         inputRef: signInputRef,
         isDirty: !!signFile.value || signClear.value,
         onSelect: onSignSelected,
         onRevert: onSignRevert,
         onDelete: onSignDelete,
-        triggerInput: () => clickFileInput(signInputRef.value),
+        triggerInput: () => signInputRef.value?.click(),
     },
 ])
-
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 let unsubscribe: UnsubscribeFunc | null = null
 
@@ -756,7 +779,64 @@ onUnmounted(() => {
     unsubscribe?.()
 })
 
-// ── File selection handlers ───────────────────────────────────────────────────
+const fieldUi = {
+    container: 'w-full',
+}
+
+const formCardUi = {
+    container: 'lg:grid-cols-2 gap-y-5',
+    wrapper: 'lg:col-span-2',
+}
+
+const sections = computed(() => [
+    {
+        id: 'branding',
+        label: t('settings.branding'),
+        icon: 'i-lucide-image',
+    },
+    {
+        id: 'organization',
+        label: t('settings.organization'),
+        icon: 'i-lucide-building-2',
+    },
+    {
+        id: 'locations',
+        label: t('settings.locations'),
+        icon: 'i-lucide-map-pin',
+    },
+    {
+        id: 'grading',
+        label: t('settings.grading'),
+        icon: 'i-lucide-trending-up',
+    },
+    {
+        id: 'urls',
+        label: t('settings.publicUrls'),
+        icon: 'i-lucide-globe',
+    },
+    {
+        id: 'legal',
+        label: t('settings.legalTitle'),
+        icon: 'i-lucide-scale',
+    },
+])
+
+const route = useRoute()
+const activeSection = computed(() => {
+    const requested = String(route.query.section ?? '')
+    return sections.value.some((section) => section.id === requested)
+        ? requested
+        : 'branding'
+})
+
+const sectionNavItems = computed(() =>
+    sections.value.map((section) => ({
+        label: section.label,
+        icon: section.icon,
+        to: { query: { section: section.id } },
+        active: activeSection.value === section.id,
+    })),
+)
 
 function onLogoSelected(file: File | null) {
     logoFile.value = file
@@ -812,8 +892,6 @@ function onSignDelete() {
     signPreview.value = null
 }
 
-// ── Dirty flag ────────────────────────────────────────────────────────────────
-
 const hasChanges = computed(() => {
     if (logoFile.value || iconFile.value || signFile.value) return true
     if (logoClear.value || iconClear.value || signClear.value) return true
@@ -835,8 +913,6 @@ const hasChanges = computed(() => {
 })
 
 watch(settings, adoptRecord, { immediate: true })
-
-// ── Save ──────────────────────────────────────────────────────────────────────
 
 async function saveSettings() {
     if (!hasChanges.value || saving.value) return
@@ -900,6 +976,79 @@ async function saveSettings() {
 </script>
 
 <style scoped>
+.settings-nav-mobile {
+    position: sticky;
+    top: calc(var(--app-top) + var(--app-top-inset, 0px));
+    z-index: 10;
+    margin: 0 -16px 16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    background: var(--app-bg);
+    scrollbar-width: none;
+}
+
+.settings-nav-desktop {
+    position: sticky;
+    top: calc(var(--app-top) + var(--app-top-inset, 0px) + 16px);
+}
+
+.asset-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+    border-radius: calc(var(--ui-radius) * 2);
+    background: var(--ui-bg);
+    transition: border-color 0.18s;
+}
+
+.asset-card--dirty {
+    border-color: var(--ui-primary);
+}
+
+.asset-card__preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    padding: 24px;
+    border-bottom: 1px solid var(--ui-border);
+    background-color: #f4f4f5;
+    background-image:
+        linear-gradient(45deg, #e4e4e7 25%, transparent 25%),
+        linear-gradient(-45deg, #e4e4e7 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e4e4e7 75%),
+        linear-gradient(-45deg, transparent 75%, #e4e4e7 75%);
+    background-size: 16px 16px;
+    background-position:
+        0 0,
+        0 8px,
+        8px -8px,
+        -8px 0;
+    cursor: pointer;
+}
+
+.asset-card__preview--empty {
+    background: var(--ui-bg-muted);
+    border-bottom-style: dashed;
+}
+
+.asset-card__preview:hover,
+.asset-card__preview:focus-visible {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: -2px;
+}
+
+.asset-card__image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.asset-card__image--mono {
+    filter: brightness(0);
+}
+
 .person-list {
     display: flex;
     flex-direction: column;
@@ -924,105 +1073,6 @@ async function saveSettings() {
 
     .person-row > :nth-child(2) {
         grid-row: 2;
-    }
-}
-
-.asset-card {
-    transition: border-color 0.2s;
-}
-
-.asset-drop-zone {
-    height: 160px;
-    border: 1.5px dashed rgba(var(--v-border-color), 0.28);
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.18s;
-}
-
-.asset-drop-zone:hover {
-    border-color: rgba(var(--v-border-color), 0.6);
-}
-
-.asset-drop-trigger {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    cursor: pointer;
-}
-
-.asset-preview {
-    display: block;
-    max-width: 100%;
-    max-height: 130px;
-    object-fit: contain;
-}
-
-.asset-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    background: rgba(var(--v-theme-surface), 0.88);
-    color: rgb(var(--v-theme-on-surface));
-    opacity: 0;
-    transition: opacity 0.18s;
-    pointer-events: none;
-}
-
-.asset-overlay__replace,
-.asset-overlay__delete {
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-.asset-overlay__replace:hover,
-.asset-overlay__replace:focus-visible {
-    background: rgba(var(--v-theme-on-surface), 0.12);
-}
-
-.asset-overlay__delete {
-    color: rgb(var(--v-theme-error));
-}
-
-.asset-overlay__delete:hover,
-.asset-overlay__delete:focus-visible {
-    background: rgba(var(--v-theme-error), 0.12);
-}
-
-.asset-drop-zone:hover .asset-overlay,
-.asset-drop-trigger:focus-visible + .asset-overlay,
-.asset-overlay:focus-within {
-    opacity: 1;
-}
-
-.asset-overlay__action {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 88px;
-    min-height: 64px;
-    justify-content: center;
-    padding: 8px 12px;
-    border: 0;
-    border-radius: 8px;
-    background: none;
-    font: inherit;
-}
-
-@media (hover: none) {
-    .asset-overlay {
-        inset: auto 0 0;
-        padding: 4px 8px;
-        opacity: 1;
-    }
-
-    .asset-overlay__action {
-        flex-direction: row;
-        min-height: 40px;
-        padding: 4px 8px;
     }
 }
 </style>

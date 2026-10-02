@@ -31,7 +31,7 @@ test('captcha failures show a translated message instead of the server text', as
     await fillLogin(page, 'someone', 'whatever1')
     await page.getByTestId('login-submit').click()
 
-    const snackbar = page.getByTestId('global-snackbar')
+    const snackbar = page.getByTestId('global-snackbar').last()
     await expect(snackbar).toContainText(
         translate(language, 'notifications.error.captcha'),
     )
@@ -60,13 +60,10 @@ test('a wrong password on email change shows a translated message', async ({
     )
 
     await gotoSettled(page, '/auth/confirm-email-change/looks-like-a-token')
-    await page
-        .getByTestId('email-change-password')
-        .locator('input')
-        .fill('E2ePassw0rd!')
+    await page.getByTestId('email-change-password').fill('E2ePassw0rd!')
     await page.getByTestId('email-change-submit').click()
 
-    const snackbar = page.getByTestId('global-snackbar')
+    const snackbar = page.getByTestId('global-snackbar').last()
     await expect(snackbar).toContainText(
         translate(language, 'account.wrongOldPassword'),
     )

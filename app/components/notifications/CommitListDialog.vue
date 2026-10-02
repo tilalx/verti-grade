@@ -13,13 +13,17 @@
         </template>
 
         <template #title>
-            <v-icon size="20">mdi-source-commit</v-icon>
+            <UIcon name="i-lucide-git-commit-horizontal" class="size-[20px]" />
             {{ $t('notifications.commitList.title') }}
         </template>
 
-        <v-alert v-if="!props.commits.length" type="info">
-            {{ $t('notifications.commitList.empty') }}
-        </v-alert>
+        <UAlert
+            v-if="!props.commits.length"
+            color="info"
+            variant="soft"
+            icon="i-lucide-info"
+            :description="$t('notifications.commitList.empty')"
+        />
 
         <div
             v-for="commit in parsedCommits"
@@ -27,7 +31,7 @@
             :key="commit.sha"
             class="commit-entry"
         >
-            <div class="d-flex align-center flex-wrap ga-2 mb-1">
+            <div class="flex items-center flex-wrap gap-2 mb-1">
                 <a
                     v-if="repoUrl"
                     :href="`${repoUrl}/commit/${commit.sha}`"
@@ -91,7 +95,8 @@ const parsedCommits = computed(() =>
 <style scoped>
 .commit-entry {
     padding: 8px 0;
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+    border-bottom: 1px solid
+        color-mix(in oklab, var(--ui-text-highlighted) 8%, transparent);
 }
 
 .commit-entry:last-child {
@@ -105,7 +110,7 @@ const parsedCommits = computed(() =>
 }
 
 .commit-link {
-    color: rgb(var(--v-theme-primary));
+    color: var(--ui-primary);
     text-decoration: none;
 }
 
@@ -115,12 +120,12 @@ const parsedCommits = computed(() =>
 
 .commit-date {
     font-size: 12px;
-    color: rgba(var(--v-theme-on-surface), 0.55);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 55%, transparent);
 }
 
 .commit-message {
     font-size: 13px;
-    color: rgba(var(--v-theme-on-surface), 0.85);
+    color: color-mix(in oklab, var(--ui-text-highlighted) 85%, transparent);
     word-break: break-word;
 }
 </style>

@@ -10,46 +10,56 @@ const TOP_LEVEL = [
 ]
 const GROUPS = ['nav-group-manage', 'nav-group-admin']
 
-test('the desktop link row is the grouped items, not one per page', async ({
+test('the desktop sidebar lists every page in labelled sections', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
 
-    const row = page.getByTestId('nav-desktop-links')
-    await expect(row).toBeVisible()
-
-    for (const id of [...TOP_LEVEL, ...GROUPS]) {
-        await expect(row.getByTestId(id)).toBeVisible()
+    const sidebar = page.getByTestId('nav-desktop-links')
+    await expect(sidebar).toBeVisible()
+    for (const id of [...TOP_LEVEL, ...GROUPS, 'nav-link-admin-settings']) {
+        await expect(sidebar.getByTestId(id)).toBeVisible()
     }
-    await expect(row.locator('button')).toHaveCount(
-        TOP_LEVEL.length + GROUPS.length,
-    )
 
-    const rowBox = (await row.boundingBox())!
-    const menuBox = (await page
-        .getByTestId('user-menu-activator')
-        .boundingBox())!
-    expect(rowBox.x + rowBox.width).toBeLessThanOrEqual(menuBox.x)
+    const sidebarBox = (await sidebar.boundingBox())!
+    const mainBox = (await page.locator('#main-content').boundingBox())!
+    expect(sidebarBox.x + sidebarBox.width).toBeLessThanOrEqual(mainBox.x)
 })
 
-test('a group menu opens and navigates to its pages', async ({
+test('collapsing the sidebar keeps the icons and survives a reload', async ({
     adminPage: page,
 }) => {
     await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
+    const sidebar = page.getByTestId('nav-sidebar')
+    const widthOf = async () =>
+        (await sidebar.locator('[data-slot="container"]').boundingBox())!.width
 
-    await page.getByTestId('nav-group-manage').click()
+    const expanded = await widthOf()
+    await page.getByTestId('nav-sidebar-toggle').click()
+    await expect(sidebar).toHaveAttribute('data-state', 'collapsed')
+    await expect.poll(widthOf).toBeLessThan(expanded / 2)
+
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
+    await expect(sidebar).toHaveAttribute('data-state', 'collapsed')
+
+    await page.getByTestId('nav-sidebar-toggle').click()
+    await expect(sidebar).toHaveAttribute('data-state', 'expanded')
+})
+
+test('section links navigate to their pages', async ({ adminPage: page }) => {
+    await gotoSettled(page, '/manage/routes', /\/manage\/routes/)
+
     await page.getByTestId('nav-link-manage-comments').click()
     await page.waitForURL('**/manage/comments')
 
-    await page.getByTestId('nav-group-admin').click()
     await page.getByTestId('nav-link-admin-settings').click()
     await page.waitForURL('**/admin/settings')
 })
 
-test('the group button shows as active while one of its pages is open', async ({
+test('the section label shows as active while one of its pages is open', async ({
     adminPage: page,
 }) => {
-    await gotoSettled(page, '/manage/comments', /\/manage\/comments/)
+    await gotoSettled(page, '/manage/inventory', /\/manage\/inventory/)
 
     await expect(page.getByTestId('nav-group-manage')).toHaveClass(
         /nav-link--active/,

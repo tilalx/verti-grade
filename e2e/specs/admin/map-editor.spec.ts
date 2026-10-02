@@ -25,21 +25,12 @@ test('admins draw a floor plan with a wall and it survives a reload', async ({
     const wallName = `${testPrefix} Cave`
     try {
         await gotoSettled(page, `/admin/map?location=${location.id}`)
-        await page
-            .getByTestId('map-editor-setup-width')
-            .locator('input')
-            .fill('20')
-        await page
-            .getByTestId('map-editor-setup-height')
-            .locator('input')
-            .fill('10')
+        await page.getByTestId('map-editor-setup-width').fill('20')
+        await page.getByTestId('map-editor-setup-height').fill('10')
         await page.getByTestId('map-editor-create').click()
         await expect(page.getByTestId('map-editor-canvas')).toBeVisible()
 
-        await page
-            .getByTestId('map-editor-new-wall')
-            .locator('input')
-            .fill(wallName)
+        await page.getByTestId('map-editor-new-wall').fill(wallName)
         await page.getByTestId('map-editor-add-wall').click()
         await clickCanvas(page, [
             [0.3, 0.3],
@@ -61,7 +52,7 @@ test('admins draw a floor plan with a wall and it survives a reload', async ({
         await expect(wallItem).not.toContainText('missing')
 
         await page.getByTestId('map-editor-save').click()
-        await expect(page.getByTestId('global-snackbar')).toContainText(
+        await expect(page.getByTestId('global-snackbar').last()).toContainText(
             'Map saved',
         )
 
@@ -116,10 +107,7 @@ test('a wall without a climbing edge blocks saving and says what is missing', as
     const wallName = `${testPrefix} Slab`
     try {
         await gotoSettled(page, `/admin/map?location=${seeded.locationId}`)
-        await page
-            .getByTestId('map-editor-new-wall')
-            .locator('input')
-            .fill(wallName)
+        await page.getByTestId('map-editor-new-wall').fill(wallName)
         await page.getByTestId('map-editor-add-wall').click()
         await clickCanvas(page, [
             [0.2, 0.6],
@@ -262,14 +250,10 @@ test('a wall stores the anchor range used for auto-placement', async ({
                 `[data-testid="map-editor-wall-item"][data-name="${testPrefix} Island"]`,
             )
             .click()
-        const from = page
-            .getByTestId('map-editor-wall-anchor-from')
-            .locator('input')
+        const from = page.getByTestId('map-editor-wall-anchor-from')
         await from.fill('10')
         await from.press('Tab')
-        const to = page
-            .getByTestId('map-editor-wall-anchor-to')
-            .locator('input')
+        const to = page.getByTestId('map-editor-wall-anchor-to')
         await to.fill('20')
         await to.press('Tab')
         await page.getByTestId('map-editor-save').click()

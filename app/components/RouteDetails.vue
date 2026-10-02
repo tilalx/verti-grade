@@ -1,23 +1,23 @@
 <template>
     <div class="view-ratings-wrapper">
-        <v-btn
+        <UButton
             v-if="compact"
-            icon="mdi-star-outline"
-            variant="text"
-            size="small"
+            icon="i-lucide-star"
+            color="neutral"
+            variant="ghost"
             :aria-label="$t('ratings.ratings')"
             :title="$t('ratings.ratings')"
             data-testid="route-details-open"
             @click="openSheet"
         />
-        <v-btn
+        <UButton
             v-else
             color="primary"
             data-testid="route-details-open"
             @click="openSheet"
         >
             {{ $t('ratings.ratings') }}
-        </v-btn>
+        </UButton>
 
         <LayoutDialogShell
             v-model="isSheetOpen"
@@ -27,7 +27,7 @@
             :title="$t('ratings.climber_reviews')"
             data-testid="route-details-sheet"
         >
-            <v-progress-linear v-if="isLoading" indeterminate color="primary" />
+            <UProgress v-if="isLoading" size="2xs" />
 
             <div v-if="!isLoading && reviews.length">
                 <CommentsCard
@@ -38,10 +38,11 @@
                     class="mb-3"
                 >
                     <template #actions>
-                        <v-btn
-                            icon="mdi-flag-outline"
-                            variant="text"
-                            size="small"
+                        <UButton
+                            icon="i-lucide-flag"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
                             :aria-label="$t('reports.reportAction')"
                             :title="$t('reports.reportAction')"
                             data-testid="comment-card-report"
@@ -53,7 +54,7 @@
 
             <LayoutEmptyState
                 v-if="!isLoading && !reviews.length"
-                icon="mdi-star-shooting-outline"
+                icon="i-lucide-sparkles"
                 :card="false"
                 :title="$t('ratings.no_reviews_yet')"
                 :hint="$t('ratings.be_the_first')"

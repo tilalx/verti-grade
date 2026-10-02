@@ -64,6 +64,7 @@ test('an email change confirms from the new address and then signs in', async ({
     page,
     testPrefix,
 }) => {
+    test.slow()
     const { pb, email, id } = await createVerifiableUser(testPrefix, 'change')
     const newEmail = mailbox(testPrefix, 'changed')
 
@@ -72,9 +73,8 @@ test('an email change confirms from the new address and then signs in', async ({
     await page.getByTestId('login-submit').click()
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'))
 
-    await page.getByTestId('user-menu-activator').click()
-    await page.getByTestId('user-menu-profile').click()
-    await page.getByTestId('profile-email').locator('input').fill(newEmail)
+    await gotoSettled(page, '/account/settings')
+    await page.getByTestId('profile-email').fill(newEmail)
     await page.getByTestId('profile-save').click()
 
     const mail = await waitForMail(page, newEmail, { subject: /email/i })
@@ -85,10 +85,7 @@ test('an email change confirms from the new address and then signs in', async ({
         /https?:\/\/[^"'\s]*\/auth\/confirm-email-change\/[^"'\s]+/,
     )
     await gotoSettled(page, path)
-    await page
-        .getByTestId('email-change-password')
-        .locator('input')
-        .fill(PASSWORD)
+    await page.getByTestId('email-change-password').fill(PASSWORD)
     await page.getByTestId('email-change-submit').click()
     await expect(page.getByTestId('email-change-done')).toBeVisible()
 

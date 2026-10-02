@@ -18,10 +18,7 @@ test('every supported locale is offered in the profile and accepted by the users
 
     await root.collection('users').update(user.id, { language: 'en' })
     const page = await pageAs(user)
-    await gotoSettled(page, '/')
-
-    await page.getByTestId('user-menu-activator').click()
-    await page.getByTestId('user-menu-profile').click()
+    await gotoSettled(page, '/account/settings?tab=preferences')
     await page.getByTestId('profile-language').click()
     await expect(
         page.locator('[data-testid^="profile-language-"]'),

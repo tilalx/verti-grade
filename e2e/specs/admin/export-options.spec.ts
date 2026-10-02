@@ -14,7 +14,7 @@ test('pdf export asks for language and fields before printing', async ({
 
     await page.getByTestId('export-locale').click()
     await page.getByRole('option', { name: 'Українська' }).click()
-    await page.getByTestId('export-show-logo').locator('input').uncheck()
+    await page.getByTestId('export-show-logo').uncheck()
 
     const request = page.waitForRequest('**/api/ui/pdf')
     const download = page.waitForEvent('download')

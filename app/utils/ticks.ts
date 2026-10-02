@@ -1,13 +1,14 @@
+import type { BadgeProps } from '@nuxt/ui'
 import type { TickType } from '#shared/utils/ticks'
 
-export const TICK_TYPE_COLORS: Record<TickType, string> = {
-    flash: 'amber-darken-2',
+export const TICK_TYPE_COLORS: Record<TickType, BadgeProps['color']> = {
+    flash: 'warning',
     top: 'success',
-    attempt: 'blue-grey-darken-1',
+    attempt: 'neutral',
 }
 
 export const TICK_TYPE_ICONS: Record<TickType, string> = {
-    flash: 'mdi-lightning-bolt',
-    top: 'mdi-flag-checkered',
-    attempt: 'mdi-reload',
+    flash: 'i-lucide-zap',
+    top: 'i-lucide-flag-triangle-right',
+    attempt: 'i-lucide-rotate-cw',
 }

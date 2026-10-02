@@ -7,34 +7,44 @@
         closable
         data-testid="role-form-dialog"
     >
-        <v-form ref="form" v-model="valid">
-            <v-text-field
-                v-model="draft.name"
-                :rules="nameRules"
-                :error-messages="nameError ? [nameError] : []"
+        <UForm ref="form" :state="draft" :validate="validateForm">
+            <UFormField
                 :label="t('permissions.roleName')"
-                :readonly="nameLocked"
-                :hint="nameLocked ? t('permissions.adminRoleLocked') : ''"
-                :persistent-hint="nameLocked"
-                prepend-inner-icon="mdi-shield-account-outline"
-                class="mb-1"
-                data-testid="role-form-name"
-                @update:model-value="nameError = ''"
-            />
+                name="name"
+                :error="nameError || undefined"
+                :help="
+                    nameLocked ? t('permissions.adminRoleLocked') : undefined
+                "
+                class="mb-4"
+            >
+                <UInput
+                    v-model="draft.name"
+                    :readonly="nameLocked"
+                    icon="i-lucide-shield-user"
+                    class="w-full"
+                    data-testid="role-form-name"
+                    @update:model-value="nameError = ''"
+                />
+            </UFormField>
 
-            <v-text-field
-                v-model="draft.description"
-                :rules="descriptionRules"
+            <UFormField
                 :label="t('permissions.roleDescription')"
-                prepend-inner-icon="mdi-text-short"
-                data-testid="role-form-description"
-            />
+                name="description"
+                class="mb-4"
+            >
+                <UInput
+                    v-model="draft.description"
+                    icon="i-lucide-text"
+                    class="w-full"
+                    data-testid="role-form-description"
+                />
+            </UFormField>
 
-            <div class="text-body-small text-medium-emphasis mb-2">
+            <div class="text-xs text-muted mb-2">
                 {{ t('permissions.roleColor') }}
             </div>
 
-            <div class="d-flex flex-wrap ga-2 align-center">
+            <div class="flex flex-wrap gap-2 items-center">
                 <button
                     v-for="c in ROLE_COLORS"
                     :key="c"
@@ -45,78 +55,79 @@
                     :style="{
                         backgroundColor: c,
                         boxShadow: isSelected(c)
-                            ? '0 0 0 2px rgb(var(--v-theme-surface)), 0 0 0 4px ' +
-                              c
+                            ? '0 0 0 2px var(--ui-bg), 0 0 0 4px ' + c
                             : 'none',
                     }"
                     :data-testid="`role-form-swatch-${c.slice(1)}`"
                     @click="pickSwatch(c)"
                 />
 
-                <v-btn
-                    :variant="customOpen ? 'tonal' : 'text'"
-                    size="small"
-                    prepend-icon="mdi-eyedropper-variant"
+                <UButton
+                    color="neutral"
+                    :variant="customOpen ? 'soft' : 'ghost'"
+                    size="sm"
+                    icon="i-lucide-pipette"
                     data-testid="role-form-color-custom"
                     @click="toggleCustom"
                 >
                     {{ t('permissions.customColor') }}
-                </v-btn>
+                </UButton>
             </div>
 
             <div v-if="customOpen" class="color-picker-section mt-3">
-                <v-color-picker
-                    v-model="draft.color"
-                    hide-inputs
-                    :modes="['hex']"
-                    width="100%"
-                    elevation="0"
-                />
+                <UColorPicker v-model="draft.color" />
             </div>
 
             <div class="mt-4">
-                <div class="text-body-small text-medium-emphasis mb-1">
+                <div class="text-xs text-muted mb-1">
                     {{ t('permissions.preview') }}
                 </div>
-                <v-chip
-                    size="small"
-                    :color="draft.color || undefined"
-                    :variant="draft.color ? 'flat' : 'tonal'"
+                <UBadge
+                    color="neutral"
+                    :variant="draft.color ? 'solid' : 'soft'"
                     :style="
                         draft.color
-                            ? { color: readableTextOn(draft.color) }
+                            ? {
+                                  backgroundColor: draft.color,
+                                  color: readableTextOn(draft.color),
+                              }
                             : undefined
                     "
                     data-testid="role-form-preview"
                 >
                     {{ draft.name || t('permissions.roleName') }}
-                </v-chip>
+                </UBadge>
             </div>
-        </v-form>
+        </UForm>
 
         <template #actions>
-            <v-btn variant="text" data-testid="role-form-cancel" @click="close">
+            <UButton
+                color="neutral"
+                variant="ghost"
+                data-testid="role-form-cancel"
+                @click="close"
+            >
                 {{ t('actions.cancel') }}
-            </v-btn>
-            <v-spacer />
-            <v-btn
+            </UButton>
+            <div class="flex-1" />
+            <UButton
                 :disabled="!valid || !hasChanges"
                 :loading="saving"
                 color="primary"
-                prepend-icon="mdi-check"
+                icon="i-lucide-check"
                 data-testid="role-form-submit"
                 @click="save"
             >
                 {{ isEdit ? t('actions.save') : t('permissions.createRole') }}
-            </v-btn>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
 import type { ClientResponseError } from 'pocketbase'
-import type { VForm } from 'vuetify/components'
-import { required, maxLength } from '~/utils/validation'
+import type { Form } from '@nuxt/ui'
+import { required, maxLength, validateRules } from '~/utils/validation'
 import type { RoleRecord } from '~/types/models'
 import { isProtectedRole } from '~/utils/roles'
 import { toHex6, readableTextOn } from '~/utils/color'
@@ -151,8 +162,11 @@ const pb = usePocketbase()
 const { error: notifyError } = useNotification()
 
 const dialog = ref(false)
-const form = ref<VForm | null>(null)
-const valid = ref(false)
+const form = ref<Form<{
+    name: string
+    description: string
+    color: string
+}> | null>(null)
 const saving = ref(false)
 const customOpen = ref(false)
 const nameError = ref('')
@@ -168,6 +182,9 @@ const nameLocked = computed(
 
 const nameRules = [required(t), maxLength(t, 50)]
 const descriptionRules = [maxLength(t, 200)]
+const validateForm = (state: Record<string, unknown>) =>
+    validateRules(state, { name: nameRules, description: descriptionRules })
+const valid = computed(() => validateForm(draft).length === 0)
 
 const hasChanges = computed(
     () =>
@@ -220,8 +237,7 @@ function close() {
 }
 
 async function save() {
-    const result = await form.value?.validate()
-    if (!result?.valid) return
+    if ((await form.value?.validate({ silent: true })) === false) return
 
     const payload = {
         name: nameLocked.value ? (props.role?.name ?? '') : draft.name.trim(),
@@ -252,10 +268,6 @@ async function save() {
 </script>
 
 <style scoped>
-.color-picker-section :deep(.v-color-picker) {
-    box-shadow: none;
-}
-
 .color-dot {
     width: 28px;
     height: 28px;

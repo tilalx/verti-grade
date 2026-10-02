@@ -16,107 +16,113 @@ export interface NavItem extends Partial<NavLink> {
 type Can = (permission: string) => boolean
 
 export const BOTTOM_NAV: NavLink[] = [
-    { to: '/map', icon: 'mdi-map-outline', label: 'routes.map' },
-    { to: '/scan', icon: 'mdi-qrcode-scan', label: 'routes.scan' },
+    { to: '/map', icon: 'i-lucide-map', label: 'routes.map' },
+    { to: '/scan', icon: 'i-lucide-scan-qr-code', label: 'routes.scan' },
     {
         to: '/logbook',
-        icon: 'mdi-notebook-check-outline',
+        icon: 'i-lucide-book-check',
         label: 'routes.logbook',
     },
-    { to: '/account', icon: 'mdi-account-circle-outline', label: 'routes.me' },
+    { to: '/account', icon: 'i-lucide-layout-grid', label: 'routes.me' },
 ]
 
 export const NAV_ITEMS: NavItem[] = [
     {
         key: 'home',
         to: '/',
-        icon: 'mdi-home-outline',
+        icon: 'i-lucide-house',
         label: 'routes.home',
-    },
-    {
-        key: 'map',
-        to: '/map',
-        icon: 'mdi-map-outline',
-        label: 'routes.map',
     },
     {
         key: 'list',
         to: '/routes',
-        icon: 'mdi-format-list-bulleted',
+        icon: 'i-lucide-list',
         label: 'routes.list',
+    },
+    {
+        key: 'map',
+        to: '/map',
+        icon: 'i-lucide-map',
+        label: 'routes.map',
     },
     {
         key: 'logbook',
         signedIn: true,
         to: '/logbook',
-        icon: 'mdi-notebook-check-outline',
+        icon: 'i-lucide-book-check',
         label: 'routes.logbook',
     },
     {
-        key: 'routes',
-        to: '/manage/routes',
-        icon: 'mdi-map-marker-path',
-        label: 'routes.dashboard',
-        permission: 'manage_routes',
-    },
-    {
         key: 'manage',
-        icon: 'mdi-tune-variant',
+        icon: 'i-lucide-sliders-horizontal',
         label: 'nav.manage',
         children: [
             {
+                to: '/manage/routes',
+                icon: 'i-lucide-waypoints',
+                label: 'routes.dashboard',
+                permission: 'manage_routes',
+            },
+            {
                 to: '/manage/map',
-                icon: 'mdi-map-marker-radius-outline',
+                icon: 'i-lucide-map-pinned',
                 label: 'routes.mapPlacement',
                 permission: 'manage_routes',
             },
             {
                 to: '/manage/inventory',
-                icon: 'mdi-package-variant-closed',
+                icon: 'i-lucide-package',
                 label: 'routes.inventory',
                 permission: 'run_inventory',
             },
             {
-                to: '/manage/comments',
-                icon: 'mdi-comment-outline',
-                label: 'routes.comments',
-                permission: 'manage_comments',
-            },
-            {
-                to: '/manage/reports',
-                icon: 'mdi-flag-outline',
-                label: 'routes.reports',
-                permission: 'manage_reports',
-            },
-            {
                 to: '/manage/analytics',
-                icon: 'mdi-chart-line',
+                icon: 'i-lucide-chart-line',
                 label: 'routes.analytics',
                 permission: 'view_analytics',
             },
         ],
     },
     {
+        key: 'moderation',
+        icon: 'i-lucide-shield-check',
+        label: 'nav.moderation',
+        children: [
+            {
+                to: '/manage/comments',
+                icon: 'i-lucide-message-square',
+                label: 'routes.comments',
+                permission: 'manage_comments',
+            },
+            {
+                to: '/manage/reports',
+                icon: 'i-lucide-flag',
+                label: 'routes.reports',
+                permission: 'manage_reports',
+            },
+        ],
+    },
+    {
         key: 'admin',
-        icon: 'mdi-shield-account-outline',
+        icon: 'i-lucide-shield-user',
         label: 'nav.admin',
         children: [
             {
                 to: '/admin/users',
-                icon: 'mdi-account-group-outline',
+                icon: 'i-lucide-users-round',
                 label: 'routes.users',
                 permission: 'manage_users',
             },
             {
-                to: '/admin/settings',
-                icon: 'mdi-cog-outline',
-                label: 'routes.settings',
+                to: '/admin/map',
+                icon: 'i-lucide-land-plot',
+                label: 'routes.mapEditor',
                 permission: 'manage_settings',
             },
             {
-                to: '/admin/map',
-                icon: 'mdi-floor-plan',
-                label: 'routes.mapEditor',
+                to: '/admin/settings',
+                icon: 'i-lucide-settings',
+                label: 'routes.settings',
                 permission: 'manage_settings',
             },
         ],
@@ -141,17 +147,11 @@ export function visibleNavItems(can: Can, signedIn = true): NavItem[] {
 export function staffSections(
     can: Can,
 ): { key: string; label: string; links: NavLink[] }[] {
-    const staffLinks = NAV_ITEMS.filter(
-        (item) => !item.children && item.permission,
-    ) as NavLink[]
     return NAV_ITEMS.filter((item) => item.children)
         .map((group) => ({
             key: group.key,
             label: group.label,
-            links: [
-                ...(group.key === 'manage' ? staffLinks : []),
-                ...group.children!,
-            ].filter(allowed(can)),
+            links: group.children!.filter(allowed(can)),
         }))
         .filter((section) => section.links.length > 0)
 }

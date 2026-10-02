@@ -1,30 +1,17 @@
 import { mount } from '@vue/test-utils'
 import LoadingState from '~/components/layout/LoadingState.vue'
 
-const skeletonStub = {
-    props: ['type'],
-    template: '<div class="skeleton" :data-type="type" />',
-}
-const slotStub = { template: '<div><slot /></div>' }
-
 function createWrapper(props: Record<string, unknown> = {}) {
     return mount(LoadingState, {
         props,
         global: {
-            stubs: {
-                'v-skeleton-loader': skeletonStub,
-                'v-row': slotStub,
-                'v-col': slotStub,
-            },
+            stubs: { USkeleton: { template: '<div class="skeleton" />' } },
         },
     })
 }
 
-function skeletonTypes(wrapper: ReturnType<typeof createWrapper>) {
-    return wrapper
-        .findAll('.skeleton')
-        .map((skeleton) => skeleton.attributes('data-type'))
-}
+const rowCount = (wrapper: ReturnType<typeof createWrapper>) =>
+    wrapper.findAll('.skeleton-row').length
 
 describe('LoadingState', () => {
     it('announces itself as busy', () => {
@@ -34,30 +21,23 @@ describe('LoadingState', () => {
         expect(wrapper.attributes('aria-live')).toBe('polite')
     })
 
-    it('renders three list skeletons by default', () => {
-        expect(skeletonTypes(createWrapper())).toEqual(
-            Array(3).fill('list-item-avatar-two-line'),
-        )
+    it('renders three list rows by default', () => {
+        expect(rowCount(createWrapper())).toBe(3)
     })
 
-    it('renders six card skeletons for the cards variant', () => {
-        expect(skeletonTypes(createWrapper({ variant: 'cards' }))).toEqual(
-            Array(6).fill('card-avatar'),
-        )
+    it('renders six cards for the cards variant', () => {
+        const wrapper = createWrapper({ variant: 'cards' })
+        expect(rowCount(wrapper)).toBe(6)
+        expect(wrapper.find('.grid').exists()).toBe(true)
     })
 
-    it('honours count and type overrides', () => {
-        expect(
-            skeletonTypes(createWrapper({ count: 1, type: 'card' })),
-        ).toEqual(['card'])
+    it('honours a count override', () => {
+        expect(rowCount(createWrapper({ count: 1 }))).toBe(1)
     })
 
     it('renders a hero, heading and list rows for the page variant', () => {
-        const types = skeletonTypes(createWrapper({ variant: 'page' }))
-
-        expect(types.slice(0, 2)).toEqual(['image', 'heading'])
-        expect(
-            types.filter((type) => type === 'list-item-avatar-two-line'),
-        ).toHaveLength(3)
+        const wrapper = createWrapper({ variant: 'page' })
+        expect(rowCount(wrapper)).toBe(3)
+        expect(wrapper.findAll('.skeleton').length).toBeGreaterThan(9)
     })
 })

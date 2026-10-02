@@ -5,7 +5,7 @@ import { gotoSettled } from '../../support/nav'
 
 async function selectOwnRoutes(page: Page, testPrefix: string) {
     await gotoSettled(page, '/manage/routes')
-    await page.getByTestId('filter-search').locator('input').fill(testPrefix)
+    await page.getByTestId('filter-search').fill(testPrefix)
     await expect(page.getByTestId('routes-row-name')).toHaveCount(2)
     await page.getByTestId('routes-select-all').click()
     await expect(page.getByTestId('routes-select-all')).toHaveText('2 selected')
@@ -84,8 +84,14 @@ test.describe('exports', () => {
 
         await page.getByTestId('export-toggle-all').click()
         await page.getByTestId('export-toggle-all').click()
-        await page.getByTestId('export-column-name').locator('input').check()
-        await page.getByTestId('export-column-qr').locator('input').check()
+        await page
+            .getByTestId('export-column-name')
+            .locator('[role=checkbox]')
+            .check()
+        await page
+            .getByTestId('export-column-qr')
+            .locator('[role=checkbox]')
+            .check()
         await page.getByTestId('export-move-up-qr').click()
 
         const downloadPromise = page.waitForEvent('download')

@@ -1,6 +1,6 @@
 <template>
     <div class="map-screen" data-testid="map-page">
-        <h1 class="d-sr-only">{{ $t('map.title') }}</h1>
+        <h1 class="sr-only">{{ $t('map.title') }}</h1>
 
         <div class="map-screen__body">
             <div class="map-screen__stage">
@@ -12,14 +12,15 @@
                         data-testid="load-error"
                     >
                         <template #actions>
-                            <v-btn
-                                variant="tonal"
-                                prepend-icon="mdi-refresh"
+                            <UButton
+                                color="neutral"
+                                variant="soft"
+                                icon="i-lucide-refresh-cw"
                                 data-testid="load-error-retry"
                                 @click="retryLoad"
                             >
                                 {{ $t('errors.retry') }}
-                            </v-btn>
+                            </UButton>
                         </template>
                     </LayoutEmptyState>
                 </div>
@@ -41,17 +42,18 @@
                 />
                 <div v-else class="map-empty" data-testid="map-empty">
                     <LayoutEmptyState
-                        icon="mdi-map-outline"
+                        icon="i-lucide-map"
                         :card="false"
                         :title="$t('map.noMap')"
                     />
-                    <v-btn
+                    <UButton
                         to="/routes"
-                        variant="tonal"
-                        prepend-icon="mdi-format-list-bulleted"
+                        color="neutral"
+                        variant="soft"
+                        icon="i-lucide-list"
                     >
                         {{ $t('map.openList') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
                 <MapFilterChips
@@ -67,45 +69,43 @@
                     :active-count="activeCount"
                     @clear="resetFilters"
                 >
-                    <v-menu v-if="locationItems.length > 1">
-                        <template #activator="{ props: menuProps }">
-                            <v-chip
-                                v-bind="menuProps"
-                                variant="flat"
-                                color="surface"
-                                prepend-icon="mdi-map-marker-outline"
-                                append-icon="mdi-menu-down"
-                                data-testid="map-location"
-                            >
-                                {{ location?.name }}
-                            </v-chip>
-                        </template>
-                        <v-list density="compact">
-                            <v-list-item
-                                v-for="item in locationItems"
-                                :key="item.value"
-                                :title="item.title"
-                                :active="item.value === locationId"
-                                @click="locationId = item.value"
-                            />
-                        </v-list>
-                    </v-menu>
+                    <UDropdownMenu
+                        v-if="locationItems.length > 1"
+                        :items="locationMenuItems"
+                        :content="{ align: 'start' }"
+                    >
+                        <UButton
+                            class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
+                            color="neutral"
+                            variant="outline"
+                            icon="i-lucide-map-pin"
+                            trailing-icon="i-lucide-chevron-down"
+                            data-testid="map-location"
+                        >
+                            {{ location?.name }}
+                        </UButton>
+                    </UDropdownMenu>
                     <template v-if="isLoggedIn" #after-type>
-                        <v-chip
+                        <UButton
                             v-for="option in sentOptions"
                             :key="option.value"
-                            variant="flat"
+                            class="map-chip rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2)]"
                             :color="
                                 sentFilter === option.value
                                     ? 'primary'
-                                    : 'surface'
+                                    : 'neutral'
+                            "
+                            :variant="
+                                sentFilter === option.value
+                                    ? 'solid'
+                                    : 'outline'
                             "
                             :aria-pressed="sentFilter === option.value"
                             :data-testid="`map-filter-${option.value}`"
                             @click="toggleSent(option.value)"
                         >
                             {{ option.label }}
-                        </v-chip>
+                        </UButton>
                     </template>
                 </MapFilterChips>
             </div>
@@ -117,31 +117,33 @@
                 @cover="sheetCover = $event"
             >
                 <template #header>
-                    <v-btn
+                    <UButton
                         v-if="selectedRoute"
-                        variant="text"
-                        prepend-icon="mdi-arrow-left"
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-lucide-arrow-left"
                         data-testid="map-route-card-close"
                         @click="selectRoute(null)"
                     >
                         {{ $t('map.backToList') }}
-                    </v-btn>
+                    </UButton>
                     <template v-else>
                         <span
-                            class="text-truncate font-weight-semibold"
+                            class="truncate font-semibold"
                             data-testid="map-list-title"
                             >{{ listTitle }} · {{ listCount }}</span
                         >
-                        <v-spacer />
-                        <v-btn
+                        <div class="flex-1" />
+                        <UButton
                             v-if="selectedWallId"
-                            variant="text"
-                            size="small"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
                             data-testid="map-list-all"
                             @click="selectWall(null)"
                         >
                             {{ $t('map.allWalls') }}
-                        </v-btn>
+                        </UButton>
                     </template>
                 </template>
 
@@ -155,15 +157,16 @@
                         :ticked="tickedRouteIds.has(selectedRoute.id)"
                     >
                         <template #actions>
-                            <v-btn
+                            <UButton
                                 v-if="isLoggedIn"
-                                variant="tonal"
-                                prepend-icon="mdi-check-circle-outline"
+                                color="neutral"
+                                variant="soft"
+                                icon="i-lucide-circle-check"
                                 data-testid="map-log-ascent"
                                 @click="openTick(selectedRoute.id)"
                             >
                                 {{ $t('ticks.logAscent') }}
-                            </v-btn>
+                            </UButton>
                             <RouteViewButton
                                 :route-id="selectedRoute.id"
                                 compact
@@ -173,19 +176,28 @@
                 </div>
                 <template v-else>
                     <div class="map-screen__search">
-                        <v-text-field
+                        <UInput
                             v-model="searchRouteName"
                             :placeholder="$t('climbing.searchRouteName')"
                             :aria-label="$t('climbing.searchRouteName')"
-                            prepend-inner-icon="mdi-magnify"
-                            density="compact"
-                            variant="solo-filled"
-                            flat
-                            hide-details
-                            clearable
+                            icon="i-lucide-search"
+                            variant="soft"
+                            size="lg"
+                            class="w-full"
                             data-testid="map-filter-search"
                             @focus="sheetSnap = 'full'"
-                        />
+                        >
+                            <template v-if="searchRouteName" #trailing>
+                                <UButton
+                                    icon="i-lucide-x"
+                                    color="neutral"
+                                    variant="link"
+                                    size="sm"
+                                    :aria-label="$t('actions.clear')"
+                                    @click="searchRouteName = ''"
+                                />
+                            </template>
+                        </UInput>
                     </div>
                     <MapRouteList
                         class="map-screen__list"
@@ -273,6 +285,17 @@ const {
               })
             : Promise.resolve([]),
     { watch: [locationId], default: () => [] },
+)
+
+const locationMenuItems = computed(() =>
+    locationItems.value.map((item) => ({
+        label: item.title,
+        type: 'checkbox' as const,
+        checked: item.value === locationId.value,
+        onSelect: () => {
+            locationId.value = item.value
+        },
+    })),
 )
 
 const loadFailed = computed(() => !!routesError.value || !!wallsError.value)
@@ -518,7 +541,7 @@ onMounted(async () => {
     top: 0;
     z-index: 1;
     padding: 4px 12px 8px;
-    background: rgb(var(--v-theme-surface));
+    background: var(--ui-bg);
 }
 
 .map-screen__list {

@@ -310,8 +310,8 @@ function onDotDown(routeId: string, event: PointerEvent) {
 }
 
 .placement-wall-outline {
-    fill: rgba(var(--v-theme-on-surface), 0.2);
-    stroke: rgba(var(--v-theme-on-surface), 0.3);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 20%, transparent);
+    stroke: color-mix(in oklab, var(--ui-text-highlighted) 30%, transparent);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }
@@ -323,20 +323,20 @@ function onDotDown(routeId: string, event: PointerEvent) {
 
 .placement-wall:focus-visible .placement-wall-outline,
 .placement-dot:focus-visible .placement-dot-hit {
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
 
 .placement-wall--selected .placement-wall-outline {
-    fill: rgba(var(--v-theme-primary), 0.2);
-    stroke: rgb(var(--v-theme-primary));
+    fill: color-mix(in oklab, var(--ui-primary) 20%, transparent);
+    stroke: var(--ui-primary);
     stroke-width: 2;
 }
 
 .placement-wall-edge {
     fill: none;
-    stroke: rgba(var(--v-theme-primary), 0.55);
+    stroke: color-mix(in oklab, var(--ui-primary) 55%, transparent);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-dasharray: 2 5;
@@ -344,7 +344,7 @@ function onDotDown(routeId: string, event: PointerEvent) {
 }
 
 .placement-wall-label {
-    fill: rgba(var(--v-theme-on-surface), 0.75);
+    fill: color-mix(in oklab, var(--ui-text-highlighted) 75%, transparent);
     font-weight: 600;
     pointer-events: none;
 }
@@ -364,7 +364,7 @@ function onDotDown(routeId: string, event: PointerEvent) {
 
 .placement-dot-ring {
     fill: none;
-    stroke: rgb(var(--v-theme-primary));
+    stroke: var(--ui-primary);
     stroke-width: 2.5;
     vector-effect: non-scaling-stroke;
     pointer-events: none;
@@ -375,8 +375,8 @@ function onDotDown(routeId: string, event: PointerEvent) {
 }
 
 .placement-ghost {
-    fill: rgba(var(--v-theme-primary), 0.35);
-    stroke: rgb(var(--v-theme-primary));
+    fill: color-mix(in oklab, var(--ui-primary) 35%, transparent);
+    stroke: var(--ui-primary);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }

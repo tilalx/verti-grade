@@ -2,57 +2,60 @@
     <div class="map-screen placement-page">
         <div class="map-screen__bar">
             <h1 class="map-screen__title">{{ $t('mapPlacement.title') }}</h1>
-            <v-select
+            <USelect
                 v-if="locationItems.length > 1"
                 v-model="locationId"
                 :items="locationItems"
+                label-key="title"
                 :aria-label="$t('climbing.location')"
-                density="compact"
-                variant="solo-filled"
-                flat
-                hide-details
+                variant="soft"
                 class="placement-location"
                 data-testid="placement-location"
             />
-            <v-btn
-                icon="mdi-undo"
-                variant="text"
+            <UButton
+                icon="i-lucide-undo-2"
+                color="neutral"
+                variant="ghost"
                 :disabled="!placement.history.value.length"
                 :aria-label="$t('mapEditor.undo')"
                 :title="$t('mapEditor.undo')"
                 data-testid="placement-undo"
                 @click="placement.undo()"
             />
-            <v-menu>
-                <template #activator="{ props: menuProps }">
-                    <v-btn
-                        v-bind="menuProps"
-                        icon="mdi-dots-vertical"
-                        variant="text"
-                        :aria-label="$t('mapPlacement.more')"
-                        data-testid="placement-more"
-                    />
+            <UPopover :content="{ align: 'end' }">
+                <UButton
+                    icon="i-lucide-ellipsis-vertical"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="$t('mapPlacement.more')"
+                    data-testid="placement-more"
+                />
+                <template #content="{ close }">
+                    <div class="flex min-w-[200px] flex-col gap-0.5 p-1">
+                        <UButton
+                            icon="i-lucide-circle-x"
+                            color="neutral"
+                            variant="ghost"
+                            :label="$t('mapPlacement.discard')"
+                            :disabled="!placement.changes.value.length"
+                            data-testid="placement-discard"
+                            @click="runAndClose(close, discard)"
+                        />
+                        <UButton
+                            v-if="can('manage_settings')"
+                            icon="i-lucide-land-plot"
+                            color="neutral"
+                            variant="ghost"
+                            :label="$t('routes.mapEditor')"
+                            :to="`/admin/map?location=${locationId}`"
+                        />
+                    </div>
                 </template>
-                <v-list density="compact">
-                    <v-list-item
-                        prepend-icon="mdi-close-circle-outline"
-                        :title="$t('mapPlacement.discard')"
-                        :disabled="!placement.changes.value.length"
-                        data-testid="placement-discard"
-                        @click="discard"
-                    />
-                    <v-list-item
-                        v-if="can('manage_settings')"
-                        prepend-icon="mdi-floor-plan"
-                        :title="$t('routes.mapEditor')"
-                        :to="`/admin/map?location=${locationId}`"
-                    />
-                </v-list>
-            </v-menu>
-            <v-btn
+            </UPopover>
+            <UButton
                 color="primary"
-                variant="flat"
-                prepend-icon="mdi-content-save-outline"
+                variant="solid"
+                icon="i-lucide-save"
                 :disabled="!placement.changes.value.length"
                 :loading="saving"
                 data-testid="placement-save"
@@ -63,23 +66,24 @@
                         n: placement.changes.value.length,
                     })
                 }}
-            </v-btn>
+            </UButton>
         </div>
 
         <div v-if="!map" class="placement-empty" data-testid="placement-empty">
             <LayoutEmptyState
-                icon="mdi-map-outline"
+                icon="i-lucide-map"
                 :card="false"
                 :title="$t('mapPlacement.noMap')"
             />
-            <v-btn
+            <UButton
                 v-if="can('manage_settings')"
                 to="/admin/map"
-                variant="tonal"
-                prepend-icon="mdi-floor-plan"
+                color="neutral"
+                variant="soft"
+                icon="i-lucide-land-plot"
             >
                 {{ $t('routes.mapEditor') }}
-            </v-btn>
+            </UButton>
         </div>
 
         <div v-else class="map-screen__body">
@@ -119,57 +123,62 @@
             >
                 <template #header>
                     <span
-                        class="placement-hint text-body-small"
+                        class="placement-hint text-xs"
                         aria-live="polite"
                         data-testid="placement-hint"
                     >
                         {{ hint }}
                     </span>
-                    <v-btn
+                    <UButton
                         v-if="placement.armedRouteId.value"
-                        variant="text"
-                        size="small"
-                        prepend-icon="mdi-skip-next"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
+                        icon="i-lucide-skip-forward"
                         data-testid="placement-skip"
                         @click="placement.skipArmed()"
                     >
                         {{ $t('mapPlacement.skip') }}
-                    </v-btn>
-                    <v-btn
+                    </UButton>
+                    <UButton
                         v-if="
                             placement.armedRouteId.value ||
                             placement.checkedIds.value.size
                         "
-                        icon="mdi-close"
-                        variant="text"
-                        size="small"
+                        icon="i-lucide-x"
+                        color="neutral"
+                        variant="ghost"
+                        size="sm"
                         :aria-label="$t('actions.cancel')"
                         data-testid="placement-cancel"
                         @click="placement.cancelArming()"
                     />
                     <template v-else-if="placement.selectedPlaced.value">
-                        <v-btn
-                            icon="mdi-chevron-left"
-                            variant="tonal"
-                            size="small"
+                        <UButton
+                            icon="i-lucide-chevron-left"
+                            color="neutral"
+                            variant="soft"
+                            size="sm"
                             :aria-label="$t('mapPlacement.nudgeBack')"
                             :title="$t('mapPlacement.nudgeBack')"
                             data-testid="placement-nudge-back"
                             @click="placement.nudge(-1)"
                         />
-                        <v-btn
-                            icon="mdi-chevron-right"
-                            variant="tonal"
-                            size="small"
+                        <UButton
+                            icon="i-lucide-chevron-right"
+                            color="neutral"
+                            variant="soft"
+                            size="sm"
                             :aria-label="$t('mapPlacement.nudgeForward')"
                             :title="$t('mapPlacement.nudgeForward')"
                             data-testid="placement-nudge-forward"
                             @click="placement.nudge(1)"
                         />
-                        <v-btn
-                            icon="mdi-map-marker-remove-outline"
-                            variant="text"
-                            size="small"
+                        <UButton
+                            icon="i-lucide-map-pin-x"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
                             :aria-label="$t('mapPlacement.remove')"
                             :title="$t('mapPlacement.remove')"
                             data-testid="placement-remove-selected"
@@ -187,12 +196,10 @@
                     class="placement-wall-box"
                     data-testid="placement-wall-box"
                 >
-                    <div class="d-flex align-center ga-2">
-                        <p class="font-weight-semibold flex-grow-1">
+                    <div class="flex items-center gap-2">
+                        <p class="font-semibold grow">
                             {{ placement.selectedWall.value.name }}
-                            <span
-                                class="text-medium-emphasis font-weight-regular"
-                            >
+                            <span class="text-muted font-normal">
                                 ·
                                 {{
                                     $t('mapPlacement.wallRoutes', {
@@ -201,17 +208,18 @@
                                 }}
                             </span>
                         </p>
-                        <v-btn
-                            icon="mdi-close"
-                            variant="text"
-                            size="small"
+                        <UButton
+                            icon="i-lucide-x"
+                            color="neutral"
+                            variant="ghost"
+                            size="sm"
                             :aria-label="$t('map.close')"
                             @click="selectWall(null)"
                         />
                     </div>
                     <p
                         v-if="placement.wallAge.value || lastReset"
-                        class="text-body-small text-medium-emphasis mb-2"
+                        class="text-xs text-muted mb-2"
                         data-testid="placement-wall-age"
                     >
                         <template v-if="placement.wallAge.value">
@@ -233,22 +241,23 @@
                             }}
                         </template>
                     </p>
-                    <div class="d-flex flex-wrap ga-2">
-                        <v-btn
-                            size="small"
-                            variant="tonal"
-                            prepend-icon="mdi-distribute-horizontal-center"
+                    <div class="flex flex-wrap gap-2">
+                        <UButton
+                            size="sm"
+                            color="neutral"
+                            variant="soft"
+                            icon="i-lucide-between-horizontal-start"
                             :disabled="placement.wallRoutes.value.length < 2"
                             data-testid="placement-distribute"
                             @click="placement.distribute()"
                         >
                             {{ $t('mapPlacement.distribute') }}
-                        </v-btn>
-                        <v-btn
-                            size="small"
-                            variant="text"
+                        </UButton>
+                        <UButton
+                            size="sm"
+                            variant="ghost"
                             color="error"
-                            prepend-icon="mdi-restore-alert"
+                            icon="i-lucide-history"
                             :disabled="
                                 !placement.savedWallRouteIds.value.length ||
                                 placement.changes.value.length > 0
@@ -262,7 +271,7 @@
                             @click="resetDialogOpen = true"
                         >
                             {{ $t('mapPlacement.resetWall') }}
-                        </v-btn>
+                        </UButton>
                     </div>
                 </div>
 
@@ -270,10 +279,11 @@
                     v-if="placement.hasAnchorRanges.value"
                     class="placement-auto"
                 >
-                    <v-btn
+                    <UButton
                         block
-                        variant="tonal"
-                        prepend-icon="mdi-auto-fix"
+                        color="neutral"
+                        variant="soft"
+                        icon="i-lucide-wand-sparkles"
                         :disabled="!placement.autoPlacements.value.size"
                         data-testid="placement-auto"
                         @click="placement.autoPlace()"
@@ -283,49 +293,53 @@
                                 n: placement.autoPlacements.value.size,
                             })
                         }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
-                <v-tabs v-model="placement.tab.value" density="compact" grow>
-                    <v-tab
-                        value="unplaced"
-                        data-testid="placement-tab-unplaced"
+                <div class="placement-tabs" role="tablist">
+                    <button
+                        v-for="tab in placementTabs"
+                        :key="tab.value"
+                        type="button"
+                        role="tab"
+                        class="placement-tab"
+                        :class="{
+                            'placement-tab--active':
+                                placement.tab.value === tab.value,
+                        }"
+                        :aria-selected="placement.tab.value === tab.value"
+                        :data-testid="`placement-tab-${tab.value}`"
+                        @click="placement.tab.value = tab.value"
                     >
-                        {{
-                            $t('mapPlacement.unplaced', {
-                                n: placement.unplacedRoutes.value.length,
-                            })
-                        }}
-                    </v-tab>
-                    <v-tab value="placed" data-testid="placement-tab-placed">
-                        {{
-                            $t('mapPlacement.placed', {
-                                n: placement.placedRoutes.value.length,
-                            })
-                        }}
-                    </v-tab>
-                </v-tabs>
+                        {{ tab.label }}
+                    </button>
+                </div>
 
                 <div class="placement-tools">
-                    <v-text-field
+                    <UInput
                         v-model="placement.search.value"
                         :placeholder="$t('climbing.searchRouteName')"
                         :aria-label="$t('climbing.searchRouteName')"
-                        prepend-inner-icon="mdi-magnify"
-                        density="compact"
-                        variant="solo-filled"
-                        flat
-                        hide-details
-                        clearable
+                        icon="i-lucide-search"
+                        variant="soft"
+                        class="placement-search"
                         data-testid="placement-search"
-                    />
-                    <v-switch
+                    >
+                        <template v-if="placement.search.value" #trailing>
+                            <UButton
+                                icon="i-lucide-x"
+                                color="neutral"
+                                variant="link"
+                                size="sm"
+                                :aria-label="$t('actions.clear')"
+                                @click="placement.search.value = ''"
+                            />
+                        </template>
+                    </UInput>
+                    <USwitch
                         v-model="placement.keepGoing.value"
                         :label="$t('mapPlacement.keepGoing')"
-                        color="primary"
-                        density="compact"
-                        hide-details
-                        inset
+                        class="shrink-0"
                         data-testid="placement-keep-going"
                     />
                 </div>
@@ -334,7 +348,7 @@
                     class="placement-checked"
                     data-testid="placement-checked"
                 >
-                    <span class="text-body-medium">
+                    <span class="text-sm">
                         {{
                             $t(
                                 'mapPlacement.checked',
@@ -343,71 +357,75 @@
                             )
                         }}
                     </span>
-                    <v-btn
-                        size="small"
-                        variant="text"
+                    <UButton
+                        size="sm"
+                        color="neutral"
+                        variant="ghost"
                         @click="placement.cancelArming()"
                     >
                         {{ $t('actions.cancel') }}
-                    </v-btn>
+                    </UButton>
                 </div>
 
-                <v-list density="compact" class="placement-list" nav>
-                    <v-list-item
+                <div class="placement-list">
+                    <div
                         v-for="item in placement.listedRoutes.value"
                         :key="item.id"
-                        :active="
-                            item.id === placement.armedRouteId.value ||
-                            item.id === placement.selectedRouteId.value
-                        "
-                        rounded="lg"
+                        class="placement-route"
+                        :class="{
+                            'placement-route--active':
+                                item.id === placement.armedRouteId.value ||
+                                item.id === placement.selectedRouteId.value,
+                        }"
+                        tabindex="0"
                         data-testid="placement-route"
                         :data-route-id="item.id"
                         @pointerdown="onItemPointerDown(item, $event)"
                         @contextmenu.prevent
                         @click="onListClick(item.id)"
+                        @keydown.enter.self="onListClick(item.id)"
                     >
-                        <template #prepend>
-                            <v-checkbox-btn
-                                v-if="placement.tab.value === 'unplaced'"
-                                :model-value="
-                                    placement.checkedIds.value.has(item.id)
-                                "
-                                density="compact"
-                                class="mr-1"
-                                :aria-label="item.name"
-                                data-testid="placement-route-check"
-                                @click.stop
-                                @update:model-value="
-                                    placement.toggleChecked(item.id)
-                                "
-                            />
-                            <RouteColorDot
-                                :color="item.color"
-                                :size="20"
-                                class="mr-3"
-                            />
-                        </template>
-                        <v-list-item-title>{{ item.name }}</v-list-item-title>
-                        <v-list-item-subtitle>
-                            {{ routeSubtitle(item) }}
-                        </v-list-item-subtitle>
-                        <template v-if="item.wall" #append>
-                            <v-btn
-                                icon="mdi-map-marker-remove-outline"
-                                size="small"
-                                variant="text"
-                                :aria-label="$t('mapPlacement.remove')"
-                                :title="$t('mapPlacement.remove')"
-                                data-testid="placement-remove"
-                                @click.stop="placement.unplace(item.id)"
-                            />
-                        </template>
-                    </v-list-item>
-                </v-list>
+                        <UCheckbox
+                            v-if="placement.tab.value === 'unplaced'"
+                            :model-value="
+                                placement.checkedIds.value.has(item.id)
+                            "
+                            class="mr-3"
+                            :aria-label="item.name"
+                            data-testid="placement-route-check"
+                            @click.stop
+                            @update:model-value="
+                                placement.toggleChecked(item.id)
+                            "
+                        />
+                        <RouteColorDot
+                            :color="item.color"
+                            :size="20"
+                            class="mr-3"
+                        />
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate text-sm">{{
+                                item.name
+                            }}</span>
+                            <span class="block truncate text-xs text-muted">
+                                {{ routeSubtitle(item) }}
+                            </span>
+                        </span>
+                        <UButton
+                            v-if="item.wall"
+                            icon="i-lucide-map-pin-x"
+                            color="neutral"
+                            variant="ghost"
+                            :aria-label="$t('mapPlacement.remove')"
+                            :title="$t('mapPlacement.remove')"
+                            data-testid="placement-remove"
+                            @click.stop="placement.unplace(item.id)"
+                        />
+                    </div>
+                </div>
                 <p
                     v-if="!placement.listedRoutes.value.length"
-                    class="text-body-small text-medium-emphasis pa-4"
+                    class="text-xs text-muted p-4"
                 >
                     {{ $t('table.no_data') }}
                 </p>
@@ -511,6 +529,20 @@ const { data: routes, refresh: refreshRoutes } = await useAsyncData(
 )
 
 const placement = useMapPlacement(routes, walls, mapWalls)
+const placementTabs = computed(() => [
+    {
+        value: 'unplaced' as const,
+        label: t('mapPlacement.unplaced', {
+            n: placement.unplacedRoutes.value.length,
+        }),
+    },
+    {
+        value: 'placed' as const,
+        label: t('mapPlacement.placed', {
+            n: placement.placedRoutes.value.length,
+        }),
+    },
+])
 
 const sheetSnap = ref<SheetSnap>('half')
 const sheetCover = ref(0)
@@ -574,6 +606,11 @@ function revealMap() {
 watch(placement.canvasArmedId, (armedId) => {
     if (armedId) revealMap()
 })
+
+function runAndClose(close: () => void, action: () => unknown) {
+    close()
+    action()
+}
 
 async function discard() {
     if (await confirmDiscard()) placement.reset()
@@ -793,13 +830,12 @@ onBeforeUnmount(() => {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+    color: var(--ui-text-muted);
 }
 
 .placement-wall-box {
     padding: 8px 8px 12px 16px;
-    border-bottom: 1px solid
-        rgba(var(--v-border-color), var(--v-border-opacity));
+    border-bottom: 1px solid var(--ui-border);
 }
 
 .placement-auto {
@@ -814,12 +850,42 @@ onBeforeUnmount(() => {
     padding: 8px 12px 0;
 }
 
-.placement-tools .v-text-field {
+.placement-search {
     flex: 1 1 180px;
 }
 
-.placement-tools .v-switch {
-    flex: 0 0 auto;
+.placement-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.placement-tab {
+    flex: 1 1 auto;
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ui-text-muted);
+    border-bottom: 2px solid transparent;
+}
+
+.placement-tab--active {
+    color: var(--ui-primary);
+    border-bottom-color: var(--ui-primary);
+}
+
+.placement-route:hover {
+    background: color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent);
+}
+
+.placement-route:focus-visible {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: -2px;
+}
+
+.placement-route--active {
+    color: var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
 }
 
 .placement-checked {
@@ -828,14 +894,22 @@ onBeforeUnmount(() => {
     justify-content: space-between;
     margin-top: 8px;
     padding: 4px 12px 4px 16px;
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
 
 .placement-list {
-    padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 8px 0;
 }
 
-.placement-list :deep(.v-list-item) {
+.placement-route {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 4px 4px 4px 8px;
+    border-radius: 8px;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -850,8 +924,8 @@ onBeforeUnmount(() => {
     gap: 8px;
     padding: 4px 10px;
     border-radius: 999px;
-    background: rgb(var(--v-theme-surface));
-    color: rgb(var(--v-theme-on-surface));
+    background: var(--ui-bg);
+    color: var(--ui-text-highlighted);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     font-size: 0.8125rem;
     pointer-events: none;

@@ -43,7 +43,7 @@ const listItem = (page: Page, id: string) =>
 
 async function saveAndReload(page: Page) {
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     return Promise.all(
@@ -113,7 +113,7 @@ test('nudge buttons move the selected dot along its wall', async ({
         .click()
     await page.getByTestId('placement-nudge-forward').click()
     await page.getByTestId('placement-save').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         'Route positions saved',
     )
     const saved = await seeded.root.collection('routes').getOne(routeId)
@@ -147,7 +147,7 @@ test('resetting a wall archives its routes', async ({
     await expect(page.getByTestId('placement-wall-age')).toBeVisible()
     await page.getByTestId('placement-reset-wall').click()
     await page.getByTestId('confirm-dialog-confirm').click()
-    await expect(page.getByTestId('global-snackbar')).toContainText(
+    await expect(page.getByTestId('global-snackbar').last()).toContainText(
         '2 routes archived',
     )
     const [first, second] = await Promise.all(
@@ -196,10 +196,7 @@ test('the route form picks the wall from the anchor number', async ({
     await page
         .getByRole('option', { name: `${testPrefix} Map Hall`, exact: true })
         .click()
-    await page
-        .getByTestId('route-form-anchor-point')
-        .locator('input')
-        .fill('35')
+    await page.getByTestId('route-form-anchor-point').fill('35')
     await expect(page.getByTestId('route-form-wall')).toContainText(
         `${testPrefix} Island`,
     )

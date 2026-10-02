@@ -7,63 +7,71 @@
         :title="$t('reports.dialogTitle')"
         data-testid="report-form-dialog"
     >
-        <p class="text-body-medium text-medium-emphasis mb-4">
+        <p class="text-sm text-muted mb-4">
             {{ $t('reports.dialogIntro') }}
         </p>
 
-        <v-form v-model="isFormValid">
-            <v-select
-                v-model="form.reason"
-                :items="reasonItems"
-                item-title="title"
-                item-value="value"
+        <UForm
+            :state="form"
+            :validate="(state) => validateRules(state, formRules)"
+            @submit.prevent
+        >
+            <UFormField
                 :label="$t('reports.reason')"
-                :rules="[rules.required]"
-                density="comfortable"
-                hide-details="auto"
+                name="reason"
                 class="mb-4"
-                data-testid="report-form-reason"
-            />
+            >
+                <USelect
+                    v-model="form.reason"
+                    :items="reasonItems"
+                    class="w-full"
+                    data-testid="report-form-reason"
+                />
+            </UFormField>
 
-            <v-textarea
-                v-model="form.explanation"
+            <UFormField
                 :label="$t('reports.explanation')"
-                :hint="$t('reports.explanationHint')"
-                :rules="[rules.nonBlank, rules.explanationLength]"
-                persistent-hint
-                rows="3"
-                auto-grow
-                counter="2000"
-                density="comfortable"
+                :help="$t('reports.explanationHint')"
+                :hint="`${form.explanation.length}/2000`"
+                name="explanation"
                 class="mb-4"
-                data-testid="report-form-explanation"
-            />
+            >
+                <UTextarea
+                    v-model="form.explanation"
+                    :rows="3"
+                    autoresize
+                    class="w-full"
+                    data-testid="report-form-explanation"
+                />
+            </UFormField>
 
-            <v-row density="comfortable">
-                <v-col cols="12" sm="6">
-                    <v-text-field
+            <div class="grid grid-cols-12 gap-4">
+                <UFormField
+                    :label="$t('reports.notifierName')"
+                    name="notifierName"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <UInput
                         v-model="form.notifierName"
-                        :label="$t('reports.notifierName')"
-                        :rules="[rules.nonBlank, rules.nameLength]"
-                        density="comfortable"
-                        hide-details="auto"
+                        class="w-full"
                         data-testid="report-form-name"
                     />
-                </v-col>
-                <v-col cols="12" sm="6">
-                    <v-text-field
+                </UFormField>
+                <UFormField
+                    :label="$t('reports.notifierEmail')"
+                    name="notifierEmail"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <UInput
                         v-model="form.notifierEmail"
                         type="email"
-                        :label="$t('reports.notifierEmail')"
-                        :rules="[rules.required, rules.email]"
-                        density="comfortable"
-                        hide-details="auto"
+                        class="w-full"
                         data-testid="report-form-email"
                     />
-                </v-col>
-            </v-row>
+                </UFormField>
+            </div>
 
-            <p class="text-body-small text-medium-emphasis mt-2 mb-1">
+            <p class="text-xs text-muted mt-2 mb-1">
                 {{ $t('reports.contactNote') }}
                 <a
                     :href="privacyUrl"
@@ -73,39 +81,45 @@
                 >
             </p>
 
-            <v-checkbox
-                v-model="form.goodFaith"
-                :label="$t('reports.goodFaith')"
-                :rules="[rules.mustAccept]"
-                density="comfortable"
-                data-testid="report-form-goodfaith"
-            />
-        </v-form>
+            <UFormField name="goodFaith" class="mt-3">
+                <UCheckbox
+                    v-model="form.goodFaith"
+                    :label="$t('reports.goodFaith')"
+                    data-testid="report-form-goodfaith"
+                />
+            </UFormField>
+        </UForm>
 
         <template #actions>
-            <v-btn
-                variant="text"
+            <UButton
+                color="neutral"
+                variant="ghost"
                 data-testid="report-form-cancel"
                 @click="close"
-                >{{ $t('actions.cancel') }}</v-btn
+                >{{ $t('actions.cancel') }}</UButton
             >
-            <v-spacer />
-            <v-btn
-                :disabled="!isFormValid"
-                :loading="saving"
+            <div class="flex-1" />
+            <UButton
+                :disabled="!isFormValid || saving"
                 color="primary"
                 data-testid="report-form-submit"
                 @click="submit"
             >
-                <template #loader><CaptchaLoader /></template>
-                {{ $t('reports.submit') }}
-            </v-btn>
+                <CaptchaLoader v-if="saving" />
+                <template v-else>{{ $t('reports.submit') }}</template>
+            </UButton>
         </template>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
-import { required, nonBlank, maxLength, validEmail } from '~/utils/validation'
+import {
+    required,
+    nonBlank,
+    maxLength,
+    validEmail,
+    validateRules,
+} from '~/utils/validation'
 import { REPORT_REASONS } from '~/utils/reports'
 import type { ReportContentType, SettingsRecord } from '~/types/models'
 
@@ -140,11 +154,10 @@ const sheetOpen = computed({
     },
 })
 
-const isFormValid = ref(false)
 const saving = ref(false)
 
 const form = reactive({
-    reason: null as string | null,
+    reason: undefined as string | undefined,
     explanation: '',
     notifierName: '',
     notifierEmail: '',
@@ -153,8 +166,8 @@ const form = reactive({
 
 const reasonItems = computed(() =>
     REPORT_REASONS.map((value) => ({
-        value,
-        title: t(`reports.reasons.${value}`),
+        value: value as string,
+        label: t(`reports.reasons.${value}`),
     })),
 )
 
@@ -170,8 +183,18 @@ const rules = {
     mustAccept: (v: unknown) => v === true || t('validation.required'),
 }
 
+const formRules = {
+    reason: [rules.required],
+    explanation: [rules.nonBlank, rules.explanationLength],
+    notifierName: [rules.nonBlank, rules.nameLength],
+    notifierEmail: [rules.required, rules.email],
+    goodFaith: [rules.mustAccept],
+}
+
+const isFormValid = computed(() => validateRules(form, formRules).length === 0)
+
 function resetForm() {
-    form.reason = null
+    form.reason = undefined
     form.explanation = ''
     form.goodFaith = false
     const account = pb.authStore.record
