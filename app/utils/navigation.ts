@@ -76,6 +76,12 @@ export const NAV_ITEMS: NavItem[] = [
                 permission: 'run_inventory',
             },
             {
+                to: '/manage/tasks',
+                icon: 'i-lucide-list-checks',
+                label: 'routes.tasks',
+                permission: 'manage_tasks',
+            },
+            {
                 to: '/manage/analytics',
                 icon: 'i-lucide-chart-line',
                 label: 'routes.analytics',

@@ -32,6 +32,7 @@
                     :routes="routes"
                     :layout-routes="allRoutes"
                     :sent-ids="isLoggedIn ? tickedRouteIds : null"
+                    :defects="defectsByRoute"
                     :matching-ids="matchingIds"
                     :show-sent="isLoggedIn"
                     :selected-wall-id="selectedWallId"
@@ -155,6 +156,7 @@
                     <RouteCard
                         :route="selectedRoute"
                         :ticked="tickedRouteIds.has(selectedRoute.id)"
+                        :defect="defectsByRoute.get(selectedRoute.id)"
                     >
                         <template #actions>
                             <UButton
@@ -204,6 +206,7 @@
                         :groups="listGroups"
                         :show-headings="!selectedWallId"
                         :ticked-ids="tickedRouteIds"
+                        :defects="defectsByRoute"
                         :selected-route-id="selectedRouteId"
                         @select="onListSelect"
                     />
@@ -242,6 +245,7 @@ const { polite: announce } = useAnnouncer()
 const { mdAndUp } = useDisplay()
 const isLoggedIn = computed(() => pb.authStore.isValid)
 const { tickedRouteIds, refreshTickedRoutes } = useTickedRoutes()
+const { defectsByRoute } = useOpenDefects()
 const { gradeColumnTitle } = useGradeSystems()
 const {
     searchRouteName,

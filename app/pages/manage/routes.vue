@@ -244,6 +244,9 @@
                             data-testid="routes-row-name"
                             >{{ row.original.name }}</span
                         >
+                        <TaskDefectMarker
+                            :severity="defectsByRoute.get(row.original.id)"
+                        />
                         <UIcon
                             v-if="row.original.has_ratings"
                             name="i-lucide-badge-check"
@@ -358,6 +361,7 @@
                     :key="route.id"
                     :route="route"
                     :selected="selectedRouteIds.has(route.id)"
+                    :defect="defectsByRoute.get(route.id)"
                     @update:selected="updateRouteSelection(route, $event)"
                     @edit="routeFormRef?.open(route)"
                 >
@@ -498,6 +502,7 @@ const { t, locale } = useI18n()
 const { mdAndDown, width: displayWidth } = useDisplay()
 const { notify, error: notifyError } = useNotification()
 const { run: runAction } = useAsyncAction()
+const { defectsByRoute } = useOpenDefects()
 
 const isMobile = computed(() => mdAndDown.value)
 

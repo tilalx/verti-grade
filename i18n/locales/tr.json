@@ -133,6 +133,7 @@
         },
         "name": "Ad",
         "reports": "Şikâyetler",
+        "tasks": "Görevler",
         "activity": "Etkinlik",
         "logbook": "Kayıt defteri",
         "view": "Görüntüle",
@@ -431,7 +432,10 @@
             "types": {
                 "report_filed": "Yeni içerik şikâyeti: “{snippet}”",
                 "report_decided_removed": "Bir şikâyet karara bağlandı — içerik kaldırıldı",
-                "report_decided_kept": "Bir şikâyet karara bağlandı — içerik yayında kaldı"
+                "report_decided_kept": "Bir şikâyet karara bağlandı — içerik yayında kaldı",
+                "task_defect_filed": "“{route}” rotasında yeni arıza bildirildi",
+                "task_assigned": "Size görev atandı: “{title}”",
+                "task_defect_fixed": "“{route}” rotasında bildirdiğiniz sorun giderildi — teşekkürler!"
             }
         }
     },
@@ -475,6 +479,10 @@
             "reports": {
                 "title": "İçerik şikâyetleri",
                 "body": "Bir içeriği bildirdiğinizde, şikâyeti işlemek ve sizi karar hakkında bilgilendirmek için adınızı, e-posta adresinizi, şikâyet nedenini ve açıklamanızı işleriz (GDPR md. 6(1)(c) ile DSA md. 16). Şikâyetler belgeleme için gerekli olduğu sürece saklanır."
+            },
+            "defects": {
+                "title": "Rota sorun bildirimleri",
+                "body": "Bir rotadaki sorunu bildirdiğinizde, seçilen sorun türünü, isteğe bağlı açıklamanızı ve fotoğrafınızı, giriş yaptıysanız hesabınızı saklarız; böylece ekip rotayı onarabilir ve sizi bilgilendirebilir. Fotoğraflarda kişilere yer vermeyin. Bildirimler rota ile birlikte silinir."
             },
             "auditLog": {
                 "title": "Denetim kaydı",
@@ -547,6 +555,7 @@
             "routeNamed": "{name} - Gripello",
             "inventory": "Rota envanteri - Gripello",
             "reports": "İçerik Şikâyetleri - Gripello",
+            "tasks": "Görevler - Gripello",
             "activity": "Etkinlik Günlüğü - Gripello",
             "verifyEmail": "E-posta Doğrulama - Gripello",
             "emailChange": "E-posta Değiştirme - Gripello",
@@ -863,6 +872,111 @@
         "mailWarning": "E-posta yapılandırılmadığı için şikâyet edenler 16. maddenin gerektirdiği onay ve karar bildirimlerini alamıyor.",
         "mailWarningAction": "Ayarları aç"
     },
+    "tasks": {
+        "pageTitle": "Görevler",
+        "pageSubtitle": "Tırmanıcıların bildirdiği arızalar ve salondaki işler.",
+        "newTitle": "Yeni görev",
+        "title": "Başlık",
+        "kind": "Tür",
+        "category": "Sorun",
+        "priority": "Öncelik",
+        "status": "Durum",
+        "location": "Konum",
+        "wall": "Duvar",
+        "assignee": "Atanan",
+        "dueDate": "Son tarih",
+        "dueOn": "Son tarih {date}",
+        "description": "Açıklama",
+        "resolutionNote": "Çözüm notu",
+        "photo": "Fotoğraf",
+        "photoHint": "İsteğe bağlı — tam yeri bulmaya yardımcı olur.",
+        "photoAdd": "Fotoğraf ekle",
+        "photoTooLarge": "Fotoğraf 5 MB’tan küçük olmalı.",
+        "saved": "Görev kaydedildi.",
+        "openRoute": "Rotayı aç",
+        "addForRoute": "Görev ekle",
+        "loadError": "Görevler yüklenemedi.",
+        "kinds": {
+            "defect": "Arıza",
+            "reset": "Yeniden kurulum",
+            "maintenance": "Bakım",
+            "other": "Diğer"
+        },
+        "categories": {
+            "loose_bolt": "Gevşek cıvata / vida",
+            "loose_hold": "Gevşek tutamak",
+            "spinning_hold": "Dönen tutamak",
+            "broken_hold": "Kırık tutamak",
+            "damaged_volume": "Hasarlı hacim",
+            "sharp_edge": "Keskin kenar",
+            "missing_hold": "Eksik tutamak",
+            "label_tag": "Etiket",
+            "other": "Diğer"
+        },
+        "priorities": {
+            "low": "Düşük",
+            "normal": "Normal",
+            "high": "Yüksek",
+            "urgent": "Acil"
+        },
+        "statuses": {
+            "open": "Açık",
+            "in_progress": "Devam ediyor",
+            "waiting": "Beklemede",
+            "done": "Tamamlandı",
+            "dismissed": "Reddedildi"
+        },
+        "statusChanged": {
+            "open": "Görev yeniden açıldı.",
+            "in_progress": "Göreve başlandı.",
+            "waiting": "Görev beklemede.",
+            "done": "Görev tamamlandı.",
+            "dismissed": "Görev reddedildi."
+        },
+        "actions": {
+            "start": "Başla",
+            "done": "Tamamla",
+            "reopen": "Yeniden aç",
+            "moveTo": "Taşı…"
+        },
+        "defect": {
+            "reportAction": "Sorun bildir",
+            "dialogTitle": "Sorun bildir",
+            "dialogIntro": "Bu rotada bir sorun mu var? Kurucuların düzeltebilmesi için haber verin.",
+            "alreadyReported": "Zaten bildirildi",
+            "whatsWrong": "Sorun ne?",
+            "details": "Ayrıntılar",
+            "detailsPlaceholder": "ör. üstten ikinci tutamak dönüyor",
+            "submit": "Bildirimi gönder",
+            "submitted": "Teşekkürler! Kurucular bilgilendirildi.",
+            "bannerTitle": "{n} bilinen sorun | {n} bilinen sorun",
+            "marker": "Bilinen sorun"
+        },
+        "board": {
+            "recentlyDone": "son 30",
+            "emptyColumn": "Burada bir şey yok",
+            "dropHint": "Bir duruma bırakın"
+        },
+        "ageDays": "{n} gündür açık | {n} gündür açık",
+        "quick": {
+            "mine": "Benim",
+            "urgent": "Acil",
+            "overdue": "Gecikmiş"
+        },
+        "sections": {
+            "task": "Görev",
+            "place": "Konum",
+            "assignment": "Atama",
+            "resolution": "Sonuç"
+        },
+        "titlePlaceholder": "ör. yeniden kurulum için A duvarını sök",
+        "descriptionPlaceholder": "Ne yapılması gerekiyor?",
+        "resolutionPlaceholder": "Ne yapıldı?",
+        "assignToMe": "Bana ata",
+        "unassigned": "Atanmadı",
+        "forThisRoute": "Bu rota için",
+        "newSubtitle": "Kurucu ekibin işlerini takip edin"
+    },
     "audit": {
         "title": "Etkinlik Günlüğü",
         "subtitle": "Sitedeki tüm kayıtlı işlemler.",
@@ -901,7 +1015,8 @@
             "roles": "Roller",
             "permissions": "İzinler",
             "settings": "Ayarlar",
-            "reports": "Şikâyetler"
+            "reports": "Şikâyetler",
+            "tasks": "Görevler"
         },
         "target": {
             "routes": "Rota",
@@ -910,7 +1025,8 @@
             "roles": "Rol",
             "permissions": "İzin",
             "settings": "Ayarlar",
-            "reports": "Şikâyet"
+            "reports": "Şikâyet",
+            "tasks": "Görev"
         },
         "changedLabel": "Değişen"
     },

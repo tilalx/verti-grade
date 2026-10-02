@@ -38,9 +38,13 @@
                         :size="26"
                     />
                     <span class="map-route-row__text">
-                        <span class="map-route-row__name">{{
-                            route.name
-                        }}</span>
+                        <span class="map-route-row__name"
+                            >{{ route.name }}
+                            <TaskDefectMarker
+                                :severity="defects?.get(route.id)"
+                                size="sm"
+                                class="align-[-2px]"
+                        /></span>
                         <span class="map-route-row__meta">{{
                             subtitle(route)
                         }}</span>
@@ -79,12 +83,14 @@
 
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
+import type { DefectSeverity } from '~/utils/tasks'
 import { formatAnchorPoint } from '#shared/utils/formatting'
 
 defineProps<{
     groups: { id: string; name: string; routes: RouteListItem[] }[]
     showHeadings: boolean
     tickedIds: ReadonlySet<string>
+    defects?: ReadonlyMap<string, DefectSeverity>
     selectedRouteId: string | null
     linkRows?: boolean
 }>()

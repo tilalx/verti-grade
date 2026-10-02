@@ -245,6 +245,11 @@ export async function sweepTestData(
     await deleteMatching(pb, 'reports', `explanation ~ ${name}`)
     await deleteMatching(
         pb,
+        'tasks',
+        `title ~ ${name} || description ~ ${name} || route.name ~ ${name}${routeInLocation}${inLocation}`,
+    )
+    await deleteMatching(
+        pb,
         'ticks',
         `route.name ~ ${name} || route.location.name ~ ${name} || user.email ~ ${name}${routeInLocation}`,
     )

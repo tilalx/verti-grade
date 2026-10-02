@@ -3,6 +3,7 @@ import { createHmac, randomBytes } from 'node:crypto'
 export const CAP_SCOPES = [
     'rating',
     'report',
+    'task',
     'password-reset',
     'login',
     'register',
