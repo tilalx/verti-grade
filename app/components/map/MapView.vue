@@ -171,7 +171,7 @@ const LABEL_HEIGHT_PX = 46
 const LABEL_CHAR_PX = 8
 const LABEL_PADDING_PX = 28
 const LABEL_EDGE_PX = 4
-const MAX_PIXELS_PER_METRE = 90
+const MAX_PIXELS_PER_METRE = 400
 const CONTROLS_WIDTH_PX = 64
 const CONTROLS_HEIGHT_PX = 160
 const FOCUS_PADDING = 2
@@ -187,7 +187,7 @@ const bounds = computed<MapBounds>(() => ({
 
 const panZoom = useSvgPanZoom({
     bounds,
-    minWidth: 3,
+    minWidth: 1,
     maxPixelsPerUnit: MAX_PIXELS_PER_METRE,
     doubleClickZoom: true,
     insetBottom: computed(() => props.insetBottom ?? 0),

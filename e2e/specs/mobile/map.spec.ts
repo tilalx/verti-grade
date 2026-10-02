@@ -74,6 +74,58 @@ test('dragging the sheet up expands it and tapping a route shows it in the sheet
     }
 })
 
+test('max zoom separates routes 20 cm apart for tapping', async ({
+    page,
+    root,
+    testPrefix,
+}) => {
+    const seeded = await seedMap(root, testPrefix, { routes: 3 })
+    try {
+        const [, neighbour, islandRoute] = seeded.routeIds
+        const islandEdgeLength = 17
+        await root.collection('routes').update(neighbour!, {
+            wall: seeded.islandWallId,
+            wall_position: 0.75 + 0.2 / islandEdgeLength,
+        })
+        await gotoSettled(page, `/map?location=${seeded.locationId}`)
+
+        const dotCenter = async (routeId: string) =>
+            centerOf(
+                await settledBox(
+                    page.locator(
+                        `[data-testid="map-route-dot"][data-route-id="${routeId}"] .map-dot-body`,
+                    ),
+                ),
+            )
+        const first = await dotCenter(islandRoute!)
+        const second = await dotCenter(neighbour!)
+        await page.getByTestId('map-svg').dispatchEvent('wheel', {
+            deltaY: -1000,
+            ctrlKey: true,
+            clientX: (first.x + second.x) / 2,
+            clientY: (first.y + second.y) / 2,
+        })
+
+        const a = await dotCenter(islandRoute!)
+        const b = await dotCenter(neighbour!)
+        const coarseHitDiameterPx = 44
+        expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThan(
+            coarseHitDiameterPx,
+        )
+
+        await page.touchscreen.tap(b.x, b.y)
+        await expect(page.getByTestId('map-route-card')).toContainText(
+            `${testPrefix}-map-route-2`,
+        )
+        await page.touchscreen.tap(a.x, a.y)
+        await expect(page.getByTestId('map-route-card')).toContainText(
+            `${testPrefix}-map-route-3`,
+        )
+    } finally {
+        await seeded.cleanup()
+    }
+})
+
 test('zooming in keeps labels of off-screen walls hidden and the chips scroll inside the map', async ({
     page,
     root,
