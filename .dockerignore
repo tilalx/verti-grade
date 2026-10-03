@@ -4,6 +4,7 @@
 !package.json
 !yarn.lock
 !nuxt.config.ts
+!postcss
 !app
 !server
 !shared
