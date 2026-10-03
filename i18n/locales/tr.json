@@ -158,7 +158,9 @@
         "me": "Daha fazla",
         "moreActions": "Diğer işlemler",
         "selectedCount": "{n} seçildi",
-        "list": "Rotalar"
+        "list": "Rotalar",
+        "competitions": "Yarışmalar",
+        "judge": "Hakemlik"
     },
     "dashboard": {
         "online": "{0} Çevrimiçi"
@@ -540,7 +542,8 @@
                 "exportColumns": "Seçilen dışa aktarma sütunlarını hatırlar",
                 "inventorySession": "Envanter taramasının ilerlemesini saklar",
                 "inventoryInstructions": "Envanter talimatlarının gösterildiğini hatırlar",
-                "offlineLogbook": "Günlüğünü ve gönderilmemiş tırmanışları çevrimdışı kullanılabilir tutar"
+                "offlineLogbook": "Günlüğünü ve gönderilmemiş tırmanışları çevrimdışı kullanılabilir tutar",
+                "offlineScores": "Sinyal yokken girdiğin yarışma sonuçlarını gönderilene kadar saklar"
             },
             "durations": {
                 "session": "Çıkış yapılana kadar",
@@ -574,7 +577,11 @@
             "scan": "Rota tara - Gripello",
             "me": "Hesabım - Gripello",
             "overview": "Genel bakış - Gripello",
-            "accountSettings": "Ayarlar - Gripello"
+            "accountSettings": "Ayarlar - Gripello",
+            "competitions": "Yarışmalar - Gripello",
+            "competition": "{name} - Yarışmalar - Gripello",
+            "judge": "Hakemlik - Gripello",
+            "competitionRules": "{name} - Kurallar - Gripello"
         },
         "content": {
             "settings": "Ayarlar",
@@ -659,7 +666,9 @@
             "run_inventory": "Envanter yap",
             "manage_reports": "Şikâyetleri yönet",
             "view_audit_log": "Etkinlik günlüğünü görüntüle",
-            "manage_tasks": "Görevleri yönet"
+            "manage_tasks": "Görevleri yönet",
+            "manage_competitions": "Yarışmaları yönet",
+            "judge_competitions": "Yarışma hakemliği"
         },
         "updated": "Yetkiler güncellendi.",
         "updateError": "Yetkiler güncellenemedi.",
@@ -685,7 +694,14 @@
         "roleDeleteError": "Rol silinemedi.",
         "adminRoleLocked": "Admin rolü yeniden adlandırılamaz veya silinemez.",
         "subtitle": "Her rolün neler yapabileceği. Değişiklikler hemen geçerli olur.",
-        "noDescription": "Açıklama yok"
+        "noDescription": "Açıklama yok",
+        "groups": {
+            "routes": "Rotalar",
+            "competitions": "Yarışmalar",
+            "moderation": "Moderasyon",
+            "admin": "Yönetim",
+            "other": "Diğer"
+        }
     },
     "time": {
         "justNow": "Az önce",
@@ -1356,5 +1372,309 @@
         "theme": "Tema",
         "themeDescription": "Sistemini takip et veya sabit bir tema seç.",
         "passwordDescription": "Yeni bir şifre seçmeden önce mevcut şifreni doğrula."
+    },
+    "competitions": {
+        "pageTitle": "Yarışmalar",
+        "newTitle": "Yeni yarışma",
+        "editTitle": "Yarışmayı düzenle",
+        "empty": "Henüz yarışma yok",
+        "saved": "Yarışma kaydedildi",
+        "name": "Ad",
+        "description": "Açıklama",
+        "location": "Konum",
+        "startsAt": "Başlangıç",
+        "endsAt": "Bitiş",
+        "endsBeforeStart": "Bitiş başlangıçtan sonra olmalı.",
+        "scoring": "Puanlama",
+        "format": "Puanlama biçimi",
+        "formats": {
+            "dynamic": "Dinamik puan",
+            "fixed": "Sabit puan",
+            "ifsc": "IFSC",
+            "tops": "Top ve zone",
+            "route_points": "Rota puanları",
+            "lead_height": "Lead yüksekliği"
+        },
+        "formatHints": {
+            "fixed": "Her boulderın kendi puanı vardır, her ek denemede azalır.",
+            "ifsc": "Top başına 25, zone başına 10, deneme başına eksi 0,1.",
+            "tops": "Top, sonra zone, sonra daha az deneme ile sıralanır.",
+            "route_points": "Her rotanın kendi puanı vardır; top-rope lead'den daha az sayılır.",
+            "lead_height": "Hakemler ulaşılan en yüksek tutamağı girer (kontrollü hareket için +). Rota başına sıralama, geometrik ortalama ile birleştirilir."
+        },
+        "zonePool": "Boulder başına zone puan havuzu",
+        "results": "Sonuçlar",
+        "liveRanking": "Canlı sıralama",
+        "freezeMinutes": "Sıralamayı dondur (bitişten önceki dakika)",
+        "status": "Durum",
+        "statuses": {
+            "draft": "Taslak",
+            "open": "Açık",
+            "closed": "Kapalı",
+            "published": "Yayınlandı"
+        },
+        "copy": "Çoğalt",
+        "copyName": "{name} (kopya)",
+        "deleteTitle": "Yarışma silinsin mi?",
+        "deleteMessage": "Bu yarışmanın tüm boulderları, kayıtları ve skorları silinecek.",
+        "categories": "Kategoriler",
+        "addCount": "Ekle ({n})",
+        "points": "Puan",
+        "zone": "Zone",
+        "voided": "Çıkarıldı",
+        "categoryName": "Kategori adı",
+        "gender": "Cinsiyet",
+        "genders": {
+            "any": "Hepsi",
+            "female": "Kadın",
+            "male": "Erkek"
+        },
+        "bornFrom": "Doğum yılı (en erken)",
+        "bornTo": "Doğum yılı (en geç)",
+        "addCategory": "Kategori ekle",
+        "categorySaved": "Kategori kaydedildi",
+        "categoryInUse": "Bu kategoride hâlâ katılımcı var.",
+        "defaultCategories": {
+            "female": "Kadınlar",
+            "male": "Erkekler"
+        },
+        "discipline": "Disiplin",
+        "disciplines": {
+            "boulder": "Bouldering",
+            "rope": "İpli tırmanış"
+        },
+        "flashBonus": "Flash bonusu",
+        "topropeFactor": "Top-rope puanı",
+        "registrationUrl": "Kayıt / ödeme bağlantısı",
+        "invalidUrl": "https:// ile başlayan bir bağlantı girin",
+        "holdCount": "Tutamaklar",
+        "items": {
+            "boulder": {
+                "tab": "Boulderlar",
+                "add": "Boulder ekle",
+                "pick": "Bu konumun boulderlarını seçin",
+                "empty": "Henüz boulder yok",
+                "added": "Boulderlar eklendi",
+                "topPool": "Boulder başına puan havuzu",
+                "bestOf": "Sayılan en iyi boulderlar",
+                "dynamicHint": "Her boulderın puan havuzu onu tamamlayan herkes arasında bölünür.",
+                "bestOfToggle": "Yalnızca en iyi boulderlar sayılır"
+            },
+            "rope": {
+                "tab": "Rotalar",
+                "add": "Rota ekle",
+                "pick": "Bu konumun ipli rotalarını seçin",
+                "empty": "Henüz rota yok",
+                "added": "Rotalar eklendi",
+                "topPool": "Rota başına puan havuzu",
+                "bestOf": "Sayılan en iyi rotalar",
+                "dynamicHint": "Her rotanın puan havuzu onu tamamlayan herkes arasında bölünür.",
+                "bestOfToggle": "Yalnızca en iyi rotalar sayılır"
+            }
+        },
+        "phases": {
+            "draft": {
+                "title": "Taslak"
+            },
+            "registration": {
+                "title": "Kayıt açık"
+            },
+            "running": {
+                "title": "Devam ediyor"
+            },
+            "ended": {
+                "title": "Bitti"
+            },
+            "published": {
+                "title": "Sonuçlar yayınlandı"
+            }
+        },
+        "checklist": {
+            "details": "Ad, tarih ve puanlama",
+            "categories": "En az bir kategori",
+            "routes": "Rota veya boulder ekleyin",
+            "points": "Her rotaya puan verin",
+            "holds": "Her rotanın tutamak sayısını girin"
+        },
+        "actions": {
+            "open": "Kaydı aç",
+            "close": "Yarışmayı kapat",
+            "publish": "Sonuçları yayınla",
+            "reopen": "Yeniden aç",
+            "unpublish": "Yayından kaldır",
+            "backToDraft": "Taslağa dön"
+        },
+        "confirm": {
+            "open": "Katılımcılar yarışmayı görür ve kaydolabilir. Puanlama zaman aralığında yapılır.",
+            "close": "Artık kimse kaydolamaz veya sonuç giremez.",
+            "publish": "Nihai sonuçlar herkese açık ve salt okunur olur.",
+            "reopen": "Kayıt ve puanlama yeniden açılır.",
+            "unpublish": "Sonuçlar düzeltebilmeniz için yeniden gizlenir.",
+            "backToDraft": "Yarışma katılımcılardan yeniden gizlenir."
+        },
+        "entryStatuses": {
+            "registered": "Kayıtlı",
+            "checked_in": "Giriş yaptı",
+            "disqualified": "Diskalifiye",
+            "withdrawn": "Çekildi"
+        },
+        "register": {
+            "title": "Katıl",
+            "youAreIn": "Kaydoldun",
+            "withdrawn": "Çekildin",
+            "payLink": "Katılım ücretini öde",
+            "rejoin": "Yeniden kaydol",
+            "withdraw": "Çekil",
+            "withdrawMessage": "Kayıt açık olduğu sürece yeniden kaydolabilirsin.",
+            "displayName": "Sonuçlardaki ad",
+            "birthYear": "Doğum yılı",
+            "category": "Kategori",
+            "pickCategory": "Kategorini seç",
+            "hidden": "Beni herkese açık sonuçlarda gizle",
+            "guardianConsent": "Ebeveynim veya vasim katılımımı onaylıyor.",
+            "submit": "Kaydol",
+            "done": "Kaydoldun"
+        },
+        "public": {
+            "title": "Yarışmalar",
+            "empty": "Henüz yarışma yok",
+            "upcoming": "Yaklaşan ve devam eden",
+            "past": "Geçmiş",
+            "manage": "Yönet"
+        },
+        "shareLink": "Kayıt bağlantısı",
+        "copyLink": "Bağlantıyı kopyala",
+        "linkCopied": "Bağlantı kopyalandı",
+        "qrCode": "QR kod",
+        "entries": "Katılımcılar",
+        "searchEntries": "Ad veya numara ara",
+        "entryCount": "{n} katılımcı",
+        "checkedInCount": "{n} giriş yaptı",
+        "paidCount": "{n} ödedi",
+        "noEntries": "Henüz katılımcı yok",
+        "paid": "Ödendi",
+        "notPaid": "Ödenmedi",
+        "checkIn": "Giriş yap",
+        "undoCheckIn": "Girişi geri al",
+        "reinstate": "Geri al",
+        "disqualify": "Diskalifiye et",
+        "entryActions": "Diğer işlemler",
+        "bib": "No",
+        "scorecard": {
+            "title": "Skor kartım",
+            "tops": "{n} top",
+            "flashes": "{n} flash",
+            "offline": "{n} henüz gönderilmedi – sinyal yok",
+            "saving": "Kaydediliyor…",
+            "nothingHere": "Burada bir şey yok",
+            "style": "Stil",
+            "styles": {
+                "lead": "Lead",
+                "toprope": "Top-rope"
+            },
+            "undoAttempt": "Denemeyi kaldır",
+            "addAttempt": "Deneme ekle",
+            "attempts": "{n} deneme",
+            "flash": "Flash",
+            "top": "Top",
+            "filters": {
+                "all": "Tümü",
+                "open": "Açık",
+                "topped": "Tamamlanan"
+            },
+            "judged": "Bu yarışmada sonuçlarını hakemler girer.",
+            "saveFailed": "Sonucun kaydedilemedi."
+        },
+        "standings": {
+            "title": "Sonuçlar",
+            "tv": "TV görünümü",
+            "frozen": "Sıralama donduruldu. Ödül töreninde açıklanacak.",
+            "hidden": "Sıralama sonuçlar yayınlandığında gösterilir.",
+            "empty": "Henüz sonuç yok",
+            "anonymous": "Gizli katılımcı",
+            "topsZones": "{tops} T · {zones} Z",
+            "final": "Nihai sonuçlar",
+            "updated": "Güncellendi {time}",
+            "scanToJoin": "Katılmak için tara"
+        },
+        "judge": {
+            "title": "Hakemlik",
+            "noCompetitions": "Hakemliğe açık yarışma yok",
+            "height": "En yüksek tutamak",
+            "open": "Skorlar",
+            "flags": {
+                "allFlashes": "Hepsini flash yaptı",
+                "uniqueTop": "Rotadaki tek top"
+            }
+        },
+        "export": {
+            "menu": "Dışa aktar",
+            "rank": "Sıra",
+            "name": "Ad",
+            "tops": "Top",
+            "zones": "Zone",
+            "status": "Durum",
+            "yes": "evet",
+            "no": "hayır",
+            "certificate": "Başarı belgesi",
+            "place": "{rank}. sıra · {category}",
+            "kinds": {
+                "results": "Sonuçlar",
+                "startlist": "Başlangıç listesi",
+                "certificates": "Belgeler"
+            }
+        },
+        "more": "Diğer işlemler",
+        "tv": {
+            "live": "Canlı",
+            "endsIn": "Bitişe",
+            "startsIn": "Başlangıca"
+        },
+        "rules": {
+            "title": "Kurallar",
+            "link": "Kurallar",
+            "sections": {
+                "flow": "Nasıl işler",
+                "scoring": "Puanlama",
+                "ranking": "Sıralama",
+                "fairPlay": "Fair play"
+            },
+            "signUp": "Hesabınla kaydol ve kategorini seç. Bir göğüs numarası alırsın.",
+            "selfScore": "Her denemeyi telefonuna gir: her deneme için +, zon tutamağını kontrol edince Zon, bitirince Top. Çevrimdışı da çalışır.",
+            "judged": "Hakemler ulaştığın en yüksek tutamağı kaydeder. + işareti, onun ötesine kontrollü bir hamle yaptığın anlamına gelir.",
+            "ropeStyle": "Topu girmeden önce Lider veya Top-rope seç.",
+            "live": "Sıralama yarışma boyunca canlı güncellenir.",
+            "noLive": "Sıralama ödül törenine kadar gizli kalır.",
+            "freeze": "Bitişten {n} dakika önce sıralama dondurulur. Son sıralama ödül töreninde açıklanır.",
+            "boulder": {
+                "dynamicTop": "Her boulder {pool} puan değerindedir ve topu yapan herkes arasında paylaşılır. Ne kadar az kişi toplarsa o kadar çok puan alırsın.",
+                "fixedPoints": "Her boulderın kendi puan değeri vardır.",
+                "bestOf": "Yalnızca en iyi {n} boulderın sayılır.",
+                "removed": "Yarışma sırasında kaldırılan bir boulder artık kimse için sayılmaz."
+            },
+            "rope": {
+                "dynamicTop": "Her rota {pool} puan değerindedir ve topu yapan herkes arasında paylaşılır. Ne kadar az kişi toplarsa o kadar çok puan alırsın.",
+                "fixedPoints": "Her rotanın kendi puan değeri vardır.",
+                "bestOf": "Yalnızca en iyi {n} rotan sayılır.",
+                "removed": "Yarışma sırasında kaldırılan bir rota artık kimse için sayılmaz."
+            },
+            "dynamicZone": "Zonlar da {pool} puanlık bir havuzu aynı şekilde paylaşır.",
+            "attemptFactors": "İlk denemede top puanların %{first} kadarını, ikincide %{second}, sonrasında %{rest} kadarını getirir.",
+            "ifscPoints": "Bir top {top} puan, bir zon {zone} puan değerindedir.",
+            "ifscPenalty": "Öncesindeki her başarısız deneme {penalty} puan düşürür.",
+            "topsCount": "Her top aynı sayılır.",
+            "leadHeight": "Her rotada ulaştığın en yüksek tutamağa göre sıralanırsın.",
+            "leadOverall": "Genel puanın, rota sıralarının geometrik ortalamasıdır. Düşük olan daha iyidir.",
+            "toprope": "Top-rope tırmanış puanların %{percent} kadarını getirir.",
+            "flashBonus": "Flash (ilk denemede top) %{percent} ekstra getirir.",
+            "perCategory": "Kendi kategorinde sıralanırsın.",
+            "tieBreakPoints": "En çok puan kazanır. Eşitlikte: daha çok top, sonra daha çok zon, sonra topa kadar daha az deneme.",
+            "tieBreakTops": "En çok top kazanır. Eşitlikte: daha çok zon, sonra topa kadar daha az deneme, sonra zona kadar daha az deneme.",
+            "tieBreakLead": "Bir rotada aynı yüksekliğe ulaşanlar ortalama sırayı paylaşır.",
+            "honest": "Dürüstçe gir. Her başlangıç bir deneme sayılır.",
+            "corrections": "Ekip puanları kontrol eder ve düzeltebilir.",
+            "entryFee": "Katılım ücreti vardır. Yarışma sayfasındaki bağlantıdan öde; ekip seni ödendi olarak işaretler."
+        },
+        "requiresPayment": "Katılım ücreti gerekli"
     }
 }

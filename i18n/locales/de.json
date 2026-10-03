@@ -158,7 +158,9 @@
         "me": "Mehr",
         "moreActions": "Weitere Aktionen",
         "selectedCount": "{n} ausgewählt",
-        "list": "Routen"
+        "list": "Routen",
+        "competitions": "Wettkämpfe",
+        "judge": "Schiedsrichter"
     },
     "dashboard": {
         "online": "{0} online"
@@ -540,7 +542,8 @@
                 "exportColumns": "Merkt sich die gewählten Export-Spalten",
                 "inventorySession": "Speichert den Fortschritt einer Inventur",
                 "inventoryInstructions": "Merkt sich, dass die Inventur-Anleitung angezeigt wurde",
-                "offlineLogbook": "Hält dein Logbuch und noch nicht gesendete Begehungen offline verfügbar"
+                "offlineLogbook": "Hält dein Logbuch und noch nicht gesendete Begehungen offline verfügbar",
+                "offlineScores": "Speichert Wettkampfergebnisse, die du ohne Netz eingetragen hast, bis sie gesendet sind"
             },
             "durations": {
                 "session": "Bis zur Abmeldung",
@@ -574,7 +577,11 @@
             "scan": "Route scannen - Gripello",
             "me": "Mein Konto - Gripello",
             "overview": "Übersicht - Gripello",
-            "accountSettings": "Einstellungen - Gripello"
+            "accountSettings": "Einstellungen - Gripello",
+            "competitions": "Wettkämpfe - Gripello",
+            "competition": "{name} - Wettkämpfe - Gripello",
+            "judge": "Schiedsrichter - Gripello",
+            "competitionRules": "{name} - Regeln - Gripello"
         },
         "content": {
             "settings": "Einstellungen",
@@ -677,7 +684,9 @@
             "run_inventory": "Inventur durchführen",
             "manage_reports": "Inhaltsmeldungen bearbeiten",
             "view_audit_log": "Aktivitätsprotokoll ansehen",
-            "manage_tasks": "Aufgaben verwalten"
+            "manage_tasks": "Aufgaben verwalten",
+            "manage_competitions": "Wettkämpfe verwalten",
+            "judge_competitions": "Wettkämpfe werten"
         },
         "updated": "Berechtigungen aktualisiert.",
         "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
@@ -703,7 +712,14 @@
         "roleDeleteError": "Rolle konnte nicht gelöscht werden.",
         "adminRoleLocked": "Die Admin-Rolle kann nicht umbenannt oder gelöscht werden.",
         "subtitle": "Was jede Rolle darf. Änderungen gelten sofort.",
-        "noDescription": "Keine Beschreibung"
+        "noDescription": "Keine Beschreibung",
+        "groups": {
+            "routes": "Routen",
+            "competitions": "Wettkämpfe",
+            "moderation": "Moderation",
+            "admin": "Verwaltung",
+            "other": "Sonstiges"
+        }
     },
     "time": {
         "justNow": "Gerade eben",
@@ -1356,5 +1372,309 @@
         "theme": "Design",
         "themeDescription": "Folge deinem System oder wähle ein festes Design.",
         "passwordDescription": "Bestätige dein aktuelles Passwort, bevor du ein neues wählst."
+    },
+    "competitions": {
+        "pageTitle": "Wettkämpfe",
+        "newTitle": "Neuer Wettkampf",
+        "editTitle": "Wettkampf bearbeiten",
+        "empty": "Noch keine Wettkämpfe",
+        "saved": "Wettkampf gespeichert",
+        "name": "Name",
+        "description": "Beschreibung",
+        "location": "Standort",
+        "startsAt": "Beginn",
+        "endsAt": "Ende",
+        "endsBeforeStart": "Das Ende muss nach dem Beginn liegen.",
+        "scoring": "Wertung",
+        "format": "Wertungsformat",
+        "formats": {
+            "dynamic": "Dynamische Punkte",
+            "fixed": "Feste Punkte",
+            "ifsc": "IFSC",
+            "tops": "Tops & Zonen",
+            "route_points": "Routenpunkte",
+            "lead_height": "Vorstieg-Höhe"
+        },
+        "formatHints": {
+            "fixed": "Jeder Boulder hat eigene Punkte, die mit jedem weiteren Versuch sinken.",
+            "ifsc": "25 pro Top, 10 pro Zone, minus 0,1 pro Versuch.",
+            "tops": "Wertung nach Tops, dann Zonen, dann weniger Versuchen.",
+            "route_points": "Jede Route hat eigene Punkte; Toprope zählt weniger als Vorstieg.",
+            "lead_height": "Schiedsrichter tragen den höchsten erreichten Griff ein (+ für kontrollierte Bewegung). Rang pro Route, kombiniert über das geometrische Mittel."
+        },
+        "zonePool": "Zonen-Punktetopf pro Boulder",
+        "results": "Ergebnisse",
+        "liveRanking": "Live-Rangliste",
+        "freezeMinutes": "Rangliste einfrieren (Minuten vor Ende)",
+        "status": "Status",
+        "statuses": {
+            "draft": "Entwurf",
+            "open": "Offen",
+            "closed": "Geschlossen",
+            "published": "Veröffentlicht"
+        },
+        "copy": "Duplizieren",
+        "copyName": "{name} (Kopie)",
+        "deleteTitle": "Wettkampf löschen?",
+        "deleteMessage": "Alle Boulder, Anmeldungen und Wertungen dieses Wettkampfs werden gelöscht.",
+        "categories": "Kategorien",
+        "addCount": "Hinzufügen ({n})",
+        "points": "Punkte",
+        "zone": "Zone",
+        "voided": "Gestrichen",
+        "categoryName": "Kategoriename",
+        "gender": "Geschlecht",
+        "genders": {
+            "any": "Alle",
+            "female": "Weiblich",
+            "male": "Männlich"
+        },
+        "bornFrom": "Geboren ab",
+        "bornTo": "Geboren bis",
+        "addCategory": "Kategorie hinzufügen",
+        "categorySaved": "Kategorie gespeichert",
+        "categoryInUse": "Diese Kategorie hat noch Teilnehmende.",
+        "defaultCategories": {
+            "female": "Damen",
+            "male": "Herren"
+        },
+        "discipline": "Disziplin",
+        "disciplines": {
+            "boulder": "Bouldern",
+            "rope": "Seilklettern"
+        },
+        "flashBonus": "Flash-Bonus",
+        "topropeFactor": "Punkte für Toprope",
+        "registrationUrl": "Link zu Anmeldung / Bezahlung",
+        "invalidUrl": "Gib einen Link mit https:// ein",
+        "holdCount": "Griffe",
+        "items": {
+            "boulder": {
+                "tab": "Boulder",
+                "add": "Boulder hinzufügen",
+                "pick": "Boulder dieses Standorts wählen",
+                "empty": "Noch keine Boulder",
+                "added": "Boulder hinzugefügt",
+                "topPool": "Punktetopf pro Boulder",
+                "bestOf": "Gewertete beste Boulder",
+                "dynamicHint": "Der Punktetopf jedes Boulders wird auf alle verteilt, die ihn getoppt haben.",
+                "bestOfToggle": "Nur die besten Boulder zählen"
+            },
+            "rope": {
+                "tab": "Routen",
+                "add": "Routen hinzufügen",
+                "pick": "Seilrouten dieses Standorts wählen",
+                "empty": "Noch keine Routen",
+                "added": "Routen hinzugefügt",
+                "topPool": "Punktetopf pro Route",
+                "bestOf": "Gewertete beste Routen",
+                "dynamicHint": "Der Punktetopf jeder Route wird auf alle verteilt, die sie getoppt haben.",
+                "bestOfToggle": "Nur die besten Routen zählen"
+            }
+        },
+        "phases": {
+            "draft": {
+                "title": "Entwurf"
+            },
+            "registration": {
+                "title": "Anmeldung offen"
+            },
+            "running": {
+                "title": "Läuft"
+            },
+            "ended": {
+                "title": "Beendet"
+            },
+            "published": {
+                "title": "Ergebnisse veröffentlicht"
+            }
+        },
+        "checklist": {
+            "details": "Name, Datum und Wertung",
+            "categories": "Mindestens eine Kategorie",
+            "routes": "Routen oder Boulder hinzufügen",
+            "points": "Jeder Route Punkte geben",
+            "holds": "Griffanzahl jeder Route setzen"
+        },
+        "actions": {
+            "open": "Anmeldung öffnen",
+            "close": "Wettkampf schließen",
+            "publish": "Ergebnisse veröffentlichen",
+            "reopen": "Wieder öffnen",
+            "unpublish": "Veröffentlichung zurückziehen",
+            "backToDraft": "Zurück zum Entwurf"
+        },
+        "confirm": {
+            "open": "Teilnehmende sehen den Wettkampf und können sich anmelden. Gewertet wird im Zeitfenster.",
+            "close": "Niemand kann sich mehr anmelden oder Ergebnisse eintragen.",
+            "publish": "Die Endergebnisse werden öffentlich und schreibgeschützt.",
+            "reopen": "Anmeldung und Wertung sind wieder offen.",
+            "unpublish": "Die Ergebnisse werden wieder verborgen, damit du sie korrigieren kannst.",
+            "backToDraft": "Der Wettkampf ist für Teilnehmende wieder unsichtbar."
+        },
+        "entryStatuses": {
+            "registered": "Angemeldet",
+            "checked_in": "Eingecheckt",
+            "disqualified": "Disqualifiziert",
+            "withdrawn": "Abgemeldet"
+        },
+        "register": {
+            "title": "Mitmachen",
+            "youAreIn": "Du bist angemeldet",
+            "withdrawn": "Du hast dich abgemeldet",
+            "payLink": "Startgebühr bezahlen",
+            "rejoin": "Wieder anmelden",
+            "withdraw": "Abmelden",
+            "withdrawMessage": "Solange die Anmeldung offen ist, kannst du dich wieder anmelden.",
+            "displayName": "Name in der Ergebnisliste",
+            "birthYear": "Geburtsjahr",
+            "category": "Kategorie",
+            "pickCategory": "Wähle deine Kategorie",
+            "hidden": "In öffentlichen Ergebnissen verbergen",
+            "guardianConsent": "Ein Elternteil oder Erziehungsberechtigter ist mit meiner Teilnahme einverstanden.",
+            "submit": "Anmelden",
+            "done": "Du bist angemeldet"
+        },
+        "public": {
+            "title": "Wettkämpfe",
+            "empty": "Noch keine Wettkämpfe",
+            "upcoming": "Demnächst und laufend",
+            "past": "Vergangen",
+            "manage": "Verwalten"
+        },
+        "shareLink": "Anmeldelink",
+        "copyLink": "Link kopieren",
+        "linkCopied": "Link kopiert",
+        "qrCode": "QR-Code",
+        "entries": "Teilnehmende",
+        "searchEntries": "Name oder Startnummer suchen",
+        "entryCount": "{n} Teilnehmende",
+        "checkedInCount": "{n} eingecheckt",
+        "paidCount": "{n} bezahlt",
+        "noEntries": "Noch keine Teilnehmenden",
+        "paid": "Bezahlt",
+        "notPaid": "Nicht bezahlt",
+        "checkIn": "Einchecken",
+        "undoCheckIn": "Check-in zurücknehmen",
+        "reinstate": "Wieder zulassen",
+        "disqualify": "Disqualifizieren",
+        "entryActions": "Weitere Aktionen",
+        "bib": "Nr.",
+        "scorecard": {
+            "title": "Meine Wertungskarte",
+            "tops": "{n} Tops",
+            "flashes": "{n} Flashes",
+            "offline": "{n} noch nicht gesendet – kein Netz",
+            "saving": "Speichert…",
+            "nothingHere": "Nichts hier",
+            "style": "Stil",
+            "styles": {
+                "lead": "Vorstieg",
+                "toprope": "Toprope"
+            },
+            "undoAttempt": "Versuch entfernen",
+            "addAttempt": "Versuch hinzufügen",
+            "attempts": "{n} Versuch | {n} Versuche",
+            "flash": "Flash",
+            "top": "Top",
+            "filters": {
+                "all": "Alle",
+                "open": "Offen",
+                "topped": "Getoppt"
+            },
+            "judged": "In diesem Wettkampf tragen Schiedsrichter deine Ergebnisse ein.",
+            "saveFailed": "Dein Ergebnis konnte nicht gespeichert werden."
+        },
+        "standings": {
+            "title": "Ergebnisse",
+            "tv": "TV-Ansicht",
+            "frozen": "Die Rangliste ist eingefroren. Sie wird bei der Siegerehrung aufgedeckt.",
+            "hidden": "Die Rangliste erscheint, sobald die Ergebnisse veröffentlicht sind.",
+            "empty": "Noch keine Ergebnisse",
+            "anonymous": "Verborgene Person",
+            "topsZones": "{tops} T · {zones} Z",
+            "final": "Endergebnis",
+            "updated": "Aktualisiert {time}",
+            "scanToJoin": "Scannen zum Mitmachen"
+        },
+        "judge": {
+            "title": "Schiedsrichter",
+            "noCompetitions": "Kein Wettkampf ist zum Werten offen",
+            "height": "Höchster Griff",
+            "open": "Ergebnisse",
+            "flags": {
+                "allFlashes": "Alles geflasht",
+                "uniqueTop": "Einziges Top einer Route"
+            }
+        },
+        "export": {
+            "menu": "Exportieren",
+            "rank": "Platz",
+            "name": "Name",
+            "tops": "Tops",
+            "zones": "Zonen",
+            "status": "Status",
+            "yes": "ja",
+            "no": "nein",
+            "certificate": "Urkunde",
+            "place": "{rank}. Platz · {category}",
+            "kinds": {
+                "results": "Ergebnisse",
+                "startlist": "Startliste",
+                "certificates": "Urkunden"
+            }
+        },
+        "more": "Weitere Aktionen",
+        "tv": {
+            "live": "Live",
+            "endsIn": "Endet in",
+            "startsIn": "Start in"
+        },
+        "rules": {
+            "title": "Regeln",
+            "link": "Regeln",
+            "sections": {
+                "flow": "So läuft es ab",
+                "scoring": "Wertung",
+                "ranking": "Rangliste",
+                "fairPlay": "Fairplay"
+            },
+            "signUp": "Melde dich mit deinem Konto an und wähle deine Kategorie. Du bekommst eine Startnummer.",
+            "selfScore": "Trage jeden Versuch auf dem Handy ein: + für jeden Versuch, Zone wenn du den Zonengriff kontrollierst, Top wenn du durch bist. Das geht auch offline.",
+            "judged": "Die Schiedsrichter notieren deinen höchsten Griff. Ein + bedeutet, dass du darüber hinaus einen kontrollierten Zug gemacht hast.",
+            "ropeStyle": "Wähle Vorstieg oder Toprope, bevor du das Top einträgst.",
+            "live": "Die Rangliste wird während des Wettkampfs live aktualisiert.",
+            "noLive": "Die Rangliste bleibt bis zur Siegerehrung verborgen.",
+            "freeze": "{n} Minuten vor dem Ende wird die Rangliste eingefroren. Die endgültige Reihenfolge gibt es bei der Siegerehrung.",
+            "boulder": {
+                "dynamicTop": "Jeder Boulder ist {pool} Punkte wert, die sich alle teilen, die ihn toppen. Je weniger Tops, desto mehr bekommst du.",
+                "fixedPoints": "Jeder Boulder hat einen eigenen Punktwert.",
+                "bestOf": "Nur deine besten {n} Boulder zählen.",
+                "removed": "Wird ein Boulder während des Wettkampfs entfernt, zählt er für niemanden mehr."
+            },
+            "rope": {
+                "dynamicTop": "Jede Route ist {pool} Punkte wert, die sich alle teilen, die sie toppen. Je weniger Tops, desto mehr bekommst du.",
+                "fixedPoints": "Jede Route hat einen eigenen Punktwert.",
+                "bestOf": "Nur deine besten {n} Routen zählen.",
+                "removed": "Wird eine Route während des Wettkampfs entfernt, zählt sie für niemanden mehr."
+            },
+            "dynamicZone": "Zonen teilen sich auf dieselbe Weise einen Topf von {pool} Punkten.",
+            "attemptFactors": "Ein Top im ersten Versuch bringt {first} % der Punkte, im zweiten {second} %, danach {rest} %.",
+            "ifscPoints": "Ein Top ist {top} Punkte wert, eine Zone {zone} Punkte.",
+            "ifscPenalty": "Jeder Fehlversuch davor kostet {penalty} Punkte.",
+            "topsCount": "Jedes Top zählt gleich.",
+            "leadHeight": "In jeder Route wirst du nach dem höchsten erreichten Griff platziert.",
+            "leadOverall": "Deine Gesamtwertung ist das geometrische Mittel deiner Routenplätze. Weniger ist besser.",
+            "toprope": "Eine Toprope-Begehung bringt {percent} % der Punkte.",
+            "flashBonus": "Ein Flash (Top im ersten Versuch) bringt {percent} % extra.",
+            "perCategory": "Gewertet wird innerhalb deiner Kategorie.",
+            "tieBreakPoints": "Die meisten Punkte gewinnen. Bei Gleichstand: mehr Tops, dann mehr Zonen, dann weniger Versuche bis zum Top.",
+            "tieBreakTops": "Die meisten Tops gewinnen. Bei Gleichstand: mehr Zonen, dann weniger Versuche bis zum Top, dann weniger Versuche bis zur Zone.",
+            "tieBreakLead": "Bei gleicher Höhe in einer Route teilen sich alle den mittleren Platz.",
+            "honest": "Trage ehrlich ein. Jeder Start zählt als Versuch.",
+            "corrections": "Das Team prüft die Ergebnisse und kann sie korrigieren.",
+            "entryFee": "Es gibt eine Startgebühr. Bezahle über den Link auf der Wettkampfseite; das Team markiert dich als bezahlt."
+        },
+        "requiresPayment": "Startgebühr erforderlich"
     }
 }

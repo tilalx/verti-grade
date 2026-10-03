@@ -9,12 +9,12 @@ const allowing =
 describe('visibleNavItems', () => {
     it('drops links and empty groups the role cannot open', () => {
         const keys = visibleNavItems(allowing()).map((item) => item.key)
-        expect(keys).toEqual(['home', 'list', 'map', 'logbook'])
+        expect(keys).toEqual(['home', 'list', 'map', 'logbook', 'competitions'])
     })
 
     it('shows guests only the public pages', () => {
         const keys = visibleNavItems(allowing(), false).map((item) => item.key)
-        expect(keys).toEqual(['home', 'list', 'map'])
+        expect(keys).toEqual(['home', 'list', 'map', 'competitions'])
     })
 })
 
@@ -67,6 +67,7 @@ describe('pageLinks', () => {
         expect(pageLinks(false).map((link) => link.to)).toEqual([
             '/',
             '/routes',
+            '/competitions',
         ])
     })
 })

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+    attachmentHeader,
     resolveApplicationUrl,
     resolveExportColumns,
     resolveRouteIds,
@@ -156,5 +157,20 @@ describe('wall column', () => {
         const route = { expand: { wall: { name: 'Cave' } } }
         expect(columns[0]!.value!(route as never, 'en')).toBe('Cave')
         expect(columns[0]!.value!({} as never, 'en')).toBe('')
+    })
+})
+
+describe('attachmentHeader', () => {
+    it('keeps the header ASCII and carries the real name encoded', () => {
+        const header = attachmentHeader('Кубок Jäm-results.pdf')
+        expect(header).toMatch(/^[\x20-\x7e]+$/)
+        expect(header).toContain('filename="Jam-results.pdf"')
+        expect(header).toContain(
+            `filename*=UTF-8''${encodeURIComponent('Кубок Jäm-results.pdf')}`,
+        )
+    })
+
+    it('falls back to a generic name when nothing ASCII is left', () => {
+        expect(attachmentHeader('Кубок')).toContain('filename="export"')
     })
 })

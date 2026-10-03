@@ -6,6 +6,7 @@ export const SESSION_ONLY_AUTH_COOKIE = 'pb_auth_session'
 export const THEME_MODE_COOKIE = 'theme-mode'
 export const SIDEBAR_OPEN_COOKIE = 'sidebar-open'
 export const EXPORT_COLUMNS_KEY = 'gripello.export-columns'
+export const COMPETITION_SCORES_KEY = 'gripello:competition-scores'
 
 export type ClientStorageKind = 'cookie' | 'localStorage' | 'indexedDB'
 
@@ -52,6 +53,12 @@ export const CLIENT_STORAGE: ClientStorageEntry[] = [
         name: INVENTORY_INSTRUCTIONS_KEY,
         kind: 'localStorage',
         purpose: 'inventoryInstructions',
+        duration: 'persistent',
+    },
+    {
+        name: COMPETITION_SCORES_KEY,
+        kind: 'localStorage',
+        purpose: 'offlineScores',
         duration: 'persistent',
     },
     {

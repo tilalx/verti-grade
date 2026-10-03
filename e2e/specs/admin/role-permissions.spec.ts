@@ -62,3 +62,34 @@ test('shows an error and does not persist the change when the update fails', asy
     await gotoSettled(page, '/admin/users')
     await expect(checkbox).not.toBeChecked()
 })
+
+test('grants and revokes a whole permission group at once', async ({
+    adminPage: page,
+    root,
+    testPrefix,
+}) => {
+    const role = await createRole(root, `${testPrefix}-role`)
+    await gotoSettled(page, '/admin/users')
+
+    const groupToggle = page.getByTestId(
+        `role-group-toggle-${role.name}-competitions`,
+    )
+    const manage = page.getByTestId(
+        `role-permissions-${role.name}-manage_competitions`,
+    )
+    const judge = page.getByTestId(
+        `role-permissions-${role.name}-judge_competitions`,
+    )
+
+    const granted = roleSaved(page)
+    await groupToggle.click()
+    expect((await granted).ok()).toBe(true)
+    await expect(manage).toBeChecked()
+    await expect(judge).toBeChecked()
+
+    const revoked = roleSaved(page)
+    await groupToggle.click()
+    expect((await revoked).ok()).toBe(true)
+    await expect(manage).not.toBeChecked()
+    await expect(judge).not.toBeChecked()
+})

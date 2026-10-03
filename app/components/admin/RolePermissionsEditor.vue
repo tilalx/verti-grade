@@ -85,17 +85,51 @@
 
                     <USeparator class="mt-3" />
 
-                    <div class="grid grow grid-cols-12 gap-2 px-4 py-3">
-                        <UCheckbox
-                            v-for="perm in allPermissions"
-                            :key="perm.id"
-                            :model-value="hasPermission(role, perm.id)"
-                            :label="t('permissions.features.' + perm.name)"
-                            :disabled="isProtectedRole(role) || saving"
-                            class="col-span-12 sm:col-span-6"
-                            :data-testid="`role-permissions-${role.name}-${perm.name}`"
-                            @update:model-value="togglePermission(role, perm)"
-                        />
+                    <div class="flex grow flex-col gap-4 px-4 py-3">
+                        <div
+                            v-for="group in permissionGroups"
+                            :key="group.key"
+                            class="flex flex-col gap-2"
+                            :data-testid="`role-group-${role.name}-${group.key}`"
+                        >
+                            <UCheckbox
+                                :model-value="
+                                    groupState(role, group.permissions)
+                                "
+                                :disabled="isProtectedRole(role) || saving"
+                                :ui="{
+                                    label: 'flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted uppercase',
+                                }"
+                                :data-testid="`role-group-toggle-${role.name}-${group.key}`"
+                                @update:model-value="
+                                    toggleGroup(role, group.permissions)
+                                "
+                            >
+                                <template #label>
+                                    <UIcon
+                                        :name="group.icon"
+                                        class="size-3.5"
+                                    />
+                                    {{ t(`permissions.groups.${group.key}`) }}
+                                </template>
+                            </UCheckbox>
+                            <div class="grid grid-cols-12 gap-2 ps-6">
+                                <UCheckbox
+                                    v-for="perm in group.permissions"
+                                    :key="perm.id"
+                                    :model-value="hasPermission(role, perm.id)"
+                                    :label="
+                                        t('permissions.features.' + perm.name)
+                                    "
+                                    :disabled="isProtectedRole(role) || saving"
+                                    class="col-span-12 sm:col-span-6"
+                                    :data-testid="`role-permissions-${role.name}-${perm.name}`"
+                                    @update:model-value="
+                                        togglePermission(role, perm)
+                                    "
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-1 px-2 pb-2">
@@ -206,6 +240,7 @@
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
 import {
+    groupPermissions,
     isProtectedRole,
     reassignTargets,
     defaultReassignTarget,
@@ -252,16 +287,38 @@ function hasPermission(role: RoleRecord, permId: string) {
     return perms.includes(permId)
 }
 
-async function togglePermission(role: RoleRecord, perm: PermissionRecord) {
-    const previousPerms = role.permissions ?? []
-    const currentPerms = [...previousPerms]
-    const idx = currentPerms.indexOf(perm.id)
-    if (idx === -1) {
-        currentPerms.push(perm.id)
-    } else {
-        currentPerms.splice(idx, 1)
-    }
+const permissionGroups = computed(() => groupPermissions(allPermissions.value))
 
+function groupState(role: RoleRecord, group: PermissionRecord[]) {
+    const granted = group.filter((perm) => hasPermission(role, perm.id)).length
+    if (granted === 0) return false
+    return granted === group.length ? true : 'indeterminate'
+}
+
+function toggleGroup(role: RoleRecord, group: PermissionRecord[]) {
+    const ids = group.map((perm) => perm.id)
+    const current = role.permissions ?? []
+    const grantAll = groupState(role, group) !== true
+    return savePermissions(
+        role,
+        grantAll
+            ? [...new Set([...current, ...ids])]
+            : current.filter((id) => !ids.includes(id)),
+    )
+}
+
+function togglePermission(role: RoleRecord, perm: PermissionRecord) {
+    const current = role.permissions ?? []
+    return savePermissions(
+        role,
+        current.includes(perm.id)
+            ? current.filter((id) => id !== perm.id)
+            : [...current, perm.id],
+    )
+}
+
+async function savePermissions(role: RoleRecord, currentPerms: string[]) {
+    const previousPerms = role.permissions ?? []
     role.permissions = currentPerms
     const saved = await runSave(
         async () => {

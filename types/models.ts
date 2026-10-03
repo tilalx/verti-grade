@@ -8,6 +8,12 @@ import type {
     TASK_STATUSES,
 } from '../app/utils/tasks'
 import type { TickType } from '../shared/utils/ticks'
+import type {
+    ClimbStyle,
+    CompetitionDiscipline,
+    ScoringFormat,
+    ScoringSettings,
+} from '../shared/utils/competitionScoring'
 import type { GymMap, MapPoint } from '../shared/utils/mapGeometry'
 import type { BoulderBandSetting } from '../shared/utils/gradeReference'
 
@@ -193,6 +199,70 @@ export interface TaskRecord extends BaseRecord {
     resolution_note?: string | null
     done_at?: string | null
     done_by?: RecordId | null
+}
+
+export type CompetitionStatus = 'draft' | 'open' | 'closed' | 'published'
+export type CompetitionEntryStatus =
+    'registered' | 'checked_in' | 'disqualified' | 'withdrawn'
+
+export interface CompetitionRecord extends BaseRecord {
+    name: string
+    description?: string | null
+    location: RecordId
+    status: CompetitionStatus
+    discipline: CompetitionDiscipline
+    registration_url?: string | null
+    requires_payment?: boolean
+    starts_at: string
+    ends_at: string
+    scoring_format: ScoringFormat
+    scoring?: Omit<ScoringSettings, 'format'> | null
+    live_ranking: boolean
+    freeze_minutes?: number | null
+}
+
+export interface CompetitionCategoryRecord extends BaseRecord {
+    competition: RecordId
+    name: string
+    gender?: 'female' | 'male' | '' | null
+    min_birth_year?: number | null
+    max_birth_year?: number | null
+    sort?: number | null
+}
+
+export interface CompetitionRouteRecord extends BaseRecord {
+    competition: RecordId
+    route: RecordId
+    number: number
+    points?: number | null
+    hold_count?: number | null
+    zone: boolean
+    voided: boolean
+}
+
+export interface CompetitionEntryRecord extends BaseRecord {
+    competition: RecordId
+    user: RecordId
+    category: RecordId
+    bib: number
+    display_name: string
+    birth_year: number
+    hidden: boolean
+    paid: boolean
+    guardian_consent: boolean
+    status: CompetitionEntryStatus
+}
+
+export interface CompetitionScoreRecord extends BaseRecord {
+    competition: RecordId
+    entry: RecordId
+    comp_route: RecordId
+    attempts: number
+    zone_attempt?: number | null
+    top_attempt?: number | null
+    style?: ClimbStyle | '' | null
+    height?: number | null
+    height_plus?: boolean | null
 }
 
 export interface OpenRouteDefectRecord extends BaseRecord {
