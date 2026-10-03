@@ -1,3 +1,4 @@
+import { cacheKeys } from '~/utils/realtimeCache'
 import { ROUTE_TYPES } from '~/utils/routes'
 import { routeSearchFilter } from '~/utils/routeSearch'
 import type { WallRecord } from '~/types/models'
@@ -15,7 +16,7 @@ export function useRouteFilters() {
     const pb = usePocketbase()
 
     const { data: wallRecords } = useAsyncData(
-        () => `route-filter-walls-${selectedLocation.value}`,
+        cacheKeys.routeFilterWalls,
         () =>
             selectedLocation.value
                 ? pb.collection('walls').getFullList<WallRecord>({
@@ -27,8 +28,9 @@ export function useRouteFilters() {
                       requestKey: null,
                   })
                 : Promise.resolve([]),
-        { default: () => [], server: false },
+        { default: () => [], server: false, watch: [selectedLocation] },
     )
+    useLiveLocation([cacheKeys.routeFilterWalls], selectedLocation)
 
     watch(selectedLocation, () => {
         selectedWall.value = ''

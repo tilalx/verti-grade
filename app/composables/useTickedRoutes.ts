@@ -1,11 +1,12 @@
 import type { TickRecord } from '~/types/models'
+import { cacheKeys } from '~/utils/realtimeCache'
 import { isOfflineError, opsOfUser } from '~/utils/tickOutbox'
 
 export function useTickedRoutes() {
     const pb = usePocketbase()
     const outbox = useTickOutbox()
     const { data } = useAsyncData(
-        'ticked-routes',
+        cacheKeys.tickedRoutes,
         async () => {
             if (!pb.authStore.isValid) return []
             const sends = await pb
@@ -45,6 +46,6 @@ export function useTickedRoutes() {
                 ]),
         ),
         refreshTickedRoutes: () =>
-            refreshNuxtData(['ticked-routes', 'logbook']),
+            refreshNuxtData([cacheKeys.tickedRoutes, cacheKeys.logbook]),
     }
 }

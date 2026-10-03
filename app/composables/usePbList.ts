@@ -36,13 +36,17 @@ export function usePbList<
     const toItem = (record: TRecord) =>
         options.map ? options.map(record) : (record as unknown as TItem)
 
-    async function fetchPage(target: number, busy: Ref<boolean>) {
+    async function fetchPage(
+        target: number,
+        busy: Ref<boolean>,
+        perPage = options.perPage,
+    ) {
         busy.value = true
         error.value = null
         try {
             const result = await pb
                 .collection(collection)
-                .getList<TRecord>(target, options.perPage, {
+                .getList<TRecord>(target, perPage, {
                     ...options.query(),
                     requestKey: options.requestKey,
                 })
@@ -65,6 +69,14 @@ export function usePbList<
     function refresh() {
         items.value = []
         return fetchPage(1, loading)
+    }
+
+    function reloadLoaded() {
+        return fetchPage(
+            1,
+            ref(false),
+            Math.max(items.value.length, options.perPage),
+        )
     }
 
     async function loadMore() {
@@ -92,6 +104,7 @@ export function usePbList<
         hasMore,
         error,
         refresh,
+        reloadLoaded,
         loadMore,
         prefetch,
     }

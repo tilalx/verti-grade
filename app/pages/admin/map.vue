@@ -279,6 +279,7 @@ import {
     type EditorWall,
 } from '~/utils/mapEditor'
 import type { SheetSnap } from '~/components/map/Sheet.vue'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 definePageMeta({
     middleware: ['auth'],
@@ -306,7 +307,7 @@ const {
 })
 
 const { data: locationRoutes } = useAsyncData(
-    'map-editor-routes',
+    cacheKeys.mapEditorRoutes,
     () =>
         locationId.value
             ? pb.collection('averageRating').getFullList<RouteScoreRecord>({
@@ -320,6 +321,7 @@ const { data: locationRoutes } = useAsyncData(
             : Promise.resolve([]),
     { watch: [locationId], default: () => [], server: false },
 )
+useLiveLocation([cacheKeys.mapEditorRoutes], locationId)
 
 const savedMap = computed(() => sanitizeGymMap(location.value?.map))
 const hasMap = computed(() => !!savedMap.value || editor.isDirty.value)

@@ -45,8 +45,10 @@ export function useGymMapLocation(
     )
     const map = computed(() => sanitizeGymMap(location.value?.map))
 
+    const wallsKey = cacheKeys.gymWalls(key)
+    useLiveLocation([wallsKey], locationId)
     const wallsRequest = useAsyncData(
-        key === 'map' ? cacheKeys.mapWalls : `${key}-walls`,
+        wallsKey,
         async () => {
             await locationsRequest
             return locationId.value

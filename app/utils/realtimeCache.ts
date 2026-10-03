@@ -1,4 +1,5 @@
 import type {
+    OpenRouteDefectRecord,
     RatingRecord,
     RouteRecord,
     RouteScoreRecord,
@@ -10,13 +11,39 @@ export const cacheKeys = {
     overviewWalls: 'overview-walls',
     mapRoutes: 'map-routes',
     mapWalls: 'map-walls',
-    mapLocation: 'map-location',
+    keyLocations: 'live-key-locations',
     routesList: 'routes-list',
     route: (routeId: string) => `route:${routeId}`,
     ratings: (routeId: string) => `ratings:${routeId}`,
     ratingsSheet: (routeId: string) => `ratings-sheet:${routeId}`,
     unplacedRoutes: 'unplaced-routes',
     locations: 'locations',
+    gymWalls: (scope: string) => `${scope}-walls`,
+    placementRoutes: 'placement-routes',
+    mapEditorRoutes: 'map-editor-routes',
+    routeFilterWalls: 'route-filter-walls',
+    openDefects: 'open-route-defects',
+    routeDefects: (routeId: string) => `route-defects:${routeId}`,
+    tickedRoutes: 'ticked-routes',
+    logbook: 'logbook',
+}
+
+export const liveTopics = {
+    openDefects: 'open_route_defects',
+    ownTicks: 'own_ticks',
+}
+
+export interface OpenDefectsChange {
+    routes: string[]
+    defects: OpenRouteDefectRecord[]
+}
+
+export type KeyLocations = Record<string, string>
+
+function inLocation<T extends { location?: string | null }>(
+    locationId: string | undefined,
+) {
+    return (record: T) => !!locationId && record.location === locationId
 }
 
 export type InScope<T> = (record: T) => boolean | null
@@ -35,21 +62,21 @@ function keySuffix(key: string, prefix: string) {
 
 export function routeRowsScope(
     key: string,
-    mapLocationId = '',
+    keyLocations: KeyLocations = {},
 ): InScope<RouteRecord> | undefined {
     if (key === cacheKeys.overviewRoutes) return () => true
     if (key === cacheKeys.routesList) return () => null
-    if (key === cacheKeys.mapRoutes)
-        return (route) => !!mapLocationId && route.location === mapLocationId
+    if (key.endsWith('-routes') && key in keyLocations)
+        return inLocation(keyLocations[key])
 }
 
 export function wallsScope(
     key: string,
-    mapLocationId = '',
+    keyLocations: KeyLocations = {},
 ): InScope<WallRecord> | undefined {
     if (key === cacheKeys.overviewWalls) return () => true
-    if (key === cacheKeys.mapWalls)
-        return (wall) => !!mapLocationId && wall.location === mapLocationId
+    if (key.endsWith('-walls') && key in keyLocations)
+        return inLocation(keyLocations[key])
 }
 
 export function ratingsRouteId(key: string) {
@@ -63,11 +90,35 @@ export function detailRouteId(key: string) {
     return keySuffix(key, cacheKeys.route(''))
 }
 
-export function isLiveKey(key: string) {
+export function defectsScope(
+    key: string,
+): ((routeId: string) => boolean) | undefined {
+    if (key === cacheKeys.openDefects) return () => true
+    const routeId = keySuffix(key, cacheKeys.routeDefects(''))
+    if (routeId) return (candidate) => candidate === routeId
+}
+
+export function replaceRouteDefects<
+    T extends Pick<OpenRouteDefectRecord, 'route'>,
+>(
+    defects: T[],
+    change: { routes: string[]; defects: T[] },
+    inScope: (routeId: string) => boolean,
+): T[] {
+    const routes = change.routes.filter(inScope)
+    if (!routes.length) return defects
+    return [
+        ...defects.filter((defect) => !routes.includes(defect.route)),
+        ...change.defects.filter((defect) => routes.includes(defect.route)),
+    ]
+}
+
+export function isLiveKey(key: string, keyLocations: KeyLocations = {}) {
     return (
         key === cacheKeys.unplacedRoutes ||
-        !!routeRowsScope(key) ||
-        !!wallsScope(key) ||
+        !!defectsScope(key) ||
+        !!routeRowsScope(key, keyLocations) ||
+        !!wallsScope(key, keyLocations) ||
         ratingsRouteId(key) !== undefined ||
         detailRouteId(key) !== undefined
     )

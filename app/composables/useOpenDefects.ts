@@ -1,10 +1,11 @@
 import type { OpenRouteDefectRecord } from '~/types/models'
+import { cacheKeys } from '~/utils/realtimeCache'
 import { defectSeverityByRoute } from '~/utils/tasks'
 
 export function useOpenDefects() {
     const pb = usePocketbase()
     const { data, refresh } = useAsyncData(
-        'open-route-defects',
+        cacheKeys.openDefects,
         () =>
             pb
                 .collection('open_route_defects')

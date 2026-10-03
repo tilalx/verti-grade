@@ -525,6 +525,7 @@ import {
 } from '~/utils/inventory'
 import type { RouteRecord } from '~/types/models'
 import { sendInBatches } from '~/utils/batch'
+import { coalesce } from '~/utils/realtimeCache'
 
 definePageMeta({
     middleware: 'auth',
@@ -1014,7 +1015,11 @@ if (initial.value) {
     allRoutes.value = initial.value
 }
 
+const loadRoutesSoon = coalesce(loadRoutes)
+const { subscribe } = usePbSubscription(loadRoutesSoon)
+
 onMounted(() => {
+    void subscribe('routes', loadRoutesSoon)
     restoreSession()
     reconcileScannedIds()
     if (!hasSeenInstructions()) instructionsDialog.value = true
