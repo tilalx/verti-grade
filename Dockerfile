@@ -20,6 +20,7 @@ COPY .yarnrc.yml package.json yarn.lock ./
 RUN --mount=type=cache,target=/root/.yarn/berry/cache \
     yarn install --immutable --inline-builds
 COPY nuxt.config.ts ./
+COPY postcss ./postcss
 COPY types ./types
 COPY i18n ./i18n
 COPY shared ./shared

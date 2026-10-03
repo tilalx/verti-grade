@@ -16,13 +16,15 @@ describe('clusterDots', () => {
         expect(cluster!.point).toEqual([0.25, 0])
     })
 
-    it('merges chains that bridge two existing groups', () => {
-        const clusters = clusterDots(
-            [dot('a', [0, 0]), dot('c', [1.6, 0]), dot('b', [0.8, 0])],
-            1,
+    it('splits a long chain of close dots into bounded clusters', () => {
+        const chain = Array.from({ length: 30 }, (_, index) =>
+            dot(`r${index}`, [index * 0.4, 0]),
         )
-        expect(clusters).toHaveLength(1)
-        expect(clusters[0]!.dots).toHaveLength(3)
+        const clusters = clusterDots(chain, 1)
+        expect(clusters.length).toBeGreaterThan(5)
+        for (const { dots } of clusters)
+            expect(dots.at(-1)!.point[0] - dots[0]!.point[0]).toBeLessThan(1)
+        expect(clusters.flatMap((cluster) => cluster.dots)).toHaveLength(30)
     })
 
     it('groups routes at the identical spot', () => {

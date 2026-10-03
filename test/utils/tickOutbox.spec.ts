@@ -6,6 +6,7 @@ import {
     isAlreadyApplied,
     opsOfUser,
     replayFailure,
+    updatableFields,
     type TickOutboxOp,
 } from '~/utils/tickOutbox'
 
@@ -131,5 +132,61 @@ describe('replayFailure', () => {
             'Failed to create record.',
         )
         expect(replayFailure(null)).toBe('Sync failed')
+    })
+})
+
+describe('offline tick edits', () => {
+    const update = (id: string, note: string): TickOutboxOp => ({
+        op: 'update',
+        id,
+        user: 'u1',
+        record: { ...tick(id, '2026-10-01'), note, type: 'flash' },
+        queued: '2026-10-03T11:00:00Z',
+    })
+
+    it('folds an edit of a queued create into the create', () => {
+        const failed = { ...create('a', '2026-10-01'), failed: 'Route gone' }
+        const queue = enqueueTickOp([failed], update('a', 'crux'))
+        expect(queue).toHaveLength(1)
+        expect(queue[0]).toMatchObject({
+            op: 'create',
+            failed: undefined,
+            record: { note: 'crux', type: 'flash', route: 'r1' },
+        })
+    })
+
+    it('keeps only the latest edit and lets a delete win', () => {
+        const queue = enqueueTickOp([update('a', 'one')], update('a', 'two'))
+        expect(queue.map((op) => op.record?.note)).toEqual(['two'])
+        expect(enqueueTickOp(queue, remove('a')).map((op) => op.op)).toEqual([
+            'delete',
+        ])
+    })
+
+    it('overlays a queued edit as pending', () => {
+        const [shown] = applyTickOutbox(
+            [tick('a', '2026-10-01')],
+            [update('a', 'crux')],
+            'u1',
+        )
+        expect(shown).toMatchObject({
+            note: 'crux',
+            type: 'flash',
+            pending: true,
+        })
+    })
+
+    it('treats a 404 edit as already resolved', () => {
+        expect(isAlreadyApplied(update('x', ''), { status: 404 })).toBe(true)
+        expect(isAlreadyApplied(update('x', ''), { status: 400 })).toBe(false)
+    })
+
+    it('replays only editable fields', () => {
+        expect(updatableFields(update('a', 'crux').record)).toEqual({
+            type: 'flash',
+            attempts: 1,
+            date: '2026-10-01',
+            note: 'crux',
+        })
     })
 })

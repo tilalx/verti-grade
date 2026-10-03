@@ -3,7 +3,7 @@ import type { TickRecord } from '~/types/models'
 export const TICKS_DB = 'gripello-ticks'
 
 export interface TickOutboxOp {
-    op: 'create' | 'delete'
+    op: 'create' | 'update' | 'delete'
     id: string
     user?: string
     record?: TickRecord
@@ -25,6 +25,19 @@ export function enqueueTickOp(
     )
     if (op.op === 'delete' && queuedCreate)
         return queue.filter((entry) => entry !== queuedCreate)
+    if (op.op === 'update' && queuedCreate)
+        return queue.map((entry) =>
+            entry === queuedCreate
+                ? {
+                      ...entry,
+                      record: {
+                          ...entry.record!,
+                          ...updatableFields(op.record),
+                      },
+                      failed: undefined,
+                  }
+                : entry,
+        )
     return [...queue.filter((entry) => entry.id !== op.id), op]
 }
 
@@ -43,6 +56,11 @@ export function applyTickOutbox<T extends TickRecord>(
             .filter((entry) => entry.op === 'delete')
             .map((entry) => entry.id),
     )
+    const updated = new Map(
+        ownOps
+            .filter((entry) => entry.op === 'update' && entry.record)
+            .map((entry) => [entry.id, entry]),
+    )
     const known = new Set(ticks.map((tick) => tick.id))
     const created = ownOps
         .filter(
@@ -54,7 +72,20 @@ export function applyTickOutbox<T extends TickRecord>(
             pending: true,
             syncFailed: entry.failed,
         }))
-    return [...created, ...ticks.filter((tick) => !deleted.has(tick.id))].sort(
+    const kept = ticks
+        .filter((tick) => !deleted.has(tick.id))
+        .map((tick) => {
+            const update = updated.get(tick.id)
+            return update
+                ? {
+                      ...tick,
+                      ...(update.record as Partial<T>),
+                      pending: true,
+                      syncFailed: update.failed,
+                  }
+                : tick
+        })
+    return [...created, ...kept].sort(
         (a, b) =>
             b.date.localeCompare(a.date) ||
             (b.created ?? '').localeCompare(a.created ?? ''),
@@ -78,11 +109,17 @@ export function isAlreadyApplied(op: TickOutboxOp, error: unknown) {
             status?: number
             response?: { data?: { id?: { code?: string } } }
         } | null) ?? {}
-    if (op.op === 'delete') return status === 404
+    if (op.op !== 'create') return status === 404
     return status === 400 && response?.data?.id?.code === DUPLICATE_ID
 }
 
 export function replayFailure(error: unknown) {
     const { message } = (error as { message?: string } | null) ?? {}
     return message || 'Sync failed'
+}
+
+export function updatableFields(record: TickRecord | undefined) {
+    if (!record) return {}
+    const { type, attempts, date, note } = record
+    return { type, attempts, date, note }
 }

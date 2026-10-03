@@ -163,6 +163,10 @@ describe('clearOfDots', () => {
         expect(clearOfDots(label, [{ x: 100, y: 105 }], 6, 8).y).toBe(72)
     })
 
+    it('moves the label below a covered dot when told to', () => {
+        expect(clearOfDots(label, [{ x: 100, y: 95 }], 6, 8, 1).y).toBe(128)
+    })
+
     it('tries further out when the next spots are taken too', () => {
         const dots = [
             { x: 100, y: 105 },

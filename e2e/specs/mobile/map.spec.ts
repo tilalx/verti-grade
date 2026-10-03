@@ -203,3 +203,36 @@ test('zooming in keeps labels of off-screen walls hidden and the chips scroll in
         await seeded.cleanup()
     }
 })
+
+test('a pinch that starts on a wall label zooms instead of panning or selecting', async ({
+    page,
+    root,
+    testPrefix,
+}) => {
+    const seeded = await seedMap(root, testPrefix, { routes: 2 })
+    try {
+        await gotoSettled(page, `/map?location=${seeded.locationId}`)
+        const svg = page.getByTestId('map-svg')
+        const widthOf = async () =>
+            Number((await svg.getAttribute('viewBox'))!.split(' ')[2])
+        const startWidth = await widthOf()
+        const label = page.locator(
+            `[data-testid="map-wall-label"][data-name="${testPrefix} Island"]`,
+        )
+        const onLabel = centerOf(await settledBox(label))
+        const touch = await touchInput(page)
+        const fingers = (spread: number) => [
+            { x: onLabel.x, y: onLabel.y, id: 1 },
+            { x: onLabel.x + 40 + spread, y: onLabel.y + 40 + spread, id: 2 },
+        ]
+        await touch('touchStart', fingers(0))
+        for (let step = 1; step <= 10; step++)
+            await touch('touchMove', fingers(step * 12))
+        await touch('touchEnd')
+
+        await expect.poll(widthOf).toBeLessThan(startWidth / 1.5)
+        await expect(page).not.toHaveURL(/wall=/)
+    } finally {
+        await seeded.cleanup()
+    }
+})

@@ -6,7 +6,9 @@ import {
     isOfflineError,
     opsOfUser,
     replayFailure,
+    updatableFields,
     TICKS_DB,
+    type PendingTick,
     type TickOutboxOp,
 } from '~/utils/tickOutbox'
 const STORES = ['outbox', 'ticks'] as const
@@ -104,6 +106,40 @@ export function useTickOutbox() {
         }
     }
 
+    async function updateTick(
+        { pending: _pending, syncFailed: _syncFailed, ...tick }: PendingTick,
+        fields: Partial<TickRecord>,
+    ) {
+        const record: TickRecord = {
+            ...tick,
+            ...fields,
+            updated: new Date().toISOString(),
+        }
+        const queued = () => {
+            enqueue({
+                op: 'update',
+                id: tick.id,
+                user: tick.user,
+                record,
+                queued: record.updated!,
+            })
+            return { tick: record, queued: true }
+        }
+        if (queue.value.some((op) => op.op === 'create' && op.id === tick.id))
+            return queued()
+        try {
+            return {
+                tick: await pb
+                    .collection('ticks')
+                    .update<TickRecord>(tick.id, fields),
+                queued: false,
+            }
+        } catch (error) {
+            if (!available || !isOfflineError(error)) throw error
+            return queued()
+        }
+    }
+
     async function deleteTick(id: string) {
         if (queue.value.some((op) => op.op === 'create' && op.id === id)) {
             enqueue({ op: 'delete', id, queued: new Date().toISOString() })
@@ -136,10 +172,14 @@ export function useTickOutbox() {
             try {
                 if (op.op === 'create')
                     await pb.collection('ticks').create(op.record)
+                else if (op.op === 'update')
+                    await pb
+                        .collection('ticks')
+                        .update(op.id, updatableFields(op.record))
                 else await pb.collection('ticks').delete(op.id)
             } catch (error) {
                 if (isOfflineError(error)) break
-                if (op.op === 'create' && !isAlreadyApplied(op, error)) {
+                if (op.op !== 'delete' && !isAlreadyApplied(op, error)) {
                     console.error('Replaying tick failed:', error)
                     queue.value = queue.value.map((entry) =>
                         entry === op
@@ -171,6 +211,7 @@ export function useTickOutbox() {
         queue,
         load,
         createTick,
+        updateTick,
         deleteTick,
         flush,
         cacheTicks,

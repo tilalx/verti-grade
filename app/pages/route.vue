@@ -138,7 +138,10 @@
                         </div>
                     </div>
 
-                    <div class="stats-card mx-4 -mt-4 rounded-lg shadow-md">
+                    <div
+                        class="stats-card mx-4 -mt-4 rounded-lg shadow-md lg:m-0 lg:mr-8"
+                        data-testid="route-stats"
+                    >
                         <div class="flex items-center justify-around py-3">
                             <LayoutStatTile
                                 :label="t('ratings.score')"
@@ -729,84 +732,6 @@ onMounted(async () => {
     }
 }
 
-@variant lg {
-    .route-page {
-        max-width: 1400px;
-        padding: 24px 24px 0;
-    }
-
-    .route-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-        grid-template-areas:
-            'hero hero'
-            'details reviews'
-            '. reviews';
-        grid-template-rows: auto auto 1fr;
-        column-gap: 32px;
-        align-items: start;
-    }
-
-    .route-layout__main {
-        display: contents;
-    }
-
-    .route-hero {
-        grid-area: hero;
-        min-height: 220px;
-        border-radius: 16px;
-        padding: 28px 32px;
-        justify-content: center;
-    }
-
-    .route-hero__content h1 {
-        font-size: 2.5rem;
-    }
-
-    .route-hero__headline {
-        justify-content: flex-start;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .route-hero__difficulty-badge {
-        min-width: 72px;
-        height: 72px;
-        border-radius: 20px;
-    }
-
-    .route-hero__difficulty-text {
-        font-size: 1.75rem;
-    }
-
-    .stats-card {
-        grid-area: hero;
-        align-self: center;
-        justify-self: end;
-        min-width: 320px;
-        margin: 0 32px 0 0;
-    }
-
-    .route-details {
-        grid-area: details;
-        padding-top: 24px;
-    }
-
-    .route-layout__reviews {
-        grid-area: reviews;
-        padding-top: 24px;
-    }
-}
-
-@variant xl {
-    .route-reviews-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-        column-gap: 16px;
-        align-items: start;
-    }
-}
-
 .route-hero__back {
     position: relative;
     z-index: 1;
@@ -901,5 +826,86 @@ onMounted(async () => {
     position: relative;
     z-index: 2;
     background: var(--ui-bg);
+}
+
+@variant lg {
+    .route-page {
+        max-width: 1400px;
+        padding: 24px 24px 0;
+    }
+
+    .route-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+        grid-template-areas:
+            'hero hero'
+            'details reviews'
+            '. reviews';
+        grid-template-rows: auto auto 1fr;
+        column-gap: 32px;
+        align-items: start;
+    }
+
+    .route-layout__main {
+        display: contents;
+    }
+
+    .route-hero {
+        grid-area: hero;
+        min-height: 220px;
+        border-radius: 16px;
+        padding: 28px 32px;
+        justify-content: center;
+    }
+
+    .route-hero__content {
+        padding-right: 360px;
+    }
+
+    .route-hero__content h1 {
+        font-size: 2.5rem;
+    }
+
+    .route-hero__headline {
+        justify-content: flex-start;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .route-hero__difficulty-badge {
+        min-width: 72px;
+        height: 72px;
+        border-radius: 20px;
+    }
+
+    .route-hero__difficulty-text {
+        font-size: 1.75rem;
+    }
+
+    .stats-card {
+        grid-area: hero;
+        align-self: center;
+        justify-self: end;
+        min-width: 320px;
+    }
+
+    .route-details {
+        grid-area: details;
+        padding-top: 24px;
+    }
+
+    .route-layout__reviews {
+        grid-area: reviews;
+        padding-top: 24px;
+    }
+}
+
+@variant xl {
+    .route-reviews-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        column-gap: 16px;
+        align-items: start;
+    }
 }
 </style>

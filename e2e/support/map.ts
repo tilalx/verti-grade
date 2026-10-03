@@ -143,10 +143,11 @@ export async function settledBox(locator: Locator) {
 
 export async function touchInput(page: Page) {
     const cdp = await page.context().newCDPSession(page)
-    return (type: string, point?: { x: number; y: number }) =>
+    type TouchPoint = { x: number; y: number; id?: number }
+    return (type: string, point?: TouchPoint | TouchPoint[]) =>
         cdp.send('Input.dispatchTouchEvent', {
             type,
-            touchPoints: point ? [point] : [],
+            touchPoints: point ? [point].flat() : [],
         })
 }
 

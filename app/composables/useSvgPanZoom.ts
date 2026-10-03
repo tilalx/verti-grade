@@ -90,6 +90,7 @@ export function useSvgPanZoom(options: PanZoomOptions) {
     let userMoved = false
     let lastTap: { x: number; y: number; time: number } | null = null
     let lastPointerType = 'mouse'
+    let startedOnMap = false
 
     function rect() {
         return svgRef.value!.getBoundingClientRect()
@@ -225,7 +226,10 @@ export function useSvgPanZoom(options: PanZoomOptions) {
 
     function onPointerDown(event: PointerEvent) {
         lastPointerType = event.pointerType
+        const target = event.target as Element
+        if (target.closest('[data-pan-ignore]')) return
         if (options.canStartPan && !options.canStartPan(event)) return
+        if (!pointers.size) startedOnMap = !!svgRef.value?.contains(target)
         stopMotion()
         const point = { x: event.clientX, y: event.clientY }
         pointers.set(event.pointerId, point)
@@ -307,7 +311,7 @@ export function useSvgPanZoom(options: PanZoomOptions) {
         }
         isPanning.value = false
         if (!dragged) {
-            zoomOnDoubleTap(event)
+            if (startedOnMap) zoomOnDoubleTap(event)
             return
         }
         const velocity = wasSingle && event.type === 'pointerup'
@@ -391,14 +395,17 @@ export function useSvgPanZoom(options: PanZoomOptions) {
         fitTo(initial.bounds, { padding: initial.padding, animate: false })
     }
 
+    let gestureRoot: HTMLElement | SVGSVGElement | null = null
+
     onMounted(() => {
         const svg = svgRef.value
         if (!svg) return
-        svg.addEventListener('pointerdown', onPointerDown)
-        svg.addEventListener('pointermove', onPointerMove)
+        gestureRoot = svg.parentElement ?? svg
+        gestureRoot.addEventListener('pointerdown', onPointerDown)
+        window.addEventListener('pointermove', onPointerMove)
         window.addEventListener('pointerup', onPointerUp)
         window.addEventListener('pointercancel', onPointerUp)
-        svg.addEventListener('click', onClickCapture, true)
+        gestureRoot.addEventListener('click', onClickCapture, true)
         svg.addEventListener('wheel', onWheel, { passive: false })
         svg.addEventListener('dblclick', onDoubleClick)
         svg.addEventListener('keydown', onKeyDown)
@@ -414,13 +421,13 @@ export function useSvgPanZoom(options: PanZoomOptions) {
         stopMotion()
         if (renderFrame) cancelAnimationFrame(renderFrame)
         resizeObserver?.disconnect()
+        window.removeEventListener('pointermove', onPointerMove)
         window.removeEventListener('pointerup', onPointerUp)
         window.removeEventListener('pointercancel', onPointerUp)
+        gestureRoot?.removeEventListener('pointerdown', onPointerDown)
+        gestureRoot?.removeEventListener('click', onClickCapture, true)
         const svg = svgRef.value
         if (!svg) return
-        svg.removeEventListener('pointerdown', onPointerDown)
-        svg.removeEventListener('pointermove', onPointerMove)
-        svg.removeEventListener('click', onClickCapture, true)
         svg.removeEventListener('wheel', onWheel)
         svg.removeEventListener('dblclick', onDoubleClick)
         svg.removeEventListener('keydown', onKeyDown)
