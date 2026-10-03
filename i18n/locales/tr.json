@@ -1,17 +1,31 @@
 {
     "colors": {
         "red": "Kırmızı",
+        "darkRed": "Koyu kırmızı",
         "orange": "Turuncu",
         "yellow": "Sarı",
+        "olive": "Zeytin yeşili",
+        "lime": "Fıstık yeşili",
         "green": "Yeşil",
+        "darkGreen": "Koyu yeşil",
+        "mint": "Nane yeşili",
+        "turquoise": "Turkuaz",
+        "teal": "Petrol mavisi",
+        "lightBlue": "Açık mavi",
         "blue": "Mavi",
+        "navy": "Lacivert",
         "purple": "Mor",
+        "lavender": "Lavanta",
+        "magenta": "Fuşya",
         "pink": "Pembe",
+        "lightPink": "Açık pembe",
         "brown": "Kahverengi",
-        "black": "Siyah",
-        "white": "Beyaz",
+        "beige": "Bej",
         "grey": "Gri",
-        "turquoise": "Turkuaz"
+        "lightGrey": "Açık gri",
+        "darkGrey": "Koyu gri",
+        "black": "Siyah",
+        "white": "Beyaz"
     },
     "common": {
         "selectItem": "{name} öğesini seç"
@@ -652,7 +666,8 @@
             "manage_settings": "Ayarları Yönet",
             "run_inventory": "Envanter yap",
             "manage_reports": "Şikâyetleri yönet",
-            "view_audit_log": "Etkinlik günlüğünü görüntüle"
+            "view_audit_log": "Etkinlik günlüğünü görüntüle",
+            "manage_tasks": "Görevleri yönet"
         },
         "updated": "Yetkiler güncellendi.",
         "updateError": "Yetkiler güncellenemedi.",
@@ -775,7 +790,15 @@
             "logo": "PNG, JPG, SVG veya WebP. Gezinme çubuğunda gösterilir.",
             "icon": "Tarayıcı sekmesinde gösterilen ICO dosyası.",
             "sign": "PNG, JPG, SVG veya WebP. Rota etiketlerine basılır."
-        }
+        },
+        "boulderBands": "Boulder renkleri",
+        "boulderBandsHint": "Boulder derecelerinin yanında ve basılı etiketlerde renk çubuğu olarak gösterilir. Bir rengin nerede bittiğini ayarlamak için tutamaçları sürükleyin; yeniden adlandırmak, rengini değiştirmek, bölmek veya kaldırmak için bir renk seçin.",
+        "bandColor": "Renk",
+        "bandName": "Ad",
+        "removeBand": "Rengi kaldır",
+        "resetBands": "Varsayılana sıfırla",
+        "splitBand": "Böl",
+        "bandBoundary": "{from} ile {to} arasındaki sınır"
     },
     "errors": {
         "notFound": {
@@ -1041,24 +1064,26 @@
     },
     "gradeConversion": {
         "title": "Derece dönüşümü",
-        "source": "{source} temel alınarak yaklaşık karşılıklar.",
+        "source": "Rota skalaları ve ≈ UIAA satırı IRCRA ölçeğini (Draper et al., 2015) değiştirmeden izler. Fb ↔ V yaygın dönüşümü kullanır. Zorluk renkleri salonun kendi şemasıdır, iki kaynağın da parçası değildir.",
         "open": "Dönüşüm tablosu",
         "show": "Diğer skalalarla karşılaştır",
-        "columns": {
-            "male": "Tırmanıcı seviyesi (erkek)",
-            "female": "Tırmanıcı seviyesi (kadın)",
-            "britishTech": "British Tech",
-            "ewbank": "Ewbank",
-            "brazilian": "Brezilya (BRZ)",
-            "metricUiaa": "Metrik UIAA",
-            "watts": "Watts"
+        "boulders": "Boulder",
+        "routes": "Rotalar",
+        "gymBand": "Zorluk rengi",
+        "orientation": "Yaklaşık",
+        "andUp": "{grade} ve üstü",
+        "bands": {
+            "yellow": "Sarı",
+            "orange": "Turuncu",
+            "blue": "Mavi",
+            "red": "Kırmızı",
+            "black": "Siyah"
         },
-        "levels": {
-            "lower": "Başlangıç (L1)",
-            "intermediate": "Orta (L2)",
-            "advanced": "İleri (L3)",
-            "elite": "Elit (L4)",
-            "higherElite": "Üst elit (L5)"
+        "notes": {
+            "fontVsFrench": "Fb 6A, Fransız 6a değildir. Fransız 6a ≈ UIAA 6, Fb 6A ≈ UIAA 7+.",
+            "beginner": "İlk rengin alt sınırı yoktur. IRCRA, Fb 3'ten kolay her şeyi “<2” altında toplar.",
+            "orientation": "≈ UIAA yalnızca fikir vermek içindir. Yeni problemleri bu satıra göre değil, referans problemlere göre derecelendirin.",
+            "bands": "Renkler salonun kendi şemasıdır (Ayarlar → Zorluk skalaları). Varsayılan, Fontainebleau'daki renkli parkurların sırasını izler (sarı, turuncu, mavi, kırmızı, siyah); evrensel bir standart yoktur."
         }
     },
     "gradeSystemsShort": {

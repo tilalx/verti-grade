@@ -13,8 +13,11 @@ export function toPbSort(
     }
     return sortByArr
         .map((sort) => {
-            const key = keyMap[sort.key] ?? sort.key
-            return sort.order === 'desc' ? `-${key}` : key
+            const fields = (keyMap[sort.key] ?? sort.key).split(',')
+            const key = fields.pop()!
+            return [...fields, sort.order === 'desc' ? `-${key}` : key].join(
+                ',',
+            )
         })
         .join(',')
 }

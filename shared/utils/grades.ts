@@ -8,10 +8,6 @@ export const DEFAULT_BOULDER_GRADE_SYSTEM: GradeSystem = 'font'
 
 type GradeTable = [label: string, index: number][]
 
-export const IRCRA_SOURCE = 'IRCRA reporting scale (Draper et al., 2015)'
-
-export const IRCRA_LEVELS = Array.from({ length: 32 }, (_, i) => i + 1)
-
 export const GRADE_TABLES: Record<GradeSystem, GradeTable> = {
     uiaa: [
         ['1', 1],

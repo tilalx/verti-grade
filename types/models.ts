@@ -9,6 +9,7 @@ import type {
 } from '../app/utils/tasks'
 import type { TickType } from '../shared/utils/ticks'
 import type { GymMap, MapPoint } from '../shared/utils/mapGeometry'
+import type { BoulderBandSetting } from '../shared/utils/gradeReference'
 
 export type RecordId = string
 
@@ -137,6 +138,7 @@ export interface SettingsRecord extends BaseRecord {
     legal_representatives?: LegalPerson[] | null
     route_grade_system?: string | null
     boulder_grade_system?: string | null
+    boulder_bands?: BoulderBandSetting[] | null
     allow_registration?: boolean
 }
 

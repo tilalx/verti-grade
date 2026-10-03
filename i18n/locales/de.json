@@ -1,17 +1,31 @@
 {
     "colors": {
         "red": "Rot",
+        "darkRed": "Dunkelrot",
         "orange": "Orange",
         "yellow": "Gelb",
+        "olive": "Olivgrün",
+        "lime": "Limettengrün",
         "green": "Grün",
+        "darkGreen": "Dunkelgrün",
+        "mint": "Mintgrün",
+        "turquoise": "Türkis",
+        "teal": "Petrol",
+        "lightBlue": "Hellblau",
         "blue": "Blau",
+        "navy": "Dunkelblau",
         "purple": "Lila",
+        "lavender": "Flieder",
+        "magenta": "Magenta",
         "pink": "Pink",
+        "lightPink": "Rosa",
         "brown": "Braun",
-        "black": "Schwarz",
-        "white": "Weiß",
+        "beige": "Beige",
         "grey": "Grau",
-        "turquoise": "Türkis"
+        "lightGrey": "Hellgrau",
+        "darkGrey": "Dunkelgrau",
+        "black": "Schwarz",
+        "white": "Weiß"
     },
     "common": {
         "selectItem": "{name} auswählen"
@@ -670,7 +684,8 @@
             "manage_settings": "Einstellungen verwalten",
             "run_inventory": "Inventur durchführen",
             "manage_reports": "Inhaltsmeldungen bearbeiten",
-            "view_audit_log": "Aktivitätsprotokoll ansehen"
+            "view_audit_log": "Aktivitätsprotokoll ansehen",
+            "manage_tasks": "Aufgaben verwalten"
         },
         "updated": "Berechtigungen aktualisiert.",
         "updateError": "Fehler beim Aktualisieren der Berechtigungen.",
@@ -775,7 +790,15 @@
             "logo": "PNG, JPG, SVG oder WebP. Wird in der Navigationsleiste angezeigt.",
             "icon": "ICO-Datei, die im Browser-Tab angezeigt wird.",
             "sign": "PNG, JPG, SVG oder WebP. Wird auf Routenschilder gedruckt."
-        }
+        },
+        "boulderBands": "Boulderfarben",
+        "boulderBandsHint": "Erscheint als Farbbalken neben Bouldergraden und auf gedruckten Schildern. Ziehe die Griffe, um festzulegen, wo eine Farbe endet; wähle eine Farbe, um sie umzubenennen, umzufärben, zu teilen oder zu entfernen.",
+        "bandColor": "Farbe",
+        "bandName": "Name",
+        "removeBand": "Farbe entfernen",
+        "resetBands": "Auf Standard zurücksetzen",
+        "splitBand": "Teilen",
+        "bandBoundary": "Grenze zwischen {from} und {to}"
     },
     "errors": {
         "notFound": {
@@ -1041,24 +1064,26 @@
     },
     "gradeConversion": {
         "title": "Grad-Umrechnung",
-        "source": "Ungefähre Entsprechungen auf Basis der {source}.",
+        "source": "Die Routenskalen und die ≈-UIAA-Zeile folgen unverändert der IRCRA-Skala (Draper et al., 2015). Fb ↔ V nutzt die übliche Umrechnung. Die Hallenfarben sind das eigene Schema der Halle und stammen aus keiner der beiden Quellen.",
         "open": "Umrechnungstabelle",
         "show": "Mit anderen Skalen vergleichen",
-        "columns": {
-            "male": "Leistungsniveau (Männer)",
-            "female": "Leistungsniveau (Frauen)",
-            "britishTech": "British Tech",
-            "ewbank": "Ewbank",
-            "brazilian": "Brasilianisch (BRZ)",
-            "metricUiaa": "UIAA metrisch",
-            "watts": "Watts"
+        "boulders": "Boulder",
+        "routes": "Routen",
+        "gymBand": "Hallenfarbe",
+        "orientation": "Orientierung",
+        "andUp": "ab {grade}",
+        "bands": {
+            "yellow": "Gelb",
+            "orange": "Orange",
+            "blue": "Blau",
+            "red": "Rot",
+            "black": "Schwarz"
         },
-        "levels": {
-            "lower": "Einsteiger (L1)",
-            "intermediate": "Mittelstufe (L2)",
-            "advanced": "Fortgeschritten (L3)",
-            "elite": "Elite (L4)",
-            "higherElite": "Höchste Elite (L5)"
+        "notes": {
+            "fontVsFrench": "Fb 6A ist nicht französisch 6a. Französisch 6a ≈ UIAA 6, Fb 6A ≈ UIAA 7+.",
+            "beginner": "Die erste Farbe hat keine Untergrenze. IRCRA fasst alles leichter als Fb 3 unter „<2“ zusammen.",
+            "orientation": "≈ UIAA dient nur der Orientierung. Neue Boulder an Referenzbouldern bewerten, nicht an dieser Zeile.",
+            "bands": "Die Farben sind das eigene Schema der Halle (Einstellungen → Bewertungsskalen). Standard ist die Circuit-Reihenfolge aus Fontainebleau (Gelb, Orange, Blau, Rot, Schwarz); einen allgemeinen Standard gibt es nicht."
         }
     },
     "gradeSystemsShort": {

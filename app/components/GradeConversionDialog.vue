@@ -2,7 +2,6 @@
     <LayoutDialogShell
         v-model="open"
         :title="$t('gradeConversion.title')"
-        :subtitle="$t('gradeConversion.source', { source: IRCRA_SOURCE })"
         :max-width="1200"
         closable
         sheet-on-mobile
@@ -23,384 +22,372 @@
             </slot>
         </template>
 
-        <div
-            class="mb-3 flex flex-wrap gap-2"
-            data-testid="grade-conversion-columns"
+        <section
+            v-for="ladder in ladders"
+            :key="ladder.key"
+            class="mb-6"
+            :data-testid="`grade-conversion-${ladder.key}`"
         >
-            <UButton
-                v-for="column in toggleableColumns"
-                :key="column.key"
-                size="xs"
-                :color="isVisible(column.key) ? 'primary' : 'neutral'"
-                :variant="isVisible(column.key) ? 'soft' : 'outline'"
-                :icon="isVisible(column.key) ? 'i-lucide-check' : undefined"
-                :aria-pressed="isVisible(column.key)"
-                :data-testid="`grade-conversion-toggle-${column.key}`"
-                @click="toggleColumn(column.key)"
-            >
-                {{ column.title }}
-            </UButton>
-        </div>
-
-        <div class="grade-conversion" data-testid="grade-conversion-table">
+            <LayoutSectionHeader :title="ladder.title" />
             <div
-                class="grade-conversion__grid grade-conversion__header"
-                :style="gridStyle"
+                class="ladder"
+                :style="{
+                    '--steps': ladder.steps,
+                    '--lanes': ladder.lanes,
+                    '--min': ladder.minWidth,
+                }"
             >
-                <div
-                    v-for="column in visibleColumns"
-                    :key="column.key"
-                    :class="{ 'grade-conversion--active': column.active }"
-                    :title="column.title"
-                >
-                    <span class="hidden sm:inline">{{ column.title }}</span>
-                    <span class="sm:hidden">{{
-                        column.shortTitle ?? column.title
-                    }}</span>
-                </div>
-            </div>
-
-            <div
-                class="grade-conversion__grid grade-conversion__body"
-                :style="{ ...gridStyle, '--rows': IRCRA_LEVELS.length }"
-            >
-                <div
-                    v-for="column in visibleColumns"
-                    :key="column.key"
-                    class="grade-conversion__column"
-                    :class="{
-                        'grade-conversion--active': column.active,
-                        'grade-conversion__column--ircra':
-                            column.key === 'ircra',
+                <span
+                    v-for="cell in ladder.cells"
+                    :key="cell.key"
+                    class="ladder__cell"
+                    :class="[
+                        `ladder__cell--${cell.kind}`,
+                        {
+                            'grade-conversion__label--highlight':
+                                cell.highlighted,
+                        },
+                    ]"
+                    :style="{
+                        '--at': cell.at,
+                        '--span': cell.span,
+                        '--lane': cell.lane,
+                        background: cell.color,
+                        color: cell.color && readableTextOn(cell.color),
                     }"
-                    :data-testid="`grade-conversion-column-${column.key}`"
+                    :data-testid="cell.testId"
                 >
-                    <template
-                        v-for="(lane, laneIndex) in column.lanes"
-                        :key="laneIndex"
-                    >
-                        <span
-                            v-for="[label, from, to] in lane"
-                            :key="label"
-                            class="grade-conversion__band-cell"
-                            :style="
-                                bandStyle(from, to, laneIndex, column.lanes)
-                            "
-                            :data-testid="`grade-conversion-${column.key}-${label}`"
-                            >{{ label }}</span
-                        >
+                    <template v-if="cell.shortText">
+                        <span class="hidden sm:inline">{{ cell.text }}</span>
+                        <span class="sm:hidden">{{ cell.shortText }}</span>
                     </template>
-                    <span
-                        v-for="[label, index] in column.labels"
-                        :key="label"
-                        class="grade-conversion__label"
-                        :class="{
-                            'grade-conversion__label--highlight': isHighlighted(
-                                column.key,
-                                label,
-                            ),
-                        }"
-                        :style="positionOf(index)"
-                        :data-testid="`grade-conversion-${column.key}-${label}`"
-                        >{{ label }}</span
-                    >
-                </div>
-
-                <div
-                    v-if="highlightIndex !== null"
-                    class="grade-conversion__band"
-                    :style="positionOf(highlightIndex)"
-                    data-testid="grade-conversion-band"
-                />
+                    <template v-else>{{ cell.text }}</template>
+                    <UBadge
+                        v-if="cell.badge"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
+                        :label="cell.badge"
+                    />
+                </span>
             </div>
-        </div>
+        </section>
+
+        <ul class="list-disc space-y-1 ps-5 text-sm text-muted">
+            <li v-for="note in NOTES" :key="note">
+                {{ $t(`gradeConversion.notes.${note}`) }}
+            </li>
+        </ul>
+        <p class="mt-3 text-xs text-dimmed">
+            {{ $t('gradeConversion.source') }}
+        </p>
     </LayoutDialogShell>
 </template>
 
 <script setup lang="ts">
 import {
-    GRADE_TABLES,
-    IRCRA_LEVELS,
-    IRCRA_SOURCE,
-    gradeIndex,
+    gradeLabels,
     type GradeSource,
     type GradeSystem,
 } from '#shared/utils/grades'
 import {
-    BRAZILIAN,
-    BRITISH_TECH_LANES,
-    EWBANK,
-    FEMALE_LEVELS,
-    MALE_LEVELS,
-    METRIC_UIAA,
-    WATTS,
-    type ReferenceBand,
-    type ReferenceLabels,
-} from '~/utils/gradeReference'
-
-interface ConversionColumn {
-    key: string
-    title: string
-    shortTitle?: string
-    active?: boolean
-    labels?: ReferenceLabels
-    lanes?: ReferenceBand[][]
-}
+    bandRanges,
+    orientationUiaa,
+    vCells,
+    type GymBand,
+} from '#shared/utils/gradeReference'
 
 const props = defineProps<{
     source?: GradeSource | null
 }>()
 
+interface LadderCell {
+    key: string
+    text: string
+    shortText?: string
+    at: number
+    span: number
+    lane: number
+    kind: 'head' | 'band' | 'primary' | 'plain' | 'orientation' | 'ircra'
+    testId?: string
+    color?: string
+    badge?: string
+    highlighted?: boolean
+}
+
+const IRCRA_STEPS = 32
+const NOTES = ['fontVsFrench', 'beginner', 'orientation', 'bands']
+
 const { t } = useI18n()
-const { smAndUp } = useDisplay()
 const open = ref(false)
-const visibleKeys = ref<string[] | null>(null)
-const { routeGradeSystem, boulderGradeSystem } = useGradeSystems()
 
-function systemColumn(system: GradeSystem): ConversionColumn {
-    return {
-        key: system,
-        title: t(`gradeSystems.${system}`),
-        shortTitle: t(`gradeSystemsShort.${system}`),
-        active: [routeGradeSystem.value, boulderGradeSystem.value].includes(
-            system,
+function isSourceGrade(system: GradeSystem, label: string) {
+    return (
+        system === props.source?.grade_system && label === props.source?.grade
+    )
+}
+
+function laneOf(
+    lane: number,
+    kind: LadderCell['kind'],
+    head: string,
+    cells: { text: string; span?: number; system?: GradeSystem }[],
+    extra: Partial<LadderCell> = {},
+): LadderCell[] {
+    let at = 1
+    return [
+        {
+            key: `${lane}-head`,
+            text: head,
+            at: 0,
+            span: 1,
+            lane,
+            kind: 'head',
+            badge: extra.badge,
+            shortText: extra.shortText,
+        },
+        ...cells.map(({ text, span = 1, system }, i) => {
+            const cell: LadderCell = {
+                key: `${lane}-${i}`,
+                text,
+                at,
+                span,
+                lane,
+                kind,
+                testId: system
+                    ? `grade-conversion-${system}-${text}`
+                    : undefined,
+                highlighted: !!system && isSourceGrade(system, text),
+            }
+            at += span
+            return cell
+        }),
+    ]
+}
+
+const { bands: gymBands, bandName } = useGymBands()
+
+function bandLabel(band: GymBand) {
+    const range = bandRanges(gymBands.value).find((r) => r.key === band.key)
+    return range?.openEnd
+        ? `${bandName(band)} · ${t('gradeConversion.andUp', { grade: range.font[0] })}`
+        : bandName(band)
+}
+
+const boulderCells = computed(() => {
+    const font = gradeLabels('font')
+    const bands = laneOf(
+        1,
+        'band',
+        t('gradeConversion.gymBand'),
+        gymBands.value.map((band) => ({
+            text: bandLabel(band),
+            span: band.span,
+        })),
+    ).map((cell, i) => {
+        const band = gymBands.value[i - 1]
+        return band
+            ? {
+                  ...cell,
+                  color: band.color,
+                  testId: `grade-conversion-band-${band.key}`,
+              }
+            : cell
+    })
+    const orientation = laneOf(
+        4,
+        'orientation',
+        '≈ UIAA',
+        font.map((_, i) => ({ text: orientationUiaa(i) })),
+        { badge: t('gradeConversion.orientation') },
+    ).map((cell) =>
+        cell.kind === 'head'
+            ? cell
+            : {
+                  ...cell,
+                  testId: `grade-conversion-orientation-${cell.at - 1}`,
+              },
+    )
+    return [
+        ...bands,
+        ...laneOf(
+            2,
+            'primary',
+            t('gradeSystems.font'),
+            font.map((text) => ({ text, system: 'font' as const })),
+            { shortText: t('gradeSystemsShort.font') },
         ),
-        labels: GRADE_TABLES[system],
-    }
-}
+        ...laneOf(
+            3,
+            'plain',
+            t('gradeSystems.v'),
+            vCells().map(({ label, span }) => ({
+                text: label,
+                span,
+                system: 'v' as const,
+            })),
+            { shortText: t('gradeSystemsShort.v') },
+        ),
+        ...orientation,
+    ]
+})
 
-function levelColumn(key: string, bands: ReferenceBand[]): ConversionColumn {
-    return {
-        key,
-        title: t(`gradeConversion.columns.${key}`),
-        lanes: [
-            bands.map(([level, from, to]) => [
-                t(`gradeConversion.levels.${level}`),
-                from,
-                to,
-            ]),
-        ],
-    }
-}
+const routeCells = computed(() => {
+    const steps = Array.from({ length: IRCRA_STEPS }, (_, i) => i)
+    return [
+        ...(['uiaa', 'french', 'yds'] as const).flatMap((system, i) => {
+            const labels = gradeLabels(system)
+            return laneOf(
+                i + 1,
+                system === 'uiaa' ? 'primary' : 'plain',
+                t(`gradeSystems.${system}`),
+                steps.map((step) =>
+                    labels[step]
+                        ? { text: labels[step], system }
+                        : { text: '—' },
+                ),
+                { shortText: t(`gradeSystemsShort.${system}`) },
+            )
+        }),
+        ...laneOf(
+            4,
+            'ircra',
+            'IRCRA',
+            steps.map((step) => ({ text: String(step + 1) })),
+        ),
+    ]
+})
 
-const columns = computed<ConversionColumn[]>(() => [
-    levelColumn('male', MALE_LEVELS),
-    levelColumn('female', FEMALE_LEVELS),
-    systemColumn('v'),
-    systemColumn('font'),
+const ladders = computed(() => [
     {
-        key: 'ircra',
-        title: 'IRCRA',
-        labels: IRCRA_LEVELS.map((level) => [String(level), level]),
-    },
-    systemColumn('yds'),
-    systemColumn('french'),
-    {
-        key: 'britishTech',
-        title: t('gradeConversion.columns.britishTech'),
-        lanes: BRITISH_TECH_LANES,
+        key: 'boulders',
+        title: t('gradeConversion.boulders'),
+        steps: gradeLabels('font').length,
+        lanes: 4,
+        minWidth: '2.5rem',
+        cells: boulderCells.value,
     },
     {
-        key: 'ewbank',
-        title: t('gradeConversion.columns.ewbank'),
-        labels: EWBANK,
-    },
-    {
-        key: 'brazilian',
-        title: t('gradeConversion.columns.brazilian'),
-        labels: BRAZILIAN,
-    },
-    systemColumn('uiaa'),
-    {
-        key: 'metricUiaa',
-        title: t('gradeConversion.columns.metricUiaa'),
-        labels: GRADE_TABLES.uiaa.map(([label, index]) => [
-            METRIC_UIAA[label] ?? label,
-            index,
-        ]),
-    },
-    {
-        key: 'watts',
-        title: t('gradeConversion.columns.watts'),
-        labels: WATTS,
+        key: 'routes',
+        title: t('gradeConversion.routes'),
+        steps: IRCRA_STEPS,
+        lanes: 4,
+        minWidth: '3rem',
+        cells: routeCells.value,
     },
 ])
 
-const toggleableColumns = computed(() =>
-    columns.value.filter((column) => column.key !== 'ircra'),
-)
-
-const visibleColumns = computed(() =>
-    columns.value.filter(
-        (column) =>
-            column.key === 'ircra' || visibleKeys.value?.includes(column.key),
-    ),
-)
-
-function isVisible(key: string) {
-    return visibleKeys.value?.includes(key) ?? false
-}
-
-function toggleColumn(key: string) {
-    const current = visibleKeys.value ?? []
-    visibleKeys.value = current.includes(key)
-        ? current.filter((visibleKey) => visibleKey !== key)
-        : [...current, key]
-}
-
-type ColumnWidth = [track: string, min: number]
-
-const DEFAULT_WIDTH: ColumnWidth = ['minmax(52px, 1fr)', 52]
-
-const COLUMN_WIDTHS: Record<string, ColumnWidth> = {
-    male: ['88px', 88],
-    female: ['88px', 88],
-    ircra: ['44px', 44],
-}
-
-const gridStyle = computed(() => {
-    const widths = visibleColumns.value.map(
-        (column) => COLUMN_WIDTHS[column.key] ?? DEFAULT_WIDTH,
-    )
-    return {
-        gridTemplateColumns: widths.map(([track]) => track).join(' '),
-        minWidth: `${widths.reduce((sum, [, min]) => sum + min, 0)}px`,
-    }
-})
-
-const highlightIndex = computed(() =>
-    gradeIndex(props.source?.grade_system, props.source?.grade),
-)
-
-function isHighlighted(columnKey: string, label: string) {
-    return (
-        columnKey === props.source?.grade_system &&
-        label === props.source?.grade
-    )
-}
-
-function positionOf(index: number) {
-    return { top: `calc(${index - 0.5} * var(--row-height))` }
-}
-
-function bandStyle(
-    from: number,
-    to: number,
-    laneIndex: number,
-    lanes: ReferenceBand[][] = [],
-) {
-    const width = 100 / lanes.length
-    return {
-        top: `calc(${from - 0.5} * var(--row-height))`,
-        height: `calc(${to - from} * var(--row-height))`,
-        left: `${laneIndex * width}%`,
-        width: `${width}%`,
-    }
-}
-
 watch(open, async (isOpen) => {
-    if (isOpen && visibleKeys.value === null) {
-        visibleKeys.value = toggleableColumns.value
-            .filter((column) => smAndUp.value || column.key in GRADE_TABLES)
-            .map((column) => column.key)
-    }
-    if (!isOpen || highlightIndex.value === null) return
+    if (!isOpen) return
     await nextTick()
-    document
-        .querySelector('[data-testid="grade-conversion-band"]')
-        ?.scrollIntoView({ block: 'center' })
+    const cells = document.querySelectorAll<HTMLElement>(
+        '.grade-conversion__label--highlight',
+    )
+    for (const cell of cells) {
+        const ladder = cell.parentElement!
+        ladder.scrollLeft =
+            cell.offsetLeft - (ladder.clientWidth - cell.offsetWidth) / 2
+    }
+    cells[0]?.scrollIntoView({ block: 'center', inline: 'nearest' })
 })
 </script>
 
 <style scoped>
-.grade-conversion {
-    --row-height: 34px;
-    max-height: 58vh;
-    overflow: auto;
-}
+@reference "~/assets/css/main.css";
 
-.grade-conversion__grid {
+.ladder {
     display: grid;
+    grid-template-columns: repeat(var(--lanes), minmax(0, 1fr));
+    gap: 1px;
+    overflow: clip;
+    border: 1px solid var(--ui-border);
+    border-radius: calc(var(--ui-radius) * 2);
+    background: var(--ui-border);
+    color: var(--ui-text-muted);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
 }
 
-.grade-conversion__header {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--ui-bg);
-}
-
-.grade-conversion__header > div {
+.ladder__cell {
+    grid-row: calc(var(--at) + 1) / span var(--span);
+    grid-column: var(--lane);
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 8px 4px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 0.8rem;
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.grade-conversion__body {
-    position: relative;
-    height: calc(var(--rows) * var(--row-height));
-    background: repeating-linear-gradient(
-        to bottom,
-        transparent 0 var(--row-height),
-        color-mix(in oklab, var(--ui-text-highlighted) 4%, transparent)
-            var(--row-height) calc(2 * var(--row-height))
-    );
-}
-
-.grade-conversion__column {
-    position: relative;
-    font-size: 0.85rem;
-}
-
-.grade-conversion__column--ircra {
-    font-weight: 700;
-    background: color-mix(in oklab, var(--ui-text-highlighted) 5%, transparent);
-}
-
-.grade-conversion__label {
-    position: absolute;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    text-align: center;
-    white-space: nowrap;
-}
-
-.grade-conversion__band-cell {
-    position: absolute;
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    padding: 2px;
+    gap: 4px;
+    min-height: 2.25rem;
+    padding: 6px 4px;
+    background: var(--ui-bg);
     text-align: center;
-    font-size: 0.75rem;
-    line-height: 1.2;
-    border: 1px solid
-        color-mix(in oklab, var(--ui-text-highlighted) 25%, transparent);
-    border-radius: 4px;
 }
 
-.grade-conversion--active {
+.ladder__cell--head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ui-bg-elevated);
+    color: var(--ui-text-highlighted);
     font-weight: 600;
 }
 
-.grade-conversion__label--highlight {
-    color: var(--ui-primary);
-    font-weight: 800;
+.ladder__cell--band {
+    align-items: flex-start;
+    padding-top: 10px;
+    font-weight: 600;
 }
 
-.grade-conversion__band {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: var(--row-height);
-    transform: translateY(-50%);
-    background: color-mix(in oklab, var(--ui-primary) 12%, transparent);
-    pointer-events: none;
+.ladder__cell--primary {
+    color: var(--ui-text-highlighted);
+    font-weight: 600;
+}
+
+.ladder__cell--orientation {
+    color: var(--ui-text-dimmed);
+    font-style: italic;
+    outline: 1px dashed var(--ui-border-accented);
+    outline-offset: -4px;
+}
+
+.ladder__cell--ircra {
+    color: var(--ui-text-dimmed);
+    font-size: 0.75rem;
+}
+
+.ladder__cell.grade-conversion__label--highlight {
+    background: color-mix(in oklab, var(--ui-primary) 12%, var(--ui-bg));
+    color: var(--ui-primary);
+    font-weight: 700;
+}
+
+@variant sm {
+    .ladder {
+        grid-template-columns: 7rem repeat(
+                var(--steps),
+                minmax(var(--min), 1fr)
+            );
+        overflow-x: auto;
+    }
+
+    .ladder__cell {
+        grid-row: var(--lane);
+        grid-column: calc(var(--at) + 1) / span var(--span);
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .ladder__cell--band {
+        align-items: center;
+        padding-top: 6px;
+    }
+
+    .ladder__cell--head {
+        position: sticky;
+        top: auto;
+        left: 0;
+        justify-content: flex-start;
+        padding-inline: 12px;
+        flex-wrap: wrap;
+    }
 }
 </style>

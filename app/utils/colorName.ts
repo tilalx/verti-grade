@@ -1,62 +1,135 @@
 import { toHex6 } from '~/utils/color'
 
-export type ColorName =
-    | 'red'
-    | 'orange'
-    | 'yellow'
-    | 'green'
-    | 'blue'
-    | 'purple'
-    | 'pink'
-    | 'brown'
-    | 'black'
-    | 'white'
-    | 'grey'
-    | 'turquoise'
+const NAMED_COLORS = {
+    red: ['#d32f2f', '#f44336', '#e53935', '#dc2626', '#ff0000'],
+    darkRed: ['#8b1a1a', '#8b0000', '#7f1d1d'],
+    orange: ['#fb8c00', '#f97316', '#ff6d00', '#da5307', '#ffa500', '#ff5722'],
+    yellow: [
+        '#e3b448',
+        '#fdd835',
+        '#ffeb3b',
+        '#facc15',
+        '#ffc107',
+        '#ffd700',
+        '#ffff00',
+    ],
+    olive: ['#827717', '#808000', '#6b6b1f'],
+    lime: [
+        '#c6ff00',
+        '#d4ff3f',
+        '#b2d235',
+        '#8bc34a',
+        '#39ff14',
+        '#cddc39',
+        '#a3e635',
+    ],
+    green: [
+        '#66bb6a',
+        '#5cd67a',
+        '#43a047',
+        '#4caf50',
+        '#22c55e',
+        '#00c853',
+        '#2e7d32',
+    ],
+    darkGreen: ['#1b5e20', '#14532d', '#006400'],
+    mint: ['#a5e8c8', '#c8e6c9', '#a5d6a7', '#98ff98'],
+    turquoise: [
+        '#1fbfb0',
+        '#00bcd4',
+        '#26c6da',
+        '#00e5ff',
+        '#00ffff',
+        '#40e0d0',
+    ],
+    teal: ['#00796b', '#009688', '#0f766e', '#008080'],
+    lightBlue: ['#81d4fa', '#b3e5fc', '#90caf9', '#87ceeb', '#7dd3fc'],
+    blue: [
+        '#4682b4',
+        '#3b5f8a',
+        '#4572a8',
+        '#1e88e5',
+        '#2196f3',
+        '#2563eb',
+        '#3f51b5',
+        '#0000ff',
+    ],
+    navy: ['#1a237e', '#1e3a8a', '#000080'],
+    purple: [
+        '#a020f0',
+        '#b620e0',
+        '#8e24aa',
+        '#9c27b0',
+        '#673ab7',
+        '#7e22ce',
+        '#800080',
+        '#4b0082',
+    ],
+    lavender: ['#b39ddb', '#ce93d8', '#c4b5fd', '#e6e6fa'],
+    magenta: ['#d81b9a', '#ff00ff', '#ff1493', '#c2185b'],
+    pink: ['#f06292', '#e91e63', '#ec407a', '#ff69b4', '#f472b6'],
+    lightPink: ['#f8bbd0', '#ffc0cb', '#fbcfe8'],
+    brown: ['#6d4c41', '#795548', '#a0522d', '#8b4513', '#5d4037'],
+    beige: ['#c2a878', '#b5a06a', '#d7c4a3', '#f5f5dc', '#e8d8b8', '#d2b48c'],
+    grey: ['#9e9e9e', '#888888', '#808080', '#9ca3af'],
+    lightGrey: ['#d4d4d4', '#c0c0c0', '#bdbdbd', '#cfcfcf', '#e0e0e0'],
+    darkGrey: ['#424242', '#4b5563', '#555555'],
+    black: ['#1a1a1a', '#000000', '#212121', '#18181b'],
+    white: ['#f7f7f7', '#ffffff', '#fafafa'],
+} as const
 
-const HUE_NAMES: [number, ColorName][] = [
-    [12, 'red'],
-    [45, 'orange'],
-    [70, 'yellow'],
-    [165, 'green'],
-    [195, 'turquoise'],
-    [250, 'blue'],
-    [295, 'purple'],
-    [345, 'pink'],
-    [360, 'red'],
-]
+export type ColorName = keyof typeof NAMED_COLORS
 
-function hsl(hex: string) {
+function oklab(hex: string): [number, number, number] {
     const value = parseInt(hex.slice(1), 16)
     const [red, green, blue] = [value >> 16, value >> 8, value].map(
-        (channel) => (channel & 0xff) / 255,
+        (channel) => {
+            const c = (channel & 0xff) / 255
+            return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+        },
     ) as [number, number, number]
-    const max = Math.max(red, green, blue)
-    const min = Math.min(red, green, blue)
-    const delta = max - min
-    const lightness = (max + min) / 2
-    const saturation = delta ? delta / (1 - Math.abs(2 * lightness - 1)) : 0
-    let hue = 0
-    if (delta && max === red) hue = ((green - blue) / delta + 6) % 6
-    else if (delta && max === green) hue = (blue - red) / delta + 2
-    else if (delta) hue = (red - green) / delta + 4
-    return { hue: hue * 60, saturation, lightness, max }
+    const l = Math.cbrt(
+        0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue,
+    )
+    const m = Math.cbrt(
+        0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue,
+    )
+    const s = Math.cbrt(
+        0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue,
+    )
+    return [
+        0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+        1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+        0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ]
 }
+
+let referenceColors: [ColorName, [number, number, number]][] | null = null
 
 export function nearestColorName(
     color: string | null | undefined,
 ): ColorName | null {
     const hex = toHex6(color)
     if (!hex) return null
-    const { hue, saturation, lightness, max } = hsl(hex)
-    if (lightness < 0.12) return 'black'
-    if (lightness > 0.95) return 'white'
-    if (saturation < 0.2) {
-        if (lightness < 0.2) return 'black'
-        return lightness > 0.9 ? 'white' : 'grey'
+    referenceColors ??= (
+        Object.entries(NAMED_COLORS) as [ColorName, readonly string[]][]
+    ).flatMap(([name, shades]) =>
+        shades.map((shade): [ColorName, [number, number, number]] => [
+            name,
+            oklab(toHex6(shade)),
+        ]),
+    )
+    const [l, a, b] = oklab(hex)
+    let best: ColorName = 'grey'
+    let bestDistance = Infinity
+    for (const [name, [refL, refA, refB]] of referenceColors) {
+        const distance = (l - refL) ** 2 + (a - refA) ** 2 + (b - refB) ** 2
+        if (distance < bestDistance) {
+            best = name
+            bestDistance = distance
+        }
     }
-    if (hue >= 10 && hue < 50 && max < 0.75) return 'brown'
-    return HUE_NAMES.find(([upperHue]) => hue < upperHue)![1]
+    return best
 }
 
 export function translatedColorName(
@@ -65,4 +138,15 @@ export function translatedColorName(
 ): string {
     const name = nearestColorName(color)
     return name ? t(`colors.${name}`) : ''
+}
+
+export function renamedForColor(
+    t: (key: string) => string,
+    name: string,
+    previousColor: string,
+    nextColor: string,
+): string {
+    const automatic =
+        !name.trim() || name === translatedColorName(t, previousColor)
+    return automatic ? translatedColorName(t, nextColor) : name
 }

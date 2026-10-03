@@ -1,5 +1,13 @@
 <template>
     <span class="grade-label" data-testid="grade-label">
+        <span
+            v-if="band"
+            class="grade-label__band"
+            :style="{ background: band.color }"
+            :title="bandName(band)"
+            :data-band="band.key"
+            data-testid="grade-label-band"
+        />
         <span>{{ grade }}</span>
         <span
             v-if="system"
@@ -16,6 +24,7 @@ import {
     isGradeSystem,
     type GradeSource,
 } from '#shared/utils/grades'
+import { gymBandFor } from '#shared/utils/gradeReference'
 
 const props = withDefaults(
     defineProps<{
@@ -28,6 +37,9 @@ const props = withDefaults(
 const gradeSystems = props.showSystem === undefined ? useGradeSystems() : null
 
 const grade = computed(() => formatGrade(props.source))
+
+const { bands, bandName } = useGymBands()
+const band = computed(() => gymBandFor(props.source, bands.value))
 
 const system = computed(() => {
     const value = props.source?.grade_system
@@ -44,6 +56,16 @@ const system = computed(() => {
     align-items: baseline;
     gap: 4px;
     white-space: nowrap;
+}
+
+.grade-label__band {
+    align-self: center;
+    width: 0.3em;
+    min-width: 4px;
+    height: 1.1em;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px
+        color-mix(in oklab, var(--ui-text-highlighted) 15%, transparent);
 }
 
 .grade-label__system {

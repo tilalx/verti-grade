@@ -1,6 +1,7 @@
 import { formatDate, normalizeCreators } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
 import { normalizeHexColor } from '#shared/utils/color'
+import { gymBandFor, type GymBand } from '#shared/utils/gradeReference'
 import type { RouteRecord } from '../../types/models'
 
 export const TAG_WIDTH = 280
@@ -11,6 +12,7 @@ const TEXT_WIDTH = 150
 const QR_SIZE = 110
 const CIRCLE_RADIUS = 12
 const CIRCLE_BORDER = 1.5
+const BAND_WIDTH = TAG_PADDING - 2
 
 export interface RouteTagOptions {
     anchorLabel: string
@@ -18,6 +20,7 @@ export interface RouteTagOptions {
     qrCode: Buffer
     logo: Buffer | null
     show: { creators: boolean; date: boolean; logo: boolean }
+    bands?: GymBand[]
 }
 
 interface TextSlot {
@@ -56,6 +59,12 @@ export function drawRouteTag(
     y: number,
     options: RouteTagOptions,
 ) {
+    const band = gymBandFor(route, options.bands)
+    if (band) {
+        doc.rect(x - TAG_PADDING, y - TAG_PADDING, BAND_WIDTH, TAG_HEIGHT).fill(
+            band.color,
+        )
+    }
     doc.rect(x - TAG_PADDING, y - TAG_PADDING, TAG_WIDTH, TAG_HEIGHT).stroke()
     doc.fillColor('black')
 

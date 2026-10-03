@@ -68,7 +68,6 @@ export interface TimelineDatum {
 
 export interface GradeDatum {
     grade: string
-    byType: Record<string, number>
     total: number
     expected: number
 }
@@ -123,6 +122,19 @@ export interface LatestComment {
     created: string | null
 }
 
+export const DISCIPLINES = ['Boulder', 'Route'] as const
+export type Discipline = (typeof DISCIPLINES)[number]
+
+export interface GradeAnalytics {
+    gradeDistribution: GradeDatum[]
+    locationGrades: LocationGradeDatum[]
+    gradeFeedback: FeedbackRoute[]
+}
+
+export function disciplineOf(route: { type?: string | null }): Discipline {
+    return route.type === 'Boulder' ? 'Boulder' : 'Route'
+}
+
 export interface AnalyticsResponse {
     generatedAt: string
     period: { from: string | null; to: string }
@@ -136,19 +148,16 @@ export interface AnalyticsResponse {
         averageLifespanDays: number | null
         unratedRoutes: number
     }
-    gradeDistribution: GradeDatum[]
-    types: string[]
+    grades: Record<Discipline, GradeAnalytics>
     routeTimeline: TimelineDatum[]
     ratingTimeline: TimelineDatum[]
     commentTimeline: TimelineDatum[]
     dailyRouteActivity: TimelineDatum[]
     ratingDistribution: number[]
     setters: SetterStats[]
-    locationGrades: LocationGradeDatum[]
     ratingBaseline: number | null
     topRated: RatedRoute[]
     lowestRated: RatedRoute[]
-    gradeFeedback: FeedbackRoute[]
     oldestActive: AgedRoute[]
     latestComments: LatestComment[]
 }
@@ -406,36 +415,6 @@ export function buildAnalytics(
         if (date) increase(dailyRouteActivity, bucketKey(date, 'day'))
     }
 
-    const types = [
-        ...new Set(scopedRoutes.map((route) => route.type || '?')),
-    ].sort()
-    const gradeRows = new Map<string, GradeDatum>()
-    const historicShare = new Map<string, number>()
-    for (const route of matchingRoutes)
-        increase(historicShare, gradeKey(route, withSystem))
-    for (const route of scopedRoutes) {
-        const grade = gradeKey(route, withSystem)
-        const row = gradeRows.get(grade) ?? {
-            grade,
-            byType: {},
-            total: 0,
-            expected: 0,
-        }
-        row.byType[route.type || '?'] = (row.byType[route.type || '?'] ?? 0) + 1
-        row.total += 1
-        gradeRows.set(grade, row)
-    }
-    for (const [grade, count] of historicShare) {
-        if (!gradeRows.has(grade))
-            gradeRows.set(grade, { grade, byType: {}, total: 0, expected: 0 })
-        gradeRows.get(grade)!.expected = round(
-            (count / matchingRoutes.length) * scopedRoutes.length,
-            1,
-        )!
-    }
-    const gradeDistribution = [...gradeRows.values()].sort((a, b) =>
-        compareGrades(a.grade, b.grade),
-    )
     const routesSetIds = new Set(routesSet.map((route) => route.id))
     const setterRoutes = new Map<string, AnalyticsRoute[]>()
     for (const route of scopedRoutes) {
@@ -471,20 +450,6 @@ export function buildAnalytics(
         }))
         .sort((a, b) => b.routes - a.routes || a.setter.localeCompare(b.setter))
 
-    const locationGradeCounts = new Map<string, LocationGradeDatum>()
-    for (const route of scopedRoutes) {
-        const location = route.locationName || '?'
-        const grade = gradeKey(route, withSystem)
-        const key = `${location}\u0000${grade}`
-        const cell = locationGradeCounts.get(key) ?? {
-            location,
-            grade,
-            count: 0,
-        }
-        cell.count += 1
-        locationGradeCounts.set(key, cell)
-    }
-
     const rated = scopedRoutes.flatMap((route) => {
         const stars = starValues(ratingsByRoute.get(route.id) ?? [])
         return stars.length >= MIN_VOTES_FOR_FEEDBACK
@@ -497,23 +462,80 @@ export function buildAnalytics(
               ]
             : []
     })
-    const feedback = scopedRoutes.flatMap((route) => {
-        const result = deviationOf(route)
-        return result
-            ? [
-                  {
-                      ...summarize(route, withSystem),
-                      setGrade: round(gradeScore(route))!,
-                      votedGrade: round(result.votedGrade)!,
-                      votedGradeLabel: isGradeSystem(route.grade_system)
-                          ? nearestGrade(route.grade_system, result.votedGrade)
-                          : '',
-                      deviation: round(result.deviation)!,
-                      votes: result.votes,
-                  },
-              ]
-            : []
-    })
+    const gradeAnalytics = (discipline: Discipline): GradeAnalytics => {
+        const matching = matchingRoutes.filter(
+            (route) => disciplineOf(route) === discipline,
+        )
+        const scoped = scopedRoutes.filter(
+            (route) => disciplineOf(route) === discipline,
+        )
+        const disciplineWithSystem =
+            new Set(matching.map((route) => route.grade_system).filter(Boolean))
+                .size > 1
+        const gradeRows = new Map<string, GradeDatum>()
+        const historicShare = new Map<string, number>()
+        for (const route of matching)
+            increase(historicShare, gradeKey(route, disciplineWithSystem))
+        for (const route of scoped) {
+            const grade = gradeKey(route, disciplineWithSystem)
+            const row = gradeRows.get(grade) ?? { grade, total: 0, expected: 0 }
+            row.total += 1
+            gradeRows.set(grade, row)
+        }
+        for (const [grade, count] of historicShare) {
+            if (!gradeRows.has(grade))
+                gradeRows.set(grade, { grade, total: 0, expected: 0 })
+            gradeRows.get(grade)!.expected = round(
+                (count / matching.length) * scoped.length,
+                1,
+            )!
+        }
+        const gradeDistribution = [...gradeRows.values()].sort((a, b) =>
+            compareGrades(a.grade, b.grade),
+        )
+        const locationGradeCounts = new Map<string, LocationGradeDatum>()
+        for (const route of scoped) {
+            const location = route.locationName || '?'
+            const grade = gradeKey(route, disciplineWithSystem)
+            const key = `${location}\u0000${grade}`
+            const cell = locationGradeCounts.get(key) ?? {
+                location,
+                grade,
+                count: 0,
+            }
+            cell.count += 1
+            locationGradeCounts.set(key, cell)
+        }
+
+        const feedback = scoped.flatMap((route) => {
+            const result = deviationOf(route)
+            return result
+                ? [
+                      {
+                          ...summarize(route, disciplineWithSystem),
+                          setGrade: round(gradeScore(route))!,
+                          votedGrade: round(result.votedGrade)!,
+                          votedGradeLabel: isGradeSystem(route.grade_system)
+                              ? nearestGrade(
+                                    route.grade_system,
+                                    result.votedGrade,
+                                )
+                              : '',
+                          deviation: round(result.deviation)!,
+                          votes: result.votes,
+                      },
+                  ]
+                : []
+        })
+        return {
+            gradeDistribution,
+            locationGrades: [...locationGradeCounts.values()],
+            gradeFeedback: feedback
+                .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
+                .slice(0, FEEDBACK_LIMIT),
+        }
+    }
+
     const topRated = [...rated]
         .sort(
             (a, b) =>
@@ -548,15 +570,16 @@ export function buildAnalytics(
                 (route) => !ratingsByRoute.has(route.id),
             ).length,
         },
-        gradeDistribution,
-        types,
+        grades: {
+            Boulder: gradeAnalytics('Boulder'),
+            Route: gradeAnalytics('Route'),
+        },
         routeTimeline: fillBuckets(routeTimeline, from, to, bucket),
         ratingTimeline: fillBuckets(ratingTimeline, from, to, bucket),
         commentTimeline: fillBuckets(commentTimeline, from, to, bucket),
         dailyRouteActivity: toTimeline(dailyRouteActivity),
         ratingDistribution,
         setters,
-        locationGrades: [...locationGradeCounts.values()],
         ratingBaseline: round(mean(rated.map((route) => route.averageRating))),
         topRated,
         lowestRated: rated
@@ -566,9 +589,6 @@ export function buildAnalytics(
                     a.averageRating - b.averageRating || b.ratings - a.ratings,
             )
             .slice(0, LIST_LIMIT),
-        gradeFeedback: feedback
-            .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
-            .slice(0, FEEDBACK_LIMIT),
         oldestActive: [...activeRoutes]
             .sort(byRouteDate)
             .slice(0, OLDEST_LIMIT)

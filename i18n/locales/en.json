@@ -1,17 +1,31 @@
 {
     "colors": {
         "red": "Red",
+        "darkRed": "Dark red",
         "orange": "Orange",
         "yellow": "Yellow",
+        "olive": "Olive",
+        "lime": "Lime",
         "green": "Green",
+        "darkGreen": "Dark green",
+        "mint": "Mint",
+        "turquoise": "Turquoise",
+        "teal": "Teal",
+        "lightBlue": "Light blue",
         "blue": "Blue",
+        "navy": "Navy",
         "purple": "Purple",
+        "lavender": "Lavender",
+        "magenta": "Magenta",
         "pink": "Pink",
+        "lightPink": "Light pink",
         "brown": "Brown",
-        "black": "Black",
-        "white": "White",
+        "beige": "Beige",
         "grey": "Grey",
-        "turquoise": "Turquoise"
+        "lightGrey": "Light grey",
+        "darkGrey": "Dark grey",
+        "black": "Black",
+        "white": "White"
     },
     "common": {
         "selectItem": "Select {name}"
@@ -670,7 +684,8 @@
             "manage_settings": "Manage settings",
             "run_inventory": "Run inventory",
             "manage_reports": "Handle content reports",
-            "view_audit_log": "View activity log"
+            "view_audit_log": "View activity log",
+            "manage_tasks": "Manage tasks"
         },
         "updated": "Permissions updated.",
         "updateError": "Could not update permissions.",
@@ -775,7 +790,15 @@
             "logo": "PNG, JPG, SVG or WebP. Shown in the navigation bar.",
             "icon": "ICO file shown in the browser tab.",
             "sign": "PNG, JPG, SVG or WebP. Printed on route labels."
-        }
+        },
+        "boulderBands": "Boulder colors",
+        "boulderBandsHint": "Shown as a color bar next to boulder grades and on printed signs. Drag the handles to move where a color ends; select a color to rename, recolor, split or remove it.",
+        "bandColor": "Color",
+        "bandName": "Name",
+        "removeBand": "Remove color",
+        "resetBands": "Reset to default",
+        "splitBand": "Split",
+        "bandBoundary": "Boundary between {from} and {to}"
     },
     "errors": {
         "notFound": {
@@ -1041,24 +1064,26 @@
     },
     "gradeConversion": {
         "title": "Grade conversion",
-        "source": "Approximate equivalents based on the {source}.",
+        "source": "The route scales and the ≈ UIAA row follow the IRCRA reporting scale (Draper et al., 2015), unchanged. Fb ↔ V uses the common conversion. Gym colors are the gym's own scheme, not part of either source.",
         "open": "Conversion table",
         "show": "Compare with other scales",
-        "columns": {
-            "male": "Climber level (male)",
-            "female": "Climber level (female)",
-            "britishTech": "British Tech",
-            "ewbank": "Ewbank",
-            "brazilian": "Brazilian (BRZ)",
-            "metricUiaa": "Metric UIAA",
-            "watts": "Watts"
+        "boulders": "Boulders",
+        "routes": "Routes",
+        "gymBand": "Gym color",
+        "orientation": "Orientation",
+        "andUp": "{grade} and up",
+        "bands": {
+            "yellow": "Yellow",
+            "orange": "Orange",
+            "blue": "Blue",
+            "red": "Red",
+            "black": "Black"
         },
-        "levels": {
-            "lower": "Lower grade (L1)",
-            "intermediate": "Intermediate (L2)",
-            "advanced": "Advanced (L3)",
-            "elite": "Elite (L4)",
-            "higherElite": "Higher elite (L5)"
+        "notes": {
+            "fontVsFrench": "Fb 6A is not French 6a. French 6a ≈ UIAA 6, Fb 6A ≈ UIAA 7+.",
+            "beginner": "The first color has no lower limit. IRCRA puts everything easier than Fb 3 into “<2”.",
+            "orientation": "≈ UIAA is orientation only. Grade new problems against benchmark problems, not this row.",
+            "bands": "Colors are the gym's own scheme (Settings → Grading scales). The default follows the Fontainebleau circuit order (yellow, orange, blue, red, black); there is no universal standard."
         }
     },
     "gradeSystemsShort": {

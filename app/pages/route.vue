@@ -131,6 +131,16 @@
                                                     )
                                                 }}</span
                                             >
+                                            <span
+                                                v-if="gymBand"
+                                                class="route-hero__difficulty-band"
+                                                :style="{
+                                                    background: gymBand.color,
+                                                }"
+                                                :title="bandName(gymBand)"
+                                                :data-band="gymBand.key"
+                                                data-testid="route-grade-band"
+                                            />
                                         </button>
                                     </template>
                                 </GradeConversionDialog>
@@ -413,6 +423,7 @@ import {
     normalizeCreators,
 } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
+import { gymBandFor } from '#shared/utils/gradeReference'
 import { formatNumber } from '#shared/utils/number'
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { reportContentUrl } from '~/utils/reports'
@@ -584,6 +595,9 @@ const heroStyle = computed(() => {
             : '0 1px 3px rgba(0, 0, 0, 0.3)',
     }
 })
+
+const { bands: gymBands, bandName } = useGymBands()
+const gymBand = computed(() => gymBandFor(metadata.value, gymBands.value))
 
 const difficultyBadgeStyle = computed(() => {
     const color = heroColor.value
@@ -794,6 +808,8 @@ onMounted(async () => {
 }
 
 .route-hero__difficulty-badge {
+    position: relative;
+    overflow: hidden;
     border: 0;
     cursor: pointer;
     flex-direction: column;
@@ -812,6 +828,13 @@ onMounted(async () => {
     font-size: 1.25rem;
     line-height: 1;
     white-space: nowrap;
+}
+
+.route-hero__difficulty-band {
+    position: absolute;
+    inset: auto 0 0;
+    height: 7px;
+    box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .route-hero__difficulty-system {

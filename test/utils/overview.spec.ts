@@ -78,15 +78,24 @@ describe('wallSummaries', () => {
                 grade_index: 7,
                 screw_date: '2026-09-20',
             }),
+            route('c', {
+                wall: 'w1',
+                type: 'Boulder',
+                grade: '6A',
+                grade_index: 15.7,
+                screw_date: '2026-09-02',
+            }),
         ]
         expect(wallSummaries(walls, routes)).toEqual([
             {
                 id: 'w1',
                 name: 'North',
                 location: 'l',
-                count: 2,
-                easiest: '5',
-                hardest: '6',
+                count: 3,
+                ranges: [
+                    { type: 'Boulder', easiest: '6A', hardest: '6A' },
+                    { type: 'Route', easiest: '5', hardest: '6' },
+                ],
                 newest: '2026-09-20',
             },
             {
@@ -94,8 +103,7 @@ describe('wallSummaries', () => {
                 name: 'Island',
                 location: 'l',
                 count: 0,
-                easiest: null,
-                hardest: null,
+                ranges: [],
                 newest: null,
             },
         ])

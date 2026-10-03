@@ -10,7 +10,7 @@ import {
     roundToCm,
     wallForAnchor,
 } from '#shared/utils/mapGeometry'
-import { formatGrade } from '#shared/utils/grades'
+import { formatGrade, gradeKey } from '#shared/utils/grades'
 import { toHex6 } from '~/utils/color'
 import {
     applyPlacements,
@@ -64,9 +64,18 @@ export function useMapPlacement(
     )
     const placedRoutes = computed(() => effectiveRoutes.value.filter(isPlaced))
     const gradeOptions = computed(() =>
-        [...new Set(effectiveRoutes.value.map((item) => formatGrade(item)))]
-            .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-            .map((grade) => ({ title: grade, value: grade })),
+        [
+            ...new Set(
+                effectiveRoutes.value
+                    .filter((item) => formatGrade(item))
+                    .sort(
+                        (a, b) =>
+                            (a.type ?? '').localeCompare(b.type ?? '') ||
+                            (a.grade_index ?? 0) - (b.grade_index ?? 0),
+                    )
+                    .map((item) => gradeKey(item, true)),
+            ),
+        ].map((grade) => ({ title: grade, value: grade })),
     )
     const colorOptions = computed(() => [
         ...new Set(
@@ -89,7 +98,8 @@ export function useMapPlacement(
         const query = (search.value ?? '').trim().toLowerCase()
         return (
             (!query || item.name.toLowerCase().includes(query)) &&
-            (!gradeFilter.value || formatGrade(item) === gradeFilter.value) &&
+            (!gradeFilter.value ||
+                gradeKey(item, true) === gradeFilter.value) &&
             (!colorFilter.value || toHex6(item.color) === colorFilter.value) &&
             (!typeFilter.value || item.type === typeFilter.value)
         )

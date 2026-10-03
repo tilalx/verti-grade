@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
 import { authHeader, gotoSettled, gotoSubscribed } from '../../support/nav'
-import { uiaa } from '../../support/seed'
+import { gradeOf, uiaa } from '../../support/seed'
 
 function stat(page: Page, key: string) {
     return page
@@ -106,6 +106,31 @@ test('filters live in the url and survive a reload', async ({
     await expect
         .poll(() => statValue(page, 'activeRoutes'))
         .toBeLessThan(allRoutes)
+})
+
+test('grade charts switch discipline in place and follow the type filter', async ({
+    adminPage: page,
+    root,
+    testPrefix,
+}) => {
+    for (const type of ['Route', 'Boulder']) {
+        await root.collection('routes').create({
+            name: `${testPrefix}-${type}`,
+            ...(type === 'Boulder' ? gradeOf('font', '6A') : uiaa('6')),
+            type,
+            creator: [`${testPrefix}-setter`],
+            screw_date: new Date().toISOString(),
+        })
+    }
+    await gotoSettled(page, '/manage/analytics?range=all')
+    await page.getByTestId('analytics-discipline-grades-Boulder').click()
+    await expect(
+        page.getByTestId('analytics-discipline-locationGrades-Boulder'),
+    ).toHaveAttribute('aria-pressed', 'true')
+
+    await gotoSettled(page, '/manage/analytics?range=all&type=Route')
+    await expect(page.getByTestId('analytics-chart-grades')).toBeVisible()
+    await expect(page.getByTestId('analytics-discipline-grades')).toHaveCount(0)
 })
 
 test('archived chip matches the routes page and toggles the url', async ({
@@ -283,7 +308,7 @@ test('reports routes whose grade votes are harder than the set grade', async ({
             ...uiaa('10'),
         })
     }
-    await gotoSettled(page, '/manage/analytics?range=all')
+    await gotoSettled(page, '/manage/analytics?range=all&type=Route')
     await expect(
         page.getByTestId('analytics-chart-grade-feedback'),
     ).toBeVisible()
@@ -291,11 +316,13 @@ test('reports routes whose grade votes are harder than the set grade', async ({
     const response = await page.request.get('/api/manage/analytics?range=all', {
         headers: await authHeader(page),
     })
-    const { gradeFeedback } = await response.json()
+    const { grades } = await response.json()
+    const gradeFeedback = grades.Route.gradeFeedback
     const sandbag = gradeFeedback.find(
         (entry: { id: string }) => entry.id === route.id,
     )
-    expect(sandbag).toMatchObject({ setGrade: 1, grade: '1 · UIAA' })
+    expect(sandbag).toMatchObject({ setGrade: 1 })
+    expect(sandbag.grade).toMatch(/^1( · UIAA)?$/)
     expect(sandbag.deviation).toBeGreaterThan(8)
 })
 

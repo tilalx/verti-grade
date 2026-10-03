@@ -28,15 +28,6 @@
             </UFormField>
 
             <div class="grid grid-cols-2 gap-4">
-                <UFormField :label="gradeFieldLabel" name="grade">
-                    <USelect
-                        :model-value="form.grade ?? undefined"
-                        :items="gradeLabels(gradeSystem)"
-                        class="w-full"
-                        data-testid="route-form-difficulty"
-                        @update:model-value="form.grade = $event"
-                    />
-                </UFormField>
                 <UFormField :label="$t('climbing.type')" name="type">
                     <USelect
                         v-model="form.type"
@@ -46,24 +37,38 @@
                         data-testid="route-form-type"
                     />
                 </UFormField>
+                <UFormField :label="gradeFieldLabel" name="grade">
+                    <USelect
+                        :model-value="form.grade ?? undefined"
+                        :items="gradeLabels(gradeSystem)"
+                        class="w-full"
+                        data-testid="route-form-difficulty"
+                        @update:model-value="form.grade = $event"
+                    />
+                </UFormField>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <UFormField
+                    v-if="!isBoulderRoute"
                     :label="$t('climbing.anchor_point')"
                     name="anchor_point"
                 >
                     <UInput
                         v-model.number="form.anchor_point"
                         type="number"
-                        :min="isBoulderRoute ? 0 : 1"
+                        min="1"
                         max="100"
                         step="1"
                         class="w-full"
                         data-testid="route-form-anchor-point"
                     />
                 </UFormField>
-                <UFormField :label="$t('climbing.location')" name="location">
+                <UFormField
+                    :label="$t('climbing.location')"
+                    name="location"
+                    :class="{ 'col-span-2': isBoulderRoute }"
+                >
                     <USelect
                         v-model="form.location"
                         :items="locationRecords ?? []"
@@ -161,15 +166,27 @@
                             type="button"
                             class="color-swatch color-swatch--custom"
                             :class="{
-                                'color-swatch--active':
-                                    !activePalette.some(isCurrentColor),
+                                'color-swatch--active': isCustomColor,
                             }"
+                            :style="
+                                isCustomColor
+                                    ? { background: form.color }
+                                    : undefined
+                            "
                             :aria-label="$t('climbing.customColor')"
                             data-testid="route-form-color-custom"
                         >
                             <UIcon
                                 name="i-lucide-pipette"
-                                class="size-5 rounded-full bg-default p-0.5 text-muted"
+                                class="size-5"
+                                :class="{
+                                    'text-white drop-shadow': !isCustomColor,
+                                }"
+                                :style="
+                                    isCustomColor
+                                        ? { color: readableTextOn(form.color) }
+                                        : undefined
+                                "
                             />
                         </button>
                         <template #content>
@@ -324,6 +341,10 @@ const activePalette = computed(() =>
         : defaultPalette.value,
 )
 
+const isCustomColor = computed(
+    () => !!form.color && !activePalette.value.some(isCurrentColor),
+)
+
 async function fetchUsedColors() {
     try {
         const records = await pb
@@ -378,6 +399,9 @@ const hasChanges = computed(
 
 const isEditMode = computed(() => editRouteId.value !== null)
 const isBoulderRoute = computed(() => form.type === 'Boulder')
+const savedAnchorPoint = computed(() =>
+    isBoulderRoute.value ? 0 : form.anchor_point,
+)
 
 const { data: locationRecords } = useLocations()
 
@@ -408,7 +432,7 @@ watch(
 )
 
 let autoWall = ''
-watch([() => form.anchor_point, locationWalls], ([anchor, walls]) => {
+watch([savedAnchorPoint, locationWalls], ([anchor, walls]) => {
     if (isEditMode.value || (form.wall && form.wall !== autoWall)) return
     autoWall = wallForAnchor(walls, anchor) ?? ''
     form.wall = autoWall
@@ -424,7 +448,7 @@ async function wallPosition(wallId: string | null) {
         fields: 'id,anchor_point,wall_position',
         requestKey: null,
     })
-    const anchor = Number(form.anchor_point)
+    const anchor = Number(savedAnchorPoint.value)
     if (!(anchor > 0))
         return freePosition(
             neighbours.map((route) => route.wall_position ?? 0.5),
@@ -476,7 +500,7 @@ const validateForm = (state: Partial<typeof form>) =>
         name: nameRules,
         grade: [requiredRule],
         type: [requiredRule],
-        anchor_point: anchorPointRules,
+        anchor_point: isBoulderRoute.value ? [] : anchorPointRules,
         location: [requiredRule],
         creator: [creatorRule],
         screw_date: [requiredRule],
@@ -610,7 +634,7 @@ async function submit() {
             grade: form.grade ?? '',
             grade_system: gradeSystem.value,
             grade_index: gradeIndex(gradeSystem.value, form.grade),
-            anchor_point: form.anchor_point,
+            anchor_point: savedAnchorPoint.value,
             location: form.location,
             type: form.type,
             comment: form.comment || '',

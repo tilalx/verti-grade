@@ -328,6 +328,31 @@
                                 data-testid="settings-boulder-grade-system"
                             />
                         </UFormField>
+                        <UFormField
+                            :label="$t('settings.boulderBands')"
+                            :description="$t('settings.boulderBandsHint')"
+                            :ui="fieldUi"
+                            class="lg:col-span-2"
+                        >
+                            <AdminBoulderBandEditor
+                                v-model="copySettings.boulder_bands"
+                            />
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <UButton
+                                    color="neutral"
+                                    variant="ghost"
+                                    size="sm"
+                                    icon="i-lucide-rotate-ccw"
+                                    data-testid="settings-boulder-band-reset"
+                                    @click="
+                                        copySettings.boulder_bands =
+                                            defaultBandSettings()
+                                    "
+                                >
+                                    {{ $t('settings.resetBands') }}
+                                </UButton>
+                            </div>
+                        </UFormField>
                     </UPageCard>
 
                     <UPageCard
@@ -542,6 +567,11 @@
 <script setup lang="ts">
 import type { UnsubscribeFunc } from 'pocketbase'
 import type { SettingsRecord } from '~/types/models'
+import {
+    DEFAULT_GYM_BANDS,
+    bandSettingsFrom,
+    type BoulderBandSetting,
+} from '#shared/utils/gradeReference'
 import { integerBetween } from '~/utils/validation'
 import {
     BOULDER_GRADE_SYSTEMS,
@@ -585,6 +615,7 @@ const original = reactive({
     route_grade_system: DEFAULT_ROUTE_GRADE_SYSTEM as string,
     boulder_grade_system: DEFAULT_BOULDER_GRADE_SYSTEM as string,
     ...legalFieldsFrom({}),
+    ...bandFieldsFrom({}),
 })
 
 function gradeSystemItems(systems: GradeSystem[]) {
@@ -594,7 +625,25 @@ function gradeSystemItems(systems: GradeSystem[]) {
     }))
 }
 
-const copySettings = reactive({ ...original, ...legalFieldsFrom(original) })
+const copySettings = reactive({
+    ...original,
+    ...legalFieldsFrom(original),
+    ...bandFieldsFrom(original),
+})
+
+function defaultBandSettings(): BoulderBandSetting[] {
+    return bandSettingsFrom(DEFAULT_GYM_BANDS, (band) =>
+        t(`gradeConversion.bands.${band.key}`),
+    )
+}
+
+function bandFieldsFrom(rec: Partial<SettingsRecord>) {
+    return {
+        boulder_bands: rec.boulder_bands?.length
+            ? rec.boulder_bands.map((band) => ({ ...band }))
+            : defaultBandSettings(),
+    }
+}
 
 function legalFieldsFrom(rec: Partial<SettingsRecord>) {
     return {
@@ -649,6 +698,10 @@ function fieldsPayload(state: EditableSettings) {
         route_grade_system: state.route_grade_system,
         boulder_grade_system: state.boulder_grade_system,
         ...legalPayload(state),
+        boulder_bands: state.boulder_bands.map((band) => ({
+            ...band,
+            name: band.name.trim(),
+        })),
     }
 }
 
@@ -676,8 +729,12 @@ function adoptRecord(rec: SettingsRecord | null | undefined) {
         rec.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
     original.boulder_grade_system =
         rec.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
-    Object.assign(original, legalFieldsFrom(rec))
-    const fresh = { ...original, ...legalFieldsFrom(original) }
+    Object.assign(original, legalFieldsFrom(rec), bandFieldsFrom(rec))
+    const fresh = {
+        ...original,
+        ...legalFieldsFrom(original),
+        ...bandFieldsFrom(original),
+    }
     for (const field of untouched) {
         Object.assign(copySettings, { [field]: fresh[field] })
     }
@@ -908,7 +965,8 @@ const hasChanges = computed(() => {
         copySettings.route_grade_system !== original.route_grade_system ||
         copySettings.boulder_grade_system !== original.boulder_grade_system ||
         JSON.stringify(legalFieldsFrom(copySettings)) !==
-            JSON.stringify(legalFieldsFrom(original))
+            JSON.stringify(legalFieldsFrom(original)) ||
+        !sameValue(copySettings.boulder_bands, original.boulder_bands)
     )
 })
 
@@ -950,7 +1008,11 @@ async function saveSettings() {
                 updated.route_grade_system || DEFAULT_ROUTE_GRADE_SYSTEM
             original.boulder_grade_system =
                 updated.boulder_grade_system || DEFAULT_BOULDER_GRADE_SYSTEM
-            Object.assign(original, legalFieldsFrom(updated))
+            Object.assign(
+                original,
+                legalFieldsFrom(updated),
+                bandFieldsFrom(updated),
+            )
 
             Object.assign(copySettings, {
                 application_url: updated.application_url ?? '',
@@ -964,6 +1026,7 @@ async function saveSettings() {
                 route_grade_system: original.route_grade_system,
                 boulder_grade_system: original.boulder_grade_system,
                 ...legalFieldsFrom(updated),
+                ...bandFieldsFrom(updated),
             })
             settings.value = updated
         },
