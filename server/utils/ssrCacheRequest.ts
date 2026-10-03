@@ -14,10 +14,12 @@ export function ssrCacheRequest(event: H3Event) {
     return {
         cacheable,
         ttlMs,
-        key: ssrCacheKey(
-            url.pathname,
-            url.search,
-            getHeader(event, 'accept-language'),
-        ),
+        key: ssrCacheKey({
+            pathname: url.pathname,
+            search: url.search,
+            acceptLanguage: getHeader(event, 'accept-language'),
+            viewportWidth: getHeader(event, 'sec-ch-viewport-width'),
+            sidebarOpen: getCookie(event, 'sidebar-open'),
+        }),
     }
 }

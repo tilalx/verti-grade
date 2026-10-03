@@ -43,7 +43,18 @@
                     {{ $t('filter.archived') }}
                 </UBadge>
                 <UBadge
-                    v-if="tick.pending"
+                    v-if="tick.syncFailed"
+                    size="sm"
+                    color="error"
+                    variant="soft"
+                    icon="i-lucide-circle-alert"
+                    :title="tick.syncFailed"
+                    data-testid="logbook-tick-sync-failed"
+                >
+                    {{ $t('ticks.syncFailed') }}
+                </UBadge>
+                <UBadge
+                    v-else-if="tick.pending"
                     size="sm"
                     color="warning"
                     variant="soft"
@@ -74,6 +85,7 @@
             <template #content="{ close }">
                 <div class="flex min-w-[160px] flex-col p-1">
                     <UButton
+                        v-if="!tick.pending"
                         icon="i-lucide-pencil"
                         color="neutral"
                         variant="ghost"

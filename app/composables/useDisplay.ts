@@ -1,4 +1,5 @@
-const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 }
+import { BREAKPOINTS } from '#shared/utils/breakpoints'
+
 const VIEWPORT_HINT = 'sec-ch-viewport-width'
 
 export function useDisplay() {

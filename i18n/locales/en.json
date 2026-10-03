@@ -1144,7 +1144,8 @@
             "new": "New"
         },
         "pendingSync": "Not synced yet",
-        "savedOffline": "Ascent saved offline. It syncs once you are back online."
+        "savedOffline": "Ascent saved offline. It syncs once you are back online.",
+        "syncFailed": "Sync failed"
     },
     "map": {
         "title": "Gym map",

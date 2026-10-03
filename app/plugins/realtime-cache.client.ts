@@ -9,6 +9,7 @@ import {
     applyRatingChange,
     cacheKeys,
     coalesce,
+    servedStaleFromSsrCache,
     isLiveKey,
     mapRows,
     NEW_ROUTE_SCORE,
@@ -187,16 +188,22 @@ export default defineNuxtPlugin((nuxtApp) => {
         }
     }
 
+    const hydratedFromStaleCache = servedStaleFromSsrCache(
+        document.documentElement.dataset.ssrAge,
+    )
     let awaitingFirstConnect = !pb.realtime.isConnected
-    function onConnect() {
-        if (awaitingFirstConnect) {
-            awaitingFirstConnect = false
-            return
-        }
+
+    function refreshLiveKeys(spreadMs: number) {
         setTimeout(() => {
             const keys = loadedKeys().filter(isLiveKey)
             if (keys.length) void refreshNuxtData(keys)
-        }, Math.random() * RECONNECT_SPREAD_MS)
+        }, Math.random() * spreadMs)
+    }
+
+    function onConnect() {
+        if (!awaitingFirstConnect) return refreshLiveKeys(RECONNECT_SPREAD_MS)
+        awaitingFirstConnect = false
+        if (hydratedFromStaleCache) refreshLiveKeys(0)
     }
 
     nuxtApp.hook('app:mounted', () => {

@@ -1,5 +1,5 @@
 import type { TickRecord } from '~/types/models'
-import { isOfflineError } from '~/utils/tickOutbox'
+import { isOfflineError, opsOfUser } from '~/utils/tickOutbox'
 
 export function useTickedRoutes() {
     const pb = usePocketbase()
@@ -31,8 +31,12 @@ export function useTickedRoutes() {
             () =>
                 new Set([
                     ...data.value,
-                    ...outbox.queue.value.flatMap((op) =>
+                    ...opsOfUser(
+                        outbox.queue.value,
+                        pb.authStore.record?.id,
+                    ).flatMap((op) =>
                         op.op === 'create' &&
+                        !op.failed &&
                         op.record?.route &&
                         op.record.type !== 'attempt'
                             ? [op.record.route]

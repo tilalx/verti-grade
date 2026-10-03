@@ -4,6 +4,8 @@ import {
     enqueueTickOp,
     isAlreadyApplied,
     isOfflineError,
+    opsOfUser,
+    replayFailure,
     TICKS_DB,
     type TickOutboxOp,
 } from '~/utils/tickOutbox'
@@ -67,9 +69,13 @@ export function useTickOutbox() {
         loaded.value = true
     }
 
+    function persist() {
+        if (available) void replaceAll('outbox', queue.value).catch(() => {})
+    }
+
     function enqueue(op: TickOutboxOp) {
         queue.value = enqueueTickOp(queue.value, op)
-        if (available) void replaceAll('outbox', queue.value).catch(() => {})
+        persist()
     }
 
     async function createTick(fields: Omit<TickRecord, 'id'>) {
@@ -87,38 +93,65 @@ export function useTickOutbox() {
             }
         } catch (error) {
             if (!available || !isOfflineError(error)) throw error
-            enqueue({ op: 'create', id: record.id, record, queued: now })
+            enqueue({
+                op: 'create',
+                id: record.id,
+                user: record.user,
+                record,
+                queued: now,
+            })
             return { tick: record, queued: true }
         }
     }
 
     async function deleteTick(id: string) {
+        if (queue.value.some((op) => op.op === 'create' && op.id === id)) {
+            enqueue({ op: 'delete', id, queued: new Date().toISOString() })
+            return { queued: false }
+        }
         try {
             await pb.collection('ticks').delete(id)
             return { queued: false }
         } catch (error) {
             if (!available || !isOfflineError(error)) throw error
-            enqueue({ op: 'delete', id, queued: new Date().toISOString() })
+            enqueue({
+                op: 'delete',
+                id,
+                user: pb.authStore.record?.id,
+                queued: new Date().toISOString(),
+            })
             return { queued: true }
         }
     }
 
     async function flush() {
         await load()
-        if (!queue.value.length || !pb.authStore.isValid) return
-        for (const op of [...queue.value]) {
+        if (!pb.authStore.isValid) return
+        const replayable = opsOfUser(
+            queue.value,
+            pb.authStore.record?.id,
+        ).filter((op) => !op.failed)
+        if (!replayable.length) return
+        for (const op of replayable) {
             try {
                 if (op.op === 'create')
                     await pb.collection('ticks').create(op.record)
                 else await pb.collection('ticks').delete(op.id)
             } catch (error) {
-                if (isOfflineError(error)) return
-                if (!isAlreadyApplied(op, error))
+                if (isOfflineError(error)) break
+                if (op.op === 'create' && !isAlreadyApplied(op, error)) {
                     console.error('Replaying tick failed:', error)
+                    queue.value = queue.value.map((entry) =>
+                        entry === op
+                            ? { ...entry, failed: replayFailure(error) }
+                            : entry,
+                    )
+                    continue
+                }
             }
-            queue.value = queue.value.filter((entry) => entry !== op)
+            queue.value = queue.value.filter((entry) => entry.id !== op.id)
         }
-        if (available) await replaceAll('outbox', queue.value).catch(() => {})
+        persist()
         await refreshNuxtData(['logbook', 'ticked-routes'])
     }
 
@@ -130,12 +163,8 @@ export function useTickOutbox() {
         return available ? readAll<T>('ticks').catch(() => []) : []
     }
 
-    async function clear() {
-        queue.value = []
-        if (!available) return
-        await Promise.all(STORES.map((name) => replaceAll(name, []))).catch(
-            () => {},
-        )
+    async function clearCachedTicks() {
+        if (available) await replaceAll('ticks', []).catch(() => {})
     }
 
     return {
@@ -146,6 +175,6 @@ export function useTickOutbox() {
         flush,
         cacheTicks,
         cachedTicks,
-        clear,
+        clearCachedTicks,
     }
 }

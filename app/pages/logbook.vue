@@ -276,7 +276,11 @@ const {
 )
 
 const logbookTicks = computed(() =>
-    applyTickOutbox(ticks.value, outbox.queue.value).map((tick) => ({
+    applyTickOutbox(
+        ticks.value,
+        outbox.queue.value,
+        pb.authStore.record?.id,
+    ).map((tick) => ({
         ...tick,
         routeArchived: !!tick.expand?.route?.archived,
     })),

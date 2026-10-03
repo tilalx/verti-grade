@@ -4,6 +4,8 @@ import {
     applyTickOutbox,
     enqueueTickOp,
     isAlreadyApplied,
+    opsOfUser,
+    replayFailure,
     type TickOutboxOp,
 } from '~/utils/tickOutbox'
 
@@ -17,22 +19,35 @@ const tick = (id: string, date: string, created = ''): TickRecord => ({
     created,
 })
 
-const create = (id: string, date: string): TickOutboxOp => ({
+const create = (id: string, date: string, user = 'u1'): TickOutboxOp => ({
     op: 'create',
     id,
-    record: tick(id, date),
+    user,
+    record: { ...tick(id, date), user },
     queued: '2026-10-03T10:00:00Z',
 })
-const remove = (id: string): TickOutboxOp => ({
+const remove = (id: string, user = 'u1'): TickOutboxOp => ({
     op: 'delete',
     id,
+    user,
     queued: '2026-10-03T10:00:00Z',
 })
 
+const duplicateId = {
+    status: 400,
+    response: { data: { id: { code: 'validation_pk_invalid' } } },
+}
+
 describe('enqueueTickOp', () => {
     it('drops a queued create when the same tick is deleted offline', () => {
-        const queue = enqueueTickOp([create('a', '2026-10-01')], remove('a'))
-        expect(queue).toEqual([])
+        expect(enqueueTickOp([create('a', '2026-10-01')], remove('a'))).toEqual(
+            [],
+        )
+    })
+
+    it('drops a failed create when it is deleted', () => {
+        const failed = { ...create('a', '2026-10-01'), failed: 'nope' }
+        expect(enqueueTickOp([failed], remove('a'))).toEqual([])
     })
 
     it('keeps a delete of a server tick and replaces duplicates by id', () => {
@@ -48,7 +63,7 @@ describe('applyTickOutbox', () => {
     it('prepends pending creates, hides deletes and sorts by date', () => {
         const ticks = [tick('b', '2026-09-30'), tick('srv', '2026-09-20')]
         const queue = [create('a', '2026-10-01'), remove('srv')]
-        const result = applyTickOutbox(ticks, queue)
+        const result = applyTickOutbox(ticks, queue, 'u1')
         expect(result.map((entry) => entry.id)).toEqual(['a', 'b'])
         expect(result[0]?.pending).toBe(true)
         expect(result[1]?.pending).toBeUndefined()
@@ -58,16 +73,63 @@ describe('applyTickOutbox', () => {
         const result = applyTickOutbox(
             [tick('a', '2026-10-01')],
             [create('a', '2026-10-01')],
+            'u1',
         )
         expect(result).toHaveLength(1)
         expect(result[0]?.pending).toBeUndefined()
     })
+
+    it("shows only the signed-in climber's queued ticks", () => {
+        const queue = [
+            create('mine', '2026-10-01'),
+            create('theirs', '2026-10-02', 'u2'),
+        ]
+        expect(applyTickOutbox([], queue, 'u1').map((t) => t.id)).toEqual([
+            'mine',
+        ])
+        expect(applyTickOutbox([], queue, undefined)).toEqual([])
+    })
+
+    it('marks a create that failed to replay', () => {
+        const failed = { ...create('a', '2026-10-01'), failed: 'Route gone' }
+        expect(applyTickOutbox([], [failed], 'u1')[0]?.syncFailed).toBe(
+            'Route gone',
+        )
+    })
+})
+
+describe('opsOfUser', () => {
+    it('returns nothing without a user', () => {
+        expect(opsOfUser([create('a', '2026-10-01')], undefined)).toEqual([])
+    })
 })
 
 describe('isAlreadyApplied', () => {
-    it('treats a 404 delete and a 400 create as already replayed', () => {
+    it('treats only a duplicate id as an already replayed create', () => {
+        expect(isAlreadyApplied(create('x', ''), duplicateId)).toBe(true)
+        expect(
+            isAlreadyApplied(create('x', ''), {
+                status: 400,
+                response: {
+                    data: { route: { code: 'validation_missing_rel_records' } },
+                },
+            }),
+        ).toBe(false)
+        expect(isAlreadyApplied(create('x', ''), { status: 400 })).toBe(false)
+        expect(isAlreadyApplied(create('x', ''), { status: 403 })).toBe(false)
+    })
+
+    it('treats a 404 delete as already replayed', () => {
         expect(isAlreadyApplied(remove('x'), { status: 404 })).toBe(true)
-        expect(isAlreadyApplied(create('x', ''), { status: 400 })).toBe(true)
-        expect(isAlreadyApplied(create('x', ''), { status: 0 })).toBe(false)
+        expect(isAlreadyApplied(remove('x'), { status: 403 })).toBe(false)
+    })
+})
+
+describe('replayFailure', () => {
+    it('keeps the server message for the badge tooltip', () => {
+        expect(replayFailure({ message: 'Failed to create record.' })).toBe(
+            'Failed to create record.',
+        )
+        expect(replayFailure(null)).toBe('Sync failed')
     })
 })

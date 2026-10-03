@@ -1144,7 +1144,8 @@
             "new": "Yeni"
         },
         "pendingSync": "Henüz eşitlenmedi",
-        "savedOffline": "Tırmanış çevrimdışı kaydedildi. Tekrar çevrimiçi olunca eşitlenir."
+        "savedOffline": "Tırmanış çevrimdışı kaydedildi. Tekrar çevrimiçi olunca eşitlenir.",
+        "syncFailed": "Eşitleme başarısız"
     },
     "map": {
         "title": "Salon haritası",

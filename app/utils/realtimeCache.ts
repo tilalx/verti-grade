@@ -173,6 +173,12 @@ export function trackRating(
     return previous ? { added: rating, removed: previous } : 'unknown'
 }
 
+export const STALE_SSR_AGE_MS = 1000
+
+export function servedStaleFromSsrCache(ageAttribute: string | undefined) {
+    return Number(ageAttribute || 0) >= STALE_SSR_AGE_MS
+}
+
 export function coalesce(task: () => Promise<unknown>, delayMs = 1000) {
     let timer: ReturnType<typeof setTimeout> | undefined
     return () => {

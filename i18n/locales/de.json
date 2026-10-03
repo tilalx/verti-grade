@@ -1144,7 +1144,8 @@
             "new": "Neu"
         },
         "pendingSync": "Noch nicht synchronisiert",
-        "savedOffline": "Begehung offline gespeichert. Sie wird synchronisiert, sobald du wieder online bist."
+        "savedOffline": "Begehung offline gespeichert. Sie wird synchronisiert, sobald du wieder online bist.",
+        "syncFailed": "Synchronisierung fehlgeschlagen"
     },
     "map": {
         "title": "Hallenplan",

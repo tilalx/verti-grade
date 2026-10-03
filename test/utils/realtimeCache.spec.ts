@@ -3,6 +3,7 @@ import {
     applyRatingChange,
     cacheKeys,
     coalesce,
+    servedStaleFromSsrCache,
     isLiveKey,
     mapRows,
     newRecordId,
@@ -251,5 +252,14 @@ describe('coalesce', () => {
         await vi.advanceTimersByTimeAsync(200)
         expect(task).toHaveBeenCalledTimes(2)
         vi.useRealTimers()
+    })
+})
+
+describe('servedStaleFromSsrCache', () => {
+    it('only flags pages served from the cache at least a second old', () => {
+        expect(servedStaleFromSsrCache(undefined)).toBe(false)
+        expect(servedStaleFromSsrCache('0')).toBe(false)
+        expect(servedStaleFromSsrCache('999')).toBe(false)
+        expect(servedStaleFromSsrCache('1000')).toBe(true)
     })
 })
