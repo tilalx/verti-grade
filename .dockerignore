@@ -16,6 +16,7 @@
 !pocketbase/go.mod
 !pocketbase/go.sum
 !pocketbase/main.go
+!pocketbase/migrations_test.go
 !pocketbase/hooks
 !pocketbase/pb_migrations
 **/node_modules
