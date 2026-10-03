@@ -42,6 +42,27 @@
                 >
                     {{ $t('filter.archived') }}
                 </UBadge>
+                <UBadge
+                    v-if="tick.syncFailed"
+                    size="sm"
+                    color="error"
+                    variant="soft"
+                    icon="i-lucide-circle-alert"
+                    :title="tick.syncFailed"
+                    data-testid="logbook-tick-sync-failed"
+                >
+                    {{ $t('ticks.syncFailed') }}
+                </UBadge>
+                <UBadge
+                    v-else-if="tick.pending"
+                    size="sm"
+                    color="warning"
+                    variant="soft"
+                    icon="i-lucide-cloud-off"
+                    data-testid="logbook-tick-pending"
+                >
+                    {{ $t('ticks.pendingSync') }}
+                </UBadge>
             </div>
             <p
                 v-if="tick.note"
@@ -64,6 +85,7 @@
             <template #content="{ close }">
                 <div class="flex min-w-[160px] flex-col p-1">
                     <UButton
+                        v-if="!tick.pending"
                         icon="i-lucide-pencil"
                         color="neutral"
                         variant="ghost"
@@ -90,9 +112,10 @@
 <script setup lang="ts">
 import type { RouteRecord, TickRecord } from '~/types/models'
 import { TICK_TYPE_COLORS, TICK_TYPE_ICONS } from '~/utils/ticks'
+import type { PendingTick } from '~/utils/tickOutbox'
 
 const props = defineProps<{
-    tick: TickRecord & { expand?: { route?: RouteRecord } }
+    tick: PendingTick<TickRecord & { expand?: { route?: RouteRecord } }>
 }>()
 
 const emit = defineEmits<{

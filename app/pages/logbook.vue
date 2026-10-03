@@ -4,7 +4,7 @@
             :title="t('ticks.logbook')"
             :subtitle="t('ticks.logbookSubtitle')"
         >
-            <template v-if="ticks.length" #actions>
+            <template v-if="logbookTicks.length" #actions>
                 <div class="flex flex-wrap gap-2">
                     <UFieldGroup data-testid="logbook-kind">
                         <UButton
@@ -57,7 +57,7 @@
             </template>
         </LayoutEmptyState>
 
-        <template v-else-if="!ticks.length">
+        <template v-else-if="!logbookTicks.length">
             <LayoutEmptyState
                 icon="i-lucide-notebook"
                 :title="t('ticks.empty')"
@@ -229,6 +229,7 @@ import {
     type LogbookRange,
     type LogbookTick,
 } from '#shared/utils/logbook'
+import { applyTickOutbox, isOfflineError } from '~/utils/tickOutbox'
 
 type LoggedTick = TickRecord & { expand?: { route?: RouteRecord } }
 
@@ -240,12 +241,14 @@ const { t } = useI18n()
 const pb = usePocketbase()
 const { notify, error: notifyError } = useNotification()
 const { refreshTickedRoutes } = useTickedRoutes()
+const outbox = useTickOutbox()
 const { gradeSystemFor } = useGradeSystems()
 
 useHead({ title: t('page.title.logbook') })
 
 definePageMeta({
     middleware: ['auth'],
+    keepalive: true,
 })
 
 // ponytail: loads the whole logbook at once, paginate by session once logbooks grow into the thousands
@@ -255,17 +258,29 @@ const {
     refresh,
 } = await useAsyncData(
     'logbook',
-    () =>
-        pb.collection('ticks').getFullList<LoggedTick>({
-            sort: '-date,-created',
-            expand: 'route',
-            requestKey: null,
-        }),
+    async () => {
+        try {
+            const list = await pb.collection('ticks').getFullList<LoggedTick>({
+                sort: '-date,-created',
+                expand: 'route',
+                requestKey: null,
+            })
+            outbox.cacheTicks(list)
+            return list
+        } catch (error) {
+            if (!isOfflineError(error)) throw error
+            return outbox.cachedTicks<LoggedTick>()
+        }
+    },
     { default: () => [] },
 )
 
-const logbookTicks = computed<LogbookTick[]>(() =>
-    ticks.value.map((tick) => ({
+const logbookTicks = computed(() =>
+    applyTickOutbox(
+        ticks.value,
+        outbox.queue.value,
+        pb.authStore.record?.id,
+    ).map((tick) => ({
         ...tick,
         routeArchived: !!tick.expand?.route?.archived,
     })),
@@ -278,7 +293,7 @@ const routeType = computed(() =>
     kind.value === 'boulder' ? 'Boulder' : 'Route',
 )
 
-const sessions = computed(() => groupTicksByDay(ticks.value))
+const sessions = computed(() => groupTicksByDay(logbookTicks.value))
 const stats = computed(() =>
     logbookStats(logbookTicks.value, kind.value, range.value),
 )
@@ -295,7 +310,7 @@ const targetIndex = computed(() =>
 const routesById = computed(
     () =>
         new Map(
-            ticks.value
+            logbookTicks.value
                 .map((tick) => tick.expand?.route)
                 .filter((route): route is RouteRecord => !!route)
                 .map((route) => [route.id, route]),
@@ -371,7 +386,7 @@ const deleteTarget = ref<TickRecord | null>(null)
 const deleting = ref(false)
 
 function reload() {
-    return Promise.all([refresh(), refreshTickedRoutes()])
+    return refreshTickedRoutes()
 }
 
 function openEdit(tick: TickRecord) {
@@ -390,7 +405,7 @@ async function confirmDelete() {
     if (!deleteTarget.value) return
     deleting.value = true
     try {
-        await pb.collection('ticks').delete(deleteTarget.value.id)
+        await outbox.deleteTick(deleteTarget.value.id)
         notify(t('ticks.deleted'))
         deleteTarget.value = null
         await reload()

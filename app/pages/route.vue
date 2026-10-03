@@ -322,7 +322,6 @@
                                 v-model="reviewDialog"
                                 :route-id="route_id"
                                 :grade-system="metadata?.grade_system"
-                                @saved="onReviewSaved"
                             />
                         </div>
                     </div>
@@ -415,6 +414,7 @@ import { formatNumber } from '#shared/utils/number'
 import { sanitizeGymMap } from '#shared/utils/mapGeometry'
 import { reportContentUrl } from '~/utils/reports'
 import { isLightColor, shadeColor } from '~/utils/color'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 definePageMeta({ key: (route) => String(route.query.id ?? '') })
 
@@ -439,7 +439,68 @@ const route_id = ref<string | null>((nuxtRoute.query.id as string) || null)
 
 const targetCommentId = ref('')
 const loading = ref(true)
-const metadata = ref<RouteListItem | null>(null)
+const { error: notifyError } = useNotification()
+
+const routeDetail = useAsyncData(
+    cacheKeys.route(route_id.value ?? ''),
+    async (): Promise<RouteListItem | null> => {
+        if (!route_id.value) return null
+        try {
+            const record = await pb
+                .collection('routes')
+                .getOne<RouteRecord>(route_id.value, {
+                    expand: 'location,wall',
+                })
+            return { ...record, creator: normalizeCreators(record.creator) }
+        } catch (err: unknown) {
+            const status = (err as { status?: number }).status ?? 0
+            if (status !== 404) throw createError({ status: status || 503 })
+            return null
+        }
+    },
+)
+
+const routeRatings = useAsyncData(
+    cacheKeys.ratings(route_id.value ?? ''),
+    async () => {
+        if (!route_id.value) return []
+        try {
+            return await pb.collection('ratings').getFullList<RatingRecord>({
+                filter: pb.filter('route_id = {:id}', { id: route_id.value }),
+                sort: '-created',
+                requestKey: null,
+            })
+        } catch (err: unknown) {
+            if (!isAbortError(err)) {
+                console.error('Error fetching ratings:', err)
+                notifyError(t('ratings.loadError'))
+            }
+            return []
+        }
+    },
+    { default: () => [] },
+)
+
+const routeDefects = useAsyncData(
+    `route-defects:${route_id.value ?? ''}`,
+    () =>
+        route_id.value
+            ? pb
+                  .collection('open_route_defects')
+                  .getFullList<OpenRouteDefectRecord>({
+                      filter: pb.filter('route = {:id}', {
+                          id: route_id.value,
+                      }),
+                      requestKey: null,
+                  })
+                  .catch(() => [])
+            : Promise.resolve([]),
+    { default: () => [] },
+)
+
+const metadata = computed(() => routeDetail.data.value ?? null)
+const openDefects = routeDefects.data
+const getOpenDefects = () => routeDefects.refresh()
 
 interface ReviewDisplay {
     id: string
@@ -451,7 +512,7 @@ interface ReviewDisplay {
     userAvatar: string | null
 }
 
-const reviews = ref<ReviewDisplay[]>([])
+const reviews = computed(() => routeRatings.data.value.map(mapReview))
 
 const reportDialog = ref(false)
 const reportTarget = ref<string | null>(null)
@@ -466,15 +527,12 @@ function openReport(id: string) {
     reportDialog.value = true
 }
 
-const { subscribe } = usePbSubscription()
 const isLoggedIn = pb.authStore.isValid
 const tickDialog = ref(false)
 const reviewDialog = ref(false)
 const defectDialog = ref(false)
 const taskDialog = ref(false)
-const openDefects = ref<OpenRouteDefectRecord[]>([])
 const { tickedRouteIds, refreshTickedRoutes } = useTickedRoutes()
-const { error: notifyError } = useNotification()
 
 // ── Page meta ──────────────────────────────────────────────────────────────
 
@@ -572,51 +630,6 @@ const avgPerceivedDifficulty = computed(() => {
 
 // ── Data fetching ──────────────────────────────────────────────────────────
 
-const getRouteMetadata = async (): Promise<void> => {
-    if (!route_id.value) return
-    try {
-        const record = await pb
-            .collection('routes')
-            .getOne<RouteRecord>(route_id.value, { expand: 'location,wall' })
-        metadata.value = {
-            ...record,
-            creator: normalizeCreators(record.creator),
-        }
-    } catch (err: unknown) {
-        const status = (err as { status?: number }).status ?? 0
-        if (status !== 404) throw createError({ status: status || 503 })
-        metadata.value = null
-    }
-}
-
-const getAllRouteRatings = async (): Promise<void> => {
-    if (!route_id.value) return
-    try {
-        const data = await pb.collection('ratings').getFullList<RatingRecord>({
-            filter: pb.filter('route_id = {:id}', { id: route_id.value }),
-            sort: '-created',
-            expand: 'user',
-            requestKey: 'routeRatings',
-        })
-        reviews.value = data.map(mapReview)
-    } catch (err: unknown) {
-        if (isAbortError(err)) return
-        console.error('Error fetching ratings:', err)
-        notifyError(t('ratings.loadError'))
-    }
-}
-
-async function getOpenDefects(): Promise<void> {
-    if (!route_id.value) return
-    openDefects.value = await pb
-        .collection('open_route_defects')
-        .getFullList<OpenRouteDefectRecord>({
-            filter: pb.filter('route = {:id}', { id: route_id.value }),
-            requestKey: 'routeOpenDefects',
-        })
-        .catch(() => [])
-}
-
 function mapReview(
     r: RatingRecord & { expand?: Record<string, unknown> },
 ): ReviewDisplay {
@@ -638,37 +651,12 @@ function mapReview(
     }
 }
 
-function onReviewSaved() {
-    void getAllRouteRatings()
-}
-
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-const { data: initial, error: loadError } = await useAsyncData(
-    `route-detail:${route_id.value}`,
-    async () => {
-        if (!route_id.value) return null
-        await Promise.all([
-            getRouteMetadata(),
-            getAllRouteRatings(),
-            getOpenDefects(),
-        ])
-        return {
-            metadata: metadata.value,
-            reviews: reviews.value,
-            openDefects: openDefects.value,
-        }
-    },
-)
+await Promise.all([routeDetail, routeRatings, routeDefects])
 
-if (initial.value) {
-    metadata.value = initial.value.metadata
-    reviews.value = initial.value.reviews
-    openDefects.value = initial.value.openDefects
-}
-
-if (loadError.value)
-    throw createError({ status: loadError.value.status, fatal: true })
+if (routeDetail.error.value)
+    throw createError({ status: routeDetail.error.value.status, fatal: true })
 if (!metadata.value) throw createError({ status: 404, fatal: true })
 
 loading.value = false
@@ -682,14 +670,6 @@ onMounted(async () => {
             .getElementById(`comment-${targetCommentId.value}`)
             ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
-
-    if (!route_id.value) return
-
-    await subscribe('ratings', (event) => {
-        if (event.record.route_id === route_id.value) {
-            void getAllRouteRatings()
-        }
-    })
 })
 </script>
 

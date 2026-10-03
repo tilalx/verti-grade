@@ -63,7 +63,7 @@ services:
         command: >
             sh -c "cp /ssl/cert.pem /usr/local/share/ca-certificates/gripello-e2e.crt &&
             update-ca-certificates &&
-            corepack enable && yarn install --immutable --mode=skip-build && yarn test:e2e"
+            corepack enable && yarn install --immutable --mode=skip-build && yarn test:e2e ${E2E_ARGS:-}"
 
 volumes:
     e2e-ssl:

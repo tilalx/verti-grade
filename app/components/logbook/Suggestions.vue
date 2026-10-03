@@ -80,6 +80,7 @@ const { data: candidates } = useAsyncData(
                     : 'archived = false',
                 sort: '-created',
                 expand: 'location',
+                skipTotal: true,
                 requestKey: null,
             })
             .then((page) => page.items)

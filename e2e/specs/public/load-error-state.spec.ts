@@ -4,14 +4,11 @@ import { gotoSettled } from '../../support/nav'
 test('the overview offers a retry when its routes fail to load', async ({
     page,
 }) => {
-    await gotoSettled(page, '/')
-    await page.getByTestId('overview-all-routes').click()
-    await page.waitForURL(/\/routes/)
-
+    await gotoSettled(page, '/routes')
     await page.route('**/api/collections/averageRating/records*', (route) =>
         route.abort('failed'),
     )
-    await page.goBack()
+    await page.getByTestId('nav-link-home').click()
     await page.waitForURL((url) => url.pathname === '/')
 
     const loadError = page.getByTestId('load-error')

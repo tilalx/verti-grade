@@ -24,33 +24,8 @@ const hydrated = useHydrated()
 const pb = usePocketbase()
 const isLoggedIn = ref(pb.authStore.isValid)
 const { refreshPermissions } = usePermissions()
-const { t } = useI18n()
-const { error: notifyError } = useNotification()
 
-const getSettings = async () => {
-    try {
-        return await pb
-            .collection('settings')
-            .getOne<SettingsRecord>('settings_123456')
-    } catch (error) {
-        if ((error as ClientResponseError).status === 404) {
-            try {
-                return await pb.collection('settings').create<SettingsRecord>({
-                    id: 'settings_123456',
-                })
-            } catch (createError) {
-                console.error('Error creating new settings:', createError)
-                notifyError(t('settings.initError'))
-                throw createError
-            }
-        }
-        console.error('An error occurred:', error)
-        notifyError(t('settings.loadError'))
-        throw error
-    }
-}
-
-const { data: settingsData } = await useAsyncData('settings', getSettings)
+const { data: settingsData } = await useSettingsRecord()
 
 const settings = ref<Partial<SettingsRecord>>(settingsData.value ?? {})
 watch(settingsData, (val) => {
@@ -154,7 +129,7 @@ onMounted(async () => {
             await pb
                 .collection('settings')
                 .subscribe('settings_123456', (e) => {
-                    settings.value = e.record as SettingsRecord
+                    settingsData.value = e.record as SettingsRecord
                 }),
         )
     } catch (error) {

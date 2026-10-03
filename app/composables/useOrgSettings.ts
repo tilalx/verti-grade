@@ -1,13 +1,5 @@
-import type { SettingsRecord } from '~/types/models'
-
 export function useOrgSettings() {
-    const pb = usePocketbase()
-    const { data } = useAsyncData('org-settings', () =>
-        pb
-            .collection('settings')
-            .getOne<SettingsRecord>('settings_123456')
-            .catch(() => null),
-    )
+    const { data } = useSettingsRecord()
 
     return {
         orgName: computed(() => data.value?.organization_name || ''),

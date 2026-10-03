@@ -230,8 +230,9 @@ import type { RouteTypeFilter } from '~/components/map/FilterChips.vue'
 import { normalizeCreators } from '#shared/utils/formatting'
 import { routesOnWall } from '~/utils/gymMap'
 import { toHex6 } from '~/utils/color'
+import { cacheKeys } from '~/utils/realtimeCache'
 
-definePageMeta({ footer: false })
+definePageMeta({ footer: false, keepalive: true })
 
 const MAP_ROUTE_FIELDS =
     'id,name,color,grade,grade_system,grade_index,anchor_point,location,type,comment,creator,screw_date,wall,wall_position,average_rating,ratings_count'
@@ -277,7 +278,7 @@ const {
     error: routesError,
     refresh: refreshRoutes,
 } = await useAsyncData(
-    'map-routes',
+    cacheKeys.mapRoutes,
     () =>
         locationId.value
             ? pb.collection('averageRating').getFullList<RouteScoreRecord>({
@@ -290,6 +291,9 @@ const {
             : Promise.resolve([]),
     { watch: [locationId], default: () => [] },
 )
+
+const mapLocation = useState<string>(cacheKeys.mapLocation, () => '')
+watch(locationId, (id) => (mapLocation.value = id), { immediate: true })
 
 const locationMenuItems = computed(() =>
     locationItems.value.map((item) => ({
@@ -510,8 +514,6 @@ function openTick(routeId: string) {
     tickOpen.value = true
 }
 
-const { subscribe } = usePbSubscription()
-
 function restoreMapType() {
     try {
         const stored = localStorage.getItem(TYPE_STORAGE_KEY)
@@ -527,8 +529,6 @@ onMounted(async () => {
         mapViewRef.value?.focusRoute(selectedRouteId.value)
     else if (selectedWallId.value)
         mapViewRef.value?.focusWall(selectedWallId.value)
-    await subscribe('routes', () => void refreshRoutes())
-    await subscribe('walls', () => void refreshWalls())
 })
 </script>
 

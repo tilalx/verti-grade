@@ -4,13 +4,13 @@ export function useAppStatus() {
     const { data: health } = useAsyncData(
         'footer:health',
         () => pb.health.check(),
-        { default: () => null, lazy: true },
+        { default: () => null, lazy: true, server: false },
     )
 
     const { data: online } = useAsyncData(
         'footer:online',
         () => pb.send('/api/online', { method: 'GET' }),
-        { default: () => ({ clients: 0 }), lazy: true },
+        { default: () => ({ clients: 0 }), lazy: true, server: false },
     )
 
     return {

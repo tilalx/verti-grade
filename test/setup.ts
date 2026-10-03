@@ -4,6 +4,8 @@ import {
     computed as vueComputed,
     onMounted as vueOnMounted,
     onBeforeUnmount as vueOnBeforeUnmount,
+    onActivated as vueOnActivated,
+    onDeactivated as vueOnDeactivated,
     watch as vueWatch,
     useId as vueUseId,
 } from 'vue'
@@ -52,6 +54,8 @@ declare global {
     var computed: typeof vueComputed
     var onMounted: typeof vueOnMounted
     var onBeforeUnmount: typeof vueOnBeforeUnmount
+    var onActivated: typeof vueOnActivated
+    var onDeactivated: typeof vueOnDeactivated
     var watch: typeof vueWatch
     var useState: <T>(key: string, init?: () => T) => { value: T }
 }
@@ -150,6 +154,13 @@ if (!('onBeforeUnmount' in globalThis)) {
     vi.stubGlobal('onBeforeUnmount', vueOnBeforeUnmount)
 } else {
     globalThis.onBeforeUnmount = vueOnBeforeUnmount
+}
+if (!('onActivated' in globalThis)) {
+    vi.stubGlobal('onActivated', vueOnActivated)
+    vi.stubGlobal('onDeactivated', vueOnDeactivated)
+} else {
+    globalThis.onActivated = vueOnActivated
+    globalThis.onDeactivated = vueOnDeactivated
 }
 if (!('watch' in globalThis)) {
     vi.stubGlobal('watch', vueWatch)

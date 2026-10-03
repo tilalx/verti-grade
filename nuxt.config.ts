@@ -28,6 +28,7 @@ export default defineNuxtConfig({
     },
     ssr: true,
     routeRules: {
+        '/logbook': { ssr: false },
         '/admin/routes': {
             redirect: { to: '/manage/routes', statusCode: 301 },
         },
@@ -49,6 +50,9 @@ export default defineNuxtConfig({
     },
     experimental: {
         viewTransition: true,
+    },
+    nitro: {
+        compressPublicAssets: { gzip: true, brotli: true },
     },
     app: {
         head: {
@@ -113,7 +117,10 @@ export default defineNuxtConfig({
         optimizeDeps: {
             include: [
                 'pocketbase',
-                'echarts',
+                'echarts/core',
+                'echarts/charts',
+                'echarts/components',
+                'echarts/renderers',
                 '@vue/devtools-core',
                 '@vue/devtools-kit',
             ],

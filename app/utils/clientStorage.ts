@@ -1,4 +1,5 @@
 import { INVENTORY_INSTRUCTIONS_KEY, INVENTORY_STORAGE_KEY } from './inventory'
+import { TICKS_DB } from './tickOutbox'
 
 export const AUTH_COOKIE = 'pb_auth'
 export const SESSION_ONLY_AUTH_COOKIE = 'pb_auth_session'
@@ -7,7 +8,7 @@ export const SIDEBAR_OPEN_COOKIE = 'sidebar-open'
 export const EXPORT_COLUMNS_KEY = 'gripello.export-columns'
 export const UPDATE_DISMISSED_KEY = 'gripello:update-dismissed'
 
-export type ClientStorageKind = 'cookie' | 'localStorage'
+export type ClientStorageKind = 'cookie' | 'localStorage' | 'indexedDB'
 
 export interface ClientStorageEntry {
     name: string
@@ -58,6 +59,12 @@ export const CLIENT_STORAGE: ClientStorageEntry[] = [
         name: INVENTORY_INSTRUCTIONS_KEY,
         kind: 'localStorage',
         purpose: 'inventoryInstructions',
+        duration: 'persistent',
+    },
+    {
+        name: TICKS_DB,
+        kind: 'indexedDB',
+        purpose: 'offlineLogbook',
         duration: 'persistent',
     },
 ]

@@ -559,6 +559,7 @@ const { data: lastReset, refresh: refreshLastReset } = useAsyncData(
                       }),
                       sort: '-archived_at',
                       fields: 'archived_at',
+                      skipTotal: true,
                       requestKey: 'placementWallReset',
                   })
                   .then((result) => result.items[0]?.archived_at ?? null)
