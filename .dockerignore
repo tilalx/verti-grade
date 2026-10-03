@@ -1,5 +1,7 @@
 *
 !.docker
+!.dockerignore
+!Dockerfile
 !.yarnrc.yml
 !package.json
 !yarn.lock
