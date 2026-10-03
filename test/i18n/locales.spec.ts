@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import de from '../../i18n/locales/de.json'
@@ -20,7 +21,25 @@ const flatten = (messages: Messages, prefix = ''): Record<string, string> =>
 const english = flatten(en)
 const translations = { de, ru, tr, uk }
 
+const seededPermissions = readdirSync('pocketbase/pb_migrations')
+    .filter((file) => file.endsWith('.js'))
+    .flatMap((file) => [
+        ...readFileSync(`pocketbase/pb_migrations/${file}`, 'utf8').matchAll(
+            /(?:set\('name', |name: )'((?:manage|view|run)_[a-z_]+)'/g,
+        ),
+    ])
+    .map((match) => match[1]!)
+
 describe('locales', () => {
+    it('labels every seeded permission', () => {
+        expect(seededPermissions).toContain('manage_tasks')
+        for (const permission of seededPermissions) {
+            expect(english).toHaveProperty([
+                `permissions.features.${permission}`,
+            ])
+        }
+    })
+
     it.each(Object.entries(translations))(
         '%s has exactly the english keys',
         (_, messages) => {

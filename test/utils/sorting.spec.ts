@@ -27,6 +27,16 @@ describe('toPbSort', () => {
         ).toBe('difficulty,-name')
     })
 
+    it('keeps grouping fields of a mapped key ascending', () => {
+        const keyMap = { difficulty: 'type,grade_index' }
+        expect(
+            toPbSort([{ key: 'difficulty', order: 'desc' }], '', keyMap),
+        ).toBe('type,-grade_index')
+        expect(
+            toPbSort([{ key: 'difficulty', order: 'asc' }], '', keyMap),
+        ).toBe('type,grade_index')
+    })
+
     it('treats a missing order as ascending (no dash prefix)', () => {
         expect(toPbSort([{ key: 'name' }])).toBe('name')
     })

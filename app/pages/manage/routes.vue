@@ -729,7 +729,7 @@ const toPbSortRoutes = (sortByArr: SortOption[]) =>
     toPbSort(sortByArr, '-created', {
         score: 'average_rating',
         location: 'location.name',
-        difficulty: 'grade_index',
+        difficulty: 'type,grade_index',
     })
 
 const sortItemsMobile = computed(() => [

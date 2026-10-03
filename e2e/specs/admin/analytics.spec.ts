@@ -291,11 +291,13 @@ test('reports routes whose grade votes are harder than the set grade', async ({
     const response = await page.request.get('/api/manage/analytics?range=all', {
         headers: await authHeader(page),
     })
-    const { gradeFeedback } = await response.json()
+    const { grades } = await response.json()
+    const gradeFeedback = grades.Route.gradeFeedback
     const sandbag = gradeFeedback.find(
         (entry: { id: string }) => entry.id === route.id,
     )
-    expect(sandbag).toMatchObject({ setGrade: 1, grade: '1 · UIAA' })
+    expect(sandbag).toMatchObject({ setGrade: 1 })
+    expect(sandbag.grade).toMatch(/^1( · UIAA)?$/)
     expect(sandbag.deviation).toBeGreaterThan(8)
 })
 

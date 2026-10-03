@@ -168,7 +168,7 @@ describe('buildAnalytics', () => {
             allTime,
             NOW,
         )
-        expect(result.gradeFeedback[0]).toMatchObject({
+        expect(result.grades.Route.gradeFeedback[0]).toMatchObject({
             votes: 3,
             votedGrade: 13.4,
             votedGradeLabel: '7',
@@ -214,7 +214,8 @@ describe('buildAnalytics', () => {
         )
         expect(scoped.summary.activeRoutes).toBe(1)
         expect(scoped.summary.ratings.value).toBe(0)
-        expect(scoped.gradeDistribution[0]!.total).toBe(1)
+        expect(scoped.grades.Route.gradeDistribution[0]!.total).toBe(1)
+        expect(scoped.grades.Boulder.gradeDistribution).toEqual([])
 
         const withArchived = buildAnalytics(
             routes,
@@ -222,7 +223,8 @@ describe('buildAnalytics', () => {
             resolveFilters({ range: 'all', archived: 'true' }, NOW),
             NOW,
         )
-        expect(withArchived.gradeDistribution[0]!.total).toBe(4)
+        expect(withArchived.grades.Route.gradeDistribution[0]!.total).toBe(3)
+        expect(withArchived.grades.Boulder.gradeDistribution[0]!.total).toBe(1)
     })
 
     it('leaves archived routes and their ratings out unless included', () => {
@@ -290,7 +292,7 @@ describe('buildAnalytics', () => {
         const result = buildAnalytics(routes, ratings, allTime, NOW)
 
         expect(
-            result.gradeFeedback.map(
+            result.grades.Route.gradeFeedback.map(
                 ({ id, setGrade, votedGrade, deviation }) => ({
                     id,
                     setGrade,
@@ -320,13 +322,13 @@ describe('buildAnalytics', () => {
             route('seven-active', { ...uiaa('7') }),
         ]
         const result = buildAnalytics(routes, [], allTime, NOW)
-        expect(result.gradeDistribution).toEqual([
+        expect(result.grades.Route.gradeDistribution).toEqual([
             { grade: '6', byType: { Route: 4 }, total: 4, expected: 2.2 },
             { grade: '7', byType: { Route: 1 }, total: 1, expected: 2.8 },
         ])
     })
 
-    it('keeps equal labels of different scales apart', () => {
+    it('puts boulders and routes on separate grade axes', () => {
         const routes = [
             route('uiaa-five', uiaa('5')),
             route('font-five', {
@@ -337,9 +339,12 @@ describe('buildAnalytics', () => {
             }),
         ]
         const result = buildAnalytics(routes, [], allTime, NOW)
-        expect(result.gradeDistribution.map((row) => row.grade)).toEqual([
-            '5 · UIAA',
-            '5 · Font',
+        const labels = (rows: { grade: string }[]) =>
+            rows.map((row) => row.grade)
+        expect(labels(result.grades.Route.gradeDistribution)).toEqual(['5'])
+        expect(labels(result.grades.Boulder.gradeDistribution)).toEqual(['5'])
+        expect(result.grades.Boulder.locationGrades).toEqual([
+            { location: 'Hall A', grade: '5', count: 1 },
         ])
     })
 
@@ -362,7 +367,7 @@ describe('buildAnalytics', () => {
         expect(result.commentTimeline).toEqual([
             { period: '2026-06', count: 1 },
         ])
-        expect(result.locationGrades).toEqual([
+        expect(result.grades.Route.locationGrades).toEqual([
             { location: 'Hall A', grade: '6', count: 1 },
             { location: 'Hall B', grade: '7', count: 1 },
         ])

@@ -1,28 +1,26 @@
 import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 
-test('conversion table opens compact on phones and columns can be added', async ({
+test('conversion ladders scroll inside the dialog on phones', async ({
     page,
 }) => {
     await gotoSettled(page, '/routes')
     await page.getByTestId('index-grade-conversion-open').click()
 
     const dialog = page.getByTestId('grade-conversion-dialog')
+    await expect(dialog.getByTestId('grade-conversion-boulders')).toBeVisible()
+    await expect(dialog.getByTestId('grade-conversion-routes')).toBeVisible()
     await expect(
-        dialog.getByTestId('grade-conversion-column-french'),
-    ).toBeVisible()
-    await expect(
-        dialog.getByTestId('grade-conversion-column-ewbank'),
-    ).toHaveCount(0)
+        dialog.getByTestId('grade-conversion-orientation-0'),
+    ).toHaveText('≤5+')
 
     await expect
         .poll(() =>
-            dialog
-                .getByTestId('grade-conversion-table')
-                .evaluate((el) => el.scrollWidth - el.clientWidth),
+            page.evaluate(
+                () =>
+                    document.documentElement.scrollWidth -
+                    document.documentElement.clientWidth,
+            ),
         )
         .toBeLessThanOrEqual(0)
-
-    await dialog.getByTestId('grade-conversion-toggle-ewbank').click()
-    await expect(dialog.getByTestId('grade-conversion-ewbank-23')).toBeVisible()
 })

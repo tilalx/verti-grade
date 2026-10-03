@@ -43,15 +43,16 @@
                         }}
                     </UBadge>
                     <UBadge
-                        v-if="summary.hardest"
+                        v-for="best in summary.hardest"
+                        :key="best.kind"
                         color="primary"
                         variant="soft"
                         icon="i-lucide-trending-up"
-                        data-testid="logbook-session-hardest"
+                        :data-testid="`logbook-session-hardest-${best.kind}`"
                     >
                         {{
                             $t('ticks.session.hardest', {
-                                grade: summary.hardest.grade,
+                                grade: gradeKey(best, true),
                             })
                         }}
                     </UBadge>
@@ -79,6 +80,7 @@
 <script setup lang="ts">
 import type { RouteRecord, TickRecord } from '~/types/models'
 import { formatDate } from '#shared/utils/formatting'
+import { gradeKey } from '#shared/utils/grades'
 import { sessionSummary } from '#shared/utils/logbook'
 import { tickDate } from '#shared/utils/ticks'
 

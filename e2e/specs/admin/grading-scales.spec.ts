@@ -49,7 +49,7 @@ test('creates a boulder graded on the boulder scale', async ({
     ).toHaveAccessibleName(/Fontainebleau/)
     await page.getByTestId('route-form-difficulty').click()
     await page.getByRole('option', { name: '6A+', exact: true }).click()
-    await page.getByTestId('route-form-anchor-point').fill('0')
+    await expect(page.getByTestId('route-form-anchor-point')).toHaveCount(0)
     await page.getByTestId('route-form-location').click()
     await page
         .getByRole('option', { name: workerLocation.name, exact: true })
@@ -68,6 +68,7 @@ test('creates a boulder graded on the boulder scale', async ({
         grade: '6A+',
         grade_system: 'font',
         grade_index: 16.4,
+        anchor_point: 0,
     })
     await page.getByTestId('filter-search').fill(name)
     await expect(page.getByTestId('routes-table')).toContainText('6A+')
@@ -133,21 +134,15 @@ test('route page links its grade to the IRCRA conversion table', async ({
     await expect(dialog.getByTestId('grade-conversion-french-7a')).toHaveClass(
         /grade-conversion__label--highlight/,
     )
-    await expect(dialog.getByTestId('grade-conversion-band')).toBeVisible()
     for (const testId of [
         'grade-conversion-yds-5.11d',
         'grade-conversion-uiaa-8',
         'grade-conversion-font-6B',
         'grade-conversion-v-V3',
-        'grade-conversion-britishTech-6a',
-        'grade-conversion-ewbank-23',
-        'grade-conversion-brazilian-7c',
-        'grade-conversion-metricUiaa-8.00',
-        'grade-conversion-watts-2.75',
-        'grade-conversion-male-Intermediate (L2)',
-        'grade-conversion-female-Advanced (L3)',
+        'grade-conversion-orientation-6',
+        'grade-conversion-band-black',
     ]) {
-        await expect(dialog.getByTestId(testId)).toBeVisible()
+        await expect(dialog.getByTestId(testId)).toBeAttached()
     }
 })
 

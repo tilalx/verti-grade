@@ -20,9 +20,14 @@ export interface WallSummary {
     name: string
     location: string
     count: number
-    easiest: string | null
-    hardest: string | null
+    ranges: GradeRange[]
     newest: string | null
+}
+
+export interface GradeRange {
+    type: 'Boulder' | 'Route'
+    easiest: string
+    hardest: string
 }
 
 const DAY_MS = 86_400_000
@@ -107,8 +112,22 @@ export function wallSummaries(
                 name: wall.name,
                 location: wall.location,
                 count: onWall.length,
-                easiest: onWall[0]?.grade ?? null,
-                hardest: onWall.at(-1)?.grade ?? null,
+                ranges: (['Boulder', 'Route'] as const).flatMap((type) => {
+                    const graded = onWall.filter(
+                        (route) =>
+                            (route.type === 'Boulder') ===
+                                (type === 'Boulder') && route.grade,
+                    )
+                    return graded.length
+                        ? [
+                              {
+                                  type,
+                                  easiest: graded[0]!.grade!,
+                                  hardest: graded.at(-1)!.grade!,
+                              },
+                          ]
+                        : []
+                }),
                 newest: newest?.screw_date ?? null,
             }
         })

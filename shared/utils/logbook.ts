@@ -196,7 +196,7 @@ export interface SessionSummary {
     climbs: number
     sends: number
     flashes: number
-    hardest: HardestSend | null
+    hardest: (HardestSend & { kind: LogbookKind })[]
 }
 
 export function sessionSummary(dayTicks: LogbookTick[]): SessionSummary {
@@ -205,7 +205,12 @@ export function sessionSummary(dayTicks: LogbookTick[]): SessionSummary {
         climbs: dayTicks.length,
         sends: sends.length,
         flashes: sends.filter((tick) => tick.type === 'flash').length,
-        hardest: hardestOf(dayTicks),
+        hardest: (['boulder', 'route'] as const).flatMap((kind) => {
+            const best = hardestOf(
+                dayTicks.filter((tick) => tickKind(tick) === kind),
+            )
+            return best ? [{ ...best, kind }] : []
+        }),
     }
 }
 

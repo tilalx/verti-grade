@@ -375,7 +375,7 @@ function onMobileSortChange(sortBy: SortOption[]) {
 const toPbSortIndex = (sortByArr: SortOption[]) =>
     toPbSort(sortByArr, '-screw_date', {
         score: 'average_rating',
-        difficulty: 'grade_index',
+        difficulty: 'type,grade_index',
     })
 
 function fetchRoutes(

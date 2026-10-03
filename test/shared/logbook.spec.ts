@@ -198,6 +198,18 @@ describe('sessionSummary', () => {
             ]),
         ).toMatchObject({ climbs: 3, sends: 2, flashes: 1 })
     })
+
+    it('keeps the hardest boulder and route apart', () => {
+        expect(
+            sessionSummary([
+                tick('top', '6B'),
+                tick('top', '8', { grade_system: 'uiaa' }),
+            ]).hardest.map(({ kind, grade }) => [kind, grade]),
+        ).toEqual([
+            ['boulder', '6B'],
+            ['route', '8'],
+        ])
+    })
 })
 
 describe('openProjects', () => {
@@ -240,7 +252,7 @@ describe('ungraded sends', () => {
     const ungraded = (): LogbookTick => tick('top', '', { grade_index: 0 })
 
     it('never count as the hardest send', () => {
-        expect(sessionSummary([ungraded()]).hardest).toBeNull()
+        expect(sessionSummary([ungraded()]).hardest).toEqual([])
     })
 
     it('do not pull the median grade down', () => {

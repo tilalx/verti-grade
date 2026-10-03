@@ -10,6 +10,7 @@ import {
     TAG_QR_ERROR_CORRECTION,
 } from '../../utils/export'
 import { drawRouteTag } from '../../utils/routeTag'
+import { gymBandsFrom } from '#shared/utils/gradeReference'
 import type { SettingsRecord } from '../../../types/models'
 
 export default eventHandler(async (event) => {
@@ -39,6 +40,7 @@ export default eventHandler(async (event) => {
         }
 
         const applicationUrl = resolveApplicationUrl(event, settings)
+        const bands = gymBandsFrom(settings.boulder_bands)
         const locale = await resolveExportLocale(event)
         const anchorLabel = await resolveExportLabel(event, 'anchor', 'Anchor')
         const fonts = useStorage('assets:server')
@@ -85,7 +87,7 @@ export default eventHandler(async (event) => {
                 route,
                 index % 2 === 0 ? 20 : 315,
                 (Math.floor(index / 2) % 4) * 193 + 30,
-                { anchorLabel, locale, qrCode, logo, show },
+                { anchorLabel, locale, qrCode, logo, show, bands },
             )
         }
 

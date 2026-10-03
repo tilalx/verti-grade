@@ -208,3 +208,56 @@ describe('route tag colour dot', () => {
         expect(fills).toContain('#DA5307')
     })
 })
+
+describe('route tag difficulty band', () => {
+    async function fillsFor(route: Partial<RouteRecord>) {
+        const doc = new PDFDocument()
+        doc.registerFont(
+            'Sans',
+            readFileSync('server/assets/fonts/Roboto-Regular.ttf'),
+        )
+        doc.registerFont(
+            'Sans-Bold',
+            readFileSync('server/assets/fonts/Roboto-Bold.ttf'),
+        )
+        const fills: unknown[] = []
+        const fill = doc.fill.bind(doc)
+        doc.fill = ((color: string) => {
+            fills.push(color)
+            return fill(color)
+        }) as typeof doc.fill
+        drawRouteTag(
+            doc,
+            {
+                id: 'abc',
+                name: 'Test',
+                color: '#000000',
+                ...route,
+            } as RouteRecord,
+            TAG_X,
+            TAG_Y,
+            {
+                anchorLabel: 'Anchor',
+                locale: 'en',
+                qrCode: await QRCode.toBuffer('https://example.com'),
+                logo: null,
+                show: { creators: false, date: false, logo: false },
+            },
+        )
+        doc.end()
+        return fills
+    }
+
+    it('paints the band colour on boulder tags only', async () => {
+        expect(
+            await fillsFor({
+                type: 'Boulder',
+                grade: '6B',
+                grade_system: 'font',
+            }),
+        ).toContain('#2563eb')
+        expect(
+            await fillsFor({ type: 'Route', grade: '6', grade_system: 'uiaa' }),
+        ).not.toContain('#2563eb')
+    })
+})

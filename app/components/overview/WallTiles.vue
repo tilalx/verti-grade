@@ -15,11 +15,21 @@
             <span class="wall-tile__count">{{
                 $t('overview.wallRoutes', { n: wall.count })
             }}</span>
-            <span v-if="wall.easiest" class="wall-tile__meta">
+            <span
+                v-for="range in wall.ranges"
+                :key="range.type"
+                class="wall-tile__meta"
+                :data-testid="`overview-wall-range-${range.type}`"
+            >
                 {{
-                    wall.easiest === wall.hardest
-                        ? wall.easiest
-                        : `${wall.easiest} – ${wall.hardest}`
+                    $t(
+                        `ticks.kind.${range.type === 'Boulder' ? 'boulder' : 'route'}`,
+                    )
+                }}
+                {{
+                    range.easiest === range.hardest
+                        ? range.easiest
+                        : `${range.easiest} – ${range.hardest}`
                 }}
             </span>
             <span v-if="wall.newest" class="wall-tile__meta">
