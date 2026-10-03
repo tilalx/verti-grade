@@ -1052,7 +1052,7 @@ useHead(() => ({
 .route-manager__mobile-pagination {
     position: sticky;
     bottom: calc(
-        var(--app-bottom, 0px) + env(safe-area-inset-bottom, 0px) + 12px
+        var(--app-bottom, 0px) + env(safe-area-inset-bottom, 0px) + 16px
     );
     z-index: 2;
     display: flex;
