@@ -1,12 +1,22 @@
+def runTestSuite(String target) {
+    sh "docker buildx build --platform linux/amd64 --target ${target} --progress=plain --output type=local,dest=test-results/${target} ."
+    junit testResults: "test-results/${target}/junit.xml"
+    if (readFile("test-results/${target}/exit-code").trim() != '0') {
+        error("${target} failed")
+    }
+}
+
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "tilalx/verti-grade"
         DOCKER_BUILDKIT = 1
-        PIPELINE_NAME = "${JOB_NAME.replaceAll('/', '_')}-${BUILD_NUMBER}"
+        CI_ID = "${JOB_NAME}-${BUILD_NUMBER}".replaceAll(/[^a-zA-Z0-9]+/, '-').toLowerCase()
         DOCKER_CLI_EXPERIMENTAL = 'enabled'
-        E2E_IMAGE = "gripello:e2e-${BUILD_NUMBER}"
+        BUILDX_BUILDER = 'gripello'
+        E2E_IMAGE = "gripello:e2e-${CI_ID}"
+        E2E_COMPOSE = "docker compose -p e2e-${CI_ID} -f e2e/docker-compose.e2e.yml"
     }
 
     options {
@@ -19,9 +29,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker run --rm --privileged tonistiigi/binfmt --install all'
-                    def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
-                    def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
-                    sh "docker buildx create --name ${builderName} --use"
+                    sh 'docker buildx inspect gripello >/dev/null 2>&1 || docker buildx create --name gripello --driver docker-container || docker buildx inspect gripello'
                     sh 'docker buildx inspect --bootstrap'
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
@@ -67,52 +75,47 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Build & Unit Tests') {
             parallel {
                 stage('Vitest') {
                     steps {
-                        sh '''
-                            docker run --rm -v "$PWD":/work -w /work -v gripello-e2e-yarn-cache:/root/.yarn/berry/cache \
-                                node:26.10.0-trixie@sha256:a723b54c35a76e947095a20a67d39585bb09c862e6b1adeb8a9f518f95e34fb0 \
-                                sh -c "npm install -g corepack --force && corepack enable && yarn install --immutable --mode=skip-build && yarn test"
-                        '''
+                        script { runTestSuite('vitest-results') }
                     }
                 }
                 stage('Go Hooks') {
                     steps {
+                        script { runTestSuite('go-results') }
+                    }
+                }
+                stage('Build (test image)') {
+                    steps {
+                        sh "docker buildx build --platform linux/amd64 --load --build-arg APP_VERSION=${env.APP_VERSION} -t ${env.E2E_IMAGE} ."
+                    }
+                }
+                stage('E2E deps') {
+                    steps {
                         sh '''
-                            docker run --rm -v "$PWD/pocketbase":/src -w /src \
-                                golang:1.27.1-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183 \
-                                go test ./...
+                            docker volume create gripello-e2e-yarn-cache
+                            $E2E_COMPOSE run --rm --no-deps e2e sh -c "corepack enable && yarn install --immutable --mode=skip-build"
                         '''
                     }
                 }
-            }
-        }
-
-        stage('Build (test image)') {
-            steps {
-                sh """
-                    docker buildx build --platform linux/amd64 --load --build-arg APP_VERSION=${env.APP_VERSION} -t ${env.E2E_IMAGE} .
-                """
             }
         }
 
         stage('E2E Tests') {
             steps {
-                sh """
-                    docker volume create gripello-e2e-yarn-cache
-                    E2E_IMAGE=${env.E2E_IMAGE} docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml up --attach e2e --abort-on-container-exit --exit-code-from e2e
-                """
+                sh '$E2E_COMPOSE up --attach e2e --abort-on-container-exit --exit-code-from e2e'
             }
             post {
                 failure {
-                    sh "E2E_IMAGE=${env.E2E_IMAGE} docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml logs --tail=500 app || true"
+                    sh '$E2E_COMPOSE logs --tail=500 app || true'
                 }
                 success {
                     script {
                         def flaky = fileExists('e2e/results/flaky.txt') ? readFile('e2e/results/flaky.txt').trim() : ''
                         if (flaky) {
+                            publishChecks name: 'E2E flaky', title: "${flaky.readLines().size()} flaky e2e tests", summary: 'Passed only on retry', text: "```\n${flaky}\n```", conclusion: 'NEUTRAL'
                             unstable("Flaky e2e tests (passed only on retry):\n${flaky}")
                         }
                     }
@@ -120,7 +123,7 @@ pipeline {
                 always {
                     junit testResults: 'e2e/results/junit.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'e2e/results/html/**, e2e/results/artifacts/**', allowEmptyArchive: true
-                    sh "docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
+                    sh '$E2E_COMPOSE down -v || true'
                 }
             }
         }
@@ -128,7 +131,7 @@ pipeline {
         stage('Build & Push (release image)') {
             steps {
                 sh """
-                    docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg DOCKER_BUILDKIT=${DOCKER_BUILDKIT} --build-arg APP_VERSION=${env.APP_VERSION} --memory 32g --memory-swap 16g ${env.RELEASE_TAGS} --push .
+                    docker buildx build --platform linux/amd64 --provenance=true --sbom=true --build-arg APP_VERSION=${env.APP_VERSION} ${env.RELEASE_TAGS} --push .
                 """
             }
         }
@@ -138,10 +141,9 @@ pipeline {
     post {
         always {
             script {
-                def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._-]/, '-')
-                def builderName = "builder-${env.BUILD_ID}-${safeBranch}"
-                sh "docker buildx rm ${builderName}"
-                sh "docker compose -p gripello-e2e-${BUILD_NUMBER} -f e2e/docker-compose.e2e.yml down -v || true"
+                sh 'docker buildx prune --builder gripello --keep-storage 20gb -f || true'
+                sh '$E2E_COMPOSE down -v || true'
+                sh "docker image rm ${env.E2E_IMAGE} || true"
             }
             cleanWs()
         }
