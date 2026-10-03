@@ -16,6 +16,7 @@ export const cacheKeys = {
     ratings: (routeId: string) => `ratings:${routeId}`,
     ratingsSheet: (routeId: string) => `ratings-sheet:${routeId}`,
     unplacedRoutes: 'unplaced-routes',
+    locations: 'locations',
 }
 
 export type InScope<T> = (record: T) => boolean | null
@@ -82,7 +83,48 @@ export function mapRows<T>(
 ): RowsData<T> {
     if (Array.isArray(data)) return patch(data)
     const items = patch(data.items)
-    return items === data.items ? data : { ...data, items }
+    if (items === data.items) return data
+    return {
+        ...data,
+        items,
+        totalItems: data.totalItems + items.length - data.items.length,
+    }
+}
+
+export type ExpandField = 'wall' | 'location'
+type Expandable = { id: string; expand?: Record<string, unknown> }
+
+export function patchExpanded<T extends Expandable>(
+    rows: T[],
+    field: ExpandField,
+    record: { id: string },
+): T[] {
+    let changed = false
+    const next = rows.map((row) => {
+        const current = row.expand?.[field] as { id?: string } | undefined
+        if (current?.id !== record.id) return row
+        changed = true
+        return {
+            ...row,
+            expand: { ...row.expand, [field]: { ...current, ...record } },
+        }
+    })
+    return changed ? next : rows
+}
+
+export function relinkExpanded<
+    T extends Expandable & Partial<Record<ExpandField, string | null>>,
+>(
+    row: T,
+    field: ExpandField,
+    known: (id: string) => { id: string } | undefined,
+): T {
+    const current = row.expand?.[field] as { id?: string } | undefined
+    const id = row[field]
+    if (!current || current.id === id) return row
+    const { [field]: _stale, ...rest } = row.expand!
+    const match = id ? known(id) : undefined
+    return { ...row, expand: match ? { ...rest, [field]: match } : rest }
 }
 
 export function upsertById<T extends { id: string }>(
@@ -201,4 +243,21 @@ export function newRecordId(length = 15) {
         bytes,
         (byte) => RECORD_ID_ALPHABET[byte % RECORD_ID_ALPHABET.length],
     ).join('')
+}
+
+export function relinkRow<
+    T extends Expandable & Partial<Record<ExpandField, string | null>>,
+>(rows: T[], id: string, known: (id: string) => { id: string } | undefined) {
+    const index = rows.findIndex((row) => row.id === id)
+    if (index < 0) return rows
+    const row = rows[index]!
+    const relinked = relinkExpanded(
+        relinkExpanded(row, 'wall', known),
+        'location',
+        known,
+    )
+    if (relinked === row) return rows
+    const next = [...rows]
+    next[index] = relinked
+    return next
 }

@@ -16,6 +16,8 @@ import {
     upsertById,
     wallsScope,
     type RatingLedger,
+    patchExpanded,
+    relinkRow,
 } from '~/utils/realtimeCache'
 import type {
     RatingRecord,
@@ -226,7 +228,7 @@ describe('cache keys', () => {
 describe('mapRows', () => {
     it('patches paged results', () => {
         const page = { items: [{ id: 'a' }], totalItems: 1 }
-        expect(mapRows(page, () => [])).toEqual({ items: [], totalItems: 1 })
+        expect(mapRows(page, () => [])).toEqual({ items: [], totalItems: 0 })
         expect(mapRows(page, (rows) => rows)).toBe(page)
     })
 })
@@ -261,5 +263,39 @@ describe('servedStaleFromSsrCache', () => {
         expect(servedStaleFromSsrCache('0')).toBe(false)
         expect(servedStaleFromSsrCache('999')).toBe(false)
         expect(servedStaleFromSsrCache('1000')).toBe(true)
+    })
+})
+
+describe('expanded names', () => {
+    const north = { id: 'w1', name: 'North' }
+    const row = (wall: string) => ({
+        id: 'r1',
+        wall,
+        location: 'l1',
+        expand: { wall: north, location: { id: 'l1', name: 'Hall' } },
+    })
+
+    it('renames an expanded wall in place', () => {
+        const [patched] = patchExpanded([row('w1')], 'wall', {
+            id: 'w1',
+            name: 'Nordwand',
+        })
+        expect(patched!.expand.wall).toEqual({ id: 'w1', name: 'Nordwand' })
+    })
+
+    it('leaves rows of other walls untouched', () => {
+        const rows = [row('w1')]
+        expect(patchExpanded(rows, 'wall', { id: 'w2', name: 'x' })).toBe(rows)
+    })
+
+    it('relinks a moved route to a known wall or drops the stale name', () => {
+        const south = { id: 'w2', name: 'South' }
+        const known = (id: string) => (id === 'w2' ? south : undefined)
+        expect(relinkRow([row('w2')], 'r1', known)[0]!.expand.wall).toBe(south)
+        expect(
+            relinkRow([row('w3')], 'r1', known)[0]!.expand,
+        ).not.toHaveProperty('wall')
+        const unchanged = [row('w1')]
+        expect(relinkRow(unchanged, 'r1', known)).toBe(unchanged)
     })
 })

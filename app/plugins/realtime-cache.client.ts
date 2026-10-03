@@ -1,5 +1,6 @@
 import type { RecordSubscription } from 'pocketbase'
 import type {
+    LocationRecord,
     RatingRecord,
     RouteRecord,
     RouteScoreRecord,
@@ -9,18 +10,22 @@ import {
     applyRatingChange,
     cacheKeys,
     coalesce,
+    detailRouteId,
     servedStaleFromSsrCache,
     isLiveKey,
     mapRows,
     NEW_ROUTE_SCORE,
+    patchExpanded,
     patchList,
     ratingsRouteId,
+    relinkRow,
     removeById,
     routeRowsScope,
     rowsOf,
     trackRating,
     upsertById,
     wallsScope,
+    type ExpandField,
     type RatingChange,
     type RatingLedger,
     type RowsData,
@@ -119,6 +124,34 @@ export default defineNuxtPlugin((nuxtApp) => {
         refreshNuxtData(cacheKeys.unplacedRoutes),
     )
 
+    const refreshRoutesListSoon = coalesce(() =>
+        refreshNuxtData(cacheKeys.routesList),
+    )
+
+    function cachedRecord(id: string) {
+        for (const key of loadedKeys()) {
+            if (key !== cacheKeys.locations && !wallsScope(key)) continue
+            const found = read<{ id: string }[]>(key).find(
+                (record) => record.id === id,
+            )
+            if (found) return found
+        }
+    }
+
+    function patchExpandedEverywhere(
+        field: ExpandField,
+        record: { id: string },
+    ) {
+        patchRouteRows((rows) => patchExpanded(rows, field, record))
+        for (const key of loadedKeys()) {
+            if (detailRouteId(key) === undefined) continue
+            const route = read<RouteRecord | null>(key)
+            if (!route) continue
+            const [next] = patchExpanded([route], field, record)
+            if (next !== route) write(key, next)
+        }
+    }
+
     function applyChange(change: RatingChange | 'unknown' | null) {
         if (change && change !== 'unknown')
             patchRouteRows((rows) => applyRatingChange(rows, change))
@@ -161,14 +194,20 @@ export default defineNuxtPlugin((nuxtApp) => {
     function onRoute({ action, record }: RecordSubscription<RouteRecord>) {
         const removed = action === 'delete' || !!record.archived
         patchRouteRows((rows, inScope) =>
-            patchList<RouteScoreRecord>(
-                rows,
-                record,
-                removed ? false : inScope(record),
-                NEW_ROUTE_SCORE,
+            relinkRow(
+                patchList<RouteScoreRecord>(
+                    rows,
+                    record,
+                    removed ? false : inScope(record),
+                    NEW_ROUTE_SCORE,
+                ),
+                record.id,
+                cachedRecord,
             ),
         )
         const keys = loadedKeys()
+        if (action === 'create' && keys.includes(cacheKeys.routesList))
+            refreshRoutesListSoon()
         if (action !== 'delete' && keys.includes(cacheKeys.route(record.id)))
             void refreshNuxtData(cacheKeys.route(record.id))
         if (keys.includes(cacheKeys.unplacedRoutes)) refreshUnplacedSoon()
@@ -186,6 +225,19 @@ export default defineNuxtPlugin((nuxtApp) => {
             )
             if (next !== data) write(key, next)
         }
+        if (action !== 'delete') patchExpandedEverywhere('wall', record)
+    }
+
+    function onLocation({
+        action,
+        record,
+    }: RecordSubscription<LocationRecord>) {
+        const data = read<LocationRecord[] | undefined>(cacheKeys.locations)
+        if (data) {
+            const next = patchList(data, record, action !== 'delete')
+            if (next !== data) write(cacheKeys.locations, next)
+        }
+        if (action !== 'delete') patchExpandedEverywhere('location', record)
     }
 
     const hydratedFromStaleCache = servedStaleFromSsrCache(
@@ -212,6 +264,9 @@ export default defineNuxtPlugin((nuxtApp) => {
             pb.collection('ratings').subscribe<RatingRecord>('*', onRating),
             pb.collection('routes').subscribe<RouteRecord>('*', onRoute),
             pb.collection('walls').subscribe<WallRecord>('*', onWall),
+            pb
+                .collection('locations')
+                .subscribe<LocationRecord>('*', onLocation),
         ]
         for (const subscription of subscriptions)
             subscription.catch((error) =>
