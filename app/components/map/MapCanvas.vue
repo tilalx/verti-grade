@@ -15,7 +15,7 @@
             <slot />
         </svg>
         <slot name="overlay" />
-        <div class="map-canvas__controls">
+        <div class="map-canvas__controls" data-pan-ignore>
             <UButton
                 icon="i-lucide-plus"
                 size="lg"
@@ -76,6 +76,7 @@ function bindSvg(element: unknown) {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    touch-action: none;
     background: color-mix(in oklab, var(--ui-text-highlighted) 3%, transparent);
 }
 

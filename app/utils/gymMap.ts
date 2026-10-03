@@ -205,6 +205,7 @@ export function clearOfDots(
     dots: { x: number; y: number }[],
     dotRadius: number,
     gap: number,
+    direction: 1 | -1 = -1,
 ): LabelBox {
     const covers = (candidate: LabelBox) =>
         dots.some(
@@ -214,8 +215,8 @@ export function clearOfDots(
                 Math.abs(dot.y - candidate.y) <
                     candidate.height / 2 + dotRadius,
         )
-    const step = label.height / 2 + gap
-    for (const offset of [0, -step, step, -step * 2, step * 2]) {
+    const step = (label.height / 2 + gap) * direction
+    for (const offset of [0, step, step * 2, -step, -step * 2]) {
         const candidate = { ...label, y: label.y + offset }
         if (!covers(candidate)) return candidate
     }
@@ -234,8 +235,8 @@ export function clusterDots<Dot extends { routeId: string; point: MapPoint }>(
 ): DotCluster<Dot>[] {
     const groups: Dot[][] = []
     for (const dot of dots) {
-        const near = groups.filter((group) =>
-            group.some(
+        const group = groups.find((candidate) =>
+            candidate.every(
                 (other) =>
                     Math.hypot(
                         other.point[0] - dot.point[0],
@@ -243,9 +244,8 @@ export function clusterDots<Dot extends { routeId: string; point: MapPoint }>(
                     ) < minDistance,
             ),
         )
-        const merged = [...near.flat(), dot]
-        for (const group of near) groups.splice(groups.indexOf(group), 1)
-        groups.push(merged)
+        if (group) group.push(dot)
+        else groups.push([dot])
     }
     return groups.map((group) => ({
         key: group

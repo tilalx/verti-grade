@@ -381,9 +381,14 @@ function checkPath([x, y]: MapPoint) {
 }
 
 const labels = computed(() => {
-    const screenDots = layoutDots.value.map((dot) =>
-        mapToScreen(dot.point, size.value, viewBox.value),
+    const screenDots = clusterDots(layoutDots.value, hitRadius.value * 2).map(
+        (cluster) => mapToScreen(cluster.point, size.value, viewBox.value),
     )
+    const mapCentreY = mapToScreen(
+        [props.map.width / 2, props.map.height / 2],
+        size.value,
+        viewBox.value,
+    ).y
     const placed = mapWalls.value.flatMap((wall) => {
         const position = mapToScreen(wall.labelAt, size.value, viewBox.value)
         const width = wall.name.length * LABEL_CHAR_PX + LABEL_PADDING_PX
@@ -404,6 +409,7 @@ const labels = computed(() => {
             screenDots,
             hitRadiusPx.value,
             LABEL_EDGE_PX,
+            position.y < mapCentreY ? 1 : -1,
         )
         const y = clampInside(box.y, LABEL_HEIGHT_PX, size.value.height)
         const nearControls = y - LABEL_HEIGHT_PX / 2 < CONTROLS_HEIGHT_PX
