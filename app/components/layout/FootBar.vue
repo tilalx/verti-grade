@@ -89,6 +89,23 @@
                         </button>
                     </template>
                 </NotificationsReleaseNotesDialog>
+
+                <NotificationsUpdatePill v-slot="{ props: activatorProps }">
+                    <button
+                        v-bind="activatorProps"
+                        type="button"
+                        class="status-pill status-pill--link status-pill--update"
+                        data-testid="footer-update"
+                    >
+                        <UIcon
+                            name="i-lucide-circle-arrow-up"
+                            class="size-[11px]"
+                        />
+                        <span class="status-label">{{
+                            $t('notifications.updateAvailable')
+                        }}</span>
+                    </button>
+                </NotificationsUpdatePill>
             </div>
 
             <!-- Right: copyright -->
@@ -231,6 +248,16 @@ const { isHealthy, onlineCount } = useAppStatus()
         var(--ui-text-highlighted) 18%,
         transparent
     );
+}
+
+.status-pill--update,
+.status-pill--update .status-label {
+    color: var(--ui-primary);
+}
+
+.status-pill--update {
+    background: color-mix(in oklab, var(--ui-primary) 10%, transparent);
+    border-color: color-mix(in oklab, var(--ui-primary) 25%, transparent);
 }
 
 @variant max-sm {

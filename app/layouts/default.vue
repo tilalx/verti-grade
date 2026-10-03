@@ -5,7 +5,6 @@
         <div class="page-body">
             <LayoutNavBar :loggedIn="isLoggedIn" :settings="settings" />
             <main id="main-content" class="app-main" tabindex="-1">
-                <NotificationsNewVersionAvailable v-if="isLoggedIn" />
                 <slot />
             </main>
             <LayoutFootBar :settings="settings" />

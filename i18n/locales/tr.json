@@ -407,14 +407,7 @@
         "deleteItem": "Bu kayıt silinsin mi? Bu işlem geri alınamaz.",
         "deleteMoreItems": "Seçili kayıtlar silinsin mi? Bu işlem geri alınamaz.",
         "archiveMoreItems": "Seçili rotalar arşivlensin mi?",
-        "updateBanner": {
-            "title": "Güncelleme mevcut —",
-            "message": "{0} sürümü yayınlandı.",
-            "commitsMessage": "{n} yeni commit mevcut. | {n} yeni commit mevcut.",
-            "viewChangelog": "Değişiklik günlüğünü görüntüle",
-            "viewCommits": "Commit'leri görüntüle",
-            "dismiss": "Kapat"
-        },
+        "updateAvailable": "Güncelleme mevcut",
         "releaseNotes": {
             "title": "Sürüm notları",
             "installedVersion": "Yüklü sürüm: {0}",
@@ -545,7 +538,6 @@
                 "colorScheme": "Açık veya koyu modu hatırlar",
                 "sidebar": "Yan gezinmenin açık olup olmadığını hatırlar",
                 "exportColumns": "Seçilen dışa aktarma sütunlarını hatırlar",
-                "updateDismissed": "Kapatılan güncelleme bildirimini hatırlar",
                 "inventorySession": "Envanter taramasının ilerlemesini saklar",
                 "inventoryInstructions": "Envanter talimatlarının gösterildiğini hatırlar",
                 "offlineLogbook": "Günlüğünü ve gönderilmemiş tırmanışları çevrimdışı kullanılabilir tutar"

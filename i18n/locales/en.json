@@ -407,14 +407,7 @@
         "deleteItem": "Delete this item? This cannot be undone.",
         "deleteMoreItems": "Delete the selected items? This cannot be undone.",
         "archiveMoreItems": "Archive the selected routes?",
-        "updateBanner": {
-            "title": "Update available —",
-            "message": "version {0} is out.",
-            "commitsMessage": "{n} new commit is available. | {n} new commits are available.",
-            "viewChangelog": "View changelog",
-            "viewCommits": "View commits",
-            "dismiss": "Dismiss"
-        },
+        "updateAvailable": "Update available",
         "releaseNotes": {
             "title": "Release notes",
             "installedVersion": "Installed version: {0}",
@@ -545,7 +538,6 @@
                 "colorScheme": "Remembers light or dark mode",
                 "sidebar": "Remembers whether the side navigation is expanded",
                 "exportColumns": "Remembers selected export columns",
-                "updateDismissed": "Remembers a dismissed update notice",
                 "inventorySession": "Keeps the progress of an inventory scan",
                 "inventoryInstructions": "Remembers that inventory instructions were shown",
                 "offlineLogbook": "Keeps your logbook and unsent ascents available offline"

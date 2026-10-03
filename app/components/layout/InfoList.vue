@@ -80,6 +80,25 @@
                     </button>
                 </template>
             </NotificationsReleaseNotesDialog>
+            <NotificationsUpdatePill v-slot="{ props: activatorProps }">
+                <button
+                    v-bind="activatorProps"
+                    type="button"
+                    class="native-row"
+                    data-testid="footer-update"
+                >
+                    <span class="native-row__icon"
+                        ><UIcon name="i-lucide-circle-arrow-up"
+                    /></span>
+                    <span class="native-row__text">{{
+                        $t('notifications.updateAvailable')
+                    }}</span>
+                    <UIcon
+                        name="i-lucide-chevron-right"
+                        class="native-row__chevron"
+                    />
+                </button>
+            </NotificationsUpdatePill>
             <div class="native-row" data-testid="footer-health">
                 <span class="native-row__icon"
                     ><UIcon name="i-lucide-server"
