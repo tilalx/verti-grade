@@ -10,7 +10,7 @@
 import type { GradeDatum } from '#shared/utils/analytics'
 import { gridBase, makeXAxis, tooltipBase, yAxisBase } from '~/utils/echarts'
 
-const props = defineProps<{ grades: GradeDatum[]; types: string[] }>()
+const props = defineProps<{ grades: GradeDatum[]; label: string }>()
 
 const { t } = useI18n()
 const { colors, palette } = useChartTheme()
@@ -30,19 +30,13 @@ const option = computed(() => ({
     ),
     yAxis: yAxisBase(colors.value),
     series: [
-        ...props.types.map((type, index) => ({
-            name: type,
+        {
+            name: props.label,
             type: 'bar',
-            stack: 'grades',
             barMaxWidth: 28,
-            itemStyle: {
-                borderColor: 'transparent',
-                borderWidth: 1,
-                borderRadius:
-                    index === props.types.length - 1 ? [4, 4, 0, 0] : 0,
-            },
-            data: props.grades.map((row) => row.byType[type] ?? 0),
-        })),
+            itemStyle: { borderRadius: [4, 4, 0, 0] },
+            data: props.grades.map((row) => row.total),
+        },
         {
             name: t('analytics.labels.expected'),
             type: 'line',

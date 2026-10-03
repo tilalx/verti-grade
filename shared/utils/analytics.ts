@@ -68,7 +68,6 @@ export interface TimelineDatum {
 
 export interface GradeDatum {
     grade: string
-    byType: Record<string, number>
     total: number
     expected: number
 }
@@ -150,7 +149,6 @@ export interface AnalyticsResponse {
         unratedRoutes: number
     }
     grades: Record<Discipline, GradeAnalytics>
-    types: string[]
     routeTimeline: TimelineDatum[]
     ratingTimeline: TimelineDatum[]
     commentTimeline: TimelineDatum[]
@@ -417,9 +415,6 @@ export function buildAnalytics(
         if (date) increase(dailyRouteActivity, bucketKey(date, 'day'))
     }
 
-    const types = [
-        ...new Set(scopedRoutes.map((route) => route.type || '?')),
-    ].sort()
     const routesSetIds = new Set(routesSet.map((route) => route.id))
     const setterRoutes = new Map<string, AnalyticsRoute[]>()
     for (const route of scopedRoutes) {
@@ -483,25 +478,13 @@ export function buildAnalytics(
             increase(historicShare, gradeKey(route, disciplineWithSystem))
         for (const route of scoped) {
             const grade = gradeKey(route, disciplineWithSystem)
-            const row = gradeRows.get(grade) ?? {
-                grade,
-                byType: {},
-                total: 0,
-                expected: 0,
-            }
-            row.byType[route.type || '?'] =
-                (row.byType[route.type || '?'] ?? 0) + 1
+            const row = gradeRows.get(grade) ?? { grade, total: 0, expected: 0 }
             row.total += 1
             gradeRows.set(grade, row)
         }
         for (const [grade, count] of historicShare) {
             if (!gradeRows.has(grade))
-                gradeRows.set(grade, {
-                    grade,
-                    byType: {},
-                    total: 0,
-                    expected: 0,
-                })
+                gradeRows.set(grade, { grade, total: 0, expected: 0 })
             gradeRows.get(grade)!.expected = round(
                 (count / matching.length) * scoped.length,
                 1,
@@ -591,7 +574,6 @@ export function buildAnalytics(
             Boulder: gradeAnalytics('Boulder'),
             Route: gradeAnalytics('Route'),
         },
-        types,
         routeTimeline: fillBuckets(routeTimeline, from, to, bucket),
         ratingTimeline: fillBuckets(ratingTimeline, from, to, bucket),
         commentTimeline: fillBuckets(commentTimeline, from, to, bucket),

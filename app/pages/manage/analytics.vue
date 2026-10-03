@@ -35,23 +35,6 @@
             </div>
         </div>
 
-        <div class="mb-3 flex justify-end">
-            <UFieldGroup data-testid="analytics-discipline">
-                <UButton
-                    v-for="option in DISCIPLINES"
-                    :key="option"
-                    size="sm"
-                    :color="discipline === option ? 'primary' : 'neutral'"
-                    :variant="discipline === option ? 'soft' : 'outline'"
-                    :aria-pressed="discipline === option"
-                    :data-testid="`analytics-discipline-${option}`"
-                    @click="selectedDiscipline = option"
-                >
-                    {{ disciplineLabel(option) }}
-                </UButton>
-            </UFieldGroup>
-        </div>
-
         <div class="mb-3 grid grid-cols-12 gap-3">
             <div class="col-span-12 lg:col-span-7 flex">
                 <AnalyticsSection
@@ -61,9 +44,17 @@
                     :loading="initialLoading"
                     :empty="!grades?.gradeDistribution.length"
                 >
+                    <template v-if="disciplines.length > 1" #actions>
+                        <AnalyticsDisciplineToggle
+                            v-model="discipline"
+                            section="grades"
+                            :options="disciplines"
+                            :label="disciplineLabel"
+                        />
+                    </template>
                     <AnalyticsGradeChart
                         :grades="grades!.gradeDistribution"
-                        :types="analytics!.types"
+                        :label="disciplineLabel(discipline)"
                     />
                 </AnalyticsSection>
             </div>
@@ -78,6 +69,14 @@
                     empty-icon="i-lucide-circle-check"
                     :empty-text="t('analytics.empty.gradeBalance')"
                 >
+                    <template v-if="disciplines.length > 1" #actions>
+                        <AnalyticsDisciplineToggle
+                            v-model="discipline"
+                            section="gradeBalance"
+                            :options="disciplines"
+                            :label="disciplineLabel"
+                        />
+                    </template>
                     <AnalyticsGradeBalanceChart
                         :grades="grades!.gradeDistribution"
                     />
@@ -127,6 +126,14 @@
                     :empty="!grades?.gradeFeedback.length"
                     :empty-text="t('analytics.empty.gradeFeedback')"
                 >
+                    <template v-if="disciplines.length > 1" #actions>
+                        <AnalyticsDisciplineToggle
+                            v-model="discipline"
+                            section="gradeFeedback"
+                            :options="disciplines"
+                            :label="disciplineLabel"
+                        />
+                    </template>
                     <AnalyticsGradeFeedbackChart
                         :routes="grades!.gradeFeedback"
                     />
@@ -187,6 +194,14 @@
                     :loading="initialLoading"
                     :empty="!grades?.locationGrades.length"
                 >
+                    <template v-if="disciplines.length > 1" #actions>
+                        <AnalyticsDisciplineToggle
+                            v-model="discipline"
+                            section="locationGrades"
+                            :options="disciplines"
+                            :label="disciplineLabel"
+                        />
+                    </template>
                     <AnalyticsLocationGradeChart
                         :cells="grades!.locationGrades"
                     />
@@ -321,16 +336,26 @@ const routeCount = (option: Discipline) =>
         (sum, row) => sum + row.total,
         0,
     )
-const discipline = computed<Discipline>(
-    () =>
-        selectedDiscipline.value ??
-        (routeCount('Boulder') > routeCount('Route') ? 'Boulder' : 'Route'),
+const disciplines = computed(() =>
+    DISCIPLINES.filter((option) => routeCount(option) > 0),
 )
+const discipline = computed<Discipline>({
+    get: () =>
+        selectedDiscipline.value &&
+        disciplines.value.includes(selectedDiscipline.value)
+            ? selectedDiscipline.value
+            : routeCount('Boulder') > routeCount('Route')
+              ? 'Boulder'
+              : 'Route',
+    set: (option) => (selectedDiscipline.value = option),
+})
 const grades = computed(() => analytics.value?.grades[discipline.value])
 const disciplineLabel = (option: Discipline) =>
     t(`ticks.kind.${option === 'Boulder' ? 'boulder' : 'route'}`)
 const gradeTitle = (section: string) =>
-    `${t(`analytics.sections.${section}`)} · ${disciplineLabel(discipline.value)}`
+    disciplines.value.length > 1
+        ? t(`analytics.sections.${section}`)
+        : `${t(`analytics.sections.${section}`)} · ${disciplineLabel(discipline.value)}`
 
 const hasGradeImbalance = computed(() =>
     (grades.value?.gradeDistribution ?? []).some(

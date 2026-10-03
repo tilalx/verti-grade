@@ -323,8 +323,8 @@ describe('buildAnalytics', () => {
         ]
         const result = buildAnalytics(routes, [], allTime, NOW)
         expect(result.grades.Route.gradeDistribution).toEqual([
-            { grade: '6', byType: { Route: 4 }, total: 4, expected: 2.2 },
-            { grade: '7', byType: { Route: 1 }, total: 1, expected: 2.8 },
+            { grade: '6', total: 4, expected: 2.2 },
+            { grade: '7', total: 1, expected: 2.8 },
         ])
     })
 
