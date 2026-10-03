@@ -128,7 +128,7 @@ const emit = defineEmits<{ saved: [tick: TickRecord] }>()
 const pb = usePocketbase()
 const { t } = useI18n()
 const { notify, error: notifyError } = useNotification()
-const { createTick } = useTickOutbox()
+const { createTick, updateTick } = useTickOutbox()
 
 const saving = ref(false)
 const today = ref(localToday())
@@ -182,12 +182,7 @@ async function submit() {
     }
     try {
         const { tick: saved, queued } = props.tick
-            ? {
-                  tick: await pb
-                      .collection('ticks')
-                      .update<TickRecord>(props.tick.id, fields),
-                  queued: false,
-              }
+            ? await updateTick(props.tick, fields)
             : await createTick({
                   ...fields,
                   user: pb.authStore.record?.id ?? '',

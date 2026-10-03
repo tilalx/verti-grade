@@ -85,7 +85,6 @@
             <template #content="{ close }">
                 <div class="flex min-w-[160px] flex-col p-1">
                     <UButton
-                        v-if="!tick.pending"
                         icon="i-lucide-pencil"
                         color="neutral"
                         variant="ghost"
