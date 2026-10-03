@@ -133,6 +133,7 @@
         },
         "name": "Name",
         "reports": "Reports",
+        "tasks": "Tasks",
         "activity": "Activity",
         "logbook": "Logbook",
         "view": "View",
@@ -431,7 +432,10 @@
             "types": {
                 "report_filed": "New content report: “{snippet}”",
                 "report_decided_removed": "A report was decided — content removed",
-                "report_decided_kept": "A report was decided — content kept online"
+                "report_decided_kept": "A report was decided — content kept online",
+                "task_defect_filed": "New defect reported on “{route}”",
+                "task_assigned": "Task assigned to you: “{title}”",
+                "task_defect_fixed": "The problem you reported on “{route}” has been fixed — thank you!"
             }
         }
     },
@@ -475,6 +479,10 @@
             "reports": {
                 "title": "Content reports",
                 "body": "If you report content, we process your name, email address, the report reason and your explanation to handle the report and inform you about the decision (Art. 6(1)(c) GDPR in conjunction with Art. 16 DSA). Reports are kept as long as needed for documentation."
+            },
+            "defects": {
+                "title": "Route problem reports",
+                "body": "If you report a problem with a route, we store the selected problem type, your optional description and photo, and — if you are signed in — your account, so staff can fix the route and let you know. Do not include people in photos. Reports are deleted together with the route."
             },
             "auditLog": {
                 "title": "Audit log",
@@ -547,6 +555,7 @@
             "routeNamed": "{name} - Gripello",
             "inventory": "Route inventory - Gripello",
             "reports": "Content reports - Gripello",
+            "tasks": "Tasks - Gripello",
             "activity": "Activity log - Gripello",
             "verifyEmail": "Verify email - Gripello",
             "emailChange": "Change email - Gripello",
@@ -863,6 +872,111 @@
         "mailWarning": "Email is not configured, so reporters are not receiving the confirmations and decision notices required by Article 16.",
         "mailWarningAction": "Open settings"
     },
+    "tasks": {
+        "pageTitle": "Tasks",
+        "pageSubtitle": "Defects reported by climbers and work to do in the gym.",
+        "newTitle": "New task",
+        "title": "Title",
+        "kind": "Type",
+        "category": "Problem",
+        "priority": "Priority",
+        "status": "Status",
+        "location": "Location",
+        "wall": "Wall",
+        "assignee": "Assigned to",
+        "dueDate": "Due date",
+        "dueOn": "Due {date}",
+        "description": "Description",
+        "resolutionNote": "Resolution note",
+        "photo": "Photo",
+        "photoHint": "Optional — helps to find the exact spot.",
+        "photoAdd": "Add a photo",
+        "photoTooLarge": "The photo must be smaller than 5 MB.",
+        "saved": "Task saved.",
+        "openRoute": "Open route",
+        "addForRoute": "Add task",
+        "loadError": "Tasks could not be loaded.",
+        "kinds": {
+            "defect": "Defect",
+            "reset": "Reset",
+            "maintenance": "Maintenance",
+            "other": "Other"
+        },
+        "categories": {
+            "loose_bolt": "Loose bolt / screw",
+            "loose_hold": "Loose hold",
+            "spinning_hold": "Spinning hold",
+            "broken_hold": "Broken hold",
+            "damaged_volume": "Damaged volume",
+            "sharp_edge": "Sharp edge",
+            "missing_hold": "Missing hold",
+            "label_tag": "Label / tag",
+            "other": "Other"
+        },
+        "priorities": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High",
+            "urgent": "Urgent"
+        },
+        "statuses": {
+            "open": "Open",
+            "in_progress": "In progress",
+            "waiting": "Waiting",
+            "done": "Done",
+            "dismissed": "Dismissed"
+        },
+        "statusChanged": {
+            "open": "Task reopened.",
+            "in_progress": "Task started.",
+            "waiting": "Task is waiting.",
+            "done": "Task done.",
+            "dismissed": "Task dismissed."
+        },
+        "actions": {
+            "start": "Start",
+            "done": "Done",
+            "reopen": "Reopen",
+            "moveTo": "Move to…"
+        },
+        "defect": {
+            "reportAction": "Report a problem",
+            "dialogTitle": "Report a problem",
+            "dialogIntro": "Something wrong with this route? Let the setters know so they can fix it.",
+            "alreadyReported": "Already reported",
+            "whatsWrong": "What is wrong?",
+            "details": "Details",
+            "detailsPlaceholder": "e.g. second hold from the top turns",
+            "submit": "Send report",
+            "submitted": "Thanks! The setters have been notified.",
+            "bannerTitle": "{n} known problem | {n} known problems",
+            "marker": "Known problem"
+        },
+        "board": {
+            "recentlyDone": "last 30",
+            "emptyColumn": "Nothing here",
+            "dropHint": "Drop on a status"
+        },
+        "ageDays": "{n} day open | {n} days open",
+        "quick": {
+            "mine": "Mine",
+            "urgent": "Urgent",
+            "overdue": "Overdue"
+        },
+        "sections": {
+            "task": "Task",
+            "place": "Location",
+            "assignment": "Assignment",
+            "resolution": "Resolution"
+        },
+        "titlePlaceholder": "e.g. Strip wall A for the reset",
+        "descriptionPlaceholder": "What needs to be done?",
+        "resolutionPlaceholder": "What was done?",
+        "assignToMe": "Assign to me",
+        "unassigned": "Unassigned",
+        "forThisRoute": "For this route",
+        "newSubtitle": "Track work for the setting team"
+    },
     "audit": {
         "title": "Activity log",
         "subtitle": "Every recorded action in the app.",
@@ -901,7 +1015,8 @@
             "roles": "Roles",
             "permissions": "Permissions",
             "settings": "Settings",
-            "reports": "Reports"
+            "reports": "Reports",
+            "tasks": "Tasks"
         },
         "target": {
             "routes": "Route",
@@ -910,7 +1025,8 @@
             "roles": "Role",
             "permissions": "Permission",
             "settings": "Settings",
-            "reports": "Report"
+            "reports": "Report",
+            "tasks": "Task"
         },
         "changedLabel": "Changed"
     },

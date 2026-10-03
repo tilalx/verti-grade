@@ -20,6 +20,7 @@ export const AUDITED_COLLECTIONS: string[] = [
     'permissions',
     'settings',
     'reports',
+    'tasks',
 ]
 
 export type AuditPeriod = '24h' | '7d' | '30d' | 'all'
@@ -140,6 +141,7 @@ export function auditTargetUrl(
     if (collectionName === 'users') return '/admin/users'
     if (collectionName === 'ratings') return '/manage/comments'
     if (collectionName === 'reports') return '/manage/reports'
+    if (collectionName === 'tasks') return '/manage/tasks'
     return null
 }
 

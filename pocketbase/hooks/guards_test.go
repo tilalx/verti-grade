@@ -20,15 +20,18 @@ func TestReconcileCaptchaRateLimits(t *testing.T) {
 	wantEnabled := []core.RateLimitRule{
 		{Label: "*:authWithPassword", Duration: 300, MaxRequests: 10},
 		{Label: "reports:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 3600, MaxRequests: 20},
-		{Label: "reports:create", Duration: 3600, MaxRequests: 5},
+		{Label: "reports:create", Audience: core.RateLimitRuleAudienceAuth, Duration: 3600, MaxRequests: 5},
 		{Label: "ratings:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 600, MaxRequests: 240},
-		{Label: "ratings:create", Duration: 600, MaxRequests: 60},
+		{Label: "ratings:create", Audience: core.RateLimitRuleAudienceAuth, Duration: 600, MaxRequests: 60},
 	}
 	if !slices.Equal(enabled, wantEnabled) {
 		t.Fatalf("enabled = %v, want %v", enabled, wantEnabled)
 	}
 	if again := reconcileCaptchaRateLimits(enabled, true); !slices.Equal(again, enabled) {
 		t.Fatalf("reconcile is not idempotent: %v", again)
+	}
+	if err := (&core.RateLimitsConfig{Rules: enabled}).Validate(); err != nil {
+		t.Fatalf("enabled rules rejected by PocketBase: %v", err)
 	}
 
 	disabled := reconcileCaptchaRateLimits(enabled, false)
@@ -41,9 +44,17 @@ func TestReconcileCaptchaRateLimits(t *testing.T) {
 		t.Fatalf("disabled = %v, want %v", disabled, wantDisabled)
 	}
 
+	conflicting := []core.RateLimitRule{
+		{Label: "reports:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 3600, MaxRequests: 20},
+		{Label: "reports:create", Duration: 3600, MaxRequests: 5},
+	}
+	if repaired := reconcileCaptchaRateLimits(conflicting, true); (&core.RateLimitsConfig{Rules: repaired}).Validate() != nil {
+		t.Fatalf("stored guest+all conflict not repaired: %v", repaired)
+	}
+
 	adminTuned := []core.RateLimitRule{
 		{Label: "reports:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 3600, MaxRequests: 3},
-		{Label: "reports:create", Duration: 3600, MaxRequests: 10},
+		{Label: "reports:create", Audience: core.RateLimitRuleAudienceAuth, Duration: 3600, MaxRequests: 10},
 		{Label: "ratings:create", Duration: 600, MaxRequests: 100},
 	}
 	if kept := reconcileCaptchaRateLimits(adminTuned, false); !slices.Equal(kept, adminTuned) {
@@ -51,9 +62,9 @@ func TestReconcileCaptchaRateLimits(t *testing.T) {
 	}
 	wantTunedEnabled := []core.RateLimitRule{
 		{Label: "reports:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 3600, MaxRequests: 3},
-		{Label: "reports:create", Duration: 3600, MaxRequests: 10},
+		{Label: "reports:create", Audience: core.RateLimitRuleAudienceAuth, Duration: 3600, MaxRequests: 10},
 		{Label: "ratings:create", Audience: core.RateLimitRuleAudienceGuest, Duration: 600, MaxRequests: 240},
-		{Label: "ratings:create", Duration: 600, MaxRequests: 100},
+		{Label: "ratings:create", Audience: core.RateLimitRuleAudienceAuth, Duration: 600, MaxRequests: 100},
 	}
 	if tuned := reconcileCaptchaRateLimits(adminTuned, true); !slices.Equal(tuned, wantTunedEnabled) {
 		t.Fatalf("admin-tuned enabled = %v, want %v", tuned, wantTunedEnabled)

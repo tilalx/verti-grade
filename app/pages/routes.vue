@@ -101,6 +101,10 @@
                         <span class="route-name" data-testid="index-row-name">{{
                             row.original.name
                         }}</span>
+                        <TaskDefectMarker
+                            :severity="defectsByRoute.get(row.original.id)"
+                            class="ml-2"
+                        />
                         <UIcon
                             v-if="row.original.has_ratings"
                             name="i-lucide-badge-check"
@@ -170,6 +174,7 @@
                     :key="route.id"
                     :route="route"
                     :ticked="tickedRouteIds.has(route.id)"
+                    :defect="defectsByRoute.get(route.id)"
                 >
                     <template #actions>
                         <div class="flex items-center gap-2 justify-end">
@@ -263,6 +268,7 @@ const tableOptions = reactive<TableOptions>({
 const loading = ref(true)
 const routes = shallowRef<RouteListItem[]>([])
 const { tickedRouteIds } = useTickedRoutes()
+const { defectsByRoute } = useOpenDefects()
 const totalItems = ref(0)
 const sentinelRef = useTemplateRef<HTMLElement>('sentinelRef')
 

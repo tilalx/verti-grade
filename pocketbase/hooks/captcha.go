@@ -21,6 +21,7 @@ type captchaRateLimit struct {
 var captchaRateLimits = map[string]captchaRateLimit{
 	"ratings:create": {base: 60, raised: 240},
 	"reports:create": {base: 5, raised: 20},
+	"tasks:create":   {base: 10, raised: 40},
 }
 
 func registerCaptcha(app core.App) {
@@ -36,6 +37,15 @@ func registerCaptcha(app core.App) {
 	app.OnRecordCreateRequest("reports").BindFunc(func(e *core.RecordRequestEvent) error {
 		if e.Auth == nil {
 			if err := enforceCaptcha(e.RequestEvent, "report"); err != nil {
+				return err
+			}
+		}
+		return e.Next()
+	})
+
+	app.OnRecordCreateRequest("tasks").BindFunc(func(e *core.RecordRequestEvent) error {
+		if e.Auth == nil {
+			if err := enforceCaptcha(e.RequestEvent, "task"); err != nil {
 				return err
 			}
 		}
@@ -93,27 +103,43 @@ func registerCaptcha(app core.App) {
 }
 
 func reconcileCaptchaRateLimits(rules []core.RateLimitRule, captchaEnabled bool) []core.RateLimitRule {
-	hasGuestRule := map[string]bool{}
+	guestLimits := map[string]int{}
 	for _, rule := range rules {
 		if rule.Audience == core.RateLimitRuleAudienceGuest {
-			hasGuestRule[rule.Label] = true
+			guestLimits[rule.Label] = rule.MaxRequests
 		}
 	}
 	reconciled := []core.RateLimitRule{}
 	for _, rule := range rules {
 		limit, gated := captchaRateLimits[rule.Label]
-		if gated && rule.Audience == core.RateLimitRuleAudienceGuest && !captchaEnabled && rule.MaxRequests == limit.raised {
+		if !gated {
+			reconciled = append(reconciled, rule)
 			continue
 		}
-		if gated && rule.Audience == core.RateLimitRuleAudienceAll {
+		guestLimit, hasGuestRule := guestLimits[rule.Label]
+		keepsGuestRule := hasGuestRule && (captchaEnabled || guestLimit != limit.raised)
+		switch rule.Audience {
+		case core.RateLimitRuleAudienceGuest:
+			if !keepsGuestRule {
+				continue
+			}
+		case core.RateLimitRuleAudienceAll:
 			if rule.MaxRequests == limit.raised {
 				rule.MaxRequests = limit.base
 			}
-			if captchaEnabled && !hasGuestRule[rule.Label] {
+			if captchaEnabled && !hasGuestRule {
 				guestRule := rule
 				guestRule.Audience = core.RateLimitRuleAudienceGuest
 				guestRule.MaxRequests = limit.raised
 				reconciled = append(reconciled, guestRule)
+				keepsGuestRule = true
+			}
+			if keepsGuestRule {
+				rule.Audience = core.RateLimitRuleAudienceAuth
+			}
+		case core.RateLimitRuleAudienceAuth:
+			if !keepsGuestRule {
+				rule.Audience = core.RateLimitRuleAudienceAll
 			}
 		}
 		reconciled = append(reconciled, rule)

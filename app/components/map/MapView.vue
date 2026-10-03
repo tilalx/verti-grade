@@ -48,6 +48,7 @@
                     :data-route-id="dot.routeId"
                     :data-color="dot.fill"
                     :data-sent="sentIds?.has(dot.routeId) || undefined"
+                    :data-defect="defects?.get(dot.routeId)"
                     :data-dimmed="isDimmed(dot.routeId) || undefined"
                     role="button"
                     tabindex="0"
@@ -84,6 +85,15 @@
                         :d="checkPath(dot.at)"
                         :stroke="dot.stroke"
                         class="map-dot-check"
+                    />
+                    <circle
+                        v-if="defects?.has(dot.routeId)"
+                        :cx="dot.point[0] + dotRadius * 0.85"
+                        :cy="dot.point[1] - dotRadius * 0.85"
+                        :r="dotRadius * 0.5"
+                        class="map-dot-defect"
+                        :class="`map-dot-defect--${defects.get(dot.routeId)}`"
+                        data-testid="map-dot-defect"
                     />
                     <circle
                         v-if="dot.routeId === selectedRouteId"
@@ -194,6 +204,7 @@ import {
 import { translatedColorName } from '~/utils/colorName'
 import { mapToScreen } from '~/utils/panZoom'
 import { svgPath } from '~/utils/mapSvg'
+import type { DefectSeverity } from '~/utils/tasks'
 
 const props = withDefaults(
     defineProps<{
@@ -202,6 +213,7 @@ const props = withDefaults(
         routes: MapRoute[]
         layoutRoutes?: MapRoute[] | null
         sentIds?: ReadonlySet<string> | null
+        defects?: ReadonlyMap<string, DefectSeverity> | null
         matchingIds?: ReadonlySet<string> | null
         showSent?: boolean
         selectedWallId?: string | null
@@ -212,6 +224,7 @@ const props = withDefaults(
         insetBottom: 0,
         layoutRoutes: null,
         sentIds: null,
+        defects: null,
         matchingIds: null,
         showSent: false,
         selectedWallId: null,
@@ -356,6 +369,7 @@ function dotLabel(routeId: string) {
         route?.name,
         translatedColorName(t, route?.color),
         props.sentIds?.has(routeId) && t('ticks.sent'),
+        props.defects?.has(routeId) && t('tasks.defect.marker'),
     ]
         .filter(Boolean)
         .join(', ')
@@ -543,6 +557,21 @@ defineExpose({ focusWall, focusRoute, fitAll })
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
     pointer-events: none;
+}
+
+.map-dot-defect {
+    stroke: var(--ui-bg);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+.map-dot-defect--urgent {
+    fill: var(--ui-error);
+}
+
+.map-dot-defect--minor {
+    fill: var(--ui-warning);
 }
 
 .map-dot-ring {

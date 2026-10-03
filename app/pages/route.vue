@@ -215,6 +215,8 @@
                             </div>
                         </div>
 
+                        <TaskDefectBanner :defects="openDefects" class="mb-4" />
+
                         <div v-if="route_id" class="flex flex-wrap gap-2 mb-6">
                             <UButton
                                 v-if="isLoggedIn"
@@ -274,6 +276,42 @@
                             >
                                 {{ t('mapPlacement.placeThis') }}
                             </UButton>
+                            <UButton
+                                v-if="!metadata.archived"
+                                color="neutral"
+                                variant="soft"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-wrench"
+                                data-testid="task-defect-open"
+                                @click="defectDialog = true"
+                            >
+                                {{ t('tasks.defect.reportAction') }}
+                            </UButton>
+                            <UButton
+                                v-if="can('manage_tasks')"
+                                color="neutral"
+                                variant="soft"
+                                size="lg"
+                                class="grow justify-center"
+                                icon="i-lucide-list-plus"
+                                data-testid="route-add-task"
+                                @click="taskDialog = true"
+                            >
+                                {{ t('tasks.addForRoute') }}
+                            </UButton>
+                            <TaskDefectDialog
+                                v-model="defectDialog"
+                                :route-id="route_id"
+                                :open-defects="openDefects"
+                                @submitted="getOpenDefects"
+                            />
+                            <TaskFormDialog
+                                v-if="can('manage_tasks')"
+                                v-model="taskDialog"
+                                :route-id="route_id"
+                                @saved="getOpenDefects"
+                            />
                             <TickDialog
                                 v-if="isLoggedIn"
                                 v-model="tickDialog"
@@ -360,7 +398,12 @@
 <script setup lang="ts">
 import { isAbortError } from '~/utils/errors'
 import type PocketBase from 'pocketbase'
-import type { RatingRecord, RouteListItem, RouteRecord } from '~/types/models'
+import type {
+    OpenRouteDefectRecord,
+    RatingRecord,
+    RouteListItem,
+    RouteRecord,
+} from '~/types/models'
 import {
     formatDate,
     locationName,
@@ -427,6 +470,9 @@ const { subscribe } = usePbSubscription()
 const isLoggedIn = pb.authStore.isValid
 const tickDialog = ref(false)
 const reviewDialog = ref(false)
+const defectDialog = ref(false)
+const taskDialog = ref(false)
+const openDefects = ref<OpenRouteDefectRecord[]>([])
 const { tickedRouteIds, refreshTickedRoutes } = useTickedRoutes()
 const { error: notifyError } = useNotification()
 
@@ -560,6 +606,17 @@ const getAllRouteRatings = async (): Promise<void> => {
     }
 }
 
+async function getOpenDefects(): Promise<void> {
+    if (!route_id.value) return
+    openDefects.value = await pb
+        .collection('open_route_defects')
+        .getFullList<OpenRouteDefectRecord>({
+            filter: pb.filter('route = {:id}', { id: route_id.value }),
+            requestKey: 'routeOpenDefects',
+        })
+        .catch(() => [])
+}
+
 function mapReview(
     r: RatingRecord & { expand?: Record<string, unknown> },
 ): ReviewDisplay {
@@ -591,14 +648,23 @@ const { data: initial, error: loadError } = await useAsyncData(
     `route-detail:${route_id.value}`,
     async () => {
         if (!route_id.value) return null
-        await Promise.all([getRouteMetadata(), getAllRouteRatings()])
-        return { metadata: metadata.value, reviews: reviews.value }
+        await Promise.all([
+            getRouteMetadata(),
+            getAllRouteRatings(),
+            getOpenDefects(),
+        ])
+        return {
+            metadata: metadata.value,
+            reviews: reviews.value,
+            openDefects: openDefects.value,
+        }
     },
 )
 
 if (initial.value) {
     metadata.value = initial.value.metadata
     reviews.value = initial.value.reviews
+    openDefects.value = initial.value.openDefects
 }
 
 if (loadError.value)

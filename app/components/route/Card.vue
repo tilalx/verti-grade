@@ -18,9 +18,10 @@
                     route.name
                 }}</span>
                 <span
-                    v-if="route.has_ratings || route.archived"
+                    v-if="route.has_ratings || route.archived || defect"
                     class="route-card__badges"
                 >
+                    <TaskDefectMarker :severity="defect" size="sm" />
                     <UIcon
                         name="i-lucide-badge-check"
                         class="size-[14px] text-amber-500"
@@ -123,6 +124,7 @@
 
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
+import type { DefectSeverity } from '~/utils/tasks'
 import {
     formatAnchorPoint,
     formatScore,
@@ -138,6 +140,7 @@ const props = withDefaults(
         selectable?: boolean
         modelValue?: boolean
         ticked?: boolean
+        defect?: DefectSeverity
     }>(),
     {
         selectable: false,

@@ -22,6 +22,7 @@
             <span class="manage-row__text">
                 <span class="manage-row__name">
                     {{ route.name }}
+                    <TaskDefectMarker :severity="defect" size="sm" />
                     <UIcon
                         name="i-lucide-badge-check"
                         class="size-[14px] text-amber-500"
@@ -50,6 +51,7 @@
 
 <script setup lang="ts">
 import type { RouteListItem } from '~/types/models'
+import type { DefectSeverity } from '~/utils/tasks'
 import {
     formatAnchorPoint,
     formatDate,
@@ -59,6 +61,7 @@ import {
 const props = defineProps<{
     route: RouteListItem
     selected: boolean
+    defect?: DefectSeverity
 }>()
 
 const emit = defineEmits<{

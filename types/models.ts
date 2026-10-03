@@ -1,6 +1,12 @@
 import type { AUDIT_ACTIONS } from '../app/utils/audit'
 import type { REPORT_REASONS, REPORT_STATUSES } from '../app/utils/reports'
 import type { ROUTE_TYPES } from '../app/utils/routes'
+import type {
+    DEFECT_CATEGORIES,
+    TASK_KINDS,
+    TASK_PRIORITIES,
+    TASK_STATUSES,
+} from '../app/utils/tasks'
 import type { TickType } from '../shared/utils/ticks'
 import type { GymMap, MapPoint } from '../shared/utils/mapGeometry'
 
@@ -161,6 +167,39 @@ export interface ReportRecord extends BaseRecord {
     decided_by?: RecordId | null
     receipt_sent?: boolean
     notified_at?: string | null
+}
+
+export type TaskKind = (typeof TASK_KINDS)[number]
+export type DefectCategory = (typeof DEFECT_CATEGORIES)[number]
+export type TaskPriorityName = (typeof TASK_PRIORITIES)[number]
+export type TaskStatus = (typeof TASK_STATUSES)[number]
+
+export interface TaskRecord extends BaseRecord {
+    kind: TaskKind
+    title?: string | null
+    category?: DefectCategory | '' | null
+    priority: number
+    status: TaskStatus
+    route?: RecordId | null
+    wall?: RecordId | null
+    location?: RecordId | null
+    description?: string | null
+    photo?: string | null
+    reporter?: RecordId | null
+    assignee?: RecordId | null
+    due_date?: string | null
+    resolution_note?: string | null
+    done_at?: string | null
+    done_by?: RecordId | null
+}
+
+export interface OpenRouteDefectRecord extends BaseRecord {
+    route: RecordId
+    category: DefectCategory
+}
+
+export interface TaskAssigneeRecord extends BaseRecord {
+    name: string
 }
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number]

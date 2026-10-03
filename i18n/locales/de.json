@@ -133,6 +133,7 @@
         },
         "name": "Name",
         "reports": "Meldungen",
+        "tasks": "Aufgaben",
         "activity": "Aktivität",
         "logbook": "Logbuch",
         "view": "Ansehen",
@@ -431,7 +432,10 @@
             "types": {
                 "report_filed": "Neue Inhaltsmeldung: „{snippet}“",
                 "report_decided_removed": "Eine Meldung wurde entschieden — Inhalt entfernt",
-                "report_decided_kept": "Eine Meldung wurde entschieden — Inhalt bleibt online"
+                "report_decided_kept": "Eine Meldung wurde entschieden — Inhalt bleibt online",
+                "task_defect_filed": "Neuer Defekt gemeldet an „{route}“",
+                "task_assigned": "Dir zugewiesen: „{title}“",
+                "task_defect_fixed": "Das gemeldete Problem an „{route}“ wurde behoben — danke!"
             }
         }
     },
@@ -475,6 +479,10 @@
             "reports": {
                 "title": "Meldungen von Inhalten",
                 "body": "Wenn du Inhalte meldest, verarbeiten wir Name, E-Mail-Adresse, Meldegrund und deine Begründung, um die Meldung zu bearbeiten und dich über die Entscheidung zu informieren (Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 16 DSA). Meldungen werden so lange aufbewahrt, wie es zur Dokumentation erforderlich ist."
+            },
+            "defects": {
+                "title": "Problemmeldungen zu Routen",
+                "body": "Wenn du ein Problem an einer Route meldest, speichern wir die gewählte Problemart, deine optionale Beschreibung und dein Foto sowie — falls angemeldet — dein Konto, damit das Team die Route reparieren und dich informieren kann. Bitte keine Personen fotografieren. Meldungen werden mit der Route gelöscht."
             },
             "auditLog": {
                 "title": "Audit-Log",
@@ -547,6 +555,7 @@
             "routeNamed": "{name} - Gripello",
             "inventory": "Inventur - Gripello",
             "reports": "Inhaltsmeldungen - Gripello",
+            "tasks": "Aufgaben - Gripello",
             "activity": "Aktivitätsprotokoll - Gripello",
             "verifyEmail": "E-Mail bestätigen - Gripello",
             "emailChange": "E-Mail ändern - Gripello",
@@ -863,6 +872,111 @@
         "mailWarning": "E-Mail ist nicht konfiguriert, daher erhalten meldende Personen weder die Eingangsbestätigung noch die Entscheidungsmitteilung nach Artikel 16.",
         "mailWarningAction": "Einstellungen öffnen"
     },
+    "tasks": {
+        "pageTitle": "Aufgaben",
+        "pageSubtitle": "Von Kletternden gemeldete Defekte und anstehende Arbeiten in der Halle.",
+        "newTitle": "Neue Aufgabe",
+        "title": "Titel",
+        "kind": "Art",
+        "category": "Problem",
+        "priority": "Priorität",
+        "status": "Status",
+        "location": "Standort",
+        "wall": "Wand",
+        "assignee": "Zugewiesen an",
+        "dueDate": "Fällig am",
+        "dueOn": "Fällig {date}",
+        "description": "Beschreibung",
+        "resolutionNote": "Erledigungsnotiz",
+        "photo": "Foto",
+        "photoHint": "Optional — hilft, die Stelle zu finden.",
+        "photoAdd": "Foto hinzufügen",
+        "photoTooLarge": "Das Foto muss kleiner als 5 MB sein.",
+        "saved": "Aufgabe gespeichert.",
+        "openRoute": "Route öffnen",
+        "addForRoute": "Aufgabe anlegen",
+        "loadError": "Aufgaben konnten nicht geladen werden.",
+        "kinds": {
+            "defect": "Defekt",
+            "reset": "Umschrauben",
+            "maintenance": "Wartung",
+            "other": "Sonstiges"
+        },
+        "categories": {
+            "loose_bolt": "Lockere Schraube",
+            "loose_hold": "Lockerer Griff",
+            "spinning_hold": "Griff dreht sich",
+            "broken_hold": "Griff gebrochen",
+            "damaged_volume": "Volumen beschädigt",
+            "sharp_edge": "Scharfe Kante",
+            "missing_hold": "Griff fehlt",
+            "label_tag": "Schild / Etikett",
+            "other": "Sonstiges"
+        },
+        "priorities": {
+            "low": "Niedrig",
+            "normal": "Normal",
+            "high": "Hoch",
+            "urgent": "Dringend"
+        },
+        "statuses": {
+            "open": "Offen",
+            "in_progress": "In Arbeit",
+            "waiting": "Wartet",
+            "done": "Erledigt",
+            "dismissed": "Verworfen"
+        },
+        "statusChanged": {
+            "open": "Aufgabe wieder geöffnet.",
+            "in_progress": "Aufgabe begonnen.",
+            "waiting": "Aufgabe wartet.",
+            "done": "Aufgabe erledigt.",
+            "dismissed": "Aufgabe verworfen."
+        },
+        "actions": {
+            "start": "Beginnen",
+            "done": "Erledigt",
+            "reopen": "Wieder öffnen",
+            "moveTo": "Verschieben nach…"
+        },
+        "defect": {
+            "reportAction": "Problem melden",
+            "dialogTitle": "Problem melden",
+            "dialogIntro": "Stimmt etwas mit dieser Route nicht? Sag dem Schrauber-Team Bescheid, damit es behoben wird.",
+            "alreadyReported": "Bereits gemeldet",
+            "whatsWrong": "Was ist los?",
+            "details": "Details",
+            "detailsPlaceholder": "z. B. zweiter Griff von oben dreht sich",
+            "submit": "Meldung senden",
+            "submitted": "Danke! Das Team wurde informiert.",
+            "bannerTitle": "{n} bekanntes Problem | {n} bekannte Probleme",
+            "marker": "Bekanntes Problem"
+        },
+        "board": {
+            "recentlyDone": "letzte 30",
+            "emptyColumn": "Nichts hier",
+            "dropHint": "Auf einen Status ziehen"
+        },
+        "ageDays": "{n} Tag offen | {n} Tage offen",
+        "quick": {
+            "mine": "Meine",
+            "urgent": "Dringend",
+            "overdue": "Überfällig"
+        },
+        "sections": {
+            "task": "Aufgabe",
+            "place": "Ort",
+            "assignment": "Zuständigkeit",
+            "resolution": "Abschluss"
+        },
+        "titlePlaceholder": "z. B. Wand A für Umschrauben abbauen",
+        "descriptionPlaceholder": "Was ist zu tun?",
+        "resolutionPlaceholder": "Was wurde gemacht?",
+        "assignToMe": "Mir zuweisen",
+        "unassigned": "Nicht zugewiesen",
+        "forThisRoute": "Für diese Route",
+        "newSubtitle": "Arbeit für das Schrauber-Team festhalten"
+    },
     "audit": {
         "title": "Aktivitätsprotokoll",
         "subtitle": "Alle aufgezeichneten Aktionen in der App.",
@@ -901,7 +1015,8 @@
             "roles": "Rollen",
             "permissions": "Berechtigungen",
             "settings": "Einstellungen",
-            "reports": "Meldungen"
+            "reports": "Meldungen",
+            "tasks": "Aufgaben"
         },
         "target": {
             "routes": "Route",
@@ -910,7 +1025,8 @@
             "roles": "Rolle",
             "permissions": "Berechtigung",
             "settings": "Einstellungen",
-            "reports": "Meldung"
+            "reports": "Meldung",
+            "tasks": "Aufgabe"
         },
         "changedLabel": "Geändert"
     },
