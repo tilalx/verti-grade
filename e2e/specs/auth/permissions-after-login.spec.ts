@@ -23,6 +23,7 @@ test('a guest who signs in keeps the redirect to a permission-guarded page', asy
     page,
 }) => {
     await gotoSettled(page, '/')
+    await page.waitForLoadState('networkidle')
     await gotoSettled(page, '/manage/comments', /\/auth\/login/)
     await signIn(page)
 

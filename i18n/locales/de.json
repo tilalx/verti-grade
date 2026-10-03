@@ -1050,7 +1050,8 @@
         "routes": "Routen",
         "wallHint": "Wo die Route auf dem Hallenplan liegt. Feinjustieren unter „Routen platzieren“.",
         "resizeList": "Liste vergrößern oder verkleinern",
-        "backToList": "Zurück zur Liste"
+        "backToList": "Zurück zur Liste",
+        "clusterLabel": "{count} Route hier, tippen zum Anzeigen | {count} Routen hier, tippen zum Anzeigen"
     },
     "mapEditor": {
         "title": "Plan-Editor",

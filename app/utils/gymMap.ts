@@ -221,3 +221,73 @@ export function clearOfDots(
     }
     return label
 }
+
+export interface DotCluster<Dot extends { routeId: string; point: MapPoint }> {
+    key: string
+    point: MapPoint
+    dots: Dot[]
+}
+
+export function clusterDots<Dot extends { routeId: string; point: MapPoint }>(
+    dots: Dot[],
+    minDistance: number,
+): DotCluster<Dot>[] {
+    const groups: Dot[][] = []
+    for (const dot of dots) {
+        const near = groups.filter((group) =>
+            group.some(
+                (other) =>
+                    Math.hypot(
+                        other.point[0] - dot.point[0],
+                        other.point[1] - dot.point[1],
+                    ) < minDistance,
+            ),
+        )
+        const merged = [...near.flat(), dot]
+        for (const group of near) groups.splice(groups.indexOf(group), 1)
+        groups.push(merged)
+    }
+    return groups.map((group) => ({
+        key: group
+            .map((dot) => dot.routeId)
+            .sort()
+            .join(','),
+        point: [
+            group.reduce((sum, dot) => sum + dot.point[0], 0) / group.length,
+            group.reduce((sum, dot) => sum + dot.point[1], 0) / group.length,
+        ],
+        dots: group,
+    }))
+}
+
+export function closestPairDistance(points: MapPoint[]): number {
+    let closest = Infinity
+    for (let i = 0; i < points.length; i++)
+        for (let j = i + 1; j < points.length; j++)
+            closest = Math.min(
+                closest,
+                Math.hypot(
+                    points[i]![0] - points[j]![0],
+                    points[i]![1] - points[j]![1],
+                ),
+            )
+    return closest
+}
+
+export function spreadAround(
+    center: MapPoint,
+    count: number,
+    spacing: number,
+): MapPoint[] {
+    const radius = Math.max(
+        spacing * 0.8,
+        spacing / 2 / Math.sin(Math.PI / Math.max(count, 2)),
+    )
+    return Array.from({ length: count }, (_, index) => {
+        const angle = (index / count) * 2 * Math.PI - Math.PI / 2
+        return [
+            center[0] + radius * Math.cos(angle),
+            center[1] + radius * Math.sin(angle),
+        ]
+    })
+}
