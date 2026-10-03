@@ -230,6 +230,7 @@ import {
     type LogbookTick,
 } from '#shared/utils/logbook'
 import { applyTickOutbox, isOfflineError } from '~/utils/tickOutbox'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 type LoggedTick = TickRecord & { expand?: { route?: RouteRecord } }
 
@@ -257,7 +258,7 @@ const {
     error: ticksError,
     refresh,
 } = await useAsyncData(
-    'logbook',
+    cacheKeys.logbook,
     async () => {
         try {
             const list = await pb.collection('ticks').getFullList<LoggedTick>({

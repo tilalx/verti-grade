@@ -183,6 +183,7 @@ import { readableTextOn } from '~/utils/color'
 import { avatarColor } from '~/utils/avatar'
 import { formatDate } from '#shared/utils/formatting'
 import type { RoleRecord, UserRecord } from '~/types/models'
+import { coalesce } from '~/utils/realtimeCache'
 
 type AdminUser = UserRecord & {
     avatarUrl: string | null
@@ -225,7 +226,7 @@ const currentUserId = computed(() => pb.authStore.record?.id ?? null)
 
 // ── Roles ─────────────────────────────────────────────────────────────────
 
-const { data: roles } = useRoles()
+const { data: roles, refresh: refreshRoles } = useRoles()
 
 const roleOptions = computed(() =>
     roles.value.map((r) => ({ label: r.name, value: r.id })),
@@ -268,6 +269,7 @@ const {
     loadingMore,
     hasMore,
     refresh: reloadUsers,
+    reloadLoaded: reloadLoadedUsers,
     loadMore,
     prefetch,
 } = usePbList<UserRecord, AdminUser>('users', {
@@ -360,7 +362,12 @@ const { subscribe } = usePbSubscription()
 
 await prefetch('admin-users')
 
+const reloadRolesSoon = coalesce(() =>
+    Promise.all([refreshRoles(), reloadLoadedUsers()]),
+)
+
 onMounted(async () => {
+    void subscribe('roles', reloadRolesSoon)
     await subscribe('users', async (e) => {
         if (e.action === 'delete') {
             removeUser(e.record.id)

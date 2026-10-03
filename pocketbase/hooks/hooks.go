@@ -15,6 +15,7 @@ func Register(app core.App) {
 	registerTicks(app)
 	registerReports(app)
 	registerTasks(app)
+	registerLive(app)
 	registerNotifications(app)
 	registerSMTPFromEnv(app)
 }

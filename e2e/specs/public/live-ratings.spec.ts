@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../support/fixtures'
-import { gotoSubscribed } from '../../support/nav'
+import { gotoSubscribed, searchRoutes } from '../../support/nav'
 import { uiaa } from '../../support/seed'
 
 function trackRefetches(page: Page) {
@@ -60,5 +60,24 @@ test('a rating from another visitor updates the open overview in place', async (
         .create({ route_id: route.id, rating: 5, ...uiaa('5') })
 
     await expect(popularRow).toBeVisible()
+    expect(refetches).toEqual([])
+})
+
+test('an edited route updates the open route list in place', async ({
+    page,
+    root,
+    route,
+}) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await gotoSubscribed(page, '/routes', 'routes')
+    await searchRoutes(page, route.name)
+    const refetches = trackRefetches(page)
+
+    const renamed = `${route.name} renamed`
+    await root.collection('routes').update(route.id, { name: renamed })
+
+    await expect(
+        page.getByTestId(`index-row-${route.id}`).getByTestId('index-row-name'),
+    ).toHaveText(renamed)
     expect(refetches).toEqual([])
 })

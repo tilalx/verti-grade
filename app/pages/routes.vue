@@ -221,7 +221,7 @@ import {
     wallName,
 } from '#shared/utils/formatting'
 import { toPbSort, type SortOption } from '~/utils/sorting'
-import { cacheKeys, coalesce } from '~/utils/realtimeCache'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 const { t, locale } = useI18n()
 const pb = usePocketbase() as PocketBase
@@ -400,7 +400,7 @@ function fetchLoadedRoutes() {
         : fetchRoutes(1, page * itemsPerPage, null)
 }
 
-const { data: routePage, refresh: reloadLoadedRoutes } = await useAsyncData(
+const { data: routePage } = await useAsyncData(
     cacheKeys.routesList,
     fetchLoadedRoutes,
     { default: () => ({ items: [] as RouteScoreRecord[], totalItems: 0 }) },
@@ -461,8 +461,6 @@ function loadMore() {
     void loadRoutes({}, { append: true })
 }
 
-const reloadSoon = coalesce(reloadLoadedRoutes)
-
 let scrollObserver: IntersectionObserver | null = null
 
 function setupScrollObserver() {
@@ -488,12 +486,7 @@ watch(pbFilter, () => {
     }, 300)
 })
 
-const { subscribe } = usePbSubscription(reloadSoon)
-
-onMounted(async () => {
-    await subscribe('routes', reloadSoon)
-    setupScrollObserver()
-})
+onMounted(setupScrollObserver)
 
 onBeforeUnmount(() => {
     if (debounceT) {

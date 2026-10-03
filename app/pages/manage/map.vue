@@ -477,6 +477,7 @@ import type { RouteRecord } from '~/types/models'
 import type { SheetSnap } from '~/components/map/Sheet.vue'
 import { formatAnchorPoint, formatDate } from '#shared/utils/formatting'
 import { formatGrade } from '#shared/utils/grades'
+import { cacheKeys } from '~/utils/realtimeCache'
 
 definePageMeta({
     middleware: 'auth',
@@ -513,7 +514,7 @@ const { locationItems, locationId, map, walls, mapWalls } =
     })
 
 const { data: routes, refresh: refreshRoutes } = await useAsyncData(
-    'placement-routes',
+    cacheKeys.placementRoutes,
     () =>
         locationId.value
             ? pb.collection('routes').getFullList<RouteRecord>({
@@ -527,6 +528,7 @@ const { data: routes, refresh: refreshRoutes } = await useAsyncData(
             : Promise.resolve([]),
     { watch: [locationId], default: () => [] },
 )
+useLiveLocation([cacheKeys.placementRoutes], locationId)
 
 const placement = useMapPlacement(routes, walls, mapWalls)
 const placementTabs = computed(() => [

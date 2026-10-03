@@ -212,6 +212,7 @@ import {
 } from '~/utils/roles'
 import { readableTextOn } from '~/utils/color'
 import type { PermissionRecord, RoleRecord } from '~/types/models'
+import { coalesce } from '~/utils/realtimeCache'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -401,4 +402,11 @@ if (initial.value) {
     allPermissions.value = initial.value.permissions
     loading.value = false
 }
+
+const fetchDataSoon = coalesce(() => fetchData({ silent: true }))
+const { subscribe } = usePbSubscription(fetchDataSoon)
+onMounted(() => {
+    void subscribe('roles', fetchDataSoon)
+    void subscribe('permissions', fetchDataSoon)
+})
 </script>

@@ -46,6 +46,25 @@ describe('usePbList', () => {
         expect(list.loading.value).toBe(false)
     })
 
+    it('reloads every loaded row in one request without clearing the list', async () => {
+        getList
+            .mockResolvedValueOnce(pageOf(['a', 'b'], 5))
+            .mockResolvedValueOnce(pageOf(['c', 'd'], 5))
+            .mockResolvedValueOnce(pageOf(['new', 'a', 'b', 'c'], 6))
+        const list = createList()
+        await list.refresh()
+        await list.loadMore()
+
+        const reloading = list.reloadLoaded()
+        expect(list.ids.value).toEqual(['a', 'b', 'c', 'd'])
+        expect(list.loading.value).toBe(false)
+        await reloading
+
+        expect(getList).toHaveBeenLastCalledWith(1, 4, expect.anything())
+        expect(list.ids.value).toEqual(['new', 'a', 'b', 'c'])
+        expect(list.totalItems.value).toBe(6)
+    })
+
     it('appends the next page and stops when exhausted', async () => {
         getList
             .mockResolvedValueOnce(pageOf(['a', 'b'], 3))

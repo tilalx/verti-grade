@@ -1,5 +1,5 @@
 import { test, expect } from '../../support/fixtures'
-import { gotoSettled } from '../../support/nav'
+import { gotoSettled, gotoSubscribed } from '../../support/nav'
 import { signInAs } from '../../support/auth'
 import { ensureUser, getRoleIds, uiaa } from '../../support/seed'
 
@@ -148,4 +148,39 @@ test('the dashboard sums up sends and turns a project into a send', async ({
     await page.getByTestId('tick-submit').click()
     await expect(page.getByTestId('logbook-projects-empty')).toBeVisible()
     await expect(value('sends')).toHaveText('3')
+})
+
+test('an ascent logged on another device appears in the open logbook', async ({
+    page,
+    root,
+    testPrefix,
+    workerLocation,
+}) => {
+    const roleIds = await getRoleIds(root)
+    const climber = await ensureUser(root, roleIds.user, 'user', testPrefix)
+    const route = await root.collection('routes').create({
+        name: `${testPrefix}-live-tick-route`,
+        ...uiaa('6+'),
+        location: workerLocation.id,
+        type: 'Route',
+        color: '#2196F3',
+        creator: ['E2E'],
+        screw_date: '2026-09-01',
+    })
+
+    await signInAs(page, climber.email, climber.password)
+    await gotoSubscribed(page, '/logbook', 'own_ticks')
+    await expect(page.getByTestId('logbook-empty')).toBeVisible()
+
+    await root.collection('ticks').create({
+        user: climber.id,
+        route: route.id,
+        type: 'flash',
+        attempts: 1,
+        date: `${new Date().toISOString().slice(0, 10)} 12:00:00.000Z`,
+    })
+
+    await expect(
+        page.getByTestId('logbook-tick').filter({ hasText: route.name }),
+    ).toBeVisible()
 })

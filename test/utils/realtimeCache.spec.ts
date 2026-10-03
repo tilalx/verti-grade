@@ -3,6 +3,8 @@ import {
     applyRatingChange,
     cacheKeys,
     coalesce,
+    defectsScope,
+    replaceRouteDefects,
     servedStaleFromSsrCache,
     isLiveKey,
     mapRows,
@@ -194,10 +196,28 @@ describe('upsertById / removeById', () => {
 })
 
 describe('cache keys', () => {
-    it('scopes map routes to their location', () => {
-        const inScope = routeRowsScope(cacheKeys.mapRoutes, 'loc1')!
-        expect(inScope({ location: 'loc1' } as RouteRecord)).toBe(true)
-        expect(inScope({ location: 'loc2' } as RouteRecord)).toBe(false)
+    it('scopes location lists to their registered location', () => {
+        const locations = {
+            [cacheKeys.mapRoutes]: 'loc1',
+            [cacheKeys.gymWalls('placement')]: 'loc1',
+        }
+        const routes = routeRowsScope(cacheKeys.mapRoutes, locations)!
+        expect(routes({ location: 'loc1' } as RouteRecord)).toBe(true)
+        expect(routes({ location: 'loc2' } as RouteRecord)).toBe(false)
+        const walls = wallsScope(cacheKeys.gymWalls('placement'), locations)!
+        expect(walls({ location: 'loc1' } as WallRecord)).toBe(true)
+        expect(walls({ location: 'loc2' } as WallRecord)).toBe(false)
+        expect(isLiveKey(cacheKeys.gymWalls('placement'), locations)).toBe(true)
+    })
+
+    it('ignores location lists without a location yet', () => {
+        const locations = { [cacheKeys.routeFilterWalls]: '' }
+        const walls = wallsScope(cacheKeys.routeFilterWalls, locations)!
+        expect(walls({ location: '' } as WallRecord)).toBe(false)
+        expect(routeRowsScope(cacheKeys.placementRoutes)).toBeUndefined()
+        expect(routeRowsScope(cacheKeys.unplacedRoutes, locations)).toBe(
+            undefined,
+        )
     })
 
     it('never inserts into the paged route list', () => {
@@ -206,9 +226,10 @@ describe('cache keys', () => {
         ).toBeNull()
     })
 
-    it('scopes map walls to their location', () => {
-        const inScope = wallsScope(cacheKeys.mapWalls, 'loc1')!
-        expect(inScope({ location: 'loc2' } as WallRecord)).toBe(false)
+    it('keeps overview walls unscoped', () => {
+        expect(wallsScope(cacheKeys.overviewWalls)!({} as WallRecord)).toBe(
+            true,
+        )
         expect(wallsScope(cacheKeys.overviewRoutes)).toBeUndefined()
     })
 
@@ -297,5 +318,42 @@ describe('expanded names', () => {
         ).not.toHaveProperty('wall')
         const unchanged = [row('w1')]
         expect(relinkRow(unchanged, 'r1', known)).toBe(unchanged)
+    })
+})
+
+describe('replaceRouteDefects', () => {
+    const defect = (id: string, route: string) => ({ id, route })
+
+    it('swaps the open defects of the changed routes', () => {
+        const list = [defect('a', 'r1'), defect('b', 'r2')]
+        const change = { routes: ['r1', 'r3'], defects: [defect('c', 'r3')] }
+        expect(replaceRouteDefects(list, change, () => true)).toEqual([
+            defect('b', 'r2'),
+            defect('c', 'r3'),
+        ])
+    })
+
+    it('keeps a single route list to its own route', () => {
+        const scope = defectsScope(cacheKeys.routeDefects('r1'))!
+        const change = {
+            routes: ['r1', 'r2'],
+            defects: [defect('a', 'r1'), defect('b', 'r2')],
+        }
+        expect(replaceRouteDefects([], change, scope)).toEqual([
+            defect('a', 'r1'),
+        ])
+    })
+
+    it('leaves lists of other routes untouched', () => {
+        const list = [defect('a', 'r1')]
+        const scope = defectsScope(cacheKeys.routeDefects('r1'))!
+        expect(
+            replaceRouteDefects(list, { routes: ['r2'], defects: [] }, scope),
+        ).toBe(list)
+    })
+
+    it('refreshes defect lists on reconnect', () => {
+        expect(isLiveKey(cacheKeys.openDefects)).toBe(true)
+        expect(isLiveKey(cacheKeys.routeDefects('r1'))).toBe(true)
     })
 })

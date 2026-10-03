@@ -1,16 +1,20 @@
 import type { RecordSubscription } from 'pocketbase'
 import type {
     LocationRecord,
+    OpenRouteDefectRecord,
     RatingRecord,
     RouteRecord,
     RouteScoreRecord,
+    TickRecord,
     WallRecord,
 } from '~/types/models'
 import {
     applyRatingChange,
     cacheKeys,
     coalesce,
+    defectsScope,
     detailRouteId,
+    liveTopics,
     servedStaleFromSsrCache,
     isLiveKey,
     mapRows,
@@ -20,12 +24,15 @@ import {
     ratingsRouteId,
     relinkRow,
     removeById,
+    replaceRouteDefects,
     routeRowsScope,
     rowsOf,
     trackRating,
     upsertById,
     wallsScope,
     type ExpandField,
+    type KeyLocations,
+    type OpenDefectsChange,
     type RatingChange,
     type RatingLedger,
     type RowsData,
@@ -38,7 +45,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     // ponytail: grows by one small entry per rating seen this session
     const ratingLedger: RatingLedger = new Map()
     const routesToRescore = new Set<string>()
-    const mapLocation = useState<string>(cacheKeys.mapLocation, () => '')
+    const keyLocations = useState<KeyLocations>(
+        cacheKeys.keyLocations,
+        () => ({}),
+    )
 
     function loadedKeys() {
         return Object.keys(nuxtApp.payload.data).filter(
@@ -64,7 +74,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         ) => RouteScoreRecord[],
     ) {
         for (const key of loadedKeys()) {
-            const inScope = routeRowsScope(key, mapLocation.value)
+            const inScope = routeRowsScope(key, keyLocations.value)
             if (!inScope) continue
             const data = read<RowsData<RouteScoreRecord>>(key)
             const next = mapRows(data, (rows) => patch(rows, inScope))
@@ -97,7 +107,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     function hasRouteRow(routeId: string) {
         return loadedKeys().some(
             (key) =>
-                !!routeRowsScope(key) &&
+                !!routeRowsScope(key, keyLocations.value) &&
                 rowsOf(read<RowsData<RouteScoreRecord>>(key)).some(
                     (row) => row.id === routeId,
                 ),
@@ -130,7 +140,11 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     function cachedRecord(id: string) {
         for (const key of loadedKeys()) {
-            if (key !== cacheKeys.locations && !wallsScope(key)) continue
+            if (
+                key !== cacheKeys.locations &&
+                !wallsScope(key, keyLocations.value)
+            )
+                continue
             const found = read<{ id: string }[]>(key).find(
                 (record) => record.id === id,
             )
@@ -215,7 +229,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     function onWall({ action, record }: RecordSubscription<WallRecord>) {
         for (const key of loadedKeys()) {
-            const inScope = wallsScope(key, mapLocation.value)
+            const inScope = wallsScope(key, keyLocations.value)
             if (!inScope) continue
             const data = read<WallRecord[]>(key)
             const next = patchList(
@@ -240,6 +254,28 @@ export default defineNuxtPlugin((nuxtApp) => {
         if (action !== 'delete') patchExpandedEverywhere('location', record)
     }
 
+    function onOpenDefects(change: OpenDefectsChange) {
+        for (const key of loadedKeys()) {
+            const inScope = defectsScope(key)
+            if (!inScope) continue
+            const data = read<OpenRouteDefectRecord[]>(key)
+            const next = replaceRouteDefects(data, change, inScope)
+            if (next !== data) write(key, next)
+        }
+    }
+
+    const refreshOwnTicksSoon = coalesce(() => {
+        const keys = loadedKeys().filter(
+            (key) =>
+                key === cacheKeys.tickedRoutes || key === cacheKeys.logbook,
+        )
+        return keys.length ? refreshNuxtData(keys) : Promise.resolve()
+    }, 300)
+
+    function onOwnTick({ record }: RecordSubscription<TickRecord>) {
+        if (record.user === pb.authStore.record?.id) refreshOwnTicksSoon()
+    }
+
     const hydratedFromStaleCache = servedStaleFromSsrCache(
         document.documentElement.dataset.ssrAge,
     )
@@ -247,7 +283,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     function refreshLiveKeys(spreadMs: number) {
         setTimeout(() => {
-            const keys = loadedKeys().filter(isLiveKey)
+            const keys = loadedKeys().filter((key) =>
+                isLiveKey(key, keyLocations.value),
+            )
             if (keys.length) void refreshNuxtData(keys)
         }, Math.random() * spreadMs)
     }
@@ -267,6 +305,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             pb
                 .collection('locations')
                 .subscribe<LocationRecord>('*', onLocation),
+            pb.realtime.subscribe(liveTopics.openDefects, onOpenDefects),
+            pb.realtime.subscribe(liveTopics.ownTicks, onOwnTick),
         ]
         for (const subscription of subscriptions)
             subscription.catch((error) =>

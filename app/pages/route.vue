@@ -496,7 +496,7 @@ const routeRatings = useAsyncData(
 )
 
 const routeDefects = useAsyncData(
-    `route-defects:${route_id.value ?? ''}`,
+    cacheKeys.routeDefects(route_id.value ?? ''),
     () =>
         route_id.value
             ? pb

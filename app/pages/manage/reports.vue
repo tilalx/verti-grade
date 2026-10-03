@@ -146,6 +146,7 @@
 <script setup lang="ts">
 import type { ReportDecision, ReportRecord } from '~/types/models'
 import { REPORT_STATUSES } from '~/utils/reports'
+import { coalesce } from '~/utils/realtimeCache'
 
 const { t } = useI18n()
 const pb = usePocketbase()
@@ -209,6 +210,7 @@ const {
     loadingMore,
     hasMore,
     refresh: reload,
+    reloadLoaded,
     loadMore,
     prefetch,
 } = usePbList<ReportRecord>('reports', {
@@ -242,6 +244,10 @@ watch(search, () => {
 watch(statusFilter, () => void reload())
 
 onBeforeUnmount(() => clearTimeout(searchDebounce))
+
+const reloadSoon = coalesce(reloadLoaded)
+const { subscribe } = usePbSubscription(reloadSoon)
+onMounted(() => subscribe('reports', reloadSoon))
 
 function clearFilters() {
     statusFilter.value = null

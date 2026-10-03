@@ -292,8 +292,7 @@ const {
     { watch: [locationId], default: () => [] },
 )
 
-const mapLocation = useState<string>(cacheKeys.mapLocation, () => '')
-watch(locationId, (id) => (mapLocation.value = id), { immediate: true })
+useLiveLocation([cacheKeys.mapRoutes], locationId)
 
 const locationMenuItems = computed(() =>
     locationItems.value.map((item) => ({
