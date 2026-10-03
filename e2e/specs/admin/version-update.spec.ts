@@ -2,8 +2,6 @@ import { test, expect } from '../../support/fixtures'
 import { gotoSettled } from '../../support/nav'
 import type { Page } from '@playwright/test'
 
-const DISMISS_KEY = 'gripello:update-dismissed'
-
 const RELEASE_PAYLOAD = {
     installed: {
         raw: '1.9.0',
@@ -70,17 +68,13 @@ async function stubVersion(page: Page, payload: unknown) {
     )
 }
 
-test('announces a new release and opens its notes', async ({
+test('announces a new release next to the version and opens its notes', async ({
     adminPage: page,
 }) => {
     await stubVersion(page, RELEASE_PAYLOAD)
     await gotoSettled(page, '/')
 
-    const banner = page.getByTestId('update-banner')
-    await expect(banner).toBeVisible()
-    await expect(banner).toContainText('v1.10.0')
-
-    await page.getByTestId('update-banner-changelog').click()
+    await page.getByTestId('footer-update').click()
 
     const dialog = page.getByTestId('release-notes-dialog')
     await expect(dialog).toBeVisible()
@@ -94,11 +88,7 @@ test('announces new commits and lists them', async ({ adminPage: page }) => {
     await stubVersion(page, COMMIT_PAYLOAD)
     await gotoSettled(page, '/')
 
-    const banner = page.getByTestId('update-banner')
-    await expect(banner).toBeVisible()
-    await expect(banner).toContainText('2 new commits')
-
-    await page.getByTestId('update-banner-commits').click()
+    await page.getByTestId('footer-update').click()
 
     const dialog = page.getByTestId('commit-list-dialog')
     await expect(dialog).toBeVisible()
@@ -117,33 +107,15 @@ test('stays hidden when the deployment is current', async ({
     await gotoSettled(page, '/')
 
     await expect(page.getByTestId('user-menu-activator')).toBeVisible()
-    await expect(page.getByTestId('update-banner')).toBeHidden()
+    await expect(page.getByTestId('footer-update')).toBeHidden()
 })
 
-test('a dismissal survives a reload but a newer release reappears', async ({
-    adminPage: page,
-}) => {
+test('stays hidden for climbers', async ({ userPage: page }) => {
     await stubVersion(page, RELEASE_PAYLOAD)
     await gotoSettled(page, '/')
 
-    await page
-        .getByTestId('update-banner')
-        .getByRole('button', { name: 'Dismiss' })
-        .click()
-    await expect(page.getByTestId('update-banner')).toBeHidden()
-
-    await gotoSettled(page, '/')
-    await expect(page.getByTestId('update-banner')).toBeHidden()
-    await expect
-        .poll(() => page.evaluate((k) => localStorage.getItem(k), DISMISS_KEY))
-        .toBe('v1.10.0')
-
-    await stubVersion(page, {
-        ...RELEASE_PAYLOAD,
-        latest: { ...RELEASE_PAYLOAD.latest, tag: 'v1.11.0' },
-    })
-    await gotoSettled(page, '/')
-    await expect(page.getByTestId('update-banner')).toBeVisible()
+    await expect(page.getByTestId('footer-version')).toBeVisible()
+    await expect(page.getByTestId('footer-update')).toBeHidden()
 })
 
 test('the footer pill shows the installed release notes to a logged-out visitor', async ({
@@ -152,7 +124,7 @@ test('the footer pill shows the installed release notes to a logged-out visitor'
     await stubVersion(page, UP_TO_DATE)
     await gotoSettled(page, '/')
 
-    await expect(page.getByTestId('update-banner')).toBeHidden()
+    await expect(page.getByTestId('footer-update')).toBeHidden()
 
     await page.getByTestId('footer-version').click()
 

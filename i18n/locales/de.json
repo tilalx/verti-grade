@@ -407,14 +407,7 @@
         "deleteItem": "Diesen Eintrag löschen? Das kann nicht rückgängig gemacht werden.",
         "deleteMoreItems": "Die ausgewählten Einträge löschen? Das kann nicht rückgängig gemacht werden.",
         "archiveMoreItems": "Die ausgewählten Routen archivieren?",
-        "updateBanner": {
-            "title": "Update verfügbar —",
-            "message": "Version {0} ist verfügbar.",
-            "commitsMessage": "{n} neuer Commit verfügbar. | {n} neue Commits verfügbar.",
-            "viewChangelog": "Änderungsprotokoll ansehen",
-            "viewCommits": "Commits ansehen",
-            "dismiss": "Schließen"
-        },
+        "updateAvailable": "Update verfügbar",
         "releaseNotes": {
             "title": "Versionshinweise",
             "installedVersion": "Installierte Version: {0}",
@@ -545,7 +538,6 @@
                 "colorScheme": "Merkt sich hellen oder dunklen Modus",
                 "sidebar": "Merkt sich, ob die Seitennavigation ausgeklappt ist",
                 "exportColumns": "Merkt sich die gewählten Export-Spalten",
-                "updateDismissed": "Merkt sich einen ausgeblendeten Update-Hinweis",
                 "inventorySession": "Speichert den Fortschritt einer Inventur",
                 "inventoryInstructions": "Merkt sich, dass die Inventur-Anleitung angezeigt wurde",
                 "offlineLogbook": "Hält dein Logbuch und noch nicht gesendete Begehungen offline verfügbar"
