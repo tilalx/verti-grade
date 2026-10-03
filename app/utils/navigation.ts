@@ -53,6 +53,12 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'routes.logbook',
     },
     {
+        key: 'competitions',
+        to: '/competitions',
+        icon: 'i-lucide-trophy',
+        label: 'routes.competitions',
+    },
+    {
         key: 'manage',
         icon: 'i-lucide-sliders-horizontal',
         label: 'nav.manage',
@@ -80,6 +86,18 @@ export const NAV_ITEMS: NavItem[] = [
                 icon: 'i-lucide-list-checks',
                 label: 'routes.tasks',
                 permission: 'manage_tasks',
+            },
+            {
+                to: '/manage/competitions',
+                icon: 'i-lucide-trophy',
+                label: 'routes.competitions',
+                permission: 'manage_competitions',
+            },
+            {
+                to: '/manage/judge',
+                icon: 'i-lucide-clipboard-pen',
+                label: 'routes.judge',
+                permission: 'judge_competitions',
             },
             {
                 to: '/manage/analytics',

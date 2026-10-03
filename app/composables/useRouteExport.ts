@@ -1,5 +1,6 @@
 import type { ExportOptions } from '~/components/ExportOptionsDialog.vue'
 import { ROUTE_TYPES } from '~/utils/routes'
+import { saveBlob } from '~/utils/download'
 
 type ExportFormat = 'pdf' | 'xlsx' | 'json'
 
@@ -20,17 +21,6 @@ async function responseToBlob(response: Response, format: ExportFormat) {
         return new Blob([text], { type: MIME_TYPES.json })
     }
     return new Blob([await response.blob()], { type: MIME_TYPES[format] })
-}
-
-function saveBlob(blob: Blob, filename: string) {
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 export function useRouteExport() {

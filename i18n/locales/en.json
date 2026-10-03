@@ -158,7 +158,9 @@
         "me": "More",
         "moreActions": "More actions",
         "selectedCount": "{n} selected",
-        "list": "Routes"
+        "list": "Routes",
+        "competitions": "Competitions",
+        "judge": "Judging"
     },
     "dashboard": {
         "online": "{0} online"
@@ -540,7 +542,8 @@
                 "exportColumns": "Remembers selected export columns",
                 "inventorySession": "Keeps the progress of an inventory scan",
                 "inventoryInstructions": "Remembers that inventory instructions were shown",
-                "offlineLogbook": "Keeps your logbook and unsent ascents available offline"
+                "offlineLogbook": "Keeps your logbook and unsent ascents available offline",
+                "offlineScores": "Keeps competition scores you entered without signal until they are sent"
             },
             "durations": {
                 "session": "Until sign-out",
@@ -574,7 +577,11 @@
             "scan": "Scan route - Gripello",
             "me": "My account - Gripello",
             "overview": "Overview - Gripello",
-            "accountSettings": "Settings - Gripello"
+            "accountSettings": "Settings - Gripello",
+            "competitions": "Competitions - Gripello",
+            "competition": "{name} - Competitions - Gripello",
+            "judge": "Judging - Gripello",
+            "competitionRules": "{name} - Rules - Gripello"
         },
         "content": {
             "settings": "Settings",
@@ -677,7 +684,9 @@
             "run_inventory": "Run inventory",
             "manage_reports": "Handle content reports",
             "view_audit_log": "View activity log",
-            "manage_tasks": "Manage tasks"
+            "manage_tasks": "Manage tasks",
+            "manage_competitions": "Manage competitions",
+            "judge_competitions": "Judge competitions"
         },
         "updated": "Permissions updated.",
         "updateError": "Could not update permissions.",
@@ -703,7 +712,14 @@
         "roleDeleteError": "Could not delete the role.",
         "adminRoleLocked": "The admin role cannot be renamed or deleted.",
         "subtitle": "What each role may do. Changes apply immediately.",
-        "noDescription": "No description"
+        "noDescription": "No description",
+        "groups": {
+            "routes": "Routes",
+            "competitions": "Competitions",
+            "moderation": "Moderation",
+            "admin": "Administration",
+            "other": "Other"
+        }
     },
     "time": {
         "justNow": "Just now",
@@ -1356,5 +1372,309 @@
         "theme": "Theme",
         "themeDescription": "Follow your system or pick a fixed theme.",
         "passwordDescription": "Confirm your current password before choosing a new one."
+    },
+    "competitions": {
+        "pageTitle": "Competitions",
+        "newTitle": "New competition",
+        "editTitle": "Edit competition",
+        "empty": "No competitions yet",
+        "saved": "Competition saved",
+        "name": "Name",
+        "description": "Description",
+        "location": "Location",
+        "startsAt": "Starts",
+        "endsAt": "Ends",
+        "endsBeforeStart": "The end must be after the start.",
+        "scoring": "Scoring",
+        "format": "Scoring format",
+        "formats": {
+            "dynamic": "Dynamic points",
+            "fixed": "Fixed points",
+            "ifsc": "IFSC",
+            "tops": "Tops & zones",
+            "route_points": "Route points",
+            "lead_height": "Lead height"
+        },
+        "formatHints": {
+            "fixed": "Each boulder has its own points, reduced for every extra attempt.",
+            "ifsc": "25 per top, 10 per zone, minus 0.1 per attempt.",
+            "tops": "Ranked by tops, then zones, then fewer attempts.",
+            "route_points": "Each route has its own points; toprope counts less than lead.",
+            "lead_height": "Judges enter the highest hold reached (+ for a controlled move). Ranked per route, combined by geometric mean."
+        },
+        "zonePool": "Zone pool per boulder",
+        "results": "Results",
+        "liveRanking": "Live ranking",
+        "freezeMinutes": "Freeze ranking (minutes before end)",
+        "status": "Status",
+        "statuses": {
+            "draft": "Draft",
+            "open": "Open",
+            "closed": "Closed",
+            "published": "Published"
+        },
+        "copy": "Duplicate",
+        "copyName": "{name} (copy)",
+        "deleteTitle": "Delete competition?",
+        "deleteMessage": "All boulders, entries and scores of this competition will be deleted.",
+        "categories": "Categories",
+        "addCount": "Add ({n})",
+        "points": "Points",
+        "zone": "Zone",
+        "voided": "Removed",
+        "categoryName": "Category name",
+        "gender": "Gender",
+        "genders": {
+            "any": "Any",
+            "female": "Female",
+            "male": "Male"
+        },
+        "bornFrom": "Born from",
+        "bornTo": "Born to",
+        "addCategory": "Add category",
+        "categorySaved": "Category saved",
+        "categoryInUse": "This category still has participants.",
+        "defaultCategories": {
+            "female": "Female",
+            "male": "Male"
+        },
+        "discipline": "Discipline",
+        "disciplines": {
+            "boulder": "Bouldering",
+            "rope": "Rope climbing"
+        },
+        "flashBonus": "Flash bonus",
+        "topropeFactor": "Points for toprope",
+        "registrationUrl": "Registration / payment link",
+        "invalidUrl": "Enter a link starting with https://",
+        "holdCount": "Holds",
+        "items": {
+            "boulder": {
+                "tab": "Boulders",
+                "add": "Add boulders",
+                "pick": "Pick boulders of this location",
+                "empty": "No boulders yet",
+                "added": "Boulders added",
+                "topPool": "Point pool per boulder",
+                "bestOf": "Best boulders that count",
+                "dynamicHint": "Each boulder's pool is split among everyone who topped it.",
+                "bestOfToggle": "Only the best boulders count"
+            },
+            "rope": {
+                "tab": "Routes",
+                "add": "Add routes",
+                "pick": "Pick rope routes of this location",
+                "empty": "No routes yet",
+                "added": "Routes added",
+                "topPool": "Point pool per route",
+                "bestOf": "Best routes that count",
+                "dynamicHint": "Each route's pool is split among everyone who topped it.",
+                "bestOfToggle": "Only the best routes count"
+            }
+        },
+        "phases": {
+            "draft": {
+                "title": "Draft"
+            },
+            "registration": {
+                "title": "Registration open"
+            },
+            "running": {
+                "title": "Running"
+            },
+            "ended": {
+                "title": "Ended"
+            },
+            "published": {
+                "title": "Results published"
+            }
+        },
+        "checklist": {
+            "details": "Name, date and scoring",
+            "categories": "At least one category",
+            "routes": "Add the routes or boulders",
+            "points": "Give every route its points",
+            "holds": "Set the hold count of every route"
+        },
+        "actions": {
+            "open": "Open registration",
+            "close": "Close competition",
+            "publish": "Publish results",
+            "reopen": "Reopen",
+            "unpublish": "Unpublish results",
+            "backToDraft": "Back to draft"
+        },
+        "confirm": {
+            "open": "Climbers can see the competition and sign up. Scoring runs in the time window.",
+            "close": "Nobody can sign up or enter scores any more.",
+            "publish": "The final results become public and read-only.",
+            "reopen": "Registration and scoring open again.",
+            "unpublish": "Results are hidden again so you can correct them.",
+            "backToDraft": "The competition is hidden from climbers again."
+        },
+        "entryStatuses": {
+            "registered": "Registered",
+            "checked_in": "Checked in",
+            "disqualified": "Disqualified",
+            "withdrawn": "Withdrawn"
+        },
+        "register": {
+            "title": "Take part",
+            "youAreIn": "You're registered",
+            "withdrawn": "You withdrew",
+            "payLink": "Pay entry fee",
+            "rejoin": "Sign up again",
+            "withdraw": "Withdraw",
+            "withdrawMessage": "You can sign up again while registration is open.",
+            "displayName": "Name in the results",
+            "birthYear": "Year of birth",
+            "category": "Category",
+            "pickCategory": "Pick your category",
+            "hidden": "Hide me from public results",
+            "guardianConsent": "A parent or guardian agrees to my participation.",
+            "submit": "Sign up",
+            "done": "You're signed up"
+        },
+        "public": {
+            "title": "Competitions",
+            "empty": "No competitions yet",
+            "upcoming": "Upcoming and running",
+            "past": "Past",
+            "manage": "Manage"
+        },
+        "shareLink": "Sign-up link",
+        "copyLink": "Copy link",
+        "linkCopied": "Link copied",
+        "qrCode": "QR code",
+        "entries": "Participants",
+        "searchEntries": "Search name or bib",
+        "entryCount": "{n} participant | {n} participants",
+        "checkedInCount": "{n} checked in",
+        "paidCount": "{n} paid",
+        "noEntries": "No participants yet",
+        "paid": "Paid",
+        "notPaid": "Not paid",
+        "checkIn": "Check in",
+        "undoCheckIn": "Undo check-in",
+        "reinstate": "Reinstate",
+        "disqualify": "Disqualify",
+        "entryActions": "More actions",
+        "bib": "Bib",
+        "scorecard": {
+            "title": "My scorecard",
+            "tops": "{n} top | {n} tops",
+            "flashes": "{n} flash | {n} flashes",
+            "offline": "{n} not sent yet – no signal",
+            "saving": "Saving…",
+            "nothingHere": "Nothing here",
+            "style": "Style",
+            "styles": {
+                "lead": "Lead",
+                "toprope": "Toprope"
+            },
+            "undoAttempt": "Remove an attempt",
+            "addAttempt": "Add an attempt",
+            "attempts": "{n} try | {n} tries",
+            "flash": "Flash",
+            "top": "Top",
+            "filters": {
+                "all": "All",
+                "open": "Open",
+                "topped": "Topped"
+            },
+            "judged": "Judges record your results in this competition.",
+            "saveFailed": "Could not save your score."
+        },
+        "standings": {
+            "title": "Results",
+            "tv": "TV view",
+            "frozen": "The ranking is frozen. It will be revealed at the ceremony.",
+            "hidden": "The ranking is shown when the results are published.",
+            "empty": "No results yet",
+            "anonymous": "Hidden climber",
+            "topsZones": "{tops} T · {zones} Z",
+            "final": "Final results",
+            "updated": "Updated {time}",
+            "scanToJoin": "Scan to take part"
+        },
+        "judge": {
+            "title": "Judging",
+            "noCompetitions": "No competition is open for judging",
+            "height": "Highest hold",
+            "open": "Scores",
+            "flags": {
+                "allFlashes": "Flashed everything",
+                "uniqueTop": "Only top on a route"
+            }
+        },
+        "export": {
+            "menu": "Export",
+            "rank": "Rank",
+            "name": "Name",
+            "tops": "Tops",
+            "zones": "Zones",
+            "status": "Status",
+            "yes": "yes",
+            "no": "no",
+            "certificate": "Certificate",
+            "place": "{rank}. place · {category}",
+            "kinds": {
+                "results": "Results",
+                "startlist": "Start list",
+                "certificates": "Certificates"
+            }
+        },
+        "more": "More actions",
+        "tv": {
+            "live": "Live",
+            "endsIn": "Ends in",
+            "startsIn": "Starts in"
+        },
+        "rules": {
+            "title": "Rules",
+            "link": "Rules",
+            "sections": {
+                "flow": "How it works",
+                "scoring": "Scoring",
+                "ranking": "Ranking",
+                "fairPlay": "Fair play"
+            },
+            "signUp": "Sign up with your account and pick your category. You get a start number.",
+            "selfScore": "Log every attempt on your phone: + for each try, Zone when you control the zone hold, Top when you finish. It works offline too.",
+            "judged": "Judges record your highest hold. A + means you made a controlled move beyond it.",
+            "ropeStyle": "Choose Lead or Toprope before you log the top.",
+            "live": "The ranking updates live while the competition runs.",
+            "noLive": "The ranking stays hidden until the award ceremony.",
+            "freeze": "{n} minutes before the end the ranking freezes. The final order is revealed at the award ceremony.",
+            "boulder": {
+                "dynamicTop": "Every boulder is worth {pool} points, shared by everyone who tops it. The fewer toppers, the more you get.",
+                "fixedPoints": "Every boulder has its own points value.",
+                "bestOf": "Only your best {n} boulders count.",
+                "removed": "If a boulder is removed during the competition, it no longer counts for anyone."
+            },
+            "rope": {
+                "dynamicTop": "Every route is worth {pool} points, shared by everyone who tops it. The fewer toppers, the more you get.",
+                "fixedPoints": "Every route has its own points value.",
+                "bestOf": "Only your best {n} routes count.",
+                "removed": "If a route is removed during the competition, it no longer counts for anyone."
+            },
+            "dynamicZone": "Zones share a pool of {pool} points the same way.",
+            "attemptFactors": "A top on the first try earns {first} % of the points, on the second {second} %, after that {rest} %.",
+            "ifscPoints": "A top is worth {top} points, a zone {zone} points.",
+            "ifscPenalty": "Every failed attempt before it costs {penalty} points.",
+            "topsCount": "Every top counts the same.",
+            "leadHeight": "On every route you are ranked by the highest hold you reached.",
+            "leadOverall": "Your overall score is the geometric mean of your route ranks. Lower is better.",
+            "toprope": "A toprope ascent earns {percent} % of the points.",
+            "flashBonus": "A flash (top on the first try) earns {percent} % extra.",
+            "perCategory": "You are ranked within your category.",
+            "tieBreakPoints": "Most points wins. On a tie: more tops, then more zones, then fewer attempts to top.",
+            "tieBreakTops": "Most tops wins. On a tie: more zones, then fewer attempts to top, then fewer attempts to zone.",
+            "tieBreakLead": "Climbers with the same height on a route share the average rank.",
+            "honest": "Log honestly. Every start counts as an attempt.",
+            "corrections": "Staff check the scores and can correct them.",
+            "entryFee": "There is an entry fee. Pay via the link on the competition page; staff mark you as paid."
+        },
+        "requiresPayment": "Entry fee required"
     }
 }

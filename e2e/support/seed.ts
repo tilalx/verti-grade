@@ -254,6 +254,7 @@ export async function sweepTestData(
         `route.name ~ ${name} || route.location.name ~ ${name} || user.email ~ ${name}${routeInLocation}`,
     )
     await deleteMatching(pb, 'ratings', `comment ~ ${name}`)
+    await deleteMatching(pb, 'competitions', owned)
     await deleteMatching(pb, 'routes', owned)
     await deleteMatching(pb, 'walls', owned)
     await deleteMatching(pb, 'locations', `name ~ ${name}`)

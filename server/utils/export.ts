@@ -238,3 +238,13 @@ export async function resolveExportColumns(
         }
     })
 }
+
+export function attachmentHeader(filename: string) {
+    const ascii =
+        filename
+            .normalize('NFKD')
+            .replace(/[^\x20-\x7e]/g, '')
+            .replace(/[^\w.-]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'export'
+    return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+}

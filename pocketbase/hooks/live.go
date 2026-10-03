@@ -3,6 +3,7 @@ package hooks
 import (
 	"encoding/json"
 	"slices"
+	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
@@ -11,9 +12,26 @@ import (
 )
 
 const (
-	openDefectsTopic = "open_route_defects"
-	ownTicksTopic    = "own_ticks"
+	openDefectsTopic  = "open_route_defects"
+	ownTicksTopic     = "own_ticks"
+	competitionsTopic = "competition_changes"
 )
+
+var competitionChangeKinds = map[string]string{
+	"competitions":           "competition",
+	"competition_routes":     "routes",
+	"competition_categories": "categories",
+	"competition_entries":    "entries",
+	"competition_scores":     "scores",
+}
+
+type competitionChange struct {
+	Competition string `json:"competition"`
+	Kind        string `json:"kind"`
+	User        string `json:"user,omitempty"`
+	Entry       string `json:"entry,omitempty"`
+	At          int64  `json:"at"`
+}
 
 type openDefect struct {
 	ID       string `json:"id"`
@@ -55,6 +73,56 @@ func registerLive(app core.App) {
 	app.OnRecordAfterCreateSuccess("ticks").BindFunc(onTickChange("create"))
 	app.OnRecordAfterUpdateSuccess("ticks").BindFunc(onTickChange("update"))
 	app.OnRecordAfterDeleteSuccess("ticks").BindFunc(onTickChange("delete"))
+
+	onCompetitionChange := func(e *core.RecordEvent) error {
+		change := competitionChangeOf(e.Record)
+		change.At = time.Now().UnixMilli()
+		broadcastCompetitionChange(e.App, change)
+		return e.Next()
+	}
+	for collection := range competitionChangeKinds {
+		app.OnRecordAfterCreateSuccess(collection).BindFunc(onCompetitionChange)
+		app.OnRecordAfterUpdateSuccess(collection).BindFunc(onCompetitionChange)
+		app.OnRecordAfterDeleteSuccess(collection).BindFunc(onCompetitionChange)
+	}
+}
+
+func broadcastCompetitionChange(app core.App, change competitionChange) {
+	if change.User == "" {
+		broadcast(app, competitionsTopic, change, nil)
+		return
+	}
+	owner := change.User
+	broadcast(app, competitionsTopic, change, func(auth *core.Record) bool {
+		return auth != nil && auth.Id == owner
+	})
+	broadcast(app, competitionsTopic, publicCompetitionChange(change), func(auth *core.Record) bool {
+		return auth == nil || auth.Id != owner
+	})
+}
+
+func publicCompetitionChange(change competitionChange) competitionChange {
+	change.User = ""
+	change.Entry = ""
+	return change
+}
+
+func competitionChangeOf(record *core.Record) competitionChange {
+	collection := record.Collection().Name
+	change := competitionChange{Kind: competitionChangeKinds[collection]}
+	if collection == "competitions" {
+		change.Competition = record.Id
+	} else {
+		change.Competition = record.GetString("competition")
+	}
+	switch collection {
+	case "competition_entries":
+		change.User = record.GetString("user")
+		change.Entry = record.Id
+	case "competition_scores":
+		change.Entry = record.GetString("entry")
+	}
+	return change
 }
 
 func defectRoutes(task *core.Record) []string {

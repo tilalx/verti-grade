@@ -4,6 +4,7 @@ import {
     isProtectedRole,
     reassignTargets,
     defaultReassignTarget,
+    groupPermissions,
 } from '~/utils/roles'
 import type { RoleRecord } from '~/types/models'
 
@@ -55,5 +56,38 @@ describe('defaultReassignTarget', () => {
 
     it('never preselects the role being deleted', () => {
         expect(defaultReassignTarget(ALL, USER.id)).not.toBe(USER.id)
+    })
+})
+
+describe('groupPermissions', () => {
+    const permission = (name: string) => ({ id: name, name })
+
+    it('sorts permissions into their groups in a fixed order', () => {
+        const groups = groupPermissions(
+            ['manage_users', 'judge_competitions', 'manage_routes'].map(
+                permission,
+            ),
+        )
+        expect(
+            groups.map(({ key, permissions }) => [
+                key,
+                permissions.map(({ name }) => name),
+            ]),
+        ).toEqual([
+            ['routes', ['manage_routes']],
+            ['competitions', ['judge_competitions']],
+            ['admin', ['manage_users']],
+        ])
+    })
+
+    it('keeps unknown permissions in an extra group', () => {
+        const groups = groupPermissions([permission('brand_new')])
+        expect(groups).toEqual([
+            {
+                key: 'other',
+                icon: 'i-lucide-ellipsis',
+                permissions: [permission('brand_new')],
+            },
+        ])
     })
 })

@@ -85,3 +85,46 @@ func TestAverageRatingView(t *testing.T) {
 		t.Errorf("unrated ratings_count = %v, want 0", got)
 	}
 }
+
+func TestCompetitionCollections(t *testing.T) {
+	app, err := tests.NewTestApp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer app.Cleanup()
+
+	jsvm.MustRegister(app, jsvm.Config{MigrationsDir: "pb_migrations"})
+	if err := app.RunAllMigrations(); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"competitions", "competition_categories", "competition_routes", "competition_entries", "competition_scores"} {
+		if _, err := app.FindCollectionByNameOrId(name); err != nil {
+			t.Errorf("collection %s missing: %v", name, err)
+		}
+	}
+	for _, permission := range []string{"manage_competitions", "judge_competitions"} {
+		if _, err := app.FindFirstRecordByData("permissions", "name", permission); err != nil {
+			t.Errorf("%s permission missing: %v", permission, err)
+		}
+	}
+	scores, err := app.FindCollectionByNameOrId("competition_scores")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := app.FindCollectionByNameOrId("competition_standings"); err != nil {
+		t.Errorf("competition_standings view missing: %v", err)
+	}
+	for _, field := range []string{"comp_route", "style", "height", "height_plus"} {
+		if scores.Fields.GetByName(field) == nil {
+			t.Errorf("competition_scores.%s missing", field)
+		}
+	}
+	competitions, err := app.FindCollectionByNameOrId("competitions")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if competitions.Fields.GetByName("requires_payment") == nil {
+		t.Error("competitions.requires_payment missing")
+	}
+}
